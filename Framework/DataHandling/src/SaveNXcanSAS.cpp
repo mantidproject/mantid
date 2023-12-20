@@ -795,6 +795,13 @@ void SaveNXcanSAS::init() {
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
 
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", 0.0,
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
+
   std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown"};
   declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(geometryOptions),
                   "The geometry type of the collimation.");
@@ -889,6 +896,11 @@ void SaveNXcanSAS::exec() {
   const auto canScatterRun = getPropertyValue("CanScatterRunNumber");
   const auto canDirectRun = getPropertyValue("CanDirectRunNumber");
 
+  // Get scaled background subtraction information
+
+  const auto scaledBgSubWorkspace = getPropertyValue("BackgroundSubtractionWorkspace");
+  const auto scaledBgSubScaleFactor = getPropertyValue("BackgroundSubtractionScaleFactor");
+
   // Add the process information
   progress.report("Adding process information.");
   if (transmissionCan) {
@@ -904,6 +916,14 @@ void SaveNXcanSAS::exec() {
     if (transmissionSample)
       addNoteToProcess(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun, sasProcessTermSampleDirect,
                        sampleDirectRun);
+  }
+
+  if (!scaledBgSubWorkspace.empty()) {
+    progress.report("Adding scaled background subtraction information.");
+    auto process = sasEntry.openGroup(sasProcessGroupName);
+    auto note = process.openGroup(sasNoteGroupName);
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
   }
 
   // Add the transmissions for sample

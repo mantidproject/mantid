@@ -247,6 +247,27 @@ public:
     TS_ASSERT(savealg.isExecuted());
   }
 
+  void testCanSetScaledBackgroundSubtractionMetadataAsProperties() {
+    // Initialize alg
+    SaveCanSAS1D2 savealg;
+
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    TS_ASSERT(savealg.isInitialized());
+    savealg.setPropertyValue("InputWorkspace", m_workspace1);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("DetectorNames", "HAB");
+
+    // Set the additional run number properties
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set BackgroundSubtractionWorkspace property",
+                              savealg.setProperty("BackgroundSubtractionWorkspace", "a_workspace"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set BackgroundSubtractionScaleFactor property",
+                              savealg.setProperty("BackgroundSubtractionScaleFactor", 1.5));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    TS_ASSERT(savealg.isExecuted());
+  }
+
   void testGroup() {
     // do the save, the results of which we'll test
     SaveCanSAS1D2 savealg;

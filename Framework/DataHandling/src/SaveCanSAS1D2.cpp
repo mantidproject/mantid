@@ -77,6 +77,13 @@ void SaveCanSAS1D2::init() {
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
   declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an invididual file");
+
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", 0.0,
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
 }
 
 /// Overwrites Algorithm method
@@ -271,7 +278,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   if (m_transcan_ws) {
     std::string can_run;
     if (m_transcan_ws->run().hasProperty("run_number")) {
-      Kernel::Property *logP = m_transcan_ws->run().getLogData("run_number");
+      Kernel::Property const *const logP = m_transcan_ws->run().getLogData("run_number");
       can_run = logP->value();
     } else {
       g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
@@ -291,6 +298,16 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
     const auto can_direct_run = getPropertyValue("CanDirectRunNumber");
     sasProcess += "\n\t\t\t<term name=\"can_direct_run\">";
     sasProcess += can_direct_run + "</term>";
+  }
+
+  // Scaled Background Subtraction information.
+  auto const &bgsubWsName = getPropertyValue("BackgroundSubtractionWorkspace");
+  auto const &bgsubScaleFactor = getPropertyValue("BackgroundSubtractionScaleFactor");
+  if (!bgsubWsName.empty()) {
+    sasProcess += "\n\t\t\t<term name=\"scaled_bgsub_workspace\">";
+    sasProcess += bgsubWsName + "</term>";
+    sasProcess += "\n\t\t\t<term name=\"scaled_bgsub_scale_factor\">";
+    sasProcess += bgsubScaleFactor + "</term>";
   }
 
   // Reduction process note, if available

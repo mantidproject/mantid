@@ -130,6 +130,18 @@ class SANSSave(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The run number for the Can Direct workspace used in the reduction. Can be blank.",
         )
+        self.declareProperty(
+            "BackgroundSubtractionWorkspace",
+            "",
+            direction=Direction.Input,
+            doc="The workspace used to perform a scaled background subtraction on the reduced workspace. Can be blank.",
+        )
+        self.declareProperty(
+            "BackgroundSubtractionScaleFactor",
+            0.0,
+            direction=Direction.Input,
+            doc="The scale factor the BackgroundSubtractionWorkspace is multiplied by before subtraction. Can be blank.",
+        )
 
     def PyExec(self):
         use_zero_error_free = self.getProperty("UseZeroErrorFree").value
@@ -163,6 +175,8 @@ class SANSSave(DataProcessorAlgorithm):
             "SampleHeight": height,
             "SampleWidth": width,
             "SampleThickness": thickness,
+            "BackgroundSubtractionWorkspace": self.getProperty("BackgroundSubtractionWorkspace").value,
+            "BackgroundSubtractionScaleFactor": self.getProperty("BackgroundSubtractionScaleFactor").value,
         }
         if maybe_geometry is not None:
             additional_properties["Geometry"] = maybe_geometry.value

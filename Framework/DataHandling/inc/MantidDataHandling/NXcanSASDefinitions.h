@@ -134,6 +134,8 @@ const std::string sasProcessTermSampleTrans = "sample_trans_run";
 const std::string sasProcessTermSampleDirect = "sample_direct_run";
 const std::string sasProcessTermCanScatter = "can_scatter_run";
 const std::string sasProcessTermCanDirect = "can_direct_run";
+const std::string sasProcessTermScaledBgSubWorkspace = "scaled_bgsub_workspace";
+const std::string sasProcessTermScaledBgSubScaleFactor = "scaled_bgsub_scale_factor";
 
 // SAStransmission_spectrum
 const std::string sasTransmissionSpectrumClassAttr = "SAStransmission_spectrum";
