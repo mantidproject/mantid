@@ -319,7 +319,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/NearestNeighbours.h:98
 variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:232
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:296
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:712
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:142
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:154
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:161

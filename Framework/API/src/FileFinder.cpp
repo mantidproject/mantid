@@ -709,7 +709,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // performance when calling findRuns()
   // with a large range of files, especially when searchPaths consists of
   // folders containing a large number of runs.
-  for (auto &extension : extensions) {
+  for (const auto &extension : extensions) {
     for (const auto &filename : filenames) {
       for (const auto &searchPath : searchPaths) {
         try {
