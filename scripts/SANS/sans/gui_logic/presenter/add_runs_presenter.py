@@ -109,7 +109,6 @@ class AddRunsPagePresenter(object):
 
     def _connect_to_view(self, view):
         view.sum.connect(self._handle_sum)
-        view.outFileChanged.connect(self._handle_out_file_changed)
         view.customOutFileChanged.connect(self._handle_custom_outfile_check_changed)
         view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
 
@@ -146,9 +145,6 @@ class AddRunsPagePresenter(object):
 
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)
-
-    def _handle_out_file_changed(self):
-        self._use_generated_file_name = False
 
     def _handle_custom_outfile_check_changed(self, enabled):
         if enabled:

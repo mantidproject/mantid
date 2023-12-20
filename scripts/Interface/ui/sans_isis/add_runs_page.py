@@ -14,7 +14,6 @@ Ui_AddRunsPage, _ = load_ui(__file__, "add_runs_page.ui")
 
 class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     sum = Signal()
-    outFileChanged = Signal()
     customOutFileChanged = Signal(bool)
     saveDirectoryClicked = Signal()
 
@@ -25,7 +24,6 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
 
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
-        self.fileNameEdit.textEdited.connect(self.outFileChanged)
         self.customFilenameCheckBox.stateChanged.connect(self._handle_custom_filename_checked)
         self.saveDirectoryButton.clicked.connect(self.saveDirectoryClicked)
 

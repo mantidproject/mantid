@@ -37,7 +37,6 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _make_mock_view(self):
         mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
         mock_view.sum = FakeSignal()
-        mock_view.outFileChanged = FakeSignal()
         mock_view.customOutFileChanged = FakeSignal()
         mock_view.saveDirectoryClicked = FakeSignal()
         return mock_view
@@ -225,7 +224,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         self.assertEqual("LOQ00005-add", returned)
 
-    def test_correct_base_name_after_set_by_user(self):
+    def test_correct_base_name_after_set_by_user_and_custom_selected(self):
         user_out_file_name = "Output"
         run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
@@ -236,13 +235,13 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         run_summation.__iter__.return_value = run_selection
 
         self.view.out_file_name.return_value = user_out_file_name
-        self.view.outFileChanged.emit()
+        self.view.customOutFileChanged.emit(True)
 
         returned = presenter._sum_base_file_name(run_selection=run_selection)
 
         self.assertEqual(returned, user_out_file_name)
 
-    def test_base_name_not_reset_after_set_by_user(self):
+    def test_base_name_not_reset_when_custom_selected(self):
         run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
         # Runs 4 / 5 / 6
@@ -250,7 +249,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         user_out_file_name = "Output"
         self.view.out_file_name.return_value = user_out_file_name
-        self.view.outFileChanged.emit()
+        self.view.customOutFileChanged.emit(True)
 
         run_summation.__iter__.return_value = run_selection
         returned = presenter._sum_base_file_name(run_selection=run_selection)
