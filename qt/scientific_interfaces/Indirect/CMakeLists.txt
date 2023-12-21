@@ -1,5 +1,4 @@
 set(SRC_FILES
-    DensityOfStates.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
@@ -10,18 +9,14 @@ set(SRC_FILES
     IndirectDiffractionReduction.cpp
     IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
-    IndirectMolDyn.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
     IndirectPlotOptionsView.cpp
-    IndirectSassena.cpp
     IndirectSettings.cpp
     IndirectSettingsHelper.cpp
     IndirectSettingsModel.cpp
     IndirectSettingsPresenter.cpp
     IndirectSettingsView.cpp
-    IndirectSimulation.cpp
-    IndirectSimulationTab.cpp
     IndirectTab.cpp
     IndirectTransmission.cpp
     Reduction/ISISEnergyTransferValidator.cpp
@@ -29,13 +24,17 @@ set(SRC_FILES
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
     Reduction/ReductionAlgorithmUtils.cpp
+    Simulation/DensityOfStates.cpp
+    Simulation/IndirectMolDyn.cpp
+    Simulation/IndirectSassena.cpp
+    Simulation/IndirectSimulation.cpp
+    Simulation/IndirectSimulationTab.cpp
     Tools/IndirectTools.cpp
     Tools/IndirectToolsTab.cpp
     Tools/IndirectTransmissionCalc.cpp
 )
 
 set(MOC_FILES
-    DensityOfStates.h
     IAddWorkspaceDialog.h
     IIndirectSettingsView.h
     ILLEnergyTransfer.h
@@ -45,19 +44,20 @@ set(MOC_FILES
     IndirectDiffractionReduction.h
     IndirectInstrumentConfig.h
     IndirectInterface.h
-    IndirectMolDyn.h
     IndirectPlotOptionsView.h
-    IndirectSassena.h
     IndirectSettings.h
     IndirectSettingsView.h
-    IndirectSimulation.h
-    IndirectSimulationTab.h
     IndirectTab.h
     IndirectTransmission.h
     ISISCalibration.h
     ISISDiagnostics.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
+    Simulation/DensityOfStates.h
+    Simulation/IndirectMolDyn.h
+    Simulation/IndirectSassena.h
+    Simulation/IndirectSimulation.h
+    Simulation/IndirectSimulationTab.h
     Tools/IndirectTools.h
     Tools/IndirectToolsTab.h
     Tools/IndirectTransmissionCalc.h
@@ -79,7 +79,6 @@ set(INC_FILES
 )
 
 set(UI_FILES
-    DensityOfStates.ui
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
@@ -88,12 +87,13 @@ set(UI_FILES
     IndirectDiffractionReduction.ui
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
-    IndirectMolDyn.ui
     IndirectPlotOptions.ui
-    IndirectSassena.ui
-    IndirectSimulation.ui
     IndirectTransmission.ui
     Reduction/ISISEnergyTransfer.ui
+    Simulation/DensityOfStates.ui
+    Simulation/IndirectMolDyn.ui
+    Simulation/IndirectSassena.ui
+    Simulation/IndirectSimulation.ui
     Tools/IndirectTools.ui
     Tools/IndirectTransmissionCalc.ui
 )
