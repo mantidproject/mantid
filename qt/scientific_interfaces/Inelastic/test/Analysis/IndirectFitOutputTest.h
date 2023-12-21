@@ -11,7 +11,6 @@
 
 #include "Analysis/IndirectFitOutput.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -67,9 +66,6 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 
 class IndirectFitOutputTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFitOutputTest() { FrameworkManager::Instance(); }
-
   static IndirectFitOutputTest *createSuite() { return new IndirectFitOutputTest(); }
 
   static void destroySuite(IndirectFitOutputTest *suite) { delete suite; }

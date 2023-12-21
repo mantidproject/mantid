@@ -14,12 +14,11 @@
 #include "Analysis/IndirectFitPlotPresenter.h"
 #include "Analysis/IndirectFitPlotView.h"
 #include "Analysis/IndirectFittingModel.h"
-#include "DataAnalysisMockObjects.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MockObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -46,9 +45,6 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 
 class IndirectFitPlotPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitPlotPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitPlotPresenterTest *createSuite() { return new IndirectFitPlotPresenterTest(); }
 
   static void destroySuite(IndirectFitPlotPresenterTest *suite) { delete suite; }
@@ -60,7 +56,7 @@ public:
     /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     auto model = std::make_unique<IndirectFitPlotModel>();
-    m_view = std::make_unique<MockIndirectFitPlotView>();
+    m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
@@ -367,7 +363,7 @@ public:
 
 private:
   std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
-  std::unique_ptr<MockIndirectFitPlotView> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitPlotView>> m_view;
   std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

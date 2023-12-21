@@ -27,6 +27,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
 public:
+  virtual ~MockIndirectDataAnalysisTab() = default;
+
   MOCK_METHOD2(handleSingleFitClicked, void(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
   MOCK_METHOD1(handleStartXChanged, void(double startX));
   MOCK_METHOD1(handleEndXChanged, void(double endX));
@@ -37,8 +39,10 @@ public:
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
 };
 
-class MockIndirectFitPlotView final : public IIndirectFitPlotView {
+class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
+  virtual ~MockIndirectFitPlotView() = default;
+
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));
@@ -98,8 +102,10 @@ public:
   MOCK_METHOD0(clearPreviews, void());
 };
 
-class MockIndirectFitOutputOptionsView final : public IIndirectFitOutputOptionsView {
+class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
 public:
+  virtual ~MockIndirectFitOutputOptionsView() = default;
+
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
 
   MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
@@ -133,6 +139,8 @@ public:
 
 class MockIndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
 public:
+  virtual ~MockIndirectFitOutputOptionsModel() = default;
+
   MOCK_METHOD1(setResultWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
   MOCK_METHOD1(setPDFWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
   MOCK_CONST_METHOD0(getResultWorkspace, WorkspaceGroup_sptr());
@@ -163,6 +171,8 @@ public:
 
 class MockIndirectFitDataModel : public IIndirectFitDataModel {
 public:
+  virtual ~MockIndirectFitDataModel() = default;
+
   MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
@@ -214,6 +224,8 @@ public:
 
 class MockFitDataView : public IIndirectFitDataView {
 public:
+  virtual ~MockFitDataView() = default;
+
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_METHOD1(validate, MantidQt::CustomInterfaces::UserInputValidator &(
                              MantidQt::CustomInterfaces::UserInputValidator &validator));

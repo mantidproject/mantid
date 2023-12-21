@@ -14,9 +14,8 @@
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitOutputOptionsPresenter.h"
 #include "Analysis/IndirectFitOutputOptionsView.h"
-#include "DataAnalysisMockObjects.h"
+#include "MockObjects.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -32,16 +31,13 @@ std::vector<std::string> getThreeParameters() { return {"Amplitude", "HWHM", "Pe
 
 class IndirectFitOutputOptionsPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitOutputOptionsPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitOutputOptionsPresenterTest *createSuite() { return new IndirectFitOutputOptionsPresenterTest(); }
 
   static void destroySuite(IndirectFitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
-    m_view = std::make_unique<MockIndirectFitOutputOptionsView>();
+    m_view = std::make_unique<NiceMock<MockIndirectFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
     m_model = model.get();
 
@@ -317,7 +313,7 @@ public:
 
 private:
   std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
-  std::unique_ptr<MockIndirectFitOutputOptionsView> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitOutputOptionsView>> m_view;
   NiceMock<MockIndirectFitOutputOptionsModel> *m_model;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_presenter;
 };

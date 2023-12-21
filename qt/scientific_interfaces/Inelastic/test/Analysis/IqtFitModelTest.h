@@ -11,7 +11,6 @@
 #include "Analysis/IqtFitModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -24,9 +23,6 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 class IqtFitModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IqtFitModelTest() { FrameworkManager::Instance(); }
-
   static IqtFitModelTest *createSuite() { return new IqtFitModelTest(); }
 
   static void destroySuite(IqtFitModelTest *suite) { delete suite; }

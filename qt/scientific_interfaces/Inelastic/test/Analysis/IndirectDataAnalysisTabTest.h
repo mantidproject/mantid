@@ -15,8 +15,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 class IndirectDataAnalysisTabTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectDataAnalysisTabTest() = default;
+  static IndirectDataAnalysisTabTest *createSuite() { return new IndirectDataAnalysisTabTest(); }
+
+  static void destroySuite(IndirectDataAnalysisTabTest *suite) { delete suite; }
 
   void test_that_single_function_correctly_identified() {
     std::string functionName = "ExpDecay";

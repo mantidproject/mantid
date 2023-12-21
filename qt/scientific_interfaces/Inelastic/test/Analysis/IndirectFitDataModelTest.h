@@ -29,7 +29,9 @@ using namespace MantidQt::MantidWidgets;
 
 class IndirectFitDataModelTest : public CxxTest::TestSuite {
 public:
-  IndirectFitDataModelTest() = default;
+  static IndirectFitDataModelTest *createSuite() { return new IndirectFitDataModelTest(); }
+
+  static void destroySuite(IndirectFitDataModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_fitData = std::make_unique<IndirectFitDataModel>();
@@ -54,6 +56,7 @@ public:
 
     auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
+    alg->setLogging(false);
     alg->setAlwaysStoreInADS(true);
     alg->setProperty("OutputWorkspace", "NAN");
     alg->setProperty("DataX", x);

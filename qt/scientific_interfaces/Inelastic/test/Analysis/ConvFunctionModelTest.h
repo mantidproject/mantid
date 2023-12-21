@@ -16,6 +16,10 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 class ConvFunctionModelTest : public CxxTest::TestSuite {
 public:
+  static ConvFunctionModelTest *createSuite() { return new ConvFunctionModelTest(); }
+
+  static void destroySuite(ConvFunctionModelTest *suite) { delete suite; }
+
   void setUp() override { m_model = std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionModel>(); }
 
   void tearDown() override { m_model.reset(); }

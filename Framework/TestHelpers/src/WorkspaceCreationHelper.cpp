@@ -211,7 +211,9 @@ Workspace2D_sptr create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool 
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
-  retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  if (maskedWorkspaceIndices.size() > 0) {
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  }
   return retVal;
 }
 
@@ -770,8 +772,8 @@ EventWorkspace_sptr createEventWorkspaceWithStartTime(int numPixels, int numBins
 // =====================================================================================
 /** Create event workspace, with several detector IDs in one event list.
  */
-EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins, double binDelta,
-                                                double xOffset) {
+EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> const &groups, int numBins,
+                                                double binDelta, double xOffset) {
 
   auto retVal = std::make_shared<EventWorkspace>();
   retVal->initialize(groups.size(), 2, 1);
@@ -1105,17 +1107,10 @@ createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sour
   detid2det_map detector_map;
   outputWS->getInstrument()->getDetectors(detector_map);
 
-  // b) determine maximum pixel id
-  detid2det_map::iterator it;
-  detid_t detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); ++it)
-    if (it->first > detid_max)
-      detid_max = it->first;
-
-  // c) Pad all the pixels and Set to zero
+  // b) Pad all the pixels and Set to zero
   size_t workspaceIndex = 0;
   const auto &detectorInfo = outputWS->detectorInfo();
-  for (it = detector_map.begin(); it != detector_map.end(); ++it) {
+  for (auto it = detector_map.begin(); it != detector_map.end(); ++it) {
     if (!detectorInfo.isMonitor(detectorInfo.indexOf(it->first))) {
       auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);

@@ -12,7 +12,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -89,9 +88,6 @@ IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<ConvFitModel> &model, Ma
 
 class ConvFitModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  ConvFitModelTest() { FrameworkManager::Instance(); }
-
   static ConvFitModelTest *createSuite() { return new ConvFitModelTest(); }
 
   static void destroySuite(ConvFitModelTest *suite) { delete suite; }

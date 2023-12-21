@@ -15,10 +15,9 @@
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "Analysis/ParameterEstimation.h"
-#include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
+#include "MockObjects.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -101,9 +100,6 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectFitDataPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitDataPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitDataPresenterTest *createSuite() { return new IndirectFitDataPresenterTest(); }
 
   static void destroySuite(IndirectFitDataPresenterTest *suite) { delete suite; }
@@ -239,8 +235,8 @@ private:
 
   std::unique_ptr<QTableWidget> m_table;
 
-  std::unique_ptr<MockFitDataView> m_view;
-  std::unique_ptr<MockIndirectFitDataModel> m_model;
+  std::unique_ptr<NiceMock<MockFitDataView>> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

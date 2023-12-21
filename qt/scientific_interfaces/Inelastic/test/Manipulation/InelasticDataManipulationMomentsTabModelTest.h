@@ -17,8 +17,11 @@ using namespace MantidQt::CustomInterfaces;
 
 class InelasticDataManipulationMomentsTabModelTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  InelasticDataManipulationMomentsTabModelTest() = default;
+  static InelasticDataManipulationMomentsTabModelTest *createSuite() {
+    return new InelasticDataManipulationMomentsTabModelTest();
+  }
+
+  static void destroySuite(InelasticDataManipulationMomentsTabModelTest *suite) { delete suite; }
 
   void setUp() override { m_model = std::make_unique<InelasticDataManipulationMomentsTabModel>(); }
 

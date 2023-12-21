@@ -13,11 +13,9 @@
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
-#include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
-
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MockObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -38,9 +36,6 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 class ConvFitDataPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  ConvFitDataPresenterTest() { FrameworkManager::Instance(); }
-
   static ConvFitDataPresenterTest *createSuite() { return new ConvFitDataPresenterTest(); }
 
   static void destroySuite(ConvFitDataPresenterTest *suite) { delete suite; }
@@ -119,8 +114,8 @@ public:
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
 
-  std::unique_ptr<MockFitDataView> m_view;
-  std::unique_ptr<MockIndirectFitDataModel> m_model;
+  std::unique_ptr<NiceMock<MockFitDataView>> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

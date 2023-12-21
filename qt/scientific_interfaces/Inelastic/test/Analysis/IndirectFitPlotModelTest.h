@@ -13,7 +13,6 @@
 #include "Analysis/IndirectFitOutput.h"
 #include "Analysis/IndirectFitPlotModel.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -73,8 +72,9 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 
 class IndirectFitPlotModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFitPlotModelTest() { FrameworkManager::Instance(); }
+  static IndirectFitPlotModelTest *createSuite() { return new IndirectFitPlotModelTest(); }
+
+  static void destroySuite(IndirectFitPlotModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_workspace = createWorkspaceWithInstrument(6, 5);

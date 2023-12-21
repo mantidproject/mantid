@@ -11,7 +11,6 @@
 #include "Analysis/FqFitModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -27,9 +26,6 @@ std::vector<std::string> getParameterLabels() { return {"f0.EISF", "f1.Width", "
 
 class FqFitModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  FqFitModelTest() { FrameworkManager::Instance(); }
-
   static FqFitModelTest *createSuite() { return new FqFitModelTest(); }
 
   static void destroySuite(FqFitModelTest *suite) { delete suite; }
