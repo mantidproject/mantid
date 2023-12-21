@@ -8,6 +8,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
 #include <algorithm>
@@ -18,6 +19,10 @@
 namespace Mantid::Geometry {
 using Kernel::IntMatrix;
 using Kernel::V3D;
+namespace {
+/// static logger object
+Kernel::Logger g_log("PointGroup");
+} // namespace
 
 /**
  * Returns all equivalent reflections for the supplied hkl.
@@ -128,8 +133,10 @@ std::string PointGroup::getLauePointGroupSymbol() const {
     } else {
       return "m-3m";
     }
+  default:
+    g_log.warning() << "Invalid crystal system - returning group with lowest symmetry (inversion only).\n";
+    return "-1"; // never used but required for gcc warning
   }
-  return "-1"; // never used but required for gcc warning
 }
 
 /**
