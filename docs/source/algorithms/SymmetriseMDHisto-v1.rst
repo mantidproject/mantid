@@ -43,6 +43,7 @@ Usage
     print("All HKL voxels have non-zero intensity?", np.all(ws_sym.getSignalArray()))
 
 Output:
+
 .. testoutput:: SymmetriseMDHisto
 
     All HKL voxels have non-zero intensity? True
