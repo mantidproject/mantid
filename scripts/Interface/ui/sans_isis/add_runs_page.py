@@ -66,6 +66,9 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     def disable_output_file_name_edit(self):
         self.fileNameEdit.setEnabled(False)
 
+    def clear_output_file_name_edit(self):
+        self.fileNameEdit.clear()
+
     def display_save_directory_box(self, title, default_path):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path, QtWidgets.QFileDialog.ShowDirsOnly)
         return filename

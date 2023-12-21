@@ -149,6 +149,7 @@ class AddRunsPagePresenter(object):
     def _handle_custom_outfile_check_changed(self, enabled):
         if enabled:
             self._use_generated_file_name = False
+            self._view.clear_output_file_name_edit()
             self._view.enable_output_file_name_edit()
             return
         self._use_generated_file_name = True

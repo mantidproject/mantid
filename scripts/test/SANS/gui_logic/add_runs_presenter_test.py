@@ -286,6 +286,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         self.view.customOutFileChanged.emit(True)
 
         self.view.enable_output_file_name_edit.assert_called_once()
+        self.view.clear_output_file_name_edit.assert_called_once()
 
 
 class SumButtonTest(AddRunsPagePresenterTestCase):
