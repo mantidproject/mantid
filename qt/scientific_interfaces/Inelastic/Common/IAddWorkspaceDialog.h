@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IAddWorkspaceDialog : public QDialog {
+class MANTIDQT_INELASTIC_DLL IAddWorkspaceDialog : public QDialog {
   Q_OBJECT
 public:
   IAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {}

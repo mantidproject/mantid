@@ -9,7 +9,7 @@
 //----------------------
 #include "InelasticDataManipulation.h"
 
-#include "IndirectSettings.h"
+#include "Common/IndirectSettings.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationIqtTab.h"
 #include "InelasticDataManipulationMomentsTab.h"

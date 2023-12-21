@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_IndirectTools.h"
 
-#include "IndirectInterface.h"
+#include "Common/IndirectInterface.h"
 #include "IndirectToolsTab.h"
 
 #include "MantidKernel/ConfigService.h"

@@ -8,7 +8,7 @@
 // Includes
 //----------------------
 #include "IndirectDataReduction.h"
-#include "IndirectSettings.h"
+#include "Common/IndirectSettings.h"
 
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"

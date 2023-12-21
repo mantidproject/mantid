@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectSettings.h"
-#include "IndirectSettingsPresenter.h"
+#include "Common/IndirectSettings.h"
+#include "Common/IndirectSettingsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 

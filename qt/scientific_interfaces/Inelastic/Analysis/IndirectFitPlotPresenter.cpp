@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
+#include "Common/IndirectSettingsHelper.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitPlotView.h"
-#include "IndirectSettingsHelper.h"
 
 #include <utility>
 

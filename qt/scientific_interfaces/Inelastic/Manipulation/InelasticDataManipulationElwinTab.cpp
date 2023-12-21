@@ -7,7 +7,7 @@
 #include "InelasticDataManipulationElwinTab.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "IndirectSettingsHelper.h"
+#include "Common/IndirectSettingsHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;

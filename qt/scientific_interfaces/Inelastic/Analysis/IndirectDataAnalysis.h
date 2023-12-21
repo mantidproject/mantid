@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "Common/IndirectInterface.h"
+#include "Common/IndirectTab.h"
 #include "DllConfig.h"
-#include "IndirectInterface.h"
-#include "IndirectTab.h"
 #include "ui_IndirectDataAnalysis.h"
 
 namespace MantidQt {

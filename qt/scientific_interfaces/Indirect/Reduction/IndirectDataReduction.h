@@ -7,8 +7,8 @@
 #pragma once
 #include "ui_IndirectDataReduction.h"
 
+#include "Common/IndirectInterface.h"
 #include "IndirectDataReductionTab.h"
-#include "IndirectInterface.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"

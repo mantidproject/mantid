@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -59,7 +59,7 @@ Provided common functionality of all indirect interface tabs.
 @author Dan Nixon
 @date 08/10/2014
 */
-class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject {
+class MANTIDQT_INELASTIC_DLL IndirectTab : public QObject {
   Q_OBJECT
 
 public:

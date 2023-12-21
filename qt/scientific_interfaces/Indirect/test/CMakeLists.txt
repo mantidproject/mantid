@@ -1,14 +1,5 @@
 # Testing
-set(TEST_FILES
-    IndirectDataValidationHelperTest.h
-    IndirectPlotOptionsModelTest.h
-    IndirectPlotOptionsPresenterTest.h
-    IndirectSettingsModelTest.h
-    IndirectSettingsPresenterTest.h
-    ISISEnergyTransferModelTest.h
-    ISISEnergyTransferModelUtilsTest.h
-    ReductionAlgorithmUtilsTest.h
-)
+set(TEST_FILES ISISEnergyTransferModelTest.h ISISEnergyTransferModelUtilsTest.h ReductionAlgorithmUtilsTest.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
@@ -17,7 +8,6 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  TEST_HELPER_SRCS ../IndirectDataValidationHelper.cpp
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock

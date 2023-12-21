@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectInterface.h"
-#include "IndirectPlotOptionsPresenter.h"
+#include "DllConfig.h"
+
+#include "Common/IndirectInterface.h"
+#include "Common/IndirectPlotOptionsPresenter.h"
 
 #include "ui_IndirectDiffractionReduction.h"
 

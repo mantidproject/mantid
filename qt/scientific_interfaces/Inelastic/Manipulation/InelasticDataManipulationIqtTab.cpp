@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationIqtTab.h"
 
-#include "IndirectSettingsHelper.h"
+#include "Common/IndirectSettingsHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"

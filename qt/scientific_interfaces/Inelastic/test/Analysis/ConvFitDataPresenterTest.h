@@ -13,7 +13,7 @@
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MockObjects.h"
 

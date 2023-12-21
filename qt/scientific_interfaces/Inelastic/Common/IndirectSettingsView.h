@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class IndirectSettingsPresenter;
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsView final : public QWidget, public IIndirectSettingsView {
+class MANTIDQT_INELASTIC_DLL IndirectSettingsView final : public QWidget, public IIndirectSettingsView {
   Q_OBJECT
 
 public:

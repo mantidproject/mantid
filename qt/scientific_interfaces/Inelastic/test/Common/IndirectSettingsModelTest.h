@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
-#include "IndirectSettingsModel.h"
+#include "Common/IndirectSettingsModel.h"
 
 using namespace MantidQt::CustomInterfaces;
 

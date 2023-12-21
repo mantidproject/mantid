@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataValidationHelper.h"
 #include "Manipulation/InelasticDataManipulationMomentsTabModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"

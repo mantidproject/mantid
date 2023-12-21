@@ -879,13 +879,13 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>IndirectPlotOptionsView.h</header>
+   <header>Common/IndirectPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>IndirectInstrumentConfig.h</header>
+   <header>Common/IndirectInstrumentConfig.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::API::FileFinderWidget</class>

@@ -245,7 +245,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>IndirectInstrumentConfig.h</header>
+   <header>Common/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

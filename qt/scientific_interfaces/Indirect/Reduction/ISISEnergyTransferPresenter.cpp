@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
+#include "Common/IndirectSettingsHelper.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"

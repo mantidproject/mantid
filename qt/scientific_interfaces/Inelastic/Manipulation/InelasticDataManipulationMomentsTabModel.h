@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectDataValidationHelper.h"
 #include "DllConfig.h"
-#include "IndirectDataValidationHelper.h"
 #include <typeinfo>
 
 using namespace Mantid::API;

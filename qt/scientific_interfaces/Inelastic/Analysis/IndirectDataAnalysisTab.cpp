@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectSettingsHelper.h"
+#include "Common/IndirectSettingsHelper.h"
 
 #include "FitTabConstants.h"
 #include "MantidAPI/FunctionFactory.h"

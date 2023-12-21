@@ -8,7 +8,7 @@
 
 #include "Analysis/IndirectFitDataModel.h"
 
-#include "IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"

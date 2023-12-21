@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectPlotOptionsModel.h"
+#include "Common/IndirectPlotOptionsModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

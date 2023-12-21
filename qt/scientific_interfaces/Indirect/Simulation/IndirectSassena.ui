@@ -220,7 +220,7 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>IndirectPlotOptionsView.h</header>
+   <header>Common/IndirectPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

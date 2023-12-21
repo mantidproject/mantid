@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class IIndirectSettings;
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter {
+class MANTIDQT_INELASTIC_DLL IndirectSettingsPresenter {
 
 public:
   explicit IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model, IIndirectSettingsView *view);

@@ -1,16 +1,4 @@
 set(SRC_FILES
-    IndirectAddWorkspaceDialog.cpp
-    IndirectDataValidationHelper.cpp
-    IndirectInterface.cpp
-    IndirectPlotOptionsModel.cpp
-    IndirectPlotOptionsPresenter.cpp
-    IndirectPlotOptionsView.cpp
-    IndirectSettings.cpp
-    IndirectSettingsHelper.cpp
-    IndirectSettingsModel.cpp
-    IndirectSettingsPresenter.cpp
-    IndirectSettingsView.cpp
-    IndirectTab.cpp
     Common/IndirectInstrumentConfig.cpp
     Diffraction/IndirectDiffractionReduction.cpp
     Reduction/IndirectDataReduction.cpp
@@ -35,14 +23,6 @@ set(SRC_FILES
 )
 
 set(MOC_FILES
-    IAddWorkspaceDialog.h
-    IIndirectSettingsView.h
-    IndirectAddWorkspaceDialog.h
-    IndirectInterface.h
-    IndirectPlotOptionsView.h
-    IndirectSettings.h
-    IndirectSettingsView.h
-    IndirectTab.h
     Common/IndirectInstrumentConfig.h
     Diffraction/IndirectDiffractionReduction.h
     Reduction/IndirectDataReduction.h
@@ -65,11 +45,6 @@ set(MOC_FILES
 
 set(INC_FILES
     DllConfig.h
-    IndirectDataValidationHelper.h
-    IndirectPlotOptionsModel.h
-    IndirectPlotOptionsPresenter.h
-    IndirectSettingsHelper.h
-    IndirectSettingsPresenter.h
     Notifier.h
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h
@@ -79,9 +54,6 @@ set(INC_FILES
 )
 
 set(UI_FILES
-    IndirectAddWorkspaceDialog.ui
-    IndirectInterfaceSettings.ui
-    IndirectPlotOptions.ui
     Common/IndirectInstrumentConfig.ui
     Diffraction/IndirectDiffractionReduction.ui
     Reduction/IndirectDataReduction.ui
@@ -125,6 +97,7 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
+                   MantidScientificInterfacesInelastic
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"

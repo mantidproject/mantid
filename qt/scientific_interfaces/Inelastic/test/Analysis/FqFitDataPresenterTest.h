@@ -14,7 +14,7 @@
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MockObjects.h"
 

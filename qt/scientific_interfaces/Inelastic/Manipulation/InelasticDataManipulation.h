@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_InelasticDataManipulation.h"
 
-#include "IndirectInterface.h"
+#include "Common/IndirectInterface.h"
 #include "InelasticDataManipulationTab.h"
 
 #include "MantidGeometry/IComponent.h"

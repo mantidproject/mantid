@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsModel {
+class MANTIDQT_INELASTIC_DLL IndirectSettingsModel {
 public:
   IndirectSettingsModel();
   virtual ~IndirectSettingsModel() = default;

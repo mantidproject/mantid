@@ -15,14 +15,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IndirectSettingsHelper {
 
-MANTIDQT_INDIRECT_DLL void setRestrictInputDataByName(bool restricted);
-MANTIDQT_INDIRECT_DLL void setExternalPlotErrorBars(bool errorBars);
-MANTIDQT_INDIRECT_DLL void setDeveloperFeatureFlags(QStringList const &flags);
+MANTIDQT_INELASTIC_DLL void setRestrictInputDataByName(bool restricted);
+MANTIDQT_INELASTIC_DLL void setExternalPlotErrorBars(bool errorBars);
+MANTIDQT_INELASTIC_DLL void setDeveloperFeatureFlags(QStringList const &flags);
 
-MANTIDQT_INDIRECT_DLL bool restrictInputDataByName();
-MANTIDQT_INDIRECT_DLL bool externalPlotErrorBars();
-MANTIDQT_INDIRECT_DLL QStringList developerFeatureFlags();
-MANTIDQT_INDIRECT_DLL bool hasDevelopmentFlag(std::string const &flag);
+MANTIDQT_INELASTIC_DLL bool restrictInputDataByName();
+MANTIDQT_INELASTIC_DLL bool externalPlotErrorBars();
+MANTIDQT_INELASTIC_DLL QStringList developerFeatureFlags();
+MANTIDQT_INELASTIC_DLL bool hasDevelopmentFlag(std::string const &flag);
 
 } // namespace IndirectSettingsHelper
 } // namespace CustomInterfaces

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectPlotOptionsPresenter.h"
+#include "Common/IndirectTab.h"
 #include "DllConfig.h"
-#include "IndirectPlotOptionsPresenter.h"
-#include "IndirectTab.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)

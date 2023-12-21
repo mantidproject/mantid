@@ -26,7 +26,7 @@ class IIndirectPlotOptionsPresenter;
 
 enum PlotWidget { Spectra, SpectraBin, SpectraSlice, SpectraTiled, SpectraUnit, SpectraSliceUnit };
 
-class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsView {
+class MANTIDQT_INELASTIC_DLL IIndirectPlotOptionsView {
 public:
   virtual void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) = 0;
 
@@ -56,7 +56,7 @@ public:
   virtual void displayWarning(QString const &message) = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView final : public API::MantidWidget, public IIndirectPlotOptionsView {
+class MANTIDQT_INELASTIC_DLL IndirectPlotOptionsView final : public API::MantidWidget, public IIndirectPlotOptionsView {
   Q_OBJECT
 
 public:

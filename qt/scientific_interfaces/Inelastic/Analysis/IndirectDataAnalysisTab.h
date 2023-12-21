@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectTab.h"
 #include "DllConfig.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
-#include "IndirectTab.h"
 #include "ui_IndirectFitTab.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"

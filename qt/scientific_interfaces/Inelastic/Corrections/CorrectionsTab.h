@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectPlotOptionsPresenter.h"
-#include "IndirectTab.h"
+#include "Common/IndirectPlotOptionsPresenter.h"
+#include "Common/IndirectTab.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"

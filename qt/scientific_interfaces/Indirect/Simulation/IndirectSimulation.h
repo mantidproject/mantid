@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_IndirectSimulation.h"
 
-#include "IndirectInterface.h"
+#include "Common/IndirectInterface.h"
 #include "IndirectSimulationTab.h"
 
 #include "MantidKernel/ConfigService.h"

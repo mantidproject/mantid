@@ -6,15 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+
+#include "../DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectInterface : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INELASTIC_DLL IndirectInterface : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:

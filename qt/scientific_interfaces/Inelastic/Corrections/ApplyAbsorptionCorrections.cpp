@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "IndirectDataValidationHelper.h"
-#include "IndirectSettingsHelper.h"
+#include "Common/IndirectDataValidationHelper.h"
+#include "Common/IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"

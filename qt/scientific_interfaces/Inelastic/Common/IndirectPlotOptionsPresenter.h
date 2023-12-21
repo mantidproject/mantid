@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectInterface.h"
-#include "IndirectPlotOptionsModel.h"
-#include "IndirectPlotOptionsView.h"
-#include "IndirectTab.h"
+#include "Common/IndirectInterface.h"
+#include "Common/IndirectPlotOptionsModel.h"
+#include "Common/IndirectPlotOptionsView.h"
+#include "Common/IndirectTab.h"
 
 #include "DllConfig.h"
 
@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL IIndirectPlotOptionsPresenter {
 public:
   virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
   virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
@@ -29,7 +29,7 @@ public:
   virtual void handlePlotTiledClicked() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
 
 public:
   IndirectPlotOptionsPresenter(

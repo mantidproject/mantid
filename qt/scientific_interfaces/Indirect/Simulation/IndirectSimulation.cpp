@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSimulation.h"
+#include "Common/IndirectSettings.h"
 #include "DensityOfStates.h"
 #include "IndirectMolDyn.h"
 #include "IndirectSassena.h"
-#include "IndirectSettings.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace MantidQt::CustomInterfaces {

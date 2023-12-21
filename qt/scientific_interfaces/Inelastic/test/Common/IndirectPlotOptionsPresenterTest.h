@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectPlotOptionsPresenter.h"
+#include "Common/IndirectPlotOptionsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 

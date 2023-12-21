@@ -47,6 +47,18 @@ set(SRC_FILES
     BayesFitting/Quasi.cpp
     BayesFitting/ResNorm.cpp
     BayesFitting/Stretch.cpp
+    Common/IndirectAddWorkspaceDialog.cpp
+    Common/IndirectDataValidationHelper.cpp
+    Common/IndirectInterface.cpp
+    Common/IndirectPlotOptionsModel.cpp
+    Common/IndirectPlotOptionsPresenter.cpp
+    Common/IndirectPlotOptionsView.cpp
+    Common/IndirectSettings.cpp
+    Common/IndirectSettingsHelper.cpp
+    Common/IndirectSettingsModel.cpp
+    Common/IndirectSettingsPresenter.cpp
+    Common/IndirectSettingsView.cpp
+    Common/IndirectTab.cpp
     Corrections/AbsorptionCorrections.cpp
     Corrections/ApplyAbsorptionCorrections.cpp
     Corrections/CalculatePaalmanPings.cpp
@@ -103,6 +115,14 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
+    Common/IAddWorkspaceDialog.h
+    Common/IIndirectSettingsView.h
+    Common/IndirectAddWorkspaceDialog.h
+    Common/IndirectInterface.h
+    Common/IndirectPlotOptionsView.h
+    Common/IndirectSettings.h
+    Common/IndirectSettingsView.h
+    Common/IndirectTab.h
     Corrections/AbsorptionCorrections.h
     Corrections/ApplyAbsorptionCorrections.h
     Corrections/CalculatePaalmanPings.h
@@ -150,6 +170,11 @@ set(INC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Common/IndirectDataValidationHelper.h
+    Common/IndirectPlotOptionsModel.h
+    Common/IndirectPlotOptionsPresenter.h
+    Common/IndirectSettingsHelper.h
+    Common/IndirectSettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
@@ -175,6 +200,9 @@ set(UI_FILES
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
+    Common/IndirectAddWorkspaceDialog.ui
+    Common/IndirectInterfaceSettings.ui
+    Common/IndirectPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
     Corrections/ApplyAbsorptionCorrections.ui
     Corrections/CalculatePaalmanPings.ui
@@ -215,7 +243,6 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
-                   MantidScientificInterfacesIndirect
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"

@@ -25,14 +25,14 @@ class UserSubWindow;
 
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IIndirectSettings {
+class MANTIDQT_INELASTIC_DLL IIndirectSettings {
 
 public:
   virtual void notifyApplySettings() = 0;
   virtual void notifyCloseSettings() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings : public QWidget, public IIndirectSettings {
+class MANTIDQT_INELASTIC_DLL IndirectSettings : public QWidget, public IIndirectSettings {
   Q_OBJECT
 
 public:
