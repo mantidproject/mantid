@@ -216,7 +216,7 @@ set(UI_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.ui
 )
 
-set(RES_FILES ../Indirect/IndirectInterfaceResources.qrc)
+set(RES_FILES Common/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(

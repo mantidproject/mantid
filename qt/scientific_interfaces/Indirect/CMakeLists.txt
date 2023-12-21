@@ -65,7 +65,7 @@ set(UI_FILES
     Tools/IndirectTransmissionCalc.ui
 )
 
-set(RES_FILES IndirectInterfaceResources.qrc)
+set(RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
