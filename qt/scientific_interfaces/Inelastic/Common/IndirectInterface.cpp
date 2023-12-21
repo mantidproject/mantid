@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectInterface.h"
-#include "IndirectSettings.h"
+#include "Settings.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -26,7 +26,7 @@ void IndirectInterface::help() {
 }
 
 void IndirectInterface::settings() {
-  auto settingsWidget = new IndirectSettings(this);
+  auto settingsWidget = new Settings(this);
   settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
   settingsWidget->loadSettings();
@@ -36,7 +36,7 @@ void IndirectInterface::settings() {
   settingsWidget->show();
 }
 
-void IndirectInterface::applySettings() { applySettings(IndirectSettings::getSettings()); }
+void IndirectInterface::applySettings() { applySettings(Settings::getSettings()); }
 
 void IndirectInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
 

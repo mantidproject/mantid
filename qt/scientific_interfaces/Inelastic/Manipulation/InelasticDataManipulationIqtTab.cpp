@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationIqtTab.h"
 
-#include "Common/IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -205,7 +205,7 @@ void InelasticDataManipulationIqtTab::plotCurrentPreview() {
   auto previewWs = getPreviewPlotWorkspace();
   auto inputWs = getInputWorkspace();
   auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected
   if (previewWs) {

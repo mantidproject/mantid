@@ -21,8 +21,8 @@ set(TEST_FILES
     Common/IndirectDataValidationHelperTest.h
     Common/IndirectPlotOptionsModelTest.h
     Common/IndirectPlotOptionsPresenterTest.h
-    Common/IndirectSettingsModelTest.h
-    Common/IndirectSettingsPresenterTest.h
+    Common/SettingsModelTest.h
+    Common/SettingsPresenterTest.h
     Manipulation/InelasticDataManipulationElwinTabModelTest.h
     Manipulation/InelasticDataManipulationIqtTabModelTest.h
     Manipulation/InelasticDataManipulationMomentsTabModelTest.h

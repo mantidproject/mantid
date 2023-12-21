@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
-#include "Common/IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
@@ -212,7 +212,7 @@ void IETPresenter::plotRawComplete(bool error) {
     auto const filename = m_view->getFirstFilename();
     std::filesystem::path fileInfo(filename);
     auto const name = fileInfo.filename().string();
-    m_plotter->plotSpectra(name + "_grp", "0", IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotSpectra(name + "_grp", "0", SettingsHelper::externalPlotErrorBars());
   }
 
   m_view->setPlotTimeIsPlotting(false);

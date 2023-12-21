@@ -14,13 +14,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectSettingsPresenter;
+class SettingsPresenter;
 
-class MANTIDQT_INELASTIC_DLL IIndirectSettingsView {
+class MANTIDQT_INELASTIC_DLL ISettingsView {
 
 public:
   virtual QWidget *getView() = 0;
-  virtual void subscribePresenter(IndirectSettingsPresenter *presenter) = 0;
+  virtual void subscribePresenter(SettingsPresenter *presenter) = 0;
 
   virtual void setSelectedFacility(QString const &text) = 0;
   virtual QString getSelectedFacility() const = 0;

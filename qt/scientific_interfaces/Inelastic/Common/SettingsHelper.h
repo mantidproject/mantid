@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IndirectSettingsHelper {
+namespace SettingsHelper {
 
 MANTIDQT_INELASTIC_DLL void setRestrictInputDataByName(bool restricted);
 MANTIDQT_INELASTIC_DLL void setExternalPlotErrorBars(bool errorBars);
@@ -24,6 +24,6 @@ MANTIDQT_INELASTIC_DLL bool externalPlotErrorBars();
 MANTIDQT_INELASTIC_DLL QStringList developerFeatureFlags();
 MANTIDQT_INELASTIC_DLL bool hasDevelopmentFlag(std::string const &flag);
 
-} // namespace IndirectSettingsHelper
+} // namespace SettingsHelper
 } // namespace CustomInterfaces
 } // namespace MantidQt

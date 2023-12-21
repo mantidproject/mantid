@@ -7,7 +7,7 @@
 #include "InelasticDataManipulationElwinTab.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "Common/IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -529,7 +529,7 @@ void InelasticDataManipulationElwinTab::handlePlotPreviewClicked() {
   auto const previewWs = getPreviewPlotWorkspace();
   auto const inputWs = getInputWorkspace();
   auto const index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected
   if (previewWs) {

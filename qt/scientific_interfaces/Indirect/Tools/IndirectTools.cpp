@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTools.h"
-#include "Common/IndirectSettings.h"
+#include "Common/Settings.h"
 #include "IndirectTransmissionCalc.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -21,7 +21,7 @@ IndirectTools::IndirectTools(QWidget *parent)
 
 void IndirectTools::initLayout() {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);

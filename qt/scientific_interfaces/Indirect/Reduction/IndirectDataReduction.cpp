@@ -8,7 +8,7 @@
 // Includes
 //----------------------
 #include "IndirectDataReduction.h"
-#include "Common/IndirectSettings.h"
+#include "Common/Settings.h"
 
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
@@ -73,7 +73,7 @@ void IndirectDataReduction::exportTabPython() {
  */
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
   addTab<IETPresenter>("ISIS Energy Transfer");

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSettingsHelper.h"
+#include "SettingsHelper.h"
 
 #include <QSettings>
 #include <QString>
@@ -30,7 +30,7 @@ QVariant getSetting(std::string const &settingGroup, std::string const &settingN
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IndirectSettingsHelper {
+namespace MantidQt::CustomInterfaces::SettingsHelper {
 
 static std::string const INDIRECT_SETTINGS_GROUP("Indirect Settings");
 static std::string const RESTRICT_DATA_PROPERTY("restrict-input-by-name");
@@ -59,4 +59,4 @@ void setDeveloperFeatureFlags(QStringList const &flags) {
   setSetting(INDIRECT_SETTINGS_GROUP, FEATURE_FLAGS_PROPERTY, flags);
 }
 
-} // namespace MantidQt::CustomInterfaces::IndirectSettingsHelper
+} // namespace MantidQt::CustomInterfaces::SettingsHelper

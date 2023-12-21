@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsModel.h"
-#include "IndirectSettingsHelper.h"
+#include "SettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -215,13 +215,13 @@ void IndirectPlotOptionsModel::plotSpectra() {
 
   if (workspaceName && indicesString) {
     std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
-    m_plotter->plotSpectra(plotWorkspaceName, indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotSpectra(plotWorkspaceName, indicesString.get(), SettingsHelper::externalPlotErrorBars());
   }
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
-    m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotBins(workspaceName.get(), binIndices, SettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::showSliceViewer() {
@@ -238,7 +238,7 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), SettingsHelper::externalPlotErrorBars());
 }
 
 boost::optional<std::string> IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {

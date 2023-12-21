@@ -14,10 +14,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IndirectSettingsModel {
+class MANTIDQT_INELASTIC_DLL SettingsModel {
 public:
-  IndirectSettingsModel();
-  virtual ~IndirectSettingsModel() = default;
+  SettingsModel();
+  virtual ~SettingsModel() = default;
 
   virtual void setFacility(std::string const &facility);
   virtual std::string getFacility() const;

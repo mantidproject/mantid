@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectSettingsPresenter.h"
+#include "SettingsPresenter.h"
 
 #include "DllConfig.h"
 
@@ -25,19 +25,19 @@ class UserSubWindow;
 
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IIndirectSettings {
+class MANTIDQT_INELASTIC_DLL ISettings {
 
 public:
   virtual void notifyApplySettings() = 0;
   virtual void notifyCloseSettings() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectSettings : public QWidget, public IIndirectSettings {
+class MANTIDQT_INELASTIC_DLL Settings : public QWidget, public ISettings {
   Q_OBJECT
 
 public:
-  IndirectSettings(QWidget *parent = nullptr);
-  ~IndirectSettings() = default;
+  Settings(QWidget *parent = nullptr);
+  ~Settings() = default;
 
   void connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows);
 
@@ -53,7 +53,7 @@ signals:
   void applySettings();
 
 private:
-  std::unique_ptr<IndirectSettingsPresenter> m_presenter;
+  std::unique_ptr<SettingsPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces

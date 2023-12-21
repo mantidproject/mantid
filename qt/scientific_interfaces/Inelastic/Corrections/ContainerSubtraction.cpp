@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
-#include "Common/IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 
 #include <utility>
 
@@ -369,8 +369,8 @@ void ContainerSubtraction::plotCurrentPreview() {
     indices.emplace_back(index);
   }
 
-  m_plotter->plotCorrespondingSpectra(
-      workspaces, indices, std::vector<bool>(workspaces.size(), IndirectSettingsHelper::externalPlotErrorBars()));
+  m_plotter->plotCorrespondingSpectra(workspaces, indices,
+                                      std::vector<bool>(workspaces.size(), SettingsHelper::externalPlotErrorBars()));
 }
 
 /*

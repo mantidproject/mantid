@@ -9,17 +9,17 @@
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
-#include "Common/IndirectSettingsModel.h"
+#include "Common/SettingsModel.h"
 
 using namespace MantidQt::CustomInterfaces;
 
-class IndirectSettingsModelTest : public CxxTest::TestSuite {
+class SettingsModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectSettingsModelTest *createSuite() { return new IndirectSettingsModelTest(); }
+  static SettingsModelTest *createSuite() { return new SettingsModelTest(); }
 
-  static void destroySuite(IndirectSettingsModelTest *suite) { delete suite; }
+  static void destroySuite(SettingsModelTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<IndirectSettingsModel>(); }
+  void setUp() override { m_model = std::make_unique<SettingsModel>(); }
 
   void tearDown() override { m_model.reset(); }
 
@@ -31,5 +31,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IndirectSettingsModel> m_model;
+  std::unique_ptr<SettingsModel> m_model;
 };

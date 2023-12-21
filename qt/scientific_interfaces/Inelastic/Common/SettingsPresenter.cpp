@@ -4,38 +4,37 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSettingsPresenter.h"
-#include "IndirectSettings.h"
-#include "IndirectSettingsHelper.h"
+#include "SettingsPresenter.h"
+#include "Settings.h"
+#include "SettingsHelper.h"
 
 namespace MantidQt::CustomInterfaces {
-using namespace IndirectSettingsHelper;
+using namespace SettingsHelper;
 
-IndirectSettingsPresenter::IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model,
-                                                     IIndirectSettingsView *view)
+SettingsPresenter::SettingsPresenter(std::unique_ptr<SettingsModel> model, ISettingsView *view)
     : m_model(std::move(model)), m_view(view) {
   m_view->subscribePresenter(this);
   loadSettings();
 }
 
-QWidget *IndirectSettingsPresenter::getView() { return m_view->getView(); }
+QWidget *SettingsPresenter::getView() { return m_view->getView(); }
 
-void IndirectSettingsPresenter::subscribeParent(IIndirectSettings *parent) { m_parent = parent; }
+void SettingsPresenter::subscribeParent(ISettings *parent) { m_parent = parent; }
 
-void IndirectSettingsPresenter::notifyOkClicked() {
+void SettingsPresenter::notifyOkClicked() {
   saveSettings();
   m_parent->notifyCloseSettings();
 }
 
-void IndirectSettingsPresenter::notifyApplyClicked() {
+void SettingsPresenter::notifyApplyClicked() {
   setApplyingChanges(true);
   saveSettings();
   setApplyingChanges(false);
 }
 
-void IndirectSettingsPresenter::notifyCancelClicked() { m_parent->notifyCloseSettings(); }
+void SettingsPresenter::notifyCancelClicked() { m_parent->notifyCloseSettings(); }
 
-void IndirectSettingsPresenter::loadSettings() {
+void SettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
 
   m_view->setRestrictInputByNameChecked(restrictInputDataByName());
@@ -44,7 +43,7 @@ void IndirectSettingsPresenter::loadSettings() {
   m_view->setDeveloperFeatureFlags(developerFeatureFlags());
 }
 
-void IndirectSettingsPresenter::saveSettings() {
+void SettingsPresenter::saveSettings() {
   m_model->setFacility(m_view->getSelectedFacility().toStdString());
 
   setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
@@ -55,7 +54,7 @@ void IndirectSettingsPresenter::saveSettings() {
   m_parent->notifyApplySettings();
 }
 
-void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {
+void SettingsPresenter::setApplyingChanges(bool applyingChanges) {
   m_view->setApplyText(applyingChanges ? "Applying..." : "Apply");
   m_view->setApplyEnabled(!applyingChanges);
   m_view->setOkEnabled(!applyingChanges);

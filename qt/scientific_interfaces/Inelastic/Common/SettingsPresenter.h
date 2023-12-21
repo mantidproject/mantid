@@ -7,22 +7,22 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndirectSettingsModel.h"
-#include "IndirectSettingsView.h"
+#include "SettingsModel.h"
+#include "SettingsView.h"
 
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectSettings;
+class ISettings;
 
-class MANTIDQT_INELASTIC_DLL IndirectSettingsPresenter {
+class MANTIDQT_INELASTIC_DLL SettingsPresenter {
 
 public:
-  explicit IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model, IIndirectSettingsView *view);
+  explicit SettingsPresenter(std::unique_ptr<SettingsModel> model, ISettingsView *view);
 
   QWidget *getView();
-  void subscribeParent(IIndirectSettings *parent);
+  void subscribeParent(ISettings *parent);
 
   void loadSettings();
 
@@ -35,9 +35,9 @@ private:
 
   void setApplyingChanges(bool applyingChanges);
 
-  std::unique_ptr<IndirectSettingsModel> m_model;
-  IIndirectSettingsView *m_view;
-  IIndirectSettings *m_parent;
+  std::unique_ptr<SettingsModel> m_model;
+  ISettingsView *m_view;
+  ISettings *m_parent;
 };
 
 } // namespace CustomInterfaces

@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BayesFitting.h"
-#include "Common/IndirectSettings.h"
+#include "Common/Settings.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
@@ -18,7 +18,7 @@ DECLARE_SUBWINDOW(BayesFitting)
 BayesFitting::BayesFitting(QWidget *parent)
     : IndirectInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);

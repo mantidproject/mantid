@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectInterfaceSettings</class>
- <widget class="QWidget" name="IndirectInterfaceSettings">
+ <class>InterfaceSettings</class>
+ <widget class="QWidget" name="InterfaceSettings">
   <property name="geometry">
    <rect>
     <x>0</x>

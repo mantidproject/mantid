@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Common/IndirectSettings.h"
-#include "Common/IndirectSettingsPresenter.h"
+#include "Common/Settings.h"
+#include "Common/SettingsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -20,11 +20,11 @@ using namespace testing;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectSettingsView : public IIndirectSettingsView {
+class MockSettingsView : public ISettingsView {
 public:
   /// Public methods
   MOCK_METHOD0(getView, QWidget *());
-  MOCK_METHOD1(subscribePresenter, void(IndirectSettingsPresenter *));
+  MOCK_METHOD1(subscribePresenter, void(SettingsPresenter *));
 
   MOCK_METHOD1(setInterfaceSettingsVisible, void(bool visible));
   MOCK_METHOD1(setInterfaceGroupBoxTitle, void(QString const &title));
@@ -54,7 +54,7 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectSettingsModel : public IndirectSettingsModel {
+class MockSettingsModel : public SettingsModel {
 public:
   /// Public methods
   MOCK_CONST_METHOD0(getSettingsGroup, std::string());
@@ -63,7 +63,7 @@ public:
   MOCK_CONST_METHOD0(getFacility, std::string());
 };
 
-class MockIndirectSettings : public IIndirectSettings {
+class MockSettings : public ISettings {
 public:
   MOCK_METHOD0(notifyApplySettings, void());
   MOCK_METHOD0(notifyCloseSettings, void());
@@ -71,19 +71,19 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectSettingsPresenterTest : public CxxTest::TestSuite {
+class SettingsPresenterTest : public CxxTest::TestSuite {
 public:
-  static IndirectSettingsPresenterTest *createSuite() { return new IndirectSettingsPresenterTest(); }
+  static SettingsPresenterTest *createSuite() { return new SettingsPresenterTest(); }
 
-  static void destroySuite(IndirectSettingsPresenterTest *suite) { delete suite; }
+  static void destroySuite(SettingsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockIndirectSettingsView>>();
-    auto model = std::make_unique<NiceMock<MockIndirectSettingsModel>>();
+    m_view = std::make_unique<NiceMock<MockSettingsView>>();
+    auto model = std::make_unique<NiceMock<MockSettingsModel>>();
     m_model = model.get();
-    m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), m_view.get());
+    m_presenter = std::make_unique<SettingsPresenter>(std::move(model), m_view.get());
 
-    m_parent = std::make_unique<NiceMock<MockIndirectSettings>>();
+    m_parent = std::make_unique<NiceMock<MockSettings>>();
     m_presenter->subscribeParent(m_parent.get());
   }
 
@@ -154,9 +154,9 @@ private:
     EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);
   }
 
-  std::unique_ptr<NiceMock<MockIndirectSettingsView>> m_view;
-  NiceMock<MockIndirectSettingsModel> *m_model;
-  std::unique_ptr<IndirectSettingsPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockSettingsView>> m_view;
+  NiceMock<MockSettingsModel> *m_model;
+  std::unique_ptr<SettingsPresenter> m_presenter;
 
-  std::unique_ptr<NiceMock<MockIndirectSettings>> m_parent;
+  std::unique_ptr<NiceMock<MockSettings>> m_parent;
 };

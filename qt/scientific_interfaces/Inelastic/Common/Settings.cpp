@@ -4,21 +4,21 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSettings.h"
+#include "Settings.h"
 #include "IndirectInterface.h"
-#include "IndirectSettingsHelper.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "SettingsHelper.h"
 
 constexpr auto SETTINGS_ICON = "mdi.settings";
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectSettings::IndirectSettings(QWidget *parent) : QWidget(parent) {
+Settings::Settings(QWidget *parent) : QWidget(parent) {
   this->setWindowTitle("Interface Settings");
 
-  auto model = std::make_unique<IndirectSettingsModel>();
-  m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), new IndirectSettingsView(this));
+  auto model = std::make_unique<SettingsModel>();
+  m_presenter = std::make_unique<SettingsPresenter>(std::move(model), new SettingsView(this));
   m_presenter->subscribeParent(this);
 
   auto layout = new QGridLayout();
@@ -26,7 +26,7 @@ IndirectSettings::IndirectSettings(QWidget *parent) : QWidget(parent) {
   setLayout(layout);
 }
 
-void IndirectSettings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows) {
+void Settings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows) {
   for (auto const &window : windows) {
     if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data())) {
       connect(this, SIGNAL(applySettings()), indirectInterface, SLOT(applySettings()));
@@ -34,22 +34,22 @@ void IndirectSettings::connectExistingInterfaces(QList<QPointer<MantidQt::API::U
   }
 }
 
-QIcon IndirectSettings::icon() { return Icons::getIcon(SETTINGS_ICON); }
+QIcon Settings::icon() { return Icons::getIcon(SETTINGS_ICON); }
 
-std::map<std::string, QVariant> IndirectSettings::getSettings() {
+std::map<std::string, QVariant> Settings::getSettings() {
   std::map<std::string, QVariant> interfaceSettings;
-  interfaceSettings["RestrictInput"] = IndirectSettingsHelper::restrictInputDataByName();
-  interfaceSettings["ErrorBars"] = IndirectSettingsHelper::externalPlotErrorBars();
+  interfaceSettings["RestrictInput"] = SettingsHelper::restrictInputDataByName();
+  interfaceSettings["ErrorBars"] = SettingsHelper::externalPlotErrorBars();
   return interfaceSettings;
 }
 
-void IndirectSettings::notifyApplySettings() { emit applySettings(); }
+void Settings::notifyApplySettings() { emit applySettings(); }
 
-void IndirectSettings::notifyCloseSettings() {
+void Settings::notifyCloseSettings() {
   if (auto settingsWindow = window())
     settingsWindow->close();
 }
 
-void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
+void Settings::loadSettings() { m_presenter->loadSettings(); }
 
 } // namespace MantidQt::CustomInterfaces

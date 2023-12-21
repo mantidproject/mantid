@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSettingsModel.h"
+#include "SettingsModel.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -13,14 +13,14 @@ using namespace Mantid::Kernel;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectSettingsModel::IndirectSettingsModel() = default;
+SettingsModel::SettingsModel() = default;
 
-void IndirectSettingsModel::setFacility(std::string const &facility) {
+void SettingsModel::setFacility(std::string const &facility) {
   auto const savedFacility = getFacility();
   if (savedFacility != facility)
     ConfigService::Instance().setFacility(facility);
 }
 
-std::string IndirectSettingsModel::getFacility() const { return ConfigService::Instance().getFacility().name(); }
+std::string SettingsModel::getFacility() const { return ConfigService::Instance().getFacility().name(); }
 
 } // namespace MantidQt::CustomInterfaces

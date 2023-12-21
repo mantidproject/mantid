@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
-#include "Common/IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -446,8 +446,7 @@ void ResNorm::plotCurrentPreview() {
     plotIndices.emplace_back(0);
   }
   m_plotter->plotCorrespondingSpectra(
-      plotWorkspaces, plotIndices,
-      std::vector<bool>(plotWorkspaces.size(), IndirectSettingsHelper::externalPlotErrorBars()));
+      plotWorkspaces, plotIndices, std::vector<bool>(plotWorkspaces.size(), SettingsHelper::externalPlotErrorBars()));
 }
 
 void ResNorm::runClicked() {
@@ -479,7 +478,7 @@ void ResNorm::saveClicked() {
  */
 void ResNorm::plotClicked() {
   setPlotResultIsPlotting(true);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")

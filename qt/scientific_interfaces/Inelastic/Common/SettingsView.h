@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ui_IndirectInterfaceSettings.h"
+#include "ui_InterfaceSettings.h"
 
-#include "IIndirectSettingsView.h"
+#include "ISettingsView.h"
 
 #include "DllConfig.h"
 
@@ -19,16 +19,16 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectSettingsPresenter;
+class SettingsPresenter;
 
-class MANTIDQT_INELASTIC_DLL IndirectSettingsView final : public QWidget, public IIndirectSettingsView {
+class MANTIDQT_INELASTIC_DLL SettingsView final : public QWidget, public ISettingsView {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsView(QWidget *parent = nullptr);
+  explicit SettingsView(QWidget *parent = nullptr);
 
   QWidget *getView() override;
-  void subscribePresenter(IndirectSettingsPresenter *presenter) override;
+  void subscribePresenter(SettingsPresenter *presenter) override;
 
   void setSelectedFacility(QString const &text) override;
   QString getSelectedFacility() const override;
@@ -54,8 +54,8 @@ private slots:
   void openHelp();
 
 private:
-  IndirectSettingsPresenter *m_presenter;
-  std::unique_ptr<Ui::IndirectInterfaceSettings> m_uiForm;
+  SettingsPresenter *m_presenter;
+  std::unique_ptr<Ui::InterfaceSettings> m_uiForm;
 };
 
 } // namespace CustomInterfaces

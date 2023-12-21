@@ -53,11 +53,11 @@ set(SRC_FILES
     Common/IndirectPlotOptionsModel.cpp
     Common/IndirectPlotOptionsPresenter.cpp
     Common/IndirectPlotOptionsView.cpp
-    Common/IndirectSettings.cpp
-    Common/IndirectSettingsHelper.cpp
-    Common/IndirectSettingsModel.cpp
-    Common/IndirectSettingsPresenter.cpp
-    Common/IndirectSettingsView.cpp
+    Common/Settings.cpp
+    Common/SettingsHelper.cpp
+    Common/SettingsModel.cpp
+    Common/SettingsPresenter.cpp
+    Common/SettingsView.cpp
     Common/IndirectTab.cpp
     Corrections/AbsorptionCorrections.cpp
     Corrections/ApplyAbsorptionCorrections.cpp
@@ -116,12 +116,12 @@ set(MOC_FILES
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
     Common/IAddWorkspaceDialog.h
-    Common/IIndirectSettingsView.h
+    Common/ISettingsView.h
     Common/IndirectAddWorkspaceDialog.h
     Common/IndirectInterface.h
     Common/IndirectPlotOptionsView.h
-    Common/IndirectSettings.h
-    Common/IndirectSettingsView.h
+    Common/Settings.h
+    Common/SettingsView.h
     Common/IndirectTab.h
     Corrections/AbsorptionCorrections.h
     Corrections/ApplyAbsorptionCorrections.h
@@ -173,8 +173,8 @@ set(INC_FILES
     Common/IndirectDataValidationHelper.h
     Common/IndirectPlotOptionsModel.h
     Common/IndirectPlotOptionsPresenter.h
-    Common/IndirectSettingsHelper.h
-    Common/IndirectSettingsPresenter.h
+    Common/SettingsHelper.h
+    Common/SettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
@@ -201,7 +201,7 @@ set(UI_FILES
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
     Common/IndirectAddWorkspaceDialog.ui
-    Common/IndirectInterfaceSettings.ui
+    Common/InterfaceSettings.ui
     Common/IndirectPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
     Corrections/ApplyAbsorptionCorrections.ui

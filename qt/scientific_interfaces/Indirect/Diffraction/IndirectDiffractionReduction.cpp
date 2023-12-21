@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
-#include "Common/IndirectSettings.h"
+#include "Common/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -45,7 +45,7 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); 
  */
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   m_plotOptionsPresenter =
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
