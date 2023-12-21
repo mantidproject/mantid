@@ -1,10 +1,5 @@
 set(SRC_FILES
-    ILLEnergyTransfer.cpp
-    ISISCalibration.cpp
-    ISISDiagnostics.cpp
     IndirectAddWorkspaceDialog.cpp
-    IndirectDataReduction.cpp
-    IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
     IndirectDiffractionReduction.cpp
     IndirectInstrumentConfig.cpp
@@ -18,7 +13,12 @@ set(SRC_FILES
     IndirectSettingsPresenter.cpp
     IndirectSettingsView.cpp
     IndirectTab.cpp
-    IndirectTransmission.cpp
+    Reduction/IndirectDataReduction.cpp
+    Reduction/IndirectDataReductionTab.cpp
+    Reduction/IndirectTransmission.cpp
+    Reduction/ILLEnergyTransfer.cpp
+    Reduction/ISISCalibration.cpp
+    Reduction/ISISDiagnostics.cpp
     Reduction/ISISEnergyTransferValidator.cpp
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
@@ -37,10 +37,7 @@ set(SRC_FILES
 set(MOC_FILES
     IAddWorkspaceDialog.h
     IIndirectSettingsView.h
-    ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
     IndirectInstrumentConfig.h
     IndirectInterface.h
@@ -48,9 +45,12 @@ set(MOC_FILES
     IndirectSettings.h
     IndirectSettingsView.h
     IndirectTab.h
-    IndirectTransmission.h
-    ISISCalibration.h
-    ISISDiagnostics.h
+    Reduction/IndirectDataReduction.h
+    Reduction/IndirectDataReductionTab.h
+    Reduction/IndirectTransmission.h
+    Reduction/ILLEnergyTransfer.h
+    Reduction/ISISCalibration.h
+    Reduction/ISISDiagnostics.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
     Simulation/DensityOfStates.h
@@ -79,16 +79,16 @@ set(INC_FILES
 )
 
 set(UI_FILES
-    ILLEnergyTransfer.ui
-    ISISCalibration.ui
-    ISISDiagnostics.ui
     IndirectAddWorkspaceDialog.ui
-    IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectPlotOptions.ui
-    IndirectTransmission.ui
+    Reduction/IndirectDataReduction.ui
+    Reduction/IndirectTransmission.ui
+    Reduction/ILLEnergyTransfer.ui
+    Reduction/ISISCalibration.ui
+    Reduction/ISISDiagnostics.ui
     Reduction/ISISEnergyTransfer.ui
     Simulation/DensityOfStates.ui
     Simulation/IndirectMolDyn.ui
