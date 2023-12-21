@@ -154,6 +154,7 @@ class AddRunsPagePresenter(object):
             return
         self._use_generated_file_name = True
         self._view.disable_output_file_name_edit()
+        self._handle_selection_changed(self._run_selector_presenter.run_selection())
 
     @staticmethod
     def _output_directory_is_not_empty(settings):
