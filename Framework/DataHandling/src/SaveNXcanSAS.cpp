@@ -385,15 +385,6 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 }
 
 /**
- * Create a note class within process
- * @param group: the sasEntry
- */
-void createNote(H5::Group &group) {
-  auto process = group.openGroup(sasProcessGroupName);
-  Mantid::DataHandling::H5Util::createGroupCanSAS(process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
-}
-
-/**
  * Add a note containing sample or can run numbers to the process group.
  * We can add two sample runs, direct and trans, and two can runs, scatter and
  * direct. Sample Scatter and Can Transmission are added to the data elsewhere
