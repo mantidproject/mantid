@@ -731,7 +731,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveNexusESS.h:27
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:147
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:320
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:519
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:78
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
