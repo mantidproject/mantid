@@ -23,15 +23,15 @@ set(SRC_FILES
     IndirectSimulation.cpp
     IndirectSimulationTab.cpp
     IndirectTab.cpp
-    IndirectTools.cpp
-    IndirectToolsTab.cpp
     IndirectTransmission.cpp
-    IndirectTransmissionCalc.cpp
     Reduction/ISISEnergyTransferValidator.cpp
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
     Reduction/ReductionAlgorithmUtils.cpp
+    Tools/IndirectTools.cpp
+    Tools/IndirectToolsTab.cpp
+    Tools/IndirectTransmissionCalc.cpp
 )
 
 set(MOC_FILES
@@ -53,14 +53,14 @@ set(MOC_FILES
     IndirectSimulation.h
     IndirectSimulationTab.h
     IndirectTab.h
-    IndirectTools.h
-    IndirectToolsTab.h
-    IndirectTransmissionCalc.h
     IndirectTransmission.h
     ISISCalibration.h
     ISISDiagnostics.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
+    Tools/IndirectTools.h
+    Tools/IndirectToolsTab.h
+    Tools/IndirectTransmissionCalc.h
 )
 
 set(INC_FILES
@@ -83,7 +83,6 @@ set(UI_FILES
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
-    Reduction/ISISEnergyTransfer.ui
     IndirectAddWorkspaceDialog.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
@@ -93,9 +92,10 @@ set(UI_FILES
     IndirectPlotOptions.ui
     IndirectSassena.ui
     IndirectSimulation.ui
-    IndirectTools.ui
     IndirectTransmission.ui
-    IndirectTransmissionCalc.ui
+    Reduction/ISISEnergyTransfer.ui
+    Tools/IndirectTools.ui
+    Tools/IndirectTransmissionCalc.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
