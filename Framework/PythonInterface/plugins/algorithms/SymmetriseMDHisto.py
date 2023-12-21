@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, IMDHistoWorkspaceProperty, PythonAlgorithm
+from mantid.api import AlgorithmFactory, IMDHistoWorkspaceProperty, PythonAlgorithm, Progress
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion
 from mantid.geometry import SpaceGroupFactory, PointGroupFactory
 import numpy as np
@@ -112,7 +112,10 @@ class SymmetriseMDHisto(PythonAlgorithm):
 
         bin_index = np.arange(signal.size).reshape(signal.shape)
         bin_at_zero = nbins % 2  # odd number of bins implies bin center at 0 along each axis
-        for sym_op in laue_ptgr.getSymmetryOperations():
+        sym_ops = laue_ptgr.getSymmetryOperations()
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(sym_ops))
+        for sym_op in sym_ops:
+            prog_reporter.report("Symmetrising")
             transformed = sym_op.transformHKL([1, 2, 3])
             axes = [int(abs(iax)) - 1 for iax in transformed]
             iflip = np.flatnonzero(np.asarray(transformed) < 0)
