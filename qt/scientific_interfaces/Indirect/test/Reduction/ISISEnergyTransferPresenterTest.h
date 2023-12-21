@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectDataReduction.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
+#include "Reduction/IndirectDataReduction.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -26,7 +26,7 @@ public:
   MOCK_METHOD3(runIETAlgorithm, std::string(MantidQt::API::BatchAlgorithmRunner *, InstrumentData, IETRunData));
 };
 
-class MockIETView : public IIETView {
+class MockIETView : public IETView {
 public:
   MOCK_CONST_METHOD0(getRunData, IETRunData());
   MOCK_CONST_METHOD0(getPlotData, IETPlotData());

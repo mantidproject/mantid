@@ -1,5 +1,7 @@
 # Testing
-set(TEST_FILES ISISEnergyTransferModelTest.h ISISEnergyTransferModelUtilsTest.h ReductionAlgorithmUtilsTest.h)
+set(TEST_FILES Reduction/ISISEnergyTransferModelTest.h Reduction/ISISEnergyTransferModelUtilsTest.h
+               Reduction/ReductionAlgorithmUtilsTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
