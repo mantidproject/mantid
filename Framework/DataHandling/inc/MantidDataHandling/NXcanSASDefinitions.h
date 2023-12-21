@@ -80,6 +80,14 @@ const std::string nxInstrumentSourceClassAttr = "NXsource";
 const std::string sasInstrumentSourceGroupName = "sassource";
 const std::string sasInstrumentSourceRadiation = "type";
 
+const std::string sasInstrumentApertureClassAttr = "SASaperture";
+const std::string nxInstrumentApertureClassAttr = "NXaperture";
+
+const std::string sasInstrumentApertureGroupName = "sasaperture";
+const std::string sasInstrumentApertureShape = "shape";
+const std::string sasInstrumentApertureGapWidth = "x_gap";
+const std::string sasInstrumentApertureGapHeight = "y_gap";
+
 const std::string sasInstrumentCollimationClassAttr = "SAScollimation";
 const std::string nxInstrumentCollimationClassAttr = "NXcollimator";
 
@@ -98,6 +106,9 @@ const std::string nxInstrumentSampleClassAttr = "NXsample";
 
 const std::string sasInstrumentSampleGroupAttr = "sassample";
 const std::string sasInstrumentSampleId = "ID";
+const std::string sasInstrumentSampleThickness = "thickness";
+
+const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
 
 const std::string sasInstrumentIDF = "idf";
 
@@ -123,6 +134,8 @@ const std::string sasProcessTermSampleTrans = "sample_trans_run";
 const std::string sasProcessTermSampleDirect = "sample_direct_run";
 const std::string sasProcessTermCanScatter = "can_scatter_run";
 const std::string sasProcessTermCanDirect = "can_direct_run";
+const std::string sasProcessTermScaledBgSubWorkspace = "scaled_bgsub_workspace";
+const std::string sasProcessTermScaledBgSubScaleFactor = "scaled_bgsub_scale_factor";
 
 // SAStransmission_spectrum
 const std::string sasTransmissionSpectrumClassAttr = "SAStransmission_spectrum";

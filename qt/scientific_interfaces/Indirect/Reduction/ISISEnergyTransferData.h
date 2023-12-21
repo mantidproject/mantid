@@ -119,21 +119,15 @@ private:
 
 class IETAnalysisData {
 public:
-  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0,
-                  const bool &useScaleFactor = false, const double &scaleFactor = 0.0)
-      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance), m_useScaleFactor(useScaleFactor),
-        m_scaleFactor(scaleFactor) {}
+  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0)
+      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance) {}
 
   bool getUseDetailedBalance() const { return m_useDetailedBalance; }
   double getDetailedBalance() const { return m_detailedBalance; }
-  bool getUseScaleFactor() const { return m_useScaleFactor; }
-  double getScaleFactor() const { return m_scaleFactor; }
 
 private:
   bool m_useDetailedBalance;
   double m_detailedBalance;
-  bool m_useScaleFactor;
-  double m_scaleFactor;
 };
 
 class IETRebinData {
@@ -262,13 +256,12 @@ private:
 
 class IETSaveData {
 public:
-  IETSaveData(const bool &nexus = false, const bool &spe = false, const bool &nxspe = false, const bool &ascii = false,
+  IETSaveData(const bool &nexus = false, const bool &spe = false, const bool &ascii = false,
               const bool &aclimax = false, const bool &daveGrp = false)
-      : m_nexus(nexus), m_spe(spe), m_nxspe(nxspe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp) {}
+      : m_nexus(nexus), m_spe(spe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp) {}
 
   bool getNexus() const { return m_nexus; }
   bool getSPE() const { return m_spe; }
-  bool getNXSPE() const { return m_nxspe; }
   bool getASCII() const { return m_ascii; }
   bool getAclimax() const { return m_aclimax; }
   bool getDaveGrp() const { return m_daveGrp; }
@@ -276,7 +269,6 @@ public:
 private:
   bool m_nexus;
   bool m_spe;
-  bool m_nxspe;
   bool m_ascii;
   bool m_aclimax;
   bool m_daveGrp;

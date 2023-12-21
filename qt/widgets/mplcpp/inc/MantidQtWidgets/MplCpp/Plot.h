@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
@@ -161,6 +162,15 @@ plotsubplots(const QStringList &workspaces, boost::optional<std::vector<int>> sp
 MANTID_MPLCPP_DLL Common::Python::Object pcolormesh(const QStringList &workspaces,
                                                     boost::optional<Common::Python::Object> fig = boost::none);
 
+/**
+ * Externall call to slice viewer GUI
+ *
+ * @param workspace A shared pointer to the target workspace
+ *
+ * @return Returns a call to the slice viewer interface show function
+ */
+
+MANTID_MPLCPP_DLL Common::Python::Object sliceviewer(const Mantid::API::Workspace_sptr &workspace);
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt

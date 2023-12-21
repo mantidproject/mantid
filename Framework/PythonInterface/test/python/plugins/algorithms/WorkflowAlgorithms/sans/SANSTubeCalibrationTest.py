@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+from tempfile import NamedTemporaryFile
+from pathlib import Path
 
 from mantid.api import AnalysisDataService
 from testhelpers import create_algorithm
@@ -66,6 +68,33 @@ class SANSTubeCalibrationTest(unittest.TestCase):
         }
         alg = self._setup_front_detector_calibration(args)
         self._assert_raises_error("The ending pixel must be less than or equal to", alg)
+
+    def test_cvalues_filepath_plus_extension_matching_existing_file_throws_error(self):
+        with NamedTemporaryFile(suffix=".txt") as cvalues_filepath:
+            args = {Prop.STRIP_POSITIONS: [920], Prop.DATA_FILES: ["test_SANS_calibration_ws"], Prop.CVALUE_FILE: cvalues_filepath.name}
+            alg = self._setup_front_detector_calibration(args)
+            self._assert_raises_error("CValues file already exists", alg)
+
+    def test_cvalues_filepath_minus_extension_matching_existing_file_throws_error(self):
+        with NamedTemporaryFile(suffix=".txt") as cvalues_filepath:
+            filepath_without_ext = str(Path(cvalues_filepath.name).with_suffix(""))
+            args = {Prop.STRIP_POSITIONS: [920], Prop.DATA_FILES: ["test_SANS_calibration_ws"], Prop.CVALUE_FILE: filepath_without_ext}
+            alg = self._setup_front_detector_calibration(args)
+            self._assert_raises_error("CValues file already exists", alg)
+
+    def test_save_input_ws_directory_does_not_exist_throws_error(self):
+        fake_directory = Path("test/directory")
+        self.assertFalse(fake_directory.is_dir())
+
+        args = {Prop.STRIP_POSITIONS: [920], Prop.DATA_FILES: ["test_SANS_calibration_ws"], Prop.SAVE_INPUT_WS: str(fake_directory)}
+        alg = self._setup_front_detector_calibration(args)
+        self._assert_raises_error("The directory for saving the integrated input workspaces does not exist", alg)
+
+    def test_save_input_ws_with_filepath_throws_error(self):
+        with NamedTemporaryFile(suffix=".nxs") as filepath:
+            args = {Prop.STRIP_POSITIONS: [920], Prop.DATA_FILES: ["test_SANS_calibration_ws"], Prop.SAVE_INPUT_WS: filepath.name}
+            alg = self._setup_front_detector_calibration(args)
+            self._assert_raises_error("The directory for saving the integrated input workspaces does not exist", alg)
 
     def _setup_front_detector_calibration(self, args):
         default_args = {Prop.ENCODER: 474.2, Prop.REAR_DET: False}

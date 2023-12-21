@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport IndirectSassena : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL IndirectSassena : public IndirectSimulationTab {
   Q_OBJECT
 
 public:

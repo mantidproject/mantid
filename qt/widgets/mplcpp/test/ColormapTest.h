@@ -36,7 +36,7 @@ public:
 
   // ----------------------- Failure tests ------------------------
   void testgetCMapWithUnknownCMapThrowsException() {
-    TS_ASSERT_THROWS(getCMap("AnUnknownName"), const PythonException &);
+    TS_ASSERT_THROWS(getCMap("AnUnknownName"), const std::invalid_argument &);
   }
 
   void testConstructionWithNonColorMapObjectThrows() {

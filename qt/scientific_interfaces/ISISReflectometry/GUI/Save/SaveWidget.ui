@@ -320,6 +320,11 @@
             <string>ILL Cosmos (*.mft)</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>ORSO Ascii (*.ort)</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>

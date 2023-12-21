@@ -18,7 +18,6 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, 
 
 
 class FigureErrorsManager(object):
-
     AXES_NOT_MANTIDAXES_ERR_MESSAGE = "Plot axes are not MantidAxes. There is no way to automatically load error data."
 
     def __init__(self, canvas):
@@ -55,7 +54,13 @@ class FigureErrorsManager(object):
         else:
             errorbar_cap_lines = []
 
-        ax.lines.insert(curve_index, ax.lines.pop())
+        # Since mpl 3.7 made ax.lines immutable, we have to do this workaround.
+        lines_to_remove = ax.get_lines()[curve_index:]
+        for line in lines_to_remove:
+            line.remove()
+        ax.add_line(lines_to_remove.pop())
+        for line in lines_to_remove:
+            ax.add_line(line)
 
         if isinstance(ax, MantidAxes) and ax.is_waterfall():
             datafunctions.convert_single_line_to_waterfall(ax, curve_index)

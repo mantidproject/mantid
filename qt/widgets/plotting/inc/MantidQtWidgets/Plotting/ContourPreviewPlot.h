@@ -40,6 +40,7 @@ public:
   void setCanvasColour(QColor const &colour);
 
   void setWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void clearPlot();
 
   std::tuple<double, double> getAxisRange(AxisID axisID) const;
 

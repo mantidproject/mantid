@@ -5,12 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-"""
-Class which loads and stores a single DNS datafile in a dictionary.
-"""
-
 import unittest
-from unittest.mock import patch
 from mantid.api import FileFinder
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
@@ -25,17 +20,12 @@ class DNSFileTest(unittest.TestCase):
         cls.filepath = get_filepath()
         cls.data = get_dataset()
         cls.full_filename = FileFinder.Instance().getFullPath("dnstof.d_dat")
-        cls.file = DNSFile("", cls.full_filename)
+        cls.file = DNSFile("", cls.full_filename, [])
         cls.txt = "".join(load_txt(cls.full_filename))
 
     def test___init__(self):
         self.assertIsInstance(self.file, ObjectDict)
         self.assertIsInstance(self.file, DNSFile)
-
-    @patch("mantidqtinterfaces.dns_powder_tof.data_structures.dns_file." "save_txt")
-    def test_write(self, mock_save):
-        self.file.write("", "123.d_dat")
-        mock_save.assert_called_with(self.txt, "123.d_dat", "")
 
     def test_read(self):
         # already read in init

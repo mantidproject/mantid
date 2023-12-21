@@ -11,6 +11,7 @@ import os.path
 import tempfile
 import unittest
 
+from qtpy.QtWidgets import QApplication
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
@@ -94,6 +95,44 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
         self.assertEqual(2, widget.editor_count)
         self.assertFalse(widget.current_editor().editor.isModified(), msg="Tab should be marked as not modified")
+
+    def test_file_added_to_watcher_on_opening_tab(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_file_added_to_watcher_on_opening_tab")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            watcher_files = widget.file_watcher.files()
+            self.assertEqual(1, len(watcher_files), "Should be one file being watched")
+            self.assertEqual(filename, watcher_files[0], "Single file being watched should be the correct file")
+
+    def test_file_removed_from_watcher_on_closing_tab(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_file_removed_from_watcher_on_closing_tab")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            widget.close_all()
+            files = widget.file_watcher.files()
+            self.assertEqual(0, len(files), "Tab is closed so should be removed from the file watcher")
+
+    def test_saving_file_adds_events_to_ignore_list(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_saving_file_adds_events_to_ignore_list")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            editor = widget.current_editor()
+            editor.editor.setText("New text")
+            widget.save_current_file()
+            QApplication.instance().processEvents()
+            self.assertEqual(0, len(widget.files_changed_unhandled), "Saving the file should not generate events")
 
 
 if __name__ == "__main__":

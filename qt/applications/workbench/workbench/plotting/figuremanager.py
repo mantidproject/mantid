@@ -301,9 +301,29 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        self._set_up_axes_title_change_callbacks()
 
         if self.toolbar:
             self.toolbar.set_buttons_visibility(self.canvas.figure)
+
+    def _set_up_axes_title_change_callbacks(self):
+        # This enables us to use the plot tile as the window title
+        plot_axes = self._axes_that_are_not_colour_bars()
+        if len(plot_axes) == 1:
+            # only set this up for single plots
+            plot_axes[0].title.add_callback(self._axes_title_changed_callback)
+
+    def _axes_title_changed_callback(self, title_artist):
+        title_text = title_artist.get_text()
+        if not title_text:
+            return
+        title_text_with_number = title_text + "-" + str(self.num)
+        current_title_text = self.get_window_title()
+        if current_title_text not in {title_text_with_number, title_text}:
+            self.set_window_title(title_text)
+
+    def _axes_that_are_not_colour_bars(self):
+        return [ax for ax in self.canvas.figure.get_axes() if not hasattr(ax, "_colorbar")]
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -317,7 +337,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.toolbar:
             self.toolbar.destroy()
 
-        self._ads_observer.observeAll(False)
         self._ads_observer = None
         # disconnect window events before calling GlobalFigureManager.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
@@ -440,6 +459,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # to allow getting a handle as plt.figure('Figure Name')
         self.canvas.figure.set_label(title)
 
+    def set_axes_title(self, title):
+        plot_axes = self._axes_that_are_not_colour_bars()
+        if len(plot_axes) == 1:
+            plot_axes[0].set_title(title)
+
     def fig_visibility_changed(self):
         """
         Make a notification in the global figure manager that
@@ -525,12 +549,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
 
-        """ArtistList will become an immutable tuple in matplotlib 3.7 which will prevent iterating through line_fill"""
-        for line_fill in fills:
+        for line_fill in reversed(fills):
             if line_fill not in ax.collections:
                 ax.add_collection(line_fill)
 
-        ax.collections.reverse()
         ax.update_waterfall(x, y)
 
         if ax.get_legend():

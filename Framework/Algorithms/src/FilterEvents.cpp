@@ -667,9 +667,9 @@ void FilterEvents::createOutputWorkspaces() {
       } else if (descriptiveNames) {
         auto infoiter = infomap.find(wsindex);
         if (infoiter != infomap.end()) {
-          std::string name = infoiter->second;
-          name = Kernel::Strings::removeSpace(name);
-          wsname << name;
+          std::string nameFromMap = infoiter->second;
+          nameFromMap = Kernel::Strings::removeSpace(nameFromMap);
+          wsname << nameFromMap;
         } else {
           wsname << m_timeSplitter.getWorkspaceIndexName(wsindex, delta_wsindex);
         }

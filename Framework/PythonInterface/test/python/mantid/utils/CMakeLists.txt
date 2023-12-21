@@ -1,6 +1,7 @@
 # mantid.utils tests
 
 add_subdirectory(nomad)
+add_subdirectory(reflectometry)
 
 set(TEST_PY_FILES absorptioncorrutilsTest.py deprecatorTest.py dgsTest.py loggingTest.py pathTest.py)
 

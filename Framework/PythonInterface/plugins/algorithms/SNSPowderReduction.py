@@ -777,7 +777,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     chunk["FilterByTimeStop"] = filter_wall[1]
 
         # Call Mantid's Load algorithm to load complete or partial data
-        api.Load(Filename=filename, OutputWorkspace=out_ws_name, **chunk)
+        api.Load(Filename=filename, OutputWorkspace=out_ws_name, NumberOfBins=1, **chunk)
 
         # Log output
         if is_event_workspace(out_ws_name):

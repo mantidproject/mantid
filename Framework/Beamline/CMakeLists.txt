@@ -12,11 +12,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Beamline SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 # Add the target for this directory
 add_library(Beamline ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Beamline ALIAS Beamline)

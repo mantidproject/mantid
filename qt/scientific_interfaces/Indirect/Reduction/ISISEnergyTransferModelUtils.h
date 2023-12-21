@@ -12,6 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+
+#include <filesystem>
 
 using namespace Mantid::API;
 
@@ -42,6 +45,18 @@ void deleteWorkspace(std::string const &name) {
   deleter->initialize();
   deleter->setProperty("Workspace", name);
   deleter->execute();
+}
+
+std::tuple<std::string, std::string> parseInputFiles(std::string const &inputFiles) {
+  std::string rawFile = inputFiles.substr(0, inputFiles.find(',')); // getting the name of the first file
+  std::filesystem::path rawFileInfo(rawFile);
+  return {rawFile, rawFileInfo.filename().string()};
+}
+
+std::vector<int> createDetectorList(int const spectraMin, int const spectraMax) {
+  std::vector<int> detectorList(spectraMax - spectraMin + 1);
+  std::iota(detectorList.begin(), detectorList.end(), spectraMin);
+  return detectorList;
 }
 
 std::string createRangeString(std::size_t const &from, std::size_t const &to) {

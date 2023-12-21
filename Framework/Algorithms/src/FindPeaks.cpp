@@ -95,7 +95,7 @@ void FindPeaks::init() {
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
 
-  declareProperty("HighBackground", true, "Relatively weak peak in high background");
+  declareProperty("HighBackground", true, "Flag whether the input data has high background compared to peak heights.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);

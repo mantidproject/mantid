@@ -32,6 +32,7 @@ class LegendTest(unittest.TestCase):
     def test_calling_create_legend_with_no_props_adds_legend_to_plot(self):
         ax = mock.Mock(spec=MantidAxes)
         ax.lines = [mock.Mock()]
+        ax.figure = mock.Mock()
 
         LegendProperties.create_legend(props=None, ax=ax)
 
@@ -41,6 +42,7 @@ class LegendTest(unittest.TestCase):
     def test_calling_create_legend_with_no_props_uses_config_values_in_legend(self, mock_ConfigService):
         ax = mock.Mock(spec=MantidAxes)
         ax.lines = [mock.Mock()]
+        ax.figure = mock.Mock()
 
         LegendProperties.create_legend(props=None, ax=ax)
 

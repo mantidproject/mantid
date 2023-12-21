@@ -44,4 +44,4 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-.. categories:: Interfaces Indirect Direct
+.. categories:: Interfaces Inelastic

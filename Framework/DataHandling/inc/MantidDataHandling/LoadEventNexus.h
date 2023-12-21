@@ -107,9 +107,9 @@ public:
                    int &nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
                    const std::vector<std::string> &allow_list, const std::vector<std::string> &block_list);
 
-  static void checkForCorruptedPeriods(std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
-                                       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
-                                       const int &nPeriods, const std::string &nexusfilename);
+  static int checkForCorruptedPeriods(std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
+                                      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
+                                      const int &nPeriods, const std::string &nexusfilename, std::string &status);
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
@@ -665,21 +665,21 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
       if (descriptor.isEntry("/" + entry_name + "/sample/name", "SDS")) {
         file.openData("name");
         const auto info = file.getInfo();
-        std::string name;
+        std::string sampleName;
         if (info.type == ::NeXus::CHAR) {
           if (info.dims.size() == 1) {
-            name = file.getStrData();
+            sampleName = file.getStrData();
           } else { // something special for 2-d array
             const int64_t total_length = std::accumulate(info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
                                                          std::multiplies<int64_t>());
             boost::scoped_array<char> val_array(new char[total_length]);
             file.getData(val_array.get());
-            name = std::string(val_array.get(), total_length);
+            sampleName = std::string(val_array.get(), total_length);
           }
         }
         file.closeData();
-        if (!name.empty()) {
-          WS->mutableSample().setName(name);
+        if (!sampleName.empty()) {
+          WS->mutableSample().setName(sampleName);
         }
       }
     } catch (::NeXus::Exception &) {

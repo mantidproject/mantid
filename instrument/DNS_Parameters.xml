@@ -3,20 +3,39 @@
 
         <component-link name="DNS">
 
-		<parameter name="deltaE-mode" type="string">
-			<value val="direct" />
-		</parameter>
+                <parameter name="deltaE-mode" type="string">
+                    <value val="direct" />
+                </parameter>
 
                 <!-- Coil currents Ca, Cb, Cc, Cz to determine the neutron polarisation -->
                 <parameter name="x_currents" type="string">
-                        <value val="0,-2,-0.77,-2.21; -0.5,-1.5,-1.2,-2.15" />
-		</parameter>
+                        <value val="0,-2,-0.77,-2.21; -0.5,-1.5,-1.2,-2.15; -0.5,-1.6,-1.07,-2.20" />
+		        </parameter>
                 <parameter name="y_currents" type="string">
-                        <value val="0,1.60,-2.77,-2.21; 0,-1.4,1.65,-2.15" />
+                        <value val="0,1.60,-2.77,-2.21; 0,-1.4,1.65,-2.15; 0,-1.5,1.78,-2.20" />
                 </parameter>
                 <parameter name="z_currents" type="string">
-                        <value val="0,0.11,-0.5,0; 0,0.15,-0.5,0" />
+                        <value val="0,0.11,-0.5,0; 0,0.15,-0.5,0; 0,0.05,-0.37,0" />
                 </parameter>
+                <parameter name="z_high_currents" type="string">
+                        <value val="0,0.15,-0.50,5.0" />
+                </parameter>
+                <parameter name="off_currents" type="string">
+                        <value val="0,0,0,0" />
+                </parameter>
+                <parameter name="zero_field_currents" type="string">
+                        <value val="0,0.15,-0.50,-2.15; 0,0.05,-0.37,-2.20" />
+                </parameter>
+                <parameter name="minus_x_currents" type="string">
+                        <value val="0,2.20,-0.12,-2.10; 0,2.30,-0.35,-2.15" />
+		        </parameter>
+                <parameter name="minus_y_currents" type="string">
+                        <value val="-0.3,2.0,-2.95,-2.15" />
+                </parameter>
+                <parameter name="minus_z_currents" type="string">
+                        <value val="0,0.15,-0.50,-4.3" />
+                </parameter>
+
 
                 <!-- Scaling factor to calculate the channel width in microseconds. Will be removed after comissioning. -->
                 <parameter name="channel_width_factor" type="string">
@@ -69,6 +88,6 @@
                         <value val="yes" />
                 </parameter>
 
-	</component-link>
+	    </component-link>
 
 </parameter-file>

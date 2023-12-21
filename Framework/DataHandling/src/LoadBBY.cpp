@@ -446,14 +446,14 @@ void LoadBBY::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std
     while (pNode) {
       if (pNode->nodeName() == "parameter") {
         auto pElem = dynamic_cast<Element *>(pNode);
-        std::string name = pElem->getAttribute("name");
+        std::string paramName = pElem->getAttribute("name");
         Poco::AutoPtr<NodeList> nodeList = pElem->childNodes();
         for (unsigned long i = 0; i < nodeList->length(); i++) {
           auto cNode = nodeList->item(i);
           if (cNode->nodeName() == "value") {
             auto cElem = dynamic_cast<Poco::XML::Element *>(cNode);
             std::string value = cElem->getAttribute("val");
-            allParams[name] = value;
+            allParams[paramName] = value;
           }
         }
       }

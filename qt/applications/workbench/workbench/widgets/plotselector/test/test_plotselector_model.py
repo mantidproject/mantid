@@ -108,9 +108,16 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.rename_figure(42, "NewName")
         self.figure_manager.set_window_title.assert_called_once_with("NewName")
 
+    def test_renaming_calls_set_axis_title(self):
+        self.model.rename_figure(42, "NewName")
+        self.figure_manager.set_axes_title.assert_called_once_with("NewName")
+
     def test_renaming_calls_with_invalid_number_raises_value_error(self):
-        self.assertRaises(ValueError, self.model.rename_figure, 0, "NewName")
+        self.assertRaisesRegex(
+            ValueError, "Error renaming, could not find a plot with the number 0", self.model.rename_figure, 0, "NewName"
+        )
         self.figure_manager.set_window_title.assert_not_called()
+        self.figure_manager.set_axes_title.assert_not_called()
 
     # ------------------------ Plot Closing -------------------------
 

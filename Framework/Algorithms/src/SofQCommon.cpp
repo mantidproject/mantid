@@ -182,12 +182,12 @@ std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace
     throw std::runtime_error("Could not determine Q binning: workspace does "
                              "not contain usable spectra.");
   }
-  std::array<double, 4> q;
-  q[0] = directQ(minE, minTwoTheta);
-  q[1] = directQ(minE, maxTwoTheta);
-  q[2] = directQ(maxE, minTwoTheta);
-  q[3] = directQ(maxE, maxTwoTheta);
-  const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
+  std::array<double, 4> qArr;
+  qArr[0] = directQ(minE, minTwoTheta);
+  qArr[1] = directQ(minE, maxTwoTheta);
+  qArr[2] = directQ(maxE, minTwoTheta);
+  qArr[3] = directQ(maxE, maxTwoTheta);
+  const auto minmaxQ = std::minmax_element(qArr.cbegin(), qArr.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
 

@@ -35,6 +35,7 @@
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
+#include <boost/format.hpp>
 #include <memory>
 
 #include <regex>
@@ -574,8 +575,11 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
+      std::string status = "";
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
+      nPeriods = checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename, status);
+      if (!status.empty())
+        alg.getLogger().warning(status);
     }
 
     // If successful, we can try to load the pulse times
@@ -677,9 +681,12 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
+      std::string status = "";
       // Check for corrupted period logs
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
+      nPeriods = checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename, status);
+      if (!status.empty())
+        alg.getLogger().warning(status);
     }
 
     // If successful, we can try to load the pulse times
@@ -740,12 +747,17 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * @param nPeriods :: the value in the nperiods log of the run. Number of
  * expected periods
  * @param nexusfilename :: the filename of the run to load
+ * @param status :: will contain any status message. Empty if no problems.
+ * @return Number of periods with data
  */
-void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
-                                              std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
-                                              const int &nPeriods, const std::string &nexusfilename) {
+int LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
+                                             std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+                                             const int &nPeriods, const std::string &nexusfilename,
+                                             std::string &status) {
   const auto valuesAsVector = tempPeriodLog->valuesAsVector();
   const auto nPeriodsInLog = *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+  int numberOfValidPeriods = nPeriodsInLog;
+  status = "";
 
   // Check for historic files
   if (nPeriodsInLog == 0 && nPeriods == 1) {
@@ -754,7 +766,13 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty
     const std::vector<int> newValues(tempPeriodLog->realSize(), 1);
     const auto times = tempPeriodLog->timesAsVector();
     periodLog.reset(new const TimeSeriesProperty<int>("period_log", times, newValues));
-  } else if (nPeriodsInLog != nPeriods) {
+    numberOfValidPeriods = 1;
+  } else if (nPeriodsInLog < nPeriods) {
+    status = boost::str(
+        boost::format(
+            "The number of periods specified in the file (%1%) is greater than the maximum period in the data (%2%).") %
+        nPeriods % nPeriodsInLog);
+  } else if (nPeriodsInLog > nPeriods) {
     // Sanity check here that period_log only contains period numbers up to
     // nperiods. These values can be different due to instrument noise, and
     // cause undescriptive crashes if not caught.
@@ -771,6 +789,7 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty
     periodLog = std::make_unique<const TimeSeriesProperty<int>>(*tempPeriodLog);
     tempPeriodLog.reset();
   }
+  return numberOfValidPeriods;
 }
 
 /** Load the instrument from the nexus file
@@ -1146,8 +1165,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
+    const auto startTime = std::chrono::high_resolution_clock::now();
     DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
                              classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
+    addTimer("loadEvents", startTime, std::chrono::high_resolution_clock::now());
   }
 
   // Info reporting

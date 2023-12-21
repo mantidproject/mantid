@@ -18,6 +18,10 @@
 #include "Reduction/RowExceptions.h"
 #include <memory>
 
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Batch Presenter");
+} // namespace
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
@@ -139,7 +143,15 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   if (m_savePresenter->shouldAutosave()) {
     auto const workspaces =
         m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
-    m_savePresenter->saveWorkspaces(workspaces);
+    try {
+      m_savePresenter->saveWorkspaces(workspaces);
+    } catch (std::runtime_error const &e) {
+      g_log.error(e.what());
+    } catch (std::exception const &e) {
+      g_log.error(e.what());
+    } catch (...) {
+      g_log.error("Unknown error while saving workspaces.");
+    }
   }
 }
 

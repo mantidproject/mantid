@@ -62,7 +62,7 @@ class MplPlot3dCanvas(FigureCanvas):
         """
         for plt in self._currPlotList:
             # del plt
-            self._myAxes.collections.remove(plt)
+            plt.remove()
         self._currPlotList = []
 
         return

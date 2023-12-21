@@ -5,53 +5,35 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "IndirectSettingsHelper.h"
 
 namespace MantidQt::CustomInterfaces {
 using namespace IndirectSettingsHelper;
 
-IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
-    : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
-      m_view(std::make_unique<IndirectSettingsView>(parent)) {
-  setUpPresenter();
-}
-
-IndirectSettingsPresenter::IndirectSettingsPresenter(IndirectSettingsModel *model, IIndirectSettingsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
-  setUpPresenter();
-}
-
-void IndirectSettingsPresenter::setUpPresenter() {
-  connect(m_view.get(), SIGNAL(okClicked()), this, SLOT(applyAndCloseSettings()));
-  connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applyChanges()));
-  connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
-
+IndirectSettingsPresenter::IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model,
+                                                     IIndirectSettingsView *view)
+    : m_model(std::move(model)), m_view(view) {
+  m_view->subscribePresenter(this);
   loadSettings();
-
-  // Temporary until better validation is used when loading data into interfaces
-  setDefaultRestrictData();
 }
 
-void IndirectSettingsPresenter::setDefaultRestrictData() const {
-  auto const isisFacility = m_model->getFacility() == "ISIS";
-  if (isisFacility)
-    setRestrictInputDataByName(isisFacility);
-}
+QWidget *IndirectSettingsPresenter::getView() { return m_view->getView(); }
 
-IIndirectSettingsView *IndirectSettingsPresenter::getView() { return m_view.get(); }
+void IndirectSettingsPresenter::subscribeParent(IIndirectSettings *parent) { m_parent = parent; }
 
-void IndirectSettingsPresenter::applyAndCloseSettings() {
+void IndirectSettingsPresenter::notifyOkClicked() {
   saveSettings();
-  closeDialog();
+  m_parent->notifyCloseSettings();
 }
 
-void IndirectSettingsPresenter::applyChanges() {
+void IndirectSettingsPresenter::notifyApplyClicked() {
   setApplyingChanges(true);
   saveSettings();
   setApplyingChanges(false);
 }
 
-void IndirectSettingsPresenter::closeDialog() { emit closeSettings(); }
+void IndirectSettingsPresenter::notifyCancelClicked() { m_parent->notifyCloseSettings(); }
 
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
@@ -66,7 +48,7 @@ void IndirectSettingsPresenter::saveSettings() {
   setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
   setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
 
-  emit applySettings();
+  m_parent->notifyApplySettings();
 }
 
 void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {

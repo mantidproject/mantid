@@ -228,8 +228,6 @@ def plot(
         legend = ax.get_legend()
         if legend is not None:
             legend.set_visible(show_legend)
-            # Stop legend interfering with the tight layout
-            legend.set_in_layout(False)
 
     # Can't have a waterfall plot with only one line.
     if len(nums) * len(workspaces) == 1 and waterfall:
@@ -567,6 +565,22 @@ def _do_single_plot_mdhisto_workspace(ax, workspaces, errors=False):
     ax.make_legend()
 
 
+def _set_axes_limits_from_properties(ax):
+    """
+    Set xlim and ylim using the x_min x_max y_min y_max properties
+    :param ax:
+    """
+    x_min_str = ConfigService.getString("plots.x_min")
+    x_max_str = ConfigService.getString("plots.x_max")
+    y_min_str = ConfigService.getString("plots.y_min")
+    y_max_str = ConfigService.getString("plots.y_max")
+    xlim = (float(x_min_str) if x_min_str else None, float(x_max_str) if x_max_str else None)
+    ylim = (float(y_min_str) if y_min_str else None, float(y_max_str) if y_max_str else None)
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+
 def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_name=None, log_values=None):
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
@@ -585,6 +599,8 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
 
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
+
+    _set_axes_limits_from_properties(ax)
     ax.make_legend()
     if set_title:
         workspace_names = [ws.name() for ws in workspaces]

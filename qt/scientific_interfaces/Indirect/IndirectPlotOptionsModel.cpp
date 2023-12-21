@@ -100,7 +100,7 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions = availableActions.get();
   actions.insert({"Plot Spectra", "Plot Spectra"});
   actions.insert({"Plot Bins", "Plot Bins"});
-  actions.insert({"Plot Contour", "Plot Contour"});
+  actions.insert({"Open Slice Viewer", "Open Slice Viewer"});
   actions.insert({"Plot Tiled", "Plot Tiled"});
   return actions;
 }
@@ -173,10 +173,10 @@ boost::optional<std::string> IndirectPlotOptionsModel::indices() const { return 
 bool IndirectPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.get())) {
-    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
+    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
       if (axisType == MantidAxis::Spectrum)
-        return validateSpectra(workspace, indices);
-      return validateBins(workspace, indices);
+        return validateSpectra(matrixWs, indices);
+      return validateBins(matrixWs, indices);
     }
   }
   return false;
@@ -224,13 +224,13 @@ void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
     m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
-void IndirectPlotOptionsModel::plotContour() {
+void IndirectPlotOptionsModel::showSliceViewer() {
   auto const workspaceName = workspace();
   auto const unitName = unit();
 
   if (workspaceName) {
     std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
-    m_plotter->plotContour(plotWorkspaceName);
+    m_plotter->showSliceViewer(plotWorkspaceName);
   }
 }
 
@@ -251,10 +251,10 @@ boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::s
                                                                           MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
-    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
       if (axisType == MantidAxis::Spectrum)
-        return checkWorkspaceSpectrumSize(workspace);
-      return checkWorkspaceBinSize(workspace);
+        return checkWorkspaceSpectrumSize(matrixWs);
+      return checkWorkspaceBinSize(matrixWs);
     }
   }
   return boost::none;

@@ -396,6 +396,7 @@ class RunTabPresenter(PresenterCommon):
 
             self._beam_centre_presenter.copy_centre_positions(self._model)
             self._beam_centre_presenter.update_centre_positions()
+            self._beam_centre_presenter.set_meters_mode_enabled(self._view.instrument == SANSInstrument.LARMOR)
 
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
@@ -1133,6 +1134,8 @@ class RunTabPresenter(PresenterCommon):
             # Beam Centre
             self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
             self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 

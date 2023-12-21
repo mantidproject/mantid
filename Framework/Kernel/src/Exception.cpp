@@ -65,7 +65,7 @@ const char *NotImplementedError::what() const noexcept { return std::logic_error
 */
 NotFoundError::NotFoundError(const std::string &Desc, std::string ObjectName)
     : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
-  outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+  outMessage = std::string(std::runtime_error::what()) + " search object '" + objectName + "'";
 }
 
 /** Constructor
@@ -77,7 +77,7 @@ NotFoundError::NotFoundError(const std::string &Desc, const int &ObjectNum) : st
   std::string obName;
   ss << ObjectNum;
   ss >> obName;
-  outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
+  outMessage = std::string(std::runtime_error::what()) + " search object '" + obName + "'";
 }
 
 NotFoundError::NotFoundError(const std::string &Desc, const int64_t &ObjectNum) : std::runtime_error(Desc) {
@@ -85,7 +85,7 @@ NotFoundError::NotFoundError(const std::string &Desc, const int64_t &ObjectNum) 
   std::string obName;
   ss << ObjectNum;
   ss >> obName;
-  outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
+  outMessage = std::string(std::runtime_error::what()) + " search object '" + obName + "'";
 }
 
 NotFoundError::NotFoundError(const std::string &Desc, const std::size_t &ObjectNum) : std::runtime_error(Desc) {
@@ -93,7 +93,7 @@ NotFoundError::NotFoundError(const std::string &Desc, const std::size_t &ObjectN
   std::string obName;
   ss << ObjectNum;
   ss >> obName;
-  outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
+  outMessage = std::string(std::runtime_error::what()) + " search object '" + obName + "'";
 }
 
 /// Copy constructor
@@ -113,7 +113,7 @@ const char *NotFoundError::what() const noexcept { return outMessage.c_str(); }
 */
 ExistsError::ExistsError(const std::string &Desc, std::string ObjectName)
     : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
-  outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+  outMessage = std::string(std::runtime_error::what()) + " search object '" + objectName + "'";
 }
 
 /// Copy constructor

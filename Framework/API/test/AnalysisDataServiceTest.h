@@ -180,6 +180,19 @@ public:
     // Remove should not throw but give a warning in the log file, changed by
     // LCC 05/2008
     TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
+    TS_ASSERT(!ads.remove("ttttt"));
+  }
+
+  void testRemoveReturnsTheWorkspaceSptr() {
+    const std::string name("MySpace");
+    addToADS(name);
+    auto const workspace = ads.remove(name);
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS("MockWorkspace", workspace->id());
+
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
+    // Should return a nullptr as the workspace does not exist
+    TS_ASSERT(!ads.remove("ttttt"));
   }
 
   void testRetrieve() {
@@ -486,6 +499,42 @@ public:
     auto group = addOrReplaceGroupToADS("ws1", 2);
 
     TS_ASSERT_THROWS(ads.addToGroup("ws1", "ws1"), const std::runtime_error &);
+  }
+
+  void test_unique_name() {
+    auto unique_name = ads.uniqueName();
+    TS_ASSERT_EQUALS(5, unique_name.size());
+
+    const std::string prefix = "testPrefix_";
+    auto uniqueWithPrefix = ads.uniqueName(4, prefix);
+
+    TS_ASSERT_EQUALS(4 + prefix.size(), uniqueWithPrefix.size());
+    TS_ASSERT_EQUALS(prefix, uniqueWithPrefix.substr(0, prefix.size()));
+
+    TS_ASSERT_THROWS(ads.uniqueName(-4), const std::invalid_argument &);
+  }
+
+  void test_unique_name_no_collision() {
+    for (char letter = 'a'; letter <= 'z'; letter++) {
+      if (letter == 'c') {
+        continue;
+      }
+      std::string wsName = "unique_" + std::string(1, letter);
+      auto ws = addToADS(wsName);
+    }
+    auto objects = ads.getObjects();
+    TS_ASSERT_EQUALS(25, objects.size()); // make sure we have all expected workspaces
+
+    TS_ASSERT_EQUALS("unique_c", ads.uniqueName(1, "unique_"));
+    auto ws = addToADS("unique_c");
+
+    TS_ASSERT_THROWS(ads.uniqueName(1, "unique_"), std::runtime_error &);
+  }
+
+  void test_unique_hidden_name() {
+    auto hiddenName = ads.uniqueHiddenName();
+    TS_ASSERT_EQUALS(11, hiddenName.size())
+    TS_ASSERT_EQUALS("__", hiddenName.substr(0, 2))
   }
 
 private:

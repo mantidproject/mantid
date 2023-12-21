@@ -129,6 +129,8 @@ public slots:
   void print();
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
+  /// Mark the file as modified
+  void markFileAsModified();
 
 signals:
   /// Inform observers that undo information is available
@@ -143,6 +145,8 @@ signals:
   void fileNameChanged(const QString &fileName);
   /// Progress has been made in script execution
   void progressMade(const int progress);
+  /// The editor now has focus
+  void editorFocusIn(const QString &filename);
 
 protected:
   /// Write to the given device
@@ -152,6 +156,7 @@ protected:
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
   QByteArray fromMimeData(const QMimeData *source, bool &rectangular) const override;
+  void focusInEvent(QFocusEvent *fe) override;
 
 private slots:
 

@@ -44,14 +44,14 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent), m_max
 }
 
 std::vector<MatrixWorkspace_const_sptr> AddWorkspaceDialog::getWorkspaces() const {
-  auto const workspaceName = this->workspaceName().trimmed().toStdString();
+  auto const wsName = this->workspaceName().trimmed().toStdString();
   std::vector<MatrixWorkspace_const_sptr> workspaces;
 
   auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName)) {
-    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
+  if (ads.doesExist(wsName)) {
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(wsName))
       workspaces.emplace_back(workspace);
-    else if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName))
+    else if (auto const group = ads.retrieveWS<WorkspaceGroup>(wsName))
       addWorkspacesFromGroup(workspaces, group);
   }
   return workspaces;

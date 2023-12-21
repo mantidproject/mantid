@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 #include <QFileInfo>
@@ -55,12 +56,23 @@ void loadFile(std::string const &filename, std::string const &workspaceName) {
   loadAlg->execute();
 }
 
+void makeGroup(std::string const &workspaceName) {
+  auto const &ads = AnalysisDataService::Instance();
+  if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+    const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", workspaceName);
+    groupAlg->setProperty("OutputWorkspace", workspaceName);
+    groupAlg->execute();
+  }
+}
+
 } // namespace
 
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true) {
+    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true), m_alwaysLoadAsGroup(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
@@ -228,6 +240,9 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
+    if (m_alwaysLoadAsGroup) {
+      makeGroup(getWsNameFromFiles().toStdString());
+    }
 
     // emit that we got a valid workspace/file to work with
     emit dataReady(getWsNameFromFiles());
@@ -363,6 +378,14 @@ QString DataSelector::getLoadBtnText() const { return m_uiForm.pbLoadFile->text(
  * @param text :: The text to display on the button
  */
 void DataSelector::setLoadBtnText(const QString &text) { m_uiForm.pbLoadFile->setText(text); }
+
+/**
+ * Sets the DataSelector to always make sure the loaded data is a WorkspaceGroup. If only one entry is loaded from a
+ * NeXus file, then this entry is added to a WorkspaceGroup.
+ *
+ * @param loadAsGroup :: Whether to load the data as a workspace group.
+ */
+void DataSelector::setAlwaysLoadAsGroup(bool const loadAsGroup) { m_alwaysLoadAsGroup = loadAsGroup; }
 
 /**
  * Read settings from the given group

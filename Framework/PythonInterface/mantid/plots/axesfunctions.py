@@ -111,6 +111,11 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization, indices)
+        # Protect against unused arguments for MDHisto workspaces
+        if "wkspIndex" in kwargs:
+            kwargs.pop("wkspIndex")
+        if "specNum" in kwargs:
+            kwargs.pop("specNum")
         dx = None
         axis = None
     else:

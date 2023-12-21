@@ -22,7 +22,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson
   @date 13/08/2013
 */
-class DLLExport IndirectTransmission : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL IndirectTransmission : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:

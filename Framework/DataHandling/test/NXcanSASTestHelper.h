@@ -34,7 +34,11 @@ struct NXcanSASTestParameters {
   std::string workspaceTitle{"sample_workspace"};
   std::string instrumentName{"SANS2D"};
   std::string radiationSource{"Spallation Neutron Source"};
+  std::string geometry{"Disc"};
+  double beamHeight{1.0};
+  double beamWidth{1.0};
   std::vector<std::string> detectors;
+  double sampleThickness{1.0};
   bool invalidDetectors{false};
   bool is2dData{false};
   std::string idf;
@@ -43,8 +47,11 @@ struct NXcanSASTestParameters {
   std::string sampleDirectRun;
   std::string canScatterRun;
   std::string canDirectRun;
+  std::string scaledBgSubWorkspace;
+  double scaledBgSubScaleFactor;
   bool hasCanRuns{false};
   bool hasSampleRuns{false};
+  bool hasBgSub{false};
 };
 
 struct NXcanSASTestTransmissionParameters {

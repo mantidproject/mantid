@@ -8,6 +8,7 @@
 // Includes
 //----------------------
 #include "IndirectDataReduction.h"
+#include "IndirectSettings.h"
 
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
@@ -102,8 +103,7 @@ void IndirectDataReduction::initLayout() {
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 void IndirectDataReduction::applySettings(std::map<std::string, QVariant> const &settings) {
@@ -455,6 +455,15 @@ void IndirectDataReduction::filterUiForFacility(const QString &facility) {
 
   // Disable instruments as required
   m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(disabledInstruments);
+}
+
+/**
+ * Controls the visiblity of analyser and reflection options
+ *
+ * @param visible whether to show the options or not
+ */
+void IndirectDataReduction::showAnalyserAndReflectionOptions(bool visible) {
+  m_uiForm.iicInstrumentConfiguration->showAnalyserAndReflectionOptions(visible);
 }
 
 } // namespace MantidQt::CustomInterfaces

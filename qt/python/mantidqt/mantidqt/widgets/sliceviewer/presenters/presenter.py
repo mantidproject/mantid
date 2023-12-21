@@ -49,7 +49,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             else SliceViewerView(self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf)
         )
         super().__init__(ws, self.view.data_view, model)
-
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
         self._cutviewer_presenter = None
@@ -423,6 +422,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         finally:
             ws.unlock()
 
+    def show_view(self):
+        self.view.show()
+
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):
             self.model.set_ws_name(new_name)
@@ -551,6 +553,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return self.get_sliceinfo().is_xy_q_frame()
 
     def get_extra_image_info_columns(self, xdata, ydata):
+        if self.view is None:
+            return {"H": "0", "K": "0", "L": "0"}
+
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
 
         if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:

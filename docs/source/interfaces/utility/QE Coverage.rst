@@ -24,15 +24,16 @@ Options
 To use, select the geometry (direct or indirect) and instrument from the tabs
 and drop-down menu. For direct geometry spectrometers, an incident energy (Ei)
 in meV must be given; for indirect geometry machines, the final energies are
-fixed at a few values which must be selected from the drop-down menu. (Negative
-values of Ei are treated as positive - the program only uses the magnitude of Ei).
+fixed at a few values which must be selected from the drop-down menu. Only positive
+values of Ei are permitted. Several Q-E trajectories can be plotted simultaneously
+by providing several Ei values separated by commas.
 
 To overplot the calculated Q-E trajectories, set the "Plot Over" check box.
 
 The plot range is from Emin to Ei for direct, and from -Ef to Emax for indirect
 geometry spectrometers, and Emin and Emax may be inputted in the appropriate text
-box. If this box is left empty, Emin=-Ei (Emax=Ef) is set automatically for
-direct (indirect) geometry.
+box. If the input for Emin is invalid or bigger than min(Ei), then Emin is
+automatically set to Emin = -max(Ei)/2 for direct (indirect) geometry.
 
 You can choose to create a 1D Mantid workspace for latter plotting using the
 "Create Workspace" check box.

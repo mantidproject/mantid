@@ -83,18 +83,18 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
     // try the string as json
   }
 
-  auto value = (*this)();
-  if (!value) {
-    value = std::make_shared<PropertyManager>();
-    (*this) = value;
+  auto pmValue = (*this)();
+  if (!pmValue) {
+    pmValue = std::make_shared<PropertyManager>();
+    (*this) = pmValue;
   }
   std::string strValueToSet = strValue.empty() ? "{}" : strValue;
   std::ostringstream msg;
   try {
     const std::unordered_set<std::string> ignored;
     bool createMissing{true};
-    value->resetProperties();
-    value->setProperties(strValueToSet, ignored, createMissing);
+    pmValue->resetProperties();
+    pmValue->setProperties(strValueToSet, ignored, createMissing);
     m_dataServiceKey.clear();
   } catch (std::invalid_argument &exc) {
     msg << "Error setting value from string.\n"

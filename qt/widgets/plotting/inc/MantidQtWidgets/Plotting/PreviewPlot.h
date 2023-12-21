@@ -68,7 +68,7 @@ public:
   RangeSelector *getRangeSelector(const QString &name) const;
 
   SingleSelector *addSingleSelector(const QString &name, SingleSelector::SelectType type = SingleSelector::XSINGLE,
-                                    double position = 0.0);
+                                    double position = 0.0, PlotLineStyle style = PlotLineStyle::Dash);
   SingleSelector *getSingleSelector(const QString &name) const;
 
   void setSelectorActive(bool active);

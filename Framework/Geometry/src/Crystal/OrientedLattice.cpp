@@ -7,6 +7,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
 
+#include <nexus/NeXusException.hpp>
+
 namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
@@ -267,10 +269,24 @@ void OrientedLattice::saveNexus(::NeXus::File *file, const std::string &group) c
   file->writeData("unit_cell_alpha", this->alpha());
   file->writeData("unit_cell_beta", this->beta());
   file->writeData("unit_cell_gamma", this->gamma());
+  file->writeData("unit_cell_a_error", this->errora());
+  file->writeData("unit_cell_b_error", this->errorb());
+  file->writeData("unit_cell_c_error", this->errorc());
+  file->writeData("unit_cell_alpha_error", this->erroralpha());
+  file->writeData("unit_cell_beta_error", this->errorbeta());
+  file->writeData("unit_cell_gamma_error", this->errorgamma());
   // Save the UB matrix
   std::vector<double> ub = this->UB.getVector();
   std::vector<int> dims(2, 3); // 3x3 matrix
   file->writeData("orientation_matrix", ub, dims);
+
+  // Save the modulated UB matrix
+  std::vector<double> modUB = this->ModUB.getVector();
+  file->writeData("modulated_orientation_matrix", modUB, dims);
+  std::vector<double> errorModHKL = this->errorModHKL.getVector();
+  file->writeData("modulated_hkl_error", errorModHKL, dims);
+  file->writeData("maximum_order", this->getMaxOrder());
+  file->writeData("cross_term", int(this->getCrossTerm()));
 
   file->closeGroup();
 }
@@ -287,6 +303,36 @@ void OrientedLattice::loadNexus(::NeXus::File *file, const std::string &group) {
   DblMatrix ubMat(ub);
   // This will set the lattice parameters and the U matrix:
   this->setUB(ubMat);
+
+  try {
+    double errora, errorb, errorc, erroralpha, errorbeta, errorgamma;
+    file->readData("unit_cell_a_error", errora);
+    file->readData("unit_cell_b_error", errorb);
+    file->readData("unit_cell_c_error", errorc);
+    file->readData("unit_cell_alpha_error", erroralpha);
+    file->readData("unit_cell_beta_error", errorbeta);
+    file->readData("unit_cell_gamma_error", errorgamma);
+    this->setError(errora, errorb, errorc, erroralpha, errorbeta, errorgamma);
+
+    std::vector<double> modUB;
+    file->readData("modulated_orientation_matrix", modUB);
+    DblMatrix ModUBMat(modUB);
+    this->setModUB(ModUBMat);
+
+    std::vector<double> errorModHKL;
+    file->readData("modulated_hkl_error", errorModHKL);
+    DblMatrix ErrorModHKL(errorModHKL);
+    this->setErrorModHKL(ErrorModHKL);
+
+    int maxOrder;
+    file->readData("maximum_order", maxOrder);
+    this->setMaxOrder(maxOrder);
+    int crossTerm;
+    file->readData("cross_term", crossTerm);
+    this->setCrossTerm(crossTerm);
+  } catch (::NeXus::Exception &) {
+    // Old files don't have these. Ignore
+  }
   file->closeGroup();
 }
 

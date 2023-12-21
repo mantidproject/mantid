@@ -11,13 +11,17 @@
 namespace MantidQt::API {
 
 ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                                         std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> properties)
-    : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)) {}
+                                         std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> properties,
+                                         bool const validatePropsPreExec)
+    : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)),
+      m_validatePropsPreExec(validatePropsPreExec) {}
 
 Mantid::API::IAlgorithm_sptr ConfiguredAlgorithm::algorithm() const { return m_algorithm; }
 
 const Mantid::API::IAlgorithmRuntimeProps &ConfiguredAlgorithm::getAlgorithmRuntimeProps() const noexcept {
   return *m_properties;
 }
+
+bool ConfiguredAlgorithm::validatePropsPreExec() const noexcept { return m_validatePropsPreExec; }
 
 } // namespace MantidQt::API

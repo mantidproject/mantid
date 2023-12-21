@@ -119,7 +119,7 @@ def load_binned(workspace_name, binning, path, file_numbers, normalize_to):
     ad1 = "Omega,0.0,359.0,1"
     ad2 = "TOF,424.0,2000.0,1"
     dimension_binning = [ad0, ad1, ad2]
-    filepaths = [f"{path}_{number:06d}.d_dat" for number in list(file_numbers)]
+    filepaths = [path.replace("*" * len(str(number)), str(number)) for number in list(file_numbers)]
     filepaths = ", ".join(filepaths)
     norm_name = "_".join((workspace_name, "norm"))
     LoadDNSSCD(

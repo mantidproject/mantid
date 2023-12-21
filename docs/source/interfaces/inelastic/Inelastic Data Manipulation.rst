@@ -12,8 +12,8 @@ Overview
 The Inelastic Data Manipulation interface provides Processes for manipulating
 reduced data from, for example, :ref:`Indirect Data Reduction <interface-indirect-data-reduction>`
 and Direct Reduction routines or S(Q, w). The output data can then be used for analysis by
-processes in, for example, the :ref:`Indirect Data Analysis <interface-inelastic-data-analysis>` and
-:ref:`Indirect Bayes <interface-indirect-bayes>` interfaces.
+processes in, for example, the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and
+:ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interfaces.
 
 .. interface:: Data Manipulation
   :align: right
@@ -44,17 +44,23 @@ Symmetrise
 This tab allows you to take an asymmetric reduced file (*_red.nxs*) and symmetrise it about
 the Y axis.
 
-The curve can be symmetrised using two methods depending on the value of **Reflect Type**:
+The center of energy in the Y axis (*E=0*) is indicated by a solid red line. Two green vertical dashed
+lines can be moved to change the value of :math:`E_{low}` and :math:`E_{high}`, which is the range of energies used to symmetrise
+the spectra. Additionally, two horizontal blue dotted lines can be moved to help in selecting a range that prevents rigged curves
+when the spectra is symmetrised.
 
-1. *Positive to Negative* (default): the range of the positive values between :math:`EMin`
-and :math:`EMax` are reflected about the Y axis and replaces the negative values
-in the range :math:`-EMax` to :math:`-EMin`, the curve between :math:`-EMin` and
-:math:`EMin` is not modified.
+The curve can be symmetrised using either side of the spectra by changing the *Reflect Type* property. This choice influences
+the direction onto which the spectra is symmetrised. Note that :math:`E_{low}` represents
+the lowest value on the range, so when the spectra is on the positive side, :math:`E_{low}` will be closer to the centre
+while in the negative side :math:`E_{low}` will be farther from the centre. The following methods are available on the *Reflect Type* property:
 
-2. *Negative to Positive*: the range of the negative values between :math:`-EMax`
-and :math:`EMin` are reflected about the Y axis and replaces the positive values
-in the range :math:`EMin` to :math:`-EMax`, the curve between :math:`-EMin` and
-:math:`EMin` is not modified.
+1. *Positive to Negative* (default): the range of the positive values between :math:`E_{low}` and :math:`E_{high}`
+   is reflected about the Y axis and replaces the corresponding values in the negative side of the spectra.
+   The curve which ranges between :math:`\pm|E_{low}|` is not modified.
+
+2. *Negative to Positive*: the range of the negative values between :math:`-E_{low}` and :math:`-E_{high}`
+   is reflected about the Y axis and replaces the corresponding values in the positive side of the spectra.
+   The curve which ranges between :math:`\pm|E_{high}|` is not modified.
 
 .. interface:: Data Manipulation
   :widget: tabSymmetrise
@@ -66,7 +72,7 @@ Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
   input to the algorithm.
 
-EMin & EMax
+ELow & EHigh
   Sets the energy range that is to be reflected about :math:`y=0`.
 
 Reflect Type
@@ -99,14 +105,14 @@ Preview
 ~~~~~~~
 
 The preview section shows what a given spectra in the input will look like after
-it has been symmetrised and gives an idea of how well the value of EMin fits the
+it has been symmetrised and gives an idea of how well the value of :math:`E_{low}` fits the
 curve on both sides of the peak.
 
 Negative Y
-  The value of :math:`y` at :math:`x=-EMin`.
+  The value of :math:`y` at :math:`x=-|E_{low}|` on  *Positive to Negative* or at :math:`x=-|E_{high}|` on *Negative to Positive*.
 
 Positive Y
-  The value of :math:`y` at :math:`x=EMin`.
+  The value of :math:`y` at :math:`x=|E_{low}|` on  *Positive to Negative* or at :math:`x=|E_{high}|` on *Negative to Positive*.
 
 Delta Y
   The difference between Negative and Positive Y. Typically this should be as
@@ -124,7 +130,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 1. In the **Input** box, load the file named ``iris26176_graphite002_red``. This will
    automatically plot the data on the first mini-plot.
 
-2. Move the green slider located at x = -0.5 to be at x = -0.4.
+2. Move the green slider located at x = 0.5 to be at x = 0.4.
 
 3. Click **Preview**. This will update the :ref:`Preview properties <preview-properties>` and
    the neighbouring mini-plot.
@@ -176,8 +182,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
@@ -209,8 +215,8 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 6. Enter a list of workspace indices in the output options (e.g. 0-2,4,6-7) and then click
    **Plot Spectra** to plot spectra from the output workspace.
 
-6. Click the down arrow on the **Plot Spectra** button, and select **Plot Contour**. This will
-   produce a contour plot of the output workspace.
+6. Click the down arrow on the **Plot Spectra** button, and select **Open Slice Viewer**. This will
+   open a slice viewer window for the output workspace.
 
 7. Choose a default save directory and then click **Save Result** to save the output workspace.
    The _sqw file is used in the :ref:`moments-example-workflow`.
@@ -501,4 +507,4 @@ ResolutionBins
   least 5 and a warning will be shown if it is less.
 
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Inelastic

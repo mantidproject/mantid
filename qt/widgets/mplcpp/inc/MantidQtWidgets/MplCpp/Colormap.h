@@ -18,7 +18,7 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * @brief Defines a C++ wrapper for the matplotlib.cm.Colormap
+ * @brief Defines a C++ wrapper for the matplotlib.colors.Colormap
  * class
  */
 class MANTID_MPLCPP_DLL Colormap : public Common::Python::InstanceHolder {
@@ -28,6 +28,9 @@ public:
 
 /// Return the matplotlib.cm module
 MANTID_MPLCPP_DLL Common::Python::Object cmModule();
+
+/// Return the matplotlib.colormaps dict
+MANTID_MPLCPP_DLL Common::Python::Dict colormaps();
 
 /// Check if the named colormap if it exists
 MANTID_MPLCPP_DLL bool cmapExists(const QString &name);

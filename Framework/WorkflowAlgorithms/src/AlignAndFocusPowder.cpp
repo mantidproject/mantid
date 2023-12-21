@@ -504,21 +504,28 @@ void AlignAndFocusPowder::exec() {
   if (xmin >= 0. || xmax > 0.) {
     getTofRange(m_outputW, tofmin, tofmax);
 
-    g_log.information() << "running CropWorkspace(TOFmin=" << xmin << ", TOFmax=" << xmax << ") started at "
-                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
+    bool setxmin = false;
     if ((xmin >= 0.) && (xmin > tofmin)) {
       cropAlg->setProperty("Xmin", xmin);
       tofmin = xmin; // increase value
+      setxmin = true;
     }
+    bool setxmax = false;
     if ((xmax > 0.) && (xmax < tofmax)) {
       cropAlg->setProperty("Xmax", xmax);
       tofmax = xmax;
+      setxmax = true;
     }
-    cropAlg->executeAsChildAlg();
-    m_outputW = cropAlg->getProperty("OutputWorkspace");
+    // only run if either xmin or xmax was set
+    if (setxmin || setxmax) {
+      g_log.information() << "running CropWorkspace(TOFmin=" << xmin << ", TOFmax=" << xmax << ") started at "
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
+      cropAlg->executeAsChildAlg();
+      m_outputW = cropAlg->getProperty("OutputWorkspace");
+    }
   }
   m_progress->report();
 
@@ -1138,9 +1145,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
     alg->executeAsChildAlg();
 
     m_groupWS = alg->getProperty("OutputWorkspace");
-    const std::string name = m_instName + "_group";
-    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+    const std::string groupname = m_instName + "_group";
+    AnalysisDataService::Instance().addOrReplace(groupname, m_groupWS);
+    this->setPropertyValue(PropertyNames::GROUP_WKSP, groupname);
   } else { // let LoadDiffCal sort out everything
     g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
     if (!groupFilename.empty())
@@ -1163,23 +1170,23 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
     if (loadGrouping) {
       m_groupWS = alg->getProperty("OutputGroupingWorkspace");
 
-      const std::string name = m_instName + "_group";
-      AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-      this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+      const std::string groupname = m_instName + "_group";
+      AnalysisDataService::Instance().addOrReplace(groupname, m_groupWS);
+      this->setPropertyValue(PropertyNames::GROUP_WKSP, groupname);
     }
     if (loadCalibration) {
       m_calibrationWS = alg->getProperty("OutputCalWorkspace");
 
-      const std::string name = m_instName + "_cal";
-      AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
-      this->setPropertyValue(PropertyNames::CAL_WKSP, name);
+      const std::string calname = m_instName + "_cal";
+      AnalysisDataService::Instance().addOrReplace(calname, m_calibrationWS);
+      this->setPropertyValue(PropertyNames::CAL_WKSP, calname);
     }
     if (loadMask) {
       m_maskWS = alg->getProperty("OutputMaskWorkspace");
 
-      const std::string name = m_instName + "_mask";
-      AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
-      this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+      const std::string maskname = m_instName + "_mask";
+      AnalysisDataService::Instance().addOrReplace(maskname, m_maskWS);
+      this->setPropertyValue(PropertyNames::MASK_WKSP, maskname);
     }
   }
 }

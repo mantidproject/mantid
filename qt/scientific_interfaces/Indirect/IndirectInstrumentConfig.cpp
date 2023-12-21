@@ -364,4 +364,16 @@ void IndirectInstrumentConfig::filterDisabledInstruments() {
   }
 }
 
+/**
+ * Controls the visiblity of analyser and reflection options
+ *
+ * @param visible whether to show the options or not
+ */
+void IndirectInstrumentConfig::showAnalyserAndReflectionOptions(bool visible) {
+  m_uiForm.lbAnalyser->setVisible(visible);
+  m_uiForm.cbAnalyser->setVisible(visible);
+  m_uiForm.lbReflection->setVisible(visible);
+  m_uiForm.cbReflection->setVisible(visible);
+}
+
 } // namespace MantidQt::MantidWidgets

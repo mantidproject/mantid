@@ -52,7 +52,7 @@ requirements:
     - setuptools
     - tbb-devel {{ tbb }}
     - pip
-    - openssl
+    - openssl {{ openssl }}
     - versioningit
     - libglu  # [linux]
   run:
@@ -74,6 +74,7 @@ requirements:
     - toml
     - libglu  # [linux]
     - joblib
+    - orsopy
 
 about:
   home: https://github.com/mantidproject/mantid

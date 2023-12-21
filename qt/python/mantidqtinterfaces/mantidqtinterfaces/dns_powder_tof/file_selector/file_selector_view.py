@@ -184,6 +184,7 @@ class DNSFileSelectorView(DNSView):
     def open_progress_dialog(self, num_of_steps):
         if num_of_steps:
             self.progress = QProgressDialog(f"Loading {num_of_steps} files...", "Abort Loading", 0, num_of_steps)
+            self.progress.setAttribute(Qt.WA_DeleteOnClose, True)
             self.progress.setWindowModality(Qt.WindowModal)
             self.progress.setMinimumDuration(200)
             self.progress.open(self._progress_canceled)
@@ -191,8 +192,10 @@ class DNSFileSelectorView(DNSView):
     def _progress_canceled(self):
         self.sig_progress_canceled.emit()
 
-    def set_progress(self, step):
-        self.progress.setValue(step)
+    def set_progress(self, iteration, iteration_max):
+        self.progress.setValue(iteration)
+        if iteration == iteration_max:
+            self.progress.close()
 
     # manipulating view
     def set_first_column_spanned(self, scan_range):

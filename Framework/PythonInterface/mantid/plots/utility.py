@@ -151,7 +151,7 @@ def row_num(ax):
     Returns the row number of an input axes with relation to a gridspec
     """
     # An 'inset' axes does not have a subplotspec, so return None
-    return ax.get_subplotspec().rowspan.start if hasattr(ax, "get_subplotspec") else None
+    return ax.get_subplotspec().rowspan.start if ax.get_subplotspec() is not None else None
 
 
 def col_num(ax):
@@ -159,7 +159,7 @@ def col_num(ax):
     Returns the column number of an input axes with relation to a gridspec
     """
     # An 'inset' axes does not have a subplotspec, so return None
-    return ax.get_subplotspec().colspan.start if hasattr(ax, "get_subplotspec") else None
+    return ax.get_subplotspec().colspan.start if ax.get_subplotspec() is not None else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):

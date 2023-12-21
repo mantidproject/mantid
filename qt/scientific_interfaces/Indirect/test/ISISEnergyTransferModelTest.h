@@ -26,11 +26,11 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::CustomInterfaces;
 
-class ISISIndirectEnergyTransferWrapper : public Algorithm {
+class ISISIndirectEnergyTransfer : public Algorithm {
 public:
-  const std::string name() const override { return "ISISIndirectEnergyTransferWrapper"; };
+  const std::string name() const override { return "ISISIndirectEnergyTransfer"; };
   int version() const override { return 1; };
-  const std::string summary() const override { return "ISISIndirectEnergyTransferWrapper Mock algorithm"; };
+  const std::string summary() const override { return "ISISIndirectEnergyTransfer Mock algorithm"; };
 
 private:
   void init() override {
@@ -49,7 +49,6 @@ private:
     declareProperty("RebinString", "");
 
     declareProperty("DetailedBalance", 0.0);
-    declareProperty("ScaleFactor", 1.0);
 
     declareProperty("UnitX", "DeltaE");
     declareProperty("FoldMultipleFrames", false);
@@ -78,7 +77,6 @@ private:
     outputWS->addColumn("str", "RebinString");
 
     outputWS->addColumn("double", "DetailedBalance");
-    outputWS->addColumn("double", "ScaleFactor");
 
     outputWS->addColumn("str", "UnitX");
     outputWS->addColumn("bool", "FoldMultipleFrames");
@@ -102,7 +100,6 @@ private:
     auto backgroundRange = getPropertyValue("BackgroundRange");
     auto rebinString = getPropertyValue("RebinString");
     auto detailedBalance = std::stod(getProperty("DetailedBalance"));
-    auto scaleFactor = std::stod(getProperty("ScaleFactor"));
     auto unitX = getPropertyValue("UnitX");
     auto foldMultipleFrames = getPropertyValue("FoldMultipleFrames") == "1";
     auto outputWorkspace = getPropertyValue("OutputWorkspace");
@@ -111,14 +108,14 @@ private:
     auto mapFile = getPropertyValue("MapFile");
 
     newRow << instrument << analyser << reflection << inputFiles << sumFiles << loadLogFiles << calibrationWorkspace
-           << eFixed << spectraRange << backgroundRange << rebinString << detailedBalance << scaleFactor << unitX
-           << foldMultipleFrames << outputWorkspace << groupingMethod << groupingString << mapFile;
+           << eFixed << spectraRange << backgroundRange << rebinString << detailedBalance << unitX << foldMultipleFrames
+           << outputWorkspace << groupingMethod << groupingString << mapFile;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("outputWS", outputWS);
   };
 };
 
-DECLARE_ALGORITHM(ISISIndirectEnergyTransferWrapper)
+DECLARE_ALGORITHM(ISISIndirectEnergyTransfer)
 
 class ISISEnergyTransferModelTest : public CxxTest::TestSuite {
 public:
@@ -261,22 +258,20 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETAnalysisData analysisData(true, 2.5, true, 2.0);
+    IETAnalysisData analysisData(true, 2.5);
     model->setAnalysisProperties(reductionAlgorithm, analysisData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("DetailedBalance"), "2.5");
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("ScaleFactor"), "2");
   }
 
   void testSetAnalysisPropertiesWithPropsDisabled() {
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETAnalysisData analysisData(false, 2.5, false, 2.0);
+    IETAnalysisData analysisData(false, 2.5);
     model->setAnalysisProperties(reductionAlgorithm, analysisData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("DetailedBalance"), "0");
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("ScaleFactor"), "1");
   }
 
   void testSetOutputPropertiesWithPropsEnabled() {
@@ -369,7 +364,7 @@ public:
     IETConversionData conversionData(1.0, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT, 2, "map_file");
     IETBackgroundData backgroundData(true, 0, 1);
-    IETAnalysisData analysisData(true, 2.5, true, 2.0);
+    IETAnalysisData analysisData(true, 2.5);
     IETRebinData rebinData(true, "Multiple", 0.0, 0.0, 0.0, "1,2");
     IETOutputData outputData(false, false);
 
@@ -388,7 +383,7 @@ public:
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("outputWS");
 
       TS_ASSERT_EQUALS(outputWS->rowCount(), 1);
-      TS_ASSERT_EQUALS(outputWS->columnCount(), 19);
+      TS_ASSERT_EQUALS(outputWS->columnCount(), 18);
 
       TS_ASSERT_EQUALS(outputWS->getColumn(0)->name(), "Instrument");
       TS_ASSERT_EQUALS(outputWS->getColumn(1)->name(), "Analyser");
@@ -405,15 +400,14 @@ public:
       TS_ASSERT_EQUALS(outputWS->getColumn(10)->name(), "RebinString");
 
       TS_ASSERT_EQUALS(outputWS->getColumn(11)->name(), "DetailedBalance");
-      TS_ASSERT_EQUALS(outputWS->getColumn(12)->name(), "ScaleFactor");
 
-      TS_ASSERT_EQUALS(outputWS->getColumn(13)->name(), "UnitX");
-      TS_ASSERT_EQUALS(outputWS->getColumn(14)->name(), "FoldMultipleFrames");
-      TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "OutputWorkspace");
+      TS_ASSERT_EQUALS(outputWS->getColumn(12)->name(), "UnitX");
+      TS_ASSERT_EQUALS(outputWS->getColumn(13)->name(), "FoldMultipleFrames");
+      TS_ASSERT_EQUALS(outputWS->getColumn(14)->name(), "OutputWorkspace");
 
-      TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingMethod");
-      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "GroupingString");
-      TS_ASSERT_EQUALS(outputWS->getColumn(18)->name(), "MapFile");
+      TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "GroupingMethod");
+      TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingString");
+      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "MapFile");
     }
   }
 
@@ -613,11 +607,33 @@ public:
     TS_ASSERT_EQUALS(errors.size(), 0);
   }
 
+  void testPlotRawAlgorithmQueueReturnsTwoAlgorithmsIfRemoveBackgroundIsFalse() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(false);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(2, algorithmQueue.size());
+  }
+
+  void testPlotRawAlgorithmQueueReturnsFourAlgorithmsIfRemoveBackgroundIsTrue() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(true, 1, 4);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(4, algorithmQueue.size());
+  }
+
 private:
   std::unique_ptr<IETModel> makeModel() { return std::make_unique<IETModel>(); }
-  IAlgorithm_sptr makeReductionAlgorithm() {
-    return AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
-  }
+  IAlgorithm_sptr makeReductionAlgorithm() { return AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer"); }
 
   std::unique_ptr<IETModel> m_model;
   IAlgorithm_sptr m_reductionAlg;

@@ -20,10 +20,6 @@ namespace API {
 class MatrixWorkspace;
 class WorkspaceGroup;
 
-/// Enumeration for a mandatory/optional property
-struct PropertyMode {
-  enum Type { Mandatory, Optional };
-};
 /// Enumeration for locking behaviour
 struct LockMode {
   enum Type { Lock, NoLock };
@@ -91,6 +87,8 @@ public:
   std::string setValueFromJson(const Json::Value &value) override;
 
   std::string setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
+
+  void setPropertyMode(const PropertyMode::Type &optional) override;
 
   std::string isValid() const override;
 

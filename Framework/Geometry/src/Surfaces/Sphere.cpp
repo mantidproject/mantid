@@ -116,11 +116,11 @@ int Sphere::side(const Kernel::V3D &Pt) const
   // amount of
   // computation if the object is not on the surface which is most likely
   const double xdiff(Pt.X() - m_centre.X()), ydiff(Pt.Y() - m_centre.Y()), zdiff(Pt.Z() - m_centre.Z());
-  const double displace = sqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) - m_radius;
-  if (fabs(displace) < Tolerance) {
+  const double displacement = sqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) - m_radius;
+  if (fabs(displacement) < Tolerance) {
     return 0;
   }
-  return (displace > 0.0) ? 1 : -1;
+  return (displacement > 0.0) ? 1 : -1;
 }
 
 /**

@@ -116,6 +116,7 @@ set(TEST_PY_FILES
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py
+    SaveISISReflectometryORSOTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py

@@ -300,7 +300,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, con
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const {
   std::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
   if (!comp) {
-    throw Kernel::Exception::NotFoundError("Could not find component", bankName);
+    throw Kernel::Exception::NotFoundError("Instrument: Could not find component", bankName);
   }
   getDetectorsInBank(dets, *comp);
 }

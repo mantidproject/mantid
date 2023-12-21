@@ -167,8 +167,8 @@ VecVecV3D PeaksOnSurface::createFaces() const {
   // p1|---|p4
   //*
 
-  const int numberOfFaces = this->numberOfFaces();
-  VecVecV3D faces(numberOfFaces);
+  const int facesN = this->numberOfFaces();
+  VecVecV3D faces(facesN);
   faces[0] = {m_vertex1, m_vertex2, m_vertex3}; // These define a face normal
                                                 // to x at xmin.
   return faces;

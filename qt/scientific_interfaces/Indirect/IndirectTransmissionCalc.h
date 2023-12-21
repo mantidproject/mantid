@@ -16,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport IndirectTransmissionCalc : public IndirectToolsTab {
+class MANTIDQT_INDIRECT_DLL IndirectTransmissionCalc : public IndirectToolsTab {
   Q_OBJECT
 
 public:

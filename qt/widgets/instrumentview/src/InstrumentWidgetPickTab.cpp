@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
+#include "MantidQtWidgets/InstrumentView/CollapsibleStack.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
@@ -209,7 +209,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
-  m_rebinPanel = panelStack->addPanel("Rebin", m_rebin);
+  m_rebinPanel = panelStack->addPanel("Rebin", m_rebin, true);
   m_rebinPanel->collapseCaption();
   collapsePlotPanel();
 
@@ -739,7 +739,11 @@ void InstrumentWidgetPickTab::initSurface() {
   if (p3d) {
     connect(p3d, SIGNAL(finishedMove()), this, SLOT(updatePlotMultipleDetectors()));
   }
+  if (m_infoController != nullptr)
+    delete m_infoController;
   m_infoController = new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
+  if (m_plotController != nullptr)
+    delete m_plotController;
   m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
   m_plotController->setTubeXUnits(static_cast<IWPickXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(static_cast<IWPickPlotType>(m_plotTypeCache));

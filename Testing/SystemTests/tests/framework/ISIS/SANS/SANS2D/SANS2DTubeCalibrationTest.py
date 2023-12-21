@@ -17,7 +17,7 @@ from collections import Counter
 
 class SANS2DTubeCalibrationTest:
     _OUTPUT_WS_NAME = "result"
-    _CVALUES_WS_NAME = "cvalues"
+    _CVALUES_WS_PREFIX = "cvalues_"
     _DATA_FILES = ["SANS2D00069117.nxs", "SANS2D00069118.nxs", "SANS2D00069119.nxs", "SANS2D00069120.nxs", "SANS2D00069116.nxs"]
     _NUM_TUBES = 120
 
@@ -40,7 +40,6 @@ class SANS2DTubeCalibrationTest:
             Background=10,
             VerticalOffset=-0.005,
             CValueThreshold=6.0,
-            SaveIntegratedWorkspaces=False,
         )
 
     @staticmethod
@@ -71,6 +70,7 @@ class SANS2DTubeCalibrationTest:
 class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS2DTubeCalibrationTest):
     _REFERENCE_FILE = "SANS2DTubeMerge_rear.nxs"
     _CVALUES_REF_FILE = "SANS2DTubeCalibration_cvalues_rear.nxs"
+    _DETECTOR_NAME = "rear"
 
     def requiredFile(self):
         return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
@@ -86,13 +86,14 @@ class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
-        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, self._CVALUES_WS_NAME, self._CVALUES_REF_FILE
+        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, f"{self._CVALUES_WS_PREFIX}{self._DETECTOR_NAME}", self._CVALUES_REF_FILE
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SANS2DTubeCalibrationTest):
     _REFERENCE_FILE = "SANS2DTubeMerge_front.nxs"
     _CVALUES_REF_FILE = "SANS2DTubeCalibration_cvalues_front.nxs"
+    _DETECTOR_NAME = "front"
 
     def requiredFile(self):
         return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
@@ -112,4 +113,4 @@ class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SAN
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
-        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, self._CVALUES_WS_NAME, self._CVALUES_REF_FILE
+        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, f"{self._CVALUES_WS_PREFIX}{self._DETECTOR_NAME}", self._CVALUES_REF_FILE

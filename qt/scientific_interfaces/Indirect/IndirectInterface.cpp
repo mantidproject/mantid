@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectInterface.h"
+#include "IndirectSettings.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -13,11 +14,11 @@ using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectInterface::IndirectInterface(QWidget *parent)
-    : UserSubWindow(parent),
-      m_settings(dynamic_cast<IndirectSettings *>(InterfaceManager().createSubWindow("Settings", this))) {
+IndirectInterface::IndirectInterface(QWidget *parent) : UserSubWindow(parent) {}
 
-  connect(m_settings.get(), SIGNAL(applySettings()), this, SLOT(applySettings()));
+void IndirectInterface::initLayout() {
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings();
 }
 
 void IndirectInterface::help() {
@@ -25,16 +26,18 @@ void IndirectInterface::help() {
 }
 
 void IndirectInterface::settings() {
-  m_settings->loadSettings();
-  m_settings->setWindowModality(Qt::WindowModal);
-  m_settings->show();
+  auto settingsWidget = new IndirectSettings(this);
+  settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
+
+  settingsWidget->loadSettings();
+  settingsWidget->setWindowFlag(Qt::Window);
+  settingsWidget->setWindowModality(Qt::WindowModal);
+  settingsWidget->show();
 }
 
-void IndirectInterface::applySettings() { applySettings(getInterfaceSettings()); }
+void IndirectInterface::applySettings() { applySettings(IndirectSettings::getSettings()); }
 
 void IndirectInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
-
-std::map<std::string, QVariant> IndirectInterface::getInterfaceSettings() const { return m_settings->getSettings(); }
 
 void IndirectInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 

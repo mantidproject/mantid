@@ -5,16 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from re import findall, sub
 from itertools import chain
 from numpy import full, nan, max, array, vstack
 from collections import defaultdict
 
+from mantid import FunctionFactory
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
 from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
+from mantid.api import CompositeFunction
 
 
 class FittingPlotModel(object):
@@ -57,11 +58,14 @@ class FittingPlotModel(object):
         for fit_prop in fit_props:
             wsname = fit_prop["properties"]["InputWorkspace"]
             self._fit_results[wsname] = {"model": fit_prop["properties"]["Function"], "status": fit_prop["status"]}
-            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            fnames = [x.split("=")[-1] for x in findall("name=[^,]*", fit_prop["properties"]["Function"])]
-            # get num params for each function (first elem empty as str begins with 'name=')
-            # need to remove ties and constraints which are enclosed in ()
-            nparams = [s.count("=") for s in sub(r"=\([^)]*\)", "", fit_prop["properties"]["Function"]).split("name=")[1:]]
+            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2, E2],...] }
+            fit_functions = FunctionFactory.createInitialized(fit_prop["properties"]["Function"])
+            if isinstance(fit_functions, CompositeFunction):
+                fnames = [func.name() for func in fit_functions]
+                nparams = [func.nParams() for func in fit_functions]
+            else:
+                fnames = [fit_functions.name()]
+                nparams = [fit_functions.nParams()]
             params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
@@ -84,7 +88,24 @@ class FittingPlotModel(object):
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
             self._fit_results[wsname]["costFunction"] = params_dict["Value"][-1]
+            self._calculate_fwhm_values(wsname, fit_functions)
         self.create_fit_tables(loaded_ws_list, active_ws_list, log_workspace_name)
+
+    def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
+        fit_func_name = fit_func.name()
+        if fit_func_name in peak_func_names:
+            peak_func = FunctionFactory.Instance().createPeakFunction(fit_func_name)
+            [peak_func.setParameter(i_param, fit_func.getParameterValue(i_param)) for i_param in range(fit_func.nParams())]
+            key_fwhm = fit_func_name + "_fwhm"
+            self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
+
+    def _calculate_fwhm_values(self, ws_name, fit_functions):
+        peak_func_names = FunctionFactory.getPeakFunctionNames()
+        if isinstance(fit_functions, CompositeFunction):
+            for func in fit_functions:
+                self._setup_peak_func_and_extract_fwhm(ws_name, peak_func_names, func)
+        else:
+            self._setup_peak_func_and_extract_fwhm(ws_name, peak_func_names, fit_functions)
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)

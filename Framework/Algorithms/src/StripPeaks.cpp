@@ -57,10 +57,7 @@ void StripPeaks::init() {
   declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
-  declareProperty("HighBackground", true,
-                  "Flag to indicate that the peaks are "
-                  "relatively weak comparing to "
-                  "background.");
+  declareProperty("HighBackground", true, "Flag whether the input data has high background compared to peak heights.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectSettings.h"
+#include "DllConfig.h"
 
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -14,11 +14,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectInterface : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INDIRECT_DLL IndirectInterface : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
   explicit IndirectInterface(QWidget *parent = nullptr);
+
+public slots:
+  void applySettings();
 
 protected slots:
   void help();
@@ -27,18 +30,12 @@ protected slots:
   void showMessageBox(QString const &message);
 
 protected:
-  std::map<std::string, QVariant> getInterfaceSettings() const;
-
-private slots:
-  void applySettings();
+  virtual void initLayout() override;
 
 private:
-  virtual void initLayout() override{};
   virtual std::string documentationPage() const { return ""; };
 
   virtual void applySettings(std::map<std::string, QVariant> const &settings);
-
-  std::unique_ptr<IndirectSettings> m_settings;
 };
 
 } // namespace CustomInterfaces

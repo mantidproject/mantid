@@ -183,8 +183,6 @@ set(SRC_FILES
     src/TableWorkspaceDomainCreator.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp)
-
 set(INC_FILES
     inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
     inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
@@ -545,11 +543,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES)

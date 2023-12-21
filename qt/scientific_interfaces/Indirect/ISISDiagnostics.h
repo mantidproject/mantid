@@ -37,7 +37,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport ISISDiagnostics : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:

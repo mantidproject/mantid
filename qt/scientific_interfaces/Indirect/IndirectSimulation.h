@@ -24,7 +24,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson, STFC
   */
 
-class DLLExport IndirectSimulation : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectSimulation : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums

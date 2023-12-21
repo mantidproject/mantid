@@ -100,7 +100,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             raise Exception("Expected {}, got {}. Difference greater than tolerance {}".format(sigma, peak_params["sigma"], tolerance))
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             FindPeaksAutomatic()
 
     def test_algorithm_with_negative_acceptance_threshold_throws(self):

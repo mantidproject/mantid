@@ -206,6 +206,40 @@ public:
     removeFile(parameters.filename);
   }
 
+  void test_that_sample_bgsub_values_included_if_properties_are_set() {
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.scaledBgSubWorkspace = "a_workspace";
+    parameters.scaledBgSubScaleFactor = 1.5;
+    parameters.hasBgSub = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Create transmission can
+    NXcanSASTestTransmissionParameters transmissionParameters;
+    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
+    transmissionParameters.usesTransmission = true;
+
+    auto transmission = getTransmissionWorkspace(transmissionParameters);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+
+    // Act
+    save_file_no_issues(ws, parameters, transmission, nullptr);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
   void test_that_unknown_detector_names_are_not_saved() {
     // Arrange
     NXcanSASTestParameters parameters;
@@ -366,10 +400,14 @@ private:
     saveAlg->setProperty("Filename", parameters.filename);
     saveAlg->setProperty("InputWorkspace", workspace);
     saveAlg->setProperty("RadiationSource", parameters.radiationSource);
+    saveAlg->setProperty("Geometry", parameters.geometry);
+    saveAlg->setProperty("SampleHeight", parameters.beamHeight);
+    saveAlg->setProperty("SampleWidth", parameters.beamWidth);
     if (!parameters.detectors.empty()) {
       std::string detectorsAsString = concatenateStringVector(parameters.detectors);
       saveAlg->setProperty("DetectorNames", detectorsAsString);
     }
+    saveAlg->setProperty("SampleThickness", parameters.sampleThickness);
 
     if (transmission) {
       saveAlg->setProperty("Transmission", transmission);
@@ -382,6 +420,8 @@ private:
     saveAlg->setProperty("SampleDirectRunNumber", parameters.sampleDirectRun);
     saveAlg->setProperty("CanScatterRunNumber", parameters.canScatterRun);
     saveAlg->setProperty("CanDirectRunNumber", parameters.canDirectRun);
+    saveAlg->setProperty("BackgroundSubtractionWorkspace", parameters.scaledBgSubWorkspace);
+    saveAlg->setProperty("BackgroundSubtractionScaleFactor", parameters.scaledBgSubScaleFactor);
 
     TSM_ASSERT_THROWS_NOTHING("Should not throw anything", saveAlg->execute());
     TSM_ASSERT("Should have executed", saveAlg->isExecuted());
@@ -435,6 +475,34 @@ private:
     TSM_ASSERT_EQUALS("Radiation sources should match.", radiationValue, radiationSource);
   }
 
+  void do_assert_aperture(H5::Group &aperture, const std::string &beamShape, const double &beamHeight,
+                          const double &beamWidth) {
+
+    auto numAttributes = aperture.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
+
+    // canSAS_class and NX_class attribute
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASaperture class", classAttribute, sasInstrumentApertureClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXaperture class", classAttribute, nxInstrumentApertureClassAttr);
+
+    // beam_shape data set
+    auto beamShapeDataSet = aperture.openDataSet(sasInstrumentApertureShape);
+    auto beamShapeValue = Mantid::DataHandling::H5Util::readString(beamShapeDataSet);
+    TSM_ASSERT_EQUALS("Beam Shapes should match.", beamShapeValue, beamShape);
+
+    // beam_height data set
+    auto beamHeightDataSet = aperture.openDataSet(sasInstrumentApertureGapHeight);
+    auto beamHeightValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamHeightDataSet);
+    TSM_ASSERT_EQUALS("Beam height should match.", beamHeightValue[0], beamHeight);
+
+    // beam_width data set
+    auto beamWidthDataSet = aperture.openDataSet(sasInstrumentApertureGapWidth);
+    auto beamWidthValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamWidthDataSet);
+    TSM_ASSERT_EQUALS("Beam width should match.", beamWidthValue[0], beamWidth);
+  }
+
   void do_assert_detector(H5::Group &instrument, const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
@@ -477,8 +545,8 @@ private:
   }
 
   void do_assert_instrument(H5::Group &instrument, const std::string &instrumentName, const std::string &idf,
-                            const std::string &radiationSource, const std::vector<std::string> &detectors,
-                            bool invalidDetectors) {
+                            const std::string &radiationSource, const std::string &geometry, const double &beamHeight,
+                            const double &beamWidth, const std::vector<std::string> &detectors, bool invalidDetectors) {
     auto numAttributes = instrument.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
@@ -502,6 +570,10 @@ private:
     auto source = instrument.openGroup(sasInstrumentSourceGroupName);
     do_assert_source(source, radiationSource);
 
+    // Check aperture
+    auto aperture = instrument.openGroup(sasInstrumentApertureGroupName);
+    do_assert_aperture(aperture, geometry, beamHeight, beamWidth);
+
     // Check detectors
     if (!invalidDetectors) {
       do_assert_detector(instrument, detectors);
@@ -511,9 +583,20 @@ private:
     }
   }
 
+  void do_assert_sample(H5::Group &sample, const double thickness) {
+    auto numAttributes = sample.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
+
+    // sample thickness data set
+    auto thicknessDataSet = sample.openDataSet(sasInstrumentSampleThickness);
+    auto thicknessValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(thicknessDataSet);
+    TSM_ASSERT_EQUALS("Sample thickness should match.", thicknessValue[0], thickness);
+  }
+
   void do_assert_process(H5::Group &process, const bool &hasSampleRuns, const bool &hasCanRuns,
                          const std::string &userFile, const std::string &sampleDirectRun,
-                         const std::string &canDirectRun) {
+                         const std::string &canDirectRun, const bool &hasBgSub, const std::string &scaledBgSubWorkspace,
+                         const double &scaledBgSubScaleFactor) {
     auto numAttributes = process.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
@@ -542,14 +625,16 @@ private:
     TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", userFileValue, userFile);
 
     // Check note
-    if (hasSampleRuns || hasCanRuns) {
+    if (hasSampleRuns || hasCanRuns || hasBgSub) {
       auto note = process.openGroup(sasNoteGroupName);
-      do_assert_process_note(note, hasSampleRuns, hasCanRuns, sampleDirectRun, canDirectRun);
+      do_assert_process_note(note, hasSampleRuns, hasCanRuns, hasBgSub, sampleDirectRun, canDirectRun,
+                             scaledBgSubWorkspace, scaledBgSubScaleFactor);
     }
   }
 
-  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns, const bool &hasCanRuns,
-                              const std::string &sampleDirectRun, const std::string &canDirectRun) {
+  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns, const bool &hasCanRuns, const bool &hasBgSub,
+                              const std::string &sampleDirectRun, const std::string &canDirectRun,
+                              const std::string &scaledBgSubWorkspace, const double &scaledBgSubScaleFactor) {
     auto numAttributes = note.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
 
@@ -570,6 +655,17 @@ private:
       auto canDirectRunDataSet = note.openDataSet(sasProcessTermCanDirect);
       auto canDirectRunValue = Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
       TSM_ASSERT_EQUALS("Should have correct can direct run number", canDirectRunValue, canDirectRun);
+    }
+
+    if (hasBgSub) {
+      auto scaledBgSubWorkspaceDataSet = note.openDataSet(sasProcessTermScaledBgSubWorkspace);
+      auto scaledBgSubWorkspaceValue = Mantid::DataHandling::H5Util::readString(scaledBgSubWorkspaceDataSet);
+      TSM_ASSERT_EQUALS("Should have correct scaled background subtraction workspace", scaledBgSubWorkspaceValue,
+                        scaledBgSubWorkspace);
+      auto scaledBgSubScaleFactorDataSet = note.openDataSet(sasProcessTermScaledBgSubScaleFactor);
+      auto scaledBgSubScaleFactorValue = Mantid::DataHandling::H5Util::readString(scaledBgSubScaleFactorDataSet);
+      TSM_ASSERT_EQUALS("Should have correct scaled background subtraction scale factor",
+                        stod(scaledBgSubScaleFactorValue), scaledBgSubScaleFactor);
     }
   }
 
@@ -840,12 +936,18 @@ private:
     // Check instrument
     auto instrument = entry.openGroup(sasInstrumentGroupName);
     do_assert_instrument(instrument, parameters.instrumentName, parameters.idf, parameters.radiationSource,
-                         parameters.detectors, parameters.invalidDetectors);
+                         parameters.geometry, parameters.beamHeight, parameters.beamWidth, parameters.detectors,
+                         parameters.invalidDetectors);
+
+    // Check Sample
+    auto sample = entry.openGroup(sasInstrumentSampleGroupAttr);
+    do_assert_sample(sample, parameters.sampleThickness);
 
     // Check process
     auto process = entry.openGroup(sasProcessGroupName);
     do_assert_process(process, parameters.hasSampleRuns, parameters.hasCanRuns, parameters.userFile,
-                      parameters.sampleDirectRun, parameters.canDirectRun);
+                      parameters.sampleDirectRun, parameters.canDirectRun, parameters.hasBgSub,
+                      parameters.scaledBgSubWorkspace, parameters.scaledBgSubScaleFactor);
 
     // Check data
     auto data = entry.openGroup(sasDataGroupName);

@@ -163,11 +163,6 @@ set(CORE_MANTIDLIBS
     Mantid::Types
 )
 
-if(UNIX)
-  # Experimental feature. Unix only at this point.
-  option(UNITY_BUILD "Switch for utilising unity builds. Faster builds for selected components.")
-endif(UNIX)
-
 add_custom_target(AllTests)
 
 if(BUILD_MANTIDFRAMEWORK)

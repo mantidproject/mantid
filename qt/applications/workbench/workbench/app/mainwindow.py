@@ -64,7 +64,7 @@ def _get_splash_image():
     )
 
 
-SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
+SPLASH = QSplashScreen(_get_splash_image())
 SPLASH.show()
 SPLASH.showMessage("Starting...", int(Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing

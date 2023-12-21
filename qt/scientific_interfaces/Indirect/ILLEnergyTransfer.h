@@ -18,7 +18,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport ILLEnergyTransfer : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:

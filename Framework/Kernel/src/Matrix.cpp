@@ -125,13 +125,13 @@ vector.
 //
 template <typename T> Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
   size_t numElements = data.size();
-  auto numRows = static_cast<size_t>(sqrt(double(numElements)));
-  size_t numRowsSquare = numRows * numRows;
+  auto numOfRows = static_cast<size_t>(sqrt(double(numElements)));
+  size_t numRowsSquare = numOfRows * numOfRows;
   if (numElements != numRowsSquare) {
     throw(std::invalid_argument("number of elements in input vector have to be square of some value"));
   }
 
-  setMem(numRows, numRows);
+  setMem(numOfRows, numOfRows);
 
   size_t ic(0);
   for (size_t i = 0; i < m_numRows; i++) {
@@ -940,11 +940,11 @@ using LU decomposition
   std::vector<int> indx(m_numRows); // Set in lubcmp
   std::vector<double> col(m_numRows);
 
-  int determinant = 0;
+  int determinantInterchange = 0;
   Matrix<T> Lcomp(*this);
-  Lcomp.lubcmp(indx.data(), determinant);
+  Lcomp.lubcmp(indx.data(), determinantInterchange);
 
-  auto det = static_cast<double>(determinant);
+  auto det = static_cast<double>(determinantInterchange);
   for (size_t j = 0; j < m_numRows; j++)
     det *= Lcomp.m_rawData[j][j];
 

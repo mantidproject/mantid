@@ -26,7 +26,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
 class DNSFileSelectorModel(DNSObsModel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.update_progress = parent.update_progress
+        self._update_progress = parent.update_progress
         # Qt tree models
         self.sample_data_tree_model = DNSTreeModel()
         self.standard_data_tree_model = DNSTreeModel()
@@ -56,8 +56,8 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def _get_start_end_file_numbers(self):
         if self.all_datafiles:
-            start = int(self.all_datafiles[0].split("_")[-2][:-2])
-            end = int(self.all_datafiles[-1].split("_")[-2][:-2])
+            start = sorted(self.all_datafiles)[0]
+            end = sorted(self.all_datafiles)[-1]
             return [start, end]
         return [0, 0]
 
@@ -69,7 +69,7 @@ class DNSFileSelectorModel(DNSObsModel):
             datafiles = filter_filenames(datafiles, start, end)
         return datafiles, file_number_range
 
-    def read_all(self, datafiles, data_path, loaded, watcher=False):
+    def read_all(self, datafiles, data_path, loaded, pol_table, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
         range specified.
@@ -77,17 +77,19 @@ class DNSFileSelectorModel(DNSObsModel):
         self.loading_canceled = False
         self._clear_scans_if_not_sequential(watcher)
         for i, filename in enumerate(datafiles):
-            self.update_progress(i, len(datafiles))
+            self._update_progress(i, len(datafiles))
             if self.loading_canceled:
                 break
-            dns_file = self._load_file_from_cache_or_new(loaded, filename, data_path)
-            if dns_file.new_format:  # ignore files with old format
+            dns_file = self._load_file_from_cache_or_new(loaded, filename, data_path, pol_table)
+            if dns_file.new_format or dns_file.legacy_format:
                 self.sample_data_tree_model.setup_model_data([dns_file])
         self.old_data_set = set(self.all_datafiles)
         self._add_number_of_files_per_scan()
-        self._save_filelist(data_path)
+        if datafiles:
+            self._save_filelist(data_path)
+            self._update_progress(len(datafiles), len(datafiles))
 
-    def read_standard(self, standard_path):
+    def read_standard(self, standard_path, polarisation_table):
         """
         Reading of standard files.
         """
@@ -95,7 +97,7 @@ class DNSFileSelectorModel(DNSObsModel):
         datafiles = return_filelist(standard_path)
         model.clear_scans()
         for filename in datafiles:
-            dns_file = DNSFile(standard_path, filename)
+            dns_file = DNSFile(standard_path, filename, polarisation_table)
             model.setup_model_data([dns_file])
         model.add_number_of_children()
         return model.rowCount()
@@ -256,10 +258,10 @@ class DNSFileSelectorModel(DNSObsModel):
 
     # caching of filelist
     @staticmethod
-    def _load_file_from_cache_or_new(loaded, filename, data_path):
+    def _load_file_from_cache_or_new(loaded, filename, data_path, pol_table):
         dns_file = loaded.get(filename, False)
         if not dns_file:
-            dns_file = DNSFile(data_path, filename)
+            dns_file = DNSFile(data_path, filename, pol_table)
         return dns_file
 
     def _save_filelist(self, data_path):

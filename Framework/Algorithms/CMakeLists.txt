@@ -150,6 +150,7 @@ set(SRC_FILES
     src/FindEPP.cpp
     src/FindPeakBackground.cpp
     src/FindPeaks.cpp
+    src/FindPeaksConvolve.cpp
     src/FitPeak.cpp
     src/FitPeaks.cpp
     src/FixGSASInstrumentFile.cpp
@@ -496,6 +497,7 @@ set(INC_FILES
     inc/MantidAlgorithms/FindEPP.h
     inc/MantidAlgorithms/FindPeakBackground.h
     inc/MantidAlgorithms/FindPeaks.h
+    inc/MantidAlgorithms/FindPeaksConvolve.h
     inc/MantidAlgorithms/FitPeak.h
     inc/MantidAlgorithms/FitPeaks.h
     inc/MantidAlgorithms/FixGSASInstrumentFile.h
@@ -698,15 +700,6 @@ set(INC_FILES
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h
 )
 
-set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp src/FFTSmooth.cpp src/FFTSmooth2.cpp src/FilterBadPulses.cpp
-                           src/SetUncertainties.cpp
-)
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
@@ -854,6 +847,7 @@ set(TEST_FILES
     FindDetectorsOutsideLimitsTest.h
     FindEPPTest.h
     FindPeakBackgroundTest.h
+    FindPeaksConvolveTest.h
     FindPeaksTest.h
     FitPeakTest.h
     FitPeaksTest.h

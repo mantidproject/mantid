@@ -11,9 +11,22 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-QHash<QString, QVariant> defaultLineKwargs() {
+using MantidQt::MantidWidgets::PlotLineStyle;
+QHash<QString, QVariant> defaultLineKwargs(PlotLineStyle style) {
   QHash<QString, QVariant> kwargs;
-  kwargs.insert("line_style", QString("--"));
+  switch (style) {
+  case PlotLineStyle::Solid:
+    kwargs.insert("line_style", QString("-"));
+    break;
+  case PlotLineStyle::Dotted:
+    kwargs.insert("line_style", QString(":"));
+    break;
+  default:
+    // Dash
+    kwargs.insert("line_style", QString("--"));
+    break;
+  }
+
   return kwargs;
 }
 
@@ -21,11 +34,12 @@ QHash<QString, QVariant> defaultLineKwargs() {
 
 namespace MantidQt::MantidWidgets {
 
-SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, double position, bool visible, const QColor &colour)
+SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, double position, PlotLineStyle style, bool visible,
+                               const QColor &colour)
     : QObject(), m_plot(plot),
       m_singleMarker(std::make_unique<SingleMarker>(m_plot->canvas(), colour.name(QColor::HexRgb), position,
                                                     std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
-                                                    selectTypeAsQString(type), defaultLineKwargs())),
+                                                    selectTypeAsQString(type), defaultLineKwargs(style))),
       m_type(type), m_visible(visible), m_markerMoving(false) {
 
   m_plot->canvas()->draw();
@@ -132,6 +146,12 @@ void SingleSelector::handleMouseUp(const QPoint &point) {
 void SingleSelector::redrawMarker() {
   if (m_visible)
     m_singleMarker->redraw();
+}
+
+void SingleSelector::disconnectMouseSignals() {
+  disconnect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
+  disconnect(m_plot, SIGNAL(mouseMove(QPoint)), this, SLOT(handleMouseMove(QPoint)));
+  disconnect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 }
 
 } // namespace MantidQt::MantidWidgets

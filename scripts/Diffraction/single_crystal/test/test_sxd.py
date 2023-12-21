@@ -14,6 +14,7 @@ from mantid.simpleapi import (
     SetUB,
     ClearUB,
     HasUB,
+    ClearCache,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -24,6 +25,7 @@ sxd_path = "Diffraction.single_crystal.sxd"
 class SXDTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        ClearCache(InstrumentCache=True)
         cls.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
@@ -37,6 +39,9 @@ class SXDTest(unittest.TestCase):
 
     def setUp(self):
         self.sxd = SXD()
+
+    def tearDown(self):
+        ClearCache(InstrumentCache=True)
 
     # --- test BaseSX methods (parent class with abstract methods) that require class instantiation ---
 
@@ -295,6 +300,18 @@ class SXDTest(unittest.TestCase):
         for ws in [ws_clone1, ws_clone2, peaks2]:
             # check bank1 moved in all workspaces
             self.assertAlmostEqual(0.0, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-10)
+
+    def test_undo_calibration_xml(self):
+        # clone workspaces
+        ws3 = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="SXD_undo_cal_test")
+        # move bank1 component to (0,0,0)
+        MoveInstrumentComponent(Workspace=ws3, ComponentName="bank1", RelativePosition=False, EnableLogging=False)
+        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=ws3, NumberOfPeaks=0, OutputWorkspace="peaks3")
+
+        SXD.undo_calibration(ws3, peaks_ws=peaks3)
+        for ws in [ws3, peaks3]:
+            # check bank1 is no longer at 0 (back at original position)
+            self.assertAlmostEqual(0.13, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-2)
 
     # --- helper funcs ---
 

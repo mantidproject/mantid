@@ -1,0 +1,1 @@
+- Fixed error in plot script generated for 1D MDHisto workspace plots.

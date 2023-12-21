@@ -118,6 +118,7 @@ class PythonFileInterpreter(QWidget):
     sig_progress = Signal(int)
     sig_exec_error = Signal(object)
     sig_exec_success = Signal(object)
+    sig_focus_in = Signal(str)
 
     def __init__(self, font=None, content=None, filename=None, parent=None, completion_enabled=True):
         """
@@ -149,6 +150,7 @@ class PythonFileInterpreter(QWidget):
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+        self.editor.editorFocusIn.connect(self.sig_focus_in)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -260,6 +262,13 @@ class PythonFileInterpreter(QWidget):
 
     def toggle_comment(self):
         self.code_commenter.toggle_comment()
+
+    def replace_all_text_no_modified_flag(self, new_content):
+        self.editor.setText(new_content)
+        self.editor.setModified(False)
+
+    def mark_as_modified(self):
+        self.editor.markFileAsModified()
 
     def _setup_editor(self, default_content, filename):
         editor = self.editor
