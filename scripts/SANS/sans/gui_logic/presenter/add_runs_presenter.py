@@ -72,6 +72,7 @@ class AddRunsPagePresenter(object):
 
         self.save_directory = ""
         self._connect_to_view(view)
+        self._handle_custom_outfile_check_changed(False)
 
         self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory, str)})
 
