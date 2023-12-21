@@ -104,6 +104,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "CalibrationFile",
             "OutputWorkspace",
             "PolarizationEfficiencies",
+            "ROIDetectorIDs",
         ]
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)
 
