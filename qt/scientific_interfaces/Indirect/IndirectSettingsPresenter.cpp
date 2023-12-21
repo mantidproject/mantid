@@ -40,6 +40,8 @@ void IndirectSettingsPresenter::loadSettings() {
 
   m_view->setRestrictInputByNameChecked(restrictInputDataByName());
   m_view->setPlotErrorBarsChecked(externalPlotErrorBars());
+
+  m_view->setDeveloperFeatureFlags(developerFeatureFlags());
 }
 
 void IndirectSettingsPresenter::saveSettings() {
@@ -47,6 +49,8 @@ void IndirectSettingsPresenter::saveSettings() {
 
   setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
   setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
+
+  setDeveloperFeatureFlags(m_view->developerFeatureFlags());
 
   m_parent->notifyApplySettings();
 }

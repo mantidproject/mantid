@@ -41,6 +41,9 @@ public:
   MOCK_METHOD1(setPlotErrorBarsChecked, void(bool check));
   MOCK_CONST_METHOD0(isPlotErrorBarsChecked, bool());
 
+  MOCK_METHOD1(setDeveloperFeatureFlags, void(QStringList const &flags));
+  MOCK_CONST_METHOD0(developerFeatureFlags, QStringList());
+
   MOCK_METHOD3(setSetting, void(QString const &settingsGroup, QString const &settingName, bool const &value));
   MOCK_METHOD2(getSetting, QVariant(QString const &settingsGroup, QString const &settingName));
 
@@ -145,6 +148,7 @@ private:
     ON_CALL(*m_view, getSelectedFacility()).WillByDefault(Return(QString::fromStdString(facility)));
     ON_CALL(*m_view, isRestrictInputByNameChecked()).WillByDefault(Return(true));
     ON_CALL(*m_view, isPlotErrorBarsChecked()).WillByDefault(Return(true));
+    ON_CALL(*m_view, developerFeatureFlags()).WillByDefault(Return(QStringList{""}));
 
     Expectation expectation = EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);
     EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);

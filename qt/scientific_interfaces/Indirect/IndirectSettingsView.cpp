@@ -55,6 +55,14 @@ void IndirectSettingsView::setPlotErrorBarsChecked(bool check) { m_uiForm->ckPlo
 
 bool IndirectSettingsView::isPlotErrorBarsChecked() const { return m_uiForm->ckPlotErrorBars->isChecked(); }
 
+void IndirectSettingsView::setDeveloperFeatureFlags(QStringList const &flags) {
+  m_uiForm->leDeveloperFeatureFlags->setText(flags.join(" "));
+}
+
+QStringList IndirectSettingsView::developerFeatureFlags() const {
+  return m_uiForm->leDeveloperFeatureFlags->text().split(" ");
+}
+
 void IndirectSettingsView::setApplyText(QString const &text) { m_uiForm->pbApply->setText(text); }
 
 void IndirectSettingsView::setApplyEnabled(bool enable) { m_uiForm->pbApply->setEnabled(enable); }

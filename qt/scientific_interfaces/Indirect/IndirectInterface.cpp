@@ -30,6 +30,7 @@ void IndirectInterface::settings() {
   settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
   settingsWidget->loadSettings();
+  settingsWidget->setAttribute(Qt::WA_DeleteOnClose);
   settingsWidget->setWindowFlag(Qt::Window);
   settingsWidget->setWindowModality(Qt::WindowModal);
   settingsWidget->show();

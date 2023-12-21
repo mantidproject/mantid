@@ -6,15 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "DllConfig.h"
+
+#include <string>
+
+#include <QStringList>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IndirectSettingsHelper {
 
 MANTIDQT_INDIRECT_DLL void setRestrictInputDataByName(bool restricted);
 MANTIDQT_INDIRECT_DLL void setExternalPlotErrorBars(bool errorBars);
+MANTIDQT_INDIRECT_DLL void setDeveloperFeatureFlags(QStringList const &flags);
 
 MANTIDQT_INDIRECT_DLL bool restrictInputDataByName();
 MANTIDQT_INDIRECT_DLL bool externalPlotErrorBars();
+MANTIDQT_INDIRECT_DLL QStringList developerFeatureFlags();
+MANTIDQT_INDIRECT_DLL bool hasDevelopmentFlag(std::string const &flag);
 
 } // namespace IndirectSettingsHelper
 } // namespace CustomInterfaces

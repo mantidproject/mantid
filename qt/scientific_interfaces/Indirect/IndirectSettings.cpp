@@ -15,6 +15,8 @@ constexpr auto SETTINGS_ICON = "mdi.settings";
 namespace MantidQt::CustomInterfaces {
 
 IndirectSettings::IndirectSettings(QWidget *parent) : QWidget(parent) {
+  this->setWindowTitle("Interface Settings");
+
   auto model = std::make_unique<IndirectSettingsModel>();
   m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), new IndirectSettingsView(this));
   m_presenter->subscribeParent(this);
