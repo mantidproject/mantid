@@ -94,7 +94,7 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
       m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 }
 
 InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}

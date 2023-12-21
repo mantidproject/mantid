@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Common/IndirectPlotOptionsPresenter.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -42,9 +42,9 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectPlotOptionsView final : public IIndirectPlotOptionsView {
+class MockOutputPlotOptionsView final : public IOutputPlotOptionsView {
 public:
-  MOCK_METHOD1(subscribePresenter, void(IIndirectPlotOptionsPresenter *));
+  MOCK_METHOD1(subscribePresenter, void(IOutputPlotOptionsPresenter *));
   MOCK_METHOD2(setPlotType,
                void(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions));
 
@@ -74,7 +74,7 @@ public:
 };
 
 /// Mock object to mock an IndirectTab
-class MockIndirectPlotOptionsModel final : public IndirectPlotOptionsModel {
+class MockOutputPlotOptionsModel final : public OutputPlotOptionsModel {
 public:
   /// Public Methods
   MOCK_METHOD1(setWorkspace, bool(std::string const &workspaceName));
@@ -97,17 +97,17 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectPlotOptionsPresenterTest : public CxxTest::TestSuite {
+class OutputPlotOptionsPresenterTest : public CxxTest::TestSuite {
 public:
-  static IndirectPlotOptionsPresenterTest *createSuite() { return new IndirectPlotOptionsPresenterTest(); }
+  static OutputPlotOptionsPresenterTest *createSuite() { return new OutputPlotOptionsPresenterTest(); }
 
-  static void destroySuite(IndirectPlotOptionsPresenterTest *suite) { delete suite; }
+  static void destroySuite(OutputPlotOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<MockIndirectPlotOptionsView>();
-    m_model = new MockIndirectPlotOptionsModel();
+    m_view = std::make_unique<MockOutputPlotOptionsView>();
+    m_model = new MockOutputPlotOptionsModel();
 
-    m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
   }
 
   void tearDown() override {
@@ -130,15 +130,15 @@ public:
 
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = std::make_unique<MockIndirectPlotOptionsView>();
-    m_model = new MockIndirectPlotOptionsModel();
+    m_view = std::make_unique<MockOutputPlotOptionsView>();
+    m_model = new MockOutputPlotOptionsModel();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
     EXPECT_CALL(*m_view, setIndices(QString(""))).Times(1);
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
-    m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
   }
 
   ///----------------------------------------------------------------------
@@ -290,7 +290,7 @@ private:
     EXPECT_CALL(*m_view, setPlotButtonEnabled(enabled)).Times(1);
   }
 
-  std::unique_ptr<MockIndirectPlotOptionsView> m_view;
-  MockIndirectPlotOptionsModel *m_model;
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_presenter;
+  std::unique_ptr<MockOutputPlotOptionsView> m_view;
+  MockOutputPlotOptionsModel *m_model;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_presenter;
 };

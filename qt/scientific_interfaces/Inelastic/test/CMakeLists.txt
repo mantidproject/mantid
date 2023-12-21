@@ -19,8 +19,8 @@ set(TEST_FILES
     Analysis/IndirectFittingModelTest.h
     Analysis/IqtFitModelTest.h
     Common/IndirectDataValidationHelperTest.h
-    Common/IndirectPlotOptionsModelTest.h
-    Common/IndirectPlotOptionsPresenterTest.h
+    Common/OutputPlotOptionsModelTest.h
+    Common/OutputPlotOptionsPresenterTest.h
     Common/SettingsModelTest.h
     Common/SettingsPresenterTest.h
     Manipulation/InelasticDataManipulationElwinTabModelTest.h

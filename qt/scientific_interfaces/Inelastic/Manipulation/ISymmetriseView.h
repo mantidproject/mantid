@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectPlotOptionsView;
+class OutputPlotOptionsView;
 class ISymmetrisePresenter;
 
 class MANTIDQT_INELASTIC_DLL ISymmetriseView {
@@ -27,7 +27,7 @@ public:
   virtual void subscribePresenter(ISymmetrisePresenter *presenter) = 0;
 
   virtual void setDefaults() = 0;
-  virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
+  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
 

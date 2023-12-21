@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectPlotOptionsView.h"
-#include "IndirectPlotOptionsPresenter.h"
+#include "OutputPlotOptionsView.h"
+#include "OutputPlotOptionsPresenter.h"
 
 #include "MantidQtIcons/Icon.h"
 
@@ -62,15 +62,15 @@ QIcon plotTiledIcon() { return MantidQt::Icons::getIcon("mdi.chart-line-stacked"
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
+OutputPlotOptionsView::OutputPlotOptionsView(QWidget *parent)
     : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
-      m_plotOptions(new Ui::IndirectPlotOptions), m_presenter() {
+      m_plotOptions(new Ui::OutputPlotOptions), m_presenter() {
   m_plotOptions->setupUi(this);
   setupView();
 }
 
-void IndirectPlotOptionsView::setupView() {
+void OutputPlotOptionsView::setupView() {
   connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
           SLOT(notifySelectedWorkspaceChanged(QString const &)));
 
@@ -91,50 +91,50 @@ void IndirectPlotOptionsView::setupView() {
   m_plotOptions->leIndices->setCompleter(m_completer.get());
 }
 
-void IndirectPlotOptionsView::subscribePresenter(IIndirectPlotOptionsPresenter *presenter) { m_presenter = presenter; }
+void OutputPlotOptionsView::subscribePresenter(IOutputPlotOptionsPresenter *presenter) { m_presenter = presenter; }
 
-void IndirectPlotOptionsView::notifySelectedWorkspaceChanged(QString const &workspaceName) {
+void OutputPlotOptionsView::notifySelectedWorkspaceChanged(QString const &workspaceName) {
   m_presenter->handleWorkspaceChanged(workspaceName.toStdString());
 }
 
-void IndirectPlotOptionsView::notifySelectedUnitChanged(QString const &unit) {
+void OutputPlotOptionsView::notifySelectedUnitChanged(QString const &unit) {
   if (!unit.isEmpty()) {
     m_presenter->handleSelectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
   }
 }
 
-void IndirectPlotOptionsView::notifySelectedIndicesChanged() {
+void OutputPlotOptionsView::notifySelectedIndicesChanged() {
   m_presenter->handleSelectedIndicesChanged(selectedIndices().toStdString());
 }
 
-void IndirectPlotOptionsView::notifySelectedIndicesChanged(QString const &spectra) {
+void OutputPlotOptionsView::notifySelectedIndicesChanged(QString const &spectra) {
   if (spectra.isEmpty()) {
     m_presenter->handleSelectedIndicesChanged(spectra.toStdString());
   }
 }
 
-void IndirectPlotOptionsView::notifyPlotSpectraClicked() {
+void OutputPlotOptionsView::notifyPlotSpectraClicked() {
   notifySelectedIndicesChanged();
   m_presenter->handlePlotSpectraClicked();
 }
 
-void IndirectPlotOptionsView::notifyPlotBinsClicked() {
+void OutputPlotOptionsView::notifyPlotBinsClicked() {
   notifySelectedIndicesChanged();
   m_presenter->handlePlotBinsClicked();
 }
 
-void IndirectPlotOptionsView::notifyShowSliceViewerClicked() {
+void OutputPlotOptionsView::notifyShowSliceViewerClicked() {
   notifySelectedIndicesChanged();
   m_presenter->handleShowSliceViewerClicked();
 }
 
-void IndirectPlotOptionsView::notifyPlotTiledClicked() {
+void OutputPlotOptionsView::notifyPlotTiledClicked() {
   notifySelectedIndicesChanged();
   m_presenter->handlePlotTiledClicked();
 }
 
-void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
-                                          std::map<std::string, std::string> const &availableActions) {
+void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
+                                        std::map<std::string, std::string> const &availableActions) {
   auto plotMenu = new QMenu;
 
   auto plotSpectraAction = new QAction(getAction(availableActions, "Plot Spectra"), this);
@@ -198,70 +198,70 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   }
 }
 
-void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
+void OutputPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
   QSignalBlocker blocker(m_plotOptions->cbWorkspace);
   m_plotOptions->cbWorkspace->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setUnitComboBoxEnabled(bool enable) {
+void OutputPlotOptionsView::setUnitComboBoxEnabled(bool enable) {
   QSignalBlocker blocker(m_plotOptions->cbPlotUnit);
   m_plotOptions->cbPlotUnit->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
+void OutputPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
   QSignalBlocker blocker(m_plotOptions->leIndices);
   m_plotOptions->leIndices->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setPlotButtonEnabled(bool enable) {
+void OutputPlotOptionsView::setPlotButtonEnabled(bool enable) {
   m_plotOptions->pbPlotSpectra->setEnabled(enable);
   m_plotOptions->tbPlot->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setPlotButtonText(QString const &text) {
+void OutputPlotOptionsView::setPlotButtonText(QString const &text) {
   m_plotOptions->pbPlotSpectra->setText(text);
   m_plotOptions->tbPlot->setText(text);
 }
 
-void IndirectPlotOptionsView::setIndicesRegex(QString const &regex) {
+void OutputPlotOptionsView::setIndicesRegex(QString const &regex) {
   m_plotOptions->leIndices->setValidator(createValidator(regex));
 }
 
-QValidator *IndirectPlotOptionsView::createValidator(QString const &regex) {
+QValidator *OutputPlotOptionsView::createValidator(QString const &regex) {
   return new QRegExpValidator(QRegExp(regex), this);
 }
 
-QString IndirectPlotOptionsView::selectedWorkspace() const { return m_plotOptions->cbWorkspace->currentText(); }
+QString OutputPlotOptionsView::selectedWorkspace() const { return m_plotOptions->cbWorkspace->currentText(); }
 
-void IndirectPlotOptionsView::setWorkspaces(std::vector<std::string> const &workspaces) {
+void OutputPlotOptionsView::setWorkspaces(std::vector<std::string> const &workspaces) {
   clearWorkspaces();
   for (auto const &name : workspaces)
     m_plotOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
-int IndirectPlotOptionsView::numberOfWorkspaces() const { return m_plotOptions->cbWorkspace->count(); }
+int OutputPlotOptionsView::numberOfWorkspaces() const { return m_plotOptions->cbWorkspace->count(); }
 
-void IndirectPlotOptionsView::clearWorkspaces() { m_plotOptions->cbWorkspace->clear(); }
+void OutputPlotOptionsView::clearWorkspaces() { m_plotOptions->cbWorkspace->clear(); }
 
-void IndirectPlotOptionsView::removeWorkspace(QString const &workspaceName) {
+void OutputPlotOptionsView::removeWorkspace(QString const &workspaceName) {
   auto const index = m_plotOptions->cbWorkspace->findText(workspaceName);
   if (index != -1)
     m_plotOptions->cbWorkspace->removeItem(index);
 }
 
-QString IndirectPlotOptionsView::selectedIndices() const { return m_plotOptions->leIndices->text(); }
+QString OutputPlotOptionsView::selectedIndices() const { return m_plotOptions->leIndices->text(); }
 
-void IndirectPlotOptionsView::setIndices(QString const &indices) {
+void OutputPlotOptionsView::setIndices(QString const &indices) {
   QSignalBlocker blocker(m_plotOptions->leIndices);
   m_plotOptions->leIndices->setText(indices);
 }
 
-void IndirectPlotOptionsView::setIndicesErrorLabelVisible(bool visible) {
+void OutputPlotOptionsView::setIndicesErrorLabelVisible(bool visible) {
   m_plotOptions->lbIndicesError->setText(visible ? "*" : "");
   m_plotOptions->lbIndicesError->setVisible(visible);
 }
 
-void IndirectPlotOptionsView::addIndicesSuggestion(QString const &indices) {
+void OutputPlotOptionsView::addIndicesSuggestion(QString const &indices) {
   auto suggestions = m_suggestionsModel->stringList();
   if (!suggestions.contains(indices)) {
     if (suggestions.size() >= NUMBER_OF_SUGGESTIONS)
@@ -273,7 +273,7 @@ void IndirectPlotOptionsView::addIndicesSuggestion(QString const &indices) {
   }
 }
 
-void IndirectPlotOptionsView::displayWarning(QString const &message) {
+void OutputPlotOptionsView::displayWarning(QString const &message) {
   QMessageBox::warning(parentWidget(), "Mantid - Warning", message);
 }
 

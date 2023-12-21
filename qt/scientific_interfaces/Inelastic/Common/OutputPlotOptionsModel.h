@@ -19,13 +19,13 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IndirectPlotOptionsModel {
+class MANTIDQT_INELASTIC_DLL OutputPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+  OutputPlotOptionsModel(boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
-  IndirectPlotOptionsModel(ExternalPlotter *plotter,
-                           boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
-  virtual ~IndirectPlotOptionsModel();
+  OutputPlotOptionsModel(ExternalPlotter *plotter,
+                         boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+  virtual ~OutputPlotOptionsModel();
 
   virtual bool setWorkspace(std::string const &workspaceName);
   virtual void removeWorkspace();

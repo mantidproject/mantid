@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectPlotOptionsPresenter.h"
 #include "Common/IndirectTab.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
@@ -35,14 +35,14 @@ public:
   IndirectSimulationTab(QWidget *parent = nullptr);
   ~IndirectSimulationTab() override;
 
-  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   void clearOutputPlotOptionsWorkspaces();
 
   virtual void loadSettings(const QSettings &settings) = 0;
 
 private:
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

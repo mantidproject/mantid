@@ -50,9 +50,9 @@ set(SRC_FILES
     Common/IndirectAddWorkspaceDialog.cpp
     Common/IndirectDataValidationHelper.cpp
     Common/IndirectInterface.cpp
-    Common/IndirectPlotOptionsModel.cpp
-    Common/IndirectPlotOptionsPresenter.cpp
-    Common/IndirectPlotOptionsView.cpp
+    Common/OutputPlotOptionsModel.cpp
+    Common/OutputPlotOptionsPresenter.cpp
+    Common/OutputPlotOptionsView.cpp
     Common/Settings.cpp
     Common/SettingsHelper.cpp
     Common/SettingsModel.cpp
@@ -119,7 +119,7 @@ set(MOC_FILES
     Common/ISettingsView.h
     Common/IndirectAddWorkspaceDialog.h
     Common/IndirectInterface.h
-    Common/IndirectPlotOptionsView.h
+    Common/OutputPlotOptionsView.h
     Common/Settings.h
     Common/SettingsView.h
     Common/IndirectTab.h
@@ -171,8 +171,8 @@ set(INC_FILES
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Common/IndirectDataValidationHelper.h
-    Common/IndirectPlotOptionsModel.h
-    Common/IndirectPlotOptionsPresenter.h
+    Common/OutputPlotOptionsModel.h
+    Common/OutputPlotOptionsPresenter.h
     Common/SettingsHelper.h
     Common/SettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
@@ -202,7 +202,7 @@ set(UI_FILES
     BayesFitting/Stretch.ui
     Common/IndirectAddWorkspaceDialog.ui
     Common/InterfaceSettings.ui
-    Common/IndirectPlotOptions.ui
+    Common/OutputPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
     Corrections/ApplyAbsorptionCorrections.ui
     Corrections/CalculatePaalmanPings.ui

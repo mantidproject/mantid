@@ -184,7 +184,7 @@ void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() const {
+OutputPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() const {
   return m_uiForm.ipoPlotOptions;
 }
 

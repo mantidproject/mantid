@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectPlotOptionsPresenter.h"
+#include "OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -34,27 +34,26 @@ std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NAT
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IIndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(
+    IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
-      m_model(std::make_unique<IndirectPlotOptionsModel>(availableActions)) {
+    : m_wsRemovedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
+      m_model(std::make_unique<OutputPlotOptionsModel>(availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view,
-                                                           IndirectPlotOptionsModel *model, PlotWidget const &plotType,
-                                                           std::string const &fixedIndices)
-    : m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
+OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
+                                                       PlotWidget const &plotType, std::string const &fixedIndices)
+    : m_wsRemovedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
 }
 
-IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false); }
+OutputPlotOptionsPresenter::~OutputPlotOptionsPresenter() { watchADS(false); }
 
-void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
+void OutputPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
   m_view->subscribePresenter(this);
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
@@ -66,7 +65,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
   setOptionsEnabled(false);
 }
 
-void IndirectPlotOptionsPresenter::watchADS(bool on) {
+void OutputPlotOptionsPresenter::watchADS(bool on) {
   auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
   if (on) {
     notificationCenter.addObserver(m_wsRemovedObserver);
@@ -77,25 +76,25 @@ void IndirectPlotOptionsPresenter::watchADS(bool on) {
   }
 }
 
-void IndirectPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
+void OutputPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
   m_plotType = plotType;
   m_view->setPlotType(plotType, m_model->availableActions());
 }
 
-void IndirectPlotOptionsPresenter::setPlotting(bool plotting) {
+void OutputPlotOptionsPresenter::setPlotting(bool plotting) {
   m_view->setPlotButtonText(plotting ? "Plotting..."
                                      : QString::fromStdString(m_model->availableActions()["Plot Spectra"]));
   setOptionsEnabled(!plotting);
 }
 
-void IndirectPlotOptionsPresenter::setOptionsEnabled(bool enable) {
+void OutputPlotOptionsPresenter::setOptionsEnabled(bool enable) {
   m_view->setWorkspaceComboBoxEnabled(m_view->numberOfWorkspaces() > 1 ? enable : false);
   m_view->setIndicesLineEditEnabled(!m_model->indicesFixed() ? enable : false);
   m_view->setPlotButtonEnabled(enable);
   m_view->setUnitComboBoxEnabled(enable);
 }
 
-void IndirectPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotification_ptr nf) {
+void OutputPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto const removedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     auto const removedName = removedWorkspace->getName();
@@ -105,7 +104,7 @@ void IndirectPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotifica
   }
 }
 
-void IndirectPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNotification_ptr nf) {
+void OutputPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
     auto const newName = newWorkspace->getName();
@@ -114,32 +113,32 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNot
   }
 }
 
-void IndirectPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
+void OutputPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
   auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
   m_view->setWorkspaces(workspaceNames);
   handleWorkspaceChanged(workspaceNames.front());
 }
 
-void IndirectPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {
+void OutputPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {
   bool success = m_model->setWorkspace(plotWorkspace);
   setOptionsEnabled(success);
   if (success && !m_model->indicesFixed())
     setIndices();
 }
 
-void IndirectPlotOptionsPresenter::clearWorkspaces() {
+void OutputPlotOptionsPresenter::clearWorkspaces() {
   m_model->removeWorkspace();
   m_view->clearWorkspaces();
   setOptionsEnabled(false);
 }
 
-void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) {
+void OutputPlotOptionsPresenter::setUnit(std::string const &unit) {
   if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceUnit) {
     m_model->setUnit(unit);
   }
 }
 
-void IndirectPlotOptionsPresenter::setIndices() {
+void OutputPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
   if (auto const indices = m_model->indices())
     handleSelectedIndicesChanged(indices.get());
@@ -149,13 +148,13 @@ void IndirectPlotOptionsPresenter::setIndices() {
     handleSelectedIndicesChanged("0");
 }
 
-void IndirectPlotOptionsPresenter::handleWorkspaceChanged(std::string const &workspaceName) {
+void OutputPlotOptionsPresenter::handleWorkspaceChanged(std::string const &workspaceName) {
   setWorkspace(workspaceName);
 }
 
-void IndirectPlotOptionsPresenter::handleSelectedUnitChanged(std::string const &unit) { setUnit(unit); }
+void OutputPlotOptionsPresenter::handleSelectedUnitChanged(std::string const &unit) { setUnit(unit); }
 
-void IndirectPlotOptionsPresenter::handleSelectedIndicesChanged(std::string const &indices) {
+void OutputPlotOptionsPresenter::handleSelectedIndicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);
   m_view->setIndices(QString::fromStdString(formattedIndices));
   m_view->setIndicesErrorLabelVisible(!m_model->setIndices(formattedIndices));
@@ -164,7 +163,7 @@ void IndirectPlotOptionsPresenter::handleSelectedIndicesChanged(std::string cons
     m_view->addIndicesSuggestion(QString::fromStdString(formattedIndices));
 }
 
-void IndirectPlotOptionsPresenter::handlePlotSpectraClicked() {
+void OutputPlotOptionsPresenter::handlePlotSpectraClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotSpectra();
@@ -172,7 +171,7 @@ void IndirectPlotOptionsPresenter::handlePlotSpectraClicked() {
   }
 }
 
-void IndirectPlotOptionsPresenter::handlePlotBinsClicked() {
+void OutputPlotOptionsPresenter::handlePlotBinsClicked() {
   if (validateWorkspaceSize(MantidAxis::Bin)) {
     auto const indicesString = m_view->selectedIndices().toStdString();
     if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
@@ -185,13 +184,13 @@ void IndirectPlotOptionsPresenter::handlePlotBinsClicked() {
   }
 }
 
-void IndirectPlotOptionsPresenter::handleShowSliceViewerClicked() {
+void OutputPlotOptionsPresenter::handleShowSliceViewerClicked() {
   setPlotting(true);
   m_model->showSliceViewer();
   setPlotting(false);
 }
 
-void IndirectPlotOptionsPresenter::handlePlotTiledClicked() {
+void OutputPlotOptionsPresenter::handlePlotTiledClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotTiled();
@@ -199,7 +198,7 @@ void IndirectPlotOptionsPresenter::handlePlotTiledClicked() {
   }
 }
 
-bool IndirectPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisType) {
+bool OutputPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisType) {
   auto const errorMessage = m_model->singleDataPoint(axisType);
   if (errorMessage) {
     m_view->displayWarning(QString::fromStdString(errorMessage.get()));

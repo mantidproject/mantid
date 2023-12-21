@@ -29,7 +29,7 @@ InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent
     : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationIqtTabView>(parent)),
       m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_iqtResFileType(), m_selectedSpectrum(0) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
 }
 
 InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() {}

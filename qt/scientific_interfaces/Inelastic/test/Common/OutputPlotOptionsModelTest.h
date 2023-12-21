@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Common/IndirectPlotOptionsModel.h"
+#include "Common/OutputPlotOptionsModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -97,20 +97,20 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectPlotOptionsModelTest : public CxxTest::TestSuite {
+class OutputPlotOptionsModelTest : public CxxTest::TestSuite {
 public:
-  IndirectPlotOptionsModelTest() : m_ads(AnalysisDataService::Instance()) {
+  OutputPlotOptionsModelTest() : m_ads(AnalysisDataService::Instance()) {
     FrameworkManager::Instance();
     m_ads.clear();
   }
 
-  static IndirectPlotOptionsModelTest *createSuite() { return new IndirectPlotOptionsModelTest(); }
+  static OutputPlotOptionsModelTest *createSuite() { return new OutputPlotOptionsModelTest(); }
 
-  static void destroySuite(IndirectPlotOptionsModelTest *suite) { delete suite; }
+  static void destroySuite(OutputPlotOptionsModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_plotter = new NiceMock<MockExternalPlotter>();
-    m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter);
+    m_model = std::make_unique<OutputPlotOptionsModel>(m_plotter);
   }
 
   void tearDown() override {
@@ -343,7 +343,7 @@ public:
 
     tearDown();
     m_plotter = new NiceMock<MockExternalPlotter>();
-    m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
+    m_model = std::make_unique<OutputPlotOptionsModel>(m_plotter, actions);
 
     actions["Open Slice Viewer"] = "Open Slice Viewer";
     actions["Plot Tiled"] = "Plot Tiled";
@@ -353,6 +353,6 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 
-  std::unique_ptr<IndirectPlotOptionsModel> m_model;
+  std::unique_ptr<OutputPlotOptionsModel> m_model;
   MockExternalPlotter *m_plotter;
 };

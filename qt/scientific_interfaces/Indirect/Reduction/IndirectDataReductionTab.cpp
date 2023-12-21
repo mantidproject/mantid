@@ -31,7 +31,7 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
 
 IndirectDataReductionTab::~IndirectDataReductionTab() = default;
 
-void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 

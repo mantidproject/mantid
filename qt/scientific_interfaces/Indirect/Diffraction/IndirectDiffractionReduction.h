@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 
 #include "Common/IndirectInterface.h"
-#include "Common/IndirectPlotOptionsPresenter.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 
 #include "ui_IndirectDiffractionReduction.h"
 
@@ -87,7 +87,7 @@ private:
   std::string m_groupingWsName;
   std::string m_groupingComponent;
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

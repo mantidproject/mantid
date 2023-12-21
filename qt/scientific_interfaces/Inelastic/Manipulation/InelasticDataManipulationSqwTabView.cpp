@@ -63,7 +63,7 @@ InelasticDataManipulationSqwTabView::~InelasticDataManipulationSqwTabView() {}
 
 void InelasticDataManipulationSqwTabView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
-IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+OutputPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 std::string InelasticDataManipulationSqwTabView::getDataName() const {
   return m_uiForm.dsInput->getCurrentDataName().toStdString();

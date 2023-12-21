@@ -14,7 +14,7 @@ IndirectSimulationTab::IndirectSimulationTab(QWidget *parent) : IndirectTab(pare
 
 IndirectSimulationTab::~IndirectSimulationTab() = default;
 
-void IndirectSimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void IndirectSimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 

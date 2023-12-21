@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Common/IndirectInstrumentConfig.h"
-#include "Common/IndirectPlotOptionsPresenter.h"
 #include "Common/IndirectTab.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -48,7 +48,7 @@ public:
   ~IndirectDataReductionTab() override;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
@@ -91,7 +91,7 @@ private slots:
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces

@@ -16,7 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectPlotOptionsView;
+class OutputPlotOptionsView;
 class IMomentsPresenter;
 
 class MANTIDQT_INELASTIC_DLL IMomentsView {
@@ -25,7 +25,7 @@ public:
   virtual void subscribePresenter(IMomentsPresenter *presenter) = 0;
 
   virtual void setupProperties() = 0;
-  virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
+  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
   virtual std::string getDataName() const = 0;
 
   virtual bool validate() = 0;

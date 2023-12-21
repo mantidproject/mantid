@@ -7,9 +7,9 @@
 #pragma once
 
 #include "Common/IndirectInterface.h"
-#include "Common/IndirectPlotOptionsModel.h"
-#include "Common/IndirectPlotOptionsView.h"
 #include "Common/IndirectTab.h"
+#include "Common/OutputPlotOptionsModel.h"
+#include "Common/OutputPlotOptionsView.h"
 
 #include "DllConfig.h"
 
@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IIndirectPlotOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL IOutputPlotOptionsPresenter {
 public:
   virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
   virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
@@ -29,17 +29,16 @@ public:
   virtual void handlePlotTiledClicked() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL OutputPlotOptionsPresenter final : public IOutputPlotOptionsPresenter {
 
 public:
-  IndirectPlotOptionsPresenter(
-      IIndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
-      std::string const &fixedIndices = "",
-      boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+                             std::string const &fixedIndices = "",
+                             boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
-  IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
-                               PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
-  ~IndirectPlotOptionsPresenter();
+  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
+                             PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
+  ~OutputPlotOptionsPresenter();
 
   void handleWorkspaceChanged(std::string const &workspaceName) override;
   void handleSelectedUnitChanged(std::string const &unit) override;
@@ -71,11 +70,11 @@ private:
   bool validateWorkspaceSize(MantidAxis const &axisType);
 
   // Observers for ADS Notifications
-  Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
-  Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
+  Poco::NObserver<OutputPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
+  Poco::NObserver<OutputPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
-  IIndirectPlotOptionsView *m_view;
-  std::unique_ptr<IndirectPlotOptionsModel> m_model;
+  IOutputPlotOptionsView *m_view;
+  std::unique_ptr<OutputPlotOptionsModel> m_model;
   PlotWidget m_plotType;
 };
 

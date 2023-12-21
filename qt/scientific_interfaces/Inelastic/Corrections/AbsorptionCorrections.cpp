@@ -120,7 +120,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
+      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
 
   QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);

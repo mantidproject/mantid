@@ -24,7 +24,7 @@ CorrectionsTab::CorrectionsTab(QWidget *parent) : IndirectTab(parent), m_dblEdFa
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
-void CorrectionsTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void CorrectionsTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 

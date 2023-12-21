@@ -103,7 +103,7 @@ std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutpu
 
 bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
-IndirectPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
+OutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
 
 std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 

@@ -124,7 +124,7 @@ void InelasticDataManipulationMomentsTabView::setWSSuffixes(QStringList const &s
   m_uiForm.dsInput->setWSSuffixes(suffix);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationMomentsTabView::getPlotOptions() const {
+OutputPlotOptionsView *InelasticDataManipulationMomentsTabView::getPlotOptions() const {
   return m_uiForm.ipoPlotOptions;
 }
 

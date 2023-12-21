@@ -27,7 +27,7 @@ InelasticDataManipulationMomentsTab::InelasticDataManipulationMomentsTab(QWidget
       m_view(view) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 }
 
 void InelasticDataManipulationMomentsTab::setup() {}

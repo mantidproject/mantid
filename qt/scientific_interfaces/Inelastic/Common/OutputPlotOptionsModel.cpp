@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectPlotOptionsModel.h"
+#include "OutputPlotOptionsModel.h"
 #include "SettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -109,20 +109,20 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+OutputPlotOptionsModel::OutputPlotOptionsModel(
     boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(std::make_unique<ExternalPlotter>()) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+OutputPlotOptionsModel::OutputPlotOptionsModel(
     ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(plotter) {}
 
-IndirectPlotOptionsModel::~IndirectPlotOptionsModel() = default;
+OutputPlotOptionsModel::~OutputPlotOptionsModel() = default;
 
-bool IndirectPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
+bool OutputPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName) && ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
     m_workspaceName = workspaceName;
@@ -131,35 +131,35 @@ bool IndirectPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   return false;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::workspace() const { return m_workspaceName; }
+boost::optional<std::string> OutputPlotOptionsModel::workspace() const { return m_workspaceName; }
 
-void IndirectPlotOptionsModel::removeWorkspace() { m_workspaceName = boost::none; }
+void OutputPlotOptionsModel::removeWorkspace() { m_workspaceName = boost::none; }
 
 std::vector<std::string>
-IndirectPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const {
+OutputPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const {
   std::vector<std::string> allNames;
   for (auto const &workspaceName : workspaceNames)
     insertWorkspaceNames(allNames, workspaceName);
   return allNames;
 }
 
-void IndirectPlotOptionsModel::setUnit(std::string const &unit) { m_unit = unit; }
+void OutputPlotOptionsModel::setUnit(std::string const &unit) { m_unit = unit; }
 
-boost::optional<std::string> IndirectPlotOptionsModel::unit() { return m_unit; }
+boost::optional<std::string> OutputPlotOptionsModel::unit() { return m_unit; }
 
-std::string IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
+std::string OutputPlotOptionsModel::formatIndices(std::string const &indices) const {
   return formatIndicesString(indices);
 }
 
-void IndirectPlotOptionsModel::setFixedIndices(std::string const &indices) {
+void OutputPlotOptionsModel::setFixedIndices(std::string const &indices) {
   m_fixedIndices = !indices.empty();
   if (m_fixedIndices)
     m_workspaceIndices = indices;
 }
 
-bool IndirectPlotOptionsModel::indicesFixed() const { return m_fixedIndices; }
+bool OutputPlotOptionsModel::indicesFixed() const { return m_fixedIndices; }
 
-bool IndirectPlotOptionsModel::setIndices(std::string const &indices) {
+bool OutputPlotOptionsModel::setIndices(std::string const &indices) {
   bool valid = validateIndices(indices);
   if (valid)
     m_workspaceIndices = indices;
@@ -168,9 +168,9 @@ bool IndirectPlotOptionsModel::setIndices(std::string const &indices) {
   return valid;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::indices() const { return m_workspaceIndices; }
+boost::optional<std::string> OutputPlotOptionsModel::indices() const { return m_workspaceIndices; }
 
-bool IndirectPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
+bool OutputPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.get())) {
     if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
@@ -182,20 +182,19 @@ bool IndirectPlotOptionsModel::validateIndices(std::string const &indices, Manti
   return false;
 }
 
-bool IndirectPlotOptionsModel::validateSpectra(const MatrixWorkspace_sptr &workspace,
-                                               std::string const &spectra) const {
+bool OutputPlotOptionsModel::validateSpectra(const MatrixWorkspace_sptr &workspace, std::string const &spectra) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex = std::stoul(splitStringBy(spectra, ",-").back());
   return lastIndex < numberOfHistograms;
 }
 
-bool IndirectPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspace, std::string const &bins) const {
+bool OutputPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspace, std::string const &bins) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(bins, ",-").back());
   return lastIndex < numberOfBins;
 }
 
-std::string IndirectPlotOptionsModel::convertUnit(const std::string &workspaceName, const std::string &unit) {
+std::string OutputPlotOptionsModel::convertUnit(const std::string &workspaceName, const std::string &unit) {
   const std::string convertedWorkspaceName = workspaceName + "_" + unit;
 
   IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
@@ -208,7 +207,7 @@ std::string IndirectPlotOptionsModel::convertUnit(const std::string &workspaceNa
   return convertedWorkspaceName;
 }
 
-void IndirectPlotOptionsModel::plotSpectra() {
+void OutputPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   auto const unitName = unit();
@@ -219,12 +218,12 @@ void IndirectPlotOptionsModel::plotSpectra() {
   }
 }
 
-void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
+void OutputPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
     m_plotter->plotBins(workspaceName.get(), binIndices, SettingsHelper::externalPlotErrorBars());
 }
 
-void IndirectPlotOptionsModel::showSliceViewer() {
+void OutputPlotOptionsModel::showSliceViewer() {
   auto const workspaceName = workspace();
   auto const unitName = unit();
 
@@ -234,21 +233,21 @@ void IndirectPlotOptionsModel::showSliceViewer() {
   }
 }
 
-void IndirectPlotOptionsModel::plotTiled() {
+void OutputPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
     m_plotter->plotTiled(workspaceName.get(), indicesString.get(), SettingsHelper::externalPlotErrorBars());
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
+boost::optional<std::string> OutputPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
   if (auto const workspaceName = workspace())
     return checkWorkspaceSize(workspaceName.get(), axisType);
   return boost::none;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
-                                                                          MantidAxis const &axisType) const {
+boost::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
+                                                                        MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
@@ -260,6 +259,6 @@ boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::s
   return boost::none;
 }
 
-std::map<std::string, std::string> IndirectPlotOptionsModel::availableActions() const { return m_actions; }
+std::map<std::string, std::string> OutputPlotOptionsModel::availableActions() const { return m_actions; }
 
 } // namespace MantidQt::CustomInterfaces

@@ -440,7 +440,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
+       <widget class="MantidQt::CustomInterfaces::OutputPlotOptionsView" name="ipoPlotOptions" native="true"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_1">
@@ -472,9 +472,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>Common/IndirectPlotOptionsView.h</header>
+   <header>Common/OutputPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

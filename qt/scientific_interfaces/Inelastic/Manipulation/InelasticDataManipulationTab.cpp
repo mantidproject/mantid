@@ -30,7 +30,7 @@ InelasticDataManipulationTab::InelasticDataManipulationTab(QObject *parent) : In
 InelasticDataManipulationTab::~InelasticDataManipulationTab() = default;
 
 void InelasticDataManipulationTab::setOutputPlotOptionsPresenter(
-    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+    std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 

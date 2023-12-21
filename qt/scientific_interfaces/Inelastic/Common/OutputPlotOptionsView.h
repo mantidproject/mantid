@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ui_IndirectPlotOptions.h"
+#include "ui_OutputPlotOptions.h"
 
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
@@ -22,13 +22,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IIndirectPlotOptionsPresenter;
+class IOutputPlotOptionsPresenter;
 
 enum PlotWidget { Spectra, SpectraBin, SpectraSlice, SpectraTiled, SpectraUnit, SpectraSliceUnit };
 
-class MANTIDQT_INELASTIC_DLL IIndirectPlotOptionsView {
+class MANTIDQT_INELASTIC_DLL IOutputPlotOptionsView {
 public:
-  virtual void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) = 0;
+  virtual void subscribePresenter(IOutputPlotOptionsPresenter *presenter) = 0;
 
   virtual void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions) = 0;
   virtual void setWorkspaceComboBoxEnabled(bool enable) = 0;
@@ -56,14 +56,14 @@ public:
   virtual void displayWarning(QString const &message) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectPlotOptionsView final : public API::MantidWidget, public IIndirectPlotOptionsView {
+class MANTIDQT_INELASTIC_DLL OutputPlotOptionsView final : public API::MantidWidget, public IOutputPlotOptionsView {
   Q_OBJECT
 
 public:
-  IndirectPlotOptionsView(QWidget *parent = nullptr);
-  ~IndirectPlotOptionsView() = default;
+  OutputPlotOptionsView(QWidget *parent = nullptr);
+  ~OutputPlotOptionsView() = default;
 
-  void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) override;
+  void subscribePresenter(IOutputPlotOptionsPresenter *presenter) override;
 
   void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions) override;
   void setWorkspaceComboBoxEnabled(bool enable) override;
@@ -108,9 +108,9 @@ private:
 
   std::unique_ptr<QStringListModel> m_suggestionsModel;
   std::unique_ptr<QCompleter> m_completer;
-  std::unique_ptr<Ui::IndirectPlotOptions> m_plotOptions;
+  std::unique_ptr<Ui::OutputPlotOptions> m_plotOptions;
 
-  IIndirectPlotOptionsPresenter *m_presenter;
+  IOutputPlotOptionsPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces
