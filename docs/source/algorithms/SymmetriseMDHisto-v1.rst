@@ -44,6 +44,7 @@ Usage
 
 Output:
 .. testoutput:: SymmetriseMDHisto
+
     All HKL voxels have non-zero intensity? True
 
 .. categories::
