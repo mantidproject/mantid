@@ -18,7 +18,7 @@ public:
   SolidAngleParams(Kernel::V3D observer, int numberOfCylinderSlices = 11)
       : m_observer(std::move(observer)), m_numberOfCylinderSlices(numberOfCylinderSlices) {}
   inline const Kernel::V3D &observer() const { return m_observer; }
-  inline const int cylinderSlices() const { return m_numberOfCylinderSlices; }
+  inline int cylinderSlices() const { return m_numberOfCylinderSlices; }
   inline const SolidAngleParams copyWithNewObserver(Kernel::V3D newObserver) const {
     return SolidAngleParams(std::move(newObserver), m_numberOfCylinderSlices);
   }
