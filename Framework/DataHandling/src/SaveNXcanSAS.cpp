@@ -511,14 +511,9 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
 }
 
 bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  const unsigned indices[] = {0, 1};
-  for (const auto index : indices) {
-    auto axis = workspace->getAxis(index);
-    if (!axis->isNumeric()) {
-      return false;
-    }
-  }
-  return true;
+  const std::array<int, 2> indices = {0, 1};
+  return std::all_of(indices.cbegin(), indices.cend(),
+                     [workspace](auto const &index) { return workspace->getAxis(index)->isNumeric(); });
 }
 
 class SpectrumAxisValueProvider {
