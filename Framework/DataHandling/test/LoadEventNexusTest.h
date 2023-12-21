@@ -1057,6 +1057,27 @@ public:
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 921)
   }
 
+  void test_monotonically_increasing_tofs() {
+    const std::string file = "CG2_monotonically_increasing_pulse_times.nxs.h5";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.setProperty("NumberOfBins", 1);
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+    const int expectedNumberEvents = 32494;
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), expectedNumberEvents);
+    double sum = 0.0;
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+      sum += eventWS->readY(i)[0];
+    TS_ASSERT_DELTA(sum, expectedNumberEvents, 1e-6)
+  }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
