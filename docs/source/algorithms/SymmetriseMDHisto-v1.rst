@@ -27,11 +27,11 @@ Usage
 
 **Example:**
 
-.. code-block:: python
+.. testcode:: SymmetriseMDHisto
 
     from mantid.simpleapi import *
 
-    y = np.ones(8)
+    y = np.r_[4*[1], 4*[0]]
     nbins = int(len(y) ** (1 / 3))
     ws = CreateMDHistoWorkspace(SignalInput=y, ErrorInput=y,
                                      Dimensionality=3, Extents='-1,1,-1,1,-1,1',
@@ -39,6 +39,12 @@ Usage
                                      Units='rlu,rlu,rlu')
 
     ws_sym = SymmetriseMDHisto(ws, PointGroup="-1", WeightedAverage=False)
+
+    print("All HKL voxels have non-zero intensity?", np.all(ws_sym.getSignalArray()))
+
+Output:
+.. testoutput:: SymmetriseMDHisto
+    All HKL voxels have non-zero intensity? True
 
 .. categories::
 
