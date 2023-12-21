@@ -44,13 +44,8 @@ set(MOC_FILES
 )
 
 set(INC_FILES
-    DllConfig.h
-    Notifier.h
-    Reduction/ISISEnergyTransferData.h
-    Reduction/ISISEnergyTransferValidator.h
-    Reduction/ISISEnergyTransferModelUtils.h
-    Reduction/ISISEnergyTransferModel.h
-    Reduction/ReductionAlgorithmUtils.h
+    DllConfig.h Reduction/ISISEnergyTransferData.h Reduction/ISISEnergyTransferValidator.h
+    Reduction/ISISEnergyTransferModelUtils.h Reduction/ISISEnergyTransferModel.h Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES
