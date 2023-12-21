@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndirectInstrumentConfig.h"
 #include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
 

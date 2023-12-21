@@ -1,7 +1,6 @@
 set(SRC_FILES
     IndirectAddWorkspaceDialog.cpp
     IndirectDataValidationHelper.cpp
-    IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
@@ -12,6 +11,7 @@ set(SRC_FILES
     IndirectSettingsPresenter.cpp
     IndirectSettingsView.cpp
     IndirectTab.cpp
+    Common/IndirectInstrumentConfig.cpp
     Diffraction/IndirectDiffractionReduction.cpp
     Reduction/IndirectDataReduction.cpp
     Reduction/IndirectDataReductionTab.cpp
@@ -38,12 +38,12 @@ set(MOC_FILES
     IAddWorkspaceDialog.h
     IIndirectSettingsView.h
     IndirectAddWorkspaceDialog.h
-    IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectPlotOptionsView.h
     IndirectSettings.h
     IndirectSettingsView.h
     IndirectTab.h
+    Common/IndirectInstrumentConfig.h
     Diffraction/IndirectDiffractionReduction.h
     Reduction/IndirectDataReduction.h
     Reduction/IndirectDataReductionTab.h
@@ -80,9 +80,9 @@ set(INC_FILES
 
 set(UI_FILES
     IndirectAddWorkspaceDialog.ui
-    IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectPlotOptions.ui
+    Common/IndirectInstrumentConfig.ui
     Diffraction/IndirectDiffractionReduction.ui
     Reduction/IndirectDataReduction.ui
     Reduction/IndirectTransmission.ui
