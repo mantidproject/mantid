@@ -1,0 +1,2 @@
+- Switching between a custom output file and an automatically-generated one can now be performed using the
+  ``Enter Custom Filename`` checkbox on the ``Sum Runs`` tab.
