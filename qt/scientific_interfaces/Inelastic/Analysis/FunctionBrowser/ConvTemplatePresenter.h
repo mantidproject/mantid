@@ -55,6 +55,8 @@ public:
   void setBackgroundA0(double value);
   void setQValues(const std::vector<double> &qValues);
   EstimationDataSelector getEstimationDataSelector() const;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
 
 signals:
   void functionStructureChanged();

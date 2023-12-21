@@ -16,11 +16,34 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
-DataForParameterEstimation createEstimationData(int const size) {
-  std::vector<double> x(size, 1);
-  std::vector<double> y(size, 0.981);
+DataForParameterEstimationCollection createEstimationData(int const nDomains, int const nDataPoints) {
+  std::vector<double> x(nDataPoints, 2.2);
+  std::vector<double> y(nDataPoints, 3.3);
 
-  return DataForParameterEstimation{x, y};
+  return DataForParameterEstimationCollection(nDomains, DataForParameterEstimation{x, y});
+}
+
+Mantid::API::IFunction_sptr createIFunction(std::string const &functionString) {
+  return Mantid::API::FunctionFactory::Instance().createInitialized(functionString);
+}
+
+Mantid::API::CompositeFunction_sptr toComposite(Mantid::API::IFunction_sptr function) {
+  return std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function);
+}
+
+Mantid::API::IFunction_sptr createComposite(std::string const &functionString1, std::string const &functionString2) {
+  auto composite = toComposite(createIFunction("name=CompositeFunction"));
+  composite->addFunction(createIFunction(functionString1));
+  composite->addFunction(createIFunction(functionString2));
+  return composite;
+}
+
+Mantid::API::IFunction_sptr createMultiDomainFunction(std::string const &functionString1,
+                                                      std::string const &functionString2) {
+  auto multiDomainFunc = toComposite(createIFunction("name=MultiDomainFunction"));
+  multiDomainFunc->addFunction(createComposite(functionString1, functionString2));
+  multiDomainFunc->addFunction(createComposite(functionString1, functionString2));
+  return multiDomainFunc;
 }
 
 } // namespace
@@ -28,34 +51,61 @@ DataForParameterEstimation createEstimationData(int const size) {
 class IDAFunctionParameterEstimationTest : public CxxTest::TestSuite {
 public:
   IDAFunctionParameterEstimationTest() {
-    m_fitFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
-      (void)x;
-      (void)y;
-      return std::unordered_map<std::string, double>{{"A0", 2.0}, {"A1", 3.0}};
+    IDAFunctionParameterEstimation::ParameterEstimator linearBackground = [](Mantid::MantidVec const &x,
+                                                                             Mantid::MantidVec const &y) {
+      return std::unordered_map<std::string, double>{{"A0", x[0]}, {"A1", y[0]}};
     };
+    IDAFunctionParameterEstimation::ParameterEstimator expDecay = [](Mantid::MantidVec const &x,
+                                                                     Mantid::MantidVec const &y) {
+      return std::unordered_map<std::string, double>{{"Height", 2.0 * x[0]}, {"Lifetime", 2.0 * y[0]}};
+    };
+
+    auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+        {"LinearBackground", linearBackground}, {"ExpDecay", expDecay}};
+    m_parameterEstimators = std::make_unique<IDAFunctionParameterEstimation>(estimators);
   }
 
-  void test_estimateFunctionParameters_does_nothing_if_estimate_data_is_too_small() {
-    IDAFunctionParameterEstimation parameterEstimation({{"LinearBackground", m_fitFunction}});
-    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
-    auto funCopy = fun->clone();
+  void test_estimateFunctionParameters_does_nothing_if_nDataPoints_is_too_small() {
+    auto multiDomainFunction = createMultiDomainFunction("name=LinearBackground", "name=ExpDecay");
 
-    parameterEstimation.estimateFunctionParameters(fun, createEstimationData(1));
+    TS_ASSERT_THROWS_NOTHING(
+        m_parameterEstimators->estimateFunctionParameters(multiDomainFunction, createEstimationData(2, 1)))
 
-    TS_ASSERT_EQUALS(fun->getParameter("A0"), funCopy->getParameter("A0"))
-    TS_ASSERT_EQUALS(fun->getParameter("A1"), funCopy->getParameter("A1"))
+    TS_ASSERT_EQUALS(0.0, multiDomainFunction->getParameter("f0.f0.A0"))
+    TS_ASSERT_EQUALS(0.0, multiDomainFunction->getParameter("f0.f0.A1"))
+    TS_ASSERT_EQUALS(1.0, multiDomainFunction->getParameter("f0.f1.Height"))
+    TS_ASSERT_EQUALS(1.0, multiDomainFunction->getParameter("f0.f1.Lifetime"))
   }
 
   void test_estimateFunctionParameters_correctly_updates_function() {
-    IDAFunctionParameterEstimation parameterEstimation({{"LinearBackground", m_fitFunction}});
-    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
+    auto multiDomainFunction = createMultiDomainFunction("name=LinearBackground", "name=ExpDecay");
 
-    parameterEstimation.estimateFunctionParameters(fun, createEstimationData(2));
+    m_parameterEstimators->estimateFunctionParameters(multiDomainFunction, createEstimationData(2, 2));
 
-    TS_ASSERT_EQUALS(fun->getParameter("A0"), 2.00)
-    TS_ASSERT_EQUALS(fun->getParameter("A1"), 3.00)
+    TS_ASSERT_EQUALS(2.2, multiDomainFunction->getParameter("f0.f0.A0"))
+    TS_ASSERT_EQUALS(3.3, multiDomainFunction->getParameter("f0.f0.A1"))
+    TS_ASSERT_EQUALS(4.4, multiDomainFunction->getParameter("f0.f1.Height"))
+    TS_ASSERT_EQUALS(6.6, multiDomainFunction->getParameter("f0.f1.Lifetime"))
+  }
+
+  void test_estimateFunctionParameters_does_not_throw_if_function_is_null() {
+    Mantid::API::IFunction_sptr multiDomainFunction = nullptr;
+    TS_ASSERT_THROWS_NOTHING(
+        m_parameterEstimators->estimateFunctionParameters(multiDomainFunction, createEstimationData(2, 2)))
+  }
+
+  void test_estimateFunctionParameters_does_not_throw_if_estimate_data_has_different_size() {
+    auto multiDomainFunction = createMultiDomainFunction("name=LinearBackground", "name=ExpDecay");
+
+    TS_ASSERT_THROWS_NOTHING(
+        m_parameterEstimators->estimateFunctionParameters(multiDomainFunction, createEstimationData(1, 2)))
+
+    TS_ASSERT_EQUALS(0.0, multiDomainFunction->getParameter("f0.f0.A0"))
+    TS_ASSERT_EQUALS(0.0, multiDomainFunction->getParameter("f0.f0.A1"))
+    TS_ASSERT_EQUALS(1.0, multiDomainFunction->getParameter("f0.f1.Height"))
+    TS_ASSERT_EQUALS(1.0, multiDomainFunction->getParameter("f0.f1.Lifetime"))
   }
 
 private:
-  IDAFunctionParameterEstimation::ParameterEstimator m_fitFunction;
+  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimators;
 };
