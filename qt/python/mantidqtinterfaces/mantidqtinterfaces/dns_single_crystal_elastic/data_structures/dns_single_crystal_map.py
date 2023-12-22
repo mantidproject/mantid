@@ -25,6 +25,10 @@ def _get_mesh(omega, two_theta, z_mesh):
     return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan
 
 
+def _correct_omega_offset(omega, omega_offset):
+    return np.subtract(omega, omega_offset)
+
+
 def _get_unique(omega_mesh, two_theta_mesh):
     omega = np.unique(omega_mesh)
     two_theta = np.unique(two_theta_mesh)
@@ -50,7 +54,8 @@ class DNSScMap(ObjectDict):
     def __init__(self, parameter, two_theta=None, omega=None, z_mesh=None, error_mesh=None):
         super().__init__()
         # non interpolated data:
-        omega_mesh, two_theta_mesh, z_mesh = _get_mesh(omega, two_theta, z_mesh)
+        omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
+        omega_mesh, two_theta_mesh, z_mesh = _get_mesh(omega_corrected, two_theta, z_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])
         hklx_mesh, hkly_mesh = _get_hkl_mesh(qx_mesh, qy_mesh, parameter["dx"], parameter["dy"])
