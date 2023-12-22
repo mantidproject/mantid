@@ -60,7 +60,7 @@ std::unordered_map<std::string, FitType>
                          {"ElasticIsoRotDiff", FitType::ElasticIsoRotDiff},
                          {"InelasticIsoRotDiff", FitType::InelasticIsoRotDiff}});
 
-std::map<ParamID, QString> g_paramName{
+std::map<ParamID, std::string> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
     {ParamID::LOR1_FWHM, "FWHM"},
@@ -184,7 +184,7 @@ std::map<TempCorrectionType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<Temp
      {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
 };
 
-QString paramName(ParamID id) { return g_paramName.at(id); }
+std::string paramName(ParamID id) { return g_paramName.at(id); }
 
 void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(), FitSubType::g_typeMap[fitType].blocks.back(),

@@ -47,21 +47,21 @@ public:
   virtual ~FunctionTemplateBrowser();
   void init();
 
-  virtual void setFunction(const QString &funStr) = 0;
+  virtual void setFunction(std::string const &funStr) = 0;
   virtual IFunction_sptr getGlobalFunction() const = 0;
   virtual IFunction_sptr getFunction() const = 0;
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
   virtual void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) = 0;
-  virtual QStringList getGlobalParameters() const = 0;
-  virtual QStringList getLocalParameters() const = 0;
-  virtual void setGlobalParameters(const QStringList &globals) = 0;
+  virtual std::vector<std::string> getGlobalParameters() const = 0;
+  virtual std::vector<std::string> getLocalParameters() const = 0;
+  virtual void setGlobalParameters(std::vector<std::string> const &globals) = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
   virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
   virtual void setCurrentDataset(int i) = 0;
   virtual int getCurrentDataset() = 0;
-  virtual void updateParameterNames(const QMap<int, QString> &parameterNames) = 0;
+  virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
@@ -73,8 +73,8 @@ public:
 
 signals:
   void functionStructureChanged();
-  void localParameterButtonClicked(const QString &paramName);
-  void parameterValueChanged(const QString &paramName, double value);
+  void localParameterButtonClicked(std::string const &parameterName);
+  void parameterValueChanged(std::string const &parameterName, double value);
 
 protected slots:
   virtual void intChanged(QtProperty *) {}

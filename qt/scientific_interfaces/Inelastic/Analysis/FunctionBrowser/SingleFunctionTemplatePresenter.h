@@ -35,20 +35,20 @@ public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
-  void setFitType(const QString &name);
+  void setFitType(std::string const &name);
 
   void init();
 
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
   int getCurrentDataset();
-  void setFunction(const QString &funStr);
+  void setFunction(std::string const &funStr);
   IFunction_sptr getGlobalFunction() const;
   IFunction_sptr getFunction() const;
-  QStringList getGlobalParameters() const;
-  QStringList getLocalParameters() const;
-  void setGlobalParameters(const QStringList &globals);
-  void setGlobal(const QString &parName, bool on);
+  std::vector<std::string> getGlobalParameters() const;
+  std::vector<std::string> getLocalParameters() const;
+  void setGlobalParameters(std::vector<std::string> const &globals);
+  void setGlobal(std::string const &parameterName, bool on);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
@@ -62,20 +62,20 @@ signals:
   void functionStructureChanged();
 
 private slots:
-  void editLocalParameter(const QString &parName);
+  void editLocalParameter(std::string const &parameterName);
   void editLocalParameterFinish(int result);
-  void viewChangedParameterValue(const QString &parName, double value);
+  void viewChangedParameterValue(std::string const &parameterName, double value);
 
 private:
   QStringList getDatasetNames() const;
   QStringList getDatasetDomainNames() const;
-  double getLocalParameterValue(const QString &parName, int i) const;
-  bool isLocalParameterFixed(const QString &parName, int i) const;
-  QString getLocalParameterTie(const QString &parName, int i) const;
-  QString getLocalParameterConstraint(const QString &parName, int i) const;
-  void setLocalParameterValue(const QString &parName, int i, double value);
-  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
-  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
+  double getLocalParameterValue(std::string const &parameterName, int i) const;
+  bool isLocalParameterFixed(std::string const &parameterName, int i) const;
+  std::string getLocalParameterTie(std::string const &parameterName, int i) const;
+  std::string getLocalParameterConstraint(std::string const &parameterName, int i) const;
+  void setLocalParameterValue(std::string const &parameterName, int i, double value);
+  void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed);
+  void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
   void updateView();
   SingleFunctionTemplateBrowser *m_view;
   std::unique_ptr<SingleFunctionTemplateModel> m_model;

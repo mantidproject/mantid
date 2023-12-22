@@ -46,21 +46,21 @@ public:
   void setStretchStretching(double, double);
   void setA0(double, double);
 
-  void setFunction(const QString &funStr) override;
+  void setFunction(std::string const &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
   void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
-  QStringList getGlobalParameters() const override;
-  QStringList getLocalParameters() const override;
-  void setGlobalParameters(const QStringList &globals) override;
+  std::vector<std::string> getGlobalParameters() const override;
+  std::vector<std::string> getLocalParameters() const override;
+  void setGlobalParameters(std::vector<std::string> const &globals) override;
   void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
   int getCurrentDataset() override;
-  void updateParameterNames(const QMap<int, QString> &parameterNames) override;
+  void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
@@ -84,7 +84,7 @@ private:
   void popupMenu(const QPoint &) override;
   double getParameterPropertyValue(QtProperty *prop) const;
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
-  void setGlobalParametersQuiet(const QStringList &globals);
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void setTieIntensitiesQuiet(bool on);
   void updateState();
 
@@ -101,7 +101,7 @@ private:
   QtProperty *m_A0 = nullptr;
   QtProperty *m_tieIntensities = nullptr;
   QMap<QtProperty *, int> m_parameterMap;
-  QMap<QtProperty *, QString> m_actualParameterNames;
+  QMap<QtProperty *, std::string> m_actualParameterNames;
   QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:

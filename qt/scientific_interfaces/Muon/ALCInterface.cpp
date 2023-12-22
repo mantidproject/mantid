@@ -131,7 +131,7 @@ void ALCInterface::updateBaselineData() {
 
     // If we have a fitting function and a fitting range
     // we can update the baseline model
-    if ((!m_baselineModellingView->function().isEmpty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
+    if ((!m_baselineModellingView->function().empty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
 
       // Fit the data
       m_baselineModellingView->emitFitRequested();

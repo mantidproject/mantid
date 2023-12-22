@@ -49,7 +49,7 @@ public:
 
   void init();
   void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
-  void setFunction(const QString &funStr);
+  void setFunction(std::string const &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
   MultiDomainFunction_sptr getFitFunction() const;
@@ -101,7 +101,7 @@ signals:
   void fitScheduled();
   void sequentialFitScheduled();
   void browserClosed();
-  void localParameterEditRequested(const QString &parName);
+  void localParameterEditRequested(std::string const &parameterName);
   void globalsChanged(int n);
 
 private:
@@ -110,8 +110,8 @@ private:
   bool isFullFunctionBrowserActive() const;
   MultiDomainFunction_sptr getGlobalFunction() const;
   IFunction_sptr getSingleFunction() const;
-  QStringList getGlobalParameters() const;
-  QStringList getLocalParameters() const;
+  std::vector<std::string> getGlobalParameters() const;
+  std::vector<std::string> getLocalParameters() const;
   void syncFullBrowserWithTemplate();
   void syncTemplateBrowserWithFull();
 

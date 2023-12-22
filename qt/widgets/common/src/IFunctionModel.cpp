@@ -12,26 +12,26 @@ namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
-void IFunctionModel::setFunctionString(const QString &funStr) {
-  if (funStr.isEmpty()) {
+void IFunctionModel::setFunctionString(std::string const &funStr) {
+  if (funStr.empty()) {
     clear();
     return;
   }
-  setFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+  setFunction(FunctionFactory::Instance().createInitialized(funStr));
 }
 
-QString IFunctionModel::getFunctionString() const {
+std::string IFunctionModel::getFunctionString() const {
   auto fun = getCurrentFunction();
   if (!fun)
     return "";
-  return QString::fromStdString(fun->asString());
+  return fun->asString();
 }
 
-QString IFunctionModel::getFitFunctionString() const {
+std::string IFunctionModel::getFitFunctionString() const {
   auto fun = getFitFunction();
   if (!fun)
     return "";
-  return QString::fromStdString(fun->asString());
+  return fun->asString();
 }
 
 void IFunctionModel::clear() { setFunction(IFunction_sptr()); }
