@@ -41,44 +41,23 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
         field_name = workspace_name[-4:]
     else:
         field_name = workspace_name[-5:]
-    if not standard:
-        LoadDNSSCD(
-            FileNames=filepaths,
-            OutputWorkspace=workspace_name,
-            NormalizationWorkspace=norm_name,
-            Normalization=params["norm_to"],
-            a=params["a"],
-            b=params["b"],
-            c=params["c"],
-            alpha=params["alpha"],
-            beta=params["beta"],
-            gamma=params["gamma"],
-            OmegaOffset=params["omega_offset"],
-            HKL1=params["hkl1"],
-            HKL2=params["hkl2"],
-            LoadAs="raw",
-            SaveHuberTo=f"huber_{field_name}",
-        )
-    else:
-        LoadDNSSCD(
-            FileNames=filepaths,
-            OutputWorkspace=workspace_name,
-            NormalizationWorkspace=norm_name,
-            Normalization=params["norm_to"],
-            a=params["a"],
-            b=params["b"],
-            c=params["c"],
-            alpha=params["alpha"],
-            beta=params["beta"],
-            gamma=params["gamma"],
-            OmegaOffset=params["omega_offset"],
-            HKL1=params["hkl1"],
-            HKL2=params["hkl2"],
-            LoadAs="raw",
-            LoadHuberFrom=f"huber_{field_name}",
-        )
+    LoadDNSSCD(
+        FileNames=filepaths,
+        OutputWorkspace=workspace_name,
+        NormalizationWorkspace=norm_name,
+        Normalization=params["norm_to"],
+        a=params["a"],
+        b=params["b"],
+        c=params["c"],
+        alpha=params["alpha"],
+        beta=params["beta"],
+        gamma=params["gamma"],
+        OmegaOffset=params["omega_offset"],
+        HKL1=params["hkl1"],
+        HKL2=params["hkl2"],
+        LoadAs="raw",
+        SaveHuberTo=f"huber_{field_name}",
+    )
     BinMD(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
-
     BinMD(InputWorkspace=norm_name, OutputWorkspace=norm_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
-
     return mtd[workspace_name]
