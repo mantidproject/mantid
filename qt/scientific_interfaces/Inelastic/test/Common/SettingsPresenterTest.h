@@ -11,65 +11,12 @@
 
 #include "Common/Settings.h"
 #include "Common/SettingsPresenter.h"
+#include "MockObjects.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-/// Mock object to mock the view
-class MockSettingsView : public ISettingsView {
-public:
-  /// Public methods
-  MOCK_METHOD0(getView, QWidget *());
-  MOCK_METHOD1(subscribePresenter, void(SettingsPresenter *));
-
-  MOCK_METHOD1(setInterfaceSettingsVisible, void(bool visible));
-  MOCK_METHOD1(setInterfaceGroupBoxTitle, void(QString const &title));
-
-  MOCK_METHOD1(setRestrictInputByNameVisible, void(bool visible));
-  MOCK_METHOD1(setPlotErrorBarsVisible, void(bool visible));
-
-  MOCK_METHOD1(setSelectedFacility, void(QString const &text));
-  MOCK_CONST_METHOD0(getSelectedFacility, QString());
-
-  MOCK_METHOD1(setRestrictInputByNameChecked, void(bool check));
-  MOCK_CONST_METHOD0(isRestrictInputByNameChecked, bool());
-
-  MOCK_METHOD1(setPlotErrorBarsChecked, void(bool check));
-  MOCK_CONST_METHOD0(isPlotErrorBarsChecked, bool());
-
-  MOCK_METHOD1(setDeveloperFeatureFlags, void(QStringList const &flags));
-  MOCK_CONST_METHOD0(developerFeatureFlags, QStringList());
-
-  MOCK_METHOD3(setSetting, void(QString const &settingsGroup, QString const &settingName, bool const &value));
-  MOCK_METHOD2(getSetting, QVariant(QString const &settingsGroup, QString const &settingName));
-
-  MOCK_METHOD1(setApplyText, void(QString const &text));
-  MOCK_METHOD1(setApplyEnabled, void(bool enable));
-  MOCK_METHOD1(setOkEnabled, void(bool enable));
-  MOCK_METHOD1(setCancelEnabled, void(bool enable));
-};
-
-/// Mock object to mock the model
-class MockSettingsModel : public SettingsModel {
-public:
-  /// Public methods
-  MOCK_CONST_METHOD0(getSettingsGroup, std::string());
-
-  MOCK_METHOD1(setFacility, void(std::string const &settingName));
-  MOCK_CONST_METHOD0(getFacility, std::string());
-};
-
-class MockSettings : public ISettings {
-public:
-  MOCK_METHOD0(notifyApplySettings, void());
-  MOCK_METHOD0(notifyCloseSettings, void());
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class SettingsPresenterTest : public CxxTest::TestSuite {
 public:

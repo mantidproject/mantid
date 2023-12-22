@@ -50,6 +50,7 @@ void createWorkspaceGroup(std::vector<std::string> const &workspaceNames, std::s
     AnalysisDataService::Instance().addOrReplace(workspaceName, workspace->clone());
 
   const auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->setLogging(false);
   groupAlg->setProperty("InputWorkspaces", workspaceNames);
   groupAlg->setProperty("OutputWorkspace", GROUP_NAME);
   groupAlg->execute();

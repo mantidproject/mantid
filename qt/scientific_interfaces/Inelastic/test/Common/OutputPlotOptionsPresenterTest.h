@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "Common/OutputPlotOptionsPresenter.h"
+#include "MockObjects.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -39,64 +40,6 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 
 } // namespace
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-/// Mock object to mock the view
-class MockOutputPlotOptionsView final : public IOutputPlotOptionsView {
-public:
-  MOCK_METHOD1(subscribePresenter, void(IOutputPlotOptionsPresenter *));
-  MOCK_METHOD2(setPlotType,
-               void(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions));
-
-  MOCK_METHOD1(setIndicesRegex, void(QString const &regex));
-
-  MOCK_CONST_METHOD0(selectedWorkspace, QString());
-  MOCK_METHOD1(setWorkspaces, void(std::vector<std::string> const &workspaces));
-
-  MOCK_METHOD1(removeWorkspace, void(QString const &workspaceName));
-  MOCK_METHOD0(clearWorkspaces, void());
-
-  MOCK_CONST_METHOD0(selectedIndices, QString());
-  MOCK_METHOD1(setIndices, void(QString const &indices));
-  MOCK_METHOD1(setIndicesErrorLabelVisible, void(bool visible));
-
-  MOCK_METHOD1(setWorkspaceComboBoxEnabled, void(bool enable));
-  MOCK_METHOD1(setUnitComboBoxEnabled, void(bool enable));
-  MOCK_METHOD1(setIndicesLineEditEnabled, void(bool enable));
-  MOCK_METHOD1(setPlotButtonEnabled, void(bool enable));
-  MOCK_METHOD1(setPlotButtonText, void(QString const &text));
-
-  MOCK_CONST_METHOD0(numberOfWorkspaces, int());
-
-  MOCK_METHOD1(addIndicesSuggestion, void(QString const &spectra));
-
-  MOCK_METHOD1(displayWarning, void(QString const &message));
-};
-
-/// Mock object to mock an IndirectTab
-class MockOutputPlotOptionsModel final : public OutputPlotOptionsModel {
-public:
-  /// Public Methods
-  MOCK_METHOD1(setWorkspace, bool(std::string const &workspaceName));
-  MOCK_METHOD0(removeWorkspace, void());
-
-  MOCK_CONST_METHOD1(getAllWorkspaceNames, std::vector<std::string>(std::vector<std::string> const &workspaceNames));
-
-  MOCK_METHOD1(setFixedIndices, void(std::string const &indices));
-  MOCK_CONST_METHOD0(indicesFixed, bool());
-
-  MOCK_CONST_METHOD1(formatIndices, std::string(std::string const &indices));
-  MOCK_CONST_METHOD2(validateIndices, bool(std::string const &indices, MantidAxis const &axisType));
-  MOCK_METHOD1(setIndices, bool(std::string const &indices));
-
-  MOCK_METHOD0(plotSpectra, void());
-  MOCK_METHOD1(plotBins, void(std::string const &binIndices));
-  MOCK_METHOD0(showSliceViewer, void());
-  MOCK_METHOD0(plotTiled, void());
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
 class OutputPlotOptionsPresenterTest : public CxxTest::TestSuite {
 public:
   static OutputPlotOptionsPresenterTest *createSuite() { return new OutputPlotOptionsPresenterTest(); }
@@ -104,8 +47,8 @@ public:
   static void destroySuite(OutputPlotOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<MockOutputPlotOptionsView>();
-    m_model = new MockOutputPlotOptionsModel();
+    m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_model = new NiceMock<MockOutputPlotOptionsModel>();
 
     m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
   }
@@ -130,8 +73,8 @@ public:
 
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = std::make_unique<MockOutputPlotOptionsView>();
-    m_model = new MockOutputPlotOptionsModel();
+    m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_model = new NiceMock<MockOutputPlotOptionsModel>();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
@@ -290,7 +233,7 @@ private:
     EXPECT_CALL(*m_view, setPlotButtonEnabled(enabled)).Times(1);
   }
 
-  std::unique_ptr<MockOutputPlotOptionsView> m_view;
-  MockOutputPlotOptionsModel *m_model;
+  std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_view;
+  NiceMock<MockOutputPlotOptionsModel> *m_model;
   std::unique_ptr<OutputPlotOptionsPresenter> m_presenter;
 };

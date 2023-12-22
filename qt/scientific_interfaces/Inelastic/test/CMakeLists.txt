@@ -30,7 +30,7 @@ set(TEST_FILES
     Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
 )
 
-set(TEST_HELPERS Analysis/MockObjects.h)
+set(TEST_HELPERS Analysis/MockObjects.h Common/MockObjects.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 
