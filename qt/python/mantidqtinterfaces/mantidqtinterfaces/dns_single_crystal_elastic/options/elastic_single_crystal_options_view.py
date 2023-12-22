@@ -63,11 +63,6 @@ class DNSElasticSCOptionsView(DNSView):
             "dy": self._content.dSB_dy,
         }
 
-        self._map["use_dx_dy"].setChecked(True)
-        self._map["dx"].setValue(3.672)
-        self._map["dy"].setValue(6.539)
-        self._map["corrections"].setChecked(False)
-        self._map["all_options"].setEnabled(False)
         # connect signals
         self._attach_signal_slots()
 
@@ -81,6 +76,55 @@ class DNSElasticSCOptionsView(DNSView):
 
     def deactivate_get_wavelength(self):
         self._map["get_wavelength"].setCheckState(0)
+
+    def _disable_det_efficiency(self, state):
+        if state == 0:
+            self._map["ignore_vana_fields"].setChecked(False)
+            self._map["ignore_vana_fields"].setEnabled(False)
+            self._map["sum_vana_sf_nsf"].setChecked(False)
+            self._map["sum_vana_sf_nsf"].setEnabled(False)
+        else:
+            self._map["ignore_vana_fields"].setEnabled(True)
+            self._map["sum_vana_sf_nsf"].setEnabled(True)
+
+    def _disable_sum_vanadium(self, state):
+        if state == 0:
+            self._map["ignore_vana_fields"].setEnabled(True)
+        else:
+            self._map["ignore_vana_fields"].setEnabled(False)
+            self._map["ignore_vana_fields"].setChecked(False)
+
+    def _disable_ignore_vana(self, state):
+        if state == 0:
+            self._map["sum_vana_sf_nsf"].setEnabled(True)
+        else:
+            self._map["sum_vana_sf_nsf"].setEnabled(False)
+            self._map["sum_vana_sf_nsf"].setChecked(False)
+
+    def _disable_lattice(self, state):
+        self._map["lattice_parameters"].setEnabled(not state)
+        self._map["dx"].setEnabled(state)
+        self._map["dy"].setEnabled(state)
+
+    def _disable_corrections(self, state):
+        if state == 0:
+            self._disable_det_efficiency(False)
+            self._map["det_efficiency"].setChecked(False)
+            self._map["flipping_ratio"].setChecked(False)
+            self._disable_subtract_sample_background(False)
+            self._map["subtract_background_from_sample"].setChecked(False)
+
+    def _disable_subtract_sample_background(self, state):
+        self._map["background_factor"].setEnabled(state)
+
+    def _automatic_binning_clicked(self, state):
+        self._map["two_theta_min"].setEnabled(not state)
+        self._map["two_theta_max"].setEnabled(not state)
+        self._map["two_theta_bin_size"].setEnabled(not state)
+        self._map["omega_min"].setEnabled(not state)
+        self._map["omega_max"].setEnabled(not state)
+        self._map["omega_bin_size"].setEnabled(not state)
+        self.sig_auto_binning_clicked.emit(state)
 
     def _get_wavelength(self, state):
         if state:
@@ -101,7 +145,14 @@ class DNSElasticSCOptionsView(DNSView):
     def _attach_signal_slots(self):
         self._map["wavelength"].valueChanged.connect(self.deactivate_get_wavelength)
         self._map["get_wavelength"].stateChanged.connect(self._get_wavelength)
+        self._map["det_efficiency"].stateChanged.connect(self._disable_det_efficiency)
+        self._map["subtract_background_from_sample"].stateChanged.connect(self._disable_subtract_sample_background)
+        self._map["corrections"].clicked.connect(self._disable_corrections)
+        self._map["sum_vana_sf_nsf"].stateChanged.connect(self._disable_sum_vanadium)
+        self._map["ignore_vana_fields"].stateChanged.connect(self._disable_ignore_vana)
+        self._map["use_dx_dy"].stateChanged.connect(self._disable_lattice)
         self._map["two_theta_min"].valueChanged.connect(self._two_theta_min_changed)
         self._map["two_theta_max"].valueChanged.connect(self._two_theta_max_changed)
         self._map["omega_min"].valueChanged.connect(self._omega_min_changed)
         self._map["omega_max"].valueChanged.connect(self._omega_max_changed)
+        self._map["automatic_binning"].stateChanged.connect(self._automatic_binning_clicked)
