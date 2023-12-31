@@ -81,7 +81,7 @@ class FermiChopper(object):
     Class which represents a Fermi chopper package
     """
 
-    __allowed_var_names = ["name", "pslit", "pslat", "radius", "rho", "tjit", "fluxcorr", "isPi"]
+    __allowed_var_names = ["name", "pslit", "pslat", "radius", "rho", "tjit", "fluxcorr", "isPi", "ei_limits"]
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
@@ -100,6 +100,14 @@ class FermiChopper(object):
         """Calculates the chopper transmission"""
         dslat = (self.pslit + self.pslat) / 1000
         return Chop.achop(Ei, freq, dslat, self.pslit / 1000.0, self.radius / 1000.0, self.rho / 1000.0) / dslat
+
+    @property
+    def emin(self):
+        return self.ei_limits[0] if hasattr(self, "ei_limits") else 0.1
+
+    @property
+    def emax(self):
+        return self.ei_limits[1] if hasattr(self, "ei_limits") else 1000.0
 
 
 class ChopperSystem(object):
@@ -275,6 +283,10 @@ class ChopperSystem(object):
 
     def setEi(self, Ei):
         """Sets the (focussed) incident energy"""
+        emin = max(self.emin, self.packages[self.package].emin if self.isFermi else 0)
+        emax = min(self.emax, self.packages[self.package].emax if self.isFermi else np.inf)
+        if Ei < emin or Ei > emax:
+            raise ValueError(f"Ei={Ei} is outside limits [{emin}, {emax}]")
         self.ei = Ei
 
     def getEi(self):
