@@ -625,7 +625,7 @@ class PyChopGui(QMainWindow):
             self.repcanvas.draw()
 
     def _gen_text_ei(self, ei, obj_in):
-        obj = Instrument(obj_in)
+        obj = copy.deepcopy(obj_in)
         obj.setEi(ei)
         en = np.linspace(0, 0.95 * ei, 10)
         # ValueErrors here will be caught in showText() or writeText()
