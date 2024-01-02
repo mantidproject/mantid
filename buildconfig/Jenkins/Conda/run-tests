@@ -5,10 +5,10 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
-#   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being ran/built
-#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
+#   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being run/built
+#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being run/built
 #   4. ENABLE_DOCS: Whether or not the docs have been built
-#   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
+#   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be run
 #   6. BUILD_THREADS: The number of threads to use during testing
 
 WORKSPACE=$1
