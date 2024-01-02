@@ -44,8 +44,8 @@ public:
   virtual void newInputFilesFromDialog(IDA::IAddWorkspaceDialog const *dialog) = 0;
   virtual void clearPreviewFile() = 0;
   virtual void clearInputFiles() = 0;
-  virtual void setRunIsRunning(const bool &running) = 0;
-  virtual void setSaveResultEnabled(const bool &enabled) = 0;
+  virtual void setRunIsRunning(const bool running) = 0;
+  virtual void setSaveResultEnabled(const bool enabled) = 0;
   virtual int getPreviewSpec() = 0;
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
   virtual std::string getPreviewFilename(int index) const = 0;

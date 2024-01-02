@@ -565,20 +565,20 @@ void InelasticDataManipulationElwinTabView::setRangeSelectorMax(QtProperty *minP
     m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
 }
 
-void InelasticDataManipulationElwinTabView::setRunIsRunning(const bool &running) {
+void InelasticDataManipulationElwinTabView::setRunIsRunning(const bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
   m_uiForm.ppPlot->watchADS(!running);
 }
 
-void InelasticDataManipulationElwinTabView::setButtonsEnabled(const bool &enabled) {
+void InelasticDataManipulationElwinTabView::setButtonsEnabled(const bool enabled) {
   setRunEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
-void InelasticDataManipulationElwinTabView::setRunEnabled(const bool &enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void InelasticDataManipulationElwinTabView::setRunEnabled(const bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void InelasticDataManipulationElwinTabView::setSaveResultEnabled(const bool &enabled) {
+void InelasticDataManipulationElwinTabView::setSaveResultEnabled(const bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 

@@ -49,8 +49,8 @@ public:
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
-  void setRunIsRunning(const bool &running) override;
-  void setSaveResultEnabled(const bool &enabled) override;
+  void setRunIsRunning(const bool running) override;
+  void setSaveResultEnabled(const bool enabled) override;
   int getPreviewSpec() override;
   std::string getPreviewWorkspaceName(int index) const override;
   std::string getPreviewFilename(int index) const override;
@@ -115,8 +115,8 @@ private:
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
   void showAddWorkspaceDialog();
   void setPreviewToDefault();
-  void setButtonsEnabled(const bool &enabled);
-  void setRunEnabled(const bool &enabled);
+  void setButtonsEnabled(const bool enabled);
+  void setRunEnabled(const bool enabled);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
   void addDataWksOrFile(IAddWorkspaceDialog const *dialog);
 
