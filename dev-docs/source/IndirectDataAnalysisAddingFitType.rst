@@ -9,7 +9,7 @@ list of available ones can seem daunting at first but it can be done by followin
 FqFit
 -----
 
-In the `FQFitConstants.h` file, there are sets of maps of {"Fit function class name", "Fit function class initialization string"}, e.g.
+In the `FitTabConstants.h` file, there are sets of maps of {"Fit function class name", "Fit function class initialization string"}, e.g.
 `{std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}`. To add
 a new fit function to FqFit you simply need to add it to this list of available functions. Currently, we divide up the
 functions into Width, EISF, and All with the intent that the list of functions would change depending on what data is
@@ -18,15 +18,13 @@ loaded into the tab, however as it is not yet implemented for the workspace inpu
 MSDFit
 ------
 
-The fit function strings in MSDFit are stored in the `IndirectDataAnalysisMSDFitTab.cpp` file in `msdFunctionStrings`,
-To add a function you just need to add it to this map and add the function to the others in `createParameterEstimation`
-e.e. `parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateMsd);`
+The fit function strings for MSDFit are also stored in the `FitTabConstants.h` file.
 
 IqtFit
 ------
 
-The fitting functions in IqtFit are hard coded into the template browser because it is not expected for other functions to be
-added to it.
+The fitting functions in IqtFit are hard coded into the template browser. These should be moved into the `FitTabConstants.h` file to
+allow us to add more functions easily in the future.
 
 ConvFit
 -------
@@ -72,14 +70,11 @@ LorentzianType, and BackgroundType. ConvFit can run fits with one of each Fit, L
 
 .. code-block:: cpp
 
-    {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {FitType::TeixeiraWater, {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
 
 
-Finally, in IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with the fit function name and shortened key, this key will be used in the output workspace from the fit.
-
-.. code-block:: cpp
-
-   m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
+Finally, in `FitTabConstants.h` add the fit function name and shortened key to the `FUNCTION_STRINGS` variable. This key will be used in the output
+workspace from the fit.
 
 In ConvFunctionModel add the build function string function
 
