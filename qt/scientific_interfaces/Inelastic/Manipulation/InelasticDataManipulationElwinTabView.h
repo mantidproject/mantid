@@ -83,7 +83,7 @@ public:
 
   void showMessageBox(std::string const &message) const override;
 
-public slots:
+private slots:
   void notifyMinChanged(double val);
   void notifyMaxChanged(double val);
   void notifyDoubleValueChanged(QtProperty *, double);
