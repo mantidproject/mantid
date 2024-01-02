@@ -21,7 +21,7 @@ namespace Mantid::Geometry {
  *
  * @return Function object with filter function for V3D.s
  */
-std::function<bool(const Kernel::V3D &)> HKLFilter::fn() const noexcept {
+std::function<bool(const Mantid::Kernel::V3D &)> HKLFilter::fn() const noexcept {
   return std::bind(&HKLFilter::isAllowed, this, std::placeholders::_1);
 }
 
@@ -36,7 +36,7 @@ HKLFilterUnaryLogicOperation::HKLFilterUnaryLogicOperation(HKLFilter_const_sptr 
 std::string HKLFilterNot::getDescription() const noexcept { return "!" + m_operand->getDescription(); }
 
 /// Returns true if the wrapped filter returns false and false otherwise.
-bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const noexcept { return !(m_operand->isAllowed(hkl)); }
+bool HKLFilterNot::isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept { return !(m_operand->isAllowed(hkl)); }
 
 /// Stores the left-hand and right-hand side operators, throws exception if
 /// either is null.
@@ -54,7 +54,7 @@ std::string HKLFilterAnd::getDescription() const noexcept {
 }
 
 /// Returns true if both wrapped filters return true.
-bool HKLFilterAnd::isAllowed(const Kernel::V3D &hkl) const noexcept {
+bool HKLFilterAnd::isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept {
   return m_lhs->isAllowed(hkl) && m_rhs->isAllowed(hkl);
 }
 
@@ -64,7 +64,7 @@ std::string HKLFilterOr::getDescription() const noexcept {
 }
 
 /// Returns true if either of the wrapped filters returns true.
-bool HKLFilterOr::isAllowed(const Kernel::V3D &hkl) const noexcept {
+bool HKLFilterOr::isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept {
   return m_lhs->isAllowed(hkl) || m_rhs->isAllowed(hkl);
 }
 
