@@ -325,7 +325,7 @@ void InelasticDataManipulationElwinTab::handlePreviewIndexChanged(int index) {
 void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string &workspaceName,
                                                                const std::string &filename) {
   auto loadHistory = m_view->isLoadHistory();
-  if (loadFile(QString::fromStdString(filename), QString::fromStdString(workspaceName), -1, -1, loadHistory)) {
+  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
     auto const workspace = getADSMatrixWorkspace(workspaceName);
 
     setInputWorkspace(workspace);

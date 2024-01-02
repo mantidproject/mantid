@@ -197,14 +197,14 @@ void IndirectTab::exportPythonScript() {
  * @param specMax :: Upper spectra bound
  * @return If the algorithm was successful
  */
-bool IndirectTab::loadFile(const QString &filename, const QString &outputName, const int specMin, const int specMax,
-                           bool loadHistory) {
+bool IndirectTab::loadFile(const std::string &filename, const std::string &outputName, const int specMin,
+                           const int specMax, bool loadHistory) {
   const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
 
   auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
   loader->initialize();
-  loader->setProperty("Filename", filename.toStdString());
-  loader->setProperty("OutputWorkspace", outputName.toStdString());
+  loader->setProperty("Filename", filename);
+  loader->setProperty("OutputWorkspace", outputName);
   setPropertyIf(loader, "SpectrumMin", castToString(specMin), specMin != -1);
   setPropertyIf(loader, "SpectrumMax", castToString(specMax), specMax != -1);
   setPropertyIf(loader, "LoadHistory", loadHistory ? "1" : "0", !loadHistory);

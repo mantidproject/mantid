@@ -402,7 +402,7 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
   if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
-    loadFile(filename, wsname, spectraMin, spectraMax);
+    loadFile(filename.toStdString(), wsname.toStdString(), spectraMin, spectraMax);
   }
   const auto input =
       std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
@@ -448,7 +448,7 @@ void ISISCalibration::calPlotRaw() {
   int const specMin = hasInstrumentDetail("spectra-min") ? getInstrumentDetail("spectra-min").toInt() : -1;
   int const specMax = hasInstrumentDetail("spectra-max") ? getInstrumentDetail("spectra-max").toInt() : -1;
 
-  if (!loadFile(filename, wsname, specMin, specMax)) {
+  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax)) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
                         "and matches the selected instrument in the Energy "
                         "Transfer tab.");

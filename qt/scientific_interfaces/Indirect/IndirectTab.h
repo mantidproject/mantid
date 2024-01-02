@@ -86,8 +86,8 @@ public:
 
 protected:
   /// Run the load algorithms
-  bool loadFile(const QString &filename, const QString &outputName, const int specMin = -1, const int specMax = -1,
-                bool loadHistory = true);
+  bool loadFile(const std::string &filename, const std::string &outputName, const int specMin = -1,
+                const int specMax = -1, bool loadHistory = true);
 
   /// Add a SaveNexusProcessed step to the batch queue
   void addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename = "");
