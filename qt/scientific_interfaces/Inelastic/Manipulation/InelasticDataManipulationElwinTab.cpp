@@ -426,7 +426,6 @@ void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialo
     if (suffixes.size() < 1) {
       uiv.addErrorMessage("The input files must be all _red or all _sqw.");
       m_view->clearInputFiles();
-      // m_view->CloseDialog();
     }
     std::string error = uiv.generateErrorMessage().toStdString();
 

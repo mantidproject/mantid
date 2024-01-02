@@ -218,6 +218,7 @@ void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
   m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
   m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
   m_addWorkspaceDialog->updateSelectedSpectra();
+  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
