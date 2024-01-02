@@ -66,10 +66,10 @@ class MANTID_GEOMETRY_DLL HKLFilter {
 public:
   virtual ~HKLFilter() = default;
 
-  std::function<bool(const Kernel::V3D &)> fn() const noexcept;
+  ::std::function<bool(const Mantid::Kernel::V3D &)> fn() const noexcept;
 
   virtual std::string getDescription() const = 0;
-  virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
+  virtual bool isAllowed(const Mantid::Kernel::V3D &hkl) const = 0;
 };
 
 using HKLFilter_uptr = std::unique_ptr<HKLFilter>;
@@ -96,7 +96,7 @@ public:
   HKLFilterNot(const HKLFilter_const_sptr &filter) : HKLFilterUnaryLogicOperation(filter) {}
 
   std::string getDescription() const noexcept override;
-  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
+  bool isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept override;
 };
 
 /// Base class for binary logic operations for HKLFilter.
@@ -124,7 +124,7 @@ public:
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
 
   std::string getDescription() const noexcept override;
-  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
+  bool isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept override;
 };
 
 /// Logical "Or"-operation for HKLFilter.
@@ -136,7 +136,7 @@ public:
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
 
   std::string getDescription() const noexcept override;
-  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
+  bool isAllowed(const Mantid::Kernel::V3D &hkl) const noexcept override;
 };
 
 MANTID_GEOMETRY_DLL const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter);

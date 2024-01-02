@@ -21,7 +21,7 @@ namespace Mantid::Geometry {
  *
  * @return Function object with filter function for V3D.s
  */
-std::function<bool(const Mantid::Kernel::V3D &)> HKLFilter::fn() const noexcept {
+::std::function<bool(const Mantid::Kernel::V3D &)> HKLFilter::fn() const noexcept {
   return std::bind(&HKLFilter::isAllowed, this, std::placeholders::_1);
 }
 
