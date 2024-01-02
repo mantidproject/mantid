@@ -51,9 +51,9 @@ std::string rearrangeIndicesSubString(std::string const &str) {
 std::string rearrangeIndicesRangeStrings(std::string const &str) {
   std::string indicesString;
   auto subStrings = splitStringBy(str, ",");
-  for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
+  for (auto it = subStrings.begin(); it != subStrings.end(); ++it) {
     indicesString += rearrangeIndicesSubString(*it);
-    indicesString += it != subStrings.end() ? "," : "";
+    indicesString += it != std::prev(subStrings.end()) ? "," : "";
   }
   return indicesString;
 }
