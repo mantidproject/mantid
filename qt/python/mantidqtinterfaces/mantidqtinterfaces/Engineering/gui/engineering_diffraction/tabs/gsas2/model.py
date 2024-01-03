@@ -565,15 +565,7 @@ class GSAS2Model(object):
         else:
             self.x_min = self.data_x_min
             self.x_max = self.data_x_max
-            success = self.determine_x_limits()
-            if not success:
-                return None
-            if not self.x_min:
-                logger.error(
-                    "Could not determine Minimum and Maximum X values from input files. "
-                    "Please set these values in the Plot Widget on the GSAS-II tab."
-                )
-                return None
+
         self.limits = [self.x_min, self.x_max]
         return True
 

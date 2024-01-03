@@ -96,13 +96,13 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # Success
-        self.view.get_x_limits_from_line_edits.return_value = [18000, 50000]
+        self.view.get_x_limits_from_line_edits.return_value = [["18000"], ["50000"]]
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
-        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [18000, 50000])
+        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [["18000"], ["50000"]])
         # Success with limits reversed
-        self.view.get_x_limits_from_line_edits.return_value = [50000, 18000]
+        self.view.get_x_limits_from_line_edits.return_value = [["5000"], ["80000"]]
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
-        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [18000, 50000])
+        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [["5000"], ["80000"]])
 
 
 if __name__ == "__main__":

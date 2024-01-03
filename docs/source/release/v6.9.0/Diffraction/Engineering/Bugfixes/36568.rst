@@ -1,0 +1,1 @@
+- Avoid cropping the range of data in the GSAS-II tab of :ref:`Engineering Diffraction GUI<Engineering_Diffraction-ref>` from its original range
