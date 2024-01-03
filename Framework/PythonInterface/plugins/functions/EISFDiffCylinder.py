@@ -11,6 +11,7 @@
 """
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
+from scipy.special import spherical_jn
 
 
 class EISFDiffCylinder(IFunction1D):
