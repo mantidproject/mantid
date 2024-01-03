@@ -540,7 +540,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ComptonScatteringCountRate.cpp:202
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h:26
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h:24
-unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DeltaFunction.cpp:38
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:377
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:1004
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/FickDiffusionSQE.cpp:81
