@@ -299,6 +299,9 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   } catch (std::invalid_argument const &e) {
     g_log.error() << "Invalid filename provided: " << e.what() << "\n";
     return;
+  } catch (std::runtime_error const &e) {
+    g_log.error() << "Save failed: " << e.what() << "\n";
+    return;
   }
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
