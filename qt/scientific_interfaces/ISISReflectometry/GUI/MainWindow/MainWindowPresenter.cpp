@@ -294,7 +294,12 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   if (filename == "")
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
-  m_fileHandler->saveJSONToFile(filename, map);
+  try {
+    m_fileHandler->saveJSONToFile(filename, map);
+  } catch (std::invalid_argument const &e) {
+    g_log.error() << "Invalid filename provided: " << e.what() << "\n";
+    return;
+  }
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
