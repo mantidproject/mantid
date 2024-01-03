@@ -360,13 +360,13 @@ void MainWindowPresenter::setDefaultInstrument(const std::string &requiredInstru
   auto requiredFacility = "ISIS";
   if (currentFacility != requiredFacility) {
     config.setString("default.facility", requiredFacility);
-    g_log.notice() << "Facility changed to " << requiredFacility;
+    g_log.notice() << "Facility changed to " << requiredFacility << "\n";
   }
 
   auto currentInstrument = config.getString("default.instrument");
   if (currentInstrument != requiredInstrument) {
     config.setString("default.instrument", requiredInstrument);
-    g_log.notice() << "Instrument changed to " << requiredInstrument;
+    g_log.notice() << "Instrument changed to " << requiredInstrument << "\n";
   }
 }
 
