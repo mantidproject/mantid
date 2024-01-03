@@ -179,7 +179,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/EQ
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:639
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:273
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:259
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ElasticWindow.cpp:112
@@ -908,7 +907,7 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:704
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:730
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDLeanEvent.cpp:0
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/GroupingWorkspace.cpp:153
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/GroupingWorkspace.cpp:161
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspaceIterator.cpp:145
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:1242
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/Peak.h:103
