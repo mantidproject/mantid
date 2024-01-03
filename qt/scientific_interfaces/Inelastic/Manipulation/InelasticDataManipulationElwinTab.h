@@ -19,87 +19,86 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 using namespace Mantid::API;
 using namespace MantidWidgets;
 using namespace IDA;
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationElwinTab : public InelasticDataManipulationTab {
-  Q_OBJECT
-
+class IElwinPresenter {
 public:
-  InelasticDataManipulationElwinTab(QWidget *parent = nullptr);
+  virtual void handleValueChanged(std::string const &propName, double value) = 0;
+  virtual void handleValueChanged(std::string const &propName, bool value) = 0;
+  virtual void handleRunClicked() = 0;
+  virtual void handleSaveClicked() = 0;
+  virtual void handlePlotPreviewClicked() = 0;
+  virtual void handleFilesFound() = 0;
+  virtual void handlePreviewSpectrumChanged(int spectrum) = 0;
+  virtual void handlePreviewIndexChanged(int index) = 0;
+  virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleAddDataFromFile(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleRemoveSelectedData() = 0;
+  virtual void updateAvailableSpectra() = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationElwinTab : public InelasticDataManipulationTab,
+                                                                 public IElwinPresenter {
+public:
+  InelasticDataManipulationElwinTab(QWidget *parent, IElwinView *view);
   ~InelasticDataManipulationElwinTab();
 
-public slots:
-  void removeSelectedData();
-  void updateAvailableSpectra();
+  // base Manipulation tab methods
+  void run() override;
+  void setup() override;
+  bool validate() override;
+
+  // Elwin interface methods
+  void handleValueChanged(std::string const &propName, double) override;
+  void handleValueChanged(std::string const &propName, bool) override;
+  void handleRunClicked() override;
+  void handleSaveClicked() override;
+  void handlePlotPreviewClicked() override;
+  void handleFilesFound() override;
+  void handlePreviewSpectrumChanged(int spectrum) override;
+  void handlePreviewIndexChanged(int index) override;
+  void handleAddData(IAddWorkspaceDialog const *dialog) override;
+  void handleAddDataFromFile(IAddWorkspaceDialog const *dialog) override;
+  void handleRemoveSelectedData() override;
+  void updateAvailableSpectra() override;
 
 protected:
-  void addData(IAddWorkspaceDialog const *dialog);
-  void checkData(IAddWorkspaceDialog const *dialog);
-  void addDataFromFile(IAddWorkspaceDialog const *dialog);
+  void runComplete(bool error) override;
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
 
-protected slots:
-  void showAddWorkspaceDialog();
-  virtual void closeDialog();
-
-signals:
-  void dataAdded();
-  void dataRemoved();
-  void dataChanged();
-
 private:
-  void run() override;
   void runFileInput();
   void runWorkspaceInput();
-  void setup() override;
-  bool validate() override;
+
   void setFileExtensionsByName(bool filter) override;
   void updateTableFromModel();
-
-  int getSelectedSpectrum() const;
-  virtual void setSelectedSpectrum(int spectrum);
-  MatrixWorkspace_sptr getInputWorkspace() const;
-  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
-
-  void checkForELTWorkspace();
-
-  std::vector<std::string> getOutputWorkspaceNames();
-  QString getOutputBasename();
-
-  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
-  MatrixWorkspace_sptr getPreviewPlotWorkspace();
-  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
-
-  std::unique_ptr<InelasticDataManipulationElwinTabView> m_view;
-  std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
-  InelasticDataManipulation *m_parent;
-  std::unique_ptr<IndirectFitDataModel> m_dataModel;
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectrum;
-  MatrixWorkspace_sptr m_inputWorkspace;
-
-  void newPreviewFileSelected(const QString &workspaceName, const QString &filename);
-  void newPreviewWorkspaceSelected(const QString &workspaceName);
-  size_t findWorkspaceID();
   void newInputFiles();
   void updateIntegrationRange();
 
-private slots:
-  void handleValueChanged(QtProperty *, double);
-  void handleValueChanged(QtProperty *, bool);
-  void checkNewPreviewSelected(int index);
-  void handlePreviewSpectrumChanged(int spectrum);
-  void unGroupInput(bool error);
-  void runClicked();
-  void saveClicked();
-  void addData();
-  void checkLoadedFiles();
-  void plotCurrentPreview();
-};
+  int getSelectedSpectrum() const;
+  virtual void setSelectedSpectrum(int spectrum);
 
+  std::vector<std::string> getOutputWorkspaceNames();
+  std::string getOutputBasename();
+  MatrixWorkspace_sptr getInputWorkspace() const;
+  MatrixWorkspace_sptr getPreviewPlotWorkspace();
+  void checkForELTWorkspace();
+  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
+  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
+  void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
+  void newPreviewWorkspaceSelected(const std::string &workspaceName);
+  size_t findWorkspaceID();
+
+  IElwinView *m_view;
+  std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
+  std::unique_ptr<IndirectFitDataModel> m_dataModel;
+  int m_selectedSpectrum;
+  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
+  MatrixWorkspace_sptr m_inputWorkspace;
+};
 } // namespace CustomInterfaces
 } // namespace MantidQt

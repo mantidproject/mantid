@@ -279,7 +279,7 @@ void ISISDiagnostics::handleNewFile() {
   int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
   int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
 
-  if (!loadFile(filename, wsname, specMin, specMax)) {
+  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax)) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
                         "and matches the selected instrument in the "
                         "EnergyTransfer tab.");

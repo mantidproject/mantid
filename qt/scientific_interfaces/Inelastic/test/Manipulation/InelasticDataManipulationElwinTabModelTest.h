@@ -85,7 +85,7 @@ public:
 
   void test_algorithm_set_up() {
     MantidQt::API::BatchAlgorithmRunner batch;
-    QString wsBaseName = "Workspace_name";
+    std::string wsBaseName = "Workspace_name";
     // The ElasticWindowMultiple algorithm is a python algorithm and so can not be called in c++ tests
     m_workspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_sqw", m_workspace);

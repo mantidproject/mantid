@@ -49,16 +49,16 @@ void InelasticDataManipulationElwinTabModel::setupGroupAlgorithm(MantidQt::API::
 }
 
 void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
-    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceBaseName,
+    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &workspaceBaseName,
     std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
     std::string const &sampleEnvironmentLogValue) {
 
-  workspaceBaseName += "_elwin_";
+  auto elwinSuffix = "_elwin_";
 
-  auto const qWorkspace = (workspaceBaseName + "eq").toStdString();
-  auto const qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
-  auto const elfWorkspace = (workspaceBaseName + "elf").toStdString();
-  auto const eltWorkspace = (workspaceBaseName + "elt").toStdString();
+  auto const qWorkspace = (workspaceBaseName + elwinSuffix + "eq");
+  auto const qSquaredWorkspace = (workspaceBaseName + elwinSuffix + "eq2");
+  auto const elfWorkspace = (workspaceBaseName + elwinSuffix + "elf");
+  auto const eltWorkspace = (workspaceBaseName + elwinSuffix + "elt");
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");

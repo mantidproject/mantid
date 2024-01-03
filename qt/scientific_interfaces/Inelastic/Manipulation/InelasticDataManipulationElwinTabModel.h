@@ -29,8 +29,9 @@ public:
   std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra spectra);
   void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                            std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
-  void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceBaseName,
-                                  std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
+  void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                  std::string const &workspaceBaseName, std::string const &inputGroupWsName,
+                                  std::string const &sampleEnvironmentLogName,
                                   std::string const &sampleEnvironmentLogValue);
   void ungroupAlgorithm(std::string const &InputWorkspace);
   void setIntegrationStart(double integrationStart);
