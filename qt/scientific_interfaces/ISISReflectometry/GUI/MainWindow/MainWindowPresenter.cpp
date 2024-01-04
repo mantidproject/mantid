@@ -297,10 +297,10 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   try {
     m_fileHandler->saveJSONToFile(filename, map);
   } catch (std::invalid_argument const &e) {
-    g_log.error() << "Invalid filename provided: " << e.what() << "\n";
+    m_messageHandler->giveUserCritical("Invalid filename provided: " + std::string(e.what()), "Save Batch");
     return;
   } catch (std::runtime_error const &e) {
-    g_log.error() << "Save failed: " << e.what() << "\n";
+    m_messageHandler->giveUserCritical("Save failed: " + std::string(e.what()), "Save Batch");
     return;
   }
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
