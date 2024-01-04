@@ -18,8 +18,7 @@ length :math:`L` [1]_. :math:`A_0(Q_z)` implements diffusion along the cylinder 
 :math:`B_0^0(Q_{\perp})` implements diffusion perpendicular to the cylinder axis.
 
 .. math::
-    B_0^0(Q_{\perp}) = (2 \frac{J_1(Q R \sin(\theta))}{Q R \sin(\theta)} )^2 =
-                     = (\sqrt(\frac{2 \pi}{(Q R \sin(\theta))^3}) j_{3/2}(Q R \sin(\theta)) )^2
+    B_0^0(Q_{\perp}) = (2 \frac{J_1(Q R \sin(\theta))}{Q R \sin(\theta)} )^2
 
 Both diffusions are assumed to be decoupled. Finally, the integration
 in :math:`\theta` implements a powder average
