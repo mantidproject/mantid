@@ -13,7 +13,7 @@ This fitting function models the diffusion of a particle confined in a cylinder 
 length :math:`L` [1]_. :math:`A_0(Q_z)` implements diffusion along the cylinder axis.
 
 .. math::
-    A_0(Q_z) = (j_0(Q L \cos(\theta)))^2
+    A_0(Q_z) = (j_0(Q L \cos(\theta)))^2 = (\frac{\sin(Q L \cos(\theta))}{Q L \cos(\theta)})^2
 
 :math:`B_0^0(Q_{\perp})` implements diffusion perpendicular to the cylinder axis.
 
