@@ -126,7 +126,6 @@ void InelasticDataManipulationIqtTab::run() {
   // Construct the result workspace for Python script export
   std::string sampleName = m_view->getSampleName();
   m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
-  // m_pythonExportWsName = sampleName.left(sampleName.find_last_of("_")). + "_iqt";
   m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }

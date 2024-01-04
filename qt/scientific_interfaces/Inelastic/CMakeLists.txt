@@ -130,15 +130,10 @@ set(MOC_FILES
     Corrections/Corrections.h
     Corrections/CorrectionsTab.h
     Manipulation/InelasticDataManipulation.h
-    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
-    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationIqtTabView.h
-    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationMomentsTabView.h
-    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSqwTabView.h
-    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabView.h
     Manipulation/InelasticDataManipulationTab.h
 )
@@ -176,10 +171,15 @@ set(INC_FILES
     Common/SettingsHelper.h
     Common/SettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
+    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
+    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
+    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationSqwTabModel.h
+    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabModel.h
+    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/ISqwView.h
     Manipulation/IMomentsView.h
     Manipulation/ISymmetriseView.h
