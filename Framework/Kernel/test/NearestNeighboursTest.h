@@ -30,7 +30,8 @@ public:
 
   void test_constructor_throws_if_no_points() {
     std::vector<Vector2d> noPoints;
-    TS_ASSERT_THROWS(NearestNeighbours<2> nn(noPoints), const std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(NearestNeighbours<2> nn(noPoints), const std::runtime_error &e, std::string(e.what()),
+                            "Need at least one point to initialise NearestNeighbours.");
   }
 
   void test_find_nearest() {

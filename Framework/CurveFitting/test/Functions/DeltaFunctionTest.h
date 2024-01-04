@@ -221,7 +221,8 @@ public:
 
   void testThrowsWhenCallingFunctionDeriv1D() {
     DeltaFunctionTest_Delta delta;
-    TS_ASSERT_THROWS(delta.callFunctionDeriv1D(), const std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(delta.callFunctionDeriv1D(), const std::runtime_error &e, std::string(e.what()),
+                            "Cannot compute derivative of a delta function");
   }
 
 }; // end of DeltaFunctionTest
