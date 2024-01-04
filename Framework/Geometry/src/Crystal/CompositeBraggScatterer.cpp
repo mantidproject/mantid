@@ -77,6 +77,12 @@ BraggScatterer_sptr CompositeBraggScatterer::getScatterer(size_t i) const {
   return m_scatterers[i];
 }
 
+/// Returns the scatterers.
+std::vector<BraggScatterer_sptr> CompositeBraggScatterer::getScatterers() const {
+
+  return m_scatterers;
+}
+
 /// Removes the i-th scatterer from the composite or throws an std::out_of_range
 /// exception.
 void CompositeBraggScatterer::removeScatterer(size_t i) {
