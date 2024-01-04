@@ -65,6 +65,7 @@ chopper_system:
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 3.2         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+          ei_limits: [0, 181]   # Limits on ei for this chopper (setting Ei outside this will give error)
         R:
           name: MARI R (500meV)
           pslit: 1.143          # Neutron transparent slit width (mm)
