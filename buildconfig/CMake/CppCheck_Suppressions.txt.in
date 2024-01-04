@@ -485,7 +485,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2309
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2378
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2454
-variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValue.cpp:557
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/LeBailFit.cpp:2225
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/LeBailFit.cpp:1453
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/LeBailFit.cpp:1578
