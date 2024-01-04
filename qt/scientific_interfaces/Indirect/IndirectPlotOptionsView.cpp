@@ -186,8 +186,8 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     plotMenu->addAction(showSliceViewerAction);
     break;
   default:
-    std::runtime_error("Plot option not found. Plot types are Spectra, "
-                       "SpectraSliced or SpectraTiled.");
+    throw std::runtime_error("Plot option not found. Plot types are Spectra, "
+                             "SpectraSliced or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
