@@ -1483,7 +1483,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/sr
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:80
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:301
-unusedScopedObject:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingPresenter.cpp:389
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.h:33
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.h:30
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:243
