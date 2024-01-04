@@ -63,6 +63,38 @@ void DiffractionFocussing2::init() {
                   "Workspace2D histogram.");
 }
 
+std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  // can only specify grouping in a single way
+  const bool hasGroupingFilename = !isDefault("GroupingFileName");
+  const bool hasGroupingWksp = !isDefault("GroupingWorkspace");
+  if (hasGroupingFilename && hasGroupingWksp) {
+    const std::string msg = "You must enter a GroupingFileName or a GroupingWorkspace, not both!";
+    issues["GroupingFileName"] = msg;
+    issues["GroupingWorkspace"] = msg;
+  } else if (!(hasGroupingFilename || hasGroupingWksp)) {
+    const std::string msg = "You must enter a GroupingFileName or a GroupingWorkspace!";
+    issues["GroupingFileName"] = msg;
+    issues["GroupingWorkspace"] = msg;
+  }
+
+  // validate input workspace
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  // Validate UnitID (spacing)
+  const std::string unitid = inputWS->getAxis(0)->unit()->unitID();
+  if (unitid == "TOF") {
+    g_log.error(
+        "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
+  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
+    std::stringstream msg;
+    msg << "UnitID " << unitid << " is not a supported spacing";
+    issues["InputWorkspace"] = msg.str();
+  }
+
+  return issues;
+}
+
 //=============================================================================
 /** Perform clean-up of memory after execution but before destructor.
  * Private method
@@ -101,18 +133,6 @@ void DiffractionFocussing2::exec() {
   nPoints = static_cast<int>(m_matrixInputW->blocksize());
   nHist = static_cast<int>(m_matrixInputW->getNumberHistograms());
 
-  // Validate UnitID (spacing)
-  Axis *axis = m_matrixInputW->getAxis(0);
-  std::string unitid = axis->unit()->unitID();
-  if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
-    g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
-    throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
-  }
-  if (unitid == "TOF") {
-    g_log.error()
-        << "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)"
-        << std::endl;
-  }
   // --- Do we need to read the grouping workspace? ----
   if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
