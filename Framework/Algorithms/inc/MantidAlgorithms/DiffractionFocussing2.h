@@ -105,9 +105,6 @@ private:
   /// Grouping workspace with groups to build
   Mantid::DataObjects::GroupingWorkspace_sptr m_groupWS;
 
-  /// Shared pointer to the event workspace
-  DataObjects::EventWorkspace_const_sptr m_eventW;
-
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
   using group2vectormap = std::map<int, std::shared_ptr<MantidVec>>;
