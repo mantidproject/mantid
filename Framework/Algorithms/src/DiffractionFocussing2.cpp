@@ -101,7 +101,6 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
  */
 void DiffractionFocussing2::cleanup() {
   // Clear maps and vectors to free up memory.
-  udet2group.clear();
   groupAtWorkspaceIndex.clear();
   std::vector<int>().swap(groupAtWorkspaceIndex);
   group2xvector.clear();
@@ -127,16 +126,18 @@ void DiffractionFocussing2::exec() {
 
   // Fill the map
   progress(0.2, "Determine Rebin Params");
-  udet2group.clear();
-  // std::cout << "(1) nGroups " << nGroups << "\n";
-  m_groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
-  if (nGroups <= 0)
-    throw std::runtime_error("No groups were specified.");
-  // std::cout << "(2) nGroups " << nGroups << "\n";
+  {                              // keep variables in relatively small scope
+    std::vector<int> udet2group; // map from udet to group
+    g_log.debug() << "(1) nGroups " << nGroups << "\n";
+    m_groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
+    if (nGroups <= 0)
+      throw std::runtime_error("No groups were specified.");
+    g_log.debug() << "(2) nGroups " << nGroups << "\n";
 
-  // This finds the rebin parameters (used in both versions)
-  // It also initializes the groupAtWorkspaceIndex[] array.
-  determineRebinParameters();
+    // This finds the rebin parameters (used in both versions)
+    // It also initializes the groupAtWorkspaceIndex[] array.
+    determineRebinParameters(udet2group);
+  }
 
   size_t totalHistProcess = this->setupGroupToWSIndices();
 
@@ -150,7 +151,7 @@ void DiffractionFocussing2::exec() {
       // Input workspace is an event workspace. Use the other exec method
       this->execEvent();
       this->cleanup();
-      return;
+      return; // <- return early!!!!!!!!!!!!!
     } else {
       // get the full d-spacing range
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
@@ -471,12 +472,14 @@ void DiffractionFocussing2::execEvent() {
 }
 
 //=============================================================================
-/** Verify that all the contributing detectors to a spectrum belongs to the same
- * group
+/** Verify that all the contributing detectors to a spectrum belongs to the same group
+ *
+ *  @param udet2group Map from udet to group
  *  @param wi :: The workspace index in the workspace
+ *
  *  @return Group number if successful otherwise return -1
  */
-int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
+int DiffractionFocussing2::validateSpectrumInGroup(const std::vector<int> &udet2group, size_t wi) {
   const auto &dets = m_matrixInputW->getSpectrum(wi).getDetectorIDs();
   if (dets.empty()) // Not in group
   {
@@ -515,11 +518,13 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
  *and min
  *  as the input spectra.
  *
+ *  @param udet2group Map from udet to group
+ *
  * The X vectors are saved in group2xvector.
  * It also initializes the groupAtWorkspaceIndex[] array.
  *
  */
-void DiffractionFocussing2::determineRebinParameters() {
+void DiffractionFocussing2::determineRebinParameters(const std::vector<int> &udet2group) {
   std::ostringstream mess;
 
   // typedef for the storage of the group ranges
@@ -541,7 +546,7 @@ void DiffractionFocussing2::determineRebinParameters() {
   groupAtWorkspaceIndex.resize(nHist);
   for (int wi = 0; wi < nHist; wi++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int group = validateSpectrumInGroup(static_cast<size_t>(wi));
+    const int group = validateSpectrumInGroup(udet2group, static_cast<size_t>(wi));
     groupAtWorkspaceIndex[wi] = group;
     if (group == -1)
       continue;
@@ -604,8 +609,6 @@ void DiffractionFocussing2::determineRebinParameters() {
     group2xvector[gpit->first] = xnew; // Register this vector in the map
     group2xstep[gpit->first] = -step;
   }
-  // Not needed anymore
-  udet2group.clear();
 }
 
 /**
