@@ -7,6 +7,7 @@
 #pragma once
 #include "ui_IndirectSimulation.h"
 
+#include "../DllConfig.h"
 #include "Common/IndirectInterface.h"
 #include "IndirectSimulationTab.h"
 

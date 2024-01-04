@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../DllConfig.h"
 #include "IndirectSimulationTab.h"
 #include "ui_IndirectSassena.h"
 
