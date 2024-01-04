@@ -28,6 +28,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(NearestNeighbours<2> nn(pts2));
   }
 
+  void test_constructor_throws_if_no_points() {
+    std::vector<Vector2d> noPoints;
+    TS_ASSERT_THROWS(NearestNeighbours<2> nn(noPoints), const std::runtime_error &);
+  }
+
   void test_find_nearest() {
     std::vector<Eigen::Vector3d> pts = {Vector3d(1, 1, 1), Vector3d(2, 2, 2)};
     NearestNeighbours<3> nn(pts);

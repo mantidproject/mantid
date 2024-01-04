@@ -316,7 +316,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:560
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:879
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:906
-unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/NearestNeighbours.h:98
 variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:232
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:296
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:713
