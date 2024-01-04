@@ -330,17 +330,21 @@ void DiffractionFocussing2::exec() {
  *  @throw std::runtime_error If the rebinning process fails
  */
 void DiffractionFocussing2::execEvent() {
-  // Create a new outputworkspace with not much in it
-  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(), m_matrixInputW->binEdges(0));
+  // Create a new outputworkspace with not much in it - bin boundaries will be replaced later
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(), HistogramData::BinEdges(2));
 
-  MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
-  bool inPlace = (m_matrixInputW == outputWS);
+  // determine if this is in-place operation
+  bool inPlace = false;
+  {
+    MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
+    inPlace = bool(m_matrixInputW == outputWS);
+  }
   if (inPlace)
     g_log.debug("Focussing EventWorkspace in-place.");
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
-  auto eventinputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
-  EventType eventWtype = eventinputWS->getEventType();
+  const auto eventinputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
+  const EventType eventWtype = eventinputWS->getEventType();
 
   std::unique_ptr<Progress> prog = std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
