@@ -274,7 +274,6 @@ bool IndirectInstrumentConfig::updateAnalysersList(const MatrixWorkspace_sptr &w
   if (!ws)
     return false;
 
-  QList<QPair<QString, QString>> instrumentModes;
   Instrument_const_sptr instrument = ws->getInstrument();
 
   std::vector<std::string> ipfAnalysers = instrument->getStringParameter("analysers");

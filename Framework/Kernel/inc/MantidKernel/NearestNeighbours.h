@@ -95,7 +95,7 @@ public:
   NearestNeighbours(const std::vector<VectorType> &points) {
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
-      std::runtime_error("Need at least one point to initialise NearestNeighbours.");
+      throw std::runtime_error("Need at least one point to initialise NearestNeighbours.");
 
     m_dataPoints = std::make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
 

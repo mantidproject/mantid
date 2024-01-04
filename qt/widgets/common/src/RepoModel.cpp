@@ -819,8 +819,6 @@ RepoModel::RepoItem *RepoModel::getParent(const QString &folder, QList<RepoItem 
  * @param root: The RepoItem root
  */
 void RepoModel::setupModelData(RepoItem *root) {
-
-  QStringList lines;
   // check server for updates to repository
   repo_ptr->check4Update();
   // get the list of entries inside the scriptrepository
@@ -867,6 +865,7 @@ void RepoModel::setupModelData(RepoItem *root) {
     }
   }
 }
+
 void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex, const QString &title,
                                  bool showWarning) const {
   g_log.information() << "Download failed " << ex.what() << "\n Detail: " << ex.systemError() << '\n';
