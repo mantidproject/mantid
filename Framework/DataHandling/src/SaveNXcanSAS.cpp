@@ -618,8 +618,7 @@ public:
  */
 void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   if (!areAxesNumeric(workspace)) {
-    std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs "
-                          "to have 2 numeric axes.");
+    throw std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs to have 2 numeric axes.");
   }
   // Add attributes for @signal, @I_axes, @Q_indices,
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
