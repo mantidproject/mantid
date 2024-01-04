@@ -102,9 +102,15 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
 void DiffractionFocussing2::cleanup() {
   // Clear maps and vectors to free up memory.
   udet2group.clear();
+  std::vector<int>().swap(udet2group);
   group2xvector.clear();
+  group2xvector = std::map<int, HistogramData::BinEdges>();
+  group2xstep.clear();
+  group2xstep = std::map<int, double>();
   this->m_validGroups.clear();
+  this->m_validGroups = std::vector<Indexing::SpectrumNumber>();
   this->m_wsIndices.clear();
+  this->m_wsIndices = std::vector<std::vector<std::size_t>>();
 }
 
 //=============================================================================
