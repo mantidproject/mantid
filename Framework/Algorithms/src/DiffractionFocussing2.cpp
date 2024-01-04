@@ -613,7 +613,7 @@ void DiffractionFocussing2::getGroupingWorkspace() {
     const std::string groupingFileName = getProperty("GroupingFileName");
     progress(0.01, "Reading grouping file");
     auto childAlg = createChildAlgorithm("CreateGroupingWorkspace");
-    childAlg->setProperty("InputWorkspace", m_matrixInputW);
+    childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();
     m_groupWS = childAlg->getProperty("OutputWorkspace");
