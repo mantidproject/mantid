@@ -144,8 +144,8 @@ void DiffractionFocussing2::exec() {
   double eventXMin = 0.;
   double eventXMax = 0.;
 
-  m_eventW = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
-  if (m_eventW != nullptr) {
+  const auto eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
+  if (eventInputWS) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
       this->execEvent();
@@ -176,8 +176,6 @@ void DiffractionFocussing2::exec() {
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
   Progress prog(this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
-
-  EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++) {
@@ -214,14 +212,16 @@ void DiffractionFocussing2::exec() {
       // Get reference to its old X,Y,and E.
       auto &Xin = inSpec.x();
 
+      // copy over detector ids
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
+
+      // get histogram version of the data
       if (eventInputWS) {
         const EventList &el = eventInputWS->getSpectrum(inWorkspaceIndex);
-        outSpec.addDetectorIDs(el.getDetectorIDs());
         el.generateHistogram(group2xstep.at(group), Xout.rawData(), Yout, Eout);
       } else {
         auto &Yin = inSpec.y();
         auto &Ein = inSpec.e();
-        outSpec.addDetectorIDs(inSpec.getDetectorIDs());
 
         try {
           // TODO This should be implemented in Histogram as rebin
@@ -338,7 +338,8 @@ void DiffractionFocussing2::execEvent() {
     g_log.debug("Focussing EventWorkspace in-place.");
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
-  EventType eventWtype = m_eventW->getEventType();
+  auto eventinputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
+  EventType eventWtype = eventinputWS->getEventType();
 
   std::unique_ptr<Progress> prog = std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
@@ -350,7 +351,7 @@ void DiffractionFocussing2::execEvent() {
 
     totalHistProcess += static_cast<int>(indices.size());
     for (auto index : indices) {
-      size_required[iGroup] += m_eventW->getSpectrum(index).getNumberEvents();
+      size_required[iGroup] += eventinputWS->getSpectrum(index).getNumberEvents();
     }
     prog->report(1, "Pre-counting");
   }
@@ -402,7 +403,7 @@ void DiffractionFocussing2::execEvent() {
       for (int i = wiChunk * chunkSize; i < max; i++) {
         // Accumulate the chunk
         size_t wi = indices[i];
-        chunkEL += m_eventW->getSpectrum(wi);
+        chunkEL += eventinputWS->getSpectrum(wi);
       }
 
       // Rejoin the chunk with the rest.
@@ -415,20 +416,20 @@ void DiffractionFocussing2::execEvent() {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
     auto nValidGroups = static_cast<int>(this->m_validGroups.size());
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
+    PARALLEL_FOR_IF(Kernel::threadSafe(*eventinputWS))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERRUPT_REGION
       const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
-        out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
+        out->getSpectrum(iGroup) += eventinputWS->getSpectrum(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 
         // When focussing in place, you can clear out old memory from the input
         // one!
         if (inPlace) {
-          std::const_pointer_cast<EventWorkspace>(m_eventW)->getSpectrum(wi).clear();
+          std::const_pointer_cast<EventWorkspace>(eventinputWS)->getSpectrum(wi).clear();
         }
       }
       PARALLEL_END_INTERRUPT_REGION
