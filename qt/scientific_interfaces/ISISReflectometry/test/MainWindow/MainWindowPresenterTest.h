@@ -685,7 +685,12 @@ private:
     EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map))
         .Times(1)
         .WillOnce(Throw(std::invalid_argument("Test error")));
-    EXPECT_CALL(m_messageHandler, giveUserCritical("Invalid filename provided: Test error", "Save Batch")).Times(1);
+    EXPECT_CALL(
+        m_messageHandler,
+        giveUserCritical(
+            "Invalid path provided. Check you have the correct permissions for this save location. \nTest error",
+            "Save Batch"))
+        .Times(1);
   }
 
   void expectBatchIsNotSavedWhenSaveFails(int batchIndex) {
@@ -696,7 +701,10 @@ private:
     EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map))
         .Times(1)
         .WillOnce(Throw(std::runtime_error("Test error, save failed.")));
-    EXPECT_CALL(m_messageHandler, giveUserCritical("Save failed: Test error, save failed.", "Save Batch")).Times(1);
+    EXPECT_CALL(
+        m_messageHandler,
+        giveUserCritical("An error occurred while saving. Please try again. \nTest error, save failed.", "Save Batch"))
+        .Times(1);
   }
 
   void expectBatchIsLoadedFromFile(int batchIndex) {

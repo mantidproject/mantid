@@ -297,10 +297,14 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   try {
     m_fileHandler->saveJSONToFile(filename, map);
   } catch (std::invalid_argument const &e) {
-    m_messageHandler->giveUserCritical("Invalid filename provided: " + std::string(e.what()), "Save Batch");
+    m_messageHandler->giveUserCritical(
+        "Invalid path provided. Check you have the correct permissions for this save location. \n" +
+            std::string(e.what()),
+        "Save Batch");
     return;
   } catch (std::runtime_error const &e) {
-    m_messageHandler->giveUserCritical("Save failed: " + std::string(e.what()), "Save Batch");
+    m_messageHandler->giveUserCritical("An error occurred while saving. Please try again. \n" + std::string(e.what()),
+                                       "Save Batch");
     return;
   }
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
