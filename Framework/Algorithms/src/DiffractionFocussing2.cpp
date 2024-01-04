@@ -118,36 +118,18 @@ void DiffractionFocussing2::cleanup() {
  *  @throw std::runtime_error If the rebinning process fails
  */
 void DiffractionFocussing2::exec() {
-  // retrieve the properties
-  std::string groupingFileName = getProperty("GroupingFileName");
-  groupWS = getProperty("GroupingWorkspace");
-
-  if (!groupingFileName.empty() && groupWS)
-    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace, not both!");
-
-  if (groupingFileName.empty() && !groupWS)
-    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace!");
-
   // Get the input workspace
   m_matrixInputW = getProperty("InputWorkspace");
   nPoints = static_cast<int>(m_matrixInputW->blocksize());
   nHist = static_cast<int>(m_matrixInputW->getNumberHistograms());
 
-  // --- Do we need to read the grouping workspace? ----
-  if (!groupingFileName.empty()) {
-    progress(0.01, "Reading grouping file");
-    auto childAlg = createChildAlgorithm("CreateGroupingWorkspace");
-    childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
-    childAlg->setProperty("OldCalFilename", groupingFileName);
-    childAlg->executeAsChildAlg();
-    groupWS = childAlg->getProperty("OutputWorkspace");
-  }
+  this->getGroupingWorkspace();
 
   // Fill the map
   progress(0.2, "Determine Rebin Params");
   udet2group.clear();
   // std::cout << "(1) nGroups " << nGroups << "\n";
-  groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
+  m_groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
   if (nGroups <= 0)
     throw std::runtime_error("No groups were specified.");
   // std::cout << "(2) nGroups " << nGroups << "\n";
@@ -623,6 +605,24 @@ void DiffractionFocussing2::determineRebinParameters() {
   }
   // Not needed anymore
   udet2group.clear();
+}
+
+/**
+ * Initialize the pointer to the grouping workspace based on input properties
+ */
+void DiffractionFocussing2::getGroupingWorkspace() {
+  m_groupWS = getProperty("GroupingWorkspace");
+
+  // Do we need to read the grouping workspace from a file?
+  if (!m_groupWS) {
+    const std::string groupingFileName = getProperty("GroupingFileName");
+    progress(0.01, "Reading grouping file");
+    auto childAlg = createChildAlgorithm("CreateGroupingWorkspace");
+    childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
+    childAlg->setProperty("OldCalFilename", groupingFileName);
+    childAlg->executeAsChildAlg();
+    m_groupWS = childAlg->getProperty("OutputWorkspace");
+  }
 }
 
 /***
