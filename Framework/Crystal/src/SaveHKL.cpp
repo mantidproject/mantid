@@ -233,7 +233,6 @@ void SaveHKL::exec() {
   }
 
   if (correctPeaks) {
-    std::vector<double> spec(11);
     std::string STRING;
     std::ifstream infile;
     std::string spectraFile = getPropertyValue("SpectraFile");
