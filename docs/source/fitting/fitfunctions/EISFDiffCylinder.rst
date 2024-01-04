@@ -51,7 +51,7 @@ Output:
 
 .. testoutput:: QdependenceFit
 
-    name=EISFDiffCylinder,A=1,R=3.5,L=1.7,constraints=(0.01<R,0.01<L),ties=(A=1)
+    name=EISFDiffCylinder,A=1,R=3.11497,L=1.68724,constraints=(0.01<R,0.01<L),ties=(A=1)
 
 .. properties::
 
