@@ -209,24 +209,16 @@ void FunctionModel::setParameterTie(std::string const &parameterName, std::strin
 }
 
 std::vector<std::string> FunctionModel::getParameterNames() const {
-  std::vector<std::string> names;
   if (hasFunction()) {
-    const auto paramNames = getCurrentFunction()->getParameterNames();
-    for (auto const &name : paramNames) {
-      names.emplace_back(name);
-    }
+    return getCurrentFunction()->getParameterNames();
   }
-  return names;
+  return std::vector<std::string>{};
 }
 std::vector<std::string> FunctionModel::getAttributeNames() const {
-  std::vector<std::string> names;
   if (hasFunction()) {
-    const auto attributeNames = getCurrentFunction()->getAttributeNames();
-    for (auto const &name : attributeNames) {
-      names.emplace_back(name);
-    }
+    return getCurrentFunction()->getAttributeNames();
   }
-  return names;
+  return std::vector<std::string>{};
 }
 
 IFunction_sptr FunctionModel::getSingleFunction(int index) const {
@@ -480,11 +472,10 @@ std::vector<std::string> FunctionModel::getGlobalParameters() const { return m_g
 void FunctionModel::setGlobalParameters(const std::vector<std::string> &globals) { m_globalParameterNames = globals; }
 
 std::vector<std::string> FunctionModel::getLocalParameters() const {
+  auto const parameterNames = getParameterNames();
   std::vector<std::string> locals;
-  for (auto const &name : getParameterNames()) {
-    if (!isGlobal(name))
-      locals.emplace_back(name);
-  }
+  std::copy_if(parameterNames.cbegin(), parameterNames.cend(), std::back_inserter(locals),
+               [&](const std::string &parameterName) { return !isGlobal(parameterName); });
   return locals;
 }
 

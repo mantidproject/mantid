@@ -451,9 +451,8 @@ void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalT
 void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
   std::vector<std::string> globals;
   globals.reserve(globalParameters.size());
-  for (auto const &global : globalParameters) {
-    globals.emplace_back(global.m_parameter);
-  }
+  std::transform(globalParameters.cbegin(), globalParameters.cend(), std::back_inserter(globals),
+                 [](GlobalParameter const &globalParam) { return globalParam.m_parameter; });
   m_functionTreeView->setGlobalParameters(globals);
 }
 

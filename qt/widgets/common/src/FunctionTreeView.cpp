@@ -942,7 +942,7 @@ std::string FunctionTreeView::getParameterName(QtProperty *prop) const {
   if (isParameter(prop)) {
     return getIndex(prop) + prop->propertyName().toStdString();
   } else {
-    auto parent = getParentParameterProperty(prop);
+    auto const *parent = getParentParameterProperty(prop);
     return getIndex(prop) + parent->propertyName().toStdString();
   }
 }
@@ -1046,7 +1046,7 @@ bool FunctionTreeView::hasTie(QtProperty *prop) const {
   if (!prop)
     return false;
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
+  foreach (QtProperty const *child, children) {
     if (child->propertyName() == "Tie") {
       return true;
     }
@@ -1073,7 +1073,7 @@ QString FunctionTreeView::getTie(QtProperty *prop) const {
     return m_tieManager->value(prop);
   }
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
+  foreach (QtProperty const *child, children) {
     if (child->propertyName() == "Tie") {
       return m_tieManager->value(child);
     }
@@ -1146,7 +1146,7 @@ bool FunctionTreeView::hasLowerBound(QtProperty *prop) const {
   auto props = prop->subProperties();
   if (props.isEmpty())
     return false;
-  foreach (QtProperty *p, props) {
+  foreach (QtProperty const *p, props) {
     if (dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
         p->propertyName() == "LowerBound")
       return true;
@@ -1164,7 +1164,7 @@ bool FunctionTreeView::hasUpperBound(QtProperty *prop) const {
   auto props = prop->subProperties();
   if (props.isEmpty())
     return false;
-  foreach (QtProperty *p, props) {
+  foreach (QtProperty const *p, props) {
     if (dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
         p->propertyName() == "UpperBound")
       return true;
@@ -1452,7 +1452,7 @@ void FunctionTreeView::setParameter(std::string const &parameterName, double val
 void FunctionTreeView::setParameterError(std::string const &parameterName, double error) {
   std::string index, name;
   std::tie(index, name) = splitParameterName(parameterName);
-  if (auto prop = getFunctionProperty(index)) {
+  if (auto const *prop = getFunctionProperty(index)) {
     auto children = prop->subProperties();
     foreach (QtProperty *child, children) {
       if (isParameter(child) && child->propertyName().toStdString() == name) {
@@ -1531,7 +1531,7 @@ void FunctionTreeView::setVectorAttribute(std::string const &attrName, std::vect
  * @param paramName :: Parameter name
  */
 double FunctionTreeView::getParameter(std::string const &parameterName) const {
-  auto prop = getParameterProperty(parameterName);
+  auto const *prop = getParameterProperty(parameterName);
   return m_parameterManager->value(prop);
 }
 /**
@@ -1558,7 +1558,7 @@ IFunction::Attribute FunctionTreeView::getAttribute(std::string const &attrName)
 QtProperty *FunctionTreeView::getParameterProperty(std::string const &parameterName) const {
   std::string index, name;
   std::tie(index, name) = splitParameterName(parameterName);
-  if (auto prop = getFunctionProperty(index)) {
+  if (auto const *prop = getFunctionProperty(index)) {
     auto children = prop->subProperties();
     foreach (QtProperty *child, children) {
       if (isParameter(child) && child->propertyName().toStdString() == name) {
@@ -1878,7 +1878,7 @@ std::pair<std::string, std::string> FunctionTreeView::getFunctionAndConstraint(Q
   auto const parName = getParameterName(prop);
   double lower = Mantid::EMPTY_DBL();
   double upper = Mantid::EMPTY_DBL();
-  for (auto p : prop->subProperties()) {
+  for (auto const *p : prop->subProperties()) {
     if (p->propertyName() == "LowerBound")
       lower = m_constraintManager->value(p);
     if (p->propertyName() == "UpperBound")

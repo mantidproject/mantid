@@ -189,7 +189,7 @@ void SingleFunctionTemplateBrowser::setParameterPropertyValue(QtProperty *prop, 
 
 void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   ScopedFalse _false(m_emitParameterValueChange);
-  for (auto &parameterName : m_parameterMap.keys()) {
+  for (auto const &parameterName : m_parameterMap.keys()) {
     auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
     m_parameterManager->setGlobal(m_parameterMap[parameterName], findIter != globals.cend());
   }
