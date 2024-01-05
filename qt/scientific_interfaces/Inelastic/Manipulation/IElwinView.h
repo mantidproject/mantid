@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
-#include "IAddWorkspaceDialog.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include <QModelIndexList>
@@ -20,7 +20,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectPlotOptionsView;
+class OutputPlotOptionsView;
 class IElwinPresenter;
 
 class MANTIDQT_INELASTIC_DLL IElwinView {
@@ -28,7 +28,7 @@ class MANTIDQT_INELASTIC_DLL IElwinView {
 public:
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
-  virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
+  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;

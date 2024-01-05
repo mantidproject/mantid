@@ -1,104 +1,71 @@
 set(SRC_FILES
-    DensityOfStates.cpp
-    ILLEnergyTransfer.cpp
-    ISISCalibration.cpp
-    ISISDiagnostics.cpp
-    IndirectAddWorkspaceDialog.cpp
-    IndirectDataReduction.cpp
-    IndirectDataReductionTab.cpp
-    IndirectDataValidationHelper.cpp
-    IndirectDiffractionReduction.cpp
-    IndirectInstrumentConfig.cpp
-    IndirectInterface.cpp
-    IndirectMolDyn.cpp
-    IndirectPlotOptionsModel.cpp
-    IndirectPlotOptionsPresenter.cpp
-    IndirectPlotOptionsView.cpp
-    IndirectSassena.cpp
-    IndirectSettings.cpp
-    IndirectSettingsHelper.cpp
-    IndirectSettingsModel.cpp
-    IndirectSettingsPresenter.cpp
-    IndirectSettingsView.cpp
-    IndirectSimulation.cpp
-    IndirectSimulationTab.cpp
-    IndirectTab.cpp
-    IndirectTools.cpp
-    IndirectToolsTab.cpp
-    IndirectTransmission.cpp
-    IndirectTransmissionCalc.cpp
+    Common/IndirectInstrumentConfig.cpp
+    Diffraction/IndirectDiffractionReduction.cpp
+    Reduction/IndirectDataReduction.cpp
+    Reduction/IndirectDataReductionTab.cpp
+    Reduction/IndirectTransmission.cpp
+    Reduction/ILLEnergyTransfer.cpp
+    Reduction/ISISCalibration.cpp
+    Reduction/ISISDiagnostics.cpp
     Reduction/ISISEnergyTransferValidator.cpp
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
     Reduction/ReductionAlgorithmUtils.cpp
+    Simulation/DensityOfStates.cpp
+    Simulation/IndirectMolDyn.cpp
+    Simulation/IndirectSassena.cpp
+    Simulation/IndirectSimulation.cpp
+    Simulation/IndirectSimulationTab.cpp
+    Tools/IndirectTools.cpp
+    Tools/IndirectToolsTab.cpp
+    Tools/IndirectTransmissionCalc.cpp
 )
 
 set(MOC_FILES
-    DensityOfStates.h
-    IAddWorkspaceDialog.h
-    IIndirectSettingsView.h
-    ILLEnergyTransfer.h
-    IndirectAddWorkspaceDialog.h
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
-    IndirectDiffractionReduction.h
-    IndirectInstrumentConfig.h
-    IndirectInterface.h
-    IndirectMolDyn.h
-    IndirectPlotOptionsView.h
-    IndirectSassena.h
-    IndirectSettings.h
-    IndirectSettingsView.h
-    IndirectSimulation.h
-    IndirectSimulationTab.h
-    IndirectTab.h
-    IndirectTools.h
-    IndirectToolsTab.h
-    IndirectTransmissionCalc.h
-    IndirectTransmission.h
-    ISISCalibration.h
-    ISISDiagnostics.h
+    Common/IndirectInstrumentConfig.h
+    Diffraction/IndirectDiffractionReduction.h
+    Reduction/IndirectDataReduction.h
+    Reduction/IndirectDataReductionTab.h
+    Reduction/IndirectTransmission.h
+    Reduction/ILLEnergyTransfer.h
+    Reduction/ISISCalibration.h
+    Reduction/ISISDiagnostics.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
+    Simulation/DensityOfStates.h
+    Simulation/IndirectMolDyn.h
+    Simulation/IndirectSassena.h
+    Simulation/IndirectSimulation.h
+    Simulation/IndirectSimulationTab.h
+    Tools/IndirectTools.h
+    Tools/IndirectToolsTab.h
+    Tools/IndirectTransmissionCalc.h
 )
 
 set(INC_FILES
-    DllConfig.h
-    IndirectDataValidationHelper.h
-    IndirectPlotOptionsModel.h
-    IndirectPlotOptionsPresenter.h
-    IndirectSettingsHelper.h
-    IndirectSettingsPresenter.h
-    Notifier.h
-    Reduction/ISISEnergyTransferData.h
-    Reduction/ISISEnergyTransferValidator.h
-    Reduction/ISISEnergyTransferModelUtils.h
-    Reduction/ISISEnergyTransferModel.h
-    Reduction/ReductionAlgorithmUtils.h
+    DllConfig.h Reduction/ISISEnergyTransferData.h Reduction/ISISEnergyTransferValidator.h
+    Reduction/ISISEnergyTransferModelUtils.h Reduction/ISISEnergyTransferModel.h Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES
-    DensityOfStates.ui
-    ILLEnergyTransfer.ui
-    ISISCalibration.ui
-    ISISDiagnostics.ui
+    Common/IndirectInstrumentConfig.ui
+    Diffraction/IndirectDiffractionReduction.ui
+    Reduction/IndirectDataReduction.ui
+    Reduction/IndirectTransmission.ui
+    Reduction/ILLEnergyTransfer.ui
+    Reduction/ISISCalibration.ui
+    Reduction/ISISDiagnostics.ui
     Reduction/ISISEnergyTransfer.ui
-    IndirectAddWorkspaceDialog.ui
-    IndirectDataReduction.ui
-    IndirectDiffractionReduction.ui
-    IndirectInstrumentConfig.ui
-    IndirectInterfaceSettings.ui
-    IndirectMolDyn.ui
-    IndirectPlotOptions.ui
-    IndirectSassena.ui
-    IndirectSimulation.ui
-    IndirectTools.ui
-    IndirectTransmission.ui
-    IndirectTransmissionCalc.ui
+    Simulation/DensityOfStates.ui
+    Simulation/IndirectMolDyn.ui
+    Simulation/IndirectSassena.ui
+    Simulation/IndirectSimulation.ui
+    Tools/IndirectTools.ui
+    Tools/IndirectTransmissionCalc.ui
 )
 
-set(RES_FILES IndirectInterfaceResources.qrc)
+set(RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
@@ -125,6 +92,7 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
+                   MantidScientificInterfacesInelastic
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"

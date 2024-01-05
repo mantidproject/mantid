@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
-#include "IAddWorkspaceDialog.h"
 #include "ui_FqFitAddWorkspaceDialog.h"
 
 namespace MantidQt {

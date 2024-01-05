@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
-#include "IAddWorkspaceDialog.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 
 namespace MantidQt {

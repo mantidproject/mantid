@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
-#include "IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -340,7 +340,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
  * Plots the current preview on the miniplot
  */
 void Quasi::plotCurrentPreview() {
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   if (m_uiForm.ppPlot->hasCurve("fit.1")) {
     QString program = m_uiForm.cbProgram->currentText();
@@ -500,7 +500,7 @@ int Quasi::displaySaveDirectoryMessage() {
  */
 void Quasi::plotClicked() {
   setPlotResultIsPlotting(true);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Output options
   std::string const plot = m_uiForm.cbPlot->currentText().toStdString();

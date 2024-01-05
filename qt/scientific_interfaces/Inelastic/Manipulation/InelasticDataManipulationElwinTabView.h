@@ -8,7 +8,7 @@
 
 #include "Analysis/IndirectFitDataModel.h"
 
-#include "IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"
@@ -33,7 +33,7 @@ public:
   void subscribePresenter(IElwinPresenter *presenter) override;
   void setup() override;
 
-  IndirectPlotOptionsView *getPlotOptions() const override;
+  OutputPlotOptionsView *getPlotOptions() const override;
   void setFBSuffixes(QStringList const &suffix) override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;

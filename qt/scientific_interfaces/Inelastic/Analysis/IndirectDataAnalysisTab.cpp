@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 
 #include "FitTabConstants.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -388,7 +388,7 @@ void IndirectDataAnalysisTab::plotSelectedSpectra(std::vector<SpectrumToPlot> co
  * @errorBars :: true if you want error bars to be plotted
  */
 void IndirectDataAnalysisTab::plotSpectrum(std::string const &workspaceName, std::size_t const &index) {
-  m_plotter->plotSpectra(workspaceName, std::to_string(index), IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotSpectra(workspaceName, std::to_string(index), SettingsHelper::externalPlotErrorBars());
 }
 
 /**

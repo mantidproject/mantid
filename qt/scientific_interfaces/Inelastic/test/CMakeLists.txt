@@ -18,6 +18,11 @@ set(TEST_FILES
     Analysis/IndirectFitPropertyBrowserTest.h
     Analysis/IndirectFittingModelTest.h
     Analysis/IqtFitModelTest.h
+    Common/IndirectDataValidationHelperTest.h
+    Common/OutputPlotOptionsModelTest.h
+    Common/OutputPlotOptionsPresenterTest.h
+    Common/SettingsModelTest.h
+    Common/SettingsPresenterTest.h
     Manipulation/InelasticDataManipulationElwinTabModelTest.h
     Manipulation/InelasticDataManipulationIqtTabModelTest.h
     Manipulation/InelasticDataManipulationMomentsTabModelTest.h
@@ -25,7 +30,7 @@ set(TEST_FILES
     Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
 )
 
-set(TEST_HELPERS ../../Indirect/IndirectDataValidationHelper.cpp Analysis/MockObjects.h)
+set(TEST_HELPERS Analysis/MockObjects.h Common/MockObjects.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 

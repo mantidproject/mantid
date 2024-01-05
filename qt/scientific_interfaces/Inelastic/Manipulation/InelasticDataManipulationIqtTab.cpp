@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationIqtTab.h"
 
-#include "IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -29,7 +29,7 @@ InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent
     : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationIqtTabView>(parent)),
       m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_iqtResFileType(), m_selectedSpectrum(0) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
 }
 
 InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() {}
@@ -205,7 +205,7 @@ void InelasticDataManipulationIqtTab::plotCurrentPreview() {
   auto previewWs = getPreviewPlotWorkspace();
   auto inputWs = getInputWorkspace();
   auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected
   if (previewWs) {

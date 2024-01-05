@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -83,7 +83,7 @@ InelasticDataManipulationIqtTabView::~InelasticDataManipulationIqtTabView() {
   m_iqtTree->unsetFactoryForManager(m_dblManager);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationIqtTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+OutputPlotOptionsView *InelasticDataManipulationIqtTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 
 void InelasticDataManipulationIqtTabView::setup() {
   m_iqtTree = new QtTreePropertyBrowser();

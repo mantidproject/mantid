@@ -26,7 +26,7 @@ class MANTIDQT_INELASTIC_DLL InelasticDataManipulationIqtTabView : public QWidge
 public:
   InelasticDataManipulationIqtTabView(QWidget *parent = nullptr);
   ~InelasticDataManipulationIqtTabView();
-  IndirectPlotOptionsView *getPlotOptions();
+  OutputPlotOptionsView *getPlotOptions();
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum);
   void setPreviewSpectrumMaximum(int value);
   void updateDisplayedBinParameters();

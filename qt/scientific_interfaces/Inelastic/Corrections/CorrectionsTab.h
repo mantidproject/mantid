@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectPlotOptionsPresenter.h"
-#include "IndirectTab.h"
+#include "Common/IndirectTab.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -69,7 +69,7 @@ public:
   CorrectionsTab(QWidget *parent = nullptr);
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Used to clear the workspaces held by the output plotting widget
@@ -109,7 +109,7 @@ private:
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
