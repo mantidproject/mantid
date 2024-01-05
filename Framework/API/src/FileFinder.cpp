@@ -471,7 +471,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
 
   g_log.information() << "Unable to find file path for " << hint << "\n";
 
-  return API::Result<std::string>("", "File not found.");
+  return API::Result<std::string>("", path.errors());
 }
 
 /**
@@ -666,17 +666,19 @@ const API::Result<std::string> FileFinderImpl::getArchivePath(const std::vector<
     g_log.debug() << iter << " ";
   g_log.debug() << "])\n";
 
+  string errors = "";
   for (const auto &arch : archs) {
     try {
       g_log.debug() << "Getting archive path for requested files\n";
       auto path = arch->getArchivePath(filenames, exts);
-      if (path) {
+      if (path)
         return path;
-      }
+      else
+        errors += path.errors();
     } catch (...) {
     }
   }
-  return API::Result<std::string>("", "File not found.");
+  return API::Result<std::string>("", errors);
 }
 
 /**
@@ -740,21 +742,24 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   }
 
   // Search the archive
+  string errors = "";
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
     const auto archivePath = getArchivePath(archs, filenames, exts);
-    try {
-      if (archivePath && Poco::File(archivePath.result()).exists()) {
-        return archivePath;
+    if (archivePath) {
+      try {
+        if (Poco::File(archivePath.result()).exists())
+          return archivePath;
+      } catch (std::exception &e) {
+        g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
+        return API::Result<std::string>("", "Cannot open file.");
       }
-    } catch (std::exception &e) {
-      g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-      return API::Result<std::string>("", "Cannot open file.");
-    }
+    } else
+      errors += archivePath.errors();
 
   } // archs
 
-  return API::Result<std::string>("", "File not found.");
+  return API::Result<std::string>("", errors);
 }
 
 std::string FileFinderImpl::toUpper(const std::string &src) const {
