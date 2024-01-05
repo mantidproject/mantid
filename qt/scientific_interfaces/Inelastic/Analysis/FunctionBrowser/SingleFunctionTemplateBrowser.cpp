@@ -157,6 +157,11 @@ void SingleFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::st
 
 void SingleFunctionTemplateBrowser::updateParameterDescriptions(const QMap<int, std::string> &) {}
 
+void SingleFunctionTemplateBrowser::updateAvailableFunctions(
+    const std::map<std::string, std::string> &functionInitialisationStrings) {
+  m_presenter.updateAvailableFunctions(functionInitialisationStrings);
+}
+
 void SingleFunctionTemplateBrowser::setErrorsEnabled(bool enabled) {
   ScopedFalse _false(m_emitParameterValueChange);
   m_parameterManager->setErrorsEnabled(enabled);
