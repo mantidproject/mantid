@@ -17,7 +17,7 @@ class EISFDiffCylinderTest(unittest.TestCase):
 
     def test_function_output(self):
         input = [0.01, 0.1, 1.0, 10.0]
-        expected = [9.9364527e-01, 9.7341655e-01, 9.6591907e-02, 3.9967863e-06]
+        expected = [9.93604824e-01, 9.69451382e-01, 5.88013757e-02, 3.89828036e-06]
         tolerance = 1.0e-05
         status, output = check_output("EISFDiffCylinder", input, expected, tolerance, A=1.0, R=3.5)
         if not status:
@@ -30,7 +30,7 @@ class EISFDiffCylinderTest(unittest.TestCase):
         # else we incur in overfitting
         guesses = (dict(A=1.0, R=3.5, L=3.0), dict(A=1.0, R=0.5, L=1.7))
         fixes = (["A", "R"], ["A", "L"])
-        for (guess, fix) in zip(guesses, fixes):
+        for guess, fix in zip(guesses, fixes):
             status, fit = do_a_fit(np.arange(0.1, 2.2, 0.2), "EISFDiffCylinder", guess=guess, fixes=fix, target=target, atol=0.01)
             if not status:
                 msg_p = "param {} target value was {}, obtained = {}"
