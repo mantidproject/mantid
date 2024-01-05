@@ -396,7 +396,7 @@ FunctionTreeView::AProperty FunctionTreeView::addFunctionProperty(QtProperty *pa
 /**
  * Add a parameter property
  * @param parent :: Parent function property
- * @param paramName :: Parameter name
+ * @param parameterName :: Parameter name
  * @param paramDesc :: Parameter description
  * @param paramValue :: Parameter value
  */
@@ -1435,7 +1435,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop, bool
 
 /**
  * Updates the function parameter value
- * @param paramName :: Parameter name
+ * @param parameterName :: Parameter name
  * @param value :: New value
  */
 void FunctionTreeView::setParameter(std::string const &parameterName, double value) {
@@ -1446,7 +1446,7 @@ void FunctionTreeView::setParameter(std::string const &parameterName, double val
 
 /**
  * Updates the function parameter error
- * @param paramName :: Parameter name
+ * @param parameterName :: Parameter name
  * @param error :: New error
  */
 void FunctionTreeView::setParameterError(std::string const &parameterName, double error) {
@@ -1528,7 +1528,7 @@ void FunctionTreeView::setVectorAttribute(std::string const &attrName, std::vect
 }
 /**
  * Get a value of a parameter
- * @param paramName :: Parameter name
+ * @param parameterName :: Parameter name
  */
 double FunctionTreeView::getParameter(std::string const &parameterName) const {
   auto const *prop = getParameterProperty(parameterName);

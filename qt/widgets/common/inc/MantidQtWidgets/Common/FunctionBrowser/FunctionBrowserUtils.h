@@ -21,7 +21,7 @@ using namespace Mantid::API;
 
 /// Split a qualified parameter name into function index and local parameter
 /// name.
-/// @param paramName :: Fully qualified parameter name (includes function
+/// @param parameterName :: Fully qualified parameter name (includes function
 /// prefix)
 ///   for example: f0.f1.A0
 /// @return :: A pair with the first item is the function index and the

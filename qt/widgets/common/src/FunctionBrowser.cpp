@@ -89,7 +89,7 @@ IFunction_sptr FunctionBrowser::getFunctionByIndex(std::string const &index) {
 }
 /**
  * Updates the function parameter value
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  * @param value :: New value
  */
 void FunctionBrowser::setParameter(std::string const &parameterName, double value) {
@@ -98,7 +98,7 @@ void FunctionBrowser::setParameter(std::string const &parameterName, double valu
 
 /**
  * Updates the function parameter error
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  * @param error :: New error
  */
 void FunctionBrowser::setParameterError(std::string const &parameterName, double error) {
@@ -107,7 +107,7 @@ void FunctionBrowser::setParameterError(std::string const &parameterName, double
 
 /**
  * Get a value of a parameter
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  */
 double FunctionBrowser::getParameter(std::string const &parameterName) const {
   return m_presenter->getParameter(parameterName);
@@ -154,7 +154,7 @@ void FunctionBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
 
 /**
  * Get value of a local parameter
- * @param parName :: Name of a parameter.
+ * @param parameterName :: Name of a parameter.
  * @param i :: Data set index.
  */
 double FunctionBrowser::getLocalParameterValue(std::string const &parameterName, int i) const {
@@ -191,7 +191,7 @@ void FunctionBrowser::addDatasets(const QStringList &names) { m_presenter->addDa
 IFunction_sptr FunctionBrowser::getGlobalFunction() { return m_presenter->getFitFunction(); }
 
 /// Fix/unfix a local parameter
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 /// @param fixed :: Make it fixed (true) or free (false)
 void FunctionBrowser::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
@@ -199,21 +199,21 @@ void FunctionBrowser::setLocalParameterFixed(std::string const &parameterName, i
 }
 
 /// Check if a local parameter is fixed
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 bool FunctionBrowser::isLocalParameterFixed(std::string const &parameterName, int i) const {
   return m_presenter->isLocalParameterFixed(parameterName, i);
 }
 
 /// Get the tie for a local parameter.
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 std::string FunctionBrowser::getLocalParameterTie(std::string const &parameterName, int i) const {
   return m_presenter->getLocalParameterTie(parameterName, i);
 }
 
 /// Set a tie for a local parameter.
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 /// @param tie :: A tie string.
 void FunctionBrowser::setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) {

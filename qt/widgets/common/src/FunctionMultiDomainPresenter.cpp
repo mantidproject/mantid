@@ -317,7 +317,7 @@ void FunctionMultiDomainPresenter::viewChangedAttribute(std::string const &attrN
 
 /**
  * Launches the Edit Local Parameter dialog and deals with the input from it.
- * @param parName :: Name of parameter that button was clicked for.
+ * @param parameterName :: Name of parameter that button was clicked for.
  */
 void FunctionMultiDomainPresenter::editLocalParameter(std::string const &parameterName) {
   auto const datasetNames = getDatasetNames();

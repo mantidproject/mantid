@@ -110,7 +110,7 @@ public:
 
     auto result = MantidQt::MantidWidgets::convertQStringListToVector(qStringList);
     TS_ASSERT_EQUALS(qStringList.size(), result.size());
-    for (auto i = 0u; i < qStringList.size(); ++i) {
+    for (auto i = 0; i < qStringList.size(); ++i) {
       TS_ASSERT_EQUALS(qStringList[i].toStdString(), result[i]);
     }
   }
@@ -120,7 +120,7 @@ public:
 
     auto result = MantidQt::MantidWidgets::convertQListToVector(qList);
     TS_ASSERT_EQUALS(qList.size(), result.size());
-    for (auto i = 0u; i < qList.size(); ++i) {
+    for (auto i = 0; i < qList.size(); ++i) {
       TS_ASSERT_EQUALS(qList[i], result[i]);
     }
   }
