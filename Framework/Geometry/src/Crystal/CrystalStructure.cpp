@@ -7,7 +7,6 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include <algorithm>
 #include <stdexcept>
-#include <iostream>
 
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
