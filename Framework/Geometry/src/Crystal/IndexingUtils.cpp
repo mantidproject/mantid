@@ -1315,11 +1315,10 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
   int n_steps = boost::math::iround(1.0 + (max_d - min_d) / delta_d);
 
   std::vector<V3D> selected_dirs;
-  V3D dir_temp;
 
   for (const auto &current_dir : full_list) {
     for (int step = 0; step <= n_steps; step++) {
-      dir_temp = current_dir;
+      V3D dir_temp = current_dir;
       dir_temp *= (min_d + step * delta_d); // increasing size
 
       int num_indexed = 0;
@@ -1351,10 +1350,8 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
   indexed_qs.reserve(q_vectors.size());
 
   directions.clear();
-  V3D current_dir;
-  V3D diff;
   for (const auto &selected_dir : selected_dirs) {
-    current_dir = selected_dir;
+    V3D current_dir = selected_dir;
 
     GetIndexedPeaks_1D(current_dir, q_vectors, required_tolerance, index_vals, indexed_qs, fit_error);
 
@@ -1365,13 +1362,12 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
     {
       bool duplicate = false;
       for (const auto &direction : directions) {
-        dir_temp = direction;
-        diff = current_dir - dir_temp;
+        V3D diff = current_dir - direction;
         // discard same direction
         if (diff.norm() < 0.001) {
           duplicate = true;
         } else {
-          diff = current_dir + dir_temp;
+          diff = current_dir + direction;
           // discard opposite direction
           if (diff.norm() < 0.001) {
             duplicate = true;
@@ -1507,8 +1503,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   int num_indexed;
   V3D current_dir;
   for (const auto &dir_num : temp_dirs_2) {
-    current_dir = dir_num;
-    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    num_indexed = NumberIndexed_1D(dir_num, q_vectors, required_tolerance);
     if (num_indexed > max_indexed)
       max_indexed = num_indexed;
   }
