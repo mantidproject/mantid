@@ -227,25 +227,17 @@ void LoadFullprofResolution::exec() {
 void LoadFullprofResolution::loadFile(const string &filename, vector<string> &lines) {
   string line;
 
-  // the variable of type ifstream:
   ifstream myfile(filename.c_str());
 
-  // check to see if the file is opened:
   if (myfile.is_open()) {
-    // while there are still lines in the
-    // file, keep reading:
     while (!myfile.eof()) {
-      // place the line from myfile into the
-      // line variable:
       getline(myfile, line);
 
-      // display the line we gathered:
       boost::algorithm::trim(line);
       if (!line.empty())
         lines.emplace_back(line);
     }
 
-    // close the stream:
     myfile.close();
   } else {
     stringstream errmsg;
