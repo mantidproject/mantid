@@ -45,6 +45,7 @@ std::string EXPORT_OPT_MANTIDQT_COMMON optionsToString(std::map<std::string, std
 
 QStringList EXPORT_OPT_MANTIDQT_COMMON convertVectorToQStringList(std::vector<std::string> const &vec);
 std::vector<std::string> EXPORT_OPT_MANTIDQT_COMMON convertQStringListToVector(QStringList const &qList);
+std::vector<std::string> EXPORT_OPT_MANTIDQT_COMMON convertQListToVector(QList<std::string> const &qList);
 
 } // namespace MantidWidgets
 } // namespace MantidQt

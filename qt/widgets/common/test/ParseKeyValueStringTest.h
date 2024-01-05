@@ -115,6 +115,16 @@ public:
     }
   }
 
+  void test_convertQListToVector() {
+    QList<std::string> qList{"a", "b", "c"};
+
+    auto result = MantidQt::MantidWidgets::convertQListToVector(qList);
+    TS_ASSERT_EQUALS(qList.size(), result.size());
+    for (auto i = 0u; i < qList.size(); ++i) {
+      TS_ASSERT_EQUALS(qList[i], result[i]);
+    }
+  }
+
 private:
   template <class StringType> void assertTestStringOutputsAreCorrect(std::map<StringType, StringType> kvp) {
     TS_ASSERT_EQUALS(kvp["a"], "1");

@@ -592,21 +592,21 @@ boost::optional<std::string> IqtFunctionModel::getExp1Prefix() const {
   if (m_numberOfExponentials == 0)
     return boost::optional<std::string>();
   if (m_numberOfExponentials == 1 && !m_hasStretchExponential && m_background.empty())
-    return "";
-  return "f0.";
+    return std::string("");
+  return std::string("f0.");
 }
 
 boost::optional<std::string> IqtFunctionModel::getExp2Prefix() const {
   if (m_numberOfExponentials < 2)
     return boost::optional<std::string>();
-  return "f1.";
+  return std::string("f1.");
 }
 
 boost::optional<std::string> IqtFunctionModel::getStretchPrefix() const {
   if (!m_hasStretchExponential)
     return boost::optional<std::string>();
   if (m_numberOfExponentials == 0 && m_background.empty())
-    return "";
+    return std::string("");
   return "f" + std::to_string(m_numberOfExponentials) + ".";
 }
 
@@ -614,7 +614,7 @@ boost::optional<std::string> IqtFunctionModel::getBackgroundPrefix() const {
   if (m_background.empty())
     return boost::optional<std::string>();
   if (m_numberOfExponentials == 0 && !m_hasStretchExponential)
-    return "";
+    return std::string("");
   return "f" + std::to_string(m_numberOfExponentials + (m_hasStretchExponential ? 1 : 0)) + ".";
 }
 

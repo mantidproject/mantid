@@ -288,4 +288,12 @@ std::vector<std::string> convertQStringListToVector(QStringList const &qList) {
   return vec;
 }
 
+std::vector<std::string> convertQListToVector(QList<std::string> const &qList) {
+  std::vector<std::string> vec;
+  vec.reserve(static_cast<std::size_t>(qList.size()));
+  std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
+                 [](std::string const &element) { return element; });
+  return vec;
+}
+
 } // namespace MantidQt::MantidWidgets

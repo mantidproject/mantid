@@ -11,6 +11,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <unordered_map>
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -55,7 +56,7 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
     m_globalParameterStore.insert(functionInfo.first, std::vector<std::string>());
   }
   // Sort the FunctionList as None should always appear first
-  m_fitTypeList = m_fitTypeToFunctionStore.keys().toVector().toStdVector();
+  m_fitTypeList = convertQListToVector(m_fitTypeToFunctionStore.keys());
   sortFunctionList(m_fitTypeList);
   m_fitType = m_fitTypeList.front();
 }
@@ -64,7 +65,7 @@ std::vector<std::string> SingleFunctionTemplateModel::getFunctionList() { return
 
 int SingleFunctionTemplateModel::getEnumIndex() {
   auto const findIter = std::find(m_fitTypeList.cbegin(), m_fitTypeList.cend(), m_fitType);
-  return findIter != m_fitTypeList.cend() ? std::distance(m_fitTypeList.cbegin(), findIter) : -1;
+  return findIter != m_fitTypeList.cend() ? static_cast<int>(std::distance(m_fitTypeList.cbegin(), findIter)) : -1;
 }
 
 void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
