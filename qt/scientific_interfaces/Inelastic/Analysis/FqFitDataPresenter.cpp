@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
+#include "FitTabConstants.h"
 #include "IDAFunctionParameterEstimation.h"
 #include "MantidAPI/TextAxis.h"
 
@@ -197,10 +198,16 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
+
 FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
                                        IIndirectFitDataView *view)
     : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance(), m_fitPropertyBrowser() {}
+
+
+void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {
+  m_fitPropertyBrowser = browser;
+}
 
 bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
@@ -236,9 +243,11 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
 
   if (paramType == "Width") {
+    m_fitPropertyBrowser->updateFunctionListInBrowser(FqFit::WIDTH_FITS);
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
   } else if (paramType == "EISF") {
+    m_fitPropertyBrowser->updateFunctionListInBrowser(FqFit::EISF_FITS);
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.eisfSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
   } else {

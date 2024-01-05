@@ -40,8 +40,12 @@ using namespace MantidWidgets;
 
 class FunctionTemplateBrowser;
 class FitStatusWidget;
-
-class MANTIDQT_INELASTIC_DLL IndirectFitPropertyBrowser : public QDockWidget {
+class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {
+public:
+  virtual ~IIndirectFitPropertyBrowser() = default;
+  virtual void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings);
+};
+class MANTIDQT_INELASTIC_DLL IndirectFitPropertyBrowser : public QDockWidget, public IIndirectFitPropertyBrowser {
   Q_OBJECT
 
 public:
@@ -84,7 +88,7 @@ public:
   void estimateFunctionParameters();
   void setBackgroundA0(double value);
   void setHiddenProperties(const std::vector<std::string> &);
-  void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings);
+  void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings) override;
 
 public slots:
   void fit();
