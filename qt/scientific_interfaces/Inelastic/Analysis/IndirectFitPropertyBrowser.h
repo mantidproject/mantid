@@ -84,6 +84,7 @@ public:
   void estimateFunctionParameters();
   void setBackgroundA0(double value);
   void setHiddenProperties(const std::vector<std::string> &);
+  void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings);
 
 public slots:
   void fit();
