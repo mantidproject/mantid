@@ -796,14 +796,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroup.cpp:54
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1160
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1177
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1184
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1356
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1367
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1509
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1519
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1551
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1560
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/StructureFactorCalculatorSummation.cpp:55
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroupFactory.cpp:29
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroupFactory.cpp:29

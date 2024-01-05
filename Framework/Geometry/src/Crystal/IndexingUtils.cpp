@@ -1174,14 +1174,14 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB, const std::vector<V3D> &q_vector
   std::vector<V3D> selected_b_dirs;
   std::vector<V3D> selected_c_dirs;
 
-  for (auto &a_dir_num : a_dir_list) {
+  for (const auto &a_dir_num : a_dir_list) {
     a_dir_temp = a_dir_num;
     a_dir_temp = V3D(a_dir_temp);
     a_dir_temp *= a;
 
     b_dir_list = MakeCircleDirections(boost::numeric_cast<int>(num_b_steps), a_dir_temp, gamma_degrees);
 
-    for (auto &b_dir_num : b_dir_list) {
+    for (const auto &b_dir_num : b_dir_list) {
       b_dir_temp = b_dir_num;
       b_dir_temp = V3D(b_dir_temp);
       b_dir_temp *= b;
@@ -1353,7 +1353,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
   directions.clear();
   V3D current_dir;
   V3D diff;
-  for (auto &selected_dir : selected_dirs) {
+  for (const auto &selected_dir : selected_dirs) {
     current_dir = selected_dir;
 
     GetIndexedPeaks_1D(current_dir, q_vectors, required_tolerance, index_vals, indexed_qs, fit_error);
@@ -1364,7 +1364,7 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
     if (length >= min_d && length <= max_d) // only keep if within range
     {
       bool duplicate = false;
-      for (auto &direction : directions) {
+      for (const auto &direction : directions) {
         dir_temp = direction;
         diff = current_dir - dir_temp;
         // discard same direction
@@ -1506,7 +1506,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   max_indexed = 0;
   int num_indexed;
   V3D current_dir;
-  for (auto &dir_num : temp_dirs_2) {
+  for (const auto &dir_num : temp_dirs_2) {
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed > max_indexed)
@@ -1516,7 +1516,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   // only keep original directions that index
   // at least 50% of max num indexed
   temp_dirs.clear();
-  for (auto &dir_num : temp_dirs_2) {
+  for (const auto &dir_num : temp_dirs_2) {
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed >= 0.50 * max_indexed)
@@ -1548,7 +1548,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   }
   // discard those with length out of bounds
   temp_dirs_2.clear();
-  for (auto &temp_dir : temp_dirs) {
+  for (const auto &temp_dir : temp_dirs) {
     current_dir = temp_dir;
     double length = current_dir.norm();
     if (length >= 0.8 * min_d && length <= 1.2 * max_d)
@@ -1557,7 +1557,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   // only keep directions that index at
   // least 75% of the max number of peaks
   temp_dirs.clear();
-  for (auto &dir_num : temp_dirs_2) {
+  for (const auto &dir_num : temp_dirs_2) {
     current_dir = dir_num;
     num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
     if (num_indexed > max_indexed * 0.75)
