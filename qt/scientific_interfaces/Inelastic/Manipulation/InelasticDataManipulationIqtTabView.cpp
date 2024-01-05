@@ -4,10 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "InelasticDataManipulationIqtTabView.h"
+#include "InelasticDataManipulationIqtTab.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/ITableWorkspace.h"
+
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -53,6 +57,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
     toIqt->setProperty("EnergyMax", energyMax);
     toIqt->setProperty("BinReductionFactor", binReductionFactor);
     toIqt->setProperty("DryRun", true);
+    toIqt->setLogging(false);
     toIqt->execute();
     propsTable = toIqt->getProperty("ParameterWorkspace");
     // the algorithm can create output even if it failed...
@@ -60,6 +65,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
     deleter->initialize();
     deleter->setChild(true);
     deleter->setProperty("Workspace", paramTableName);
+    deleter->setLogging(false);
     deleter->execute();
   } catch (std::exception &) {
     return std::make_tuple(false, 0.0f, 0, 0);
@@ -72,8 +78,9 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-using namespace IDA;
-InelasticDataManipulationIqtTabView::InelasticDataManipulationIqtTabView(QWidget *parent) : m_iqtTree(nullptr) {
+
+InelasticDataManipulationIqtTabView::InelasticDataManipulationIqtTabView(QWidget *parent)
+    : m_presenter(), m_iqtTree(nullptr) {
   m_uiForm.setupUi(parent);
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
@@ -83,7 +90,7 @@ InelasticDataManipulationIqtTabView::~InelasticDataManipulationIqtTabView() {
   m_iqtTree->unsetFactoryForManager(m_dblManager);
 }
 
-OutputPlotOptionsView *InelasticDataManipulationIqtTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+OutputPlotOptionsView *InelasticDataManipulationIqtTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void InelasticDataManipulationIqtTabView::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
@@ -133,26 +140,143 @@ void InelasticDataManipulationIqtTabView::setup() {
   xRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   // signals / slots & validators
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SIGNAL(sampDataReady(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SIGNAL(resDataReady(const QString &)));
-  connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SIGNAL(iterationsChanged(int)));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SIGNAL(plotCurrentPreview()));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SIGNAL(errorsClicked(int)));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(handleErrorsClicked(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SIGNAL(previewSpectrumChanged(int)));
-  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SLOT(notifySampDataReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(notifyResDataReady(const QString &)));
+  connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SLOT(notifyIterationsChanged(int)));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(notifyErrorsClicked(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(notifyPreviewSpectrumChanged(int)));
+  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyUpdateEnergyRange(int)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SIGNAL(valueChanged(QtProperty *, double)));
+          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(notifyValueChanged(QtProperty *, double)));
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
-  iterationsChanged(m_uiForm.spIterations->value());
-  errorsClicked(1);
+  notifyIterationsChanged(m_uiForm.spIterations->value());
+  notifyErrorsClicked(1);
   m_dblManager->setValue(m_properties["SampleBinning"], 10);
+}
+
+void InelasticDataManipulationIqtTabView::subscribePresenter(IIqtPresenter *presenter) { m_presenter = presenter; }
+
+void InelasticDataManipulationIqtTabView::notifySampDataReady(const QString &filename) {
+  m_presenter->handleSampDataReady(filename.toStdString());
+}
+
+void InelasticDataManipulationIqtTabView::notifyResDataReady(const QString &resFilename) {
+  m_presenter->handleResDataReady(resFilename.toStdString());
+}
+
+void InelasticDataManipulationIqtTabView::notifyIterationsChanged(int iterations) {
+  m_presenter->handleIterationsChanged(iterations);
+}
+
+void InelasticDataManipulationIqtTabView::notifyRunClicked() { m_presenter->handleRunClicked(); }
+
+void InelasticDataManipulationIqtTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
+
+void InelasticDataManipulationIqtTabView::notifyPlotCurrentPreview() { m_presenter->handlePlotCurrentPreview(); }
+
+void InelasticDataManipulationIqtTabView::notifyErrorsClicked(int state) {
+  m_uiForm.spIterations->setEnabled(state);
+  m_presenter->handleErrorsClicked(state);
+}
+
+void InelasticDataManipulationIqtTabView::notifyPreviewSpectrumChanged(int spectra) {
+  m_presenter->handlePreviewSpectrumChanged(spectra);
+}
+
+void InelasticDataManipulationIqtTabView::notifyUpdateEnergyRange(int state) {
+  if (state != 0) {
+    auto const value = m_dblManager->value(m_properties["ELow"]);
+    m_dblManager->setValue(m_properties["EHigh"], -value);
+  }
+}
+
+void InelasticDataManipulationIqtTabView::notifyValueChanged(QtProperty *prop, double value) {
+  m_presenter->handleValueChanged(prop->propertyName().toStdString(), value);
+}
+
+/**
+ * Updates the range selectors and properties when range selector is moved.
+ *
+ * @param min Range selector min value
+ * @param max Range selector max value
+ */
+void InelasticDataManipulationIqtTabView::notifyRangeChanged(double min, double max) {
+  double oldMin = m_dblManager->value(m_properties["ELow"]);
+  double oldMax = m_dblManager->value(m_properties["EHigh"]);
+
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
+
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+  if (fabs(oldMin - min) > 0.0000001) {
+    m_dblManager->setValue(m_properties["ELow"], min);
+    xRangeSelector->setMinimum(min);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["EHigh"], -min);
+      xRangeSelector->setMaximum(-min);
+    }
+  }
+
+  if (fabs(oldMax - max) > 0.0000001) {
+    m_dblManager->setValue(m_properties["EHigh"], max);
+    xRangeSelector->setMaximum(max);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["ELow"], -max);
+      xRangeSelector->setMinimum(-max);
+    }
+  }
+
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+  updateDisplayedBinParameters();
+}
+
+/**
+ * Updates the range selectors when the ELow or EHigh property is changed in the
+ * table.
+ *
+ * @param prop The property which has been changed
+ * @param val The new position for the range selector
+ */
+void InelasticDataManipulationIqtTabView::notifyUpdateRangeSelector(QtProperty *prop, double val) {
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
+
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+  if (prop == m_properties["ELow"]) {
+    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["EHigh"], -val);
+      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
+    }
+
+  } else if (prop == m_properties["EHigh"]) {
+    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["ELow"], -val);
+      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
+    }
+  }
+
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+  updateDisplayedBinParameters();
 }
 
 void InelasticDataManipulationIqtTabView::setPreviewSpectrumMaximum(int value) {
@@ -178,24 +302,25 @@ bool InelasticDataManipulationIqtTabView::validate() {
     uiv.addErrorMessage("ELow must be less than EHigh.\n");
 
   auto const message = uiv.generateErrorMessage();
-  showMessageBox(message);
+  if (!message.isEmpty())
+    showMessageBox(message.toStdString());
 
   return message.isEmpty();
 }
 
-void InelasticDataManipulationIqtTabView::setSampleFBSuffixes(QStringList const suffix) {
+void InelasticDataManipulationIqtTabView::setSampleFBSuffixes(const QStringList &suffix) {
   m_uiForm.dsInput->setFBSuffixes(suffix);
 }
 
-void InelasticDataManipulationIqtTabView::setSampleWSSuffixes(QStringList const suffix) {
+void InelasticDataManipulationIqtTabView::setSampleWSSuffixes(const QStringList &suffix) {
   m_uiForm.dsInput->setWSSuffixes(suffix);
 }
 
-void InelasticDataManipulationIqtTabView::setResolutionFBSuffixes(QStringList const suffix) {
+void InelasticDataManipulationIqtTabView::setResolutionFBSuffixes(const QStringList &suffix) {
   m_uiForm.dsResolution->setFBSuffixes(suffix);
 }
 
-void InelasticDataManipulationIqtTabView::setResolutionWSSuffixes(QStringList const suffix) {
+void InelasticDataManipulationIqtTabView::setResolutionWSSuffixes(const QStringList &suffix) {
   m_uiForm.dsResolution->setWSSuffixes(suffix);
 }
 
@@ -218,47 +343,6 @@ void InelasticDataManipulationIqtTabView::plotInput(MatrixWorkspace_sptr inputWS
   if (inputWS && inputWS->x(spectrum).size() > 1) {
     m_uiForm.ppPlot->addSpectrum("Sample", inputWS, spectrum);
   }
-}
-
-/**
- * Updates the range selectors and properties when range selector is moved.
- *
- * @param min Range selector min value
- * @param max Range selector max value
- */
-void InelasticDataManipulationIqtTabView::rangeChanged(double min, double max) {
-  double oldMin = m_dblManager->value(m_properties["ELow"]);
-  double oldMax = m_dblManager->value(m_properties["EHigh"]);
-
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
-
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateRangeSelector(QtProperty *, double)));
-
-  if (fabs(oldMin - min) > 0.0000001) {
-    m_dblManager->setValue(m_properties["ELow"], min);
-    xRangeSelector->setMinimum(min);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["EHigh"], -min);
-      xRangeSelector->setMaximum(-min);
-    }
-  }
-
-  if (fabs(oldMax - max) > 0.0000001) {
-    m_dblManager->setValue(m_properties["EHigh"], max);
-    xRangeSelector->setMaximum(max);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["ELow"], -max);
-      xRangeSelector->setMinimum(-max);
-    }
-  }
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-
-  updateDisplayedBinParameters();
 }
 
 void InelasticDataManipulationIqtTabView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace,
@@ -306,86 +390,6 @@ void InelasticDataManipulationIqtTabView::setRangeSelectorDefault(const MatrixWo
 }
 
 /**
- * Updates the range selectors when the ELow or EHigh property is changed in the
- * table.
- *
- * @param prop The property which has been changed
- * @param val The new position for the range selector
- */
-void InelasticDataManipulationIqtTabView::updateRangeSelector(QtProperty *prop, double val) {
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
-
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateRangeSelector(QtProperty *, double)));
-
-  if (prop == m_properties["ELow"]) {
-    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["EHigh"], -val);
-      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
-    }
-
-  } else if (prop == m_properties["EHigh"]) {
-    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["ELow"], -val);
-      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
-    }
-  }
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-
-  updateDisplayedBinParameters();
-}
-
-/**
- * Calculates binning parameters.
- */
-void InelasticDataManipulationIqtTabView::updateDisplayedBinParameters() {
-  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
-  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
-  auto &ads = AnalysisDataService::Instance();
-  if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
-    return;
-
-  double energyMin = m_dblManager->value(m_properties["ELow"]);
-  double energyMax = m_dblManager->value(m_properties["EHigh"]);
-  double numBins = m_dblManager->value(m_properties["SampleBinning"]);
-
-  if (numBins == 0)
-    return;
-  if (energyMin == 0 && energyMax == 0)
-    return;
-
-  bool success(false);
-  float energyWidth(0.0f);
-  int resolutionBins(0), sampleBins(0);
-  std::tie(success, energyWidth, sampleBins, resolutionBins) =
-      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax, numBins);
-  if (success) {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-               SLOT(updateRangeSelector(QtProperty *, double)));
-
-    // Update data in property editor
-    m_dblManager->setValue(m_properties["EWidth"], energyWidth);
-    m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
-    m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
-
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-            SLOT(updateRangeSelector(QtProperty *, double)));
-
-    // Warn for low number of resolution bins
-    if (resolutionBins < 5)
-      showMessageBox("Results may be inaccurate as ResolutionBins is "
-                     "less than 5.\nLower the SampleBinning.");
-  }
-}
-
-/**
  * Set the minimum of a range selector if it is less than the maximum value.
  * To be used when changing the min or max via the Property table
  *
@@ -419,17 +423,56 @@ void InelasticDataManipulationIqtTabView::setRangeSelectorMax(QtProperty *minPro
     m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
 }
 
-void InelasticDataManipulationIqtTabView::updateEnergyRange(int state) {
-  if (state != 0) {
-    auto const value = m_dblManager->value(m_properties["ELow"]);
-    m_dblManager->setValue(m_properties["EHigh"], -value);
+/**
+ * Calculates binning parameters.
+ */
+void InelasticDataManipulationIqtTabView::updateDisplayedBinParameters() {
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
+  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
+
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
+    return;
+
+  double energyMin = m_dblManager->value(m_properties["ELow"]);
+  double energyMax = m_dblManager->value(m_properties["EHigh"]);
+  double numBins = m_dblManager->value(m_properties["SampleBinning"]);
+
+  if (numBins == 0)
+    return;
+  if (energyMin == 0 && energyMax == 0)
+    return;
+
+  bool success(false);
+  float energyWidth(0.0f);
+  int resolutionBins(0), sampleBins(0);
+  std::tie(success, energyWidth, sampleBins, resolutionBins) =
+      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax, numBins);
+  if (success) {
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+               SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+    // Update data in property editor
+    m_dblManager->setValue(m_properties["EWidth"], energyWidth);
+    m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
+    m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
+
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+            SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+
+    // Warn for low number of resolution bins
+    if (resolutionBins < 5)
+      showMessageBox("Results may be inaccurate as ResolutionBins is "
+                     "less than 5.\nLower the SampleBinning.");
   }
 }
 
-void InelasticDataManipulationIqtTabView::handleErrorsClicked(int state) { m_uiForm.spIterations->setEnabled(state); }
-
-std::string InelasticDataManipulationIqtTabView::getSampleName() {
+std::string InelasticDataManipulationIqtTabView::getSampleName() const {
   return m_uiForm.dsInput->getCurrentDataName().toStdString();
+}
+
+void InelasticDataManipulationIqtTabView::showMessageBox(const std::string &message) const {
+  QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));
 }
 
 } // namespace MantidQt::CustomInterfaces

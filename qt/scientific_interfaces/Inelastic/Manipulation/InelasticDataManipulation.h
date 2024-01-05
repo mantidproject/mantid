@@ -74,40 +74,13 @@ private:
   void closeEvent(QCloseEvent *close) override;
 
   /**
-   * Adds a tab to the cache of tabs that can be shown.
+   * Adds an MVP tab to the cache of tabs that can be shown.
    *
-   * THis method is used to ensure that the tabs are always loaded and their
+   * This method is used to ensure that the tabs are always loaded and their
    * layouts setup for the sake of screenshoting them for documentation.
    *
    * @param name Name to be displayed on tab
    */
-  template <typename TabPresenter> void addTab(const QString &name) {
-    QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
-    QVBoxLayout *tabLayout = new QVBoxLayout(tabWidget);
-    tabWidget->setLayout(tabLayout);
-
-    QScrollArea *tabScrollArea = new QScrollArea(tabWidget);
-    tabLayout->addWidget(tabScrollArea);
-    tabScrollArea->setWidgetResizable(true);
-
-    QWidget *tabContent = new QWidget(tabScrollArea);
-    tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
-    tabScrollArea->setWidget(tabContent);
-    tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    InelasticDataManipulationTab *tabIDRContent = new TabPresenter(tabContent);
-
-    tabIDRContent->setupTab();
-    tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
-
-    // Add to the cache
-    m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
-
-    // Add all tabs to UI initially
-    m_uiForm.twIDRTabs->addTab(tabWidget, name);
-  }
 
   template <typename TabPresenter, typename TabView> void addMVPTab(const QString &name) {
     QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
