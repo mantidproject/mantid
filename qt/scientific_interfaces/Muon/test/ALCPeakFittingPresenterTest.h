@@ -19,6 +19,8 @@
 #include "../Muon/IALCPeakFittingModel.h"
 #include "../Muon/IALCPeakFittingView.h"
 
+#include <boost/optional/optional_io.hpp>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
