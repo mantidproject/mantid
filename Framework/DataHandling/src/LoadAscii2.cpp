@@ -408,7 +408,6 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, con
  */
 void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns) {
   m_lineNo = 0;
-  std::vector<double> values;
   // processheader will also look for a base number of columns, to save time
   // here if possible
   // but if the user specifies a number of lines to skip that check won't happen
@@ -433,6 +432,7 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<st
                                      std::to_string(cols) + ".");
           } else if (cols != 1) {
             try {
+              std::vector<double> values;
               fillInputValues(values, columns);
             } catch (boost::bad_lexical_cast &) {
               continue;
@@ -484,7 +484,6 @@ void LoadAscii2::processHeader(std::ifstream &file) {
       ++row;
       boost::trim(line);
 
-      std::list<std::string> columns;
       size_t lineCols = 0;
 
       if (!line.empty()) {
@@ -502,6 +501,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
           continue;
         }
         if (std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') {
+          std::list<std::string> columns;
           lineCols = this->splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 delimiters if it is

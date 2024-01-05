@@ -1157,8 +1157,6 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB, const std::vector<V3D> &q_vector
 
   std::vector<V3D> a_dir_list = MakeHemisphereDirections(boost::numeric_cast<int>(num_a_steps));
 
-  std::vector<V3D> b_dir_list;
-
   V3D a_dir_temp;
   V3D b_dir_temp;
   V3D c_dir_temp;
@@ -1179,7 +1177,8 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB, const std::vector<V3D> &q_vector
     a_dir_temp = V3D(a_dir_temp);
     a_dir_temp *= a;
 
-    b_dir_list = MakeCircleDirections(boost::numeric_cast<int>(num_b_steps), a_dir_temp, gamma_degrees);
+    std::vector<V3D> b_dir_list =
+        MakeCircleDirections(boost::numeric_cast<int>(num_b_steps), a_dir_temp, gamma_degrees);
 
     for (const auto &b_dir_num : b_dir_list) {
       b_dir_temp = b_dir_num;

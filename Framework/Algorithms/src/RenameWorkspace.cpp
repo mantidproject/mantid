@@ -52,8 +52,6 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
 
   // get the output workspace name
   std::string outputwsName = getPropertyValue("OutputWorkspace");
-  // check if we are overriding existing workspaces
-  bool overrideWorkspaces = getProperty("OverwriteExisting");
 
   // First check input and output names are different
   if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace")) {
@@ -65,6 +63,8 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
 
   // Test to see if the output already exists
   if (AnalysisDataService::Instance().doesExist(outputwsName)) {
+    // check if we are overriding existing workspaces
+    bool overrideWorkspaces = getProperty("OverwriteExisting");
     // Output name already exists - either remove or error
     if (!overrideWorkspaces) {
       // If we try to delete the workspace here a subtle bug is introduced

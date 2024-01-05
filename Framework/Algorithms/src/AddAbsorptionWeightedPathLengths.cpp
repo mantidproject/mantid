@@ -120,7 +120,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
     Peak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
-    std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA), absFactorErrors(NLAMBDA);
+    std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA);
 
     bool useSinglePath = getProperty("UseSinglePath");
     if (useSinglePath) {
@@ -142,7 +142,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
     } else {
       MersenneTwister rng(seed + int(i));
       MCInteractionStatistics detStatistics(peak.getDetectorID(), inputWS->sample());
-
+      std::vector<double> absFactorErrors(NLAMBDA);
       strategy.calculate(rng, peak.getDetectorPosition(), lambdas, peakWavelength, absFactors, absFactorErrors,
                          detStatistics);
 

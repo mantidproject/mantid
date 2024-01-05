@@ -225,12 +225,11 @@ void LoadFullprofResolution::exec() {
  * @param lines :: vector of strings for each non-empty line in .irf file
  */
 void LoadFullprofResolution::loadFile(const string &filename, vector<string> &lines) {
-  string line;
-
   ifstream myfile(filename.c_str());
 
   if (myfile.is_open()) {
     while (!myfile.eof()) {
+      string line;
       getline(myfile, line);
 
       boost::algorithm::trim(line);
