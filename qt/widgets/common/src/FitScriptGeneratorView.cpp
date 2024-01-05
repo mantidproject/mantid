@@ -49,10 +49,6 @@ template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qLi
   return vec;
 }
 
-QString globalToQString(MantidQt::MantidWidgets::GlobalParameter const &global) {
-  return QString::fromStdString(global.m_parameter);
-}
-
 template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
   QList<T> qList;
   qList.reserve(static_cast<int>(vec.size()));

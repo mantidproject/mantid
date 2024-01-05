@@ -100,7 +100,7 @@ signals:
 
   /// Parameter value is changed in the Function Browser _either by user or
   /// programmatically_
-  void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void parameterChanged(std::string const &funcIndex, std::string const &paramName);
 
   /// Request to plot guess
   void plotGuessClicked();

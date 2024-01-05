@@ -244,8 +244,7 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       auto const names = subType->getParameterNames(index);
       auto const descriptions = subType->getParameterDescriptions(index);
       QList<QtProperty *> props;
-      auto const np = names.size();
-      for (int i = 0; i < np; ++i) {
+      for (auto i = 0u; i < names.size(); ++i) {
         auto prop = m_parameterManager->addProperty(QString::fromStdString(names[i]));
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);

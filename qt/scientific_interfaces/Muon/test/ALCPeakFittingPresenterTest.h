@@ -43,7 +43,7 @@ public:
   void requestFit() { emit fitRequested(); }
   void changeCurrentFunction() { emit currentFunctionChanged(); }
   void changePeakPicker() { emit peakPickerChanged(); }
-  void changeParameter(const QString &funcIndex, const QString &paramName) {
+  void changeParameter(std::string const &funcIndex, std::string const &paramName) {
     emit parameterChanged(funcIndex, paramName);
   }
   void plotGuess() override { emit plotGuessClicked(); }
@@ -244,7 +244,7 @@ public:
                                        AllOf(Property(&IPeakFunction::centre, 4), Property(&IPeakFunction::fwhm, 2),
                                              Property(&IPeakFunction::height, 6)))));
 
-    m_view->changeParameter(QString("f1"), QString("Sigma"));
+    m_view->changeParameter("f1", "Sigma");
   }
 
   // parameterChanged signal is thrown in many scenarios - we want to update the
@@ -256,7 +256,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
-    m_view->changeParameter(QString("f1"), QString("Sigma"));
+    m_view->changeParameter("f1", "Sigma");
   }
 
   void test_onParameterChanged_nonPeak() {
@@ -266,7 +266,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
-    m_view->changeParameter(QString("f1"), QString("A0"));
+    m_view->changeParameter("f1", "A0");
   }
 
   void test_helpPage() {
