@@ -104,9 +104,14 @@ void DiffractionFocussing2::cleanup() {
   groupAtWorkspaceIndex.clear();
   std::vector<int>().swap(groupAtWorkspaceIndex);
   group2xvector.clear();
+  group2xvector = std::map<int, HistogramData::BinEdges>();
+  group2xstep.clear();
+  group2xstep = std::map<int, double>();
   group2wgtvector.clear();
   this->m_validGroups.clear();
+  std::vector<Indexing::SpectrumNumber>().swap(m_validGroups);
   this->m_wsIndices.clear();
+  std::vector<std::vector<std::size_t>>().swap(this->m_wsIndices);
 }
 
 //=============================================================================
@@ -331,20 +336,25 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it - bin boundaries will be replaced later
-  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(), HistogramData::BinEdges(2));
+  auto eventOutputW = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(), HistogramData::BinEdges(2));
 
-  // determine if this is in-place operation
-  bool inPlace = false;
+  // determine if this is an in-place operation so events can be deleted from the in put while running
+  bool inPlace;
   {
     MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
     inPlace = bool(m_matrixInputW == outputWS);
   }
-  if (inPlace)
+  if (inPlace) {
     g_log.debug("Focussing EventWorkspace in-place.");
+  }
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   const auto eventinputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
   const EventType eventWtype = eventinputWS->getEventType();
+  if (inPlace) {
+    // MRU isn't needed since the workspace will be deleted soon
+    std::const_pointer_cast<EventWorkspace>(eventinputWS)->clearMRU();
+  }
 
   std::unique_ptr<Progress> prog = std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
@@ -368,10 +378,10 @@ void DiffractionFocussing2::execEvent() {
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
     const auto group = static_cast<int>(m_validGroups[iGroup]);
-    EventList &groupEL = out->getSpectrum(iGroup);
+    EventList &groupEL = eventOutputW->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
+    groupEL.clear(true); // remove detector ids
     groupEL.reserve(size_required[iGroup]);
-    groupEL.clearDetectorIDs();
     groupEL.setSpectrumNo(group);
     prog->reportIncrement(1, "Allocating");
   }
@@ -383,12 +393,12 @@ void DiffractionFocussing2::execEvent() {
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
-    EventList &groupEL = out->getSpectrum(0);
+    EventList &groupEL = eventOutputW->getSpectrum(0);
     const std::vector<size_t> &indices = this->m_wsIndices[0];
 
-    int chunkSize = 200;
+    constexpr int chunkSize{200};
 
-    int end = (totalHistProcess / chunkSize) + 1;
+    const int end = (totalHistProcess / chunkSize) + 1;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wiChunk = 0; wiChunk < end; wiChunk++) {
@@ -427,14 +437,14 @@ void DiffractionFocussing2::execEvent() {
       const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
-        out->getSpectrum(iGroup) += eventinputWS->getSpectrum(wi);
+        eventOutputW->getSpectrum(iGroup) += eventinputWS->getSpectrum(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 
         // When focussing in place, you can clear out old memory from the input
         // one!
         if (inPlace) {
-          std::const_pointer_cast<EventWorkspace>(eventinputWS)->getSpectrum(wi).clear();
+          std::const_pointer_cast<EventWorkspace>(eventinputWS)->getSpectrum(wi).clear(true);
         }
       }
       PARALLEL_END_INTERRUPT_REGION
@@ -451,7 +461,7 @@ void DiffractionFocussing2::execEvent() {
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
-    if (workspaceIndex >= out->getNumberHistograms()) {
+    if (workspaceIndex >= eventOutputW->getNumberHistograms()) {
       g_log.warning() << "Warning! Invalid workspace index found for group # " << group
                       << ". Histogram will be empty.\n";
       continue;
@@ -462,17 +472,17 @@ void DiffractionFocussing2::execEvent() {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
         // Reset Histogram instead of BinEdges, the latter forbids size change.
-        out->setHistogram(workspaceIndex, BinEdges(git->second.cowData()));
+        eventOutputW->setHistogram(workspaceIndex, BinEdges(git->second.cowData()));
       else
         // Just use the 1st X vector it found, instead of nothin.
         // Reset Histogram instead of BinEdges, the latter forbids size change.
-        out->setHistogram(workspaceIndex, BinEdges(group2xvector.begin()->second.cowData()));
+        eventOutputW->setHistogram(workspaceIndex, BinEdges(group2xvector.begin()->second.cowData()));
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";
   }
-  out->clearMRU();
-  setProperty("OutputWorkspace", std::move(out));
+  eventOutputW->clearMRU();
+  setProperty("OutputWorkspace", std::move(eventOutputW));
 }
 
 //=============================================================================
