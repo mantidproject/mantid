@@ -57,7 +57,7 @@ public:
   BraggScatterer_sptr clone() const override;
 
   virtual void addScatterer(const BraggScatterer_sptr &scatterer);
-  virtual void addScatterers(const BraggScatterer_sptr &scatterer);
+  void addScatterers(const std::vector<BraggScatterer_sptr> &scatterer);
   void setScatterers(const std::vector<BraggScatterer_sptr> &scatterers);
   size_t nScatterers() const;
   BraggScatterer_sptr getScatterer(size_t i) const;
