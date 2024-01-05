@@ -42,14 +42,6 @@ std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indi
   return workspaceIndices;
 }
 
-std::vector<std::string> convertToStdVector(QStringList const &qList) {
-  std::vector<std::string> vec;
-  vec.reserve(static_cast<std::size_t>(qList.size()));
-  std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
-                 [](QString const &element) { return element.toStdString(); });
-  return vec;
-}
-
 template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qList) {
   std::vector<T> vec;
   vec.reserve(static_cast<std::size_t>(qList.size()));
@@ -57,10 +49,8 @@ template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qLi
   return vec;
 }
 
-QString toQString(std::string const &str) { return QString::fromStdString(str); }
-
 QString globalToQString(MantidQt::MantidWidgets::GlobalParameter const &global) {
-  return toQString(global.m_parameter);
+  return QString::fromStdString(global.m_parameter);
 }
 
 template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
@@ -406,8 +396,8 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
   return {m_editLocalParameterDialog->getParameterName(),
           convertQListToStdVector(m_editLocalParameterDialog->getValues()),
           convertQListToStdVector(m_editLocalParameterDialog->getFixes()),
-          convertToStdVector(m_editLocalParameterDialog->getTies()),
-          convertToStdVector(m_editLocalParameterDialog->getConstraints())};
+          convertQStringListToVector(m_editLocalParameterDialog->getTies()),
+          convertQStringListToVector(m_editLocalParameterDialog->getConstraints())};
 }
 
 std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
