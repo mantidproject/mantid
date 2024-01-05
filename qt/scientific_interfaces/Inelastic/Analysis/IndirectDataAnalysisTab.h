@@ -84,6 +84,7 @@ public:
 
   void setupOutputOptionsPresenter(bool const editResults = false);
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
+  void subscribeFitBrowserToDataPresenter();
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
