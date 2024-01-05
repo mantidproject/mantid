@@ -82,7 +82,7 @@ void CrystalStructure::setScatterers(const CompositeBraggScatterer_sptr &scatter
 /// Adds all scatterers in the supplied collection into the internal one
 /// (scatterers are copied).
 void CrystalStructure::addScatterers(const CompositeBraggScatterer_sptr &scatterers) {
-  m_scatterers->setScatterers(scatterers->getScatterers());
+  m_scatterers->addScatterers(scatterers->getScatterers());
 
   assignUnitCellToScatterers(m_cell);
 }
