@@ -788,7 +788,7 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:354
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Workspace2D.cpp:373
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:354
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:183
+constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/ReflectometryTransform.cpp:0
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/FakeMD.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/WorkspaceSingleValue.cpp:93
