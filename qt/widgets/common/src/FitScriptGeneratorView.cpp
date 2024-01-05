@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
@@ -60,14 +61,6 @@ QString toQString(std::string const &str) { return QString::fromStdString(str); 
 
 QString globalToQString(MantidQt::MantidWidgets::GlobalParameter const &global) {
   return toQString(global.m_parameter);
-}
-
-template <typename Function, typename T>
-QStringList convertToQStringList(Function const &func, std::vector<T> const &vec) {
-  QStringList qList;
-  qList.reserve(static_cast<int>(vec.size()));
-  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList), func);
-  return qList;
 }
 
 template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
@@ -399,9 +392,9 @@ void FitScriptGeneratorView::openEditLocalParameterDialog(
     std::vector<std::string> const &domainNames, std::vector<double> const &values, std::vector<bool> const &fixes,
     std::vector<std::string> const &ties, std::vector<std::string> const &constraints) {
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      this, parameter, convertToQStringList(toQString, workspaceNames), convertToQStringList(toQString, domainNames),
-      convertToQList(values), convertToQList(fixes), convertToQStringList(toQString, ties),
-      convertToQStringList(toQString, constraints));
+      this, parameter, convertVectorToQStringList(workspaceNames), convertVectorToQStringList(domainNames),
+      convertToQList(values), convertToQList(fixes), convertVectorToQStringList(ties),
+      convertVectorToQStringList(constraints));
 
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(onEditLocalParameterFinished(int)));
 

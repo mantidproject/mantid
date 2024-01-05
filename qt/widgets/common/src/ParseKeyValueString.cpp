@@ -271,4 +271,13 @@ std::string convertAlgPropsToString(Mantid::API::IAlgorithmRuntimeProps const &o
     return result + std::string(";") + prop + std::string("=") + options.getPropertyValue(prop);
   });
 }
+
+QStringList convertVectorToQStringList(std::vector<std::string> const &vec) {
+  QStringList qStringList;
+  qStringList.reserve(static_cast<int>(vec.size()));
+  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qStringList),
+                 [](std::string const &str) { return QString::fromStdString(str); });
+  return qStringList;
+}
+
 } // namespace MantidQt::MantidWidgets

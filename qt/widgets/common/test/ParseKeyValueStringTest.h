@@ -95,6 +95,16 @@ public:
     TS_ASSERT_EQUALS("", result);
   }
 
+  void test_convertVectorToQStringList() {
+    std::vector<std::string> vec{"a", "b", "c"};
+
+    auto result = MantidQt::MantidWidgets::convertVectorToQStringList(vec);
+    TS_ASSERT_EQUALS(vec.size(), result.size());
+    for (auto i = 0u; i < vec.size(); ++i) {
+      TS_ASSERT_EQUALS(vec[i], result[i].toStdString());
+    }
+  }
+
 private:
   template <class StringType> void assertTestStringOutputsAreCorrect(std::map<StringType, StringType> kvp) {
     TS_ASSERT_EQUALS(kvp["a"], "1");

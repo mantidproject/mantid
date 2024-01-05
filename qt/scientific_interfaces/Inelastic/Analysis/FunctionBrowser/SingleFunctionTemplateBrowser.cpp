@@ -16,6 +16,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
@@ -58,11 +59,7 @@ void SingleFunctionTemplateBrowser::createProperties() {
 
 void SingleFunctionTemplateBrowser::setDataType(std::vector<std::string> const &allowedFunctionsList) {
   ScopedFalse _false(m_emitEnumChange);
-  QStringList allowedFunctions;
-  for (auto const &func : allowedFunctionsList) {
-    allowedFunctions << QString::fromStdString(func);
-  }
-  m_enumManager->setEnumNames(m_fitType, allowedFunctions);
+  m_enumManager->setEnumNames(m_fitType, convertVectorToQStringList(allowedFunctionsList));
   m_enumManager->setValue(m_fitType, 0);
 }
 

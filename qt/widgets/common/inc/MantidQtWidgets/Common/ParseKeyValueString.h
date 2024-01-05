@@ -17,6 +17,7 @@ into a map of key/value pairs.
 #include "MantidKernel/System.h"
 
 #include <QString>
+#include <QStringList>
 #include <sstream>
 #include <string>
 
@@ -41,5 +42,8 @@ std::string EXPORT_OPT_MANTIDQT_COMMON convertAlgPropsToString(Mantid::API::IAlg
 std::string EXPORT_OPT_MANTIDQT_COMMON optionsToString(std::map<std::string, std::string> const &options,
                                                        const bool quoteValues = true,
                                                        const std::string &separator = ", ");
+
+QStringList EXPORT_OPT_MANTIDQT_COMMON convertVectorToQStringList(std::vector<std::string> const &vec);
+
 } // namespace MantidWidgets
 } // namespace MantidQt
