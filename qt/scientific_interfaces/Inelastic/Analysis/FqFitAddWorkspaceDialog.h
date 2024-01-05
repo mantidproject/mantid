@@ -10,11 +10,13 @@
 #include "DllConfig.h"
 #include "ui_FqFitAddWorkspaceDialog.h"
 
+#include <QDialog>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit FqFitAddWorkspaceDialog(QWidget *parent);
@@ -38,6 +40,7 @@ public slots:
   void emitParameterTypeChanged(const QString &index);
 
 signals:
+  void addData();
   void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
 

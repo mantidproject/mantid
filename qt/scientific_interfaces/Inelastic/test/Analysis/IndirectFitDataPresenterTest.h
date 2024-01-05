@@ -52,10 +52,9 @@ private:
   double m_dbl;
 };
 
-class FakeDialog : public IAddWorkspaceDialog {
+class MockDialog : public IAddWorkspaceDialog {
 
 public:
-  FakeDialog() : IAddWorkspaceDialog(nullptr) {}
   virtual std::string workspaceName() const override { return "Name"; }
   virtual void setWSSuffices(const QStringList &suffices) override { (void)suffices; }
   virtual void setFBSuffices(const QStringList &suffices) override { (void)suffices; }
@@ -129,7 +128,7 @@ public:
   ///----------------------------------------------------------------------
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_indirect() {
-    auto dialog = new FakeDialog();
+    auto dialog = new MockDialog();
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 

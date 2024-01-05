@@ -9,11 +9,13 @@
 #include "DllConfig.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 
+#include <QDialog>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit ConvFitAddWorkspaceDialog(QWidget *parent);
@@ -28,6 +30,9 @@ public:
   void setResolutionFBSuffices(const QStringList &suffices);
 
   void updateSelectedSpectra() override;
+
+signals:
+  void addData();
 
 private slots:
   void selectAllSpectra(int state);

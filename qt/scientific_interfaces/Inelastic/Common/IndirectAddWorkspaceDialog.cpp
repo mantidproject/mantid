@@ -67,7 +67,7 @@ const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_R
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
+IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.leWorkspaceIndices->setValidator(createValidator(SPECTRA_LIST, this).release());
   setAllSpectraSelectionEnabled(false);

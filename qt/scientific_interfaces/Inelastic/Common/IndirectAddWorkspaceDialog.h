@@ -10,11 +10,13 @@
 #include "IAddWorkspaceDialog.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
+#include <QDialog>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL IndirectAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit IndirectAddWorkspaceDialog(QWidget *parent);
@@ -28,6 +30,9 @@ public:
   void updateSelectedSpectra() override;
 
   std::string getFileName() const;
+
+signals:
+  void addData();
 
 private slots:
   void selectAllSpectra(int state);

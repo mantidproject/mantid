@@ -203,31 +203,20 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
-std::unique_ptr<IAddWorkspaceDialog>
-InelasticDataManipulationElwinTabView::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(this->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
+  auto dialog = new IndirectAddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(getSampleWSSuffices());
+  dialog->setFBSuffices(getSampleFBSuffices());
+  dialog->updateSelectedSpectra();
+  dialog->show();
+
+  m_addWorkspaceDialog = dialog;
 }
 
-void InelasticDataManipulationElwinTabView::notifyCloseDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
-}
-
-void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m_addWorkspaceDialog.get()); }
+void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m_addWorkspaceDialog); }
 
 /** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
  * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is

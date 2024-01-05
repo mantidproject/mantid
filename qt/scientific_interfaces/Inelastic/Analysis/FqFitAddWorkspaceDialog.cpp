@@ -12,7 +12,7 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
+FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));

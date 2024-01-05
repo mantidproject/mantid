@@ -97,7 +97,6 @@ private slots:
   void notifyAddWorkspaceDialog();
   void notifyAddData();
   void notifyRemoveDataClicked();
-  void notifyCloseDialog();
 
 private:
   void setHorizontalHeaders();
@@ -120,11 +119,9 @@ private:
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
   void addDataWksOrFile(IAddWorkspaceDialog const *dialog);
 
-  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
-
   IElwinPresenter *m_presenter;
   QtTreePropertyBrowser *m_elwTree;
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
+  IAddWorkspaceDialog *m_addWorkspaceDialog;
 
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtDoublePropertyManager *m_dblManager;

@@ -7,28 +7,22 @@
 #pragma once
 
 #include "DllConfig.h"
-#include <QDialog>
-#include <QObject>
+
+#include <string>
+
+#include <QStringList>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IAddWorkspaceDialog : public QDialog {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IAddWorkspaceDialog {
 public:
-  IAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {}
   virtual std::string workspaceName() const = 0;
   virtual void setWSSuffices(const QStringList &suffices) = 0;
   virtual void setFBSuffices(const QStringList &suffices) = 0;
 
   virtual void updateSelectedSpectra() = 0;
-
-  void closeEvent(QCloseEvent *) override { emit closeDialog(); }
-
-signals:
-  void addData();
-  void closeDialog();
 };
 
 } // namespace IDA

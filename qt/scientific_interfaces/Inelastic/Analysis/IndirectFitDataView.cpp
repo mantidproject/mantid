@@ -103,7 +103,6 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
   setHorizontalHeaders(headers);
 
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
-  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveClicked()));
   connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SLOT(notifyUnifyClicked()));
   connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
@@ -200,20 +199,16 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) {
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
 void IndirectFitDataView::showAddWorkspaceDialog() {
-  auto dialog = getAddWorkspaceDialog();
+  auto dialog = new IndirectAddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(m_wsSampleSuffixes);
   dialog->setFBSuffices(m_fbSampleSuffixes);
   dialog->updateSelectedSpectra();
   dialog->show();
-}
 
-IAddWorkspaceDialog *IndirectFitDataView::getAddWorkspaceDialog() {
-  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(parentWidget());
-
-  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
-
-  return m_addWorkspaceDialog;
+  m_addWorkspaceDialog = dialog;
 }
 
 void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
