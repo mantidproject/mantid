@@ -325,7 +325,7 @@ void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName
 }
 
 void FitScriptGeneratorView::openAddWorkspaceDialog() {
-  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(this);
+  m_addWorkspaceDialog = new AddWorkspaceDialog(this);
   m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(addWorkspaceDialogAccepted()));

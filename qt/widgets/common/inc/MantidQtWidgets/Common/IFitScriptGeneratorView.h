@@ -26,7 +26,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class IndirectAddWorkspaceDialog;
+class AddWorkspaceDialog;
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
 struct GlobalParameter;
@@ -128,7 +128,7 @@ public:
   virtual FitScriptGeneratorDataTable *tableWidget() const = 0;
   virtual QPushButton *removeButton() const = 0;
   virtual QPushButton *addWorkspaceButton() const = 0;
-  virtual IndirectAddWorkspaceDialog *addWorkspaceDialog() const = 0;
+  virtual AddWorkspaceDialog *addWorkspaceDialog() const = 0;
   virtual QPushButton *generateScriptToFileButton() const = 0;
   virtual QPushButton *generateScriptToClipboardButton() const = 0;
 };

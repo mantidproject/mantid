@@ -1,5 +1,5 @@
 set(SRC_FILES
-    src/IndirectAddWorkspaceDialog.cpp
+    src/AddWorkspaceDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
@@ -155,7 +155,7 @@ set(SRC_FILES
 )
 
 set(QT5_MOC_FILES
-    inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -338,7 +338,7 @@ set(QT5_INC_FILES
 )
 
 set(QT5_UI_FILES
-    inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui

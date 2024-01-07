@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -67,7 +67,7 @@ const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_R
 
 namespace MantidQt::MantidWidgets {
 
-IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
+AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.leWorkspaceIndices->setValidator(createValidator(SPECTRA_LIST, this).release());
   setAllSpectraSelectionEnabled(false);
@@ -78,28 +78,24 @@ IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : QDialo
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-std::string IndirectAddWorkspaceDialog::workspaceName() const {
+std::string AddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-FunctionModelSpectra IndirectAddWorkspaceDialog::workspaceIndices() const {
+FunctionModelSpectra AddWorkspaceDialog::workspaceIndices() const {
   return FunctionModelSpectra(m_uiForm.leWorkspaceIndices->text().toStdString());
 }
 
-void IndirectAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
-  m_uiForm.dsWorkspace->setWSSuffixes(suffices);
-}
+void AddWorkspaceDialog::setWSSuffices(const QStringList &suffices) { m_uiForm.dsWorkspace->setWSSuffixes(suffices); }
 
-void IndirectAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
-  m_uiForm.dsWorkspace->setFBSuffixes(suffices);
-}
+void AddWorkspaceDialog::setFBSuffices(const QStringList &suffices) { m_uiForm.dsWorkspace->setFBSuffixes(suffices); }
 
-void IndirectAddWorkspaceDialog::updateSelectedSpectra() {
+void AddWorkspaceDialog::updateSelectedSpectra() {
   auto const state = m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
   selectAllSpectra(state);
 }
 
-void IndirectAddWorkspaceDialog::selectAllSpectra(int state) {
+void AddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
   if (validWorkspace(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
@@ -108,7 +104,7 @@ void IndirectAddWorkspaceDialog::selectAllSpectra(int state) {
     m_uiForm.leWorkspaceIndices->setEnabled(true);
 }
 
-void IndirectAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
+void AddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
   const auto workspace = getWorkspace(name);
   if (workspace)
@@ -117,7 +113,7 @@ void IndirectAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) 
     setAllSpectraSelectionEnabled(false);
 }
 
-void IndirectAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
+void AddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
   if (m_uiForm.ckAllSpectra->isChecked()) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
@@ -125,12 +121,8 @@ void IndirectAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   }
 }
 
-void IndirectAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
-  m_uiForm.ckAllSpectra->setEnabled(doEnable);
-}
+void AddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) { m_uiForm.ckAllSpectra->setEnabled(doEnable); }
 
-std::string IndirectAddWorkspaceDialog::getFileName() const {
-  return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
-}
+std::string AddWorkspaceDialog::getFileName() const { return m_uiForm.dsWorkspace->getFullFilePath().toStdString(); }
 
 } // namespace MantidQt::MantidWidgets

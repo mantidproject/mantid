@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -204,7 +204,7 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  auto dialog = new IndirectAddWorkspaceDialog(parentWidget());
+  auto dialog = new AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -224,7 +224,7 @@ void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m
  */
 void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog const *dialog) {
   try {
-    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog);
     if (indirectDialog) {
       // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
       if (indirectDialog->getFileName().empty()) {
@@ -232,7 +232,7 @@ void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog
       } else
         m_presenter->handleAddDataFromFile(dialog);
     } else
-      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
+      (throw std::invalid_argument("Unable to access AddWorkspaceDialog"));
 
   } catch (const std::runtime_error &ex) {
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
@@ -337,7 +337,7 @@ void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(IAddWorkspac
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+  if (const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog)) {
     workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
     filename = QString::fromStdString(indirectDialog->getFileName());
   }

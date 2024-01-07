@@ -14,7 +14,7 @@
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;
@@ -82,7 +82,7 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_convfit() {
-    auto dialog = new MantidQt::MantidWidgets::IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 

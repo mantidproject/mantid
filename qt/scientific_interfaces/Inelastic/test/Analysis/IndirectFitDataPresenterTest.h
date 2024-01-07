@@ -15,7 +15,7 @@
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "Analysis/ParameterEstimation.h"
-#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -133,7 +133,7 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
-    auto dialog = new MantidQt::MantidWidgets::IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 

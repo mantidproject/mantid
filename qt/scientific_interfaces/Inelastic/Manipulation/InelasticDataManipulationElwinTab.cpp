@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -419,7 +419,7 @@ void InelasticDataManipulationElwinTab::handleAddData(IAddWorkspaceDialog const 
 void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
-    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog);
     QList<QString> allFiles;
     allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
     auto const suffixes = getFilteredSuffixes(allFiles);
@@ -440,7 +440,7 @@ void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialo
 }
 
 void InelasticDataManipulationElwinTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+  if (const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog))
     m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 

@@ -23,7 +23,7 @@ class IAddWorkspaceDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectAddWorkspaceDialog;
+class AddWorkspaceDialog;
 class IIndirectFitDataPresenter;
 
 class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public QTabWidget, public IIndirectFitDataView {

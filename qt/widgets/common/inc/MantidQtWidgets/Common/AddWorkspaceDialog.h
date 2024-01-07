@@ -9,7 +9,7 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "ui_IndirectAddWorkspaceDialog.h"
+#include "ui_AddWorkspaceDialog.h"
 
 #include <vector>
 
@@ -18,10 +18,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON IndirectAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
+class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit IndirectAddWorkspaceDialog(QWidget *parent);
+  explicit AddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   FunctionModelSpectra workspaceIndices() const;
@@ -44,7 +44,7 @@ private:
   void setWorkspace(const std::string &workspace);
   void setAllSpectraSelectionEnabled(bool doEnable);
 
-  Ui::IndirectAddWorkspaceDialog m_uiForm;
+  Ui::AddWorkspaceDialog m_uiForm;
 };
 
 } // namespace MantidWidgets
