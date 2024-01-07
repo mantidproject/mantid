@@ -23,7 +23,9 @@ class TestFunctionBrowser(GuiWindowTest):
     is_multi = False
 
     def create_widget(self):
-        return FunctionBrowser(None, self.is_multi)
+        widget = FunctionBrowser(None, self.is_multi)
+        # widget.resize(500, 500)  # The tests will fail when run on a high-resolution screen locally
+        return widget
 
     def view_set_parameter(self, param_name, value):
         view = self.widget.view()
