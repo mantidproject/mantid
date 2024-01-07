@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
+    src/IndirectAddWorkspaceDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
@@ -156,6 +157,7 @@ set(SRC_FILES
 
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -278,6 +280,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
+    inc/MantidQtWidgets/Common/IAddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -338,6 +341,7 @@ set(QT5_INC_FILES
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui

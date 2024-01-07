@@ -8,7 +8,6 @@
 
 #include "Analysis/IndirectFitDataModel.h"
 
-#include "Common/IAddWorkspaceDialog.h"
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"
@@ -16,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {

@@ -13,8 +13,8 @@
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
-#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;

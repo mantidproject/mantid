@@ -207,7 +207,7 @@ void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser
   m_fitPropertyBrowser = browser;
 }
 
-bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
+bool FqFitDataPresenter::addWorkspaceFromDialog(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(), fqFitDialog->parameterNameIndex());
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
@@ -321,7 +321,8 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &
   return types;
 }
 
-void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(
+    MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index

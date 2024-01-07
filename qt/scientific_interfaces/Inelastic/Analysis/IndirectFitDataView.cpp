@@ -7,8 +7,8 @@
 #include "IndirectFitDataView.h"
 #include "IndirectFitDataPresenter.h"
 
-#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 #include <QDoubleValidator>
 #include <QItemDelegate>
 #include <QRegExpValidator>
@@ -199,7 +199,7 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) {
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
 void IndirectFitDataView::showAddWorkspaceDialog() {
-  auto dialog = new IndirectAddWorkspaceDialog(parentWidget());
+  auto dialog = new MantidWidgets::IndirectAddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);

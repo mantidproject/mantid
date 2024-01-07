@@ -18,6 +18,7 @@
 #include "Analysis/IndirectFitPropertyBrowser.h"
 #include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;

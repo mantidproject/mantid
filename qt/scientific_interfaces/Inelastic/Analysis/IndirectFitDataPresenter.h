@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
 #include "IndirectFitDataView.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
@@ -26,7 +26,7 @@ class IIndirectDataAnalysisTab;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
 public:
-  virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleAddData(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveClicked() = 0;
   virtual void handleUnifyClicked() = 0;
   virtual void handleCellChanged(int row, int column) = 0;
@@ -38,7 +38,7 @@ public:
   IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
   std::vector<IndirectFitData> *getFittingData();
-  virtual bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog);
+  virtual bool addWorkspaceFromDialog(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
@@ -80,7 +80,7 @@ public:
 
   virtual void subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
-  void handleAddData(IAddWorkspaceDialog const *dialog) override;
+  void handleAddData(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;
   void handleUnifyClicked() override;
   void handleCellChanged(int row, int column) override;

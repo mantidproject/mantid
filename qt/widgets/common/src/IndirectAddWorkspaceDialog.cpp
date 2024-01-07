@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -65,7 +65,7 @@ const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::MantidWidgets {
 
 IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -133,4 +133,4 @@ std::string IndirectAddWorkspaceDialog::getFileName() const {
   return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::MantidWidgets

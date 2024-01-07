@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
-#include "Common/IAddWorkspaceDialog.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"
@@ -15,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {

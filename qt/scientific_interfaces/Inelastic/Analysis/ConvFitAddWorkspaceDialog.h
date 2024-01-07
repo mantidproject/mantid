@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 
 #include <QDialog>
@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit ConvFitAddWorkspaceDialog(QWidget *parent);

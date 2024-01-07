@@ -6,17 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-#include "IAddWorkspaceDialog.h"
+#include "DllOption.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
 #include <QDialog>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidWidgets {
 
-class MANTIDQT_INELASTIC_DLL IndirectAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
+class EXPORT_OPT_MANTIDQT_COMMON IndirectAddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit IndirectAddWorkspaceDialog(QWidget *parent);
@@ -45,6 +44,5 @@ private:
   Ui::IndirectAddWorkspaceDialog m_uiForm;
 };
 
-} // namespace IDA
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

@@ -18,7 +18,7 @@
 #include "Analysis/IIndirectFitPlotView.h"
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
-#include "Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
 #include <string>
 #include <utility>

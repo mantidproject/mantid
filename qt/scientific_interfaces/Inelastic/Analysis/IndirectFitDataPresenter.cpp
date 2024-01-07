@@ -10,7 +10,7 @@
 #include <map>
 #include <utility>
 
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -27,8 +27,8 @@ std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { retur
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
-bool IndirectFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<MantidQt::MantidWidgets::IndirectAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
     return true;
   }

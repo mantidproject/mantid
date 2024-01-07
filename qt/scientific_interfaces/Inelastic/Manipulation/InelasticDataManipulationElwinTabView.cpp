@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;

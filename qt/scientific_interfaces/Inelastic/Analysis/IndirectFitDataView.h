@@ -17,10 +17,12 @@
 #include <QTabWidget>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class IAddWorkspaceDialog;
+}
 namespace CustomInterfaces {
 namespace IDA {
 
-class IAddWorkspaceDialog;
 class IndirectAddWorkspaceDialog;
 class IIndirectFitDataPresenter;
 
@@ -65,7 +67,7 @@ protected:
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
 
-  IAddWorkspaceDialog *m_addWorkspaceDialog;
+  MantidWidgets::IAddWorkspaceDialog *m_addWorkspaceDialog;
   IIndirectFitDataPresenter *m_presenter;
 
 protected slots:
