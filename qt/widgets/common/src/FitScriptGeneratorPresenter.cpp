@@ -280,9 +280,12 @@ void FitScriptGeneratorPresenter::setWorkspaces(QStringList const &workspaceName
 void FitScriptGeneratorPresenter::addWorkspaces(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
                                                 FunctionModelSpectra const &workspaceIndices) {
   for (auto const &workspace : workspaces) {
+    auto const maxIndex = workspace->getNumberHistograms() - 1u;
     for (auto const &workspaceIndex : workspaceIndices) {
-      auto const xData = workspace->x(workspaceIndex.value);
-      addWorkspace(workspace, workspaceIndex, xData.front(), xData.back());
+      if (workspaceIndex.value <= maxIndex) {
+        auto const xData = workspace->x(workspaceIndex.value);
+        addWorkspace(workspace, workspaceIndex, xData.front(), xData.back());
+      }
     }
   }
   checkForWarningMessages();
