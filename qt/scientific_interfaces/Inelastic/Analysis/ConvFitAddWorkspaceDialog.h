@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 
@@ -22,7 +23,7 @@ public:
 
   std::string workspaceName() const override;
   std::string resolutionName() const;
-  std::string workspaceIndices() const;
+  MantidWidgets::FunctionModelSpectra workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;

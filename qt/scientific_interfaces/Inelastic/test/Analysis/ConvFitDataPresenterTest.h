@@ -51,7 +51,7 @@ public:
 
     m_workspace = createWorkspace(6);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_model->addWorkspace("WorkspaceName", "0-5");
+    m_model->addWorkspace("WorkspaceName", FunctionModelSpectra("0-5"));
   }
 
   void tearDown() override {
@@ -82,7 +82,7 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_convfit() {
-    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::IndirectAddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 

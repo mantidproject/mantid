@@ -7,8 +7,11 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
+
+#include <vector>
 
 #include <QDialog>
 
@@ -21,7 +24,7 @@ public:
   explicit IndirectAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
-  std::string workspaceIndices() const;
+  FunctionModelSpectra workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;

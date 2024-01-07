@@ -133,13 +133,14 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
-    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::IndirectAddWorkspaceDialog(nullptr);
     TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspace_with_spectra_calls_to_model() {
-    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", "0-3")).Times(Exactly(1));
-    m_presenter->addWorkspace("WorkspaceName", "0-3");
+    auto workpaceIndices = FunctionModelSpectra("0-3");
+    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", workpaceIndices)).Times(Exactly(1));
+    m_presenter->addWorkspace("WorkspaceName", workpaceIndices);
   }
 
   void test_setResolution_calls_to_model() {

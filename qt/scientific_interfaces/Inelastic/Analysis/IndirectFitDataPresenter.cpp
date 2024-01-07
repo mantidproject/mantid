@@ -35,8 +35,9 @@ bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidQt::MantidWidgets::I
   return false;
 }
 
-void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
-  m_model->addWorkspace(workspaceName, spectra);
+void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName,
+                                            const FunctionModelSpectra &workspaceIndices) {
+  m_model->addWorkspace(workspaceName, workspaceIndices);
 }
 
 void IndirectFitDataPresenter::setResolution(const std::string &name) {

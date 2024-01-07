@@ -1,5 +1,4 @@
 set(SRC_FILES
-    src/AddWorkspaceDialog.cpp
     src/IndirectAddWorkspaceDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
@@ -156,7 +155,6 @@ set(SRC_FILES
 )
 
 set(QT5_MOC_FILES
-    inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -340,7 +338,6 @@ set(QT5_INC_FILES
 )
 
 set(QT5_UI_FILES
-    inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/IndirectAddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
@@ -361,7 +358,6 @@ set(QT5_UI_FILES
 )
 
 set(MOC_FILES
-    inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -724,7 +720,6 @@ set(TEST_FILES
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES
-    test/AddWorkspaceDialogTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h

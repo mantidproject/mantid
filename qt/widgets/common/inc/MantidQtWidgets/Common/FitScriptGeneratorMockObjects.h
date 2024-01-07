@@ -85,7 +85,7 @@ public:
 
   MOCK_METHOD0(openAddWorkspaceDialog, void());
   MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
-  MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<WorkspaceIndex>());
+  MOCK_CONST_METHOD0(getDialogWorkspaceIndices, FunctionModelSpectra());
 
   MOCK_METHOD7(openEditLocalParameterDialog,
                void(std::string const &parameter, std::vector<std::string> const &workspaceNames,
@@ -116,7 +116,7 @@ public:
   MOCK_CONST_METHOD0(tableWidget, FitScriptGeneratorDataTable *());
   MOCK_CONST_METHOD0(removeButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceButton, QPushButton *());
-  MOCK_CONST_METHOD0(addWorkspaceDialog, AddWorkspaceDialog *());
+  MOCK_CONST_METHOD0(addWorkspaceDialog, IndirectAddWorkspaceDialog *());
   MOCK_CONST_METHOD0(generateScriptToFileButton, QPushButton *());
   MOCK_CONST_METHOD0(generateScriptToClipboardButton, QPushButton *());
 

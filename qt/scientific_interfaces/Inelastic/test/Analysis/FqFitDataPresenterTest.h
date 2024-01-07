@@ -94,7 +94,7 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
-    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::IndirectAddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 

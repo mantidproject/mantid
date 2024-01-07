@@ -85,8 +85,8 @@ std::string ConvFitAddWorkspaceDialog::resolutionName() const {
   return m_uiForm.dsResolution->getCurrentDataName().toStdString();
 }
 
-std::string ConvFitAddWorkspaceDialog::workspaceIndices() const {
-  return m_uiForm.leWorkspaceIndices->text().toStdString();
+MantidWidgets::FunctionModelSpectra ConvFitAddWorkspaceDialog::workspaceIndices() const {
+  return MantidWidgets::FunctionModelSpectra(m_uiForm.leWorkspaceIndices->text().toStdString());
 }
 
 void ConvFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {

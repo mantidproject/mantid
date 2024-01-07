@@ -39,7 +39,7 @@ public:
   ~IndirectFitDataPresenter();
   std::vector<IndirectFitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog);
-  void addWorkspace(const std::string &workspaceName, const std::string &spectra);
+  void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);

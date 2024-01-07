@@ -82,8 +82,8 @@ std::string IndirectAddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-std::string IndirectAddWorkspaceDialog::workspaceIndices() const {
-  return m_uiForm.leWorkspaceIndices->text().toStdString();
+FunctionModelSpectra IndirectAddWorkspaceDialog::workspaceIndices() const {
+  return FunctionModelSpectra(m_uiForm.leWorkspaceIndices->text().toStdString());
 }
 
 void IndirectAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {

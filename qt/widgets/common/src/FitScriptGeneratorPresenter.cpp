@@ -278,7 +278,7 @@ void FitScriptGeneratorPresenter::setWorkspaces(QStringList const &workspaceName
 }
 
 void FitScriptGeneratorPresenter::addWorkspaces(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
-                                                std::vector<WorkspaceIndex> const &workspaceIndices) {
+                                                FunctionModelSpectra const &workspaceIndices) {
   for (auto const &workspace : workspaces) {
     for (auto const &workspaceIndex : workspaceIndices) {
       auto const xData = workspace->x(workspaceIndex.value);

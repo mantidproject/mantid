@@ -34,14 +34,6 @@ using namespace MantidQt::API;
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
 
-std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indices) {
-  std::vector<WorkspaceIndex> workspaceIndices;
-  workspaceIndices.reserve(indices.size());
-  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(workspaceIndices),
-                 [](int index) { return WorkspaceIndex(index); });
-  return workspaceIndices;
-}
-
 template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qList) {
   std::vector<T> vec;
   vec.reserve(static_cast<std::size_t>(qList.size()));
@@ -95,9 +87,6 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
   observeDelete(false);
   observeClear(false);
   observeRename(false);
-
-  if (m_addWorkspaceDialog)
-    closeAddWorkspaceDialog();
 
   m_dataTable.reset();
   m_functionTreeView.reset();
@@ -336,41 +325,32 @@ void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName
 }
 
 void FitScriptGeneratorView::openAddWorkspaceDialog() {
-  m_addWorkspaceDialog = std::make_unique<AddWorkspaceDialog>(this);
+  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(this);
+  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(addWorkspaceDialogAccepted()));
 }
 
-void FitScriptGeneratorView::closeAddWorkspaceDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog.reset();
-}
-
-void FitScriptGeneratorView::addWorkspaceDialogAccepted(bool close) {
+void FitScriptGeneratorView::addWorkspaceDialogAccepted() {
   m_presenter->notifyPresenter(ViewEvent::AddDomainAccepted);
-  if (close)
-    closeAddWorkspaceDialog();
 }
 
 std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
   std::vector<MatrixWorkspace_const_sptr> workspaces;
   if (m_addWorkspaceDialog) {
-    workspaces = m_addWorkspaceDialog->getWorkspaces();
-    if (workspaces.empty())
-      displayWarning("Failed to add workspace: '" + m_addWorkspaceDialog->workspaceName().toStdString() +
-                     "' doesn't exist.");
+    auto const workspaceName = m_addWorkspaceDialog->workspaceName();
+    auto &ads = AnalysisDataService::Instance();
+    if (ads.doesExist(workspaceName)) {
+      workspaces.emplace_back(ads.retrieveWS<MatrixWorkspace>(workspaceName));
+    } else {
+      displayWarning("Failed to add workspace: '" + workspaceName + "' doesn't exist.");
+    }
   }
   return workspaces;
 }
 
-std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() const {
-  std::vector<WorkspaceIndex> workspaceIndices;
-  if (m_addWorkspaceDialog)
-    workspaceIndices = convertToWorkspaceIndex(m_addWorkspaceDialog->workspaceIndices());
-  return workspaceIndices;
+FunctionModelSpectra FitScriptGeneratorView::getDialogWorkspaceIndices() const {
+  return m_addWorkspaceDialog->workspaceIndices();
 }
 
 void FitScriptGeneratorView::openEditLocalParameterDialog(
@@ -462,12 +442,6 @@ void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const 
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
-}
-
-void FitScriptGeneratorView::closeEvent(QCloseEvent *event) {
-  if (m_addWorkspaceDialog)
-    closeAddWorkspaceDialog();
-  QWidget::closeEvent(event);
 }
 
 } // namespace MantidQt::MantidWidgets
