@@ -580,6 +580,13 @@ class DeleteMethodsTest(unittest.TestCase):
         ws_group = GroupWorkspaces(InputWorkspaces=ws_ptrs, OutputWorkspace=str(uuid.uuid4()))
         return ws_group
 
+    def _create_ads_bgsub_workspace(self):
+        ws_ptrs = []
+        for i in range(2):
+            self._ads_names.append(str(uuid.uuid4()))
+            ws_ptrs.append(CreateSampleWorkspace(OutputWorkspace=self._ads_names[-1]))
+        return ws_ptrs
+
     @staticmethod
     def _create_non_ads_sample_workspaces():
         ws_group = WorkspaceGroup()
@@ -598,6 +605,15 @@ class DeleteMethodsTest(unittest.TestCase):
 
     def test_delete_reduced_workspace_in_ads(self):
         package = self._pack_reduction_package(self._create_ads_sample_workspaces)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertTrue(all(name in current_ads_names for name in self._ads_names))
+        delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertFalse(all(name in current_ads_names for name in self._ads_names))
+
+    def test_delete_reduced_and_bgsub_workspace_in_ads(self):
+        package = self._pack_reduction_package(self._create_ads_sample_workspaces)
+        package.reduced_bgsub_name = self._create_ads_bgsub_workspace()
         current_ads_names = AnalysisDataService.getObjectNames()
         self.assertTrue(all(name in current_ads_names for name in self._ads_names))
         delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)

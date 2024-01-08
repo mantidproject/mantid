@@ -1405,7 +1405,8 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
             reduced_lab_sample = reduction_package.reduced_lab_sample
             reduced_hab_sample = reduction_package.reduced_hab_sample
 
-            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_bgsub, reduced_lab_sample, reduced_hab_sample])
+            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_lab_sample, reduced_hab_sample])
+            workspaces_to_delete.extend(reduced_bgsub)
 
         _delete_workspaces(delete_alg, workspaces_to_delete)
 
