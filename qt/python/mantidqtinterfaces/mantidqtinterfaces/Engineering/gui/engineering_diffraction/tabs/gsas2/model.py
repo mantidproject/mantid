@@ -506,29 +506,6 @@ class GSAS2Model(object):
     # X Limits
     # =========
 
-    def determine_x_limits(self):
-        tof_min = self.determine_tof_min()
-        if not tof_min:
-            return None
-        for workspace_index in range(len(self.x_min)):
-            if tof_min[workspace_index] > self.x_min[workspace_index]:
-                self.x_min[workspace_index] = tof_min[workspace_index]
-        return True
-
-    def determine_tof_min(self):
-        tof_min = []
-        if self.number_of_regions > 1 and len(self.instrument_files) == 1:
-            tof_min = self.get_crystal_params_from_instrument(self.instrument_files[0])
-            if not tof_min:
-                return None
-        elif self.number_of_regions == len(self.instrument_files):
-            for input_instrument in self.instrument_files:
-                loop_instrument_tof_min = self.get_crystal_params_from_instrument(input_instrument)
-                if not loop_instrument_tof_min:
-                    return None
-                tof_min.append(loop_instrument_tof_min[0])
-        return tof_min
-
     def understand_data_structure(self):
         self.data_x_min = []
         self.data_x_max = []

@@ -8,6 +8,8 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
+
+
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import model, view, presenter
 
 # from testhelpers import assertRaisesNothing
@@ -98,11 +100,11 @@ class TestGSAS2Presenter(unittest.TestCase):
         # Success
         self.view.get_x_limits_from_line_edits.return_value = [["18000"], ["50000"]]
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
-        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [["18000"], ["50000"]])
+        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[18000.0], [50000.0]])
         # Success with limits reversed
-        self.view.get_x_limits_from_line_edits.return_value = [["5000"], ["80000"]]
+        self.view.get_x_limits_from_line_edits.return_value = [["50000"], ["8000"]]
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
-        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [["5000"], ["80000"]])
+        self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[8000.0], [50000.0]])
 
 
 if __name__ == "__main__":

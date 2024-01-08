@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import numpy as np
 
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
-import functools
 
 
 class GSAS2Presenter(object):
@@ -56,16 +56,9 @@ class GSAS2Presenter(object):
             return None
         current_limits = self.view.get_x_limits_from_line_edits()
         if current_limits:
-            # Check current_limits != self.view.initial_x_limits:
-            if not functools.reduce(
-                lambda p, q: p and q,
-                map(
-                    lambda cur_limit, init_limit: round(float(cur_limit[0]), 2) == round(init_limit, 2),
-                    current_limits,
-                    self.view.initial_x_limits,
-                ),
-            ):
-                return current_limits
+            # Check current_limits != self.view.initial_x_limits upto 2 decimal places
+            if not np.allclose(np.sort(np.array(current_limits, dtype=float), axis=None), self.view.initial_x_limits, atol=1e-2):
+                return np.sort(np.array(current_limits, dtype=float), axis=0).tolist()
         return None
 
     # =================
