@@ -601,11 +601,8 @@ void LoadAscii2::addToCurrentSpectra(const std::list<std::string> &columns) {
   m_spectraStart = false;
   fillInputValues(values, columns);
   // add X and Y
-  auto histo = m_curSpectra->histogram();
-  histo.resize(histo.size() + 1);
-
-  histo.mutableX().back() = values[0];
-  histo.mutableY().back() = values[1];
+  m_curHistoX.emplace_back(values[0]);
+  m_curHistoY.emplace_back(values[1]);
 
   // check for E and DX
   switch (m_baseCols) {
@@ -613,17 +610,16 @@ void LoadAscii2::addToCurrentSpectra(const std::list<std::string> &columns) {
   // workspace, omit DX
   case 3: {
     // E in file, include it, omit DX
-    histo.mutableE().back() = values[2];
+    m_curHistoE.emplace_back(values[2]);
     break;
   }
   case 4: {
     // E and DX in file, include both
-    histo.mutableE().back() = values[2];
+    m_curHistoE.emplace_back(values[2]);
     m_curDx.emplace_back(values[3]);
     break;
   }
   }
-  m_curSpectra->setHistogram(histo);
   m_curBins++;
 }
 
@@ -673,12 +669,33 @@ void LoadAscii2::newSpectra() {
     }
 
     if (m_curSpectra) {
+      auto numXPoints = m_curHistoX.size();
+      if (numXPoints > 0) {
+        auto hist = m_curSpectra->histogram();
+        hist.resize(numXPoints);
+        auto &x = hist.mutableX();
+        auto &y = hist.mutableY();
+
+        for (size_t i = 0; i < numXPoints; ++i) {
+          x[i] = m_curHistoX[i];
+          y[i] = m_curHistoY[i];
+        }
+
+        if (m_baseCols > 2) {
+          auto &e = hist.mutableE();
+          for (size_t i = 0; i < numXPoints; ++i)
+            e[i] = m_curHistoE[i];
+        }
+        m_curSpectra->setHistogram(hist);
+      }
+
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
         if (m_curSpectra->x().size() == m_curDx.size())
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.emplace_back(*m_curSpectra);
       }
+
       m_curSpectra.reset();
     }
 
@@ -686,6 +703,9 @@ void LoadAscii2::newSpectra() {
                                                               HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
     m_spectraStart = true;
+    m_curHistoX.clear();
+    m_curHistoY.clear();
+    m_curHistoE.clear();
   }
 }
 
