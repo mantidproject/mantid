@@ -452,7 +452,7 @@ class GSAS2Model(object):
 
                 generator = ReflectionGenerator(structure)
 
-                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 3.0, ReflectionConditionFilter.StructureFactor)
+                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 4.2, ReflectionConditionFilter.StructureFactor)
                 dValues = generator.getDValues(hkls)
                 pg = structure.getSpaceGroup().getPointGroup()
                 # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
