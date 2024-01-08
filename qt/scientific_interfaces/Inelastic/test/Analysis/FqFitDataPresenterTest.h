@@ -14,6 +14,7 @@
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
+#include "Analysis/IndirectFitPropertyBrowser.h"
 #include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MockObjects.h"
@@ -63,6 +64,8 @@ public:
     m_presenter = std::make_unique<FqFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
+    m_fitPropertyBrowser = std::make_unique<IndirectFitPropertyBrowser>();
+    m_presenter->subscribeFitPropertyBrowser(std::move(m_fitPropertyBrowser.get()));
   }
 
   void tearDown() override {
@@ -70,18 +73,21 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser.get()))
 
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
 
     m_dataTable.reset();
+    m_fitPropertyBrowser.reset();
   }
 
   void test_that_the_presenter_and_mock_objects_have_been_created() {
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
+    TS_ASSERT(m_fitPropertyBrowser);
   }
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
@@ -130,4 +136,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
+  std::unique_ptr<IndirectFitPropertyBrowser> m_fitPropertyBrowser;
 };
