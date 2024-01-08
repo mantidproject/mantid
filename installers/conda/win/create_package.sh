@@ -2,7 +2,7 @@
 
 # Constructs a standalone windows MantidWorkbench installer using NSIS.
 # The package is created from a pre-packaged version of Mantid from conda
-# and removes any excess that is not necessary in a standalone
+# and removes some excess that is not necessary in a standalone
 # package
 
 # Print usage and exit
@@ -217,6 +217,12 @@ OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 # Run the makensis command from our nsis Conda environment
 echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
 cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
+
+if [ ! -f "$OUTFILE_NAME" ]; then
+  echo "Error creating package, no file found at $OUTFILE_NAME"
+  exit 1
+fi
+
 echo "Package packaged, find it here: $OUTFILE_NAME"
 
 echo "Done"
