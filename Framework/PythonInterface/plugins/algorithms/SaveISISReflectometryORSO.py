@@ -157,14 +157,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         instrument_name = ws.getInstrument().getName()
 
         for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
-            dataset.add_measurement_file(True, file, comment=f"Incident angle {theta}")
+            dataset.add_measurement_data_file(file, comment=f"Incident angle {theta}")
 
         first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
         for file in first_trans_files:
-            dataset.add_measurement_file(False, file, comment="First transmission run")
+            dataset.add_measurement_additional_file(file, comment="First transmission run")
 
         for file in second_trans_files:
-            dataset.add_measurement_file(False, file, comment="Second transmission run")
+            dataset.add_measurement_additional_file(file, comment="Second transmission run")
 
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """

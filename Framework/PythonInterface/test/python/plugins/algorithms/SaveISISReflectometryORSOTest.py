@@ -245,14 +245,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         return None
 
-    def _get_reduction_workflow_histories_for_reduced_ws(self, reduced_ws):
-        workflow_histories = []
-        for history in reduced_ws.getHistory().getAlgorithmHistories():
-            if history.name() == self._REDUCTION_WORKFLOW_ALG:
-                workflow_histories.append(history)
-
-        return workflow_histories
-
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
         self._check_data_in_file(ws, resolution, check_file_exists=False)

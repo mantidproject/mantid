@@ -233,7 +233,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_data_files(dataset, 0)
         self._check_num_additional_files(dataset, 0)
 
-        dataset.add_measurement_file(True, filename, timestamp, comment)
+        dataset.add_measurement_data_file(filename, timestamp, comment)
 
         self._check_files_are_created(dataset, [filename], 1, 0, True)
         data_file = dataset.dataset.info.data_source.measurement.data_files[0]
@@ -247,7 +247,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_data_files(dataset, 0)
         self._check_num_additional_files(dataset, 0)
 
-        dataset.add_measurement_file(True, filename)
+        dataset.add_measurement_data_file(filename)
 
         self._check_files_are_created(dataset, [filename], 1, 0, True)
         data_file = dataset.dataset.info.data_source.measurement.data_files[0]
@@ -262,7 +262,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_additional_files(dataset, 0)
 
         for filename in filenames:
-            dataset.add_measurement_file(True, filename)
+            dataset.add_measurement_data_file(filename)
 
         self._check_files_are_created(dataset, filenames, len(filenames), 0, True)
 
@@ -275,7 +275,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_data_files(dataset, 0)
         self._check_num_additional_files(dataset, 0)
 
-        dataset.add_measurement_file(False, filename, timestamp, comment)
+        dataset.add_measurement_additional_file(filename, timestamp, comment)
 
         self._check_files_are_created(dataset, [filename], 0, 1, False)
         data_file = dataset.dataset.info.data_source.measurement.additional_files[0]
@@ -289,7 +289,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_data_files(dataset, 0)
         self._check_num_additional_files(dataset, 0)
 
-        dataset.add_measurement_file(False, filename)
+        dataset.add_measurement_additional_file(filename)
 
         self._check_files_are_created(dataset, [filename], 0, 1, False)
         data_file = dataset.dataset.info.data_source.measurement.additional_files[0]
@@ -304,7 +304,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_num_additional_files(dataset, 0)
 
         for filename in filenames:
-            dataset.add_measurement_file(False, filename)
+            dataset.add_measurement_additional_file(filename)
 
         self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
 

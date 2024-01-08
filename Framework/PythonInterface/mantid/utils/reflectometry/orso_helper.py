@@ -70,17 +70,17 @@ class MantidORSODataset:
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
 
-    def add_measurement_file(
-        self, is_data_file, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None
-    ) -> None:
-        file = File(filename, timestamp, comment)
+    def add_measurement_data_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        self._header.data_source.measurement.data_files.append(self._create_file(filename, timestamp, comment))
 
-        if is_data_file:
-            self._header.data_source.measurement.data_files.append(file)
-        else:
-            if self._header.data_source.measurement.additional_files is None:
-                self._header.data_source.measurement.additional_files = []
-            self._header.data_source.measurement.additional_files.append(file)
+    def add_measurement_additional_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        if self._header.data_source.measurement.additional_files is None:
+            self._header.data_source.measurement.additional_files = []
+        self._header.data_source.measurement.additional_files.append(self._create_file(filename, timestamp, comment))
+
+    @staticmethod
+    def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
+        return File(filename, timestamp, comment)
 
     def _create_mandatory_header(
         self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str
