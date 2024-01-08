@@ -385,19 +385,14 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 }
 
 /**
- * Add a note containing sample or can run numbers to the process group.
- * We can add two sample runs, direct and trans, and two can runs, scatter and
- * direct. Sample Scatter and Can Transmission are added to the data elsewhere
+ * Add an entry to the process group.
  * @param group: the sasEntry
- * @param firstEntryName: string containing the name of the first value to save
- * @param firstEntryValue: string containing the first value to save
- * @param secondEntryName: string contianing the name of the second value to
- * save
- * @param secondEntryValue: string containing the second value to save
+ * @param entryName: string containing the name of the value to save
+ * @param entryValue: string containing the value to save
  */
 void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
-  // Populate note
+  // Populate process entry
   Mantid::DataHandling::H5Util::write(process, entryName, entryValue);
 }
 
