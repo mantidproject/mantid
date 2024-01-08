@@ -228,6 +228,29 @@ public:
     TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
   }
 
+  void testGetAlgorithmsWithInvalidOptions() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    EXPECT_CALL(*mockAlgFactory, makeRowProcessingAlgorithm(_)).Times(1).WillOnce(Throw(std::invalid_argument("")));
+
+    // Create the job manager and ensure the group/row is selected for processing
+    auto jobManager = makeJobManager(twoGroupsWithARowModel(), std::move(mockAlgFactory));
+    selectGroup(jobManager, 0);
+    selectRow(jobManager, 0, 0);
+
+    // Execute the test
+    auto const algorithms = jobManager.getAlgorithms();
+
+    // Check the row was marked with an error
+    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].get();
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row.message(), "Error while setting algorithm properties: ");
+    // Check the row was not included in the results
+    TS_ASSERT(algorithms.empty());
+
+    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].get();
+    TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
+  }
+
   void testGetAlgorithmsWithEmptyModel() {
     auto jobManager = makeJobManager();
     auto const algorithms = jobManager.getAlgorithms();

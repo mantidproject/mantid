@@ -223,6 +223,10 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
     // reductions.
     row.setSkipped(true);
     return;
+  } catch (std::invalid_argument const &e) {
+    row.setError("Error while setting algorithm properties: " + std::string(e.what()));
+    row.setSkipped(true);
+    return;
   }
   algorithms.emplace_back(std::move(algorithm));
 }
