@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSymmetriseTabView.h"
-#include "IndirectDataValidationHelper.h"
+#include "Common/IndirectDataValidationHelper.h"
 #include "InelasticDataManipulationSymmetriseTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -184,7 +184,7 @@ void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() const {
+OutputPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() const {
   return m_uiForm.ipoPlotOptions;
 }
 

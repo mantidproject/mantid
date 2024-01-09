@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
 #include "IndirectFitDataView.h"
 #include "ParameterEstimation.h"

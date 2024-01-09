@@ -692,7 +692,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXTomo
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveNexusESS.h:26
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveNexusESS.h:27
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:320
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:519
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:78
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
@@ -747,7 +746,7 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:37
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:38
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Workspace2D.cpp:373
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:183
+constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/ReflectometryTransform.cpp:0
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/FakeMD.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/WorkspaceSingleValue.cpp:93
@@ -1448,7 +1447,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflecto
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:788
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:510
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:786
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:56
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferValidator.cpp:100
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:99
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:34

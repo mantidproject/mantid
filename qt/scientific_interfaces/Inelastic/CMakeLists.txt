@@ -47,6 +47,18 @@ set(SRC_FILES
     BayesFitting/Quasi.cpp
     BayesFitting/ResNorm.cpp
     BayesFitting/Stretch.cpp
+    Common/IndirectAddWorkspaceDialog.cpp
+    Common/IndirectDataValidationHelper.cpp
+    Common/IndirectInterface.cpp
+    Common/OutputPlotOptionsModel.cpp
+    Common/OutputPlotOptionsPresenter.cpp
+    Common/OutputPlotOptionsView.cpp
+    Common/Settings.cpp
+    Common/SettingsHelper.cpp
+    Common/SettingsModel.cpp
+    Common/SettingsPresenter.cpp
+    Common/SettingsView.cpp
+    Common/IndirectTab.cpp
     Corrections/AbsorptionCorrections.cpp
     Corrections/ApplyAbsorptionCorrections.cpp
     Corrections/CalculatePaalmanPings.cpp
@@ -103,6 +115,14 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
+    Common/IAddWorkspaceDialog.h
+    Common/ISettingsView.h
+    Common/IndirectAddWorkspaceDialog.h
+    Common/IndirectInterface.h
+    Common/OutputPlotOptionsView.h
+    Common/Settings.h
+    Common/SettingsView.h
+    Common/IndirectTab.h
     Corrections/AbsorptionCorrections.h
     Corrections/ApplyAbsorptionCorrections.h
     Corrections/CalculatePaalmanPings.h
@@ -110,15 +130,10 @@ set(MOC_FILES
     Corrections/Corrections.h
     Corrections/CorrectionsTab.h
     Manipulation/InelasticDataManipulation.h
-    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
-    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationIqtTabView.h
-    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationMomentsTabView.h
-    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSqwTabView.h
-    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabView.h
     Manipulation/InelasticDataManipulationTab.h
 )
@@ -150,15 +165,26 @@ set(INC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Common/IndirectDataValidationHelper.h
+    Common/OutputPlotOptionsModel.h
+    Common/OutputPlotOptionsPresenter.h
+    Common/SettingsHelper.h
+    Common/SettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
+    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
+    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
+    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationSqwTabModel.h
+    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabModel.h
+    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/ISqwView.h
     Manipulation/IMomentsView.h
     Manipulation/ISymmetriseView.h
     Manipulation/IElwinView.h
+    Manipulation/IIqtView.h
 )
 
 set(UI_FILES
@@ -175,6 +201,9 @@ set(UI_FILES
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
+    Common/IndirectAddWorkspaceDialog.ui
+    Common/InterfaceSettings.ui
+    Common/OutputPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
     Corrections/ApplyAbsorptionCorrections.ui
     Corrections/CalculatePaalmanPings.ui
@@ -188,7 +217,7 @@ set(UI_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.ui
 )
 
-set(RES_FILES ../Indirect/IndirectInterfaceResources.qrc)
+set(RES_FILES Common/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
@@ -215,7 +244,6 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
-                   MantidScientificInterfacesIndirect
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"

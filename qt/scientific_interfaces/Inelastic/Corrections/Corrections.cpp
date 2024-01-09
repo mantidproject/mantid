@@ -8,8 +8,8 @@
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
+#include "Common/Settings.h"
 #include "ContainerSubtraction.h"
-#include "IndirectSettings.h"
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)
@@ -61,7 +61,7 @@ void Corrections::initLayout() {
     connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));

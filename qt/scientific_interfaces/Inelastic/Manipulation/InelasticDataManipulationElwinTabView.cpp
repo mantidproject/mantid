@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -181,10 +181,6 @@ void InelasticDataManipulationElwinTabView::setup() {
   setHorizontalHeaders();
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationElwinTabView::getPlotOptions() const {
-  return m_uiForm.ipoPlotOptions;
-}
-
 void InelasticDataManipulationElwinTabView::subscribePresenter(IElwinPresenter *presenter) { m_presenter = presenter; }
 
 void InelasticDataManipulationElwinTabView::notifyRunClicked() { m_presenter->handleRunClicked(); }
@@ -253,6 +249,8 @@ void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
   }
 }
+
+OutputPlotOptionsView *InelasticDataManipulationElwinTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void InelasticDataManipulationElwinTabView::setHorizontalHeaders() {
   QStringList headers;

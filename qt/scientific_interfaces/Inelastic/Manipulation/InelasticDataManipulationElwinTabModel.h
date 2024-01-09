@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
+#include "Common/IndirectDataValidationHelper.h"
 #include "DllConfig.h"
-#include "IndirectDataValidationHelper.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
-#include "IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"

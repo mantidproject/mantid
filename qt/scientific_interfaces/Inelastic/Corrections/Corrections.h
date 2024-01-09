@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectInterface.h"
-#include "IndirectTab.h"
+#include "Common/IndirectInterface.h"
+#include "Common/IndirectTab.h"
 
 #include "ui_Corrections.h"
 

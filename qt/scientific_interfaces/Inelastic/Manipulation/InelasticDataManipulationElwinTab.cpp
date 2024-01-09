@@ -7,7 +7,7 @@
 #include "InelasticDataManipulationElwinTab.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "IndirectSettingsHelper.h"
+#include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -94,7 +94,7 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
       m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 }
 
 InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}
@@ -529,7 +529,7 @@ void InelasticDataManipulationElwinTab::handlePlotPreviewClicked() {
   auto const previewWs = getPreviewPlotWorkspace();
   auto const inputWs = getInputWorkspace();
   auto const index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected
   if (previewWs) {

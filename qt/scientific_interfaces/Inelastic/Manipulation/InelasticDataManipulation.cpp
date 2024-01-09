@@ -9,7 +9,7 @@
 //----------------------
 #include "InelasticDataManipulation.h"
 
-#include "IndirectSettings.h"
+#include "Common/Settings.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationIqtTab.h"
 #include "InelasticDataManipulationMomentsTab.h"
@@ -56,14 +56,14 @@ void InelasticDataManipulation::exportTabPython() {
  */
 void InelasticDataManipulation::initLayout() {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
   addMVPTab<InelasticDataManipulationSymmetriseTab, InelasticDataManipulationSymmetriseTabView>("Symmetrise");
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
   addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
   addMVPTab<InelasticDataManipulationElwinTab, InelasticDataManipulationElwinTabView>("Elwin");
-  addTab<InelasticDataManipulationIqtTab>("Iqt");
+  addMVPTab<InelasticDataManipulationIqtTab, InelasticDataManipulationIqtTabView>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button

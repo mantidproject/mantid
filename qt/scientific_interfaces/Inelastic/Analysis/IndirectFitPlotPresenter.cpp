@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
+#include "Common/SettingsHelper.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitPlotView.h"
-#include "IndirectSettingsHelper.h"
 
 #include <utility>
 
@@ -286,7 +286,7 @@ void IndirectFitPlotPresenter::updateBackgroundSelector() {
 
 void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
   const auto resultWs = m_model->getResultWorkspace();
-  const auto errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+  const auto errorBars = SettingsHelper::externalPlotErrorBars();
   if (resultWs)
     m_plotter->plotSpectra(resultWs->getName(), "0-2", errorBars);
   else

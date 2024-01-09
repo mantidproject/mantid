@@ -1128,7 +1128,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
+          <widget class="MantidQt::CustomInterfaces::OutputPlotOptionsView" name="ipoPlotOptions" native="true"/>
          </item>
         </layout>
        </widget>
@@ -1140,9 +1140,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>IndirectPlotOptionsView.h</header>
+   <header>Common/OutputPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1171,8 +1171,6 @@
   <tabstop>spBackgroundEnd</tabstop>
   <tabstop>ckDetailedBalance</tabstop>
   <tabstop>spDetailedBalance</tabstop>
-  <tabstop>ckScaleMultiplier</tabstop>
-  <tabstop>spScaleMultiplier</tabstop>
   <tabstop>ckDoNotRebin</tabstop>
   <tabstop>cbRebinType</tabstop>
   <tabstop>spRebinLow</tabstop>
@@ -1186,7 +1184,6 @@
   <tabstop>ckCm1Units</tabstop>
   <tabstop>ckSaveSPE</tabstop>
   <tabstop>ckSaveNexus</tabstop>
-  <tabstop>ckSaveNXSPE</tabstop>
   <tabstop>ckSaveASCII</tabstop>
   <tabstop>ckSaveAclimax</tabstop>
  </tabstops>
@@ -1237,22 +1234,6 @@
     <hint type="destinationlabel">
      <x>376</x>
      <y>397</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckScaleMultiplier</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spScaleMultiplier</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>432</x>
-     <y>244</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>527</x>
-     <y>245</y>
     </hint>
    </hints>
   </connection>

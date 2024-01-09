@@ -624,45 +624,24 @@ private:
     auto userFileValue = Mantid::DataHandling::H5Util::readString(userFileDataSet);
     TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", userFileValue, userFile);
 
-    // Check note
-    if (hasSampleRuns || hasCanRuns || hasBgSub) {
-      auto note = process.openGroup(sasNoteGroupName);
-      do_assert_process_note(note, hasSampleRuns, hasCanRuns, hasBgSub, sampleDirectRun, canDirectRun,
-                             scaledBgSubWorkspace, scaledBgSubScaleFactor);
-    }
-  }
-
-  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns, const bool &hasCanRuns, const bool &hasBgSub,
-                              const std::string &sampleDirectRun, const std::string &canDirectRun,
-                              const std::string &scaledBgSubWorkspace, const double &scaledBgSubScaleFactor) {
-    auto numAttributes = note.getNumAttrs();
-    TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
-
-    // canSAS_class and NX_class attribute
-    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASnote class", classAttribute, sasNoteClassAttr);
-
-    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXnote class", classAttribute, nxNoteClassAttr);
-
     if (hasSampleRuns) {
-      auto sampleDirectRunDataSet = note.openDataSet(sasProcessTermSampleDirect);
+      auto sampleDirectRunDataSet = process.openDataSet(sasProcessTermSampleDirect);
       auto sampleDirectRunValue = Mantid::DataHandling::H5Util::readString(sampleDirectRunDataSet);
       TSM_ASSERT_EQUALS("Should have correct sample direct run number", sampleDirectRunValue, sampleDirectRun);
     }
 
     if (hasCanRuns) {
-      auto canDirectRunDataSet = note.openDataSet(sasProcessTermCanDirect);
+      auto canDirectRunDataSet = process.openDataSet(sasProcessTermCanDirect);
       auto canDirectRunValue = Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
       TSM_ASSERT_EQUALS("Should have correct can direct run number", canDirectRunValue, canDirectRun);
     }
 
     if (hasBgSub) {
-      auto scaledBgSubWorkspaceDataSet = note.openDataSet(sasProcessTermScaledBgSubWorkspace);
+      auto scaledBgSubWorkspaceDataSet = process.openDataSet(sasProcessTermScaledBgSubWorkspace);
       auto scaledBgSubWorkspaceValue = Mantid::DataHandling::H5Util::readString(scaledBgSubWorkspaceDataSet);
       TSM_ASSERT_EQUALS("Should have correct scaled background subtraction workspace", scaledBgSubWorkspaceValue,
                         scaledBgSubWorkspace);
-      auto scaledBgSubScaleFactorDataSet = note.openDataSet(sasProcessTermScaledBgSubScaleFactor);
+      auto scaledBgSubScaleFactorDataSet = process.openDataSet(sasProcessTermScaledBgSubScaleFactor);
       auto scaledBgSubScaleFactorValue = Mantid::DataHandling::H5Util::readString(scaledBgSubScaleFactorDataSet);
       TSM_ASSERT_EQUALS("Should have correct scaled background subtraction scale factor",
                         stod(scaledBgSubScaleFactorValue), scaledBgSubScaleFactor);

@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSymmetriseTab.h"
-#include "IndirectDataValidationHelper.h"
+#include "Common/IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
@@ -30,7 +30,7 @@ InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(Q
       m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 
   m_model->setIsPositiveReflect(true);
   m_view->setDefaults();
