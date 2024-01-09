@@ -260,8 +260,19 @@ void LoadNexusMonitors2::exec() {
     EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
+    if (xmin > xmax) {
+      // these values are adjusted below by one
+      xmin = 0;
+      xmax = 1;
+      g_log.warning() << "time-of-flight range of events are unusual. Reseting range " << xmin << " to " << xmax
+                      << "\n";
+    } else {
+      // move out by one just like LoadEventNexus
+      xmin = xmin - 1;
+      xmax = xmax + 1;
+    }
 
-    auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
+    auto axis = HistogramData::BinEdges{xmin, xmax};
     eventWS->setAllX(axis); // Set the binning axis using this.
 
     // a certain generation of ISIS files modify the time-of-flight
@@ -671,6 +682,12 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
   file.getAttr("units", tof_units);
   Kernel::Units::timeConversionVector(time_of_flight, tof_units, "microseconds");
   file.closeData();
+
+  // warn the user if no events were found
+  if (time_of_flight.empty()) {
+    g_log.warning() << "No events found in \"" << m_monitorInfo[ws_index].name << "\"\n";
+    return; // early
+  }
 
   file.openData("event_time_zero"); // pulse time
   MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
