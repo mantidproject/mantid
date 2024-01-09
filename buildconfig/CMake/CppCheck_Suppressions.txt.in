@@ -450,9 +450,9 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/EstimateFitParameters.cpp:362
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/EstimateFitParameters.cpp:389
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/EstimateFitParameters.cpp:300
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:579
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:580
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:581
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/LeBailFunction.cpp:239
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/LeBailFunction.cpp:964

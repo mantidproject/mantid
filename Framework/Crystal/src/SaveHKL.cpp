@@ -240,9 +240,8 @@ void SaveHKL::exec() {
       std::string ignoreLine;
       size_t a = 1;
       for (int wi = 0; wi < 8; wi++)
-        getline(infile, ignoreLine); // Saves the line in STRING.
-      while (!infile.eof())          // To get you all the lines.
-      {
+        getline(infile, ignoreLine);
+      while (!infile.eof()) {
         time.resize(a + 1);
         spectra.resize(a + 1);
         std::string line;
