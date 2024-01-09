@@ -123,7 +123,8 @@ bool isEventMonitor(::NeXus::File &file) {
 //------------------------------------------------------------------------------
 /// Initialization method.
 void LoadNexusMonitors2::init() {
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".nxs"),
+  const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, exts),
                   "The name (including its full or relative path) of the NeXus file to "
                   "attempt to load. The file extension must either be .nxs or .NXS");
 
@@ -225,6 +226,9 @@ void LoadNexusMonitors2::exec() {
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
+  // cache path to entry for later
+  const std::string entryPath = file.getPath();
+
   // TODO-NEXT: load event monitor if it is required to do so
   //            load histogram monitor if it is required to do so
   // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
@@ -260,12 +264,15 @@ void LoadNexusMonitors2::exec() {
     EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
+
     if (xmin > xmax) {
-      // these values are adjusted below by one
       xmin = 0;
       xmax = 1;
-      g_log.warning() << "time-of-flight range of events are unusual. Reseting range " << xmin << " to " << xmax
-                      << "\n";
+      if (eventWS->getNumberEvents() == 0) {
+        g_log.warning("No events loading. Resetting time-of-flight range 0 to 1");
+      } else {
+        g_log.warning("time-of-flight range of events are unusual. Resetting time-of-flight range 0 to 1");
+      }
     } else {
       // move out by one just like LoadEventNexus
       xmin = xmin - 1;
@@ -292,6 +299,7 @@ void LoadNexusMonitors2::exec() {
 
   // Need to get the instrument name from the file
   std::string instrumentName;
+  file.openPath(entryPath); // reset path in case of unusual behavior
   file.openGroup("instrument", "NXinstrument");
   try {
     file.openData("name");
@@ -685,7 +693,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
 
   // warn the user if no events were found
   if (time_of_flight.empty()) {
-    g_log.warning() << "No events found in \"" << m_monitorInfo[ws_index].name << "\"\n";
+    g_log.error() << "No events found in \"" << m_monitorInfo[ws_index].name << "\"\n";
     return; // early
   }
 
