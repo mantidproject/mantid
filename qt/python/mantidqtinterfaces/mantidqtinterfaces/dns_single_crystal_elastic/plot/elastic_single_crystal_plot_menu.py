@@ -9,11 +9,12 @@
 DNS single crystal elastic plot tab menu of DNS reduction GUI.
 """
 
-import os
 from mantidqt import icons
 from qtpy.QtCore import Signal
-from qtpy.QtGui import QIcon
+from qtpy.QtGui import QPixmap, QIcon
 from qtpy.QtWidgets import QActionGroup, QMenu
+from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import create_colormap_img
+from mantid.plots.utility import get_colormap_names
 
 
 def set_mdi_icons(mapping):
@@ -28,9 +29,24 @@ def set_mdi_icons(mapping):
 
 
 def set_up_colormap_selector(mapping):
-    plot_dir = os.path.dirname(__file__)
-    plot_dir = plot_dir.replace("\\", "/")
-    mapping["colormap"].addItem(QIcon(f"{plot_dir}/colormaps/jet.png"), "jet")
+    colormap_names = get_colormap_names()
+    for cmap_name in colormap_names:
+        qt_img = create_colormap_img(cmap_name)
+        pixmap = QPixmap.fromImage(qt_img)
+        mapping["colormap"].addItem(QIcon(pixmap), cmap_name)
+        mapping["colormap"].setCurrentIndex(colormap_names.index("jet"))
+
+
+class DNSElasticSCPlotOptionsMenu(QMenu):
+    def __init__(self, parent):
+        super().__init__("Plot Options")
+        # adding action
+        action_omega_offset = self.addAction("Change \u03C9 Offset")
+        action_dx_dy = self.addAction("Change d-spacings")
+
+        # connections
+        action_omega_offset.triggered.connect(parent.change_omega_offset)
+        action_dx_dy.triggered.connect(parent.change_dxdy)
 
 
 class DNSElasticSCPlotViewMenu(QMenu):
