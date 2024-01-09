@@ -385,33 +385,15 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 }
 
 /**
- * Create a note class within process
+ * Add an entry to the process group.
  * @param group: the sasEntry
+ * @param entryName: string containing the name of the value to save
+ * @param entryValue: string containing the value to save
  */
-void createNote(H5::Group &group) {
+void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
-  Mantid::DataHandling::H5Util::createGroupCanSAS(process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
-}
-
-/**
- * Add a note containing sample or can run numbers to the process group.
- * We can add two sample runs, direct and trans, and two can runs, scatter and
- * direct. Sample Scatter and Can Transmission are added to the data elsewhere
- * @param group: the sasEntry
- * @param firstEntryName: string containing the name of the first value to save
- * @param firstEntryValue: string containing the first value to save
- * @param secondEntryName: string contianing the name of the second value to
- * save
- * @param secondEntryValue: string containing the second value to save
- */
-void addNoteToProcess(H5::Group &group, const std::string &firstEntryName, const std::string &firstEntryValue,
-                      const std::string &secondEntryName, const std::string &secondEntryValue) {
-  auto process = group.openGroup(sasProcessGroupName);
-  auto note = process.openGroup(sasNoteGroupName);
-
-  // Populate note
-  Mantid::DataHandling::H5Util::write(note, firstEntryName, firstEntryValue);
-  Mantid::DataHandling::H5Util::write(note, secondEntryName, secondEntryValue);
+  // Populate process entry
+  Mantid::DataHandling::H5Util::write(process, entryName, entryValue);
 }
 
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
@@ -515,14 +497,9 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
 }
 
 bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  const unsigned indices[] = {0, 1};
-  for (const auto index : indices) {
-    auto axis = workspace->getAxis(index);
-    if (!axis->isNumeric()) {
-      return false;
-    }
-  }
-  return true;
+  const std::array<int, 2> indices = {0, 1};
+  return std::all_of(indices.cbegin(), indices.cend(),
+                     [workspace](auto const &index) { return workspace->getAxis(index)->isNumeric(); });
 }
 
 class SpectrumAxisValueProvider {
@@ -908,21 +885,19 @@ void SaveNXcanSAS::exec() {
     addProcess(sasEntry, workspace);
   }
 
-  if (transmissionCan || transmissionSample) {
-    createNote(sasEntry);
-    if (transmissionCan)
-      addNoteToProcess(sasEntry, sasProcessTermCanScatter, canScatterRun, sasProcessTermCanDirect, canDirectRun);
-    if (transmissionSample)
-      addNoteToProcess(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun, sasProcessTermSampleDirect,
-                       sampleDirectRun);
+  if (transmissionCan) {
+    addProcessEntry(sasEntry, sasProcessTermCanScatter, canScatterRun);
+    addProcessEntry(sasEntry, sasProcessTermCanDirect, canDirectRun);
+  }
+  if (transmissionSample) {
+    addProcessEntry(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun);
+    addProcessEntry(sasEntry, sasProcessTermSampleDirect, sampleDirectRun);
   }
 
   if (!scaledBgSubWorkspace.empty()) {
     progress.report("Adding scaled background subtraction information.");
-    auto process = sasEntry.openGroup(sasProcessGroupName);
-    auto note = process.openGroup(sasNoteGroupName);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
   }
 
   // Add the transmissions for sample
