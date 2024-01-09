@@ -56,7 +56,9 @@ public:
 
   void tearDown() override {
     m_fitPropertyBrowser.reset();
+    std::cout << "Tear down: fpb reset" << std::endl;
     Mantid::API::AnalysisDataService::Instance().clear();
+    std::cout << "Tear down: ads cleared" << std::endl;
   }
 
   // This is a very specific test for a bug that is now fixed to prevent regression
@@ -219,8 +221,11 @@ public:
     m_fitPropertyBrowser->createCompositeFunction("name=UserFunction;");
     m_fitPropertyBrowser->setWorkspaceName("test_ws_name");
     m_fitPropertyBrowser->fit();
+    std::cout << "Reached end of fitting" << std::endl;
     TS_ASSERT_EQUALS(algFailedSpy_failed.count(), 1);
+    std::cout << "Compared algorithmFailed count" << std::endl;
     TS_ASSERT_EQUALS(algFailedSpy_finished.count(), 0);
+    std::cout << "Compared algorithmFinished count" << std::endl;
   }
 
 private:
