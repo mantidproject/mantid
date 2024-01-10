@@ -909,7 +909,7 @@ public:
     double getParameter(const QString &funStr);
     int getNumberOfDatasets() const;
     void setNumberOfDatasets(int n);
-    void setCurrentDataset(int i);
+    void setCurrentDataset(int i) throw(std::exception);
     int getCurrentDataset() const;
     void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
