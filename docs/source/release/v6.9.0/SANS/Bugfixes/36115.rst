@@ -1,0 +1,1 @@
+- The GUI will now return to its default output options when the reduction mode is switched between 1D and 2D.
