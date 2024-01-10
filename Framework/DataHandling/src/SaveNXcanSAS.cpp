@@ -731,7 +731,7 @@ void SaveNXcanSAS::init() {
   inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
                                                                      inputWSValidator),
-                  "The input workspace, which must be in units of Q");
+                  "The input workspace, which must be in units of Q. Can be a 1D or a 2D workspace.");
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
