@@ -118,8 +118,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_sortButton = new QPushButton("Sort");
   m_sortButton->setToolTip("Sort all workspaces by name, size, or the last time they were modified");
 
-  if (m_groupButton)
-    m_groupButton->setEnabled(false);
+  m_groupButton->setEnabled(false);
   m_deleteButton->setEnabled(false);
   m_clearButton->setEnabled(false);
   m_saveButton->setEnabled(false);
