@@ -21,7 +21,6 @@ class RunTabModel:
 
     def update_save_types(self, selected_types: SaveOptions):
         self._save_types = selected_types
-        self._save_types.user_modified = True
 
     def get_reduction_mode(self):
         return self._reduction_mode
@@ -33,11 +32,8 @@ class RunTabModel:
     def _set_save_opts_for_reduction_mode(self, val: ReductionDimensionality):
         """
         Sets the save options for the given reduction mode depending on reduction mode
-        *if* the user has not changed their save options at any point
         :param val: New reduction dimensionality
         """
-        if self._save_types.user_modified:
-            return  # Don't mess with what a user might have preset
         if val is ReductionDimensionality.ONE_DIM:
             self._save_types = SaveOptions(can_sas_1d=True)
         elif val is ReductionDimensionality.TWO_DIM:

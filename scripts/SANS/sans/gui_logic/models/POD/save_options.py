@@ -13,7 +13,6 @@ class SaveOptions:
     can_sas_1d: bool = False
     nxs_can_sas: bool = False
     rkh: bool = False
-    user_modified: bool = False
 
     def to_all_states(self):
         """
