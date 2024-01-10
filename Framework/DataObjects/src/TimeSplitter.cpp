@@ -351,13 +351,11 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
     return;
 
   // Loop over m_roi_map and build all partial TimeROIs
-  int target{NO_TARGET};
-  DateAndTime intervalStart, intervalStop;
   auto it = m_roi_map.cbegin();
   for (; it != std::prev(m_roi_map.cend()); it++) {
-    intervalStart = it->first;
-    intervalStop = std::next(it)->first;
-    target = it->second;
+    DateAndTime intervalStart = it->first;
+    DateAndTime intervalStop = std::next(it)->first;
+    int target = it->second;
 
     if (m_cachedPartialTimeROIs.count(target) > 0) {
       m_cachedPartialTimeROIs[target].appendROIFast(intervalStart, intervalStop);

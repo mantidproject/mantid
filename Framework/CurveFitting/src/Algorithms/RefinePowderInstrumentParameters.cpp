@@ -912,12 +912,12 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(const
     row >> parname;
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double tmpdbl = std::numeric_limits<float>::quiet_NaN();
-      string tmpstr;
       try {
         row >> tmpdbl;
       } catch (runtime_error &) {
         g_log.error() << "Import MC parameter " << colnames[ic] << " error in row " << ir << " of workspace "
                       << tablews->getName() << '\n';
+        string tmpstr;
         row >> tmpstr;
         g_log.error() << "Should be " << tmpstr << '\n';
       }

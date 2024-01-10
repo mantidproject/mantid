@@ -291,10 +291,9 @@ std::set<Mantid::detid_t> getAllDetectorIDsFromWorkspace(const Mantid::API::Work
 std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
-  std::set<Mantid::detid_t> spectrumIDs;
   auto numSpectra = ws->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; i++) {
-    spectrumIDs = ws->getSpectrum(i).getDetectorIDs();
+    std::set<Mantid::detid_t> spectrumIDs = ws->getSpectrum(i).getDetectorIDs();
     detectorIDs.insert(spectrumIDs.begin(), spectrumIDs.end());
   }
   return detectorIDs;
@@ -306,14 +305,11 @@ std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(const Mantid::API
 std::set<Mantid::detid_t> getAllDetectorIDsFromGroupWorkspace(const Mantid::API::WorkspaceGroup_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
-  std::set<Mantid::detid_t> detectorIDsSingleWorkspace;
-
-  MatrixWorkspace_sptr matrixWS;
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
   for (const auto &workspace : workspaces) {
-    matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
+    MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    std::set<Mantid::detid_t> detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(), detectorIDsSingleWorkspace.end());
   }
   return detectorIDs;

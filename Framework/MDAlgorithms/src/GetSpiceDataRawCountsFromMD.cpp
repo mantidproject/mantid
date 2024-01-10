@@ -148,11 +148,11 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(const API::IMDEventWorksp
     throw std::runtime_error("Logic error! Vector of 2theta must have same size as "
                              "vector of detectors' counts.");
 
-  // Get monitor counts
-  std::vector<double> vec2thetaMon;
-  std::vector<double> vecMonitorCounts;
   // Normalize if required
   if (donormalize) {
+    // Get monitor counts
+    std::vector<double> vec2thetaMon;
+    std::vector<double> vecMonitorCounts;
     getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     // check
     if (vecDetCounts.size() != vecMonitorCounts.size())
@@ -224,12 +224,12 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(const API::IMDEventW
     throw std::runtime_error("Logic error! number of sample logs should be "
                              "same as number of detector's counts.");
 
-  // Get monitor counts
-  std::vector<double> vec2thetaMon;
-  std::vector<double> vecMonitorCounts;
   // FIXME - Consider refactoring in future
   // Normalize if required
   if (donormalize) {
+    // Get monitor counts
+    std::vector<double> vec2thetaMon;
+    std::vector<double> vecMonitorCounts;
     getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     if (vecDetCounts.size() != vecMonitorCounts.size())
       throw std::runtime_error("Number of detectors' counts' is different from that of "

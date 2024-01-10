@@ -245,10 +245,10 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int 
   while (std::getline(infile, line)) {
     lineNum++;
 
-    // Tokens in a line
-    std::vector<std::string> tokens;
-
     if (boost::regex_match(line, lineRegex)) {
+      // Tokens in a line
+      std::vector<std::string> tokens;
+
       boost::trim(line);
       boost::split(tokens, line, isspace, boost::token_compress_on);
 

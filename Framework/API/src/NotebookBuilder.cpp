@@ -104,11 +104,10 @@ void NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &it
 const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_const_sptr &algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory->name();
-  std::string prop;
 
   auto props = algHistory->getProperties();
   for (const auto &propIter : props) {
-    prop = buildPropertyString(propIter);
+    std::string prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }

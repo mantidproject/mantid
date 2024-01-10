@@ -967,8 +967,6 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
 
   } while (true);
 
-  // Get information from all but data group
-  std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
   try {
     m_nexusFile->openPath(entry.path()); // This is
@@ -979,6 +977,8 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
                              entry.path() + ". Lower level error description: " + re.what());
   }
   try {
+    // Get information from all but data group
+    std::string parameterStr;
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(), parameterStr);
     // Populate the instrument parameters in this workspace
@@ -1216,8 +1216,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   } while (true);
 
-  // Get information from all but data group
-  std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
   try {
     m_nexusFile->openPath(entry.path()); // This is
@@ -1228,6 +1226,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
                              entry.path() + ". Lower level error description: " + re.what());
   }
   try {
+    // Get information from all but data group
+    std::string parameterStr;
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(), parameterStr);
     // Populate the instrument parameters in this workspace
@@ -1829,14 +1829,14 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
     local_workspace->setDistribution(false);
   }
 
-  // Get information from all but data group
-  std::string parameterStr;
-
   progress(progressStart + 0.05 * progressRange, "Reading the sample details...");
 
   // Hop to the right point
   m_nexusFile->openPath(mtd_entry.path());
   try {
+    // Get information from all but data group
+    std::string parameterStr;
+
     // This loads logs, sample, and instrument.
     local_workspace->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(),
                                              parameterStr); // REQUIRED PER PERIOD

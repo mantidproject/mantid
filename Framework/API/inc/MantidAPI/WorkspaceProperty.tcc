@@ -205,8 +205,6 @@ template <typename TYPE> void WorkspaceProperty<TYPE>::setPropertyMode(const Pro
  *  @returns A user level description of the problem or "" if it is valid.
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
-  // start with the no error condition
-  std::string error;
 
   // If an output workspace it must have a name, although it might not exist
   // in the ADS yet
@@ -236,9 +234,9 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
       // test whether it is a group
       if (std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
         return isValidGroup(std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
-      } else {
-        error = "Workspace " + this->value() + " is not of the correct type";
       }
+
+      std::string error = "Workspace " + this->value() + " is not of the correct type";
       return error;
     }
   }

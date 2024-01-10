@@ -828,7 +828,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction
 double RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &function, const Workspace2D_sptr &dataws,
                                                       int wsindex, bool powerfit) {
   // 1. Store original
-  map<string, pair<double, double>> start_paramvaluemap, paramvaluemap1, paramvaluemap2, paramvaluemap3;
+  map<string, pair<double, double>> start_paramvaluemap, paramvaluemap1;
   storeFunctionParameterValue(function, start_paramvaluemap);
 
   // 2. Calculate starting chi^2
@@ -840,6 +840,7 @@ double RefinePowderInstrumentParameters3::fitFunction(const IFunction_sptr &func
   double final_chi2 = DBL_MAX;
 
   if (powerfit) {
+    map<string, pair<double, double>> paramvaluemap2, paramvaluemap3;
     // a) Use Simplex to fit
     string minimizer = "Simplex";
     double chi2simplex;

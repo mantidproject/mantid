@@ -115,7 +115,6 @@ WorkspaceGroup_sptr createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t 
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
-  std::string wsName;
 
   std::shared_ptr<Geometry::Instrument> inst1 = std::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
@@ -126,7 +125,7 @@ WorkspaceGroup_sptr createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t 
     MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
 
     wsGroup->addWorkspace(ws);
-    wsName = wsNameStem + std::to_string(period);
+    std::string wsName = wsNameStem + std::to_string(period);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
@@ -139,7 +138,6 @@ Mantid::API::WorkspaceGroup_sptr createMultiPeriodAsymmetryData(const int &nPeri
   Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
-  std::string wsName;
 
   std::shared_ptr<Mantid::Geometry::Instrument> inst1 = std::make_shared<Mantid::Geometry::Instrument>();
   inst1->setName("EMU");
@@ -149,7 +147,7 @@ Mantid::API::WorkspaceGroup_sptr createMultiPeriodAsymmetryData(const int &nPeri
         createAsymmetryWorkspace(nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
 
     wsGroup->addWorkspace(ws);
-    wsName = wsNameStem + std::to_string(period);
+    std::string wsName = wsNameStem + std::to_string(period);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
@@ -241,7 +239,6 @@ WorkspaceGroup_sptr createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorks
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
-  std::string wsName;
 
   for (int period = 1; period < nWorkspaces + 1; period++) {
     // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
@@ -250,7 +247,7 @@ WorkspaceGroup_sptr createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorks
     MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period, detIDstart);
     wsGroup->addWorkspace(ws);
 
-    wsName = wsNameStem + std::to_string(period);
+    std::string wsName = wsNameStem + std::to_string(period);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 

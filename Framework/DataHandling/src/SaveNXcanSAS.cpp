@@ -144,9 +144,9 @@ std::vector<std::string> splitDetectorNames(std::string detectorNames) {
   const std::string delimiter = ",";
   std::vector<std::string> detectors;
   size_t pos(0);
-  std::string detectorName;
+
   while ((pos = detectorNames.find(delimiter)) != std::string::npos) {
-    detectorName = detectorNames.substr(0, pos);
+    std::string detectorName = detectorNames.substr(0, pos);
     boost::algorithm::trim(detectorName);
     detectors.emplace_back(detectorName);
     detectorNames.erase(0, pos + delimiter.length());
