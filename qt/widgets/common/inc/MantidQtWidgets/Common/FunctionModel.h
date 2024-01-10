@@ -85,7 +85,7 @@ private:
   void checkDatasets();
   void checkNumberOfDomains(const QList<FunctionModelDataset> &datasets) const;
   int numberOfDomains(const QList<FunctionModelDataset> &datasets) const;
-  void checkIndex(int) const;
+  [[nodiscard]] bool checkIndex(int const index) const;
   void updateGlobals();
   void setResolutionFromWorkspace(const IFunction_sptr &fun);
   void setResolutionFromWorkspace(const IFunction_sptr &fun, const MatrixWorkspace_sptr &workspace);
