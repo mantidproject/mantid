@@ -132,7 +132,6 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
-  std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
   if (!entryName.empty()) {
@@ -148,6 +147,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
+      std::string emptyStr;
       recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */, useFullPath);
       NXclosegroup(nxfileID);
     }

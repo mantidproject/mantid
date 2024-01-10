@@ -6,10 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectTab.h"
+#include "Common/OutputPlotOptionsPresenter.h"
 #include "DllConfig.h"
-#include "IndirectInstrumentConfig.h"
-#include "IndirectPlotOptionsPresenter.h"
-#include "IndirectTab.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -46,7 +45,7 @@ public:
   ~InelasticDataManipulationTab() override;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
@@ -72,7 +71,7 @@ protected:
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces

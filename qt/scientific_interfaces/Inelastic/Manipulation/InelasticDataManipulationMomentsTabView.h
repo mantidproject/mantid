@@ -29,7 +29,7 @@ public:
   void subscribePresenter(IMomentsPresenter *presenter) override;
 
   void setupProperties() override;
-  IndirectPlotOptionsView *getPlotOptions() const override;
+  OutputPlotOptionsView *getPlotOptions() const override;
   std::string getDataName() const override;
 
   bool validate() override;

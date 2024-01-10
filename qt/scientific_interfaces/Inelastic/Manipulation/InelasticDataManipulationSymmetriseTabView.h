@@ -29,7 +29,7 @@ public:
   void subscribePresenter(ISymmetrisePresenter *presenter) override;
 
   void setDefaults() override;
-  IndirectPlotOptionsView *getPlotOptions() const override;
+  OutputPlotOptionsView *getPlotOptions() const override;
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
 

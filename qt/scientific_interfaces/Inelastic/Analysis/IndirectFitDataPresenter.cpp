@@ -9,7 +9,7 @@
 #include <map>
 #include <utility>
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 
 namespace {
 

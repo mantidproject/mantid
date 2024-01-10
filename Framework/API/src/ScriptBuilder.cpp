@@ -167,7 +167,6 @@ const std::string ScriptBuilder::buildCommentString(const AlgorithmHistory &algH
 const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory.name();
-  std::string prop;
 
   if (name == COMMENT_ALG)
     return buildCommentString(algHistory);
@@ -208,7 +207,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(*propIter, name);
+    std::string prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -265,12 +264,11 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
     return "";
   }
 
-  // Create a vector of all non workspace property type names
-  std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
-
   std::string prop;
   // No need to specify value for default properties
   if (!propHistory.isDefault()) {
+    // Create a vector of all non workspace property type names
+    std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
     // Do not give values to output properties other than workspace properties
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {

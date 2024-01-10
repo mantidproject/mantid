@@ -43,6 +43,11 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   }
 }
 
+IFunction_sptr FunctionModel::getFullFunction() const {
+  // It is important that this does not return a copy/clone of the function
+  return m_function;
+}
+
 IFunction_sptr FunctionModel::getFitFunction() const {
   if (!m_function)
     return m_function;
@@ -587,9 +592,7 @@ bool FunctionModel::isGlobal(const QString &parName) const { return m_globalPara
 QString FunctionModel::setBackgroundA0(double value) {
   std::string foundName;
   auto const fun = getCurrentFunction();
-  auto getA0 = [](IFunction const &f) -> std::string {
-    return (dynamic_cast<IBackgroundFunction const *>(&f) && f.hasParameter("A0")) ? "A0" : "";
-  };
+  auto getA0 = [](IFunction const &f) -> std::string { return f.hasParameter("A0") ? "A0" : ""; };
   auto const cf = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (cf) {
     if (fun->name() != "CompositeFunction")

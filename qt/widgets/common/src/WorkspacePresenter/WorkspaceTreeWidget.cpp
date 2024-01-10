@@ -448,8 +448,8 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   }
 
   int hiddenCount = 0;
-  QList<QTreeWidgetItem *> visibleGroups;
   if (!text.isEmpty()) {
+    QList<QTreeWidgetItem *> visibleGroups;
     // Loop over everything (currently loaded) and top level
     // find out what is already expanded
     QStringList expanded;

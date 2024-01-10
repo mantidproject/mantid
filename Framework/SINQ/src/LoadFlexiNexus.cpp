@@ -91,7 +91,6 @@ void LoadFlexiNexus::loadDictionary(const std::string &dictFile) {
 }
 
 void LoadFlexiNexus::readData(NeXus::File *fin) {
-  Mantid::DataObjects::Workspace2D_sptr ws;
   std::map<std::string, std::string>::const_iterator it;
 
   if ((it = dictionary.find("data")) == dictionary.end()) {

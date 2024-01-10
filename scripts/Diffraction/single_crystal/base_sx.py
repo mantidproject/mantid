@@ -27,6 +27,7 @@ class INTEGRATION_TYPE(Enum):
     MD = "int_MD"
     MD_OPTIMAL_RADIUS = "int_MD_opt"
     SKEW = "int_skew"
+    SHOEBOX = "int_shoebox"
 
 
 class BaseSX(ABC):
@@ -341,6 +342,11 @@ class BaseSX(ABC):
         peaks_int = mantid.IntegratePeaksSkew(InputWorkspace=ws, PeaksWorkspace=peaks, OutputWorkspace=out_peaks, **kwargs)
         return peaks_int
 
+    @staticmethod
+    def integrate_peaks_shoebox(ws, peaks, out_peaks, **kwargs):
+        peaks_int = mantid.IntegratePeaksShoeboxTOF(InputWorkspace=ws, PeaksWorkspace=peaks, OutputWorkspace=out_peaks, **kwargs)
+        return peaks_int
+
     @default_apply_to_all_runs
     def integrate_data(self, integration_type, peak_type, tol=0, run=None, **kwargs):
         pk_table = self.get_peaks(run, peak_type)
@@ -357,6 +363,8 @@ class BaseSX(ABC):
             if ws is not None:
                 kwargs["ws"] = ws  # use this workspace to avoid loading in empty
             self.integrate_peaks_MD_optimal_radius(ws_md, pk_table, peak_int_name, **kwargs)
+        elif integration_type == INTEGRATION_TYPE.SHOEBOX:
+            BaseSX.integrate_peaks_shoebox(ws, pk_table, peak_int_name, **kwargs)
         else:
             BaseSX.integrate_peaks_skew(ws, pk_table, peak_int_name, **kwargs)
         # store result

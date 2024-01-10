@@ -206,6 +206,40 @@ public:
     removeFile(parameters.filename);
   }
 
+  void test_that_sample_bgsub_values_included_if_properties_are_set() {
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.scaledBgSubWorkspace = "a_workspace";
+    parameters.scaledBgSubScaleFactor = 1.5;
+    parameters.hasBgSub = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Create transmission can
+    NXcanSASTestTransmissionParameters transmissionParameters;
+    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
+    transmissionParameters.usesTransmission = true;
+
+    auto transmission = getTransmissionWorkspace(transmissionParameters);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+
+    // Act
+    save_file_no_issues(ws, parameters, transmission, nullptr);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
   void test_that_unknown_detector_names_are_not_saved() {
     // Arrange
     NXcanSASTestParameters parameters;
@@ -386,6 +420,8 @@ private:
     saveAlg->setProperty("SampleDirectRunNumber", parameters.sampleDirectRun);
     saveAlg->setProperty("CanScatterRunNumber", parameters.canScatterRun);
     saveAlg->setProperty("CanDirectRunNumber", parameters.canDirectRun);
+    saveAlg->setProperty("BackgroundSubtractionWorkspace", parameters.scaledBgSubWorkspace);
+    saveAlg->setProperty("BackgroundSubtractionScaleFactor", parameters.scaledBgSubScaleFactor);
 
     TSM_ASSERT_THROWS_NOTHING("Should not throw anything", saveAlg->execute());
     TSM_ASSERT("Should have executed", saveAlg->isExecuted());
@@ -559,7 +595,8 @@ private:
 
   void do_assert_process(H5::Group &process, const bool &hasSampleRuns, const bool &hasCanRuns,
                          const std::string &userFile, const std::string &sampleDirectRun,
-                         const std::string &canDirectRun) {
+                         const std::string &canDirectRun, const bool &hasBgSub, const std::string &scaledBgSubWorkspace,
+                         const double &scaledBgSubScaleFactor) {
     auto numAttributes = process.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
@@ -587,35 +624,27 @@ private:
     auto userFileValue = Mantid::DataHandling::H5Util::readString(userFileDataSet);
     TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", userFileValue, userFile);
 
-    // Check note
-    if (hasSampleRuns || hasCanRuns) {
-      auto note = process.openGroup(sasNoteGroupName);
-      do_assert_process_note(note, hasSampleRuns, hasCanRuns, sampleDirectRun, canDirectRun);
-    }
-  }
-
-  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns, const bool &hasCanRuns,
-                              const std::string &sampleDirectRun, const std::string &canDirectRun) {
-    auto numAttributes = note.getNumAttrs();
-    TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
-
-    // canSAS_class and NX_class attribute
-    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASnote class", classAttribute, sasNoteClassAttr);
-
-    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXnote class", classAttribute, nxNoteClassAttr);
-
     if (hasSampleRuns) {
-      auto sampleDirectRunDataSet = note.openDataSet(sasProcessTermSampleDirect);
+      auto sampleDirectRunDataSet = process.openDataSet(sasProcessTermSampleDirect);
       auto sampleDirectRunValue = Mantid::DataHandling::H5Util::readString(sampleDirectRunDataSet);
       TSM_ASSERT_EQUALS("Should have correct sample direct run number", sampleDirectRunValue, sampleDirectRun);
     }
 
     if (hasCanRuns) {
-      auto canDirectRunDataSet = note.openDataSet(sasProcessTermCanDirect);
+      auto canDirectRunDataSet = process.openDataSet(sasProcessTermCanDirect);
       auto canDirectRunValue = Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
       TSM_ASSERT_EQUALS("Should have correct can direct run number", canDirectRunValue, canDirectRun);
+    }
+
+    if (hasBgSub) {
+      auto scaledBgSubWorkspaceDataSet = process.openDataSet(sasProcessTermScaledBgSubWorkspace);
+      auto scaledBgSubWorkspaceValue = Mantid::DataHandling::H5Util::readString(scaledBgSubWorkspaceDataSet);
+      TSM_ASSERT_EQUALS("Should have correct scaled background subtraction workspace", scaledBgSubWorkspaceValue,
+                        scaledBgSubWorkspace);
+      auto scaledBgSubScaleFactorDataSet = process.openDataSet(sasProcessTermScaledBgSubScaleFactor);
+      auto scaledBgSubScaleFactorValue = Mantid::DataHandling::H5Util::readString(scaledBgSubScaleFactorDataSet);
+      TSM_ASSERT_EQUALS("Should have correct scaled background subtraction scale factor",
+                        stod(scaledBgSubScaleFactorValue), scaledBgSubScaleFactor);
     }
   }
 
@@ -896,7 +925,8 @@ private:
     // Check process
     auto process = entry.openGroup(sasProcessGroupName);
     do_assert_process(process, parameters.hasSampleRuns, parameters.hasCanRuns, parameters.userFile,
-                      parameters.sampleDirectRun, parameters.canDirectRun);
+                      parameters.sampleDirectRun, parameters.canDirectRun, parameters.hasBgSub,
+                      parameters.scaledBgSubWorkspace, parameters.scaledBgSubScaleFactor);
 
     // Check data
     auto data = entry.openGroup(sasDataGroupName);

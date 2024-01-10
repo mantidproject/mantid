@@ -220,19 +220,3 @@ class BeamCentreModel(object):
     @component.setter
     def component(self, value):
         self._component = value
-
-    @property
-    def update_front(self):
-        return self._update_front
-
-    @update_front.setter
-    def update_front(self, value):
-        self._update_front = value
-
-    @property
-    def update_rear(self):
-        return self._update_rear
-
-    @update_rear.setter
-    def update_rear(self, value):
-        self._update_rear = value

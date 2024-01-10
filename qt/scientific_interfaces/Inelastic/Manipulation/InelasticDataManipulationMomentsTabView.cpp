@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationMomentsTabView.h"
-#include "IndirectDataValidationHelper.h"
+#include "Common/IndirectDataValidationHelper.h"
 #include "InelasticDataManipulationMomentsTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -124,7 +124,7 @@ void InelasticDataManipulationMomentsTabView::setWSSuffixes(QStringList const &s
   m_uiForm.dsInput->setWSSuffixes(suffix);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationMomentsTabView::getPlotOptions() const {
+OutputPlotOptionsView *InelasticDataManipulationMomentsTabView::getPlotOptions() const {
   return m_uiForm.ipoPlotOptions;
 }
 

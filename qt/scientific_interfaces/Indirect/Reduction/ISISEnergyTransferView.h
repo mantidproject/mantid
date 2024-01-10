@@ -39,7 +39,7 @@ public:
   std::string getCustomGrouping() const;
 
   std::string getGroupOutputOption() const;
-  IndirectPlotOptionsView *getPlotOptionsView() const;
+  OutputPlotOptionsView *getPlotOptionsView() const;
   bool getGroupOutputCheckbox() const;
 
   std::string getFirstFilename() const;

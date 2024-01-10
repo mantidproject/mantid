@@ -43,6 +43,8 @@ public:
   CrystalSystem crystalSystem() const { return m_crystalSystem; }
   LatticeSystem latticeSystem() const { return m_latticeSystem; }
 
+  std::string getLauePointGroupSymbol() const;
+
   /// Return true if the hkls are in same group
   bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
 

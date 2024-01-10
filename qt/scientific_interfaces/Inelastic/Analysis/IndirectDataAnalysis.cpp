@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysis.h"
-#include "IndirectSettings.h"
+#include "Common/Settings.h"
 
 #include "DataAnalysisTabFactory.h"
 #include "IndirectDataAnalysisTab.h"
@@ -16,7 +16,7 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   auto const tabFactory = std::make_unique<DataAnalysisTabFactory>(m_uiForm.twIDATabs);
   m_tabs.emplace(MSD_FIT, tabFactory->makeMSDFitTab(MSD_FIT));

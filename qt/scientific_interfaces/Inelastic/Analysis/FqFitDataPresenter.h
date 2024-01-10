@@ -10,7 +10,6 @@
 #include "FqFitDataView.h"
 #include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "IndirectFitDataPresenter.h"
-#include "Notifier.h"
 
 #include <QComboBox>
 #include <QSpacerItem>

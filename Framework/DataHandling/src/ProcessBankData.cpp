@@ -189,7 +189,8 @@ void ProcessBankData::run() {
             // tof limits from things observed here
             if (tof > my_longest_tof) {
               my_longest_tof = tof;
-            } else if (tof < my_shortest_tof) {
+            }
+            if (tof < my_shortest_tof) {
               my_shortest_tof = tof;
             }
           } else

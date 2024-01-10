@@ -611,13 +611,12 @@ LoadGroupMapFile::~LoadGroupMapFile() {
  * Creates a group -> [spectra list] map by parsing the input file.
  */
 void LoadGroupMapFile::parseFile() {
-  std::string line;
-
   try {
     // We don't use the total number of groups report at the top of the file but
     // we'll tell them
     // later if there is a problem with it for their diagnostic purposes
     size_t givenNoOfGroups;
+    std::string line;
 
     if (!nextDataLine(line))
       throw std::invalid_argument("The input file doesn't appear to contain any data");

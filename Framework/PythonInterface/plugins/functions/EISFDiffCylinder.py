@@ -11,6 +11,7 @@
 """
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
+from scipy.special import jv
 
 
 class EISFDiffCylinder(IFunction1D):
@@ -55,10 +56,11 @@ class EISFDiffCylinder(IFunction1D):
         x = np.asarray(xvals)  # Q values
         z = length * np.outer(x, self.cos_theta)
         # EISF along cylinder Z-axis
+        # np.sin(z) / z is equal to scipy.special.spherical_jn(0, z) and is faster
         a = np.square(np.where(z < 1e-9, 1 - z * z / 6, np.sin(z) / z))
         z = radius * np.outer(x, self.sin_theta)
         #  EISF on cylinder cross-section (diffusion on a disc)
-        b = np.square(np.where(z < 1e-6, 1 - z * z / 10, 3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
+        b = np.square(np.where(z < 1e-6, 1 - z * z / 10, 2 * jv(1, z) / z))
         # integrate in theta
         eisf = self.d_theta * np.sum(self.sin_theta * a * b, axis=1)
         return self.getParameterValue("A") * eisf

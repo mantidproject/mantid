@@ -426,9 +426,9 @@ fi
 ###############################################################################
 # Uncomment this when the dev-docs are ready to build without warnings
 if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
-  rm -fr $BUILD_DIR/dev-docs/doctree/*
-  rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
-  ${CMAKE_EXE} --build . --target dev-docs-html
+    rm -fr $BUILD_DIR/dev-docs/doctree/*
+    rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
+    ${CMAKE_EXE} --build . --target dev-docs-html
 fi
 
 ###############################################################################
@@ -458,11 +458,11 @@ fi
 if [[ ${DO_SYSTEMTESTS} == true ]]; then
     if [[ ${PRBUILD} == true ]]; then
         # Don't run installer tests if package isn't built.
-		if [[ ${DO_BUILD_PKG} == false ]]; then
-		    RUN_INSTALLER_TESTS=false BUILD_CONFIG=$BUILD_CONFIG EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
-		else
+		    if [[ ${DO_BUILD_PKG} == false ]]; then
+		        RUN_INSTALLER_TESTS=false BUILD_CONFIG=$BUILD_CONFIG EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+		    else
             EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
-		fi
+		    fi
     else
         $SCRIPT_DIR/systemtests
     fi

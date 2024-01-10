@@ -170,6 +170,13 @@ public:
     presenter.initialize();
   }
 
+  void test_setDataThrowsWithNullData() {
+    MockALCDataLoadingView view;
+    ALCDataLoadingPresenter presenter(&view);
+    TS_ASSERT_THROWS_EQUALS(presenter.setData(nullptr), const std::invalid_argument &e, std::string(e.what()),
+                            "Cannot load an empty workspace");
+  }
+
   void test_defaultLoad() {
     InSequence s;
 

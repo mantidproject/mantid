@@ -80,7 +80,7 @@ class AbinsBasicTest(unittest.TestCase):
         )
 
         # no name for workspace
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", TemperatureInKelvin=self._temperature)
+        self.assertRaises(TypeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", TemperatureInKelvin=self._temperature)
 
         # keyword total in the name of the workspace
         self.assertRaisesRegex(

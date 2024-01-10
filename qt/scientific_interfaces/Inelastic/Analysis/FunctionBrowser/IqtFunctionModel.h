@@ -27,6 +27,7 @@ class MANTIDQT_INELASTIC_DLL IqtFunctionModel : public IFunctionModel {
 public:
   IqtFunctionModel();
   void setFunction(IFunction_sptr fun) override;
+  IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
   bool hasFunction() const override;
   void addFunction(const QString &prefix, const QString &funStr) override;

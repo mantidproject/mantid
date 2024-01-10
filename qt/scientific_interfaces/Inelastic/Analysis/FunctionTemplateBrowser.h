@@ -86,7 +86,7 @@ protected slots:
   virtual void parameterButtonClicked(QtProperty *) = 0;
 
 private:
-  virtual void createBrowser();
+  void createBrowser();
   virtual void createProperties() = 0;
 
 protected:

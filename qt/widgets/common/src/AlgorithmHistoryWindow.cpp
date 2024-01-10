@@ -429,21 +429,23 @@ void AlgorithmHistoryWindow::writeToScriptFile() {
 }
 
 void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory &envHistory) {
-  std::string osname = envHistory.osName();
-  std::string osversion = envHistory.osVersion();
-  std::string frwkversn = envHistory.frameworkVersion();
-
   QLineEdit *osNameEdit = getosNameEdit();
-  if (osNameEdit)
+  if (osNameEdit) {
+    std::string osname = envHistory.osName();
     osNameEdit->setText(osname.c_str());
+  }
 
   QLineEdit *osVersionEdit = getosVersionEdit();
-  if (osVersionEdit)
+  if (osVersionEdit) {
+    std::string osversion = envHistory.osVersion();
     osVersionEdit->setText(osversion.c_str());
+  }
 
   QLineEdit *frmwkVersnEdit = getfrmworkVersionEdit();
-  if (frmwkVersnEdit)
+  if (frmwkVersnEdit) {
+    std::string frwkversn = envHistory.frameworkVersion();
     frmwkVersnEdit->setText(frwkversn.c_str());
+  }
 }
 
 void AlgorithmHistoryWindow::updateAll(const Mantid::API::AlgorithmHistory_const_sptr &algHistory) {
@@ -575,10 +577,9 @@ void AlgHistoryProperties::copySelectedItemText() {
  */
 void AlgHistoryProperties::displayAlgHistoryProperties() {
   QStringList propList;
-  std::string sProperty;
   for (std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin(); pIter != m_Histprop.end();
        ++pIter) {
-    sProperty = (*pIter)->name();
+    std::string sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
     sProperty = (*pIter)->value();
