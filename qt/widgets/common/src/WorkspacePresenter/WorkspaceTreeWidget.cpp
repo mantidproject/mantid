@@ -231,7 +231,7 @@ void WorkspaceTreeWidget::showCriticalUserMessage(const std::string &caption, co
 
 void WorkspaceTreeWidget::onLoadAccept() {
   QObject *sender = QObject::sender();
-  auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
+  const auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
   if (!dlg)
     return; // should never happen
 
@@ -370,7 +370,7 @@ void WorkspaceTreeWidget::saveWorkspaceCollection() {
 }
 
 void WorkspaceTreeWidget::handleShowSaveAlgorithm() {
-  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
     QString actionName = sendingAction->text();
@@ -1481,7 +1481,7 @@ void WorkspaceTreeWidget::onClickShowDetectorTable() {
 void WorkspaceTreeWidget::showDetectorsTable() {
   // get selected workspace
   auto ws = QString::fromStdString(getSelectedWorkspaceNames()[0]);
-  auto table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
+  const auto table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
   if (!table) {
     QMessageBox::information(this, "Error", QString("Cannot create detectors tables for workspace ") + ws);
   }
