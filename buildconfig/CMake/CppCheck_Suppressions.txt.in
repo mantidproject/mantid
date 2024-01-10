@@ -310,7 +310,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:560
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:879
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:906
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:232
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:295
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:142
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:154
