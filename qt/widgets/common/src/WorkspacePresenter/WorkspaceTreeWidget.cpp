@@ -633,52 +633,52 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
  */
 void WorkspaceTreeWidget::createSortMenuActions() {
   m_sortCriteria = SortCriteria::ByName;
-  m_sortMenu = new QMenu(this);
+  QMenu *sortMenu = new QMenu(this);
 
-  QAction *m_ascendingSortAction = new QAction("Ascending", this);
-  QAction *m_descendingSortAction = new QAction("Descending", this);
-  QAction *m_byNameChoice = new QAction("Name", this);
-  QAction *m_byLastModifiedChoice = new QAction("Last Modified", this);
-  QAction *m_byMemorySize = new QAction("Size", this);
+  QAction *ascendingSortAction = new QAction("Ascending", this);
+  QAction *descendingSortAction = new QAction("Descending", this);
+  QAction *byNameChoice = new QAction("Name", this);
+  QAction *byLastModifiedChoice = new QAction("Last Modified", this);
+  QAction *byMemorySize = new QAction("Size", this);
 
-  m_ascendingSortAction->setCheckable(true);
-  m_ascendingSortAction->setEnabled(true);
+  ascendingSortAction->setCheckable(true);
+  ascendingSortAction->setEnabled(true);
 
-  m_descendingSortAction->setCheckable(true);
-  m_descendingSortAction->setEnabled(true);
+  descendingSortAction->setCheckable(true);
+  descendingSortAction->setEnabled(true);
 
-  QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
-  sortDirectionGroup->addAction(m_ascendingSortAction);
-  sortDirectionGroup->addAction(m_descendingSortAction);
+  QActionGroup *sortDirectionGroup = new QActionGroup(sortMenu);
+  sortDirectionGroup->addAction(ascendingSortAction);
+  sortDirectionGroup->addAction(descendingSortAction);
   sortDirectionGroup->setExclusive(true);
-  m_ascendingSortAction->setChecked(true);
+  ascendingSortAction->setChecked(true);
 
-  m_byNameChoice->setCheckable(true);
-  m_byNameChoice->setEnabled(true);
+  byNameChoice->setCheckable(true);
+  byNameChoice->setEnabled(true);
 
-  m_byLastModifiedChoice->setCheckable(true);
-  m_byLastModifiedChoice->setEnabled(true);
+  byLastModifiedChoice->setCheckable(true);
+  byLastModifiedChoice->setEnabled(true);
 
-  m_byMemorySize->setCheckable(true);
-  m_byMemorySize->setEnabled(true);
+  byMemorySize->setCheckable(true);
+  byMemorySize->setEnabled(true);
 
-  m_sortChoiceGroup = new QActionGroup(m_sortMenu);
-  m_sortChoiceGroup->addAction(m_byNameChoice);
-  m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
-  m_sortChoiceGroup->addAction(m_byMemorySize);
-  m_sortChoiceGroup->setExclusive(true);
-  m_byNameChoice->setChecked(true);
+  QActionGroup *sortChoiceGroup = new QActionGroup(sortMenu);
+  sortChoiceGroup->addAction(byNameChoice);
+  sortChoiceGroup->addAction(byLastModifiedChoice);
+  sortChoiceGroup->addAction(byMemorySize);
+  sortChoiceGroup->setExclusive(true);
+  byNameChoice->setChecked(true);
 
-  connect(m_ascendingSortAction, SIGNAL(triggered()), this, SLOT(sortAscending()));
-  connect(m_descendingSortAction, SIGNAL(triggered()), this, SLOT(sortDescending()));
-  connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
-  connect(m_byLastModifiedChoice, SIGNAL(triggered()), this, SLOT(chooseByLastModified()));
-  connect(m_byMemorySize, SIGNAL(triggered()), this, SLOT(chooseByMemorySize()));
+  connect(ascendingSortAction, SIGNAL(triggered()), this, SLOT(sortAscending()));
+  connect(descendingSortAction, SIGNAL(triggered()), this, SLOT(sortDescending()));
+  connect(byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
+  connect(byLastModifiedChoice, SIGNAL(triggered()), this, SLOT(chooseByLastModified()));
+  connect(byMemorySize, SIGNAL(triggered()), this, SLOT(chooseByMemorySize()));
 
-  m_sortMenu->addActions(sortDirectionGroup->actions());
-  m_sortMenu->addSeparator();
-  m_sortMenu->addActions(m_sortChoiceGroup->actions());
-  m_sortButton->setMenu(m_sortMenu);
+  sortMenu->addActions(sortDirectionGroup->actions());
+  sortMenu->addSeparator();
+  sortMenu->addActions(sortChoiceGroup->actions());
+  m_sortButton->setMenu(sortMenu);
 }
 
 /**
