@@ -18,7 +18,7 @@ class TestRunTabModel(unittest.TestCase):
     def test_constructor_sets_defaults(self):
         self.assertEqual(ReductionDimensionality.ONE_DIM, self.model.get_reduction_mode())
         # Represents default save opts for 1D
-        self.assertEqual(SaveOptions(can_sas_1d=True), self.model.get_save_types())
+        self.assertEqual(SaveOptions(can_sas_1d=True, nxs_can_sas=True), self.model.get_save_types())
 
     def test_reduction_mode_stored(self):
         for mode in [ReductionDimensionality.TWO_DIM, ReductionDimensionality.ONE_DIM]:
@@ -28,7 +28,7 @@ class TestRunTabModel(unittest.TestCase):
     def test_reduction_mode_updates_save_opts(self):
         for mode, expected in [
             (ReductionDimensionality.TWO_DIM, SaveOptions(nxs_can_sas=True)),
-            (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True)),
+            (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True, nxs_can_sas=True)),
         ]:
             self.model.update_reduction_mode(mode)
             self.assertEqual(expected, self.model.get_save_types())

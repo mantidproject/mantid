@@ -35,7 +35,7 @@ class RunTabModel:
         :param val: New reduction dimensionality
         """
         if val is ReductionDimensionality.ONE_DIM:
-            self._save_types = SaveOptions(can_sas_1d=True)
+            self._save_types = SaveOptions(can_sas_1d=True, nxs_can_sas=True)
         elif val is ReductionDimensionality.TWO_DIM:
             self._save_types = SaveOptions(nxs_can_sas=True)
         else:
