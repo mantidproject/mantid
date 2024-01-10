@@ -1144,7 +1144,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ConvolutionFunct
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:189
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FlowLayout.h:68
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransformMD.cpp:0
-knownPointerToBool:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionModel.cpp:591
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelector.cpp:38
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
