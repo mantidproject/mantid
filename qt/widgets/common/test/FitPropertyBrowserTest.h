@@ -47,11 +47,15 @@ DECLARE_FUNCTION(FitPropertyBrowserTest_Funct)
 
 class FitPropertyBrowserTest : public CxxTest::TestSuite {
 public:
-  static FitPropertyBrowserTest *createSuite() { return new FitPropertyBrowserTest; }
+  static FitPropertyBrowserTest *createSuite() { return new FitPropertyBrowserTest(); }
   static void destroySuite(FitPropertyBrowserTest *suite) { delete suite; }
 
   void setUp() override { // create a FunctionBrowser
     m_fitPropertyBrowser = std::make_unique<MantidQt::MantidWidgets::FitPropertyBrowser>();
+    m_algSignalSpyFailed = std::make_unique<QSignalSpy>(m_fitPropertyBrowser.get(),
+                                                        &MantidQt::MantidWidgets::FitPropertyBrowser::algorithmFailed);
+    m_algSignalSpyFinished = std::make_unique<QSignalSpy>(
+        m_fitPropertyBrowser.get(), &MantidQt::MantidWidgets::FitPropertyBrowser::algorithmFinished);
   }
 
   void tearDown() override {
@@ -211,10 +215,8 @@ public:
   }
 
   void test_alg_failed_signal_emmitted_upon_exception() {
-    QSignalSpy algFailedSpy_failed(m_fitPropertyBrowser.get(),
-                                   &MantidQt::MantidWidgets::FitPropertyBrowser::algorithmFailed);
-    QSignalSpy algFailedSpy_finished(m_fitPropertyBrowser.get(),
-                                     &MantidQt::MantidWidgets::FitPropertyBrowser::algorithmFinished);
+    m_algSignalSpyFailed->clear();
+    m_algSignalSpyFinished->clear();
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 5, 5, 5);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("test_ws_name", ws);
     m_fitPropertyBrowser->init();
@@ -222,14 +224,16 @@ public:
     m_fitPropertyBrowser->setWorkspaceName("test_ws_name");
     m_fitPropertyBrowser->fit();
     std::cout << "Reached end of fitting" << std::endl;
-    TS_ASSERT_EQUALS(algFailedSpy_failed.count(), 1);
+    TS_ASSERT_EQUALS(m_algSignalSpyFailed->count(), 1);
     std::cout << "Compared algorithmFailed count" << std::endl;
-    TS_ASSERT_EQUALS(algFailedSpy_finished.count(), 0);
+    TS_ASSERT_EQUALS(m_algSignalSpyFinished->count(), 0);
     std::cout << "Compared algorithmFinished count" << std::endl;
   }
 
 private:
   std::unique_ptr<MantidQt::MantidWidgets::FitPropertyBrowser> m_fitPropertyBrowser;
+  std::unique_ptr<QSignalSpy> m_algSignalSpyFailed;
+  std::unique_ptr<QSignalSpy> m_algSignalSpyFinished;
 
   void expect_and_close_message_box() {
     QTimer::singleShot(0, [=]() {
