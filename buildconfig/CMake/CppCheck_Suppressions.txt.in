@@ -782,9 +782,8 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexus.cpp:248
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/VectorColumn.h:92
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusLogs.cpp:587
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:38
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:434
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:183
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:690
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:453
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:184
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:366

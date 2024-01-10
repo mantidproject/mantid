@@ -123,10 +123,10 @@ bool isEventMonitor(::NeXus::File &file) {
 //------------------------------------------------------------------------------
 /// Initialization method.
 void LoadNexusMonitors2::init() {
-  const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
+  const std::vector<std::string> exts{".nxs.h5", ".nxs"};
   declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, exts),
                   "The name (including its full or relative path) of the NeXus file to "
-                  "attempt to load. The file extension must either be .nxs or .NXS");
+                  "attempt to load. The file extension must either be .nxs, .NXS, or .nxs.h5");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
@@ -712,7 +712,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
   // load up the event list
   DataObjects::EventList &event_list = eventWS->getSpectrum(ws_index);
 
-  Mantid::Types::Core::DateAndTime pulsetime(0);
+  Mantid::Types::Core::DateAndTime pulsetime;
   Mantid::Types::Core::DateAndTime lastpulsetime(0);
   std::size_t numEvents = time_of_flight.size();
   bool pulsetimesincreasing = true;
