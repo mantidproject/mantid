@@ -255,7 +255,7 @@ void WorkspaceTreeWidget::renameWorkspace() { m_presenter->notifyFromView(ViewNo
 void WorkspaceTreeWidget::showRenameDialog(const StringList &wsNames) {
   QStringList names;
 
-  for (auto &ws : wsNames)
+  for (const auto &ws : wsNames)
     names.append(QString::fromStdString(ws));
 
   m_mantidDisplayModel->renameWorkspace(names);
@@ -277,7 +277,7 @@ void WorkspaceTreeWidget::recordWorkspaceRename(const std::string &oldName, cons
   QList<QString> oldNames = m_renameMap.keys(qs_oldName);
   // non-empty list of oldNames become new_name
   if (!oldNames.isEmpty()) {
-    for (auto &name : oldNames)
+    for (const auto &name : oldNames)
       m_renameMap[name] = qs_newName;
   } else {
     // record a new rename pair
@@ -298,7 +298,7 @@ bool WorkspaceTreeWidget::deleteConfirmation() const {
 
 void WorkspaceTreeWidget::deleteWorkspaces(const StringList &wsNames) {
   QStringList names;
-  for (auto &ws : wsNames)
+  for (const auto &ws : wsNames)
     names.append(QString::fromStdString(ws));
   m_mantidDisplayModel->deleteWorkspaces(names);
 }
@@ -1199,7 +1199,7 @@ void WorkspaceTreeWidget::popupContextMenu() {
         (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
     bool firstPass(true);
     // Check to see if any options aren't visible
-    for (auto &programName : programNames) {
+    for (const auto &programName : programNames) {
       std::string visible =
           Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programName + ".visible");
       std::string target =
@@ -1453,7 +1453,7 @@ void WorkspaceTreeWidget::showColourFillPlot() {
     auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
 
     if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
-      for (auto &name : wsGroup->getNames())
+      for (const auto &name : wsGroup->getNames())
         allWsNames.append(QString::fromStdString(name));
     } else
       allWsNames.append(item->text(0));

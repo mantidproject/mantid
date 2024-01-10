@@ -1370,11 +1370,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:1935
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:2079
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentActor.h:256
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:259
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:281
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:302
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:1203
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:1457
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:235
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:374
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:1485
