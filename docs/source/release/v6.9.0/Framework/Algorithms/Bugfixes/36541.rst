@@ -1,0 +1,1 @@
+- Sped up the `LoadAscii` algorithm by at least one order of magnitude.
