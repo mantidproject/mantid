@@ -87,19 +87,15 @@ set(SRC_FILES
 set(MOC_FILES
     Analysis/ConvFitAddWorkspaceDialog.h
     Analysis/ConvFitDataView.h
-    Analysis/ConvFitDataPresenter.h
     Analysis/IndirectDataAnalysis.h
     Analysis/IndirectDataAnalysisTab.h
     Analysis/FqFitAddWorkspaceDialog.h
-    Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
     Analysis/FunctionTemplateBrowser.h
-    Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
-    Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitDataView.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
@@ -141,7 +137,9 @@ set(MOC_FILES
 set(INC_FILES
     DllConfig.h
     PrecompiledHeader.h
+    Analysis/ConvFitDataPresenter.h
     Analysis/DataAnalysisTabFactory.h
+    Analysis/FqFitDataPresenter.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
     Analysis/IqtFitModel.h
@@ -149,12 +147,14 @@ set(INC_FILES
     Analysis/ConvFitModel.h
     Analysis/FitTabConstants.h
     Analysis/IIndirectFitDataModel.h
-    Analysis/IndirectFitDataModel.h
+    Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutput.h
     Analysis/IIndirectFitOutputOptionsModel.h
     Analysis/IIndirectFitPlotView.h
     Analysis/IIndirectFittingModel.h
     Analysis/IndirectFitData.h
+    Analysis/IndirectFitDataModel.h
+    Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitOutput.h
     Analysis/IndirectFitOutputOptionsModel.h
     Analysis/IndirectFitOutputOptionsPresenter.h

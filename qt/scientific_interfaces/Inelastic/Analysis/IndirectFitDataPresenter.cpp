@@ -5,42 +5,20 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include <map>
 #include <utility>
 
 #include "Common/IndirectAddWorkspaceDialog.h"
 
-namespace {
-
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  // this sets the input bool to false whilst this object is in scope and then
-  // resets it to its old value when this object drops out of scope.
-  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-} // namespace
-
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : m_model(model), m_view(view) {
+IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
+                                                   IIndirectFitDataView *view)
+    : m_tab(tab), m_model(model), m_view(view) {
+  m_view->subscribePresenter(this);
   observeReplace(true);
-
-  connect(m_view, SIGNAL(addClicked()), this, SIGNAL(requestedAddWorkspaceDialog()));
-  connect(m_view, SIGNAL(addClicked()), this, SLOT(showAddWorkspaceDialog()));
-
-  connect(m_view, SIGNAL(removeClicked()), this, SLOT(removeSelectedData()));
-
-  connect(m_view, SIGNAL(unifyClicked()), this, SLOT(unifyRangeToSelectedData()));
-
-  connect(m_view, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
-  connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
@@ -68,16 +46,20 @@ void IndirectFitDataPresenter::setResolution(const std::string &name) {
   }
 }
 
-void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
+void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) {
+  m_view->setSampleWSSuffices(suffixes);
+}
 
-void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
+void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) {
+  m_view->setSampleFBSuffices(suffixes);
+}
 
 void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
-  m_wsResolutionSuffixes = suffixes;
+  m_view->setResolutionWSSuffices(suffixes);
 }
 
 void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
-  m_fbResolutionSuffixes = suffixes;
+  m_view->setResolutionFBSuffices(suffixes);
 }
 
 void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
@@ -108,54 +90,21 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolut
   return m_model->getResolutionsForFit();
 }
 
-QStringList IndirectFitDataPresenter::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
-
-QStringList IndirectFitDataPresenter::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
-
-QStringList IndirectFitDataPresenter::getResolutionWSSuffices() const { return m_wsResolutionSuffixes; }
-
-QStringList IndirectFitDataPresenter::getResolutionFBSuffices() const { return m_fbResolutionSuffixes; }
-
 UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
 }
 
-void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-}
-
-std::unique_ptr<IAddWorkspaceDialog> IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
-void IndirectFitDataPresenter::addData() { addData(m_addWorkspaceDialog.get()); }
-
-void IndirectFitDataPresenter::closeDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
-}
-
-void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
   try {
-    emit dataAdded(dialog);
+    m_tab->handleDataAdded(dialog);
     updateTableFromModel();
-    emit dataChanged();
+    m_tab->handleDataChanged();
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
 }
 
 void IndirectFitDataPresenter::updateTableFromModel() {
-  ScopedFalse _signalBlock(m_emitCellChanged);
   m_view->clearTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
@@ -206,10 +155,6 @@ void IndirectFitDataPresenter::addTableEntry(FitDomainIndex row) {
 }
 
 void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
-  if (!m_emitCellChanged) {
-    return;
-  }
-
   if (m_view->getColumnIndexFromName("StartX") == column) {
     setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
   } else if (m_view->getColumnIndexFromName("EndX") == column) {
@@ -224,7 +169,7 @@ void IndirectFitDataPresenter::setTableStartXAndEmit(double X, int row, int colu
 
   m_model->setStartX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).first, row, column);
-  emit startXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
+  m_tab->handleTableStartXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column) {
@@ -232,21 +177,21 @@ void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column
 
   m_model->setEndX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).second, row, column);
-  emit endXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
+  m_tab->handleTableEndXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setStartX(startX, subIndices.first, subIndices.second);
-  emit startXChanged(startX, subIndices.first, subIndices.second);
+  m_tab->handleTableStartXChanged(startX, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setEndX(endX, subIndices.first, subIndices.second);
-  emit endXChanged(endX, subIndices.first, subIndices.second);
+  m_tab->handleTableEndXChanged(endX, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
@@ -271,7 +216,7 @@ std::map<int, QModelIndex> IndirectFitDataPresenter::getUniqueIndices(const QMod
 /**
  * Removes selected rows, with no repeats
  */
-void IndirectFitDataPresenter::removeSelectedData() {
+void IndirectFitDataPresenter::handleRemoveClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
@@ -282,11 +227,11 @@ void IndirectFitDataPresenter::removeSelectedData() {
     m_model->removeDataByIndex(FitDomainIndex(item->second.row()));
   }
   updateTableFromModel();
-  emit dataRemoved();
-  emit dataChanged();
+  m_tab->handleDataRemoved();
+  m_tab->handleDataChanged();
 }
 
-void IndirectFitDataPresenter::unifyRangeToSelectedData() {
+void IndirectFitDataPresenter::handleUnifyClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.

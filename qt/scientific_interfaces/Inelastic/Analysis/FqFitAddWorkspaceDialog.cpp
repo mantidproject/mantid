@@ -19,7 +19,7 @@ FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspac
   connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
+  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 std::string FqFitAddWorkspaceDialog::workspaceName() const {

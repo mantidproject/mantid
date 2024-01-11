@@ -5,8 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "IIndirectFitDataView.h"
-#include "IndirectFitPlotView.h"
 #include "IndirectFitPropertyBrowser.h"
 
 #include <QMainWindow>
@@ -16,15 +14,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+class IndirectFitDataView;
+class IndirectFitPlotView;
+
 class MANTIDQT_INELASTIC_DLL IndirectDockWidgetArea : public QMainWindow {
   Q_OBJECT
 
 public:
   IndirectDockWidgetArea(QWidget *parent = nullptr);
   virtual ~IndirectDockWidgetArea(){};
-  void setFitDataView(IIndirectFitDataView *fitDataView);
+  void setFitDataView(IndirectFitDataView *fitDataView);
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
-  IIndirectFitDataView *m_fitDataView;
+  IndirectFitDataView *m_fitDataView;
   IndirectFitPlotView *m_fitPlotView;
 };
 

@@ -31,7 +31,7 @@ private:
 };
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis *axis,
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis const *axis,
                                                                              Predicate const &predicate) {
   std::vector<std::string> labels;
   std::vector<std::size_t> spectra;
@@ -197,11 +197,10 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
-  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
-}
+FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
+                                       IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
 bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
@@ -249,11 +248,11 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveWorkspaceID() { m_activeWorkspaceID = m_model->getNumberOfWorkspaces(); }
-
 void FqFitDataPresenter::updateActiveWorkspaceID(WorkspaceID index) { m_activeWorkspaceID = index; }
 
-void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+void FqFitDataPresenter::handleAddClicked() { updateActiveWorkspaceID(m_model->getNumberOfWorkspaces()); }
+
+void FqFitDataPresenter::handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -266,7 +265,7 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
   updateParameterOptions(dialog, parameters);
 }
 
-void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
+void FqFitDataPresenter::handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
   if (!workspaceName.empty() && m_adsInstance.doesExist(workspaceName)) {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -357,21 +356,12 @@ void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID worksp
     logger.warning("Invalid EISF index specified.");
 }
 
-std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(), SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *, const std::string &)));
-  connect(dialog.get(), SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
-  return dialog;
-}
-
 void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
-  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto axis = dynamic_cast<Mantid::API::TextAxis const *>(workspace->getAxis(1));
   const auto parameter = axis->label(subIndices.second.value);
 
   const auto workspaceIndex = m_model->getSpectrum(row);

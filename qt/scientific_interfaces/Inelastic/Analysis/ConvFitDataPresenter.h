@@ -16,20 +16,13 @@ namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
 class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
-  Q_OBJECT
 public:
-  ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
 
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 
-signals:
-  void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceID);
-
 protected:
   void addTableEntry(FitDomainIndex row) override;
-
-private:
-  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
 };
 
 } // namespace IDA

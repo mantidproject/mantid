@@ -5,9 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-#include "Common/SettingsHelper.h"
 
+#include "Common/SettingsHelper.h"
 #include "FitTabConstants.h"
+#include "IndirectFitPlotView.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -76,23 +78,7 @@ void IndirectDataAnalysisTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connectDataPresenter();
   connectFitPropertyBrowser();
-}
-
-void IndirectDataAnalysisTab::connectDataPresenter() {
-  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double, WorkspaceID, WorkspaceIndex)), this,
-          SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
-          SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(handleStartXChanged(double)));
-  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(handleEndXChanged(double)));
-
-  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded(IAddWorkspaceDialog const *)), this,
-          SLOT(respondToDataAdded(IAddWorkspaceDialog const *)));
-  connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
 void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
@@ -200,14 +186,15 @@ void IndirectDataAnalysisTab::setModelEndX(double endX) {
   m_dataPresenter->setStartX(endX, dataIndex, getSelectedSpectrum());
 }
 
-void IndirectDataAnalysisTab::tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void IndirectDataAnalysisTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID,
+                                                       WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setStartX(startX);
     m_plotPresenter->updateGuess();
   }
 }
 
-void IndirectDataAnalysisTab::tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void IndirectDataAnalysisTab::handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();
@@ -604,13 +591,7 @@ void IndirectDataAnalysisTab::updateResultOptions() {
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
-void IndirectDataAnalysisTab::respondToSingleResolutionLoaded() {
-  setModelFitFunction();
-  m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuessAvailability();
-}
-
-void IndirectDataAnalysisTab::respondToDataChanged() {
+void IndirectDataAnalysisTab::handleDataChanged() {
   updateDataReferences();
   m_fittingModel->removeFittingData();
   m_plotPresenter->updateAvailableSpectra();
@@ -620,7 +601,7 @@ void IndirectDataAnalysisTab::respondToDataChanged() {
   updateResultOptions();
 }
 
-void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
+void IndirectDataAnalysisTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
   if (m_dataPresenter->addWorkspaceFromDialog(dialog)) {
     m_fittingModel->addDefaultParameters();
   }
@@ -630,7 +611,7 @@ void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dial
   updateParameterEstimationData();
 }
 
-void IndirectDataAnalysisTab::respondToDataRemoved() {
+void IndirectDataAnalysisTab::handleDataRemoved() {
   m_fittingModel->removeDefaultParameters();
   updateDataReferences();
   auto displayNames = m_dataPresenter->createDisplayNames();
