@@ -17,7 +17,7 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
-  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.26 # v0.3.25/26 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
