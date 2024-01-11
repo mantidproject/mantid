@@ -338,12 +338,12 @@ void FitScriptGeneratorView::addWorkspaceDialogAccepted() {
 std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
   std::vector<MatrixWorkspace_const_sptr> workspaces;
   if (m_addWorkspaceDialog) {
-    auto const workspaceName = m_addWorkspaceDialog->workspaceName();
+    auto const wsName = m_addWorkspaceDialog->workspaceName();
     auto &ads = AnalysisDataService::Instance();
-    if (ads.doesExist(workspaceName)) {
-      workspaces.emplace_back(ads.retrieveWS<MatrixWorkspace>(workspaceName));
+    if (ads.doesExist(wsName)) {
+      workspaces.emplace_back(ads.retrieveWS<MatrixWorkspace>(wsName));
     } else {
-      displayWarning("Failed to add workspace: '" + workspaceName + "' doesn't exist.");
+      displayWarning("Failed to add workspace: '" + wsName + "' doesn't exist.");
     }
   }
   return workspaces;
