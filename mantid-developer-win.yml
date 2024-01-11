@@ -8,7 +8,7 @@ dependencies:
   - ccache
   - cmake>=3.21.0,<3.27.0 # Avoid bug in 3.20.* and 3.27.* with updating external projects
   - conda-wrappers
-  - doxygen>=1.9.*
+  - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
   - euphonic>=1.2.1,<2.0
   - graphviz>=2.47.0
@@ -50,3 +50,4 @@ dependencies:
   - cppcheck==2.12.1
   - pre-commit>=2.12.0
   - joblib
+  - orsopy
