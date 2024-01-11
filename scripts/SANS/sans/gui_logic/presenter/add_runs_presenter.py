@@ -67,12 +67,12 @@ class AddRunsPagePresenter(object):
         self._parent_view = parent_view
         self._sum_runs_model = sum_runs_model
         self._use_generated_file_name = True
+        self._view.disable_output_file_name_edit()
 
         self._init_sub_presenters(view)
 
         self.save_directory = ""
         self._connect_to_view(view)
-        self._handle_custom_outfile_check_changed(False)
 
         self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory, str)})
 
