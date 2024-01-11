@@ -59,7 +59,7 @@ void SingleFunctionTemplateBrowser::createProperties() {
 
 void SingleFunctionTemplateBrowser::setDataType(std::vector<std::string> const &allowedFunctionsList) {
   ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setEnumNames(m_fitType, convertVectorToQStringList(allowedFunctionsList));
+  m_enumManager->setEnumNames(m_fitType, stdVectorToQStringList(allowedFunctionsList));
   m_enumManager->setValue(m_fitType, 0);
 }
 

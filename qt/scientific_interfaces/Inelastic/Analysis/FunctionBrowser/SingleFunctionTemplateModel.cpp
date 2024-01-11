@@ -56,7 +56,7 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
     m_globalParameterStore.insert(functionInfo.first, std::vector<std::string>());
   }
   // Sort the FunctionList as None should always appear first
-  m_fitTypeList = convertQListToVector(m_fitTypeToFunctionStore.keys());
+  m_fitTypeList = qListToStdVector(m_fitTypeToFunctionStore.keys());
   sortFunctionList(m_fitTypeList);
   m_fitType = m_fitTypeList.front();
 }

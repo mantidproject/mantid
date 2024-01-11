@@ -378,9 +378,8 @@ void FitScriptGeneratorView::openEditLocalParameterDialog(
     std::vector<std::string> const &domainNames, std::vector<double> const &values, std::vector<bool> const &fixes,
     std::vector<std::string> const &ties, std::vector<std::string> const &constraints) {
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      this, parameter, convertVectorToQStringList(workspaceNames), convertVectorToQStringList(domainNames),
-      convertToQList(values), convertToQList(fixes), convertVectorToQStringList(ties),
-      convertVectorToQStringList(constraints));
+      this, parameter, stdVectorToQStringList(workspaceNames), stdVectorToQStringList(domainNames),
+      convertToQList(values), convertToQList(fixes), stdVectorToQStringList(ties), stdVectorToQStringList(constraints));
 
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(onEditLocalParameterFinished(int)));
 
@@ -392,8 +391,8 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
   return {m_editLocalParameterDialog->getParameterName(),
           convertQListToStdVector(m_editLocalParameterDialog->getValues()),
           convertQListToStdVector(m_editLocalParameterDialog->getFixes()),
-          convertQStringListToVector(m_editLocalParameterDialog->getTies()),
-          convertQStringListToVector(m_editLocalParameterDialog->getConstraints())};
+          qStringListToStdVector(m_editLocalParameterDialog->getTies()),
+          qStringListToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
 std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
