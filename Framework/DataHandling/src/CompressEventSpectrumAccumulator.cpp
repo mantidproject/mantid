@@ -14,8 +14,10 @@ namespace Mantid {
 namespace DataHandling {
 CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
     std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, CompressBinningMode bin_mode)
-    : m_divisor(abs(divisor)), m_offset(static_cast<double>(histogram_bin_edges->front())),
-      m_histogram_edges(std::move(histogram_bin_edges)) {
+    : m_divisor(abs(divisor)), m_histogram_edges(std::move(histogram_bin_edges)) {
+  // divisor is applied to make it
+  m_offset = static_cast<double>(m_histogram_edges->front()) / m_divisor;
+
   // create the fine histogram
   // all values start at zero because nothing has been accumulated
   const auto NUM_BINS = static_cast<size_t>(m_histogram_edges->size() - 1);

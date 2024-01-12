@@ -25,21 +25,22 @@ public:
   static CompressEventSpectrumAccumulatorTest *createSuite() { return new CompressEventSpectrumAccumulatorTest(); }
   static void destroySuite(CompressEventSpectrumAccumulatorTest *suite) { delete suite; }
 
-  void test_accumulator_linear() {
-    constexpr double TOF_MIN{0};
-    constexpr double TOF_MAX{10000000};  // 1e7
-    constexpr double TOF_DELTA_HIST{10}; // this puts 10 events in each bin
+  void run_linear_test(const double tof_min, const double tof_delta_hist) {
+    constexpr double TOF_MAX{10000000}; // 1e7
 
     // set up the fine histogram
-    const size_t NUM_HIST_BINS = static_cast<size_t>((TOF_MAX - TOF_MIN) / TOF_DELTA_HIST);
+    const size_t NUM_HIST_BINS = static_cast<size_t>((TOF_MAX - tof_min) / tof_delta_hist);
     auto tof_fine_bins = std::make_shared<std::vector<double>>();
     for (size_t i = 0; i < NUM_HIST_BINS + 1; ++i) { // to convert to edges
-      tof_fine_bins->push_back(static_cast<double>(TOF_MIN + (i * TOF_DELTA_HIST)));
+      const double tof = static_cast<double>(tof_min + (static_cast<double>(i) * tof_delta_hist));
+      tof_fine_bins->push_back(tof);
     }
     TS_ASSERT_EQUALS(tof_fine_bins->size(), NUM_HIST_BINS + 1);
+    TS_ASSERT_EQUALS(tof_fine_bins->front(), tof_min);
+    TS_ASSERT_EQUALS(tof_fine_bins->back(), TOF_MAX);
 
     // create the accumulator
-    CompressEventSpectrumAccumulator accumulator(tof_fine_bins, TOF_DELTA_HIST,
+    CompressEventSpectrumAccumulator accumulator(tof_fine_bins, tof_delta_hist,
                                                  DataHandling::CompressBinningMode::LINEAR);
 
     // check that the starting condition is correct
@@ -47,11 +48,12 @@ public:
     TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), 0);
 
     // add a bunch of events
-    const size_t NUM_RAW_EVENTS = static_cast<size_t>(TOF_MAX - TOF_MIN);
+    const size_t NUM_RAW_EVENTS = static_cast<size_t>(TOF_MAX - tof_min);
     for (size_t i = 0; i < NUM_RAW_EVENTS; ++i) {
-      accumulator.addEvent(static_cast<float>(i) + static_cast<float>(TOF_MIN));
+      accumulator.addEvent(static_cast<float>(i) + static_cast<float>(tof_min));
     }
-    TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), NUM_RAW_EVENTS / static_cast<size_t>(TOF_DELTA_HIST));
+    const size_t NUM_WGHT_EVENTS = static_cast<size_t>((TOF_MAX - tof_min) / tof_delta_hist);
+    TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), NUM_WGHT_EVENTS);
 
     // set up an EventList to add weighted events to
     EventList event_list;
@@ -62,6 +64,24 @@ public:
     // write the events
     accumulator.createWeightedEvents(raw_events);
     TS_ASSERT_EQUALS(raw_events->size(), accumulator.numberWeightedEvents());
+  }
+
+  void test_accumulator_linear_delta10() {
+    constexpr double TOF_MIN{0};
+    constexpr double TOF_DELTA_HIST{10}; // this puts 10 events in each bin
+    run_linear_test(TOF_MIN, TOF_DELTA_HIST);
+  }
+
+  void test_accumulator_linear_offset10_delta10() {
+    constexpr double TOF_MIN{10};
+    constexpr double TOF_DELTA_HIST{10}; // this puts 10 events in each bin
+    run_linear_test(TOF_MIN, TOF_DELTA_HIST);
+  }
+
+  void test_accumulator_linear_delta20() {
+    constexpr double TOF_MIN{0};
+    constexpr double TOF_DELTA_HIST{20}; // this puts 20 events in each bin
+    run_linear_test(TOF_MIN, TOF_DELTA_HIST);
   }
 
   // ====================================== BEGIN OF REMOVE
@@ -147,7 +167,7 @@ public:
 
     auto tof_fine_bins = std::make_shared<std::vector<double>>();
     for (size_t i = 0; i < snap_num_bins + 1; ++i) { // to convert to edges
-      tof_fine_bins->push_back(static_cast<double>(*snap_min + (i * DELTA)));
+      tof_fine_bins->push_back(static_cast<double>(*snap_min + (static_cast<double>(i) * DELTA)));
     }
 
     const size_t MAX_EVENTS = snap_tof->size(); //  / 10;
@@ -170,7 +190,8 @@ public:
 
     {
       auto seconds = snap_timer.elapsed();
-      std::cout << "Accumulator             in " << seconds << "s | rate=" << (MAX_EVENTS / seconds) << "E/s\n"
+      std::cout << "Accumulator             in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) / seconds)
+                << "E/s\n"
                 << "                      numWeighted=" << accumulator.numberWeightedEvents()
                 << " numHist=" << accumulator.numberHistBins() << " unused="
                 << (100. * double(accumulator.numberHistBins() - accumulator.numberWeightedEvents()) /
@@ -190,7 +211,7 @@ public:
       const auto stdbin = EventList::findLinearBin(*tof_fine_bins.get(), tof, DELTA, *snap_min);
       if (stdbin) {
         const auto bin = stdbin.get();
-        snap_vec_tof[bin] += tof;
+        snap_vec_tof[bin] += static_cast<float>(tof);
         snap_vec_count[bin] += 1;
       } else {
         std::cout << "????????????????????? " << tof << " not in range of fine histogram\n";
@@ -198,13 +219,13 @@ public:
     }
 
     // pre-count how much to allocate for the output
-    std::size_t numWgtEvents =
-        std::accumulate(snap_vec_count.cbegin(), snap_vec_count.cend(), 0, [](const auto &current, const auto &value) {
-          if (value > 0)
-            return current + 1;
-          else
-            return current;
-        });
+    std::size_t numWgtEvents = std::accumulate(snap_vec_count.cbegin(), snap_vec_count.cend(), static_cast<size_t>(0),
+                                               [](const auto &current, const auto &value) {
+                                                 if (value > 0)
+                                                   return current + 1;
+                                                 else
+                                                   return current;
+                                               });
 
     EventList snap_events_wgt1;
     snap_events_wgt1.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
@@ -222,7 +243,8 @@ public:
     snap_events_wgt1.setSortOrder(Mantid::DataObjects::EventSortType::TOF_SORT);
     {
       auto seconds = snap_timer.elapsed();
-      std::cout << "WeightedEventNoTime VEC in " << seconds << "s | rate=" << (MAX_EVENTS / seconds) << "E/s\n"
+      std::cout << "WeightedEventNoTime VEC in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) / seconds)
+                << "E/s\n"
                 << "                    elements.size=" << snap_wgt_events1->size()
                 << " memory=" << (snap_events_wgt1.getMemorySize() / 1024) << "kB\n"
                 << "                    unused temporary fine bins=" << (snap_num_bins - snap_wgt_events1->size())

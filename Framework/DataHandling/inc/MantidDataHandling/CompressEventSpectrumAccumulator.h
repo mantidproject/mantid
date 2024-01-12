@@ -33,8 +33,11 @@ private:
   /// Do not allow constructing
   CompressEventSpectrumAccumulator();
 
-  const double m_divisor;
-  const double m_offset;
+  // offset is applied after division
+  // see EventList::findLinearBin for implementation on what that means
+  double m_divisor;
+  double m_offset;
+
   /// function pointer on how to find the bin boundaries
   boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double);
 
