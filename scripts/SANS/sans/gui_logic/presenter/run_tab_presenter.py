@@ -22,11 +22,10 @@ from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
-from sans.common.enums import ReductionDimensionality
 from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import ReductionMode, RangeStepType, RowState, SampleShape, SaveType, SANSInstrument
+from sans.common.enums import ReductionMode, RangeStepType, RowState, SampleShape, SaveType, SANSInstrument, ReductionDimensionality
 from sans.gui_logic.gui_common import (
     add_dir_to_datasearch,
     get_reduction_mode_from_gui_selection,
