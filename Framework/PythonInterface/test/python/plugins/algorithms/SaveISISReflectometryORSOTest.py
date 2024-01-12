@@ -41,6 +41,10 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _FIRST_TRANS_COMMENT = "First transmission run"
     _SECOND_TRANS_COMMENT = "Second transmission run"
 
+    # Metadata headings
+    _ADDITIONAL_FILES_HEADING = "#     additional_files:\n"
+    _REDUCTION_HEADING = "# reduction:\n"
+
     def setUp(self):
         self._oldFacility = config["default.facility"]
         if self._oldFacility.strip() == "":
@@ -77,32 +81,43 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._temp_dir.cleanup()
 
     def test_create_file_from_workspace_with_reduction_history(self):
-        # Check that relevant information is extracted from the history produced by the ISIS Reflectometry reduction
+        # Check that relevant information is extracted from the history produced by the ISIS Reflectometry GUI reduction
         resolution = 0.02
-        reduced_ws = self._get_ws_from_reduction("INTER13460, 13461, 13462.nxs", resolution, "IvsQ_13460+13461+13462")
+        reduced_ws = self._get_ws_from_reduction(
+            "INTER13460, 13461, 13462.nxs", resolution, "IvsQ_13460+13461+13462", "13463", "13464, 13462"
+        )
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
         expected_data_files = ["INTER00013460.nxs", "INTER00013461.nxs", "INTER00013462.nxs"]
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
-        excluded_values = [f"#     additional_files:\n"]
-
-        self._check_file_contents(header_values_to_check, reduced_ws, resolution, excluded_values)
-
-    def test_create_file_from_workspace_with_reduction_history_and_transmission_runs(self):
-        resolution = 0.02
-        reduced_ws = self._get_ws_from_reduction("13460", resolution, "IvsQ_binned_13460", "13463", "13464, 13462")
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
-
-        expected_data_files = ["INTER00013460.nxs"]
         expected_additional_file_entries = {
             "INTER00013463.nxs": self._FIRST_TRANS_COMMENT,
             "INTER00013464.nxs": self._SECOND_TRANS_COMMENT,
             "INTER00013462.nxs": self._SECOND_TRANS_COMMENT,
         }
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
-        header_values_to_check.append(self._expected_additional_file_header_values(expected_additional_file_entries))
+        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
+        metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
+        metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
 
-        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
+
+    def test_create_file_from_workspace_with_stitched_reduction_history(self):
+        # Testing the stitched reduction output helps to ensure that we're not getting duplicates in the metadata
+        # because there will be multiple calls to ReflectometryISISLoadAndProcess in the history
+        resolution = 0.02
+        reduced_ws = self._get_ws_from_stitched_reduction(["13460", "13461"], resolution, "13463", "13464, 13462")
+        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
+
+        expected_data_files = ["INTER00013460.nxs", "INTER00013461.nxs"]
+        expected_additional_file_entries = {
+            "INTER00013463.nxs": self._FIRST_TRANS_COMMENT,
+            "INTER00013464.nxs": self._SECOND_TRANS_COMMENT,
+            "INTER00013462.nxs": self._SECOND_TRANS_COMMENT,
+        }
+        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
+        metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
+        metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
+
+        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
     def test_create_file_for_period_data_workspace_with_reduction_history(self):
         # The history produced for the ISIS Reflectometry reduction is slightly different for period data, so
@@ -112,9 +127,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws)
+        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
 
-        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
     def test_create_file_from_workspace_with_no_reduction_history(self):
         ws = LoadNexus("INTER13460")
@@ -144,9 +159,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(rb_num_log_name="")
         SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
-        excluded_values = [self._header_entries_for_sample_ws[0], self._header_entries_for_sample_ws[1]]
+        excluded_metadata = [self._header_entries_for_sample_ws[0], self._header_entries_for_sample_ws[1]]
 
-        self._check_file_header(None, excluded_values)
+        self._check_file_header(None, excluded_metadata)
 
     def test_file_includes_proposal_id_and_doi_for_alternative_rb_num_log(self):
         ws = self._create_sample_workspace(rb_num_log_name=self._LOG_EXP_IDENTIFIER)
@@ -195,7 +210,24 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         return AnalysisDataService.retrieve(reduced_ws_name)
 
-    def _get_header_values_expected_from_reduced_ws(self, reduced_ws, expected_data_files=None):
+    def _get_ws_from_stitched_reduction(self, input_runs, resolution, first_trans_runs=None, second_trans_runs=None):
+        reduced_workspaces = []
+        for run in input_runs:
+            reduced_ws = self._get_ws_from_reduction(run, resolution, f"IvsQ_binned_{run}", first_trans_runs, second_trans_runs)
+            reduced_workspaces.append(reduced_ws)
+
+        stitched_ws_name = "stitched_ws"
+        args = {
+            "InputWorkspaces": reduced_workspaces,
+            "OutputWorkspace": stitched_ws_name,
+            "Params": resolution,
+        }
+        alg = create_algorithm("Stitch1DMany", **args)
+        alg.setRethrows(True)
+        assertRaisesNothing(self, alg.execute)
+        return AnalysisDataService.retrieve(stitched_ws_name)
+
+    def _get_basic_metadata_expected_from_reduced_ws(self, reduced_ws):
         expected_header_values = []
         history = self._get_reduction_history_for_reduced_ws(reduced_ws)
         self.assertIsNotNone(history)
@@ -209,28 +241,26 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         expected_header_values.append(f"data_set: {reduced_ws.name()}")
 
-        if expected_data_files:
-            expected_header_values.append(self._expected_data_file_header_values(expected_data_files))
-
         return expected_header_values
 
-    def _expected_data_file_header_values(self, expected_entries):
-        files_entry = [f"#     data_files:\n"]
+    def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
+        files_entry = ["#     data_files:\n"]
 
         for run_file in expected_entries:
             files_entry.append(f"#     - file: {run_file}\n")
             files_entry.append(f"#       comment: Incident angle {self._runs_and_angles[run_file]}\n")
 
+        files_entry.append(expected_section_end)
         return "".join(files_entry)
 
-    @staticmethod
-    def _expected_additional_file_header_values(expected_entries):
-        files_entry = [f"#     additional_files:\n"]
+    def _get_expected_additional_file_metadata(self, expected_entries, expected_section_end):
+        files_entry = [self._ADDITIONAL_FILES_HEADING]
 
         for run_file, comment in expected_entries.items():
             files_entry.append(f"#     - file: {run_file}\n")
             files_entry.append(f"#       comment: {comment}\n")
 
+        files_entry.append(expected_section_end)
         return "".join(files_entry)
 
     def _get_reduction_history_for_reduced_ws(self, reduced_ws):
@@ -260,6 +290,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         if included_header_values:
             for header_item in included_header_values:
                 self.assertIn(header_item, orso_header_and_data)
+                self.assertEqual(orso_header_and_data.count(header_item), 1, "Entry duplicated in ORSO file header")
 
         if excluded_header_values:
             assert orso_header_and_data
