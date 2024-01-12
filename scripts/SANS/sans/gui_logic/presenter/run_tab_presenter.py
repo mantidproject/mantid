@@ -22,6 +22,7 @@ from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
+from sans.common.enums import ReductionDimensionality
 from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
@@ -571,10 +572,15 @@ class RunTabPresenter(PresenterCommon):
         )
 
     def on_reduction_dimensionality_changed(self):
-        self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
+        dimensionality = self._view.reduction_dimensionality
+        self._run_tab_model.update_reduction_mode(dimensionality)
         # Update save options in case they've updated in the model
         save_opts = self._run_tab_model.get_save_types()
         self._view.save_types = save_opts
+        if dimensionality is ReductionDimensionality.TWO_DIM:
+            self._view.disable_can_sas_1D_button()
+            return
+        self._view.enable_can_sas_1D_button()
 
     def _validate_output_modes(self):
         """
