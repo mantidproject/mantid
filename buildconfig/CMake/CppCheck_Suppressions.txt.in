@@ -1410,7 +1410,6 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:584
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrowser.cpp:48
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransformMD.cpp:0
-knownPointerToBool:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionModel.cpp:591
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelector.cpp:38
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/UserSubWindowFactory.h:94
@@ -1781,14 +1780,11 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlo
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:254
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferValidator.cpp:100
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:99
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:34
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:374
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:22
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:35
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:41
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:127
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:93
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IqtFitModel.cpp:47
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataModel.cpp:84
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataModel.cpp:92
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataModel.cpp:112
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataModel.cpp:201
@@ -1800,4 +1796,3 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/An
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:66
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:158
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp:186
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp:86
