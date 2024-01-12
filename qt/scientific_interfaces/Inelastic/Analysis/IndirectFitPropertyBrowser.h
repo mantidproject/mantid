@@ -40,6 +40,7 @@ using namespace MantidWidgets;
 
 class FunctionTemplateBrowser;
 class FitStatusWidget;
+
 class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {
 public:
   virtual ~IIndirectFitPropertyBrowser() = default;

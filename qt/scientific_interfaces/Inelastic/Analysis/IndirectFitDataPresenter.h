@@ -78,7 +78,7 @@ public:
     UNUSED_ARG(single);
   };
 
-  virtual void subscribeFitPropertyBrowser(IndirectFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
+  virtual void subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
   void handleAddData(IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;
