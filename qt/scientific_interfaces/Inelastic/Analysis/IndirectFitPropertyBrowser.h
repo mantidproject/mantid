@@ -44,7 +44,7 @@ class FitStatusWidget;
 class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {
 public:
   virtual ~IIndirectFitPropertyBrowser() = default;
-  virtual void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings);
+  virtual void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings) = 0;
 };
 class MANTIDQT_INELASTIC_DLL IndirectFitPropertyBrowser : public QDockWidget, public IIndirectFitPropertyBrowser {
   Q_OBJECT
