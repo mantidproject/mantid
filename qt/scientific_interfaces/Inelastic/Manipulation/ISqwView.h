@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectPlotOptionsView;
+class OutputPlotOptionsView;
 class ISqwPresenter;
 
 class MANTIDQT_INELASTIC_DLL ISqwView {
@@ -26,7 +26,7 @@ class MANTIDQT_INELASTIC_DLL ISqwView {
 public:
   virtual void subscribePresenter(ISqwPresenter *presenter) = 0;
 
-  virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
+  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
   virtual std::tuple<double, double> getQRangeFromPlot() const = 0;

@@ -90,6 +90,11 @@ void ContourPreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplace
 }
 
 /**
+ * Clears current contour plot held in the MantidAxes
+ */
+void ContourPreviewPlot::clearPlot() { m_canvas->gca<MantidAxes>().clear(); }
+
+/**
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
@@ -103,7 +108,6 @@ void ContourPreviewPlot::setWorkspace(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     auto axes = m_canvas->gca<MantidAxes>();
     axes.pcolormesh(workspace);
-
     m_canvas->draw();
   } else {
     g_log.warning("Cannot plot a null workspace.");

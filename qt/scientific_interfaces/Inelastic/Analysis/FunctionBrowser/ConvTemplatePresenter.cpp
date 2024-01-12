@@ -294,4 +294,13 @@ EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const 
   return m_model->getEstimationDataSelector();
 }
 
+void ConvTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
+  m_model->updateParameterEstimationData(std::move(data));
+}
+
+void ConvTemplatePresenter::estimateFunctionParameters() {
+  m_model->estimateFunctionParameters();
+  updateViewParameters();
+}
+
 } // namespace MantidQt::CustomInterfaces::IDA

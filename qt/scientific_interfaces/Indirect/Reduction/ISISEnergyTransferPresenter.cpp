@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
+#include "Common/SettingsHelper.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
-#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -34,7 +34,7 @@ IETPresenter::IETPresenter(IndirectDataReduction *idrUI, QWidget *parent)
       m_view(std::make_unique<IETView>(this, parent)) {
 
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSlice));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 
@@ -212,7 +212,7 @@ void IETPresenter::plotRawComplete(bool error) {
     auto const filename = m_view->getFirstFilename();
     std::filesystem::path fileInfo(filename);
     auto const name = fileInfo.filename().string();
-    m_plotter->plotSpectra(name + "_grp", "0", IndirectSettingsHelper::externalPlotErrorBars());
+    m_plotter->plotSpectra(name + "_grp", "0", SettingsHelper::externalPlotErrorBars());
   }
 
   m_view->setPlotTimeIsPlotting(false);

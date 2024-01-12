@@ -11,6 +11,7 @@
 #include "DllConfig.h"
 #include "IIndirectFitPlotView.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QIcon>
@@ -51,12 +52,14 @@ private:
   QIcon m_icon;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotView : public IIndirectFitPlotView {
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotView : public API::MantidWidget, public IIndirectFitPlotView {
   Q_OBJECT
 
 public:
   IndirectFitPlotView(QWidget *parent = nullptr);
-  virtual ~IndirectFitPlotView() override;
+  virtual ~IndirectFitPlotView();
+
+  void subscribePresenter(IIndirectFitPlotPresenter *presenter) override;
 
   void watchADS(bool watch) override;
 
@@ -102,27 +105,35 @@ public:
   void setHWHMRangeVisible(bool visible) override;
 
   void displayMessage(const std::string &message) const override;
-  void disableSpectrumPlotSelection() override;
 
   void allowRedraws(bool state) override;
   void redrawPlots() override;
 
-public slots:
-  void clearTopPreview() override;
-  void clearBottomPreview() override;
-  void clearPreviews() override;
+  void setHWHMMinimum(double minimum) override;
+  void setHWHMMaximum(double maximum) override;
   void setHWHMRange(double minimum, double maximum) override;
-  void setHWHMMaximum(double minimum) override;
-  void setHWHMMinimum(double maximum) override;
+
+  void clearPreviews() override;
 
 private slots:
   void setBackgroundBounds();
 
-  void emitDelayedPlotSpectrumChanged();
-  void emitPlotSpectrumChanged();
-  void emitPlotSpectrumChanged(const QString &spectrum);
-  void emitSelectedFitDataChanged(int /*index*/);
-  void emitPlotGuessChanged(int /*doPlotGuess*/);
+  void notifyDelayedPlotSpectrumChanged();
+  void notifyPlotSpectrumChanged();
+  void notifyPlotSpectrumChanged(const QString &spectrum);
+  void notifySelectedFitDataChanged(int /*index*/);
+  void notifyPlotGuessChanged(int /*doPlotGuess*/);
+  void notifyPlotCurrentPreview();
+  void notifyFitSelectedSpectrum();
+
+  void notifyStartXChanged(double value);
+  void notifyEndXChanged(double value);
+
+  void notifyHWHMMinimumChanged(double value);
+  void notifyHWHMMaximumChanged(double value);
+
+  void notifyFWHMChanged(double minimum, double maximum);
+  void notifyBackgroundChanged(double value);
 
 private:
   void createSplitterWithPlots();
@@ -140,10 +151,14 @@ private:
   void addBackgroundRangeSelector();
   void addHWHMRangeSelector();
 
+  void clearTopPreview();
+  void clearBottomPreview();
+
   std::unique_ptr<Ui::IndirectFitPreviewPlot> m_plotForm;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;
+  IIndirectFitPlotPresenter *m_presenter;
 };
 
 } // namespace IDA

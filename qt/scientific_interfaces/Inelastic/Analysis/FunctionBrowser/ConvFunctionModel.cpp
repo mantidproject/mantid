@@ -11,12 +11,34 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
+#include <map>
+
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
+auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  (void)x;
+  return std::unordered_map<std::string, double>{{"Amplitude", y[1]}};
+};
+
+auto const sqeFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  (void)x;
+  return std::unordered_map<std::string, double>{{"Height", y[1]}};
+};
+
+auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+    {"Lorentzian", lorentzian},        {"LorentzianN", lorentzian},       {"TeixeiraWaterSQE", sqeFunction},
+    {"FickDiffusionSQE", sqeFunction}, {"ChudleyElliotSQE", sqeFunction}, {"HallRossSQE", sqeFunction}};
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-ConvFunctionModel::ConvFunctionModel() = default;
+ConvFunctionModel::ConvFunctionModel()
+    : m_parameterEstimation(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;
@@ -34,6 +56,7 @@ void ConvFunctionModel::setModel() {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model.setGlobalParameters(makeGlobalList());
+  estimateFunctionParameters();
 }
 
 void ConvFunctionModel::setFunction(IFunction_sptr fun) {
@@ -127,6 +150,8 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun, bool &isL
     throw std::runtime_error("Function has wrong structure. Function not recognized");
   }
 }
+
+IFunction_sptr ConvFunctionModel::getFullFunction() const { return m_model.getFullFunction(); }
 
 IFunction_sptr ConvFunctionModel::getFitFunction() const { return m_model.getFitFunction(); }
 
@@ -247,12 +272,25 @@ void ConvFunctionModel::removeBackground() {
 bool ConvFunctionModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
 EstimationDataSelector ConvFunctionModel::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
-            const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
+  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+            const std::pair<double, double> &range) -> DataForParameterEstimation {
+    (void)range;
+
+    auto const maxElement = std::max_element(y.cbegin(), y.cend());
+    if (maxElement == y.cend())
+      return DataForParameterEstimation{{}, {}};
+
+    auto const maxElementIndex = std::distance(y.cbegin(), maxElement);
+    return DataForParameterEstimation{{x[0], x[maxElementIndex]}, {y[0], *maxElement}};
+  };
 }
 
 void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
+}
+
+void ConvFunctionModel::estimateFunctionParameters() {
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
 void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {

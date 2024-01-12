@@ -8,8 +8,8 @@
 #include "ui_BayesFitting.h"
 
 #include "BayesFittingTab.h"
+#include "Common/IndirectInterface.h"
 #include "DllConfig.h"
-#include "IndirectInterface.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>

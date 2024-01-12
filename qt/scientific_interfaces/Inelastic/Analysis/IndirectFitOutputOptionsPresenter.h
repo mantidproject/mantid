@@ -6,25 +6,31 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectEditResultsDialog.h"
 #include "IndirectFitOutputOptionsModel.h"
 #include "IndirectFitOutputOptionsView.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter : public QObject {
-  Q_OBJECT
+class IIndirectDataAnalysisTab;
+
+class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsPresenter {
 public:
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view);
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view);
-  ~IndirectFitOutputOptionsPresenter() override;
+  virtual void handleGroupWorkspaceChanged(std::string const &selectedGroup) = 0;
+  virtual void handlePlotClicked() = 0;
+  virtual void handleSaveClicked() = 0;
+  virtual void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
+                                            std::string const &outputName) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public IIndirectFitOutputOptionsPresenter {
+public:
+  IndirectFitOutputOptionsPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
+                                    std::unique_ptr<IIndirectFitOutputOptionsModel> model);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
@@ -47,24 +53,16 @@ public:
 
   void setEditResultVisible(bool visible);
 
-signals:
-  void plotSpectra();
-
-private slots:
-  void setAvailablePlotOptions(std::string const &selectedGroup);
-  void plotResult();
-  void saveResult();
-  void editResult();
-  void replaceSingleFitResult();
-  void closeEditResultDialog();
+  void handleGroupWorkspaceChanged(std::string const &selectedGroup) override;
+  void handlePlotClicked() override;
+  void handleSaveClicked() override;
+  void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
+                                    std::string const &outputName) override;
 
 private:
-  void setUpPresenter();
-
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
-  std::unique_ptr<IndirectEditResultsDialog> getEditResultsDialog(QWidget *parent) const;
   void setEditingResult(bool editing);
 
   void replaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
@@ -72,9 +70,9 @@ private:
 
   void displayWarning(std::string const &message);
 
-  std::unique_ptr<IndirectEditResultsDialog> m_editResultsDialog;
-  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
+  IIndirectDataAnalysisTab *m_tab;
   IIndirectFitOutputOptionsView *m_view;
+  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
 };
 
 } // namespace IDA

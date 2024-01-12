@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataView.h"
+#include "ConvFitAddWorkspaceDialog.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -30,6 +31,17 @@ ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeade
 ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
+}
+
+IAddWorkspaceDialog *ConvFitDataView::getAddWorkspaceDialog() {
+  m_addWorkspaceDialog = new ConvFitAddWorkspaceDialog(parentWidget());
+  if (auto dialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(m_addWorkspaceDialog)) {
+    dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
+    dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  }
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
+  return m_addWorkspaceDialog;
 }
 
 void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {

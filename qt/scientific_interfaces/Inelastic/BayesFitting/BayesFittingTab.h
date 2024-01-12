@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectTab.h"
 #include "DllConfig.h"
-#include "IndirectTab.h"
 
 #include <QSettings>
 

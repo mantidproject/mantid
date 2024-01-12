@@ -43,6 +43,11 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   }
 }
 
+IFunction_sptr FunctionModel::getFullFunction() const {
+  // It is important that this does not return a copy/clone of the function
+  return m_function;
+}
+
 IFunction_sptr FunctionModel::getFitFunction() const {
   if (!m_function)
     return m_function;
@@ -225,8 +230,7 @@ QStringList FunctionModel::getAttributeNames() const {
 }
 
 IFunction_sptr FunctionModel::getSingleFunction(int index) const {
-  checkIndex(index);
-  if (!hasFunction()) {
+  if (!checkIndex(index) || !hasFunction()) {
     return IFunction_sptr();
   }
   return m_function->getFunction(index);
@@ -352,8 +356,9 @@ int FunctionModel::getNumberDomains() const { return static_cast<int>(m_numberDo
 int FunctionModel::currentDomainIndex() const { return static_cast<int>(m_currentDomainIndex); }
 
 void FunctionModel::setCurrentDomainIndex(int index) {
-  checkIndex(index);
-  m_currentDomainIndex = static_cast<size_t>(index);
+  if (checkIndex(index)) {
+    m_currentDomainIndex = static_cast<size_t>(index);
+  }
 }
 
 double FunctionModel::getLocalParameterValue(const QString &parName, int i) const {
@@ -504,14 +509,13 @@ int FunctionModel::numberOfDomains(const QList<FunctionModelDataset> &datasets) 
   });
 }
 
-/// Check a domain/function index to be in range.
-void FunctionModel::checkIndex(int index) const {
-  if (index == 0)
-    return;
-  if (index < 0 || index >= getNumberDomains()) {
-    throw std::runtime_error("Domain index is out of range: " + std::to_string(index) + " out of " +
-                             std::to_string(getNumberDomains()));
-  }
+bool FunctionModel::checkIndex(int const index) const {
+  auto const indexInRange = index == 0 || (index > 0 && index < getNumberDomains());
+  // If the domain index is out of range, this indicates a problem in the logic of our code.
+  // We want the index to be ignored in Release mode (i.e. for a user), but we want an exception
+  // when in Debug mode (i.e. to alert a dev of the logic issue).
+  assert(indexInRange);
+  return indexInRange;
 }
 
 void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
@@ -587,9 +591,7 @@ bool FunctionModel::isGlobal(const QString &parName) const { return m_globalPara
 QString FunctionModel::setBackgroundA0(double value) {
   std::string foundName;
   auto const fun = getCurrentFunction();
-  auto getA0 = [](IFunction const &f) -> std::string {
-    return (dynamic_cast<IBackgroundFunction const *>(&f) && f.hasParameter("A0")) ? "A0" : "";
-  };
+  auto getA0 = [](IFunction const &f) -> std::string { return f.hasParameter("A0") ? "A0" : ""; };
   auto const cf = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (cf) {
     if (fun->name() != "CompositeFunction")

@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
+#include "IndirectFitDataPresenter.h"
+
+#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
 #include <QItemDelegate>
@@ -94,16 +97,19 @@ namespace IDA {
 IndirectFitDataView::IndirectFitDataView(QWidget *parent) : IndirectFitDataView(defaultHeaders(), parent) {}
 
 IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *parent)
-    : IIndirectFitDataView(parent), m_uiForm(new Ui::IndirectFitDataView) {
+    : QTabWidget(parent), m_uiForm(new Ui::IndirectFitDataView) {
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);
 
-  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SIGNAL(cellChanged(int, int)));
+  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
-  connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SIGNAL(removeClicked()));
-  connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SIGNAL(unifyClicked()));
+  connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveClicked()));
+  connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SLOT(notifyUnifyClicked()));
+  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
 }
+
+void IndirectFitDataView::subscribePresenter(IIndirectFitDataPresenter *presenter) { m_presenter = presenter; }
 
 QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFitData; }
 
@@ -163,7 +169,9 @@ void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return m_HeaderLabels.indexOf(ColName); }
+int IndirectFitDataView::getColumnIndexFromName(std::string const &ColName) {
+  return m_HeaderLabels.indexOf(QString::fromStdString(ColName));
+}
 
 void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 
@@ -178,6 +186,39 @@ QString IndirectFitDataView::getText(int row, int column) const {
 QModelIndexList IndirectFitDataView::getSelectedIndexes() const {
   return m_uiForm->tbFitData->selectionModel()->selectedIndexes();
 }
+
+void IndirectFitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
+
+void IndirectFitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
+
+void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
+
+void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
+
+void IndirectFitDataView::showAddWorkspaceDialog() {
+  auto dialog = getAddWorkspaceDialog();
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(m_wsSampleSuffixes);
+  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->updateSelectedSpectra();
+  dialog->show();
+}
+
+IAddWorkspaceDialog *IndirectFitDataView::getAddWorkspaceDialog() {
+  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(parentWidget());
+
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
+  return m_addWorkspaceDialog;
+}
+
+void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
+
+void IndirectFitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
+
+void IndirectFitDataView::notifyUnifyClicked() { m_presenter->handleUnifyClicked(); }
+
+void IndirectFitDataView::notifyCellChanged(int row, int column) { m_presenter->handleCellChanged(row, column); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
