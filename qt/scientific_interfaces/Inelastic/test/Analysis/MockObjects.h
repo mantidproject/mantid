@@ -247,7 +247,7 @@ public:
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
-  MOCK_CONST_METHOD1(DataColumnContainsText, bool(QString));
+  MOCK_CONST_METHOD1(dataColumnContainsText, bool(const std::string &columnText));
 
   MOCK_METHOD1(setSampleWSSuffices, void(const QStringList &suffices));
   MOCK_METHOD1(setSampleFBSuffices, void(const QStringList &suffices));
@@ -264,4 +264,4 @@ public:
   MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
 };
 
-GNU_DIAG_ON_SUGGEST_OVERRIDE;
+GNU_DIAG_ON_SUGGEST_OVERRIDE

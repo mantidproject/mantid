@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/FitTabConstants.h"
 #include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
@@ -64,8 +65,9 @@ public:
     m_presenter = std::make_unique<FqFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_fitPropertyBrowser = std::make_unique<NiceMock<MockFitPropertyBrowser>>();
-    m_presenter->subscribeFitPropertyBrowser(std::move(m_fitPropertyBrowser.get()));
+
+    m_fitPropertyBrowser = new NiceMock<MockFitPropertyBrowser>();
+    m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser);
   }
 
   void tearDown() override {
@@ -73,14 +75,14 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser.get()))
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser));
 
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
 
     m_dataTable.reset();
-    m_fitPropertyBrowser.reset();
+    delete m_fitPropertyBrowser;
   }
 
   void test_that_the_presenter_and_mock_objects_have_been_created() {
@@ -136,5 +138,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<NiceMock<MockFitPropertyBrowser>> m_fitPropertyBrowser;
+  MockFitPropertyBrowser *m_fitPropertyBrowser;
 };
