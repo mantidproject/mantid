@@ -64,7 +64,7 @@ public:
     m_presenter = std::make_unique<FqFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_fitPropertyBrowser = std::make_unique<IndirectFitPropertyBrowser>();
+    m_fitPropertyBrowser = std::make_unique<NiceMock<MockFitPropertyBrowser>>();
     m_presenter->subscribeFitPropertyBrowser(std::move(m_fitPropertyBrowser.get()));
   }
 
@@ -136,5 +136,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<IndirectFitPropertyBrowser> m_fitPropertyBrowser;
+  std::unique_ptr<NiceMock<MockFitPropertyBrowser>> m_fitPropertyBrowser;
 };

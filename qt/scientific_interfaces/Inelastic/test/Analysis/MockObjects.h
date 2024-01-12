@@ -18,6 +18,8 @@
 #include "Analysis/IIndirectFitPlotView.h"
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Common/IAddWorkspaceDialog.h"
+#include "Analysis/IndirectFitPropertyBrowser.h"
+
 
 #include <string>
 #include <utility>
@@ -237,6 +239,7 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitDataPresenter *presenter));
 
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
+  MOCK_CONST_METHOD0(isTableEmpty, bool());
   MOCK_METHOD1(validate, MantidQt::CustomInterfaces::UserInputValidator &(
                              MantidQt::CustomInterfaces::UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
@@ -245,6 +248,7 @@ public:
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
+  MOCK_CONST_METHOD1(DataColumnContainsText, bool(QString));
 
   MOCK_METHOD1(setSampleWSSuffices, void(const QStringList &suffices));
   MOCK_METHOD1(setSampleFBSuffices, void(const QStringList &suffices));
@@ -254,4 +258,11 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
-GNU_DIAG_ON_SUGGEST_OVERRIDE
+class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {
+public:
+  virtual ~MockFitPropertyBrowser() = default;
+
+  MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
+};
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE;
