@@ -1082,6 +1082,46 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_no_events() {
+    // this test was created for the strange case of an event file having no events anywhere
+    // originally it was only an empty monitor but the test file was expanded
+
+    const std::string filename = "CG3_22446_empty.nxs.h5";
+    const std::string wsname = "CG3_empty";
+
+    // run the algorithm
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", filename);
+    loader.setPropertyValue("OutputWorkspace", wsname);
+    //    loader.setProperty("LoadAllLogs", false);
+    loader.setProperty("LoadMonitors", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    auto &ads = AnalysisDataService::Instance();
+
+    // validate the event workspace
+    {
+      MatrixWorkspace_sptr wksp = ads.retrieveWS<MatrixWorkspace>(wsname);
+      TS_ASSERT(wksp);
+      auto event_wksp = std::dynamic_pointer_cast<EventWorkspace>(wksp);
+      TS_ASSERT(event_wksp);
+      TS_ASSERT_EQUALS(event_wksp->getNumberEvents(), 0.);
+    }
+
+    // validate the monitor workspace
+    {
+      MatrixWorkspace_sptr wksp_mon = ads.retrieveWS<MatrixWorkspace>(wsname + "_monitors");
+      TS_ASSERT(wksp_mon);
+      auto event_wksp = std::dynamic_pointer_cast<EventWorkspace>(wksp_mon);
+      TS_ASSERT(event_wksp);
+      TS_ASSERT_EQUALS(event_wksp->getNumberEvents(), 0.);
+    }
+
+    // cleanup
+    AnalysisDataService::Instance().remove(wsname);
+  }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
