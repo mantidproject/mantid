@@ -67,6 +67,7 @@ class AddRunsPagePresenter(object):
         self._parent_view = parent_view
         self._sum_runs_model = sum_runs_model
         self._use_generated_file_name = True
+        self._view.disable_output_file_name_edit()
 
         self._init_sub_presenters(view)
 
@@ -109,7 +110,7 @@ class AddRunsPagePresenter(object):
 
     def _connect_to_view(self, view):
         view.sum.connect(self._handle_sum)
-        view.outFileChanged.connect(self._handle_out_file_changed)
+        view.customOutFileChanged.connect(self._handle_custom_outfile_check_changed)
         view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
 
     def _make_base_file_name_from_selection(self, run_selection):
@@ -146,8 +147,15 @@ class AddRunsPagePresenter(object):
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)
 
-    def _handle_out_file_changed(self):
-        self._use_generated_file_name = False
+    def _handle_custom_outfile_check_changed(self, enabled):
+        if enabled:
+            self._use_generated_file_name = False
+            self._view.clear_output_file_name_edit()
+            self._view.enable_output_file_name_edit()
+            return
+        self._use_generated_file_name = True
+        self._view.disable_output_file_name_edit()
+        self._handle_selection_changed(self._run_selector_presenter.run_selection())
 
     @staticmethod
     def _output_directory_is_not_empty(settings):
