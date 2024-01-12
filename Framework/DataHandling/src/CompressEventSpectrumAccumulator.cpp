@@ -14,8 +14,10 @@ namespace Mantid {
 namespace DataHandling {
 CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
     std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, CompressBinningMode bin_mode)
-    : m_divisor(abs(divisor)), m_histogram_edges(std::move(histogram_bin_edges)) {
+    : m_histogram_edges(std::move(histogram_bin_edges)) {
   // divisor is applied to make it
+
+  m_divisor = abs(divisor);
   m_offset = static_cast<double>(m_histogram_edges->front()) / m_divisor;
 
   // create the fine histogram
@@ -24,9 +26,18 @@ CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
   m_tof.resize(NUM_BINS, 0.);
   m_count.resize(NUM_BINS, 0.);
 
-  // setup function pointer for finding bins
+  const auto tof_min = static_cast<double>(m_histogram_edges->front());
+
+  // setup function pointer  and parameters for finding bins
+  // look in EventList for why
   if (bin_mode == CompressBinningMode::LINEAR) {
     m_findBin = EventList::findLinearBin;
+    m_divisor = abs(divisor);
+    m_offset = tof_min / m_divisor;
+  } else if (bin_mode == CompressBinningMode::LOGARITHMIC) {
+    m_findBin = EventList::findLogBin;
+    m_divisor = log1p(abs(divisor)); // use this to do change of base
+    m_offset = log(tof_min) / m_divisor;
   } else {
     throw std::runtime_error("Haven't implemented this compression binning strategy");
   }
