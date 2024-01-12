@@ -25,10 +25,11 @@ CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
   m_count.resize(NUM_BINS, 0.);
 
   // setup function pointer for finding bins
-  if (bin_mode == CompressBinningMode::LINEAR)
+  if (bin_mode == CompressBinningMode::LINEAR) {
     m_findBin = EventList::findLinearBin;
-  else
-    throw std::runtime_error("Haven't implemented non-linear bins");
+  } else {
+    throw std::runtime_error("Haven't implemented this compression binning strategy");
+  }
 }
 
 /**
@@ -53,9 +54,12 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
 
   // loop over bins and create events when appropriate
   const auto NUM_BINS = this->numberHistBins();
+  double total_weight = 0.;
   for (size_t i = 0; i < NUM_BINS; ++i) {
-    if (const auto counts = m_count[i] > 0) {
+    const auto counts = m_count[i];
+    if (counts > 0) {
       const double weight = static_cast<double>(counts);
+      total_weight += weight;
       const double tof = static_cast<double>(m_tof[i]) / weight;
       raw_events->emplace_back(tof, weight, weight);
     }

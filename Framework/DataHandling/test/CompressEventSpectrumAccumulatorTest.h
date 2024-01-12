@@ -64,6 +64,15 @@ public:
     // write the events
     accumulator.createWeightedEvents(raw_events);
     TS_ASSERT_EQUALS(raw_events->size(), accumulator.numberWeightedEvents());
+
+    // the first event has the weight of the fine histogram width
+    TS_ASSERT_DELTA(raw_events->front().weight(), tof_delta_hist, .1);
+
+    // confim that all events were added
+    const double total_weight =
+        std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
+                        [](const auto &current, const auto &value) { return current + value.weight(); });
+    TS_ASSERT_DELTA(total_weight, static_cast<double>(NUM_RAW_EVENTS), .1);
   }
 
   void test_accumulator_linear_delta10() {
