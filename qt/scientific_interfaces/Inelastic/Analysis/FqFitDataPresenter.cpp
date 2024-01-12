@@ -199,13 +199,7 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 namespace MantidQt::CustomInterfaces::IDA {
 
 
-FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
-                                       IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance(), m_fitPropertyBrowser() {}
-
-
-void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {
+void FqFitDataPresenter::subscribeFitPropertyBrowser(IndirectFitPropertyBrowser *browser) {
   m_fitPropertyBrowser = browser;
 }
 
@@ -222,7 +216,6 @@ bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialo
     } else {
       setActiveEISF(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
     }
-
     updateActiveWorkspaceID(getNumberOfWorkspaces());
     return true;
   }
@@ -235,23 +228,39 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = createFqFitParameters(workspace);
   const auto spectrum = getParameterSpectrum(parameters);
+  auto fqFitFunctionList = chooseFqFitFunctions(paramType == "Width");
+
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
+  m_fitPropertyBrowser->updateFunctionListInBrowser(fqFitFunctionList);
 
   if (paramType == "Width") {
-    m_fitPropertyBrowser->updateFunctionListInBrowser(FqFit::WIDTH_FITS);
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
   } else if (paramType == "EISF") {
-    m_fitPropertyBrowser->updateFunctionListInBrowser(FqFit::EISF_FITS);
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.eisfSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
   } else {
     throw std::invalid_argument("Invalid Parameter Type");
+  }
+}
+
+std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool paramWidth) {
+  if (m_view->isTableEmpty()) { // when first data is added to table, it can only be either WIDTH or EISF
+    return paramWidth ? FqFit::WIDTH_FITS : FqFit::EISF_FITS;
+  } else {
+    bool widthFuncs = paramWidth || m_view->DataColumnContainsText("FWHM");
+    bool eisfFuncs = !paramWidth || m_view->DataColumnContainsText("EISF");
+    if (widthFuncs && eisfFuncs)
+      return FqFit::ALL_FITS;
+    else if (widthFuncs)
+      return FqFit::WIDTH_FITS;
+    else
+      return FqFit::EISF_FITS;
   }
 }
 
@@ -384,7 +393,6 @@ void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   newRow.startX = range.first;
   newRow.endX = range.second;
   newRow.exclude = exclude;
-
   m_view->addTableEntry(row.value, newRow);
 }
 } // namespace MantidQt::CustomInterfaces::IDA
