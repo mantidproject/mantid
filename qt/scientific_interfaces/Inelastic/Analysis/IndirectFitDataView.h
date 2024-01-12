@@ -42,7 +42,7 @@ public:
   void clearTable() override;
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
-  bool DataColumnContainsText(QString text) const override;
+  bool dataColumnContainsText(std::string const &columnText) const override;
 
   void setSampleWSSuffices(const QStringList &suffices) override;
   void setSampleFBSuffices(const QStringList &suffices) override;

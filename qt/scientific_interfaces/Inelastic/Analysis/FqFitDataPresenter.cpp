@@ -253,12 +253,12 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   }
 }
 
-std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool paramWidth) {
+std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool paramWidth) const {
   if (m_view->isTableEmpty()) { // when first data is added to table, it can only be either WIDTH or EISF
     return paramWidth ? FqFit::WIDTH_FITS : FqFit::EISF_FITS;
-  } else {
-    bool widthFuncs = paramWidth || m_view->DataColumnContainsText("FWHM");
-    bool eisfFuncs = !paramWidth || m_view->DataColumnContainsText("EISF");
+
+    bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
+    bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
     if (widthFuncs && eisfFuncs)
       return FqFit::ALL_FITS;
     else if (widthFuncs)

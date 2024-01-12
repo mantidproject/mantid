@@ -55,7 +55,7 @@ private:
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
-  std::map<std::string, std::string> chooseFqFitFunctions(bool paramWidth);
+  std::map<std::string, std::string> chooseFqFitFunctions(bool paramWidth) const;
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;

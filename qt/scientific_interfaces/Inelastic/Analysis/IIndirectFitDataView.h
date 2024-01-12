@@ -43,7 +43,7 @@ public:
   virtual void clearTable() = 0;
   virtual QString getText(int row, int column) const = 0;
   virtual QModelIndexList getSelectedIndexes() const = 0;
-  virtual bool DataColumnContainsText(QString text) const = 0;
+  virtual bool dataColumnContainsText(std::string const &columnText) const = 0;
 
   virtual void setSampleWSSuffices(const QStringList &suffices) = 0;
   virtual void setSampleFBSuffices(const QStringList &suffices) = 0;
