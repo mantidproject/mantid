@@ -1370,6 +1370,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:1935
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:2079
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentActor.h:256
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:1484
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:808
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h:46
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300
