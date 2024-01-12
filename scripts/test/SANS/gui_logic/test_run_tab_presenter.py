@@ -289,9 +289,16 @@ class RunTabPresenterTest(unittest.TestCase):
         self.view_observers.save_options.notify_subscribers()
         self.mock_run_tab_model.update_save_types.assert_called_once_with(self._mock_view.save_types)
 
-    def test_on_reduction_options_changed_called(self):
+    def test_on_reduction_options_changed(self):
         self.view_observers.reduction_dim.notify_subscribers()
         self.mock_run_tab_model.update_reduction_mode.assert_called_once_with(self._mock_view.reduction_dimensionality)
+        self._mock_view.enable_can_sas_1D_button.assert_called_once()
+
+    def test_on_reduction_options_changed_called_2D(self):
+        self._mock_view.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        self.view_observers.reduction_dim.notify_subscribers()
+        self.mock_run_tab_model.update_reduction_mode.assert_called_once_with(self._mock_view.reduction_dimensionality)
+        self._mock_view.disable_can_sas_1D_button.assert_called_once()
 
     def test_on_reduction_options_changed_updates_save_opts(self):
         self.view_observers.reduction_dim.notify_subscribers()
