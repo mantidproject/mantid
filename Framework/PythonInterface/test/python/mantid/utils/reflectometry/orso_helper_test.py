@@ -238,6 +238,13 @@ class MantidORSODatasetTest(unittest.TestCase):
 
         self.assertEqual(doi, dataset.dataset.info.data_source.experiment.doi)
 
+    def test_set_reduction_call_on_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        call = "ReflectometryReductionCall"
+        dataset.set_reduction_call(call)
+
+        self.assertEqual(call, dataset.dataset.info.reduction.call)
+
     def test_create_local_datetime_from_utc_string(self):
         date_string = "2023-10-18T12:30:45.12345"
         expected_value = datetime.combine(date(2023, 10, 18), time(12, 30, 45)).replace(tzinfo=timezone.utc).astimezone(tz=None)

@@ -70,6 +70,9 @@ class MantidORSODataset:
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
 
+    def set_reduction_call(self, call: str) -> None:
+        self._header.reduction.call = call
+
     def add_measurement_data_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
         self._header.data_source.measurement.data_files.append(self._create_file(filename, timestamp, comment))
 
