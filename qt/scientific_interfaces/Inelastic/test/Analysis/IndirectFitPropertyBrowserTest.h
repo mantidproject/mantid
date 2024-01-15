@@ -42,21 +42,21 @@ class MockFunctionTemplateBrowser : public FunctionTemplateBrowser {
 public:
   void emitFunctionStructureChanged() { emit functionStructureChanged(); }
   // public methods
-  MOCK_METHOD1(setFunction, void(const QString &funStr));
+  MOCK_METHOD1(setFunction, void(std::string const &funStr));
   MOCK_CONST_METHOD0(getGlobalFunction, IFunction_sptr());
   MOCK_CONST_METHOD0(getFunction, IFunction_sptr());
   MOCK_METHOD1(setNumberOfDatasets, void(int));
   MOCK_CONST_METHOD0(getNumberOfDatasets, int());
   MOCK_METHOD1(setDatasets, void(const QList<FunctionModelDataset> &datasets));
-  MOCK_CONST_METHOD0(getGlobalParameters, QStringList());
-  MOCK_CONST_METHOD0(getLocalParameters, QStringList());
-  MOCK_METHOD1(setGlobalParameters, void(const QStringList &globals));
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
+  MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
   MOCK_METHOD1(updateMultiDatasetParameters, void(const IFunction &fun));
   MOCK_METHOD1(updateMultiDatasetParameters, void(const ITableWorkspace &paramTable));
   MOCK_METHOD1(updateParameters, void(const IFunction &fun));
   MOCK_METHOD1(setCurrentDataset, void(int i));
   MOCK_METHOD0(getCurrentDataset, int());
-  MOCK_METHOD1(updateParameterNames, void(const QMap<int, QString> &parameterNames));
+  MOCK_METHOD1(updateParameterNames, void(const QMap<int, std::string> &parameterNames));
   MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
   MOCK_METHOD0(clear, void());
   MOCK_CONST_METHOD0(getEstimationDataSelector, EstimationDataSelector());
@@ -104,7 +104,7 @@ public:
   }
 
   void test_setFunction_sets_function_in_template() {
-    QString funString = "FunctionString";
+    std::string funString = "FunctionString";
     EXPECT_CALL(*m_templateBrowser, setFunction(funString)).Times(Exactly(1));
     m_browser->setFunction(funString);
   }

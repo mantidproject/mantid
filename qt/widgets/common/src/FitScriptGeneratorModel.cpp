@@ -71,17 +71,15 @@ FitDomainIndex getDomainIndexOf(std::string const &fullParameter) {
 }
 
 std::string getParameterName(std::string const &constraint) {
-  return splitParameterName(splitConstraintString(constraint).first).second.toStdString();
+  return splitParameterName(splitConstraintString(constraint).first).second;
 }
 
-std::string getFunctionIndex(std::string const &parameter) {
-  return splitFunctionPrefix(parameter).first.toStdString();
-}
+std::string getFunctionIndex(std::string const &parameter) { return splitFunctionPrefix(parameter).first; }
 
 std::string getAdjustedConstraint(std::string const &constraint) {
   auto const parameterName = getParameterName(constraint);
   auto const limits = splitConstraintString(constraint).second;
-  return limits.first.toStdString() + "<" + parameterName + "<" + limits.second.toStdString();
+  return limits.first + "<" + parameterName + "<" + limits.second;
 }
 
 } // namespace

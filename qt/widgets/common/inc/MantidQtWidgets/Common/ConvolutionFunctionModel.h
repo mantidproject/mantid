@@ -25,20 +25,20 @@ public:
   void setModel(const std::string &background, const std::vector<std::pair<std::string, size_t>> &resolutionWorkspaces,
                 const std::string &lorentzianPeaks, const std::string &fitType, bool hasDeltaFunction,
                 const std::vector<double> &qValues, const bool isQDependent, bool hasTempCorrection, double tempValue);
-  boost::optional<QString> backgroundPrefix() const { return m_backgroundPrefix; }
-  boost::optional<QString> convolutionPrefix() const { return m_convolutionPrefix; }
-  boost::optional<QString> deltaFunctionPrefix() const { return m_deltaFunctionPrefix; }
-  boost::optional<QString> tempFunctionPrefix() const { return m_tempFunctionPrefix; }
+  boost::optional<std::string> backgroundPrefix() const { return m_backgroundPrefix; }
+  boost::optional<std::string> convolutionPrefix() const { return m_convolutionPrefix; }
+  boost::optional<std::string> deltaFunctionPrefix() const { return m_deltaFunctionPrefix; }
+  boost::optional<std::string> tempFunctionPrefix() const { return m_tempFunctionPrefix; }
   boost::optional<QStringList> peakPrefixes() const { return m_peakPrefixes; }
-  boost::optional<QString> fitTypePrefix() const { return m_fitTypePrefix; }
+  boost::optional<std::string> fitTypePrefix() const { return m_fitTypePrefix; }
 
   std::string resolutionWorkspace() const { return m_resolutionWorkspace; }
   int resolutionWorkspaceIndex() const { return m_resolutionWorkspaceIndex; }
 
 private:
   void findComponentPrefixes();
-  void iterateThroughFunction(IFunction *func, const QString &prefix);
-  void setPrefix(IFunction *func, const QString &prefix);
+  void iterateThroughFunction(IFunction *func, std::string const &prefix);
+  void setPrefix(IFunction *func, std::string const &prefix);
 
   CompositeFunction_sptr createInnerFunction(const std::string &lorentzianPeaks, const std::string &fitType,
                                              bool hasDeltaFunction, bool isQDependent, double q, bool hasTempCorrection,
@@ -49,11 +49,11 @@ private:
                                                    const IFunction_sptr &innerFunction);
   IFunction_sptr createResolutionFunction(const std::string &workspaceName, size_t workspaceIndex);
   CompositeFunction_sptr addBackground(CompositeFunction_sptr domainFunction, const std::string &background);
-  boost::optional<QString> m_backgroundPrefix;
-  boost::optional<QString> m_convolutionPrefix;
-  boost::optional<QString> m_deltaFunctionPrefix;
-  boost::optional<QString> m_tempFunctionPrefix;
-  boost::optional<QString> m_fitTypePrefix;
+  boost::optional<std::string> m_backgroundPrefix;
+  boost::optional<std::string> m_convolutionPrefix;
+  boost::optional<std::string> m_deltaFunctionPrefix;
+  boost::optional<std::string> m_tempFunctionPrefix;
+  boost::optional<std::string> m_fitTypePrefix;
   boost::optional<QStringList> m_peakPrefixes;
   std::string m_resolutionWorkspace;
   int m_resolutionWorkspaceIndex;

@@ -189,7 +189,7 @@ void IqtTemplateBrowser::setStretchStretching(double value, double error) {
 
 void IqtTemplateBrowser::setA0(double value, double error) { setParameterPropertyValue(m_A0, value, error); }
 
-void IqtTemplateBrowser::setFunction(const QString &funStr) { m_presenter.setFunction(funStr); }
+void IqtTemplateBrowser::setFunction(std::string const &funStr) { m_presenter.setFunction(funStr); }
 
 IFunction_sptr IqtTemplateBrowser::getGlobalFunction() const { return m_presenter.getGlobalFunction(); }
 
@@ -201,11 +201,13 @@ int IqtTemplateBrowser::getNumberOfDatasets() const { return m_presenter.getNumb
 
 void IqtTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) { m_presenter.setDatasets(datasets); }
 
-QStringList IqtTemplateBrowser::getGlobalParameters() const { return m_presenter.getGlobalParameters(); }
+std::vector<std::string> IqtTemplateBrowser::getGlobalParameters() const { return m_presenter.getGlobalParameters(); }
 
-QStringList IqtTemplateBrowser::getLocalParameters() const { return m_presenter.getLocalParameters(); }
+std::vector<std::string> IqtTemplateBrowser::getLocalParameters() const { return m_presenter.getLocalParameters(); }
 
-void IqtTemplateBrowser::setGlobalParameters(const QStringList &globals) { m_presenter.setGlobalParameters(globals); }
+void IqtTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
+  m_presenter.setGlobalParameters(globals);
+}
 
 void IqtTemplateBrowser::intChanged(QtProperty *prop) {
   if (prop == m_numberOfExponentials && m_emitIntChange) {
@@ -230,7 +232,7 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
     return;
   if (prop == m_background) {
     auto background = m_enumManager->enumNames(prop)[m_enumManager->value(prop)];
-    m_presenter.setBackground(background);
+    m_presenter.setBackground(background.toStdString());
   }
 }
 
@@ -262,15 +264,15 @@ void IqtTemplateBrowser::setCurrentDataset(int i) { m_presenter.setCurrentDatase
 
 int IqtTemplateBrowser::getCurrentDataset() { return m_presenter.getCurrentDataset(); }
 
-void IqtTemplateBrowser::updateParameterNames(const QMap<int, QString> &parameterNames) {
+void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_actualParameterNames.clear();
   ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[i];
     m_actualParameterNames[prop] = name;
-    if (!name.isEmpty()) {
-      prop->setPropertyName(name);
+    if (!name.empty()) {
+      prop->setPropertyName(QString::fromStdString(name));
     }
   }
 }
@@ -321,18 +323,19 @@ void IqtTemplateBrowser::setParameterPropertyValue(QtProperty *prop, double valu
   }
 }
 
-void IqtTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
+void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   ScopedFalse _false(m_emitParameterValueChange);
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
     auto const name = m_actualParameterNames[prop];
-    if (globals.contains(name)) {
+    auto const findIter = std::find(globals.cbegin(), globals.cend(), name);
+    if (findIter != globals.cend()) {
       m_parameterManager->setGlobal(prop, true);
       parameterProperies.removeOne(prop);
     }
   }
   for (auto const prop : parameterProperies) {
-    if (!m_actualParameterNames[prop].isEmpty()) {
+    if (!m_actualParameterNames[prop].empty()) {
       m_parameterManager->setGlobal(prop, false);
     }
   }

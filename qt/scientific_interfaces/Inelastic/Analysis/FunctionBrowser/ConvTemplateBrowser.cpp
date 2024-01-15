@@ -69,7 +69,7 @@ void ConvTemplateBrowser::createProperties() {
   m_intManager->blockSignals(false);
 }
 
-void ConvTemplateBrowser::setFunction(const QString &funStr) { m_presenter.setFunction(funStr); }
+void ConvTemplateBrowser::setFunction(std::string const &funStr) { m_presenter.setFunction(funStr); }
 
 IFunction_sptr ConvTemplateBrowser::getGlobalFunction() const { return m_presenter.getGlobalFunction(); }
 
@@ -85,11 +85,13 @@ void ConvTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &dataset
   m_presenter.setDatasets(datasets);
 }
 
-QStringList ConvTemplateBrowser::getGlobalParameters() const { return m_presenter.getGlobalParameters(); }
+std::vector<std::string> ConvTemplateBrowser::getGlobalParameters() const { return m_presenter.getGlobalParameters(); }
 
-QStringList ConvTemplateBrowser::getLocalParameters() const { return m_presenter.getLocalParameters(); }
+std::vector<std::string> ConvTemplateBrowser::getLocalParameters() const { return m_presenter.getLocalParameters(); }
 
-void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) { m_presenter.setGlobalParameters(globals); }
+void ConvTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
+  m_presenter.setGlobalParameters(globals);
+}
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
@@ -184,15 +186,15 @@ void ConvTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter.u
 
 void ConvTemplateBrowser::setCurrentDataset(int i) { m_presenter.setCurrentDataset(i); }
 
-void ConvTemplateBrowser::updateParameterNames(const QMap<int, QString> &parameterNames) {
+void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_actualParameterNames.clear();
   ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[static_cast<int>(i)];
     m_actualParameterNames[prop] = name;
-    if (!name.isEmpty()) {
-      prop->setPropertyName(name);
+    if (!name.empty()) {
+      prop->setPropertyName(QString::fromStdString(name));
     }
   }
 }
@@ -219,13 +221,13 @@ void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
     auto const name = m_actualParameterNames[prop];
-    if (globals.contains(name)) {
+    if (globals.contains(QString::fromStdString(name))) {
       m_parameterManager->setGlobal(prop, true);
       parameterProperies.removeOne(prop);
     }
   }
   for (auto const prop : parameterProperies) {
-    if (!m_actualParameterNames[prop].isEmpty()) {
+    if (!m_actualParameterNames[prop].empty()) {
       m_parameterManager->setGlobal(prop, false);
     }
   }
@@ -242,9 +244,8 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       auto const names = subType->getParameterNames(index);
       auto const descriptions = subType->getParameterDescriptions(index);
       QList<QtProperty *> props;
-      auto const np = names.size();
-      for (int i = 0; i < np; ++i) {
-        auto prop = m_parameterManager->addProperty(names[i]);
+      for (auto i = 0u; i < names.size(); ++i) {
+        auto prop = m_parameterManager->addProperty(QString::fromStdString(names[i]));
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);
         props.append(prop);
@@ -255,13 +256,13 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       parameters[index] = props;
     }
     if (isub == SubTypeIndex::Lorentzian) {
-      auto subtypeProp = m_intManager->addProperty(subType->name());
+      auto subtypeProp = m_intManager->addProperty(QString::fromStdString(subType->name()));
       m_intManager->setMinimum(subtypeProp, 0);
       m_intManager->setMaximum(subtypeProp, 2);
       m_subTypeProperties.push_back(subtypeProp);
 
     } else {
-      auto subTypeProp = m_enumManager->addProperty(subType->name());
+      auto subTypeProp = m_enumManager->addProperty(QString::fromStdString(subType->name()));
       m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
       m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
       m_subTypeProperties.push_back(subTypeProp);

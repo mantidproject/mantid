@@ -25,7 +25,8 @@ void ALCPeakFittingPresenter::initialize() {
   connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
 
   // We are updating the whole function anyway, so paramName if left out
-  connect(m_view, SIGNAL(parameterChanged(QString, QString)), SLOT(onParameterChanged(QString)));
+  connect(m_view, SIGNAL(parameterChanged(std::string const &, std::string const &)),
+          SLOT(onParameterChanged(std::string const &)));
 
   connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
   connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
@@ -74,12 +75,12 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
 
   // Update all the defined parameters of the peak function
   for (size_t i = 0; i < peakFunc->nParams(); ++i) {
-    QString paramName = QString::fromStdString(peakFunc->parameterName(i));
-    m_view->setParameter(*index, paramName, peakFunc->getParameter(paramName.toStdString()));
+    auto const paramName = peakFunc->parameterName(i);
+    m_view->setParameter(*index, paramName, peakFunc->getParameter(paramName));
   }
 }
 
-void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
+void ALCPeakFittingPresenter::onParameterChanged(std::string const &funcIndex) {
   auto currentIndex = m_view->currentFunctionIndex();
 
   // We are interested in parameter changed of the currently selected function
