@@ -362,8 +362,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:302
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:668
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:701
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScatterer.h:71
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:338
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:347
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:375
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:384
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:209
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:91
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:151
@@ -919,7 +919,7 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Expor
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:36
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:41
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:46
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:84
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:251
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceFactory.cpp:58
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IFunction.cpp:90
