@@ -1439,6 +1439,4 @@ postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/
 postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFittingModel.cpp:187
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:45
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:66
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:158
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp:191
 
