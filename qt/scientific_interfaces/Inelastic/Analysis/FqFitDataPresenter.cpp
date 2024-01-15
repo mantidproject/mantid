@@ -265,6 +265,8 @@ std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool
       return FqFit::WIDTH_FITS;
     else
       return FqFit::EISF_FITS;
+
+    return FqFit::ALL_FITS; // default
   }
 }
 
