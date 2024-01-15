@@ -254,20 +254,17 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
 }
 
 std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool paramWidth) const {
-  if (m_view->isTableEmpty()) { // when first data is added to table, it can only be either WIDTH or EISF
+  if (m_view->isTableEmpty()) // when first data is added to table, it can only be either WIDTH or EISF
     return paramWidth ? FqFit::WIDTH_FITS : FqFit::EISF_FITS;
 
-    bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
-    bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
-    if (widthFuncs && eisfFuncs)
-      return FqFit::ALL_FITS;
-    else if (widthFuncs)
-      return FqFit::WIDTH_FITS;
-    else
-      return FqFit::EISF_FITS;
-
-    return FqFit::ALL_FITS; // default
-  }
+  bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
+  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
+  if (widthFuncs && eisfFuncs)
+    return FqFit::ALL_FITS;
+  else if (widthFuncs)
+    return FqFit::WIDTH_FITS;
+  else
+    return FqFit::EISF_FITS;
 }
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
