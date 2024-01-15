@@ -34,7 +34,7 @@ public:
   const std::string name() const override { return "SaveRKH"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Save a MatrixWorkspace to a file in the ISIS RKH format for 1D or 2D data.";
+    return "Save a MatrixWorkspace to a file in the ISIS RKH format (for 1D or 2D data).";
   }
 
   /// Algorithm's version
