@@ -28,7 +28,7 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(), m_lattice(nullptr), m_crystalStructure(),
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(), m_lattices(nullptr), m_crystalStructure(),
       m_samples(), m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0) {}
 
 /**
@@ -36,11 +36,11 @@ Sample::Sample()
  *  @param copy :: const reference to the sample object
  */
 Sample::Sample(const Sample &copy)
-    : m_name(copy.m_name), m_shape(copy.m_shape), m_environment(copy.m_environment), m_lattice(nullptr),
+    : m_name(copy.m_name), m_shape(copy.m_shape), m_environment(copy.m_environment), m_lattices(nullptr),
       m_crystalStructure(), m_samples(copy.m_samples), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
       m_height(copy.m_height), m_width(copy.m_width) {
-  if (copy.m_lattice)
-    m_lattice = std::make_unique<OrientedLattice>(copy.getOrientedLattice());
+  if (copy.m_lattices)
+    m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(copy.getOrientedLattices());
 
   if (copy.hasCrystalStructure()) {
     m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(copy.getCrystalStructure());
@@ -66,10 +66,10 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  if (rhs.m_lattice)
-    m_lattice = std::make_unique<OrientedLattice>(rhs.getOrientedLattice());
+  if (rhs.m_lattices)
+    m_lattices = std::make_unique<std::vector<OrientedLattice>>(rhs.getOrientedLattices());
   else
-    m_lattice.reset(nullptr);
+    m_lattices.reset(nullptr);
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -152,10 +152,10 @@ void Sample::setEnvironment(std::shared_ptr<SampleEnvironment> env) { m_environm
  * @throw std::runtime_error If the OrientedLattice has not been defined
  */
 const OrientedLattice &Sample::getOrientedLattice() const {
-  if (!m_lattice) {
+  if (!m_lattices) {
     throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
   }
-  return *m_lattice;
+  return (*m_lattices)[0];
 }
 
 /** Return a reference to the OrientedLattice of this sample
@@ -163,20 +163,57 @@ const OrientedLattice &Sample::getOrientedLattice() const {
  * @throw std::runtime_error If the OrientedLattice has not been defined
  */
 OrientedLattice &Sample::getOrientedLattice() {
-  if (!m_lattice) {
+  if (!m_lattices) {
     throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
   }
-  return *m_lattice;
+  return (*m_lattices)[0];
 }
 
 /** Attach an OrientedLattice onto this sample
  *
  * @param lattice :: A pointer to a OrientedLattice.
  */
-void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) { m_lattice = std::move(lattice); }
+void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
+  std::vector<Geometry::OrientedLattice> lattices = {*(lattice.release())};
+
+  if (m_lattices == nullptr) {
+    m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(lattices);
+  } else {
+    m_lattices.reset(&lattices);
+  }
+}
 
 /** @return true if the sample has an OrientedLattice  */
-bool Sample::hasOrientedLattice() const { return (m_lattice != nullptr); }
+bool Sample::hasOrientedLattice() const { return (m_lattices != nullptr); }
+
+void Sample::addOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
+  if (!m_lattices) {
+    std::vector<Geometry::OrientedLattice> lattices = {*(lattice.release())};
+    m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(lattices);
+  } else {
+    m_lattices->push_back(*(lattice.release()));
+  }
+}
+
+void Sample::setOrientedLattices(std::unique_ptr<std::vector<Geometry::OrientedLattice>> lattices) {
+  m_lattices = move(lattices);
+}
+
+std::vector<Geometry::OrientedLattice> &Sample::getOrientedLattices() {
+  if (!m_lattices) {
+    throw std::runtime_error("Sample::getOrientedLattices - No OrientedLattice has been defined.");
+  }
+
+  return *m_lattices;
+}
+
+const std::vector<Geometry::OrientedLattice> &Sample::getOrientedLattices() const {
+  if (!m_lattices) {
+    throw std::runtime_error("Sample::getOrientedLattices - No OrientedLattice has been defined.");
+  }
+
+  return *m_lattices;
+}
 
 const Geometry::CrystalStructure &Sample::getCrystalStructure() const {
   if (!hasCrystalStructure()) {
@@ -305,7 +342,7 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   // OrientedLattice
   if (hasOrientedLattice()) {
     file->writeData("num_oriented_lattice", 1);
-    m_lattice->saveNexus(file, "oriented_lattice");
+    (*m_lattices)[0].saveNexus(file, "oriented_lattice");
   } else
     file->writeData("num_oriented_lattice", 0);
 
@@ -383,8 +420,9 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_oriented_lattice;
     file->readData("num_oriented_lattice", num_oriented_lattice);
     if (num_oriented_lattice > 0) {
-      m_lattice = std::make_unique<OrientedLattice>();
-      m_lattice->loadNexus(file, "oriented_lattice");
+      std::unique_ptr<Geometry::OrientedLattice> lattice = std::make_unique<Geometry::OrientedLattice>();
+      lattice->loadNexus(file, "oriented_lattice");
+      setOrientedLattice(move(lattice));
     }
   }
 
@@ -406,8 +444,8 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
  * Delete the oriented lattice.
  */
 void Sample::clearOrientedLattice() {
-  if (m_lattice) {
-    m_lattice.reset(nullptr);
+  if (m_lattices) {
+    m_lattices.reset(nullptr);
   }
 }
 
@@ -427,7 +465,7 @@ bool Sample::operator==(const Sample &other) const {
     else
       return true;
   };
-  return *m_lattice == *other.m_lattice && this->m_name == other.m_name && this->m_height == other.m_height &&
+  return *m_lattices == *other.m_lattices && this->m_name == other.m_name && this->m_height == other.m_height &&
          this->m_width == other.m_width && this->m_thick == other.m_thick && m_geom_id == other.m_geom_id &&
          compare(m_environment, other.m_environment, [](const auto &x) { return x->name(); }) &&
          compare(m_shape, other.m_shape, [](const auto &x) { return x->shape(); }) &&
