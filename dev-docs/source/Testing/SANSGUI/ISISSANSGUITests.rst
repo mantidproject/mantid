@@ -32,10 +32,15 @@ Set up
 
 Automatic Save Selection
 ########################
-#. Switch between 1D and 2D at the bottom of the screen, it should automatically switch
-   between CanSAS and NXcanSAS
-#. Change any of the tick boxes (e.g. tick RKH), and switch between 1D and 2D. It should
-   not change.
+
+#. Switch between ``1D`` and ``2D`` ``Reduction`` modes at the bottom of the screen.
+
+   * When 1D is selected, ``CanSAS (1D)`` and ``NxCanSAS (1D/2D)`` should be checked.
+   * When 2D is selected, only ``NxCanSAS (1D/2D)`` should be checked.
+
+#. Check ``RKH (1D/2D)``.
+#. Change the reduction mode.
+#. The options should revert to the defaults above (with ``RKH (1D/2D)`` unchecked).
 
 Runs table editing
 ##################

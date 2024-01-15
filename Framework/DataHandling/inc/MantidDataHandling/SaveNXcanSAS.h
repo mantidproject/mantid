@@ -23,7 +23,9 @@ public:
   ~SaveNXcanSAS() override = default;
   const std::string name() const override { return "SaveNXcanSAS"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override { return "Writes a MatrixWorkspace to a file in the NXcanSAS format."; }
+  const std::string summary() const override {
+    return "Save a MatrixWorkspace to a file in the NXcanSAS format (for both 1D and 2D data).";
+  }
 
   /// Algorithm's version
   int version() const override { return (1); }

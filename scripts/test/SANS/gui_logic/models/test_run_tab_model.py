@@ -18,14 +18,7 @@ class TestRunTabModel(unittest.TestCase):
     def test_constructor_sets_defaults(self):
         self.assertEqual(ReductionDimensionality.ONE_DIM, self.model.get_reduction_mode())
         # Represents default save opts for 1D
-        self.assertEqual(SaveOptions(can_sas_1d=True), self.model.get_save_types())
-
-    def test_setting_save_types_marks_as_user_set(self):
-        default_options = SaveOptions()
-        self.assertFalse(default_options.user_modified)
-        self.model.update_save_types(default_options)
-        save_types = self.model.get_save_types()
-        self.assertTrue(save_types.user_modified)
+        self.assertEqual(SaveOptions(can_sas_1d=True, nxs_can_sas=True), self.model.get_save_types())
 
     def test_reduction_mode_stored(self):
         for mode in [ReductionDimensionality.TWO_DIM, ReductionDimensionality.ONE_DIM]:
@@ -35,16 +28,8 @@ class TestRunTabModel(unittest.TestCase):
     def test_reduction_mode_updates_save_opts(self):
         for mode, expected in [
             (ReductionDimensionality.TWO_DIM, SaveOptions(nxs_can_sas=True)),
-            (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True)),
+            (ReductionDimensionality.ONE_DIM, SaveOptions(can_sas_1d=True, nxs_can_sas=True)),
         ]:
-            self.model.update_reduction_mode(mode)
-            self.assertEqual(expected, self.model.get_save_types())
-
-    def test_reduction_mode_skips_update_with_custom_save(self):
-        expected = SaveOptions(nxs_can_sas=True, rkh=True, user_modified=True)
-        self.model.update_save_types(expected)
-
-        for mode in [ReductionDimensionality.ONE_DIM, ReductionDimensionality.TWO_DIM]:
             self.model.update_reduction_mode(mode)
             self.assertEqual(expected, self.model.get_save_types())
 
