@@ -25,6 +25,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace DataHandling

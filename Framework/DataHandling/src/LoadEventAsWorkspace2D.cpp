@@ -14,7 +14,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <regex>
@@ -24,7 +26,10 @@ namespace DataHandling {
 using namespace API;
 using Mantid::HistogramData::HistogramX;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::PropertyWithValue;
+using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Kernel::UnitFactory;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventAsWorkspace2D)
 
@@ -40,7 +45,9 @@ int LoadEventAsWorkspace2D::version() const { return 1; }
 const std::string LoadEventAsWorkspace2D::category() const { return "TODO: FILL IN A CATEGORY"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadEventAsWorkspace2D::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string LoadEventAsWorkspace2D::summary() const {
+  return "Load event data, integrating the events during loading";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithms properties.
@@ -50,10 +57,61 @@ void LoadEventAsWorkspace2D::init() {
   this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
                         "The name of the Event NeXus file to read, including its full or "
                         "relative path. ");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMin", -20000., Direction::Input),
+                  "To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the minimum accepted value in microseconds. Keep "
+                  "blank to load all events.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMax", 20000, Direction::Input),
+                  "To exclude events that do not fall within a range "
+                  "of times-of-flight. "
+                  "This is the maximum accepted value in microseconds. Keep "
+                  "blank to load all events.");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+                      "LogAllowList", std::vector<std::string>(), Direction::Input),
+                  "If specified, only these logs will be loaded from the file (each "
+                  "separated by a space).");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+                      "LogBlockList", std::vector<std::string>(), Direction::Input),
+                  "If specified, these logs will NOT be loaded from the file (each "
+                  "separated by a space).");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("XCenterLog", "wavelength", Direction::Input),
+                  "Name of log to take the x-bin center from");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("XWidthLog", "wavelength_spread", Direction::Input),
+                  "Name of log to take the x-bin width from");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("XCenter", EMPTY_DBL(), Direction::Input),
+                  "Value to set x-bin center to which overrides XCenterLog");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("XWidth", EMPTY_DBL(), Direction::Input),
+                  "Value to set x-bin width to which overrides XWidthLog");
+  declareProperty("Units", "Wavelength",
+                  std::make_shared<StringListValidator>(UnitFactory::Instance().getConvertibleUnits()),
+                  "The name of the units to convert to (must be one of those "
+                  "registered in\n"
+                  "the Unit Factory)");
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
+std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
+  std::map<std::string, std::string> results;
+
+  const std::vector<std::string> allow_list = getProperty("LogAllowList");
+  const std::vector<std::string> block_list = getProperty("LogBlockList");
+
+  if (!allow_list.empty() && !block_list.empty()) {
+    results["LogAllowList"] =
+        "LogBlockList and LogAllowList are mutually exclusive. Please only enter values for one of these fields.";
+    results["LogBlockList"] =
+        "LogBlockList and LogAllowList are mutually exclusive. Please only enter values for one of these fields.";
+  }
+
+  if (getPropertyValue("FilterByTofMin") >= getPropertyValue("FilterByTofMax")) {
+    results["FilterByTofMin"] = "FilterByTofMin must be less than FilterByTofMax";
+    results["FilterByTofMax"] = "FilterByTofMax must be greater than FilterByTofMin";
+  }
+
+  return results;
+}
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -66,7 +124,8 @@ void LoadEventAsWorkspace2D::exec() {
   // Load the logs
   int nPeriods = 1;                                                               // Unused
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, WS, *this, false, nPeriods, periodLog);
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, WS, *this, false, nPeriods, periodLog,
+                                                         getProperty("LogAllowList"), getProperty("LogBlockList"));
 
   if (nPeriods != 1)
     g_log.warning("This algorithm does not correctly handle period data");
@@ -88,7 +147,6 @@ void LoadEventAsWorkspace2D::exec() {
   LoadEventNexusIndexSetup indexSetup(WS, EMPTY_INT(), EMPTY_INT(), range);
   auto indexInfo = indexSetup.makeIndexInfo();
   const size_t numHist = indexInfo.size();
-  g_log.warning() << "found " << indexInfo.size() << " histograms\n";
 
   // make output workspace with correct number of histograms
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(WS, numHist, 2, 1);
@@ -97,6 +155,8 @@ void LoadEventAsWorkspace2D::exec() {
 
   // now load the data
   const auto id_to_wi = outWS->getDetectorIDToWorkspaceIndexMap();
+  const double tof_min = getProperty("FilterByTofMin");
+  const double tof_max = getProperty("FilterByTofMax");
 
   std::vector<uint32_t> Y(numHist, 0);
 
@@ -135,8 +195,8 @@ void LoadEventAsWorkspace2D::exec() {
           if (wi == id_to_wi.end())
             continue;
 
-          auto tof = event_times[i];
-          if (tof > 20000. || tof < -20000.)
+          const auto tof = event_times[i];
+          if (tof < tof_min || tof > tof_max)
             continue;
 
           Y[wi->second]++;
@@ -151,8 +211,15 @@ void LoadEventAsWorkspace2D::exec() {
   h5file.close();
 
   // determine x values
-  const auto center = outWS->run().getStatistics("wavelength").mean;
-  const auto width = outWS->run().getStatistics("wavelength_spread").mean * center;
+  double center = getProperty("XCenter");
+  if (center == EMPTY_DBL())
+    center = outWS->run().getStatistics(getPropertyValue("XCenterLog")).mean;
+
+  double width = getProperty("XWidth");
+  if (width == EMPTY_DBL())
+    width = outWS->run().getStatistics(getPropertyValue("XWidthLog")).mean;
+  width *= center;
+
   const auto xBins = {center - width / 2, center + width / 2};
 
   // set the data on the workspace
@@ -164,7 +231,7 @@ void LoadEventAsWorkspace2D::exec() {
   }
 
   // set units
-  outWS->getAxis(0)->setUnit("wavelength");
+  outWS->getAxis(0)->setUnit(getPropertyValue("Units"));
   outWS->setYUnit("Counts");
 
   // add filename
