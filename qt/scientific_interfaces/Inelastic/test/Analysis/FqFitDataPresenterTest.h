@@ -66,8 +66,8 @@ public:
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
 
-    m_fitPropertyBrowser = new NiceMock<MockFitPropertyBrowser>();
-    m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser);
+    m_fitPropertyBrowser = std::make_unique<NiceMock<MockFitPropertyBrowser>>();
+    m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser.get());
   }
 
   void tearDown() override {
@@ -75,14 +75,15 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser.get()));
 
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
 
     m_dataTable.reset();
-    delete m_fitPropertyBrowser;
+    m_fitPropertyBrowser.reset();
+    // delete m_fitPropertyBrowser;
   }
 
   void test_that_the_presenter_and_mock_objects_have_been_created() {
@@ -138,5 +139,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  MockFitPropertyBrowser *m_fitPropertyBrowser;
+  std::unique_ptr<NiceMock<MockFitPropertyBrowser>> m_fitPropertyBrowser;
 };
