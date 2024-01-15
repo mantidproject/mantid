@@ -1,0 +1,1 @@
+- Added nexus file support in :ref:`PEARLTransfit <algm-PEARLTransfit>`

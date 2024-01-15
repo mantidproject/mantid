@@ -22,7 +22,7 @@
 from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, mtd
 from mantid.simpleapi import (
-    LoadRaw,
+    Load,
     DeleteWorkspace,
     CropWorkspace,
     NormaliseByCurrent,
@@ -127,7 +127,8 @@ class PEARLTransfit(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            MultipleFileProperty("Files", extensions=[".raw", ".s0x"]), doc="Files of calibration runs (numors). Must be detector scans."
+            MultipleFileProperty("Files", extensions=[".raw", ".s0x", ".nxs"]),
+            doc="Files of calibration runs (numors). Must be detector scans.",
         )
         self.declareProperty(
             name="FoilType",
@@ -375,13 +376,13 @@ class PEARLTransfit(PythonAlgorithm):
             fnNoExt = path.splitext(fileName)[0]
             if isFirstFile:
                 firstFileName = fnNoExt
-            fileName_Raw = fnNoExt + "_raw"
+            fileName_format = fnNoExt + "_" + fileName.split(".")[-1]
             fileName_3 = fnNoExt + "_3"
-            LoadRaw(Filename=file, OutputWorkspace=fileName_Raw)
-            CropWorkspace(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw, XMin=100, XMax=19990)
-            NormaliseByCurrent(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw)
-            ExtractSingleSpectrum(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_3, WorkspaceIndex=3)
-            DeleteWorkspace(fileName_Raw)
+            Load(Filename=file, OutputWorkspace=fileName_format)
+            CropWorkspace(InputWorkspace=fileName_format, OutputWorkspace=fileName_format, XMin=100, XMax=19990)
+            NormaliseByCurrent(InputWorkspace=fileName_format, OutputWorkspace=fileName_format)
+            ExtractSingleSpectrum(InputWorkspace=fileName_format, OutputWorkspace=fileName_3, WorkspaceIndex=3)
+            DeleteWorkspace(fileName_format)
             ConvertUnits(InputWorkspace=fileName_3, Target="Energy", OutputWorkspace=fileName_3)
             self.TransfitRebin(fileName_3, fileName_3, foilType, divE)
             if not isFirstFile:
