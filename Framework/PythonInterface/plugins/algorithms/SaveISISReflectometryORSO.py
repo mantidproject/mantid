@@ -157,6 +157,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
+        dataset.set_reduction_call(self._get_reduction_script(ws))
 
         reduction_workflow_histories = self._get_reduction_workflow_alg_histories(ws)
         if not reduction_workflow_histories:
@@ -319,6 +320,18 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             return f"{inst_prefix}{run_num.rjust(run_num_width, '0')}"
         except OverflowError:
             raise_error()
+
+    def _get_reduction_script(self, ws) -> Optional[str]:
+        """
+        Get the workspace reduction history as a script.
+        """
+        if ws.getHistory().empty():
+            return None
+
+        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=ws)
+        alg.execute()
+        script = alg.getPropertyValue("ScriptText")
+        return "\n".join(script.split("\n")[6:])  # trim the header and import
 
     def _get_reduction_alg_history(self, ws):
         """
