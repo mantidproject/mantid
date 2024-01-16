@@ -174,12 +174,16 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param lattice :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
-  std::vector<Geometry::OrientedLattice> lattices = {*(lattice.release())};
+  if (!lattice) {
+    throw std::runtime_error("Sample::setOrientedLattice - The provided lattice pointer is nullptr.");
+  }
+
+  std::vector<Geometry::OrientedLattice> lattices = {*lattice};
 
   if (m_lattices == nullptr) {
-    m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(lattices);
+    m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(std::move(lattices));
   } else {
-    m_lattices.reset(&lattices);
+    *m_lattices = std::move(lattices);
   }
 }
 
@@ -187,11 +191,15 @@ void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> latti
 bool Sample::hasOrientedLattice() const { return (m_lattices != nullptr); }
 
 void Sample::addOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
+  if (!lattice) {
+    throw std::runtime_error("Sample::addOrientedLattice - The provided lattice pointer is nullptr.");
+  }
+
   if (!m_lattices) {
-    std::vector<Geometry::OrientedLattice> lattices = {*(lattice.release())};
+    std::vector<Geometry::OrientedLattice> lattices = {*lattice};
     m_lattices = std::make_unique<std::vector<Geometry::OrientedLattice>>(lattices);
   } else {
-    m_lattices->push_back(*(lattice.release()));
+    m_lattices->push_back(*lattice);
   }
 }
 
