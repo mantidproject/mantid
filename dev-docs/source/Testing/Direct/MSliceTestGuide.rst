@@ -257,6 +257,32 @@ The Command Line Interface
    :align: center
    :width: 80%
 
+4. Run Another Example Script in the Mantid Editor
+##################################################
+
+#. Run the script below.
+#. There should be one new window with a slice plot
+
+.. code:: python
+
+    import mslice.cli as mc
+    import mslice.plotting.pyplot as plt
+
+    ws = mc.Load('C:\\MAR21335_Ei60meV.nxs')
+    ws_scaled = mc.Scale(InputWorkspace=ws, OutputWorkspace='ws_scaled', Factor='3')
+
+    fig = plt.gcf()
+    fig.clf()
+    ax = fig.add_subplot(111, projection="mslice")
+    slice_ws = mc.Slice(ws_scaled, Axis1="|Q|,0.27356,11.0351,0.04671", Axis2="DeltaE,-30.0,58.2,0.3", NormToOne=False)
+
+    mesh = ax.pcolormesh(slice_ws, cmap="viridis")
+    mesh.set_clim(0.0, 1130.5997349657723)
+    cb = plt.colorbar(mesh, ax=ax)
+    cb.set_label('Intensity (arb. units)', labelpad=20, rotation=270, picker=5, fontsize=10.0)
+    ax.set_title('MAR21335_Ei60meV_scaled', fontsize=12.0)
+    mc.Show()
+
 The Workspace Manager
 ---------------------
 
