@@ -7,6 +7,8 @@
 
 #include "MantidDataHandling/CompressEventBankAccumulator.h"
 
+#include <iostream>
+
 namespace Mantid {
 namespace DataHandling {
 CompressEventBankAccumulator::CompressEventBankAccumulator(detid_t min_detid, detid_t max_detid,
@@ -40,6 +42,18 @@ void CompressEventBankAccumulator::addEvent(const detid_t detid, const float tof
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
   m_spectra_accum[det_index].addEvent(tof_f);
+}
+
+void CompressEventBankAccumulator::createWeightedEvents(
+    const detid_t detid, std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const {
+  if ((detid < m_detid_min) || detid > m_detid_max) {
+    std::stringstream msg;
+    msg << "Encountered invalid detid=" << detid;
+    throw std::runtime_error(msg.str());
+  }
+
+  const auto det_index = static_cast<size_t>(detid - m_detid_min);
+  m_spectra_accum[det_index].createWeightedEvents(raw_events);
 }
 
 std::size_t CompressEventBankAccumulator::numberWeightedEvents() const {

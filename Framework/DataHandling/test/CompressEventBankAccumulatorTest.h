@@ -59,6 +59,35 @@ public:
     // verify total number of weighted events created
     size_t numWghtExpected = static_cast<size_t>(num_spectra + 1) * (tof_fine_bins->size() - 1);
     TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), numWghtExpected);
+
+    { // this should generate an exception
+      // set up an EventList to add weighted events to
+      EventList event_list;
+      event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+      std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
+      getEventsFrom(event_list, raw_events);
+
+      TS_ASSERT_THROWS(accumulator.createWeightedEvents(min_detid - 1, raw_events), std::runtime_error const &);
+    }
+
+    // all event lists will be identical because of how fake data was made
+    for (detid_t detid = min_detid; detid <= max_detid; ++detid) {
+      // set up an EventList to add weighted events to
+      EventList event_list;
+      event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+      std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
+      getEventsFrom(event_list, raw_events);
+
+      // write the events and verify
+      accumulator.createWeightedEvents(detid, raw_events);
+      TS_ASSERT_EQUALS(raw_events->size(), (tof_fine_bins->size() - 1));
+
+      // confim that the correct number events were added
+      const double total_weight =
+          std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
+                          [](const auto &current, const auto &value) { return current + value.weight(); });
+      TS_ASSERT_DELTA(total_weight, 9806., .1); // observed value, but could be calculated
+    }
   }
 
   // ====================================== BEGIN OF REMOVE
@@ -150,7 +179,7 @@ public:
     const size_t MAX_EVENTS = snap_tof->size(); //  / 10;
     std::cout << "Parsing " << MAX_EVENTS << " events\n";
 
-    // -------------------- accumulator
+    // -------------------- spectrum accumulator
     snap_timer.reset();
 
     CompressEventSpectrumAccumulator accumulator(tof_fine_bins, DELTA, DataHandling::CompressBinningMode::LINEAR);
@@ -167,14 +196,14 @@ public:
 
     {
       auto seconds = snap_timer.elapsed();
-      std::cout << "Accumulator             in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) / seconds)
+      std::cout << "Spectrum Accumulator  in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) / seconds)
                 << "E/s\n"
                 << "                      numWeighted=" << accumulator.numberWeightedEvents()
                 << " numHist=" << accumulator.numberHistBins() << " unused="
                 << (100. * double(accumulator.numberHistBins() - accumulator.numberWeightedEvents()) /
                     double(accumulator.numberHistBins()))
                 << "%\n"
-                << "                    elements.size=" << raw_events->size()
+                << "                     elements.size=" << raw_events->size()
                 << " memory=" << (event_list.getMemorySize() / 1024) << "kB\n";
     }
 

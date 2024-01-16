@@ -23,6 +23,10 @@ public:
                                std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor);
 
   void addEvent(const detid_t detid, const float tof);
+
+  void createWeightedEvents(const detid_t detid,
+                            std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
+
   /// method only intended for testing
   std::size_t numberWeightedEvents() const;
 
