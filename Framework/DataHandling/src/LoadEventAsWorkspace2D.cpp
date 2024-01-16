@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -24,6 +25,7 @@
 namespace Mantid {
 namespace DataHandling {
 using namespace API;
+using Mantid::DataObjects::Workspace2D;
 using Mantid::HistogramData::HistogramX;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
@@ -88,7 +90,7 @@ void LoadEventAsWorkspace2D::init() {
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
