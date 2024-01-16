@@ -132,7 +132,7 @@ mv $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
+mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 mv $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/
 
