@@ -13,6 +13,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/filesystem.hpp>
+
+#include <algorithm>
 #include <numeric>
 
 namespace Mantid::DataHandling::ANSTO {
@@ -485,4 +488,211 @@ bool File::append(const std::string &path, const std::string &name, const void *
 }
 
 } // namespace Tar
+
+namespace Anxs {
+
+int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
+  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF * 1e9);
+  return retval;
+}
+
+std::string extractWorkspaceTitle(std::string &nxsFile) {
+  namespace fs = boost::filesystem;
+  fs::path p = nxsFile;
+  for (; !p.extension().empty();)
+    p = p.stem();
+  return p.generic_string();
+}
+
+// load nx dataset
+template <class T> bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, T &value, int index) {
+  try {
+    NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    dataSet.load();
+
+    // if negative index go from the end
+    if (index < 0) {
+      auto N = dataSet.dim0();
+      value = dataSet[N + index];
+    } else {
+      value = dataSet[index];
+    }
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
+bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+  try {
+    NeXus::NXChar dataSet = entry.openNXChar(path);
+    dataSet.load();
+
+    value = std::string(dataSet(), dataSet.dim0());
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
+
+bool isTimedDataSet(const NeXus::NXEntry &entry, const std::string &path) {
+  auto newEntry = entry.openNXGroup(path);
+  auto datasets = newEntry.datasets();
+  auto valid = (datasets.size() == 2 && newEntry.containsDataSet("time") && newEntry.containsDataSet("value"));
+  return valid;
+}
+
+// Extract the start and end time in nsecs from the nexus file
+// based on entry/scan_dataset/[time, value]
+//
+// The time is the start time value is duration in nsec for each dataset
+//
+std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int datasetIx) {
+
+  auto timestamp = entry.openNXDataSet<uint64_t>("scan_dataset/time");
+  timestamp.load();
+  auto offset = entry.openNXDataSet<int64_t>("scan_dataset/value");
+  offset.load();
+  try {
+    auto start = timestamp[datasetIx];
+    auto end = start + offset[datasetIx];
+    return {start, end};
+  } catch (std::runtime_error &) {
+    return {0, 0};
+  }
+}
+
+// Extract the relevant timestamped data. Get the timestamp first to
+// determine the index limits (it assumed the timestamp is ordered).
+// Then extract the value from that range.
+// The start index is the first entry where the timestamp is less than
+// or equal to to the start time. The start index may occur before the
+// startT time but it is the parameter value at the start time as all
+// subsequenet values occur after the start time. This logic is needed
+// as the recorded value is only captured on the change in value an if
+// the value did not change in the window there would no logged value
+// in the period.
+
+template <typename T>
+int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                        std::vector<uint64_t> &times, std::vector<T> &events, std::string &units) {
+
+  auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
+  timeStamp.load();
+  int maxn = timeStamp.size();
+  int startIx{0}, endIx{0};
+  auto itt = timeStamp();
+  for (int i = 0; i < maxn; i++) {
+    auto v = itt[i];
+    if (v <= startTime)
+      startIx = i;
+    if (v < endTime)
+      endIx = i + 1;
+  }
+  times.assign(itt + startIx, itt + endIx);
+
+  auto values = entry.openNXDataSet<T>(path + "/value");
+  units = values.attributes("units");
+  values.load();
+  auto itv = values();
+  events.assign(itv + startIx, itv + endIx);
+
+  return endIx - startIx;
+}
+
+template <typename T>
+bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                         ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units) {
+  eventTime = 0;
+  eventValue = 0;
+  std::vector<uint64_t> times;
+  std::vector<T> values;
+  auto n = extractTimedDataSet<T>(entry, path, startTime, endTime, times, values, units);
+  if (n == 0)
+    return false;
+
+  bool retn = true;
+  switch (valueOption) {
+  case ScanLog::Mean:
+    eventValue = std::accumulate(values.begin(), values.end(), 0) / n;
+    eventTime = std::accumulate(times.begin(), times.end(), 0) / n;
+    break;
+  case ScanLog::Start:
+    eventValue = values[0];
+    eventTime = times[0];
+    break;
+  case ScanLog::End:
+    eventValue = values[n - 1];
+    eventTime = times[n - 1];
+    break;
+  default:
+    retn = false;
+  }
+  return retn;
+}
+
+void ReadEventData(const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec, uint64_t end_nsec,
+                   const std::string &neutron_path, int tube_resolution) {
+
+  // the detector event time zero is the actual chopper time and all the events are
+  // relative to this base
+
+  // Get the event index, base values and values but check if there is data available
+  auto eventID = entry.openNXDataSet<uint32_t>(neutron_path + "/event_id");
+  if (eventID.dim0() == 0)
+    return;
+  eventID.load();
+  auto eventIndex = entry.openNXDataSet<uint32_t>(neutron_path + "/event_time_zero_index");
+  eventIndex.load();
+  auto zeroOffset = entry.openNXDataSet<uint64_t>(neutron_path + "/event_time_zero");
+  zeroOffset.load();
+  auto offsetValues = entry.openNXDataSet<uint32_t>(neutron_path + "/event_time_offset");
+  offsetValues.load();
+  uint32_t numPulses = eventIndex.size();
+  uint32_t totalEvents = offsetValues.size();
+
+  // The chopper times are monotonically increasing but there may be duplicate
+  // pulse times when a 'efu' buffer is full mid pulse. In this case the buffer
+  // is sent but the next buffer uses the same pulse time. Only send the frame
+  // event when it changes.
+
+  uint64_t lastFrameTS{0};
+
+  // Run through the data and forward the event data if the pulse time occurs between
+  // start and end time. To be clear the start and end time relates to the pulse times.
+  for (uint32_t ix = 0; ix < numPulses; ix++) {
+    auto pulseTime = zeroOffset[ix];
+    if (start_nsec <= pulseTime && pulseTime < end_nsec) {
+      if (pulseTime > lastFrameTS) {
+        handler->newFrame();
+        lastFrameTS = pulseTime;
+      }
+      auto baseIndex = eventIndex[ix];
+      auto lastIndex = (ix + 1 < numPulses ? eventIndex[ix + 1] : totalEvents);
+      for (uint32_t j = baseIndex; j < lastIndex; j++) {
+        // convert tof to microseconds as double and pixel as (x,y)
+        // and send to handler
+        double tof = offsetValues[j] * 1.0e-3;
+        auto pixel = eventID[j];
+        size_t y = pixel % tube_resolution;
+        size_t x = (pixel - y) / tube_resolution;
+        handler->addEvent(x, y, tof);
+      }
+    }
+  }
+}
+
+// template instantiation
+template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, float &value, int index);
+template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, int &value, int index);
+template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
+template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, int64_t &value, int index);
+template int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                 uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
+                                 std::string &units);
+template bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                  uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, float &eventValue,
+                                  std::string &units);
+
+} // namespace Anxs
+
 } // namespace Mantid::DataHandling::ANSTO
