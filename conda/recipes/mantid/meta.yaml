@@ -43,6 +43,7 @@ requirements:
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
+    - libxml2 {{ libxml2 }}
     - muparser
     - nexus
     - numpy {{ numpy }}

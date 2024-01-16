@@ -21,6 +21,11 @@ python:
 boost:
   - 1.78
 
+# Problem resolving mantidqt environment with qt-main 5.15.8 after
+# libxml2 went from 2.10.4-hfdac1af_0  ->  2.12.4-h232c23b_1
+libxml2:
+  - <2.11
+
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
   - 1.22.*
