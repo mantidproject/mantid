@@ -188,7 +188,7 @@ void SolidAngle::init() {
 
   auto greaterThanTwo = std::make_shared<BoundedValidator<int>>();
   greaterThanTwo->setLower(3);
-  declareProperty("NumberOfCylinderSlices", 11, greaterThanTwo,
+  declareProperty("NumberOfCylinderSlices", 10, greaterThanTwo,
                   "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
                   "angle of a tube detector.");
 }

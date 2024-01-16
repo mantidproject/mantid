@@ -63,8 +63,8 @@ Output:
 
 .. testoutput:: solidAngle
 
-    Solid angle of Spectra 1 in Bank 1: 6.27e-08
-    Solid angle of Spectra 101 in Bank 2: 1.57e-08
+    Solid angle of Spectra 1 in Bank 1: 6.40e-08
+    Solid angle of Spectra 101 in Bank 2: 1.60e-08
 
 **Example: BIOSANS**
 

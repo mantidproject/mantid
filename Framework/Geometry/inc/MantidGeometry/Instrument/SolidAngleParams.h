@@ -15,7 +15,7 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SolidAngleParams {
 public:
-  SolidAngleParams(Kernel::V3D observer, int numberOfCylinderSlices = 11)
+  SolidAngleParams(Kernel::V3D observer, int numberOfCylinderSlices = 10)
       : m_observer(std::move(observer)), m_numberOfCylinderSlices(numberOfCylinderSlices) {}
   inline const Kernel::V3D &observer() const { return m_observer; }
   inline int cylinderSlices() const { return m_numberOfCylinderSlices; }
