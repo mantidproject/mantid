@@ -187,6 +187,10 @@ class PythonFileInterpreter(QWidget):
             self.find_replace_dialog.close()
         super(PythonFileInterpreter, self).closeEvent(event)
 
+    def close(self):
+        self.abort()
+        super(PythonFileInterpreter, self).close()
+
     def show_find_replace_dialog(self):
         if self.find_replace_dialog is None:
             self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
