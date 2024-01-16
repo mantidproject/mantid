@@ -585,7 +585,7 @@ class RunTabPresenter(PresenterCommon):
         # Update save options in case they've updated in the model
         save_opts = self._run_tab_model.get_save_types()
         self._view.save_types = save_opts
-        self._check_if_saveCanSAS1D_is_usable()
+        self._check_if_SaveCanSAS1D_is_usable()
 
     def _validate_output_modes(self):
         """
@@ -619,7 +619,7 @@ class RunTabPresenter(PresenterCommon):
             self._view.disable_file_type_buttons()
         else:
             self._view.enable_file_type_buttons()
-            self._check_if_saveCanSAS1D_is_usable()
+            self._check_if_SaveCanSAS1D_is_usable()
 
     def on_process_all_clicked(self):
         """
