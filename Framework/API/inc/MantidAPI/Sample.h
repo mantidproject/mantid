@@ -87,9 +87,9 @@ public:
   bool hasOrientedLattice() const;
 
   void addOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice);
-  void setOrientedLattices(std::unique_ptr<std::vector<Geometry::OrientedLattice>> lattices);
-  std::vector<Geometry::OrientedLattice> &getOrientedLattices();
-  const std::vector<Geometry::OrientedLattice> &getOrientedLattices() const;
+  void setOrientedLattices(std::vector<std::shared_ptr<Geometry::OrientedLattice>> lattices);
+  std::vector<std::shared_ptr<Geometry::OrientedLattice>> &getOrientedLattices();
+  const std::vector<std::shared_ptr<Geometry::OrientedLattice>> &getOrientedLattices() const;
   //@}
 
   /** @name Access the sample's crystal structure */
@@ -134,8 +134,8 @@ private:
   Geometry::IObject_sptr m_shape;
   /// An owned pointer to the SampleEnvironment object
   std::shared_ptr<Geometry::SampleEnvironment> m_environment;
-  /// Pointer to the OrientedLattice of the sample, NULL if not set.
-  std::unique_ptr<std::vector<Geometry::OrientedLattice>> m_lattices;
+  /// Vector of oriented lattices
+  std::vector<std::shared_ptr<Geometry::OrientedLattice>> m_lattices;
 
   /// CrystalStructure of the sample
   std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;

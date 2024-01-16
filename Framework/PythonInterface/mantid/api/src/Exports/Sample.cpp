@@ -37,7 +37,7 @@ void export_Sample() {
       .def("getOrientedLattice", (const OrientedLattice &(Sample::*)() const) & Sample::getOrientedLattice, arg("self"),
            return_value_policy<reference_existing_object>(), "Get the first oriented lattice for this sample")
       .def("getOrientedLattices",
-           (const std::vector<OrientedLattice> &(Sample::*)() const) & Sample::getOrientedLattices,
+           (const std::vector<std::shared_ptr<OrientedLattice>> &(Sample::*)() const) & Sample::getOrientedLattices,
            return_value_policy<reference_existing_object>(), "Get the oriented lattices for this sample")
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
