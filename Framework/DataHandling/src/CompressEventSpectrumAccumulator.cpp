@@ -65,12 +65,10 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
 
   // loop over bins and create events when appropriate
   const auto NUM_BINS = this->numberHistBins();
-  double total_weight = 0.;
   for (size_t i = 0; i < NUM_BINS; ++i) {
     const auto counts = m_count[i];
     if (counts > 0) {
       const double weight = static_cast<double>(counts);
-      total_weight += weight;
       const double tof = static_cast<double>(m_tof[i]) / weight;
       raw_events->emplace_back(tof, weight, weight);
     }
