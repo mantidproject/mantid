@@ -83,7 +83,6 @@ public:
 
     m_dataTable.reset();
     m_fitPropertyBrowser.reset();
-    // delete m_fitPropertyBrowser;
   }
 
   void test_that_the_presenter_and_mock_objects_have_been_created() {
