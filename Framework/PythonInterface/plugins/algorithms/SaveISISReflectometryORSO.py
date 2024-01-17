@@ -328,10 +328,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if ws.getHistory().empty():
             return None
 
-        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=ws)
+        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=ws, ExcludeHeader=True)
         alg.execute()
         script = alg.getPropertyValue("ScriptText")
-        return "\n".join(script.split("\n")[6:])  # trim the header and import
+        return "\n".join(script.split("\n")[2:])  # trim the import statement
 
     def _get_reduction_alg_history(self, ws):
         """

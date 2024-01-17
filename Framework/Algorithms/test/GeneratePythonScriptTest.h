@@ -126,6 +126,34 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
+  void test_exclude_header() {
+    // Create test workspace
+    const std::string workspaceName = "testGeneratePython";
+    create_test_workspace(workspaceName);
+
+    // We expect the header and import to be excluded from the final script
+    const std::string expected_result =
+        "from mantid.simpleapi import *\n\n"
+        "CreateWorkspace(OutputWorkspace=\'testGeneratePython\', DataX=\'1,2,3,5,6\', DataY=\'7,9,16,4,3\', "
+        "DataE=\'2,3,4,2,1\', WorkspaceTitle=\'Test Workspace\')\nCropWorkspace(InputWorkspace=\'testGeneratePython\', "
+        "OutputWorkspace=\'testGeneratePython\', XMin=2, XMax=5)\nPower(InputWorkspace=\'testGeneratePython\', "
+        "OutputWorkspace=\'testGeneratePython\', Exponent=1.5)\nNonExistingAlgorithm()";
+
+    // Set up and execute the algorithm.
+    GeneratePythonScript alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ExcludeHeader", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(alg.getPropertyValue("ScriptText"), expected_result);
+
+    // Clean the ADS
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
   void create_test_workspace(const std::string &wsName) {
     Mantid::Algorithms::CreateWorkspace creator;
     Mantid::Algorithms::CropWorkspace cropper;
