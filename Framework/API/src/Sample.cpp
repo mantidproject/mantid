@@ -41,9 +41,8 @@ Sample::Sample(const Sample &copy)
       m_width(copy.m_width) {
   if (copy.hasCrystalStructure()) {
     m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>();
-    for (const auto &lattice : copy.m_lattices) {
-      m_lattices.push_back(std::make_shared<Geometry::OrientedLattice>(*lattice));
-    }
+    std::transform(copy.m_lattices.begin(), copy.m_lattices.end(), std::back_inserter(m_lattices),
+                   [](const auto &lattice) { return std::make_shared<Geometry::OrientedLattice>(*lattice); });
     m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(copy.getCrystalStructure());
   }
 }
@@ -68,9 +67,8 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_height = rhs.m_height;
   m_width = rhs.m_width;
   m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>();
-  for (const auto &lattice : rhs.m_lattices) {
-    m_lattices.push_back(std::make_shared<Geometry::OrientedLattice>(*lattice));
-  }
+  std::transform(rhs.m_lattices.begin(), rhs.m_lattices.end(), std::back_inserter(m_lattices),
+                 [](const auto &lattice) { return std::make_shared<Geometry::OrientedLattice>(*lattice); });
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
