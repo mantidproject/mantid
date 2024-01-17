@@ -83,6 +83,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CG3_13118.nxs.h5"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("XCenter", wavelength))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("XWidth", wavelength_spread))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTOFMin", "-20000"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTOFMax", "20000"))
     TS_ASSERT(alg.execute());
 
     Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -139,7 +141,7 @@ public:
     TS_ASSERT(compare->getProperty("Result"));
   }
 
-  void test_HB2C() {
+  void test_BSS() {
     // compare loading with LoadEventAsWorkspace2D to LoadEventNexus+Integration
 
     // load with LoadEventAsWorkspace2D
@@ -148,11 +150,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "HB2C_475936.nxs.h5"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "BSS_11841_event.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XCenter", "1.54"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XWidth", "0.1"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTOFMin", "0"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTOFMax", "1000000"))
     TS_ASSERT(alg.execute());
 
     Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -162,7 +162,7 @@ public:
     auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
     load->initialize();
     load->setChild(true);
-    load->setProperty("Filename", "HB2C_475936.nxs.h5");
+    load->setProperty("Filename", "BSS_11841_event.nxs");
     load->execute();
     Mantid::API::Workspace_sptr outputWS2 = load->getProperty("OutputWorkspace");
     TS_ASSERT(outputWS2);
@@ -171,6 +171,7 @@ public:
     integrate->initialize();
     integrate->setChild(true);
     integrate->setProperty("InputWorkspace", outputWS2);
+    integrate->setProperty("RangeLower", 0.0);
     integrate->execute();
 
     Mantid::API::MatrixWorkspace_sptr outputWS3 = integrate->getProperty("OutputWorkspace");

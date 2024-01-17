@@ -59,12 +59,12 @@ void LoadEventAsWorkspace2D::init() {
   this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
                         "The name of the Event NeXus file to read, including its full or "
                         "relative path. ");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMin", -20000., Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
                   "To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the minimum accepted value in microseconds. Keep "
                   "blank to load all events.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMax", 20000, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
                   "To exclude events that do not fall within a range "
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
@@ -107,9 +107,17 @@ std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
         "LogBlockList and LogAllowList are mutually exclusive. Please only enter values for one of these fields.";
   }
 
-  if (getPropertyValue("FilterByTofMin") >= getPropertyValue("FilterByTofMax")) {
-    results["FilterByTofMin"] = "FilterByTofMin must be less than FilterByTofMax";
-    results["FilterByTofMax"] = "FilterByTofMax must be greater than FilterByTofMin";
+  const double tofMin = getProperty("FilterByTofMin");
+  const double tofMax = getProperty("FilterByTofMax");
+
+  if (tofMin != EMPTY_DBL() && tofMax != EMPTY_DBL()) {
+    if (tofMin == EMPTY_DBL() || tofMax == EMPTY_DBL()) {
+      results["FilterByTofMin"] = "You must specify both min & max or neither TOF filters";
+      results["FilterByTofMax"] = "You must specify both min & max or neither TOF filters";
+    } else if (tofMin >= tofMax) {
+      results["FilterByTofMin"] = "FilterByTofMin must be less than FilterByTofMax";
+      results["FilterByTofMax"] = "FilterByTofMax must be greater than FilterByTofMin";
+    }
   }
 
   return results;
@@ -122,7 +130,6 @@ void LoadEventAsWorkspace2D::exec() {
 
   // temporary workspace to load instrument and metadata
   MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
   // Load the logs
   int nPeriods = 1;                                                               // Unused
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
@@ -157,10 +164,20 @@ void LoadEventAsWorkspace2D::exec() {
 
   // now load the data
   const auto id_to_wi = outWS->getDetectorIDToWorkspaceIndexMap();
+  detid_t min_detid = std::numeric_limits<detid_t>::max();
+  detid_t max_detid = std::numeric_limits<detid_t>::min();
+
+  for (const auto &entry : id_to_wi) {
+    min_detid = std::min(min_detid, entry.first);
+    max_detid = std::max(max_detid, entry.first);
+  }
+
   const double tof_min = getProperty("FilterByTofMin");
   const double tof_max = getProperty("FilterByTofMax");
+  const bool tof_filtering = (tof_min != EMPTY_DBL() && tof_max != EMPTY_DBL());
 
-  std::vector<uint32_t> Y(numHist, 0);
+  // vector to stored to integrated counts by detector ID
+  std::vector<uint32_t> Y(max_detid + 1, 0);
 
   ::NeXus::File h5file(filename);
 
@@ -188,20 +205,33 @@ void LoadEventAsWorkspace2D::exec() {
           continue;
         h5file.openGroup(entry_name, "NXevent_data");
 
-        const auto event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_id");
-        const auto event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_offset");
+        std::vector<uint32_t> event_ids;
+
+        if (descriptor.isEntry("/entry/" + entry_name + "/event_id", "SDS"))
+          event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_id");
+        else
+          event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
+
+        std::vector<float> event_times;
+        if (tof_filtering) {
+          if (descriptor.isEntry("/entry/" + entry_name + "/event_time_offset", "SDS"))
+            event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_offset");
+          else
+            event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
+        }
 
         for (size_t i = 0; i < event_ids.size(); i++) {
-          auto det_id = event_ids[i];
-          auto wi = id_to_wi.find(det_id);
-          if (wi == id_to_wi.end())
+          if (tof_filtering) {
+            const auto tof = event_times[i];
+            if (tof < tof_min || tof > tof_max)
+              continue;
+          }
+
+          const detid_t det_id = event_ids[i];
+          if (det_id < min_detid || det_id > max_detid)
             continue;
 
-          const auto tof = event_times[i];
-          if (tof < tof_min || tof > tof_max)
-            continue;
-
-          Y[wi->second]++;
+          Y[det_id]++;
         }
 
         h5file.closeGroup();
@@ -226,10 +256,13 @@ void LoadEventAsWorkspace2D::exec() {
 
   // set the data on the workspace
   auto histX = Mantid::Kernel::make_cow<HistogramX>(xBins);
-  for (size_t idx = 0; idx < numHist; idx++) {
-    outWS->mutableY(idx) = Y[idx];
-    outWS->mutableE(idx) = sqrt(Y[idx]);
-    outWS->setSharedX(idx, histX);
+  for (detid_t detid = min_detid; detid <= max_detid; detid++) {
+    auto wi = id_to_wi.find(detid);
+    if (wi == id_to_wi.end())
+      continue;
+    outWS->mutableY(wi->second) = Y[detid];
+    outWS->mutableE(wi->second) = sqrt(Y[detid]);
+    outWS->setSharedX(wi->second, histX);
   }
 
   // set units
