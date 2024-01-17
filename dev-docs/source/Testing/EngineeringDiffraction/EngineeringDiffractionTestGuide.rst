@@ -87,8 +87,19 @@ Focus
     :width: 900px
 
 6. Check that in your save location there is a Focus folder containing the following files:
-   - `ENGINX_305761_307521_bank_1_dSpacing.nxs`, `ENGINX_305761_307521_bank_2_dSpacing.nxs`, `ENGINX_305761_307521_bank_1_TOF.nxs` and `ENGINX_305761_307521_bank_2_TOF.nxs` (i.e. two files, for the xunits TOF and d-Spacing, per spectrum)
-   - `ENGINX_305761_307521_all_banks.gss` and `ENGINX_305761_307521_all_banks.abc` (i.e. two ASCII files per run - each file contains all the spectra for a focused run).
+
+    - ENGINX_305738_305721_all_banks_dSpacing.abc
+    - ENGINX_305738_305721_all_banks_dSpacing.gss
+    - ENGINX_305738_305721_all_banks_TOF.abc
+    - ENGINX_305738_305721_all_banks_TOF.gss
+    - ENGINX_305738_305721_bank_1_dSpacing.nxs
+    - ENGINX_305738_305721_bank_1_TOF.nxs
+    - ENGINX_305738_305721_bank_2_dSpacing.abc
+    - ENGINX_305738_305721_bank_2_dSpacing.gss
+    - ENGINX_305738_305721_bank_2_dSpacing.nxs
+    - ENGINX_305738_305721_bank_2_TOF.abc
+    - ENGINX_305738_305721_bank_2_TOF.gss
+    - ENGINX_305738_305721_bank_2_TOF.nxs
 
 Test 2
 ^^^^^^
@@ -124,7 +135,7 @@ This test covers the Cropping functionality in the Calibration tab.
 8. Set the ``Region Of Interest`` to ``Crop to Spectra`` and using ``Custom Spectra`` ``1200-2400`` (these spectrum numbers correspond to the South Bank).
    Please note that some custom spectra values may cause the algorithms to fail. Click ``Calibrate`` and a similar plot to before should appear but with only 2 subplots.
 
-9. Set the ``Region of Interest`` to ``Texture (20 spec)`` - there should be 20 spectra per run (5 tiled plot windows, 4 spectra per window).
+9. Set the ``Region of Interest`` to ``Texture (20 spec)`` and click ``Calibrate`` - there should be 20 spectra per run (5 tiled plot windows, 4 spectra per window).
 
 
 Test 4
@@ -137,7 +148,10 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 1. In the fitting tab, load multiple of these newly focused TOF .nxs files in the `Load Focused Data` section. The path to the focused files should be auto populated
 
-2. Click the `Load` button. A row should be added to the UI table for each focused run.There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI). Each row in these tables should correspond to the equivalent row in the UI table. There should be an additional table called `run_info` that provides some of the metadata for each run.
+2. Click the `Load` button. A row should be added to the UI table for each focused run.
+   There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI).
+   There should be an additional table called `run_info` that provides some of the metadata for each run.
+   Each row in these tables should correspond to the equivalent row in the UI table.
 
 3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
    Reopen settings to check these selected sample logs have been remembered. Note that any change to the selected logs won't take effect until the interface is reopened.
@@ -178,7 +192,7 @@ Test 7
 
 This tests that the background subtraction works.
 
-1. Load in a run - the `Subtract BG` box should be checked in the UI table by default. This should generate a workspace with suffix `_bgsug` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
+1. Load in a run - the `Subtract BG` box should be checked in the UI table by default. This should generate a workspace with suffix `_bgsub` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
 
 2. Select the row in the table and check the `Inspect Background` button should now be enabled regardless of whether the `Subtract BG` box is checked.
 
