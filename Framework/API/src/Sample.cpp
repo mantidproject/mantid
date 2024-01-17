@@ -36,10 +36,14 @@ Sample::Sample()
  *  @param copy :: const reference to the sample object
  */
 Sample::Sample(const Sample &copy)
-    : m_name(copy.m_name), m_shape(copy.m_shape), m_environment(copy.m_environment), m_lattices(copy.m_lattices),
-      m_crystalStructure(), m_samples(copy.m_samples), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
-      m_height(copy.m_height), m_width(copy.m_width) {
+    : m_name(copy.m_name), m_shape(copy.m_shape), m_environment(copy.m_environment), m_lattices(), m_crystalStructure(),
+      m_samples(copy.m_samples), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
+      m_width(copy.m_width) {
   if (copy.hasCrystalStructure()) {
+    m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>();
+    for (const auto &lattice : copy.m_lattices) {
+      m_lattices.push_back(std::make_shared<Geometry::OrientedLattice>(*lattice));
+    }
     m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(copy.getCrystalStructure());
   }
 }
@@ -63,7 +67,10 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>(rhs.m_lattices);
+  m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>();
+  for (const auto &lattice : rhs.m_lattices) {
+    m_lattices.push_back(std::make_shared<Geometry::OrientedLattice>(*lattice));
+  }
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -168,6 +175,7 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param lattice :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
+  m_lattices.clear();
   if (lattice) {
     m_lattices.push_back(std::move(lattice));
   }
