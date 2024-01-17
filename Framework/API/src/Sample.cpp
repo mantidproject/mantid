@@ -179,11 +179,9 @@ void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> latti
 bool Sample::hasOrientedLattice() const { return !(m_lattices.empty()); }
 
 void Sample::addOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
-  if (!lattice) {
-    throw std::runtime_error("Sample::addOrientedLattice - The provided lattice pointer is nullptr.");
+  if (lattice) {
+    m_lattices.push_back(std::move(lattice));
   }
-
-  m_lattices.push_back(std::move(lattice));
 }
 
 void Sample::setOrientedLattices(std::vector<std::shared_ptr<Geometry::OrientedLattice>> lattices) {
