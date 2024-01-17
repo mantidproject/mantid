@@ -518,22 +518,23 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::stri
   try {
     if (m_isModulatedStructure) {
       auto findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
+      findUB->setPropertyValue("Tolerance", "0.05");
       findUB->setPropertyValue("ToleranceForSatellite", "0.05");
       findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", outWS);
       findUB->executeAsChildAlg();
 
-      if (outWS->mutableSample().hasOrientedLattice()) {
-        OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
-        auto &peaks = outWS->getPeaks();
-        for (auto &peak : peaks) {
+      // if (outWS->mutableSample().hasOrientedLattice()) {
+      //   OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
+      //   auto &peaks = outWS->getPeaks();
+      //   for (auto &peak : peaks) {
 
-          V3D hkl = peak.getHKL();
-          V3D mnp = peak.getIntMNP();
-          for (int i = 0; i <= 2; i++)
-            hkl += o_lattice.getModVec(i) * mnp[i];
-          peak.setHKL(hkl);
-        }
-      }
+      //     V3D hkl = peak.getHKL();
+      //     V3D mnp = peak.getIntMNP();
+      //     for (int i = 0; i <= 2; i++)
+      //       hkl += o_lattice.getModVec(i) * mnp[i];
+      //     peak.setHKL(hkl);
+      //   }
+      // }
     }
   } catch (std::runtime_error &e) {
     g_log.warning() << "Could not recalculate modulated UB\n";
