@@ -34,6 +34,10 @@ class LoadWANDSCDTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 5)
         ref_err = 0.0157660
         self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), ref_err, 5)
+        np.testing.assert_allclose(
+            LoadWANDTest_ws.getExperimentInfo(0).run().getProperty("s1").value,
+            LoadWANDTest_ws.getExperimentInfo(0).run().getProperty("HB2C:Mot:s1").value,
+        )
 
         LoadWANDTest_ws.delete()
         van.delete()

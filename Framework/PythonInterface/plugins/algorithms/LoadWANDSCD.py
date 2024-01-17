@@ -320,6 +320,8 @@ class LoadWANDSCD(PythonAlgorithm):
 
         add_time_series_property("s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
         outWS.getExperimentInfo(0).run().getProperty("s1").units = "deg"
+        add_time_series_property("HB2C:Mot:s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
+        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:s1").units = "deg"
         add_time_series_property("duration", outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
         outWS.getExperimentInfo(0).run().getProperty("duration").units = "second"
         outWS.getExperimentInfo(0).run().addProperty("run_number", run_number_array, True)
