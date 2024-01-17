@@ -134,6 +134,17 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             QApplication.instance().processEvents()
             self.assertEqual(0, len(widget.files_changed_unhandled), "Saving the file should not generate events")
 
+    def test_open_file_in_new_tab_with_utf8_content(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "utf8_characters")
+            with open(filename, "w", encoding="utf_8") as f:
+                f.write("输出坐标系")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                # Test that we can open a utf-8 file with no exceptions
+                widget.open_file_in_new_tab(filename)
+            self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
+
 
 if __name__ == "__main__":
     unittest.main()
