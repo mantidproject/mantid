@@ -362,8 +362,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:302
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:668
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:701
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScatterer.h:71
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:364
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:373
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:362
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:371
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:209
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:91
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:151

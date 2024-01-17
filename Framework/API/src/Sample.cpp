@@ -168,11 +168,9 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param lattice :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) {
-  if (!lattice) {
-    throw std::runtime_error("Sample::setOrientedLattice - The provided lattice pointer is nullptr.");
+  if (lattice) {
+    m_lattices.push_back(std::move(lattice));
   }
-
-  m_lattices = std::vector<std::shared_ptr<Geometry::OrientedLattice>>{std::move(lattice)};
 }
 
 /** @return true if the sample has an OrientedLattice  */
