@@ -162,7 +162,7 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/EQ
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:639
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:677
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:273
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:71
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:81
