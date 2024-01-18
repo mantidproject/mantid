@@ -12,6 +12,7 @@
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
+#include "IndirectFitPropertyBrowser.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -76,6 +77,8 @@ public:
     UNUSED_ARG(dataIndex);
     UNUSED_ARG(single);
   };
+
+  virtual void subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
   void handleAddData(IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;

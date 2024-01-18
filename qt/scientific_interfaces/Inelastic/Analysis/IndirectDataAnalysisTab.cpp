@@ -85,6 +85,10 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
 
+void IndirectDataAnalysisTab::subscribeFitBrowserToDataPresenter() {
+  m_dataPresenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser);
+}
+
 void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<IndirectFitOutputOptionsModel>();
   m_outOptionsPresenter =

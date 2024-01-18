@@ -60,6 +60,7 @@ public:
   void setParameterValueQuietly(std::string const &parameterName, double parameterValue, double parameterError);
   void setDataType(std::vector<std::string> const &allowedFunctionsList);
   void setEnumValue(int enumIndex);
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
 protected slots:
   void enumChanged(QtProperty *) override;
