@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
@@ -20,6 +21,7 @@
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 bool doesExistInADS(std::string const &workspaceName) {

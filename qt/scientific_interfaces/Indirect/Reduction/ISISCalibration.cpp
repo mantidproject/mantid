@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
-
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -19,6 +19,7 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");

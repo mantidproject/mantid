@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
@@ -14,6 +15,8 @@
 #include <QFileInfo>
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISDiagnostics");
