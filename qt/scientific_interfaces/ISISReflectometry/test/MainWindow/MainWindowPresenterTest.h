@@ -32,6 +32,7 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::Throw;
 
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
@@ -427,6 +428,22 @@ public:
     verifyAndClear();
   }
 
+  void testSaveBatchToInvalidPath() {
+    auto presenter = makePresenter();
+    auto const batchIndex = 1;
+    expectBatchIsNotSavedToInvalidFile(batchIndex);
+    presenter.notifySaveBatchRequested(batchIndex);
+    verifyAndClear();
+  }
+
+  void testSaveBatchHandlesFailedSave() {
+    auto presenter = makePresenter();
+    auto const batchIndex = 1;
+    expectBatchIsNotSavedWhenSaveFails(batchIndex);
+    presenter.notifySaveBatchRequested(batchIndex);
+    verifyAndClear();
+  }
+
   void testLoadBatch() {
     auto presenter = makePresenter();
     auto const batchIndex = 1;
@@ -658,6 +675,36 @@ private:
     EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
     EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false)).Times(1).WillOnce(Return(map));
     EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map)).Times(1);
+  }
+
+  void expectBatchIsNotSavedToInvalidFile(int batchIndex) {
+    auto const filename = std::string("/test.json");
+    auto const map = QMap<QString, QVariant>();
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false)).Times(1).WillOnce(Return(map));
+    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map))
+        .Times(1)
+        .WillOnce(Throw(std::invalid_argument("Test error")));
+    EXPECT_CALL(
+        m_messageHandler,
+        giveUserCritical(
+            "Invalid path provided. Check you have the correct permissions for this save location. \nTest error",
+            "Save Batch"))
+        .Times(1);
+  }
+
+  void expectBatchIsNotSavedWhenSaveFails(int batchIndex) {
+    auto const filename = std::string("/test.json");
+    auto const map = QMap<QString, QVariant>();
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false)).Times(1).WillOnce(Return(map));
+    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map))
+        .Times(1)
+        .WillOnce(Throw(std::runtime_error("Test error, save failed.")));
+    EXPECT_CALL(
+        m_messageHandler,
+        giveUserCritical("An error occurred while saving. Please try again. \nTest error, save failed.", "Save Batch"))
+        .Times(1);
   }
 
   void expectBatchIsLoadedFromFile(int batchIndex) {
