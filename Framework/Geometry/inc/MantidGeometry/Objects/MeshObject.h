@@ -86,9 +86,9 @@ public:
   double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
-  double solidAngle(const Kernel::V3D &observer) const override;
+  double solidAngle(const SolidAngleParams &params) const override;
   // Solid angle with a scaling of the object
-  double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const override;
+  double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const override;
 
   /// Calculates the volume of this object.
   double volume() const override;

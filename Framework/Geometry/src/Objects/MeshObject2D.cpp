@@ -301,14 +301,14 @@ int MeshObject2D::getName() const {
  * another. In that case there would still be a solid angle contribution as
  * there is no way of detecting the shadowing.
  *
- * @param observer
+ * @param params
  * @return
  */
-double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
+double MeshObject2D::solidAngle(const SolidAngleParams &params) const {
   double solidAngleSum(0);
   Kernel::V3D vertex1, vertex2, vertex3;
   for (size_t i = 0; getTriangle(i, m_triangles, m_vertices, vertex1, vertex2, vertex3); ++i) {
-    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2, vertex3, params.observer());
     if (sa > 0) {
       solidAngleSum += sa;
     }
@@ -316,13 +316,13 @@ double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
   return solidAngleSum;
 }
 
-double MeshObject2D::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
+double MeshObject2D::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),
                  [&scaleFactor](const auto &vertex) { return vertex * scaleFactor; });
   MeshObject2D meshScaled(m_triangles, scaledVertices, m_material);
-  return meshScaled.solidAngle(observer);
+  return meshScaled.solidAngle(params);
 }
 
 bool MeshObject2D::operator==(const MeshObject2D &other) const {

@@ -1395,27 +1395,71 @@ public:
 
     double satol(1e-8); // tolerance for solid angle
 
+    // First test with the old default (only) number of cylinder slices (10)
+    auto solidAngleParams = SolidAngleParams(V3D(), 10);
+
     // solid angle at point -0.5 from capped cyl -1.0 -0.997 in x, rad 0.005 -
     // approx WISH cylinder
     // We intentionally exclude the cylinder end caps so they this should
     // produce 0
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.5, 0.0, 0.0))), 0.0,
+                    satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-1.497, 0.0, 0.0))), 0.0,
+                    satol);
 
     // Side values
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)), 0.00301186, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)), 0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0, 0, 0.1))), 0.00301186,
+                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0, 0, -0.1))), 0.00301186,
+                    satol);
     // Sweep in the axis of the cylinder angle to see if the solid angle
     // decreases (as we are excluding the end caps)
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)), 0.00100267, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0.1, 0.0, 0.1))),
+                    0.00100267, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)), 4 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.999, 0.0, 0.0))),
+                    4 * M_PI, satol);
 
     // surface points
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)), 2 * M_PI, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)), 2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-1.0, 0.0, 0.0))),
+                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.997, 0.0, 0.0))),
+                    2 * M_PI, satol);
+
+    // Now test with the new default number of cylinder slices
+    solidAngleParams = SolidAngleParams(V3D(), 11);
+
+    // solid angle at point -0.5 from capped cyl -1.0 -0.997 in x, rad 0.005 -
+    // approx WISH cylinder
+    // We intentionally exclude the cylinder end caps so they this should
+    // produce 0
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.5, 0.0, 0.0))), 0.0,
+                    satol);
+    // Other end
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-1.497, 0.0, 0.0))), 0.0,
+                    satol);
+
+    // Side values
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0, 0, 0.1))), 0.00310589,
+                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0, 0, -0.1))),
+                    0.0030629329, satol);
+    // Sweep in the axis of the cylinder angle to see if the solid angle
+    // decreases (as we are excluding the end caps)
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(0.1, 0.0, 0.1))),
+                    0.0010351385, satol);
+
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.999, 0.0, 0.0))),
+                    4 * M_PI, satol);
+
+    // surface points
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-1.0, 0.0, 0.0))),
+                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(solidAngleParams.copyWithNewObserver(V3D(-0.997, 0.0, 0.0))),
+                    2 * M_PI, satol);
   }
 
   void testSolidAngleCubeTriangles()

@@ -44,7 +44,7 @@ public:
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
   double getPhiOffset(const double &offset) const override;
-  double solidAngle(const Kernel::V3D &observer) const override;
+  double solidAngle(const Geometry::SolidAngleParams &params) const override;
   bool isParametrized() const override;
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
