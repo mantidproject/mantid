@@ -56,10 +56,10 @@ void CompressEventBankAccumulator::createWeightedEvents(
   m_spectra_accum[det_index].createWeightedEvents(raw_events);
 }
 
-std::size_t CompressEventBankAccumulator::numberWeightedEvents() const {
-  size_t totalWeightedEvents =
-      std::accumulate(m_spectra_accum.cbegin(), m_spectra_accum.cend(), static_cast<size_t>(0),
-                      [](const auto &current, const auto &value) { return current + value.numberWeightedEvents(); });
+double CompressEventBankAccumulator::totalWeight() const {
+  double totalWeightedEvents =
+      std::accumulate(m_spectra_accum.cbegin(), m_spectra_accum.cend(), 0.,
+                      [](const auto &current, const auto &value) { return current + value.totalWeight(); });
   return totalWeightedEvents;
 }
 

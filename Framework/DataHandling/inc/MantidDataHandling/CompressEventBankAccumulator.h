@@ -28,7 +28,7 @@ public:
                             std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
 
   /// method only intended for testing
-  std::size_t numberWeightedEvents() const;
+  double totalWeight() const;
 
 private:
   // disable default constructor
