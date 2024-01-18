@@ -139,6 +139,16 @@ void LoadEventAsWorkspace2D::exec() {
   if (nPeriods != 1)
     g_log.warning("This algorithm does not correctly handle period data");
 
+  // set center and width parameters, do it before we try to load the data so if the log doesn't exist we fail fast
+  double center = getProperty("XCenter");
+  if (center == EMPTY_DBL())
+    center = WS->run().getStatistics(getPropertyValue("XCenterLog")).mean;
+
+  double width = getProperty("XWidth");
+  if (width == EMPTY_DBL())
+    width = WS->run().getStatistics(getPropertyValue("XWidthLog")).mean;
+  width *= center;
+
   const Kernel::NexusHDF5Descriptor descriptor(filename);
 
   // Load the instrument
@@ -243,15 +253,6 @@ void LoadEventAsWorkspace2D::exec() {
   h5file.close();
 
   // determine x values
-  double center = getProperty("XCenter");
-  if (center == EMPTY_DBL())
-    center = outWS->run().getStatistics(getPropertyValue("XCenterLog")).mean;
-
-  double width = getProperty("XWidth");
-  if (width == EMPTY_DBL())
-    width = outWS->run().getStatistics(getPropertyValue("XWidthLog")).mean;
-  width *= center;
-
   const auto xBins = {center - width / 2, center + width / 2};
 
   // set the data on the workspace
