@@ -44,11 +44,11 @@ const std::string LoadEventAsWorkspace2D::name() const { return "LoadEventAsWork
 int LoadEventAsWorkspace2D::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadEventAsWorkspace2D::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string LoadEventAsWorkspace2D::category() const { return "DataHandling\\Nexus"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadEventAsWorkspace2D::summary() const {
-  return "Load event data, integrating the events during loading";
+  return "Load event data, integrating the events during loading. Also set the X-axis based on log data.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -78,18 +78,16 @@ void LoadEventAsWorkspace2D::init() {
                   "If specified, these logs will NOT be loaded from the file (each "
                   "separated by a space).");
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("XCenterLog", "wavelength", Direction::Input),
-                  "Name of log to take the x-bin center from");
+                  "Name of log to take to use as the X-bin center");
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("XWidthLog", "wavelength_spread", Direction::Input),
-                  "Name of log to take the x-bin width from");
+                  "Name of log to take to use as the X-bin width");
   declareProperty(std::make_unique<PropertyWithValue<double>>("XCenter", EMPTY_DBL(), Direction::Input),
-                  "Value to set x-bin center to which overrides XCenterLog");
+                  "Value to set X-bin center to which overrides XCenterLog");
   declareProperty(std::make_unique<PropertyWithValue<double>>("XWidth", EMPTY_DBL(), Direction::Input),
-                  "Value to set x-bin width to which overrides XWidthLog");
+                  "Value to set X-bin width to which overrides XWidthLog");
   declareProperty("Units", "Wavelength",
                   std::make_shared<StringListValidator>(UnitFactory::Instance().getConvertibleUnits()),
-                  "The name of the units to convert to (must be one of those "
-                  "registered in\n"
-                  "the Unit Factory)");
+                  "The name of the units to convert to (must be one of those registered in the Unit Factory)");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -128,9 +126,12 @@ std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
 void LoadEventAsWorkspace2D::exec() {
   std::string filename = getPropertyValue("Filename");
 
+  auto prog = std::make_unique<Progress>(this, 0.0, 1.0, 6);
+
   // temporary workspace to load instrument and metadata
   MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   // Load the logs
+  prog->doReport("Loading logs");
   int nPeriods = 1;                                                               // Unused
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, WS, *this, false, nPeriods, periodLog,
@@ -149,12 +150,21 @@ void LoadEventAsWorkspace2D::exec() {
     width = WS->run().getStatistics(getPropertyValue("XWidthLog")).mean;
   width *= center;
 
+  if (width == 0.) {
+    std::string errmsg(
+        "Width was calculated to be 0 (XCenter*XWidth). This will result in a invalid bin with zero width");
+    g_log.error(errmsg);
+    throw std::runtime_error(errmsg);
+  }
+
   const Kernel::NexusHDF5Descriptor descriptor(filename);
 
   // Load the instrument
+  prog->doReport("Loading instrument");
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, WS, "entry", this, &descriptor);
 
   // load run metadata
+  prog->doReport("Loading metadata");
   try {
     LoadEventNexus::loadEntryMetadata(filename, WS, "entry", descriptor);
   } catch (std::exception &e) {
@@ -162,6 +172,7 @@ void LoadEventAsWorkspace2D::exec() {
   }
 
   // create IndexInfo
+  prog->doReport("Creating IndexInfo");
   const std::vector<int32_t> range;
   LoadEventNexusIndexSetup indexSetup(WS, EMPTY_INT(), EMPTY_INT(), range);
   auto indexInfo = indexSetup.makeIndexInfo();
@@ -197,6 +208,8 @@ void LoadEventAsWorkspace2D::exec() {
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
 
+  prog->doReport("Reading and integrating data");
+
   auto itClassEntries = allEntries.find("NXevent_data");
 
   if (itClassEntries != allEntries.end()) {
@@ -213,6 +226,8 @@ void LoadEventAsWorkspace2D::exec() {
         // skip entries with junk data
         if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
           continue;
+
+        g_log.debug() << "Loading bank " << entry_name << '\n';
         h5file.openGroup(entry_name, "NXevent_data");
 
         std::vector<uint32_t> event_ids;
@@ -255,6 +270,7 @@ void LoadEventAsWorkspace2D::exec() {
   // determine x values
   const auto xBins = {center - width / 2, center + width / 2};
 
+  prog->doReport("Setting data to workspace");
   // set the data on the workspace
   auto histX = Mantid::Kernel::make_cow<HistogramX>(xBins);
   for (detid_t detid = min_detid; detid <= max_detid; detid++) {
