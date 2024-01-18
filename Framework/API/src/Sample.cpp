@@ -415,7 +415,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     if (num_oriented_lattice > 0) {
       std::unique_ptr<Geometry::OrientedLattice> lattice = std::make_unique<Geometry::OrientedLattice>();
       lattice->loadNexus(file, "oriented_lattice");
-      setOrientedLattice(move(lattice));
+      setOrientedLattice(std::move(lattice));
     }
   }
 
