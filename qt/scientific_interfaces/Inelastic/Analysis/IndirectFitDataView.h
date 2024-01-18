@@ -33,7 +33,7 @@ public:
   void subscribePresenter(IIndirectFitDataPresenter *presenter) override;
 
   QTableWidget *getDataTable() const override;
-  bool isTableEmpty() const;
+  bool isTableEmpty() const override;
 
   UserInputValidator &validate(UserInputValidator &validator) override;
   virtual void addTableEntry(size_t row, FitDataRow newRow) override;
@@ -42,6 +42,7 @@ public:
   void clearTable() override;
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
+  bool dataColumnContainsText(std::string const &columnText) const override;
 
   void setSampleWSSuffices(const QStringList &suffices) override;
   void setSampleFBSuffices(const QStringList &suffices) override;

@@ -34,6 +34,7 @@ public:
   virtual void subscribePresenter(IIndirectFitDataPresenter *presenter) = 0;
 
   virtual QTableWidget *getDataTable() const = 0;
+  virtual bool isTableEmpty() const = 0;
 
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
   virtual void addTableEntry(size_t row, FitDataRow newRow) = 0;
@@ -42,6 +43,7 @@ public:
   virtual void clearTable() = 0;
   virtual QString getText(int row, int column) const = 0;
   virtual QModelIndexList getSelectedIndexes() const = 0;
+  virtual bool dataColumnContainsText(std::string const &columnText) const = 0;
 
   virtual void setSampleWSSuffices(const QStringList &suffices) = 0;
   virtual void setSampleFBSuffices(const QStringList &suffices) = 0;

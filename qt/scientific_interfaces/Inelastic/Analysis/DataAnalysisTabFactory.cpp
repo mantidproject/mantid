@@ -65,6 +65,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) c
   tab->setupFitDataView<FqFitDataView>();
   tab->setupOutputOptionsPresenter();
   tab->setUpFitDataPresenter<FqFitDataPresenter>();
+  tab->subscribeFitBrowserToDataPresenter();
   tab->setupPlotView(FqFit::X_BOUNDS);
   return tab;
 }

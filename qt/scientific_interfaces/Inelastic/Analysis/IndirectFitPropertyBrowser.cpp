@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
 #include "FitStatusWidget.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -255,6 +256,14 @@ void IndirectFitPropertyBrowser::updateParameters(const IFunction &fun) {
     m_functionBrowser->updateParameters(fun);
   else
     m_templateBrowser->updateParameters(fun);
+}
+
+void IndirectFitPropertyBrowser::updateFunctionListInBrowser(
+    const std::map<std::string, std::string> &functionStrings) {
+  auto singleFuncTemplate = dynamic_cast<SingleFunctionTemplateBrowser *>(m_templateBrowser);
+  if (singleFuncTemplate) {
+    singleFuncTemplate->updateAvailableFunctions(functionStrings);
+  }
 }
 
 void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const IFunction &fun) {

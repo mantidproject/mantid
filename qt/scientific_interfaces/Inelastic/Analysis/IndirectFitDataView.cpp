@@ -179,6 +179,10 @@ void IndirectFitDataView::setCell(std::unique_ptr<QTableWidgetItem> cell, size_t
   m_uiForm->tbFitData->setItem(static_cast<int>(row), static_cast<int>(column), cell.release());
 }
 
+bool IndirectFitDataView::dataColumnContainsText(std::string const &columnText) const {
+  return !m_uiForm->tbFitData->findItems(QString::fromStdString(columnText), Qt::MatchContains).isEmpty();
+}
+
 QString IndirectFitDataView::getText(int row, int column) const {
   return m_uiForm->tbFitData->item(static_cast<int>(row), column)->text();
 }
