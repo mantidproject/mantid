@@ -389,6 +389,8 @@ class MultiPythonFileInterpreter(QWidget):
     def save_current_file(self):
         self.current_editor().save(force_save=True)
         filename = self.current_editor().filename
+        if not filename:
+            return
         self.add_file_to_watcher(filename)
         self.files_that_we_have_changed[filename] = osp.getmtime(filename)
 

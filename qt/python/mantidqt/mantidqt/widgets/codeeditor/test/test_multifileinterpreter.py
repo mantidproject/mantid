@@ -134,6 +134,14 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             QApplication.instance().processEvents()
             self.assertEqual(0, len(widget.files_changed_unhandled), "Saving the file should not generate events")
 
+    def test_cancelled_save_does_not_add_file_to_watcher(self):
+        widget = MultiPythonFileInterpreter()
+        widget.current_editor = mock.MagicMock(autospec=True)
+        widget.current_editor().filename = ""
+        widget.save_current_file()
+        self.assertEqual(0, len(widget.file_watcher.files()), "File watcher should be empty")
+        self.assertEqual(0, len(widget.files_that_we_have_changed), "We haven't changed any files so this should be empty")
+
 
 if __name__ == "__main__":
     unittest.main()
