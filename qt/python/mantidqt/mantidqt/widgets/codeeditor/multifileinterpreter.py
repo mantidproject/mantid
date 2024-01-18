@@ -338,7 +338,7 @@ class MultiPythonFileInterpreter(QWidget):
         :param filepath: A path to an existing file
         :param startup: Flag for if function is being called on startup
         """
-        with open(filepath, "r") as code_file:
+        with open(filepath, "r", encoding="utf_8") as code_file:
             content = code_file.read()
 
         matching_index = self.find_matching_tab(filepath)
@@ -368,7 +368,7 @@ class MultiPythonFileInterpreter(QWidget):
             self.open_file_in_new_tab(file)
             return
 
-        with open(file, "r") as code_file:
+        with open(file, "r", encoding="utf_8") as code_file:
             content = code_file.read()
 
         editor = self.editor_at(matching_tab_index)
