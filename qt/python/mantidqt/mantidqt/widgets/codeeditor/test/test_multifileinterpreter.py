@@ -143,7 +143,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
                 # Test that we can open a utf-8 file with no exceptions
                 widget.open_file_in_new_tab(filename)
-            self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file"
+            self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
 
     def test_cancelled_save_does_not_add_file_to_watcher(self):
         widget = MultiPythonFileInterpreter()
