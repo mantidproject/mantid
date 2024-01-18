@@ -20,18 +20,20 @@ enum class CompressBinningMode { LINEAR, LOGARITHMIC };
  */
 class MANTID_DATAHANDLING_DLL CompressEventSpectrumAccumulator {
 public:
+  // TODO parameter for expected number of events
   CompressEventSpectrumAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
                                    CompressBinningMode bin_mode);
 
   void addEvent(const float tof);
   void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
 
-  std::size_t numberWeightedEvents() const;
   std::size_t numberHistBins() const;
+  double totalWeight() const;
 
 private:
   /// Do not allow constructing
   CompressEventSpectrumAccumulator();
+  void allocateFineHistogram();
 
   // offset is applied after division
   // see EventList::findLinearBin for implementation on what that means
@@ -44,9 +46,14 @@ private:
   /// shared pointer for the histogram bin boundaries
   const std::shared_ptr<std::vector<double>> m_histogram_edges;
   /// sum of all time-of-flight within the bin
-  std::vector<float> m_tof;
+  mutable std::vector<float> m_tof;
   /// sum of all events seen in an individual bin
   std::vector<uint32_t> m_count;
+  /// track
+  bool initialized;
+
+public:
+  size_t numevents; // REMOVE
 };
 
 } // namespace DataHandling

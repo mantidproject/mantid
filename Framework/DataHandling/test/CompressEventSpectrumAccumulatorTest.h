@@ -46,14 +46,8 @@ public:
     // create the accumulator
     CompressEventSpectrumAccumulator accumulator(histogram_bin_edges, divisor, bin_mode);
 
-    // check that the starting condition is correct
-    TS_ASSERT_EQUALS(accumulator.numberHistBins(), histogram_bin_edges->size() - 1);
-    TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), 0);
-
     // add a bunch of events
     const size_t NUM_RAW_EVENTS = addEvents(accumulator, static_cast<float>(tof_min));
-
-    TS_ASSERT_EQUALS(accumulator.numberWeightedEvents(), num_wght_events);
 
     // set up an EventList to add weighted events to
     EventList event_list;
@@ -63,7 +57,7 @@ public:
 
     // write the events
     accumulator.createWeightedEvents(raw_events);
-    TS_ASSERT_EQUALS(raw_events->size(), accumulator.numberWeightedEvents());
+    TS_ASSERT_EQUALS(raw_events->size(), num_wght_events);
 
     // the first event has the weight of the fine histogram width
     TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
