@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CalculatePaalmanPings.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -21,6 +23,8 @@
 #include <QValidator>
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("CalculatePaalmanPings");

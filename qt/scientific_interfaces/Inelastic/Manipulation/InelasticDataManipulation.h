@@ -47,8 +47,6 @@ public:
   /// Run Python-based initialisation commands
   void initLocalPython() override;
 
-  std::vector<std::pair<std::string, std::vector<std::string>>> getInstrumentModes();
-
 signals:
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();

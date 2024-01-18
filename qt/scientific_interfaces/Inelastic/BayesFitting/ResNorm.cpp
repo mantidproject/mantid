@@ -5,8 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -15,6 +16,8 @@
 #include <string>
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ResNorm");

@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationIqtTab.h"
 
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -19,6 +21,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");

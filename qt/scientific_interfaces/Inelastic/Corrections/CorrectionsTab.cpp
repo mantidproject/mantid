@@ -5,12 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CorrectionsTab.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QSettings>
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace MantidQt::CustomInterfaces {
 /**

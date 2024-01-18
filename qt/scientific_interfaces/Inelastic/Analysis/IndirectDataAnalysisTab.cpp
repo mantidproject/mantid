@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-
 #include "Common/SettingsHelper.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/SettingsHelper.h"
+
 #include "FitTabConstants.h"
 #include "IndirectFitPlotView.h"
 
@@ -27,6 +29,7 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 /// Logger

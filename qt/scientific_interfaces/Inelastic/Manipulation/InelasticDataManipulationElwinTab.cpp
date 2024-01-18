@@ -7,7 +7,9 @@
 #include "InelasticDataManipulationElwinTab.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,6 +22,8 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");

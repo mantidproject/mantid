@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSqwTab.h"
 #include "Common/IndirectDataValidationHelper.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceManipulationUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -18,6 +19,8 @@
 #include <QFileInfo>
 
 using namespace IndirectDataValidationHelper;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
