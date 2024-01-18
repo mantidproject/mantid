@@ -55,7 +55,7 @@ enum EventSortType {
 
 class MANTID_DATAOBJECTS_DLL EventList : public Mantid::API::IEventList {
 public:
-  EventList();
+  EventList(const Mantid::API::EventType event_type = Mantid::API::EventType::TOF);
 
   EventList(EventWorkspaceMRU *mru, specnum_t specNo);
 
