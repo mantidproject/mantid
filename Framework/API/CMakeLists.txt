@@ -322,6 +322,7 @@ set(INC_FILES
     inc/MantidAPI/RefAxis.h
     inc/MantidAPI/RegionSelectorObserver.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
+    inc/MantidAPI/Result.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
     inc/MantidAPI/SampleShapeValidator.h
@@ -458,6 +459,7 @@ set(TEST_FILES
     ProjectionTest.h
     RawCountValidatorTest.h
     ResizeRectangularDetectorHelperTest.h
+    ResultTest.h
     RunTest.h
     SampleShapeValidatorTest.h
     SampleTest.h
