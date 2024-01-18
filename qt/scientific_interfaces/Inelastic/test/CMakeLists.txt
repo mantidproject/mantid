@@ -23,6 +23,7 @@ set(TEST_FILES
     Common/OutputPlotOptionsPresenterTest.h
     Common/SettingsModelTest.h
     Common/SettingsPresenterTest.h
+    Common/WorkspaceManipulationUtilsTest.h
     Manipulation/InelasticDataManipulationElwinTabModelTest.h
     Manipulation/InelasticDataManipulationIqtTabModelTest.h
     Manipulation/InelasticDataManipulationMomentsTabModelTest.h
