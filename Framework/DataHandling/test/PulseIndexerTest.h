@@ -19,5 +19,65 @@ public:
   static PulseIndexerTest *createSuite() { return new PulseIndexerTest(); }
   static void destroySuite(PulseIndexerTest *suite) { delete suite; }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void run_test(std::shared_ptr<std::vector<uint64_t>> eventIndices, const size_t start_event_index,
+                const size_t total_events) {
+    PulseIndexer indexer(eventIndices, start_event_index, total_events);
+
+    // test locating the first pulse entirely containing the event index
+    for (size_t pulse_index = 0; pulse_index < eventIndices->size(); ++pulse_index)
+      for (size_t start_index = 0; start_index < pulse_index; ++start_index)
+        TS_ASSERT_EQUALS(indexer.getPulseIndex(eventIndices->operator[](pulse_index), start_index), pulse_index);
+
+    // test locating the first event index for the pulse
+    // how start_event_index affects values is baked in from how code worked pre 2024
+    for (size_t i = 0; i < eventIndices->size(); ++i)
+      TS_ASSERT_EQUALS(indexer.getFirstEventIndex(i), eventIndices->operator[](i) - start_event_index);
+
+    // test locating the flast event index for the pulse
+    // how start_event_index affects values is baked in from how code worked pre 2024
+    for (size_t i = 0; i < eventIndices->size() - 1; ++i)
+      TS_ASSERT_EQUALS(indexer.getLastEventIndex(i), eventIndices->operator[](i + 1) - start_event_index);
+    TS_ASSERT_EQUALS(indexer.getLastEventIndex(eventIndices->size() - 1), total_events);
+  }
+
+  void test_Simple() {
+    auto eventIndices = std::make_shared<std::vector<uint64_t>>();
+    for (uint64_t i = 0; i < 30; i += 10) {
+      eventIndices->push_back(i);
+    }
+
+    TS_ASSERT_EQUALS(eventIndices->size(), 3);
+
+    constexpr size_t total_events{40};
+    constexpr size_t start_event_index{0};
+    run_test(eventIndices, start_event_index, total_events);
+  }
+
+  std::shared_ptr<std::vector<uint64_t>> generate_nonConstant() {
+    auto eventIndices = std::make_shared<std::vector<uint64_t>>();
+    eventIndices->push_back(10);
+    eventIndices->push_back(12);
+    eventIndices->push_back(15);
+    eventIndices->push_back(16);
+
+    TS_ASSERT_EQUALS(eventIndices->size(), 4);
+
+    return eventIndices;
+  }
+
+  void test_nonConstant() {
+    auto eventIndices = generate_nonConstant();
+
+    constexpr size_t total_events{20};
+
+    run_test(eventIndices, 0, total_events);
+  }
+
+  void test_nonConstantWithOffset() {
+    auto eventIndices = generate_nonConstant();
+
+    constexpr size_t total_events{20};
+
+    run_test(eventIndices, 2, total_events);
+  }
 };

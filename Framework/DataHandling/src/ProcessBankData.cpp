@@ -115,7 +115,7 @@ void ProcessBankData::run() {
     throw std::runtime_error("Event index is not sorted");
 
   // And there are this many pulses
-  const auto NUM_PULSES = thisBankPulseTimes->pulseTimes.size();
+  const auto NUM_PULSES = event_index->size();
   prog->report(entry_name + ": filling events");
 
   auto *alg = m_loader.alg;
@@ -152,6 +152,7 @@ void ProcessBankData::run() {
       throw std::runtime_error(msg.str());
     }
 
+    // loop through events associated with a single pulse
     for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
