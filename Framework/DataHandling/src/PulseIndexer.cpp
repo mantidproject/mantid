@@ -11,7 +11,7 @@
 
 namespace Mantid::DataHandling {
 PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
-                           const std::size_t numEvents, const std::string entry_name)
+                           const std::size_t numEvents, const std::string &entry_name)
     : m_event_index(std::move(event_index)), m_firstEventIndex(firstEventIndex), m_numEvents(numEvents),
       m_entry_name(entry_name) {
   m_numPulses = m_event_index->size();

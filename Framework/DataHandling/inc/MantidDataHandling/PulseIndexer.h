@@ -21,7 +21,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL PulseIndexer {
 public:
   PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
-               const std::size_t numEvents, const std::string entry_name);
+               const std::size_t numEvents, const std::string &entry_name);
 
   /// Which element in the event_index array is the one to use
   size_t getFirstPulseIndex(const size_t event_index) const;
