@@ -14,19 +14,24 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   m_numPulses = m_event_index->size();
 }
 
-// this assumes that last_pulse_index is already to the point of including this
-// one so we only need to search forward
+/**
+ * This performs a linear search because it is much more likely that the index
+ * to look for is at the beginning.
+ */
 size_t PulseIndexer::getFirstPulseIndex(const size_t event_index) const {
-  constexpr size_t last_pulse_index{0};
+  // return early if the number of event indices is too small
+  if (1 >= m_event_index->size())
+    return 1;
 
-  if (last_pulse_index + 1 >= m_event_index->size())
-    return last_pulse_index;
+  // special case to stop from setting up temporary objects
+  if (event_index == 0)
+    return 0;
 
   // linear search is used because it is more likely that the next pulse index
-  // is the correct one to use the + last_pulse_index + 1 is because we are
+  // is the correct one to use the next one is because we are
   // confirm that the next index is bigger, not the current
   const auto event_index_end = m_event_index->cend();
-  auto event_index_iter = m_event_index->cbegin() + last_pulse_index;
+  auto event_index_iter = m_event_index->cbegin();
 
   while ((event_index < *event_index_iter) || (event_index >= *(event_index_iter + 1))) {
     event_index_iter++;
