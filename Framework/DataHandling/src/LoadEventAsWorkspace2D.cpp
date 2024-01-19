@@ -198,7 +198,7 @@ void LoadEventAsWorkspace2D::exec() {
   const bool tof_filtering = (tof_min != EMPTY_DBL() && tof_max != EMPTY_DBL());
 
   // vector to stored to integrated counts by detector ID
-  std::vector<uint32_t> Y(max_detid + 1, 0);
+  std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
 
   ::NeXus::File h5file(filename);
 
@@ -256,7 +256,7 @@ void LoadEventAsWorkspace2D::exec() {
           if (det_id < min_detid || det_id > max_detid)
             continue;
 
-          Y[det_id]++;
+          Y[det_id - min_detid]++;
         }
 
         h5file.closeGroup();
@@ -272,14 +272,18 @@ void LoadEventAsWorkspace2D::exec() {
 
   prog->doReport("Setting data to workspace");
   // set the data on the workspace
-  auto histX = Mantid::Kernel::make_cow<HistogramX>(xBins);
+  const auto histX = Mantid::Kernel::make_cow<HistogramX>(xBins);
   for (detid_t detid = min_detid; detid <= max_detid; detid++) {
-    auto wi = id_to_wi.find(detid);
-    if (wi == id_to_wi.end())
+    const auto id_wi = id_to_wi.find(detid);
+    if (id_wi == id_to_wi.end())
       continue;
-    outWS->mutableY(wi->second) = Y[detid];
-    outWS->mutableE(wi->second) = sqrt(Y[detid]);
-    outWS->setSharedX(wi->second, histX);
+
+    const auto wi = id_wi->second;
+    const auto y = Y[detid - min_detid];
+
+    outWS->mutableY(wi) = y;
+    outWS->mutableE(wi) = sqrt(y);
+    outWS->setSharedX(wi, histX);
   }
 
   // set units
