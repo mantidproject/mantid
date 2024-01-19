@@ -6,11 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/PulseIndexer.h"
+#include <sstream>
+#include <utility>
 
 namespace Mantid::DataHandling {
 PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
-                           const std::size_t numEvents)
-    : m_event_index(std::move(event_index)), m_firstEventIndex(firstEventIndex), m_numEvents(numEvents) {
+                           const std::size_t numEvents, const std::string entry_name)
+    : m_event_index(std::move(event_index)), m_firstEventIndex(firstEventIndex), m_numEvents(numEvents),
+      m_entry_name(entry_name) {
   m_numPulses = m_event_index->size();
 }
 
@@ -41,6 +44,26 @@ size_t PulseIndexer::getFirstPulseIndex(const size_t event_index) const {
       break;
   }
   return static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
+}
+
+std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseIndex) const {
+  const auto start = this->getStartEventIndex(pulseIndex);
+  // return early if the start is too big
+  if (start > m_numEvents)
+    return std::make_pair(start, m_numEvents);
+
+  // get the end index
+  const auto stop = this->getStopEventIndex(pulseIndex);
+  if (start > stop) {
+    std::stringstream msg;
+    msg << "Something went really wrong: " << start << " > " << stop << "| " << m_entry_name
+        << " startAt=" << m_firstEventIndex << " numEvents=" << m_event_index->size() << " RAWINDICES=["
+        << start + m_firstEventIndex << ",?)"
+        << " pulseIndex=" << pulseIndex << " of " << m_event_index->size();
+    throw std::runtime_error(msg.str());
+  }
+
+  return std::make_pair(start, stop);
 }
 
 size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {

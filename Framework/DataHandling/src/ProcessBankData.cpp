@@ -112,7 +112,7 @@ void ProcessBankData::run() {
   const double TOF_MAX = alg->filter_tof_max;
   const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
-  const PulseIndexer pulseIndexer(event_index, startAt, numEvents);
+  const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name);
 
   for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(startAt); pulseIndex < NUM_PULSES; pulseIndex++) {
     // Save the pulse time at this index for creating those events
@@ -120,24 +120,15 @@ void ProcessBankData::run() {
     const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
     const int periodIndex = logPeriodNumber - 1;
 
-    const auto firstEventIndex = pulseIndexer.getStartEventIndex(pulseIndex);
-    if (firstEventIndex > numEvents)
+    // determine range of events for the pulse
+    const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
+    if (eventIndexRange.first > numEvents)
       break;
-
-    const auto lastEventIndex = pulseIndexer.getStopEventIndex(pulseIndex);
-    if (firstEventIndex == lastEventIndex)
+    else if (eventIndexRange.first == eventIndexRange.second)
       continue;
-    else if (firstEventIndex > lastEventIndex) {
-      std::stringstream msg;
-      msg << "Something went really wrong: " << firstEventIndex << " > " << lastEventIndex << "| " << entry_name
-          << " startAt=" << startAt << " numEvents=" << event_index->size() << " RAWINDICES=["
-          << firstEventIndex + startAt << ",?)"
-          << " pulseIndex=" << pulseIndex << " of " << event_index->size();
-      throw std::runtime_error(msg.str());
-    }
 
     // loop through events associated with a single pulse
-    for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex; ++eventIndex) {
+    for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
       const detid_t &detId = static_cast<detid_t>((*event_detid)[eventIndex]);

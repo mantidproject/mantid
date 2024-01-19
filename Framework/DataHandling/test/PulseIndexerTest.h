@@ -21,7 +21,7 @@ public:
 
   void run_test(std::shared_ptr<std::vector<uint64_t>> eventIndices, const size_t start_event_index,
                 const size_t total_events) {
-    PulseIndexer indexer(eventIndices, start_event_index, total_events);
+    PulseIndexer indexer(eventIndices, start_event_index, total_events, "junk_name");
 
     // test locating the first pulse entirely containing the event index
     for (size_t pulse_index = 0; pulse_index < eventIndices->size(); ++pulse_index)
