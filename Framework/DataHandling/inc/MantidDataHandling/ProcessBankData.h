@@ -67,7 +67,7 @@ private:
   /// Progress reporting
   API::Progress *prog;
   /// event pixel ID array
-  const std::shared_ptr<std::vector<uint32_t>> event_id;
+  const std::shared_ptr<std::vector<uint32_t>> event_detid;
   /// event TOF array
   const std::shared_ptr<std::vector<float>> event_time_of_flight;
   /// # of events in arrays
@@ -82,10 +82,10 @@ private:
   bool have_weight;
   /// event weights array
   const std::shared_ptr<std::vector<float>> event_weight;
-  /// Minimum pixel id
-  detid_t m_min_id;
-  /// Maximum pixel id
-  detid_t m_max_id;
+  /// Minimum pixel id (inclusive)
+  detid_t m_min_detid;
+  /// Maximum pixel id (inclusive)
+  detid_t m_max_detid;
 }; // ENDDEF-CLASS ProcessBankData
 } // namespace DataHandling
 } // namespace Mantid

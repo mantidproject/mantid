@@ -24,12 +24,18 @@ ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry
                                  detid_t max_event_id)
     : Task(), m_loader(m_loader), entry_name(std::move(entry_name)),
       pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector), pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset),
-      prog(prog), event_id(std::move(event_id)), event_time_of_flight(std::move(event_time_of_flight)),
+      prog(prog), event_detid(std::move(event_id)), event_time_of_flight(std::move(event_time_of_flight)),
       numEvents(numEvents), startAt(startAt), event_index(std::move(event_index)),
       thisBankPulseTimes(std::move(thisBankPulseTimes)), have_weight(have_weight),
-      event_weight(std::move(event_weight)), m_min_id(min_event_id), m_max_id(max_event_id) {
+      event_weight(std::move(event_weight)), m_min_detid(min_event_id), m_max_detid(max_event_id) {
   // Cost is approximately proportional to the number of events to process.
   m_cost = static_cast<double>(numEvents);
+
+  if (m_max_detid < m_min_detid) {
+    std::stringstream msg;
+    msg << "max detid (" << m_max_detid << ") < min (" << m_min_detid << ")";
+    throw std::runtime_error(msg.str());
+  }
 }
 
 /*
@@ -37,11 +43,11 @@ ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry
  */
 void ProcessBankData::preCountAndReserveMem() {
   // ---- Pre-counting events per pixel ID ----
-  std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+  std::vector<size_t> counts(m_max_detid - m_min_detid + 1, 0);
   for (size_t i = 0; i < numEvents; i++) {
-    const auto thisId = static_cast<detid_t>((*event_id)[i]);
-    if (!(thisId < m_min_id || thisId > m_max_id)) // or allows for skipping out early
-      counts[thisId - m_min_id]++;
+    const auto thisId = static_cast<detid_t>((*event_detid)[i]);
+    if (!(thisId < m_min_detid || thisId > m_max_detid)) // or allows for skipping out early
+      counts[thisId - m_min_detid]++;
   }
 
   // Now we pre-allocate (reserve) the vectors of events in each pixel
@@ -49,8 +55,8 @@ void ProcessBankData::preCountAndReserveMem() {
   auto &outputWS = m_loader.m_ws;
   const auto *alg = m_loader.alg;
   const size_t numEventLists = outputWS.getNumberHistograms();
-  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-    const auto pixelIndex = pixID - m_min_id; // index from zero
+  for (detid_t pixID = m_min_detid; pixID <= m_max_detid; ++pixID) {
+    const auto pixelIndex = pixID - m_min_detid; // index from zero
     if (counts[pixelIndex] > 0) {
       const size_t wi = getWorkspaceIndexFromPixelID(pixID);
       // Find the workspace index corresponding to that pixel ID
@@ -100,7 +106,7 @@ void ProcessBankData::run() {
   const bool compress = (alg->compressTolerance >= 0);
 
   // Which detector IDs were touched?
-  std::vector<bool> usedDetIds(m_max_id - m_min_id + 1, false);
+  std::vector<bool> usedDetIds(m_max_detid - m_min_detid + 1, false);
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
@@ -134,8 +140,8 @@ void ProcessBankData::run() {
     for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
-      const detid_t &detId = (*event_id)[eventIndex];
-      if (detId >= m_min_id && detId <= m_max_id) {
+      const detid_t &detId = static_cast<detid_t>((*event_detid)[eventIndex]);
+      if (detId >= m_min_detid && detId <= m_max_detid) {
         // Create the tofevent
         const auto tof = static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
@@ -176,7 +182,7 @@ void ProcessBankData::run() {
             badTofs++;
 
           // Track all the touched wi
-          const auto detidIndex = detId - m_min_id;
+          const auto detidIndex = detId - m_min_detid;
           if (!usedDetIds[detidIndex])
             usedDetIds[detidIndex] = true;
         } // valid time-of-flight
@@ -196,8 +202,8 @@ void ProcessBankData::run() {
   // Do it on all the detector IDs we touched
   auto &outputWS = m_loader.m_ws;
   const size_t numEventLists = outputWS.getNumberHistograms();
-  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-    if (usedDetIds[pixID - m_min_id]) {
+  for (detid_t pixID = m_min_detid; pixID <= m_max_detid; ++pixID) {
+    if (usedDetIds[pixID - m_min_detid]) {
       // Find the workspace index corresponding to that pixel ID
       size_t wi = getWorkspaceIndexFromPixelID(pixID);
       if (wi < numEventLists) {
