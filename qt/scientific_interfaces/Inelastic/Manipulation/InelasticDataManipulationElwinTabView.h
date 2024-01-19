@@ -46,7 +46,7 @@ public:
 
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void newInputFiles() override;
-  void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) override;
+  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
   void setRunIsRunning(const bool running) override;
@@ -117,11 +117,11 @@ private:
   void setButtonsEnabled(const bool enabled);
   void setRunEnabled(const bool enabled);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
-  void addDataWksOrFile(IAddWorkspaceDialog const *dialog);
+  void addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   IElwinPresenter *m_presenter;
   QtTreePropertyBrowser *m_elwTree;
-  IAddWorkspaceDialog *m_addWorkspaceDialog;
+  MantidWidgets::IAddWorkspaceDialog *m_addWorkspaceDialog;
 
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtDoublePropertyManager *m_dblManager;

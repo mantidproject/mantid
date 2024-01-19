@@ -27,8 +27,8 @@ std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { retur
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
-bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<MantidQt::MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
+bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
     return true;
   }
@@ -95,7 +95,7 @@ UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &valid
   return m_view->validate(validator);
 }
 
-void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     m_tab->handleDataAdded(dialog);
     updateTableFromModel();

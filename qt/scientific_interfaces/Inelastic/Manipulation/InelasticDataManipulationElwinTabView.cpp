@@ -204,7 +204,7 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  auto dialog = new AddWorkspaceDialog(parentWidget());
+  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -222,9 +222,9 @@ void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m
  * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is
  * already filtered.
  */
-void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
-    const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog);
     if (indirectDialog) {
       // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
       if (indirectDialog->getFileName().empty()) {
@@ -333,11 +333,11 @@ void InelasticDataManipulationElwinTabView::newInputFiles() {
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
-  if (const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog)) {
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
     filename = QString::fromStdString(indirectDialog->getFileName());
   }

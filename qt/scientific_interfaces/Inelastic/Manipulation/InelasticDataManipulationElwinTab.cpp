@@ -290,7 +290,7 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   // Clear the existing list of files
   if (m_dataModel->getNumberOfWorkspaces().value < 2)
     m_view->clearPreviewFile();
@@ -404,7 +404,7 @@ std::string InelasticDataManipulationElwinTab::getOutputBasename() {
   return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName)).toStdString();
 }
 
-void InelasticDataManipulationElwinTab::handleAddData(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
     updateTableFromModel();
@@ -416,10 +416,10 @@ void InelasticDataManipulationElwinTab::handleAddData(IAddWorkspaceDialog const 
   }
 }
 
-void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
-    const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog);
     QList<QString> allFiles;
     allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
     auto const suffixes = getFilteredSuffixes(allFiles);
@@ -439,8 +439,8 @@ void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialo
   }
 }
 
-void InelasticDataManipulationElwinTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(dialog))
+void InelasticDataManipulationElwinTab::addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog))
     m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
 }
 
