@@ -38,7 +38,8 @@ FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : Indi
 
 void FqFitDataView::showAddWorkspaceDialog() {
   auto dialog = new FqFitAddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
   connect(dialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
           SLOT(notifyWorkspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)));
   connect(dialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
@@ -49,8 +50,6 @@ void FqFitDataView::showAddWorkspaceDialog() {
   dialog->setFBSuffices(m_fbSampleSuffixes);
   dialog->updateSelectedSpectra();
   dialog->show();
-
-  m_addWorkspaceDialog = dialog;
 }
 
 void FqFitDataView::notifyAddClicked() {

@@ -34,11 +34,12 @@ public:
   std::string getFileName() const;
 
 signals:
-  void addData();
+  void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);
+  void emitAddData();
 
 private:
   void setWorkspace(const std::string &workspace);

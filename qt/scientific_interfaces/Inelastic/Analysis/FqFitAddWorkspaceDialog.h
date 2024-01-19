@@ -35,14 +35,15 @@ public:
 
   void updateSelectedSpectra() override{};
 
-public slots:
-  void emitWorkspaceChanged(const QString &name);
-  void emitParameterTypeChanged(const QString &index);
-
 signals:
-  void addData();
+  void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
   void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
+
+private slots:
+  void emitWorkspaceChanged(const QString &name);
+  void emitParameterTypeChanged(const QString &index);
+  void emitAddData();
 
 private:
   Ui::FqFitAddWorkspaceDialog m_uiForm;

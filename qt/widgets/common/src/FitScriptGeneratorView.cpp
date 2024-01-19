@@ -325,20 +325,24 @@ void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName
 }
 
 void FitScriptGeneratorView::openAddWorkspaceDialog() {
-  m_addWorkspaceDialog = new AddWorkspaceDialog(this);
-  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(addWorkspaceDialogAccepted()));
+  auto dialog = new AddWorkspaceDialog(this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(addWorkspaceDialogAccepted(MantidWidgets::IAddWorkspaceDialog *)));
 }
 
-void FitScriptGeneratorView::addWorkspaceDialogAccepted() {
-  m_presenter->notifyPresenter(ViewEvent::AddDomainAccepted);
+void FitScriptGeneratorView::addWorkspaceDialogAccepted(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  if (auto addWorkspaceDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
+    m_presenter->handleAddDomainAccepted(getDialogWorkspaces(dialog), addWorkspaceDialog->workspaceIndices());
+  }
 }
 
-std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
+std::vector<MatrixWorkspace_const_sptr>
+FitScriptGeneratorView::getDialogWorkspaces(MantidWidgets::IAddWorkspaceDialog *dialog) {
   std::vector<MatrixWorkspace_const_sptr> workspaces;
-  if (m_addWorkspaceDialog) {
-    auto const wsName = m_addWorkspaceDialog->workspaceName();
+  if (dialog) {
+    auto const wsName = dialog->workspaceName();
     auto &ads = AnalysisDataService::Instance();
     if (ads.doesExist(wsName)) {
       workspaces.emplace_back(ads.retrieveWS<MatrixWorkspace>(wsName));
@@ -347,10 +351,6 @@ std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspa
     }
   }
   return workspaces;
-}
-
-FunctionModelSpectra FitScriptGeneratorView::getDialogWorkspaceIndices() const {
-  return m_addWorkspaceDialog->workspaceIndices();
 }
 
 void FitScriptGeneratorView::openEditLocalParameterDialog(

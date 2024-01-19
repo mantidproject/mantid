@@ -53,7 +53,7 @@ public:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
-  void notifyAddData();
+  void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 protected:
   IndirectFitDataView(const QStringList &headers, QWidget *parent);
@@ -66,7 +66,6 @@ protected:
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
 
-  MantidWidgets::IAddWorkspaceDialog *m_addWorkspaceDialog;
   IIndirectFitDataPresenter *m_presenter;
 
 protected slots:

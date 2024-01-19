@@ -28,6 +28,7 @@ namespace MantidWidgets {
 
 class AddWorkspaceDialog;
 class FitScriptGeneratorDataTable;
+class IAddWorkspaceDialog;
 class IFitScriptGeneratorPresenter;
 struct GlobalParameter;
 struct GlobalTie;
@@ -42,7 +43,6 @@ public:
     ADSRenameEvent,
     RemoveDomainClicked,
     AddDomainClicked,
-    AddDomainAccepted,
     StartXChanged,
     EndXChanged,
     SelectionChanged,
@@ -89,8 +89,8 @@ public:
                                   double endX) = 0;
 
   virtual void openAddWorkspaceDialog() = 0;
-  [[nodiscard]] virtual std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() = 0;
-  [[nodiscard]] virtual FunctionModelSpectra getDialogWorkspaceIndices() const = 0;
+  [[nodiscard]] virtual std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+  getDialogWorkspaces(MantidWidgets::IAddWorkspaceDialog *dialog) = 0;
 
   virtual void openEditLocalParameterDialog(std::string const &parameter,
                                             std::vector<std::string> const &workspaceNames,
@@ -128,7 +128,6 @@ public:
   virtual FitScriptGeneratorDataTable *tableWidget() const = 0;
   virtual QPushButton *removeButton() const = 0;
   virtual QPushButton *addWorkspaceButton() const = 0;
-  virtual AddWorkspaceDialog *addWorkspaceDialog() const = 0;
   virtual QPushButton *generateScriptToFileButton() const = 0;
   virtual QPushButton *generateScriptToClipboardButton() const = 0;
 };

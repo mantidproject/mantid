@@ -204,6 +204,9 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
+  if (m_addWorkspaceDialog)
+    return;
+
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
 

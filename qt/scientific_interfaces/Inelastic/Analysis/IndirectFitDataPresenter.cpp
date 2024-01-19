@@ -102,6 +102,8 @@ void IndirectFitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog 
     m_tab->handleDataChanged();
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
+  } catch (const std::invalid_argument &ex) {
+    displayWarning(ex.what());
   }
 }
 

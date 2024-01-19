@@ -50,9 +50,6 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[mayb
   case ViewEvent::AddDomainClicked:
     handleAddDomainClicked();
     return;
-  case ViewEvent::AddDomainAccepted:
-    handleAddDomainAccepted();
-    return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
     return;
@@ -148,10 +145,8 @@ void FitScriptGeneratorPresenter::handleRemoveDomainClicked() { removeDomains(m_
 
 void FitScriptGeneratorPresenter::handleAddDomainClicked() { m_view->openAddWorkspaceDialog(); }
 
-void FitScriptGeneratorPresenter::handleAddDomainAccepted() {
-  auto const workspaces = m_view->getDialogWorkspaces();
-  auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
-
+void FitScriptGeneratorPresenter::handleAddDomainAccepted(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
+                                                          FunctionModelSpectra const &workspaceIndices) {
   if (!workspaces.empty() && !workspaceIndices.empty())
     addWorkspaces(workspaces, workspaceIndices);
 }

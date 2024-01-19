@@ -199,19 +199,20 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) {
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
 void IndirectFitDataView::showAddWorkspaceDialog() {
-  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+  auto dialog = std::make_unique<MantidWidgets::AddWorkspaceDialog>(parentWidget());
+  connect(dialog.get(), SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::AddWorkspaceDialog *)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(m_wsSampleSuffixes);
   dialog->setFBSuffices(m_fbSampleSuffixes);
   dialog->updateSelectedSpectra();
   dialog->show();
-
-  m_addWorkspaceDialog = dialog;
 }
 
-void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
+void IndirectFitDataView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  m_presenter->handleAddData(dialog);
+}
 
 void IndirectFitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
 

@@ -73,7 +73,7 @@ ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : QDialog(
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
   connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
+  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
@@ -127,6 +127,8 @@ void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   else
     setAllSpectraSelectionEnabled(false);
 }
+
+void ConvFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
 
 void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
