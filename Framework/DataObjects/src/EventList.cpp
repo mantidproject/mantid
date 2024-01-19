@@ -137,9 +137,9 @@ struct comparePulseTimeTOFDelta {
 
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
-EventList::EventList()
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
-      order(UNSORTED), mru(nullptr) {}
+EventList::EventList(const EventType event_type)
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts),
+      eventType(event_type), order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
