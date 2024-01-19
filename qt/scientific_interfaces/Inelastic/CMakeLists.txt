@@ -92,7 +92,6 @@ set(MOC_FILES
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
     Analysis/FunctionTemplateBrowser.h
-    Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
     Analysis/IndirectFitDataView.h
@@ -110,7 +109,6 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
-    Common/ISettingsView.h
     Common/IndirectInterface.h
     Common/OutputPlotOptionsView.h
     Common/Settings.h
@@ -147,6 +145,7 @@ set(INC_FILES
     Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutput.h
     Analysis/IIndirectFitOutputOptionsModel.h
+    Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IIndirectFitPlotView.h
     Analysis/IIndirectFittingModel.h
     Analysis/IndirectFitData.h
@@ -163,6 +162,7 @@ set(INC_FILES
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Common/IndirectDataValidationHelper.h
+    Common/ISettingsView.h
     Common/OutputPlotOptionsModel.h
     Common/OutputPlotOptionsPresenter.h
     Common/SettingsHelper.h
