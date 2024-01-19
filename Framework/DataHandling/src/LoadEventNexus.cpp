@@ -969,7 +969,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
