@@ -16,7 +16,9 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
 
 // this assumes that last_pulse_index is already to the point of including this
 // one so we only need to search forward
-size_t PulseIndexer::getPulseIndex(const size_t event_index, const size_t last_pulse_index) const {
+size_t PulseIndexer::getFirstPulseIndex(const size_t event_index) const {
+  constexpr size_t last_pulse_index{0};
+
   if (last_pulse_index + 1 >= m_event_index->size())
     return last_pulse_index;
 
@@ -36,7 +38,7 @@ size_t PulseIndexer::getPulseIndex(const size_t event_index, const size_t last_p
   return static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
 }
 
-size_t PulseIndexer::getFirstEventIndex(const size_t pulseIndex) const {
+size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
   const auto firstEventIndex = m_event_index->operator[](pulseIndex);
   if (firstEventIndex >= m_firstEventIndex)
     return firstEventIndex - m_firstEventIndex;
@@ -44,7 +46,7 @@ size_t PulseIndexer::getFirstEventIndex(const size_t pulseIndex) const {
     return 0;
 }
 
-size_t PulseIndexer::getLastEventIndex(const size_t pulseIndex) const {
+size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
   if (pulseIndex + 1 >= m_numPulses)
     return m_numEvents;
 

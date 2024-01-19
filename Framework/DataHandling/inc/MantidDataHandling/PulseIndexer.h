@@ -23,11 +23,11 @@ public:
                const std::size_t numEvents);
 
   /// Which element in the event_index array is the one to use
-  size_t getPulseIndex(const size_t event_index, const size_t last_pulse_index) const;
+  size_t getFirstPulseIndex(const size_t event_index) const;
   /// The first event(tof,detid) index to read for this pulse
-  size_t getFirstEventIndex(const size_t pulseIndex) const;
+  size_t getStartEventIndex(const size_t pulseIndex) const;
   /// The one past the last event(tof,detid) index to read for this pulse
-  size_t getLastEventIndex(const size_t pulseIndex) const;
+  size_t getStopEventIndex(const size_t pulseIndex) const;
 
 private:
   PulseIndexer(); // do not allow empty constructor

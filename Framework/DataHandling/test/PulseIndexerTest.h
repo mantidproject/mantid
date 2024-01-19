@@ -25,19 +25,18 @@ public:
 
     // test locating the first pulse entirely containing the event index
     for (size_t pulse_index = 0; pulse_index < eventIndices->size(); ++pulse_index)
-      for (size_t start_index = 0; start_index < pulse_index; ++start_index)
-        TS_ASSERT_EQUALS(indexer.getPulseIndex(eventIndices->operator[](pulse_index), start_index), pulse_index);
+      TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(eventIndices->operator[](pulse_index)), pulse_index);
 
     // test locating the first event index for the pulse
     // how start_event_index affects values is baked in from how code worked pre 2024
     for (size_t i = 0; i < eventIndices->size(); ++i)
-      TS_ASSERT_EQUALS(indexer.getFirstEventIndex(i), eventIndices->operator[](i) - start_event_index);
+      TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), eventIndices->operator[](i) - start_event_index);
 
     // test locating the flast event index for the pulse
     // how start_event_index affects values is baked in from how code worked pre 2024
     for (size_t i = 0; i < eventIndices->size() - 1; ++i)
-      TS_ASSERT_EQUALS(indexer.getLastEventIndex(i), eventIndices->operator[](i + 1) - start_event_index);
-    TS_ASSERT_EQUALS(indexer.getLastEventIndex(eventIndices->size() - 1), total_events);
+      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), eventIndices->operator[](i + 1) - start_event_index);
+    TS_ASSERT_EQUALS(indexer.getStopEventIndex(eventIndices->size() - 1), total_events);
   }
 
   void test_Simple() {

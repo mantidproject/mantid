@@ -9,6 +9,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidDataHandling/PulseIndexer.h"
 
 using namespace Mantid::DataObjects;
 
@@ -30,31 +31,6 @@ ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry
   // Cost is approximately proportional to the number of events to process.
   m_cost = static_cast<double>(numEvents);
 }
-
-namespace {
-// this assumes that last_pulse_index is already to the point of including this
-// one so we only need to search forward
-inline size_t getPulseIndex(const size_t event_index, const size_t last_pulse_index,
-                            const std::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
-  if (last_pulse_index + 1 >= event_index_vec->size())
-    return last_pulse_index;
-
-  // linear search is used because it is more likely that the next pulse index
-  // is the correct one to use the + last_pulse_index + 1 is because we are
-  // confirm that the next index is bigger, not the current
-  const auto event_index_end = event_index_vec->cend();
-  auto event_index_iter = event_index_vec->cbegin() + last_pulse_index;
-
-  while ((event_index < *event_index_iter) || (event_index >= *(event_index_iter + 1))) {
-    event_index_iter++;
-
-    // make sure not to go past the end
-    if (event_index_iter + 1 == event_index_end)
-      break;
-  }
-  return std::distance(event_index_vec->cbegin(), event_index_iter);
-}
-} // namespace
 
 /*
  * Pre-counting the events per pixel ID allows for allocating the proper amount of memory in each output event vector
@@ -130,17 +106,19 @@ void ProcessBankData::run() {
   const double TOF_MAX = alg->filter_tof_max;
   const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
-  for (std::size_t pulseIndex = getPulseIndex(startAt, 0, event_index); pulseIndex < NUM_PULSES; pulseIndex++) {
+  const PulseIndexer pulseIndexer(event_index, startAt, numEvents);
+
+  for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(startAt); pulseIndex < NUM_PULSES; pulseIndex++) {
     // Save the pulse time at this index for creating those events
     const auto &pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
     const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
     const int periodIndex = logPeriodNumber - 1;
 
-    const auto firstEventIndex = getFirstEventIndex(pulseIndex);
+    const auto firstEventIndex = pulseIndexer.getStartEventIndex(pulseIndex);
     if (firstEventIndex > numEvents)
       break;
 
-    const auto lastEventIndex = getLastEventIndex(pulseIndex, NUM_PULSES);
+    const auto lastEventIndex = pulseIndexer.getStopEventIndex(pulseIndex);
     if (firstEventIndex == lastEventIndex)
       continue;
     else if (firstEventIndex > lastEventIndex) {
@@ -256,23 +234,6 @@ void ProcessBankData::run() {
     alg->getLogger().debug() << "Time to ProcessBankData " << entry_name << " " << timer << "\n";
 #endif
 } // END-OF-RUN()
-
-size_t ProcessBankData::getFirstEventIndex(const size_t pulseIndex) const {
-  const auto firstEventIndex = event_index->operator[](pulseIndex);
-  if (firstEventIndex >= startAt)
-    return firstEventIndex - startAt;
-  else
-    return 0;
-}
-
-size_t ProcessBankData::getLastEventIndex(const size_t pulseIndex, const size_t numPulses) const {
-  if (pulseIndex + 1 >= numPulses)
-    return numEvents;
-
-  const size_t lastEventIndex = event_index->operator[](pulseIndex + 1) - startAt;
-
-  return std::min(lastEventIndex, numEvents);
-}
 
 /**
  * Get the workspace index for a given pixel ID. Throws if the pixel ID is
