@@ -266,6 +266,39 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 196)
 
+    def test_reduction_with_different_custom_groupings_creates_a_workspace_with_the_correct_size(self):
+        custom_grouping_strings = {"3:198": 196, "3:25,27:198": 195, "3-198": 1, "3-25,26:198": 174, "3+5+7,8-40,41:198": 160}
+
+        for custom_string, expected_size in custom_grouping_strings.items():
+            reduced_workspace = ISISIndirectDiffractionReduction(
+                InputFiles=["29244"],
+                GroupingPolicy="Custom",
+                GroupingString=custom_string,
+                InstrumentParFile="IP0005.dat",
+                Instrument="VESUVIO",
+                mode="diffspec",
+                SpectraRange=[3, 198],
+            )
+
+            self.assertEqual(reduced_workspace.getItem(0).getNumberHistograms(), expected_size)
+
+    def test_reduction_with_map_file(self):
+        reduced_workspace = ISISIndirectDiffractionReduction(
+            InputFiles=["29244"],
+            GroupingPolicy="File",
+            MapFile="vesuvio_4_by_24.map",
+            InstrumentParFile="IP0005.dat",
+            Instrument="VESUVIO",
+            mode="diffspec",
+            SpectraRange=[3, 98],
+        )
+
+        self.assertTrue(isinstance(reduced_workspace, WorkspaceGroup), "Result workspace should be a workspace group.")
+        self.assertEqual(reduced_workspace.getNames()[0], "vesuvio29244_diffspec_red")
+
+        red_ws = reduced_workspace.getItem(0)
+        self.assertEqual(red_ws.getNumberHistograms(), 24)
+
     # ------------------------------------------Failure cases------------------------------------------
 
     def test_reduction_with_cal_file_osiris_diffonly_fails(self):
