@@ -15,6 +15,14 @@ from mantid.kernel import *
 from mantid import config
 
 
+def _str_or_none(string):
+    return string if string != "" else None
+
+
+def _ws_or_none(workspace_name):
+    return mtd[workspace_name] if workspace_name != "" else None
+
+
 def is_range_ascending(range_string, delimiter):
     range_limits = tuple(map(int, range_string.split(delimiter)))
     return range_limits[0] < range_limits[1]
@@ -127,12 +135,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingPolicy",
             defaultValue="All",
-            validator=StringListValidator(["All", "Individual", "Workspace", "IPF"]),
-            doc="Selects the type of detector grouping to be used.",
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom"]),
+            doc="The method used to group spectra.",
         )
         self.declareProperty(
             WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Workspace containing spectra grouping.",
+            doc="A workspace containing a spectra grouping.",
+        )
+        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Spectra to group as a string")
+        self.declareProperty(
+            FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A map file containing a spectra grouping.",
         )
 
         self.declareProperty(
@@ -177,12 +190,18 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.warning("type = " + str(type(mode)))
                 issues["CalFile"] = "Cal Files are currently only available for use in OSIRIS diffspec mode"
 
+        # Validate grouping method
+        grouping_method = self.getPropertyValue("GroupingPolicy")
+        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+
+        if grouping_method == "Workspace" and grouping_ws is None:
+            issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
+
         return issues
 
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
-
         from IndirectReductionCommon import (
             get_multi_frame_rebin,
             identify_bad_detectors,
@@ -317,7 +336,14 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
-                group_spectra(ws_name, masked_detectors=masked_detectors, method=self._grouping_method, group_ws=self._grouping_workspace)
+                group_spectra(
+                    ws_name,
+                    masked_detectors=masked_detectors,
+                    method=self._grouping_method,
+                    group_file=self._grouping_map_file,
+                    group_ws=self._grouping_workspace,
+                    group_string=self._grouping_string,
+                )
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -356,9 +382,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._mode = self.getPropertyValue("Mode")
         self._spectra_range = self.getProperty("SpectraRange").value
         self._rebin_string = self.getPropertyValue("RebinParam")
+
         self._grouping_method = self.getPropertyValue("GroupingPolicy")
-        grouping_ws_name = self.getPropertyValue("GroupingWorkspace")
-        self._grouping_workspace = mtd[grouping_ws_name] if grouping_ws_name else None
+        self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
+        self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
 
         if self._rebin_string == "":
             self._rebin_string = None
