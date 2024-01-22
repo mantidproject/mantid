@@ -149,7 +149,6 @@ QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) {
 QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) {
   QVector<QString> resultVec;
   resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
-
   std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
                  [](const auto &str) { return QString::fromStdString(str); });
   return resultVec;

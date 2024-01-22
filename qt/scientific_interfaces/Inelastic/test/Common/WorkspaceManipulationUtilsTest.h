@@ -19,8 +19,6 @@ using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
 namespace {
 
-auto &ads = Mantid::API::AnalysisDataService::Instance();
-
 MatrixWorkspace_sptr createWorkspaceWithInstrumentAndParameters() {
 
   auto testWorkspace = createWorkspace(1, 5);

@@ -23,7 +23,7 @@ MANTIDQT_INELASTIC_DLL std::string getEMode(const Mantid::API::MatrixWorkspace_s
 MANTIDQT_INELASTIC_DLL double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
 MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res);
-MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspacee,
+MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                                                      QPair<double, double> &res);
 
 MANTIDQT_INELASTIC_DLL QPair<double, double>
