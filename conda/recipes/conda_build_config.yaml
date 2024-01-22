@@ -77,10 +77,6 @@ libopenblas:
 euphonic:
   - '>=1.2.1,<2.0'
 
-# 2.2.0 causes resolution issues in the mantidqt host environment on linux
-librdkafka:
-  - <=2.1.1
-
 # 6.8.0 causes issues in mantidqt CMake when cross compiling.
 sip:
   - <=6.7.11

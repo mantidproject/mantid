@@ -43,7 +43,7 @@ requirements:
     - jemalloc  # [unix]
     - jsoncpp
     - libopenblas {{ libopenblas }}  # [osx or linux]
-    - librdkafka {{ librdkafka }}
+    - librdkafka
     - lib3mf  # [win]
     - muparser
     - nexus
