@@ -9,6 +9,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/NexusIOHelper.h"
 

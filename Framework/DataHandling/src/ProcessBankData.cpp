@@ -10,12 +10,13 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidDataHandling/PulseIndexer.h"
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::DataObjects;
 
 namespace Mantid::DataHandling {
 
-ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
+ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> event_id,
                                  std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents,
                                  size_t startAt, std::shared_ptr<std::vector<uint64_t>> event_index,
