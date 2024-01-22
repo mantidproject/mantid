@@ -46,7 +46,7 @@ sphinx_bootstrap_theme:
 
 # Some unit test failures present in 1.12.0 from tanh not being found.
 scipy:
-  - '>=1.10.0,!=1.12.0'
+  - '>=1.10.0'
 
 pyqt:
   - 5.15
