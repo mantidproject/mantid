@@ -8,8 +8,7 @@
 #include "MantidDataHandling/CompressEventSpectrumAccumulator.h"
 #include "MantidDataObjects/EventList.h"
 
-// for setting execution mode in sortq
-// include <execution>
+#include <tbb/parallel_sort.h>
 
 using Mantid::DataObjects::EventList;
 
@@ -84,9 +83,8 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
   if (m_tof.empty())
     return;
 
-  // code below assumes the tofs are sortedd
-  // tbb::parallel_sort(m_tof.begin(), m_tof.end()); may be better
-  std::sort(m_tof.begin(), m_tof.end());
+  // code below assumes the tofs are sorted
+  tbb::parallel_sort(m_tof.begin(), m_tof.end());
 
   raw_events->clear();                    // clean out previous version
   raw_events->reserve(m_tof.size() / 10); // blindly assume 10 raw events get compressed on average
