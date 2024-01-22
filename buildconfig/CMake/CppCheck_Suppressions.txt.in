@@ -49,9 +49,9 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayPrope
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:403
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileValidator.cpp:133
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileDescriptor.cpp:85
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:175
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:176
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:177
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LibraryManager.cpp:119
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:407
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:148

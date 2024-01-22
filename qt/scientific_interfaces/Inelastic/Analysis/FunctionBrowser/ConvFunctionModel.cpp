@@ -17,8 +17,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
-  (void)x;
-  return std::unordered_map<std::string, double>{{"Amplitude", y[1]}};
+  return std::unordered_map<std::string, double>{{"Amplitude", y[1]}, {"FWHM", 2.0 * std::abs(x[1] - x[0])}};
 };
 
 auto const sqeFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
@@ -277,11 +276,15 @@ EstimationDataSelector ConvFunctionModel::getEstimationDataSelector() const {
     (void)range;
 
     auto const maxElement = std::max_element(y.cbegin(), y.cend());
-    if (maxElement == y.cend())
+    auto const halfMaxElement =
+        std::find_if(y.cbegin(), y.cend(), [&maxElement](double const val) { return val > *maxElement / 2.0; });
+    if (maxElement == y.cend() || halfMaxElement == y.cend())
       return DataForParameterEstimation{{}, {}};
 
     auto const maxElementIndex = std::distance(y.cbegin(), maxElement);
-    return DataForParameterEstimation{{x[0], x[maxElementIndex]}, {y[0], *maxElement}};
+    auto const halfMaxElementIndex = std::distance(y.cbegin(), halfMaxElement);
+
+    return DataForParameterEstimation{{x[halfMaxElementIndex], x[maxElementIndex]}, {*halfMaxElement, *maxElement}};
   };
 }
 
