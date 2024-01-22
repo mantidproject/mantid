@@ -5,34 +5,43 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsView.h"
+#include "IndirectEditResultsDialog.h"
+#include "IndirectFitOutputOptionsPresenter.h"
 
 #include <QMessageBox>
 
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
-    : IIndirectFitOutputOptionsView(parent), m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()) {
+    : API::MantidWidget(parent), m_editResultsDialog(),
+      m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()), m_presenter() {
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(emitGroupWorkspaceChanged(QString const &)));
+          SLOT(notifyGroupWorkspaceChanged(QString const &)));
 
-  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(emitPlotClicked()));
-  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(emitSaveClicked()));
-  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(emitEditResultClicked()));
+  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(notifyPlotClicked()));
+  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(handleEditResultClicked()));
 }
 
-IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() = default;
-
-void IndirectFitOutputOptionsView::emitGroupWorkspaceChanged(QString const &group) {
-  emit groupWorkspaceChanged(group.toStdString());
+void IndirectFitOutputOptionsView::subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) {
+  m_presenter = presenter;
 }
 
-void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
+void IndirectFitOutputOptionsView::notifyGroupWorkspaceChanged(QString const &group) {
+  m_presenter->handleGroupWorkspaceChanged(group.toStdString());
+}
 
-void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
+void IndirectFitOutputOptionsView::notifyPlotClicked() { m_presenter->handlePlotClicked(); }
 
-void IndirectFitOutputOptionsView::emitEditResultClicked() { emit editResultClicked(); }
+void IndirectFitOutputOptionsView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
+
+void IndirectFitOutputOptionsView::notifyReplaceSingleFitResult() {
+  m_presenter->handleReplaceSingleFitResult(m_editResultsDialog->getSelectedInputWorkspaceName(),
+                                            m_editResultsDialog->getSelectedSingleFitWorkspaceName(),
+                                            m_editResultsDialog->getOutputWorkspaceName());
+}
 
 void IndirectFitOutputOptionsView::setGroupWorkspaceComboBoxVisible(bool visible) {
   m_outputOptions->cbGroupWorkspace->setVisible(visible);
@@ -79,9 +88,13 @@ std::string IndirectFitOutputOptionsView::getSelectedPlotType() const {
   return m_outputOptions->cbPlotType->currentText().toStdString();
 }
 
-void IndirectFitOutputOptionsView::setPlotText(QString const &text) { m_outputOptions->pbPlot->setText(text); }
+void IndirectFitOutputOptionsView::setPlotText(std::string const &text) {
+  m_outputOptions->pbPlot->setText(QString::fromStdString(text));
+}
 
-void IndirectFitOutputOptionsView::setSaveText(QString const &text) { m_outputOptions->pbSave->setText(text); }
+void IndirectFitOutputOptionsView::setSaveText(std::string const &text) {
+  m_outputOptions->pbSave->setText(QString::fromStdString(text));
+}
 
 void IndirectFitOutputOptionsView::setPlotExtraOptionsEnabled(bool enable) {
   m_outputOptions->cbGroupWorkspace->setEnabled(enable);
@@ -101,6 +114,14 @@ void IndirectFitOutputOptionsView::setSaveEnabled(bool enable) { m_outputOptions
 
 void IndirectFitOutputOptionsView::setEditResultVisible(bool visible) {
   m_outputOptions->pbEditResult->setVisible(visible);
+}
+
+void IndirectFitOutputOptionsView::handleEditResultClicked() {
+  m_editResultsDialog = new IndirectEditResultsDialog(this);
+  m_editResultsDialog->setAttribute(Qt::WA_DeleteOnClose);
+  m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
+  m_editResultsDialog->show();
+  connect(m_editResultsDialog, SIGNAL(replaceSingleFitResult()), this, SLOT(notifyReplaceSingleFitResult()));
 }
 
 void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {

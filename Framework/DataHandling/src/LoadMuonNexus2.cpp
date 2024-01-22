@@ -444,9 +444,9 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
     auto &file = descriptor.data();
     file.openPath(root + "/" + versionField);
-    int32_t version = 0;
-    file.getData(&version);
-    if (version != 2)
+    int32_t IDFversion = 0;
+    file.getData(&IDFversion);
+    if (IDFversion != 2)
       return 0;
 
     file.openPath(root + "/definition");

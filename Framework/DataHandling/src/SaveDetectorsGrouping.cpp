@@ -140,14 +140,14 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
 
   // 1. Get Instrument information
   const auto &instrument = mGroupWS->getInstrument();
-  const std::string name = instrument->getName();
-  g_log.debug() << "Instrument " << name << '\n';
+  const std::string instrumentName = instrument->getName();
+  g_log.debug() << "Instrument " << instrumentName << '\n';
 
   // 2. Start document (XML)
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", name);
+  pRoot->setAttribute("instrument", instrumentName);
   pRoot->setAttribute("idf-date", instrument->getValidFromDate().toISO8601String());
 
   // Set description if was specified by user

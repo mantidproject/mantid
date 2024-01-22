@@ -165,6 +165,14 @@ class BeamCentrePresenterTest(unittest.TestCase):
         for attr in rear_attr:
             self.assertEqual(getattr(mocked_external_model, attr), getattr(self.presenter._beam_centre_model, attr))
 
+    def test_set_scale_to_meters_on(self):
+        self.presenter.set_meters_mode_enabled(True)
+        self.view.set_position_unit.assert_called_with("m")
+
+    def test_set_scale_to_meters_off(self):
+        self.presenter.set_meters_mode_enabled(False)
+        self.view.set_position_unit.assert_called_with("mm")
+
     def test_on_update_rows_updates_centres(self):
         # As the rear centres can update when the rows change (due to different run number groups)
         # we should always update from the model

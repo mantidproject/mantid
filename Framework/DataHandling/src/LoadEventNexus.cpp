@@ -445,7 +445,6 @@ void LoadEventNexus::execLoader() {
 
 std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
-  std::string isooffset; // ISO8601 offset
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
   // the offset is and absolute timestamp, which is relative to the start of
@@ -455,6 +454,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
     logger.warning("In firstLastPulseTimes: no ISO8601 offset attribute "
                    "provided for event_time_zero, using UNIX epoch instead");
   } else {
+    std::string isooffset; // ISO8601 offset
     file.getAttr("offset", isooffset);
     offset = DateAndTime(isooffset);
   }
@@ -969,7 +969,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();

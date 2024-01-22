@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IndirectDataValidationHelper.h"
 #include "DllConfig.h"
-#include "IndirectDataValidationHelper.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
@@ -25,7 +25,7 @@ public:
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange);
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void reflectNegativeToPositive();
-  void setWorkspaceName(QString workspaceName);
+  void setWorkspaceName(std::string const &workspaceName);
   void setEMin(double value);
   void setEMax(double value);
   void setIsPositiveReflect(bool value);

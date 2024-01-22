@@ -185,7 +185,6 @@ void SortTableWorkspaceDialog::addColumn() {
 
   // suggest a name for the new column: one that hasn't been used in
   // other sort columns
-  QString newColumnName;
   foreach (QString name, m_columnNames) {
     if (!m_sortColumns.contains(name)) {
       columnName->setItemText(-1, name);

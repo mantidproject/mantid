@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationTab.h"
 
-#include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -31,7 +30,7 @@ InelasticDataManipulationTab::InelasticDataManipulationTab(QObject *parent) : In
 InelasticDataManipulationTab::~InelasticDataManipulationTab() = default;
 
 void InelasticDataManipulationTab::setOutputPlotOptionsPresenter(
-    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+    std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 

@@ -27,8 +27,8 @@ This class is for searching the ISIS data archive
 class MANTID_DATAHANDLING_DLL ISISDataArchive : public API::IArchiveSearch {
 public:
   /// Returns the path to a filename given the list of extensions to try
-  std::string getArchivePath(const std::set<std::string> &filenames,
-                             const std::vector<std::string> &exts) const override;
+  const API::Result<std::string> getArchivePath(const std::set<std::string> &filenames,
+                                                const std::vector<std::string> &exts) const override;
 
   /// Public and virtual for testing purposes
   virtual std::string getCorrectExtension(const std::string &path, const std::vector<std::string> &exts) const;

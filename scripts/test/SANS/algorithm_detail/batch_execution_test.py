@@ -21,8 +21,10 @@ from sans.algorithm_detail.batch_execution import (
     subtract_scaled_background,
     check_for_background_workspace_in_ads,
     group_bgsub_if_required,
+    save_to_file,
 )
 from sans.common.enums import SaveType, ReductionMode
+from sans.common.constants import SCALED_BGSUB_SUFFIX
 
 
 class ADSMock(object):
@@ -319,8 +321,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "CanScatterRunNumber": "7",
             "CanDirectRunNumber": "8",
         }
+        additional_metadata = {}
 
-        save_workspace_to_file(ws_name, [], filename, additional_run_numbers)
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers, additional_metadata)
 
         expected_options = {
             "InputWorkspace": ws_name,
@@ -334,14 +337,78 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
+    @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
+    def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func):
+        state = mock.MagicMock()
+        save_info_mock = mock.MagicMock()
+        scaled_bg_mock = mock.MagicMock()
+        scaled_bg_mock.workspace = "scaled_ws"
+        scaled_bg_mock.scale_factor = 0.5
+        file_formats_mock = mock.MagicMock()
+        save_info_mock.file_format = file_formats_mock
+        state.save = save_info_mock
+        state.background_subtraction = scaled_bg_mock
+        reduction_package = mock.MagicMock()
+        reduction_package.state = state
+
+        mock_names_func.return_value = ["unsubbed_ws"]
+        save_to_file([reduction_package], False, {}, {})
+        mock_save_func.assert_called_with("unsubbed_ws", file_formats_mock, "unsubbed_ws", {}, {})
+
+    @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
+    def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func):
+        state = mock.MagicMock()
+        save_info_mock = mock.MagicMock()
+        scaled_bg_mock = mock.MagicMock()
+        scaled_bg_mock.workspace = "scaled_ws"
+        scaled_bg_mock.scale_factor = 0.5
+        file_formats_mock = mock.MagicMock()
+        save_info_mock.file_format = file_formats_mock
+        state.save = save_info_mock
+        state.background_subtraction = scaled_bg_mock
+        reduction_package = mock.MagicMock()
+        reduction_package.state = state
+
+        mock_names_func.return_value = ["subbed_ws" + SCALED_BGSUB_SUFFIX]
+        save_to_file([reduction_package], False, {}, {})
+        mock_save_func.assert_called_with(
+            "subbed_ws" + SCALED_BGSUB_SUFFIX,
+            file_formats_mock,
+            "subbed_ws" + SCALED_BGSUB_SUFFIX,
+            {},
+            {"BackgroundSubtractionWorkspace": "scaled_ws", "BackgroundSubtractionScaleFactor": 0.5},
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_subtracted_save_workspace_to_file_does_include_metadata_in_options(self, mock_alg_manager):
+        ws_name = "wsName_bgsub"
+        filename = "fileName"
+        additional_run_numbers = {}
+        additional_metadata = {"BackgroundSubtractionWorkspace": "tobesubtracted", "BackgroundSubtractionScaleFactor": "1.25"}
+
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers, additional_metadata)
+
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": "",
+            "TransmissionCan": "",
+            "BackgroundSubtractionWorkspace": "tobesubtracted",
+            "BackgroundSubtractionScaleFactor": "1.25",
+        }
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_that_save_workspace_to_file_can_set_file_types(self, mock_alg_manager):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
+        additional_metadata = {}
         file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
 
-        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
+        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers, additional_metadata)
 
         expected_options = {
             "InputWorkspace": ws_name,
@@ -362,6 +429,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
+        additional_metadata = {}
         file_types = []
         transmission_name = "transName"
         transmission_can_name = "transCanName"
@@ -371,6 +439,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             file_types,
             filename,
             additional_run_numbers,
+            additional_metadata,
             transmission_name=transmission_name,
             transmission_can_name=transmission_can_name,
         )
@@ -511,6 +580,17 @@ class DeleteMethodsTest(unittest.TestCase):
         ws_group = GroupWorkspaces(InputWorkspaces=ws_ptrs, OutputWorkspace=str(uuid.uuid4()))
         return ws_group
 
+    def _create_ads_bgsub_workspace(self):
+        ws_ptrs = []
+        for i in range(2):
+            self._ads_names.append(str(uuid.uuid4()))
+            ws_ptrs.append(CreateSampleWorkspace(OutputWorkspace=self._ads_names[-1]))
+        return ws_ptrs
+
+    def _create_ads_single_workspace(self):
+        self._ads_names.append(str(uuid.uuid4()))
+        return CreateSampleWorkspace(OutputWorkspace=self._ads_names[-1])
+
     @staticmethod
     def _create_non_ads_sample_workspaces():
         ws_group = WorkspaceGroup()
@@ -532,6 +612,29 @@ class DeleteMethodsTest(unittest.TestCase):
         current_ads_names = AnalysisDataService.getObjectNames()
         self.assertTrue(all(name in current_ads_names for name in self._ads_names))
         delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertFalse(all(name in current_ads_names for name in self._ads_names))
+
+    def test_delete_reduced_and_bgsub_workspace_in_ads(self):
+        package = self._pack_reduction_package(self._create_ads_sample_workspaces)
+        package.reduced_bgsub_name = self._create_ads_bgsub_workspace()
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertTrue(all(name in current_ads_names for name in self._ads_names))
+        delete_reduced_workspaces(reduction_packages=[package], include_non_transmission=False)
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertFalse(all(name in current_ads_names for name in self._ads_names))
+
+    def test_delete_reduced_and_no_bgsub_workspace_given(self):
+        package = self._pack_reduction_package(self._create_ads_sample_workspaces)
+        package.reduced_bgsub_name = None
+        package.reduced_lab = self._create_ads_single_workspace()
+        package.reduced_hab = self._create_ads_single_workspace()
+        package.reduced_merged = self._create_ads_single_workspace()
+        package.reduced_lab_sample = self._create_ads_single_workspace()
+        package.reduced_hab_sample = self._create_ads_single_workspace()
+        current_ads_names = AnalysisDataService.getObjectNames()
+        self.assertTrue(all(name in current_ads_names for name in self._ads_names))
+        delete_reduced_workspaces(reduction_packages=[package])
         current_ads_names = AnalysisDataService.getObjectNames()
         self.assertFalse(all(name in current_ads_names for name in self._ads_names))
 

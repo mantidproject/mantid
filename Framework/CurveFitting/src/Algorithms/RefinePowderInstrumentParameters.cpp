@@ -527,8 +527,8 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string>
   stringstream dbss;
   set<string>::iterator setiter;
   for (setiter = paramstofitset.begin(); setiter != paramstofitset.end(); ++setiter) {
-    string name = *setiter;
-    dbss << setw(20) << name;
+    string paramName = *setiter;
+    dbss << setw(20) << paramName;
   }
   g_log.notice() << "Parameters to refine: " << dbss.str() << '\n';
 
@@ -912,12 +912,12 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(const
     row >> parname;
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double tmpdbl = std::numeric_limits<float>::quiet_NaN();
-      string tmpstr;
       try {
         row >> tmpdbl;
       } catch (runtime_error &) {
         g_log.error() << "Import MC parameter " << colnames[ic] << " error in row " << ir << " of workspace "
                       << tablews->getName() << '\n';
+        string tmpstr;
         row >> tmpstr;
         g_log.error() << "Should be " << tmpstr << '\n';
       }

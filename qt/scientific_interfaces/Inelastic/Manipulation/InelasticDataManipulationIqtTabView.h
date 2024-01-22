@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IIqtView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
@@ -17,45 +18,54 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationIqtTabView : public QWidget {
+class IIqtPresenter;
+
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationIqtTabView : public QWidget, public IIqtView {
   Q_OBJECT
 
 public:
   InelasticDataManipulationIqtTabView(QWidget *parent = nullptr);
   ~InelasticDataManipulationIqtTabView();
-  IndirectPlotOptionsView *getPlotOptions();
-  void plotInput(MatrixWorkspace_sptr inputWS, int spectrum);
-  void setPreviewSpectrumMaximum(int value);
-  void updateDisplayedBinParameters();
-  void setRangeSelectorDefault(const MatrixWorkspace_sptr inputWorkspace, const QPair<double, double> &range);
-  bool validate();
-  void setSampleFBSuffixes(QStringList const suffix);
-  void setSampleWSSuffixes(QStringList const suffix);
-  void setResolutionFBSuffixes(QStringList const suffix);
-  void setResolutionWSSuffixes(QStringList const suffix);
-  void setRunEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
-  void setRunText(bool running);
-  void setWatchADS(bool watch);
-  void setup();
+
+  void subscribePresenter(IIqtPresenter *presenter) override;
+
+  OutputPlotOptionsView *getPlotOptions() const override;
+  void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
+  void setPreviewSpectrumMaximum(int value) override;
+  void updateDisplayedBinParameters() override;
+  void setRangeSelectorDefault(const MatrixWorkspace_sptr inputWorkspace, const QPair<double, double> &range) override;
+  bool validate() override;
+  void setSampleFBSuffixes(const QStringList &suffix) override;
+  void setSampleWSSuffixes(const QStringList &suffix) override;
+  void setResolutionFBSuffixes(const QStringList &suffix) override;
+  void setResolutionWSSuffixes(const QStringList &suffix) override;
+  void setRunEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
+  void setRunText(bool running) override;
+  void setWatchADS(bool watch) override;
+  void setup() override;
+  void showMessageBox(const std::string &message) const override;
 
   // getters for properties
-  std::string getSampleName();
+  std::string getSampleName() const override;
 
-signals:
-  void sampDataReady(const QString &);
-  void resDataReady(const QString &);
-  void iterationsChanged(int);
-  void errorsClicked(int);
-  void previewSpectrumChanged(int);
-  void runClicked();
-  void saveClicked();
-  void plotCurrentPreview();
-  void showMessageBox(const QString &message);
-  void valueChanged(QtProperty *, double);
+private slots:
+  void notifySampDataReady(const QString &filename);
+  void notifyResDataReady(const QString &resFilename);
+  void notifyIterationsChanged(int iterations);
+  void notifyRunClicked();
+  void notifySaveClicked();
+  void notifyPlotCurrentPreview();
+  void notifyErrorsClicked(int state);
+  void notifyPreviewSpectrumChanged(int spectra);
+  void notifyUpdateEnergyRange(int state);
+  void notifyValueChanged(QtProperty *prop, double value);
+  void notifyRangeChanged(double min, double max);
+  void notifyUpdateRangeSelector(QtProperty *prop, double val);
 
 private:
   void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
@@ -64,19 +74,16 @@ private:
                            double newValue);
 
   Ui::InelasticDataManipulationIqtTab m_uiForm;
+
+  // Presenter
+  IIqtPresenter *m_presenter;
   QtTreePropertyBrowser *m_iqtTree;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
   /// Double manager to create properties
   QtDoublePropertyManager *m_dblManager;
-  /// Double editor facotry for the properties browser
+  /// Double editor factory for the properties browser
   DoubleEditorFactory *m_dblEdFac;
-
-private slots:
-  void rangeChanged(double min, double max);
-  void updateRangeSelector(QtProperty *prop, double val);
-  void updateEnergyRange(int state);
-  void handleErrorsClicked(int);
 };
 
 } // namespace CustomInterfaces

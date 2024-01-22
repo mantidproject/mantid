@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "Result.h"
 
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -44,8 +45,8 @@ public:
    * the archive
    * @param exts :: A list of extensions to check for in turn against each file
    */
-  virtual std::string getArchivePath(const std::set<std::string> &filenames,
-                                     const std::vector<std::string> &exts) const = 0;
+  virtual const Result<std::string> getArchivePath(const std::set<std::string> &filenames,
+                                                   const std::vector<std::string> &exts) const = 0;
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch

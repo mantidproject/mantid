@@ -229,9 +229,8 @@ std::string FileProperty::setValue(const std::string &propValue) {
   // sure the
   // directory exists for a Save property
   if (Poco::Path(strippedValue).isAbsolute()) {
-    std::string error;
     if (isSaveProperty()) {
-      error = createDirectory(strippedValue);
+      std::string error = createDirectory(strippedValue);
       if (!error.empty())
         return error;
     }
@@ -344,7 +343,7 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
         addExtension(lower, exts);
         addExtension(upper, exts);
       }
-      foundFile = FileFinder::Instance().findRun(propValue, exts);
+      foundFile = FileFinder::Instance().findRun(propValue, exts).result();
     } else // non-runfiles go through FileFinder::getFullPath
     {
       foundFile = FileFinder::Instance().getFullPath(propValue);

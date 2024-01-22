@@ -860,8 +860,8 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   evaluateValidator(v);
 
   try {
-    auto &value = boost::get<std::vector<double>>(m_data);
-    value.assign(v.begin(), v.end());
+    auto &data = boost::get<std::vector<double>>(m_data);
+    data.assign(v.begin(), v.end());
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -1335,8 +1335,8 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
 
     Kernel::UnitParametersMap pmap{};
     spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex, pmap);
-    std::vector<double> emptyVec;
     try {
+      std::vector<double> emptyVec;
       wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
       outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
     } catch (std::exception &) {

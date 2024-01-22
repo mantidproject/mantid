@@ -33,21 +33,8 @@ requirements:
     - libcxx                                 # [osx]
 
   host:
-    # These following were updated on the same day and caused problems when building mantidqt,
-    # so we are pinning them all for now while investigating further.
-    - aom=3.5.0
-    - dav1d=1.2.0
     - icu=72.1
     - libxml2=2.10.4
-    - boost-cpp=1.78.0
-    - libhwloc=2.9.1
-    - tbb=2021.9.0
-    - cairo=1.16.0
-    - tbb-devel=2021.9.0
-    - harfbuzz=7.3.0
-    - libass=0.17.1
-    - ffmpeg=5.1.2
-    - vtk=9.2.6
     - boost {{ boost }}
     - eigen
     - gsl {{ gsl }}

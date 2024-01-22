@@ -68,9 +68,9 @@ void PropertyHandler::init() {
     pi->property()->addSubProperty(fnProp);
     // assign m_item
     QList<QtBrowserItem *> itList = pi->children();
-    foreach (QtBrowserItem *item, itList) {
-      if (item->property() == fnProp) {
-        m_item = item;
+    foreach (QtBrowserItem *browserItem, itList) {
+      if (browserItem->property() == fnProp) {
+        m_item = browserItem;
         break;
       }
     }
@@ -1134,11 +1134,11 @@ void PropertyHandler::addTie(const QString &tieStr) {
   std::string name = parts[0].trimmed().toStdString();
   std::string expr = parts[1].trimmed().toStdString();
   try {
-    auto &cfun = *m_browser->compositeFunction();
-    cfun.tie(name, expr);
-    cfun.applyTies();
+    auto &cfunction = *m_browser->compositeFunction();
+    cfunction.tie(name, expr);
+    cfunction.applyTies();
     const bool recursive = true;
-    QString parName = QString::fromStdString(cfun.parameterLocalName(cfun.parameterIndex(name), recursive));
+    QString parName = QString::fromStdString(cfunction.parameterLocalName(cfunction.parameterIndex(name), recursive));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
@@ -1239,7 +1239,7 @@ void PropertyHandler::removeTie(const QString &parName) {
  @returns and estimate of the peak width, or 0 if an error occurs
 */
 double PropertyHandler::EstimateFwhm() const {
-  double fwhm = 0.;
+  double fwhmEstimate = 0.;
   auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
@@ -1247,7 +1247,7 @@ double PropertyHandler::EstimateFwhm() const {
     const auto &Y = ws->y(wi);
     size_t n = Y.size() - 1;
     if (m_ci < 0 || m_ci > static_cast<int>(n)) {
-      fwhm = 0.;
+      fwhmEstimate = 0.;
     } else {
       double halfHeight = ((Y[m_ci] - m_base) / 2.) + m_base;
       // walk to the right
@@ -1266,17 +1266,17 @@ double PropertyHandler::EstimateFwhm() const {
         }
       }
 
-      fwhm = fabs(X[rightHwhmIndex] - X[leftHwhmIndex]);
+      fwhmEstimate = fabs(X[rightHwhmIndex] - X[leftHwhmIndex]);
 
       // apply a maximum limitation if larger than the fitting region
       double fitRange = m_browser->endX() - m_browser->startX();
-      if (fwhm > fitRange) {
+      if (fwhmEstimate > fitRange) {
         // set to 10% of fitting region
-        fwhm = fitRange * 0.1;
+        fwhmEstimate = fitRange * 0.1;
       }
     }
   }
-  return fwhm;
+  return fwhmEstimate;
 }
 /**
  * Calculate m_base: the baseline level under the peak (if this function is a

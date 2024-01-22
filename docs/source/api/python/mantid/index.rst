@@ -28,3 +28,4 @@ Submodules
    testing/index
    simpleapi
    fitfunctions
+   fixtures

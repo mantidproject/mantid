@@ -195,7 +195,6 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         child_alg = create_algorithm("ReflectometryISISLoadAndProcess")
         excluded = [
             "InputRunList",
-            "ROIDetectorIDs",
             "ThetaIn",
             "ThetaLogName",
             "HideInputWorkspaces",

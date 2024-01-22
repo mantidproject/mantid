@@ -497,8 +497,8 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
     // check that the supplied names are in the function
     // it is acceptable to be missing parameters
     bool failed = false;
-    for (const auto &name : suppliedParameterNames) {
-      if (std::find(functionParameterNames.begin(), functionParameterNames.end(), name) ==
+    for (const auto &parName : suppliedParameterNames) {
+      if (std::find(functionParameterNames.begin(), functionParameterNames.end(), parName) ==
           functionParameterNames.end()) {
         failed = true;
         break;
@@ -2318,14 +2318,14 @@ std::string FitPeaks::getPeakHeightParameterName(const API::IPeakFunction_const_
   std::string height_name("");
 
   std::vector<std::string> peak_parameters = peak_function->getParameterNames();
-  for (const auto &name : peak_parameters) {
-    if (name == "Height") {
+  for (const auto &parName : peak_parameters) {
+    if (parName == "Height") {
       height_name = "Height";
       break;
-    } else if (name == "I") {
+    } else if (parName == "I") {
       height_name = "I";
       break;
-    } else if (name == "Intensity") {
+    } else if (parName == "Intensity") {
       height_name = "Intensity";
       break;
     }

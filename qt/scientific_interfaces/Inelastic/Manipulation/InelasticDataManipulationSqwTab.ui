@@ -407,18 +407,6 @@
    </item>
    <item row="2" column="0">
     <widget class="QGroupBox" name="groupBox">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>45</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>45</height>
-      </size>
-     </property>
      <property name="title">
       <string>Run</string>
      </property>
@@ -444,18 +432,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pbRun">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>23</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>180</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Run</string>
         </property>
@@ -479,12 +455,6 @@
    </item>
    <item row="3" column="0">
     <widget class="QGroupBox" name="sqw_outputOptions">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>56</height>
-      </size>
-     </property>
      <property name="title">
       <string>Output</string>
      </property>
@@ -496,7 +466,7 @@
        <number>7</number>
       </property>
       <item>
-       <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
+       <widget class="MantidQt::CustomInterfaces::OutputPlotOptionsView" name="ipoPlotOptions" native="true"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_1">
@@ -539,15 +509,15 @@
    <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/ContourPreviewPlot.h</header>
+   <header>Common/OutputPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
    <extends>QWidget</extends>
-   <header>IndirectPlotOptionsView.h</header>
+   <header>MantidQtWidgets/Plotting/ContourPreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

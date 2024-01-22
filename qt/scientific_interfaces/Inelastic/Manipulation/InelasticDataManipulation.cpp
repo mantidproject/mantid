@@ -9,7 +9,7 @@
 //----------------------
 #include "InelasticDataManipulation.h"
 
-#include "IndirectSettings.h"
+#include "Common/Settings.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationIqtTab.h"
 #include "InelasticDataManipulationMomentsTab.h"
@@ -56,19 +56,19 @@ void InelasticDataManipulation::exportTabPython() {
  */
 void InelasticDataManipulation::initLayout() {
   m_uiForm.setupUi(this);
-  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
-  addTab<InelasticDataManipulationSymmetriseTab>("Symmetrise");
+  addMVPTab<InelasticDataManipulationSymmetriseTab, InelasticDataManipulationSymmetriseTabView>("Symmetrise");
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
-  addTab<InelasticDataManipulationMomentsTab>("Moments");
-  addTab<InelasticDataManipulationElwinTab>("Elwin");
-  addTab<InelasticDataManipulationIqtTab>("Iqt");
+  addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
+  addMVPTab<InelasticDataManipulationElwinTab, InelasticDataManipulationElwinTabView>("Elwin");
+  addMVPTab<InelasticDataManipulationIqtTab, InelasticDataManipulationIqtTabView>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  // Connect the Python export buton
+  // Connect the Python export button
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));

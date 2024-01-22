@@ -215,7 +215,7 @@ class InstrumentArrayConverter:
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
-        drows, dcols = nrows // 2, ncols // 2
+        drows, dcols = int(nrows) // 2, int(ncols) // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
         peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
@@ -266,7 +266,7 @@ class PeakData:
                 if len(xvals) > signal.shape[-1]:
                     xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
                 xcens[irow, icol, :] = xvals
-        return xcens, signal, errors
+        return xcens, signal, errors**2, ispecs
 
     def get_roi_on_detector(self, detids):
         isort = np.argsort(detids.flatten())

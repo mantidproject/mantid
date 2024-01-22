@@ -133,16 +133,16 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
     if (tabWS->columnCount() != 3) {
       validationOutput["NormalizationTable"] = "NormalizationTable must have three columns";
     }
-    auto names = tabWS->getColumnNames();
+    auto columnNames = tabWS->getColumnNames();
     int normCount = 0;
     int wsNamesCount = 0;
-    for (const std::string &name : names) {
+    for (const std::string &columnName : columnNames) {
 
-      if (name == "norm") {
+      if (columnName == "norm") {
         normCount += 1;
       }
 
-      if (name == "name") {
+      if (columnName == "name") {
         wsNamesCount += 1;
       }
     }

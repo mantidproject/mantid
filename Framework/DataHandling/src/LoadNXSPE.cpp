@@ -52,16 +52,16 @@ using Mantid::HistogramData::BinEdges;
  * @return confidence 0 - 100%
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
-  int confidence = 0;
+  int identifierConfidence = 0;
   if (value == "NXSPE") {
-    confidence = 99;
+    identifierConfidence = 99;
   } else {
     boost::regex re("^NXSP", boost::regex::icase);
     if (boost::regex_match(value, re)) {
-      confidence = 95;
+      identifierConfidence = 95;
     }
   }
-  return confidence;
+  return identifierConfidence;
 }
 
 /**
@@ -287,8 +287,10 @@ void LoadNXSPE::exec() {
 
     Kernel::V3D pos;
     pos.spherical(r, polar.at(i), azimuthal.at(i));
-    // Define the size of the detector using the minimum of the polar or azimuthal width
-    double rr = r * sin(std::min(std::abs(polar_width.at(i)), std::abs(azimuthal_width.at(i))) * deg2rad / 2);
+    // Define the size of the detector using the minimum of the polar or azimuthal width (with maximum of 2 deg)
+    double rr =
+        r * sin(std::min(std::min(std::abs(polar_width.at(i)), std::abs(azimuthal_width.at(i))), 2.0) * deg2rad / 2);
+
     const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), std::max(rr, 0.01));
 
     Geometry::Detector *det = new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);

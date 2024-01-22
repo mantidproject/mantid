@@ -126,16 +126,16 @@ std::map<std::string, std::string> ConvertFitFunctionForMuonTFAsymmetry::validat
     if (tabWS->columnCount() != 3) {
       result["NormalizationTable"] = "NormalizationTable must have three columns";
     }
-    auto names = tabWS->getColumnNames();
+    auto columnNames = tabWS->getColumnNames();
     int normCount = 0;
     int wsNamesCount = 0;
-    for (const std::string &name : names) {
+    for (const std::string &columnName : columnNames) {
 
-      if (name == "norm") {
+      if (columnName == "norm") {
         normCount += 1;
       }
 
-      if (name == "name") {
+      if (columnName == "name") {
         wsNamesCount += 1;
       }
     }
@@ -153,8 +153,9 @@ std::map<std::string, std::string> ConvertFitFunctionForMuonTFAsymmetry::validat
     }
   } else {
     const std::vector<std::string> wsNames = getProperty("WorkspaceList");
-    for (std::string name : wsNames) {
-      API::MatrixWorkspace_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(name);
+    for (std::string wsName : wsNames) {
+      API::MatrixWorkspace_const_sptr ws =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(wsName);
       const Mantid::API::Run &run = ws->run();
       if (!run.hasProperty("analysis_asymmetry_norm")) {
         result["NormalizationTable"] = "NormalizationTable has not been "
@@ -224,8 +225,8 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(const Mantid
   bool copyTies = getProperty("CopyTies");
   if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
-    for (const auto &name : originalNames) {
-      const auto index = original->parameterIndex(name);
+    for (const auto &parName : originalNames) {
+      const auto index = original->parameterIndex(parName);
       auto originalTie = original->getTie(index);
       if (originalTie) {
         const auto stringTie = originalTie->asString();
@@ -356,8 +357,8 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::I
   bool copyTies = getProperty("CopyTies");
   if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
-    for (const auto &name : originalNames) {
-      auto index = original->parameterIndex(name);
+    for (const auto &parName : originalNames) {
+      auto index = original->parameterIndex(parName);
       auto originalTie = original->getTie(index);
       if (originalTie) {
         auto stringTie = originalTie->asString();

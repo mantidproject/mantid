@@ -9,17 +9,18 @@ EISFDiffCylinder
 Description
 -----------
 
-This fitting function models the diffusion of a particle confined in a
-cylinder of radius :math:`R` and length :math:`L` [1]_.
+This fitting function models the diffusion of a particle confined in a cylinder of radius :math:`R` and
+length :math:`L` [1]_. :math:`A_0(Q_z)` implements diffusion along the cylinder axis.
 
 .. math::
-    A_0(Q_z) = (\frac{j_0(Q R \cos(\theta))}{Q R \cos(\theta)})^2
-    B_0^0(Q_{\perp}) = (3 \frac{j_1(Q L \sin(\theta))}{Q L \sin(\theta)})^2
-   \frac{1}{2} \int_0^{\pi} d\theta \sin(\theta)
+    A_0(Q_z) = (j_0(Q L \cos(\theta)))^2 = (\frac{\sin(Q L \cos(\theta))}{Q L \cos(\theta)})^2
 
-:math:`A_0(Q_z)` implements diffusion along the cylinder axis.
-:math:`B_0^0(Q_{\perp})` implements diffusion perpendicular to the cylinder
-axis. Both diffusions are assumed to be decoupled. Finally, the integration
+:math:`B_0^0(Q_{\perp})` implements diffusion perpendicular to the cylinder axis.
+
+.. math::
+    B_0^0(Q_{\perp}) = (2 \frac{J_1(Q R \sin(\theta))}{Q R \sin(\theta)} )^2
+
+Both diffusions are assumed to be decoupled. Finally, the integration
 in :math:`\theta` implements a powder average
 (`spherical Bessel functions <http://mathworld.wolfram.com/SphericalBesselFunctionoftheFirstKind.html>`__).
 
@@ -50,7 +51,7 @@ Output:
 
 .. testoutput:: QdependenceFit
 
-    name=EISFDiffCylinder,A=1,R=3.5,L=1.7,constraints=(0.01<R,0.01<L),ties=(A=1)
+    name=EISFDiffCylinder,A=1,R=3.11497,L=1.68724,constraints=(0.01<R,0.01<L),ties=(A=1)
 
 .. properties::
 

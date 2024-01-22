@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
+#include "FitTabConstants.h"
 #include "IDAFunctionParameterEstimation.h"
 #include "MantidAPI/TextAxis.h"
 
@@ -31,7 +32,7 @@ private:
 };
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis *axis,
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis const *axis,
                                                                              Predicate const &predicate) {
   std::vector<std::string> labels;
   std::vector<std::size_t> spectra;
@@ -197,10 +198,13 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
-  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
+FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
+                                       IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
+
+void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {
+  m_fitPropertyBrowser = browser;
 }
 
 bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
@@ -216,7 +220,6 @@ bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialo
     } else {
       setActiveEISF(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
     }
-
     updateActiveWorkspaceID(getNumberOfWorkspaces());
     return true;
   }
@@ -229,12 +232,15 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = createFqFitParameters(workspace);
   const auto spectrum = getParameterSpectrum(parameters);
+  auto fqFitFunctionList = chooseFqFitFunctions(paramType == "Width");
+
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
+  m_fitPropertyBrowser->updateFunctionListInBrowser(fqFitFunctionList);
 
   if (paramType == "Width") {
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
@@ -247,13 +253,27 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   }
 }
 
-void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
+std::map<std::string, std::string> FqFitDataPresenter::chooseFqFitFunctions(bool paramWidth) const {
+  if (m_view->isTableEmpty()) // when first data is added to table, it can only be either WIDTH or EISF
+    return paramWidth ? FqFit::WIDTH_FITS : FqFit::EISF_FITS;
 
-void FqFitDataPresenter::updateActiveWorkspaceID() { m_activeWorkspaceID = m_model->getNumberOfWorkspaces(); }
+  bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
+  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
+  if (widthFuncs && eisfFuncs)
+    return FqFit::ALL_FITS;
+  else if (widthFuncs)
+    return FqFit::WIDTH_FITS;
+  else
+    return FqFit::EISF_FITS;
+}
+
+void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
 void FqFitDataPresenter::updateActiveWorkspaceID(WorkspaceID index) { m_activeWorkspaceID = index; }
 
-void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+void FqFitDataPresenter::handleAddClicked() { updateActiveWorkspaceID(m_model->getNumberOfWorkspaces()); }
+
+void FqFitDataPresenter::handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -266,7 +286,7 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
   updateParameterOptions(dialog, parameters);
 }
 
-void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
+void FqFitDataPresenter::handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
   if (!workspaceName.empty() && m_adsInstance.doesExist(workspaceName)) {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -357,21 +377,12 @@ void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID worksp
     logger.warning("Invalid EISF index specified.");
 }
 
-std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(), SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *, const std::string &)));
-  connect(dialog.get(), SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
-  return dialog;
-}
-
 void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
-  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto axis = dynamic_cast<Mantid::API::TextAxis const *>(workspace->getAxis(1));
   const auto parameter = axis->label(subIndices.second.value);
 
   const auto workspaceIndex = m_model->getSpectrum(row);
@@ -385,7 +396,6 @@ void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   newRow.startX = range.first;
   newRow.endX = range.second;
   newRow.exclude = exclude;
-
   m_view->addTableEntry(row.value, newRow);
 }
 } // namespace MantidQt::CustomInterfaces::IDA

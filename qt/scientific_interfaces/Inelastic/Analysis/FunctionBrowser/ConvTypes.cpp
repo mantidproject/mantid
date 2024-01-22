@@ -60,7 +60,7 @@ std::unordered_map<std::string, FitType>
                          {"ElasticIsoRotDiff", FitType::ElasticIsoRotDiff},
                          {"InelasticIsoRotDiff", FitType::InelasticIsoRotDiff}});
 
-std::map<ParamID, QString> g_paramName{
+std::map<ParamID, std::string> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
     {ParamID::LOR1_FWHM, "FWHM"},
@@ -132,10 +132,10 @@ std::map<ParamID, QString> g_paramName{
 template <>
 std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typeMap{
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
-    {FitType::FickDiffusion, {"Fick Diffusion", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
-    {FitType::ChudleyElliot, {"Chudley-Elliot", "ChudleyElliotSQE", {ParamID::CE_HEIGHT, ParamID::CE_CENTRE}}},
-    {FitType::HallRoss, {"Hall-Ross", "HallRossSQE", {ParamID::HR_HEIGHT, ParamID::HR_CENTRE}}},
+    {FitType::TeixeiraWater, {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {FitType::FickDiffusion, {"Fick Diffusion SQE", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
+    {FitType::ChudleyElliot, {"Chudley-Elliot SQE", "ChudleyElliotSQE", {ParamID::CE_HEIGHT, ParamID::CE_CENTRE}}},
+    {FitType::HallRoss, {"Hall-Ross SQE", "HallRossSQE", {ParamID::HR_HEIGHT, ParamID::HR_CENTRE}}},
     {FitType::StretchedExpFT, {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
     {FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
     {FitType::ElasticDiffSphere,
@@ -184,7 +184,7 @@ std::map<TempCorrectionType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<Temp
      {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
 };
 
-QString paramName(ParamID id) { return g_paramName.at(id); }
+std::string paramName(ParamID id) { return g_paramName.at(id); }
 
 void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(), FitSubType::g_typeMap[fitType].blocks.back(),

@@ -91,7 +91,6 @@ void LoadFlexiNexus::loadDictionary(const std::string &dictFile) {
 }
 
 void LoadFlexiNexus::readData(NeXus::File *fin) {
-  Mantid::DataObjects::Workspace2D_sptr ws;
   std::map<std::string, std::string>::const_iterator it;
 
   if ((it = dictionary.find("data")) == dictionary.end()) {
@@ -261,12 +260,12 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   std::map<std::string, std::string>::const_iterator it;
 
   // get a name
-  std::string name(axisNames[index]);
-  name += "axis-name";
-  if ((it = dictionary.find(name)) != dictionary.end()) {
-    name = it->second;
+  std::string axisName(axisNames[index]);
+  axisName += "axis-name";
+  if ((it = dictionary.find(axisName)) != dictionary.end()) {
+    axisName = it->second;
   } else {
-    name = axisNames[index];
+    axisName = axisNames[index];
   }
 
   // get axis data
@@ -294,10 +293,10 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
     const auto tmp = max;
     max = min;
     min = tmp;
-    g_log.notice("WARNING: swapped axis values on " + name);
+    g_log.notice("WARNING: swapped axis values on " + axisName);
   }
-  Mantid::Geometry::GeneralFrame frame(name, "");
-  return MDHistoDimension_sptr(new MDHistoDimension(name, name, frame, min, max, length));
+  Mantid::Geometry::GeneralFrame frame(axisName, "");
+  return MDHistoDimension_sptr(new MDHistoDimension(axisName, axisName, frame, min, max, length));
 }
 void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, const ExperimentInfo_sptr &info) {
   std::map<std::string, std::string>::const_iterator it;

@@ -389,8 +389,8 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
   // make sure that we can read those files back in again
   bool isInValidOldFormat = true;
   try {
-    auto name = sasCollimationElement->getChildElement("name");
-    check(name, "name");
+    auto nameElement = sasCollimationElement->getChildElement("name");
+    check(nameElement, "name");
   } catch (Kernel::Exception::NotFoundError &) {
     isInValidOldFormat = false;
   }

@@ -218,6 +218,7 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/RectangularDetector.h
     inc/MantidGeometry/Instrument/ReferenceFrame.h
     inc/MantidGeometry/Instrument/SampleEnvironment.h
+    inc/MantidGeometry/Instrument/SolidAngleParams.h
     inc/MantidGeometry/Instrument/StructuredDetector.h
     inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
     inc/MantidGeometry/Instrument_fwd.h

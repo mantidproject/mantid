@@ -33,12 +33,12 @@ public:
   void setFunction(IFunction_sptr fun) override;
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
-  void setFitType(const QString &name);
-  QString getFitType();
+  void setFitType(const std::string &name);
+  std::string getFitType();
   void removeFitType();
-  QStringList getFunctionList();
+  std::vector<std::string> getFunctionList();
   int getEnumIndex();
-  void setGlobal(const QString &name, bool isGlobal);
+  void setGlobal(std::string const &parameterName, bool isGlobal);
 
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -46,12 +46,12 @@ public:
   void estimateFunctionParameters();
 
 private:
-  QString m_fitType;
+  std::string m_fitType;
   DataForParameterEstimationCollection m_estimationData;
-  QMap<QString, IFunction_sptr> m_fitTypeToFunctionStore;
-  QMap<QString, QStringList> m_globalParameterStore;
-  QStringList m_fitTypeList;
-  boost::optional<QString> findFitTypeForFunctionName(const QString &name) const;
+  QMap<std::string, IFunction_sptr> m_fitTypeToFunctionStore;
+  QMap<std::string, std::vector<std::string>> m_globalParameterStore;
+  std::vector<std::string> m_fitTypeList;
+  boost::optional<std::string> findFitTypeForFunctionName(const std::string &name) const;
   // Parameter estimation
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };

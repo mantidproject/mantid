@@ -15,7 +15,7 @@ IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent) : QDialog(
 
   connect(m_uiForm.pbPasteInputName, SIGNAL(clicked()), this, SLOT(setOutputWorkspaceName()));
   connect(m_uiForm.pbReplaceFitResult, SIGNAL(clicked()), this, SIGNAL(replaceSingleFitResult()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
+  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 void IndirectEditResultsDialog::setWorkspaceSelectorSuffices(QStringList const &suffices) {

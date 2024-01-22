@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
-from sans.common.general_functions import get_bank_for_spectrum_number
+from sans.common.general_functions import get_bank_for_spectrum_number, get_detector_types_from_instrument
 from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
@@ -170,10 +170,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         front = self.get_val("front_centre", det_config_dict)
         all = self.get_val("all_centre", det_config_dict)
 
-        if self.reduction_mode.reduction_mode is ReductionMode.LAB:
+        if self.reduction_mode.reduction_mode in [ReductionMode.LAB, ReductionMode.HAB]:
             update_translations(DetectorType.LAB, rear)
-        elif self.reduction_mode.reduction_mode is ReductionMode.HAB:
-            update_translations(DetectorType.HAB, front)
+            if DetectorType.HAB in get_detector_types_from_instrument(self.instrument):
+                update_translations(DetectorType.HAB, front)
         elif self.reduction_mode.reduction_mode in [ReductionMode.ALL, ReductionMode.MERGED]:
             if self.instrument is SANSInstrument.LOQ:
                 update_translations(DetectorType.LAB, rear)

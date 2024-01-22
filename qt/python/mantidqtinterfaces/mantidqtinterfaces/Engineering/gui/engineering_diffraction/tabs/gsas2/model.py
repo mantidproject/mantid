@@ -452,7 +452,7 @@ class GSAS2Model(object):
 
                 generator = ReflectionGenerator(structure)
 
-                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 3.0, ReflectionConditionFilter.StructureFactor)
+                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 4.2, ReflectionConditionFilter.StructureFactor)
                 dValues = generator.getDValues(hkls)
                 pg = structure.getSpaceGroup().getPointGroup()
                 # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
@@ -506,29 +506,6 @@ class GSAS2Model(object):
     # X Limits
     # =========
 
-    def determine_x_limits(self):
-        tof_min = self.determine_tof_min()
-        if not tof_min:
-            return None
-        for workspace_index in range(len(self.x_min)):
-            if tof_min[workspace_index] > self.x_min[workspace_index]:
-                self.x_min[workspace_index] = tof_min[workspace_index]
-        return True
-
-    def determine_tof_min(self):
-        tof_min = []
-        if self.number_of_regions > 1 and len(self.instrument_files) == 1:
-            tof_min = self.get_crystal_params_from_instrument(self.instrument_files[0])
-            if not tof_min:
-                return None
-        elif self.number_of_regions == len(self.instrument_files):
-            for input_instrument in self.instrument_files:
-                loop_instrument_tof_min = self.get_crystal_params_from_instrument(input_instrument)
-                if not loop_instrument_tof_min:
-                    return None
-                tof_min.append(loop_instrument_tof_min[0])
-        return tof_min
-
     def understand_data_structure(self):
         self.data_x_min = []
         self.data_x_max = []
@@ -565,15 +542,7 @@ class GSAS2Model(object):
         else:
             self.x_min = self.data_x_min
             self.x_max = self.data_x_max
-            success = self.determine_x_limits()
-            if not success:
-                return None
-            if not self.x_min:
-                logger.error(
-                    "Could not determine Minimum and Maximum X values from input files. "
-                    "Please set these values in the Plot Widget on the GSAS-II tab."
-                )
-                return None
+
         self.limits = [self.x_min, self.x_max]
         return True
 

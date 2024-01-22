@@ -271,7 +271,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         engrid = np.transpose(np.tile(en, (np.shape(y)[1], 1)))
         # Calculates the Debye-Waller and Bose factors from the Temperature and mean-squared displacements
         qqgridsq = qqgrid**2
-        DWF = np.exp(-2 * (qqgridsq * msd))
+        DWF = np.exp(-(qqgridsq * msd))
         idm = np.where(engrid < 0)
         idp = np.where(engrid >= 0)
         # The expression for the population (Bose) factor and phonon energy dependence below actually refer to the phonon

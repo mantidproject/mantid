@@ -155,8 +155,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   std::string status = (normConst == 0) ? "Estimate" : "Fixed";
   std::vector<std::string> methods(specLength, status);
-  std::string name = (specLength > 1) ? wsName + "_spec_" : wsName;
-  std::vector<std::string> wsNames(specLength, name);
+  std::string baseName = (specLength > 1) ? wsName + "_spec_" : wsName;
+  std::vector<std::string> wsNames(specLength, baseName);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {

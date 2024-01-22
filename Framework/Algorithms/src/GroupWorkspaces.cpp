@@ -100,10 +100,10 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
   Poco::Glob glob(globExpression);
 
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const auto names = ads.topLevelItems();
-  for (const auto &name : names) {
-    if (glob.match(name.first)) {
-      addToGroup(name.second);
+  const auto wsNames = ads.topLevelItems();
+  for (const auto &wsName : wsNames) {
+    if (glob.match(wsName.first)) {
+      addToGroup(wsName.second);
     }
   }
 }
@@ -116,8 +116,8 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names, const std::string &outputName) {
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  for (const auto &name : names) {
-    addToGroup(name != outputName ? ads.retrieve(name) : ads.remove(name));
+  for (const auto &wsName : names) {
+    addToGroup(wsName != outputName ? ads.retrieve(wsName) : ads.remove(wsName));
   }
 }
 

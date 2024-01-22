@@ -82,11 +82,7 @@ void CrystalStructure::setScatterers(const CompositeBraggScatterer_sptr &scatter
 /// Adds all scatterers in the supplied collection into the internal one
 /// (scatterers are copied).
 void CrystalStructure::addScatterers(const CompositeBraggScatterer_sptr &scatterers) {
-  size_t count = scatterers->nScatterers();
-
-  for (size_t i = 0; i < count; ++i) {
-    m_scatterers->addScatterer(scatterers->getScatterer(i));
-  }
+  m_scatterers->addScatterers(scatterers->getScatterers());
 
   assignUnitCellToScatterers(m_cell);
 }
@@ -97,15 +93,15 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(const SpaceGroup_con
   m_centering.reset();
 
   // First letter is centering
-  std::string centering = spaceGroup->hmSymbol().substr(0, 1);
+  std::string centeringSymbol = spaceGroup->hmSymbol().substr(0, 1);
 
-  if (centering == "R") {
-    centering = "Robv";
+  if (centeringSymbol == "R") {
+    centeringSymbol = "Robv";
   }
 
   const auto &reflectionConditions = getAllReflectionConditions();
   for (auto &reflectionCondition : reflectionConditions) {
-    if (reflectionCondition->getSymbol() == centering) {
+    if (reflectionCondition->getSymbol() == centeringSymbol) {
       m_centering = reflectionCondition;
       break;
     }

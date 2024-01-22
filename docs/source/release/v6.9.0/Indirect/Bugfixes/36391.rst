@@ -1,1 +1,0 @@
--  Fixed a bug where clicking 'Run' on the :ref:`Apply Absorption Corrections<indirect_apply_absorp_correct>` Tab in the :ref:`Corrections<interface-indirect-corrections>` GUI with non-grouped Corrections workspace would close Mantid. A Warning is shown instead if wrong entry workspace.

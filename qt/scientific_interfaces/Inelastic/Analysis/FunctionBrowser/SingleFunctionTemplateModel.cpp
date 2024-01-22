@@ -11,6 +11,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <unordered_map>
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -18,8 +19,8 @@ namespace MantidQt::CustomInterfaces::IDA {
 namespace {
 // Sort the function list, keep existing order just rotate the None entry into
 // the front
-void sortFunctionList(QStringList &list) {
-  auto ix = std::find(list.begin(), list.end(), QString("None"));
+void sortFunctionList(std::vector<std::string> &list) {
+  auto ix = std::find(list.begin(), list.end(), "None");
   if (ix == list.end() || ix == list.begin()) {
     return;
   } else {
@@ -51,24 +52,28 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
     } catch (std::invalid_argument &) {
       // Error in function string, adding an empty function to map
     }
-    m_fitTypeToFunctionStore.insert(QString::fromStdString(functionInfo.first), function);
-    m_globalParameterStore.insert(QString::fromStdString(functionInfo.first), QStringList());
+    m_fitTypeToFunctionStore.insert(functionInfo.first, function);
+    m_globalParameterStore.insert(functionInfo.first, std::vector<std::string>());
   }
   // Sort the FunctionList as None should always appear first
-  m_fitTypeList = m_fitTypeToFunctionStore.keys();
+  m_fitTypeList = qListToStdVector(m_fitTypeToFunctionStore.keys());
   sortFunctionList(m_fitTypeList);
   m_fitType = m_fitTypeList.front();
 }
 
-QStringList SingleFunctionTemplateModel::getFunctionList() { return m_fitTypeList; }
-int SingleFunctionTemplateModel::getEnumIndex() { return m_fitTypeList.indexOf(m_fitType); }
+std::vector<std::string> SingleFunctionTemplateModel::getFunctionList() { return m_fitTypeList; }
+
+int SingleFunctionTemplateModel::getEnumIndex() {
+  auto const findIter = std::find(m_fitTypeList.cbegin(), m_fitTypeList.cend(), m_fitType);
+  return findIter != m_fitTypeList.cend() ? static_cast<int>(std::distance(m_fitTypeList.cbegin(), findIter)) : -1;
+}
 
 void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   if (!fun)
     return;
   if (fun->nFunctions() == 0) {
     const auto name = fun->name();
-    auto fitType = findFitTypeForFunctionName(QString::fromStdString(name));
+    auto fitType = findFitTypeForFunctionName(name);
     if (fitType) {
       setFitType(fitType.value());
     } else {
@@ -79,7 +84,7 @@ void SingleFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   }
 }
 
-void SingleFunctionTemplateModel::setFitType(const QString &type) {
+void SingleFunctionTemplateModel::setFitType(const std::string &type) {
   if (m_function) {
     m_globalParameterStore[m_fitType] = getGlobalParameters();
   }
@@ -93,7 +98,7 @@ void SingleFunctionTemplateModel::setFitType(const QString &type) {
   estimateFunctionParameters();
 }
 
-QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
+std::string SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 
 EstimationDataSelector SingleFunctionTemplateModel::getEstimationDataSelector() const {
   return [](const std::vector<double> &x, const std::vector<double> &y,
@@ -125,38 +130,30 @@ void SingleFunctionTemplateModel::updateParameterEstimationData(DataForParameter
 }
 
 void SingleFunctionTemplateModel::estimateFunctionParameters() {
-  if (m_estimationData.size() != static_cast<size_t>(getNumberDomains())) {
-    return;
-  }
-  // Estimate function parameters - parameters are updated in-place.
-  for (int i = 0; i < getNumberDomains(); ++i) {
-    auto function = getSingleFunction(i);
-    m_parameterEstimation->estimateFunctionParameters(function, m_estimationData[i]);
-  }
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
-void SingleFunctionTemplateModel::setGlobal(const QString &name, bool isGlobal) {
+void SingleFunctionTemplateModel::setGlobal(std::string const &parameterName, bool isGlobal) {
   auto globalParameters = getGlobalParameters();
-  if (isGlobal && !globalParameters.contains(name)) {
-    globalParameters << name;
-  } else if (!isGlobal && globalParameters.contains(name)) {
-    globalParameters.removeAll(name);
+  auto const findIter = std::find(globalParameters.cbegin(), globalParameters.cend(), parameterName);
+  if (isGlobal && findIter == globalParameters.cend()) {
+    globalParameters.emplace_back(parameterName);
+  } else if (!isGlobal && findIter != globalParameters.cend()) {
+    globalParameters.erase(findIter);
   }
-  globalParameters.removeDuplicates();
   setGlobalParameters(globalParameters);
 }
 
-boost::optional<QString> SingleFunctionTemplateModel::findFitTypeForFunctionName(const QString &name) const {
-  auto nameAsString = name.toStdString();
+boost::optional<std::string> SingleFunctionTemplateModel::findFitTypeForFunctionName(const std::string &name) const {
   auto result = std::find_if(m_fitTypeToFunctionStore.constBegin(), m_fitTypeToFunctionStore.constEnd(),
-                             [&nameAsString](const auto &function) -> bool {
+                             [&name](const auto &function) -> bool {
                                if (function)
-                                 return function->name() == nameAsString;
+                                 return function->name() == name;
                                else
                                  return false;
                              });
   if (result != std::end(m_fitTypeToFunctionStore)) {
-    return boost::optional<QString>{result.key()};
+    return boost::optional<std::string>{result.key()};
   }
   return boost::none;
 }

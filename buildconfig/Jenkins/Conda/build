@@ -5,7 +5,7 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
-#   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
+#   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
 #   3. ENABLE_DOCS: build the user docs
 #   4. ENABLE_DEV_DOCS: build the user docs
 #   5. ENABLE_BUILD_CODE: whether or not to build the main code target

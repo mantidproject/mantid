@@ -37,8 +37,9 @@ std::shared_ptr<Geometry::MeshObject> MeshFileIO::translate(std::shared_ptr<Geom
     if (translationVector.size() != 3) {
       throw std::invalid_argument("Invalid Translation vector, must have exactly 3 dimensions");
     }
-    Kernel::V3D translate = createScaledV3D(translationVector[0], translationVector[1], translationVector[2]);
-    environmentMesh->translate(translate);
+    Kernel::V3D scaledTranslationVector =
+        createScaledV3D(translationVector[0], translationVector[1], translationVector[2]);
+    environmentMesh->translate(scaledTranslationVector);
   }
   return environmentMesh;
 }

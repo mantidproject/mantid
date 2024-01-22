@@ -7,8 +7,10 @@
 #pragma once
 #include "AsciiSaver.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/IFileHandler.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
+#include "SaveAlgorithmRunner.h"
 #include "SavePresenter.h"
 #include <memory>
 
@@ -18,9 +20,15 @@ namespace ISISReflectometry {
 
 class SavePresenterFactory {
 public:
+  SavePresenterFactory(IFileHandler *fileHandler) : m_fileHandler(fileHandler) {}
+
   std::unique_ptr<ISavePresenter> make(ISaveView *view) {
-    return std::make_unique<SavePresenter>(view, std::make_unique<AsciiSaver>());
+    return std::make_unique<SavePresenter>(
+        view, std::make_unique<AsciiSaver>(std::make_unique<SaveAlgorithmRunner>(), m_fileHandler));
   }
+
+private:
+  IFileHandler *m_fileHandler;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

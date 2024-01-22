@@ -748,8 +748,6 @@ void AlgorithmDialog::executeAlgorithmAsync() {
         m_exitButton->setEnabled(false);
         m_btnTimer.setInterval(1000);
         connect(&m_btnTimer, SIGNAL(timeout()), this, SLOT(enableExitButton()));
-      } else {
-        m_statusTracked = false;
       }
     }
     algToExec->executeAsync();
@@ -771,6 +769,8 @@ void AlgorithmDialog::removeAlgorithmFromManager() {
 }
 
 void AlgorithmDialog::enableExitButton() { m_exitButton->setEnabled(true); }
+
+void AlgorithmDialog::disableExitButton() { m_exitButton->setEnabled(false); }
 
 //------------------------------------------------------
 // Private member functions

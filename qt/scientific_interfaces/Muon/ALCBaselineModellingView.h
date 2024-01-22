@@ -30,7 +30,7 @@ public:
   ALCBaselineModellingView(QWidget *widget);
   ~ALCBaselineModellingView() override;
 
-  QString function() const override;
+  std::string function() const override;
   SectionRow sectionRow(int row) const override;
   SectionSelector sectionSelector(int index) const override;
   int noOfSectionRows() const override;

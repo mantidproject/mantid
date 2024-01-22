@@ -205,6 +205,7 @@ signals:
   void textZoomedIn();
   void textZoomedOut();
   void progressMade(const int);
+  void editorFocusIn(const QString &filename);
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -901,14 +902,14 @@ public:
     FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
     FunctionTreeView *view() const;
     void setStretchLastColumn(bool stretch);
-    void setFunction(const QString &funStr);
-    QString getFunctionString();
-    QString getFitFunctionString() const;
-    void setParameter(const QString &funStr, double value);
-    double getParameter(const QString &funStr);
+    void setFunction(const std::string &funStr);
+    std::string getFunctionString();
+    std::string getFitFunctionString() const;
+    void setParameter(const std::string &funStr, double value);
+    double getParameter(const std::string &funStr);
     int getNumberOfDatasets() const;
     void setNumberOfDatasets(int n);
-    void setCurrentDataset(int i);
+    void setCurrentDataset(int i) throw(std::exception);
     int getCurrentDataset() const;
     void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
@@ -918,8 +919,8 @@ public:
     void hideGlobalCheckbox();
     void showGlobalCheckbox();
 
-    QStringList getGlobalParameters() const;
-    void setGlobalParameters(const QStringList &globals);
+    std::vector<std::string> getGlobalParameters() const;
+    void setGlobalParameters(const std::vector<std::string> &globals);
     void clear();
     void updateParameters(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
@@ -939,14 +940,14 @@ public:
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
     %End
-    SIP_PYOBJECT getFunctionByIndex(const QString &index);
+    SIP_PYOBJECT getFunctionByIndex(const std::string &index);
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
     %End
 signals:
     void functionStructureChanged();
-    void parameterChanged(const QString &funcIndex, const QString &paramName);
-    void attributeChanged(const QString &attributeName);
+    void parameterChanged(const std::string &funcIndex, const std::string &parameterName);
+    void attributeChanged(const std::string &attributeName);
 };
 
 // ---------------------------------
@@ -961,11 +962,11 @@ public:
     int getNumberOfQtProperties() const;
     int getNumberOfTieProperties() const;
     int getNumberOfConstraintProperties() const;
-    QRect getVisualRectFunctionProperty(const QString &index) const;
-    QRect getVisualRectParameterProperty(const QString &index) const;
+    QRect getVisualRectFunctionProperty(const std::string &index) const;
+    QRect getVisualRectParameterProperty(const std::string &index) const;
     QTreeWidget *treeWidget() const;
-    QWidget *getParamWidget(const QString &paramName) const;
-    double getParameter(const QString &paramName) const;
+    QWidget *getParamWidget(const std::string &parameterName) const;
+    double getParameter(const std::string &parameterName) const;
 };
 
 // ---------------------------------

@@ -319,9 +319,13 @@ class SXD(BaseSX):
             mantid.DeleteWorkspace(ws)
 
     @staticmethod
-    def undo_calibration(ws):
+    def undo_calibration(ws, peaks_ws=None):
         mantid.ClearInstrumentParameters(Workspace=ws)  # reset workspace calibration
         mantid.LoadParameterFile(Workspace=ws, Filename="SXD_Parameters.xml", EnableLogging=False)
+        if peaks_ws is not None:
+            mantid.ApplyInstrumentToPeaks(
+                InputWorkspace=peaks_ws, InstrumentWorkspace=ws, OutputWorkspace=SXD.retrieve(peaks_ws).name(), EnableLogging=False
+            )
 
     @staticmethod
     def remove_peaks_on_detector_edge(peaks, nedge):

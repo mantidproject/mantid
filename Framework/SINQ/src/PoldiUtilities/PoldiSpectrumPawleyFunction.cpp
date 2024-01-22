@@ -30,7 +30,6 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(const FunctionDomain1DSpect
                                                      FunctionValues &values) const {
   values.zeroCalculated();
 
-  size_t domainSize = domain.size();
   size_t index = domain.getWorkspaceIndex();
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
@@ -44,7 +43,7 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(const FunctionDomain1DSpect
       m_pawleyFunction->function(*(helper->domain), helper->values);
 
       for (size_t j = 0; j < helper->values.size(); ++j) {
-        values.addToCalculated((j + baseOffset) % domainSize, helper->values[j] * helper->factors[j]);
+        values.addToCalculated((j + baseOffset) % domain.size(), helper->values[j] * helper->factors[j]);
       }
     }
 

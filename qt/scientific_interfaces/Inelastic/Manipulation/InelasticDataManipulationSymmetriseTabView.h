@@ -7,6 +7,8 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "ISymmetriseView.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -18,44 +20,46 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSymmetriseTabView : public QWidget {
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSymmetriseTabView : public QWidget, public ISymmetriseView {
   Q_OBJECT
-
 public:
-  InelasticDataManipulationSymmetriseTabView(QWidget *perent = nullptr);
+  InelasticDataManipulationSymmetriseTabView(QWidget *parent = nullptr);
   ~InelasticDataManipulationSymmetriseTabView();
-  void setDefaults();
-  IndirectPlotOptionsView *getPlotOptions();
-  void setFBSuffixes(QStringList const suffix);
-  void setWSSuffixes(QStringList const suffix);
-  void plotNewData(QString const &workspaceName);
-  void updateMiniPlots();
-  bool validate();
-  void setRawPlotWatchADS(bool watchADS);
-  double getElow() const;
-  double getEhigh() const;
-  double getPreviewSpec();
-  QString getInputName();
-  void previewAlgDone();
-  void enableSave(bool save);
-  void enableRun(bool save);
-  void updateRangeSelectors(QtProperty *prop, double value);
-  void replotNewSpectrum(double value);
-  bool verifyERange(QString const &workspaceName);
 
-signals:
-  void doubleValueChanged(QtProperty *, double);
-  void enumValueChanged(QtProperty *, int);
-  void dataReady(QString const &);
-  void previewClicked();
-  void runClicked();
-  void saveClicked();
-  void showMessageBox(const QString &message);
+  void subscribePresenter(ISymmetrisePresenter *presenter) override;
+
+  void setDefaults() override;
+  OutputPlotOptionsView *getPlotOptions() const override;
+  void setFBSuffixes(QStringList const &suffix) override;
+  void setWSSuffixes(QStringList const &suffix) override;
+
+  double getElow() const override;
+  double getEhigh() const override;
+  double getPreviewSpec() override;
+  std::string getDataName() const override;
+
+  void plotNewData(std::string const &workspaceName) override;
+  void updateMiniPlots() override;
+  void replotNewSpectrum(double value) override;
+  void updateRangeSelectors(std::string const &propName, double value) override;
+  bool verifyERange(std::string const &workspaceName) override;
+  void setRawPlotWatchADS(bool watchADS) override;
+
+  void previewAlgDone() override;
+  void enableSave(bool save) override;
+  void enableRun(bool run) override;
+  bool validate() override;
+  void showMessageBox(std::string const &message) const override;
 
 private slots:
-  void xRangeLowChanged(double value);
-  void xRangeHighChanged(double value);
-  void reflectTypeChanged(QtProperty *, int value);
+  void notifyDoubleValueChanged(QtProperty *, double);
+  void notifyReflectTypeChanged(QtProperty *, int value);
+  void notifyDataReady(QString const &);
+  void notifyPreviewClicked();
+  void notifyRunClicked();
+  void notifySaveClicked();
+  void notifyXrangeLowChanged(double value);
+  void notifyXrangeHighChanged(double value);
 
 private:
   void resetEDefaults(bool isPositive, QPair<double, double> range);
@@ -70,6 +74,8 @@ private:
   QtDoublePropertyManager *m_dblManager;
   QtGroupPropertyManager *m_grpManager;
   QtEnumPropertyManager *m_enumManager;
+
+  ISymmetrisePresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

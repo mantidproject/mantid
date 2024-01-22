@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, call
 from numpy import isnan, nan
 
 from mantid import FunctionFactory
@@ -191,10 +191,12 @@ class FittingPlotModelTest(unittest.TestCase):
         mock_log_ws_name = mock.MagicMock()
         mock_conv_tof_to_d.return_value = 1.0
         mock_conv_tof_e.return_value = 0.5
+
+        # Below return values are set to 'nan' to show that values for calculating fwhm are taken from func_str in the fitprop
         mock_table_return_values = {
             "Name": ["Height", "Centre", "Radius", "Cost function value"],
-            "Value": [16.0, 38613.0, 0.65, 1.7],
-            "Error": [nan, nan, 0.0, 0.0],
+            "Value": [nan, nan, nan, nan],
+            "Error": [nan, nan, nan, nan],
         }
         mock_conv_tof_to_d.return_value = 1.0
         mock_conv_tof_e.return_value = 0.5
@@ -204,16 +206,7 @@ class FittingPlotModelTest(unittest.TestCase):
         self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
 
         self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
-        self.assertEqual(
-            self.model._fit_results["name1"]["results"],
-            {
-                "ElasticIsoRotDiff_Height": [[16.0, nan]],
-                "ElasticIsoRotDiff_Centre": [[38613.0, nan]],
-                "ElasticIsoRotDiff_Centre_dSpacing": [[1.0, 0.5]],
-                "ElasticIsoRotDiff_Radius": [[0.65, 0.0]],
-                "ElasticIsoRotDiff_fwhm": [self._get_fwhm_values(func_str, 0)],
-            },
-        )
+        self.assertEqual(self.model._fit_results["name1"]["results"]["ElasticIsoRotDiff_fwhm"], [self._get_fwhm_values(func_str, 0)])
 
     @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
@@ -281,6 +274,46 @@ class FittingPlotModelTest(unittest.TestCase):
                 "Bessel_Nu": [[0.1, 4.5]],
             },
         )
+
+    @patch("mantid.api.FunctionFactoryImpl.createPeakFunction")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_fwhm_independent_from_params_table(
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e, mock_create_peak_func
+    ):
+        mock_peak_func = mock.MagicMock()
+        mock_create_peak_func.return_value = mock_peak_func
+        mock_loaded_ws_list = mock.MagicMock()
+        mock_active_ws_list = mock.MagicMock()
+        mock_log_ws_name = mock.MagicMock()
+        mock_table_return_values = {
+            "Name": [
+                "Height",
+                "Centre",
+                "Radius",
+                "Cost function value",
+            ],
+            "Value": [nan] * 4,
+            "Error": [nan] * 4,
+        }
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        func_str = "name=ElasticIsoRotDiff,Q=0.3,Height=20.2136,Centre=23666.0,Radius=0.98"
+        fitprop = self._setup_update_fit_test(
+            mock_table_return_values,
+            mock_ads,
+            mock_get_diffs,
+            func_str,
+            peak_center_params=["ElasticIsoRotDiff_Centre"],
+        )
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        # Q is a non-fitting parameter. So not expecting a call for that
+        mock_peak_func.setParameter.assert_has_calls(calls=[call(0, 20.2136), call(1, 23666.0), call(2, 0.98)])
+        mock_peak_func.fwhm.assert_called_once()
 
     def setup_test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws):
         loaded_ws_list = ["name1", "name2"]

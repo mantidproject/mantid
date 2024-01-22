@@ -93,6 +93,7 @@ set(PYTHON_PLUGINS
     algorithms/InelasticEMUauReduction.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
+    algorithms/IntegratePeaksShoeboxTOF.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
@@ -170,6 +171,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
     algorithms/SaveINS.py
+    algorithms/SaveISISReflectometryORSO.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -185,6 +187,7 @@ set(PYTHON_PLUGINS
     algorithms/CNCSSuggestTIB.py
     algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
+    algorithms/SymmetriseMDHisto.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
     algorithms/TestWorkspaceGroupProperty.py

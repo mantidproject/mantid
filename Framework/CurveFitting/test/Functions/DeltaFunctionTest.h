@@ -83,6 +83,9 @@ public:
 
   std::string name() const override { return "DeltaFunctionTest_Delta"; }
 
+  // Expose protected function so we can test it.
+  void callFunctionDeriv1D() { functionDeriv1D(nullptr, nullptr, 0); }
+
 }; // end of DeltaFunctionTest_Delta
 
 class DeltaFunctionTest : public CxxTest::TestSuite {
@@ -214,6 +217,12 @@ public:
       auto d = y[i] - hh * exp(-xx * xx / bb) - scale1 * ha * exp(-xx1 * xx1 / a) - scale2 * ha * exp(-xx2 * xx2 / a);
       TS_ASSERT_DELTA(d, 0.0, 1e-11);
     }
+  }
+
+  void testThrowsWhenCallingFunctionDeriv1D() {
+    DeltaFunctionTest_Delta delta;
+    TS_ASSERT_THROWS_EQUALS(delta.callFunctionDeriv1D(), const std::runtime_error &e, std::string(e.what()),
+                            "Cannot compute derivative of a delta function");
   }
 
 }; // end of DeltaFunctionTest

@@ -67,9 +67,9 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.presenter._read_all(True, False, 0, 100)
         self.model.set_datafiles_to_load.assert_called_once_with("C:/data", [0, 100], True, False)
         self.view.open_progress_dialog.assert_called_once_with(1)
-        self.model.read_all.assert_called_once_with(["a"], "C:/data", ["b"], False)
+        self.model.read_all.assert_called_once_with(["a"], "C:/data", ["b"], [], False)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._filter_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._filter_standard")
     def test_read_standard(self, mock_filter_standard):
         self.model.read_standard.return_value = True
         self.presenter._read_standard()
@@ -88,8 +88,8 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.presenter._cancel_loading()
         self.model.set_loading_canceled.assert_called_once_with(True)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._format_view")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._read_all")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._format_view")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._read_all")
     def test_autoload_new(self, mock_read_all, mock_format_view):
         self.presenter.param_dict = get_file_selector_param_dict()
         self.presenter._old_data_set = [1]
@@ -111,13 +111,13 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.watcher.stop_watcher.assert_called_once()
         self.assertEqual(mock_format_view.call_count, 4)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._get_non_hidden_rows")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._get_non_hidden_rows")
     def test_check_all_visible_scans(self, mock_hidden_row):
         mock_hidden_row.return_value = [1, 2]
         self.presenter._check_all_visible_scans()
         self.model.check_scans_by_rows.assert_called_once_with([1, 2])
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._get_non_hidden_rows")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._get_non_hidden_rows")
     def test_check_last_scans(self, mock_hidden_row):
         mock_hidden_row.return_value = [1, 2]
         self.view.get_number_scans_to_check.return_value = 0
@@ -173,8 +173,8 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.model.filter_standard_types.assert_called_once_with({"vanadium": True}, True, False)
         self.view.hide_scan.assert_not_called()
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._filter_standard")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._read_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._filter_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._read_standard")
     def test_changed_to_standard(self, mock_read, mock_filter):
         self.model.get_number_of_scans.return_value = 1
         self.presenter._changed_to_standard()
@@ -191,8 +191,8 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.presenter.modus = "123_tof"
         self.assertTrue(self.presenter._is_modus_tof())
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._filter_scans")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._filter_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._filter_scans")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._filter_standard")
     def test_modus_changed(self, mock_filter_standard, mock_filter_scans):
         self.presenter.modus = "123_tof"
         self.presenter._modus_changed()
@@ -202,13 +202,11 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
 
     def test_update_progress(self):
         self.presenter.update_progress(0, 0)
-        self.view.set_progress.assert_called_once_with(1)
+        self.view.set_progress.assert_called_once_with(0, 0)
         self.view.set_progress.reset_mock()
         self.presenter.update_progress(2, 0)
-        self.view.set_progress.assert_called_once_with(3)
+        self.view.set_progress.assert_called_once_with(2, 0)
         self.view.set_progress.reset_mock()
-        self.presenter.update_progress(10, 200)
-        self.view.set_progress.assert_not_called()
 
     def test_right_click(self):
         self.presenter.param_dict = get_file_selector_param_dict()
@@ -223,8 +221,8 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.model.get_data.assert_any_call(full_info=False)
         self.assertEqual(self.model.get_data.call_count, 3)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._auto_select_standard")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter.get_option_dict")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._auto_select_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter.get_option_dict")
     def test_process_request(self, mock_get_option, mock_auto_select_standard):
         mock_get_option.return_value = {}
         with self.assertRaises(KeyError):
@@ -234,7 +232,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.presenter.process_request()
         mock_auto_select_standard.assert_called_once_with(state=2)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.print")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.print")
     def test_set_view_from_param(self, mock_print):
         self.presenter.param_dict = get_file_selector_param_dict()
         self.model.check_by_file_numbers.return_value = []
@@ -243,14 +241,16 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.model.check_by_file_numbers.assert_called_once_with([796640, 796640])
         self.model.check_by_file_numbers.return_value = [1, 2]
         self.presenter.set_view_from_param()
-        mock_print.assert_called_once_with("Of 0 loaded checked file numbers" " [1, 2] were not found " "in list of datafiles")
+        mock_print.assert_called_once_with("Of 0 loaded checked file numbers [1, 2] were not found in list of datafiles")
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._sample_data_clicked")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._standard_data_clicked")
-    def test_tab_got_focus(self, mock_standard_data_clicked, mock_sample_data_clicked):
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._clear_data_trees")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._sample_data_clicked")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._standard_data_clicked")
+    def test_tab_got_focus(self, mock_clear_data_trees, mock_standard_data_clicked, mock_sample_data_clicked):
         self.presenter.modus = "123_tof"
         self._standard_data_counter = 0
         self.presenter.tab_got_focus()
+        mock_clear_data_trees.assert_called_once()
         mock_standard_data_clicked.assert_called_once()
         mock_sample_data_clicked.assert_called_once()
         self.view.hide_tof.assert_called_once_with(hidden=False)
@@ -264,16 +264,16 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         mock_sample_data_clicked.assert_not_called()
         self.view.hide_tof.assert_called_once_with(hidden=True)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._read_all")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._read_all")
     def test_process_commandline_request(self, mock_read):
         command_dict = {"files": [{"start": 0, "end": 10}]}
         self.presenter.process_commandline_request(command_dict)
         mock_read.assert_called_once_with(filtered=True, start=0, end=10)
         self.model.check_file_number_range.assert_called_once_with(0, 10)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._format_view")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._filter_scans")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._read_all")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._format_view")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._filter_scans")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._read_all")
     def test_sample_data_clicked(self, mock_read_all, mock_filter_scans, mock_format_view):
         self.model.get_sample_data_model.return_value = True
         self.model.get_number_of_scans.return_value = []
@@ -284,10 +284,10 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         mock_filter_scans.assert_called_once()
         mock_format_view.assert_called_once()
 
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._format_view")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._check_all_visible_scans")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter.get_option_dict")
-    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_" "presenter.DNSFileSelectorPresenter._changed_to_standard")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._format_view")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._check_all_visible_scans")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter.get_option_dict")
+    @patch("mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_presenter.DNSFileSelectorPresenter._changed_to_standard")
     def test_standard_data_clicked(self, mock_change_std, mock_get_opts, mock_check_scans, mock_format_view):
         self.model.get_standard_data_model.return_value = True
         self.model.get_number_of_scans.return_value = []

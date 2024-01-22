@@ -20,10 +20,10 @@ using namespace MantidWidgets;
  */
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
-          SLOT(editLocalParameter(const QString &)));
-  connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
-          SLOT(viewChangedParameterValue(const QString &, double)));
+  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
+          SLOT(editLocalParameter(std::string const &)));
+  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
+          SLOT(viewChangedParameterValue(std::string const &, double)));
 }
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
@@ -82,7 +82,7 @@ void IqtTemplatePresenter::setStretchExponential(bool on) {
   emit functionStructureChanged();
 }
 
-void IqtTemplatePresenter::setBackground(const QString &name) {
+void IqtTemplatePresenter::setBackground(std::string const &name) {
   if (name == "None") {
     m_view->removeBackground();
     m_model->removeBackground();
@@ -90,7 +90,7 @@ void IqtTemplatePresenter::setBackground(const QString &name) {
     m_view->addFlatBackground();
     m_model->setBackground(name);
   } else {
-    throw std::logic_error("Browser doesn't support background " + name.toStdString());
+    throw std::logic_error("Browser doesn't support background " + name);
   }
   setErrorsEnabled(false);
   updateView();
@@ -101,7 +101,7 @@ void IqtTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomain
 
 int IqtTemplatePresenter::getNumberOfDatasets() const { return m_model->getNumberDomains(); }
 
-void IqtTemplatePresenter::setFunction(const QString &funStr) {
+void IqtTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
   m_view->clear();
   setErrorsEnabled(false);
@@ -126,17 +126,17 @@ IFunction_sptr IqtTemplatePresenter::getGlobalFunction() const { return m_model-
 
 IFunction_sptr IqtTemplatePresenter::getFunction() const { return m_model->getCurrentFunction(); }
 
-QStringList IqtTemplatePresenter::getGlobalParameters() const { return m_model->getGlobalParameters(); }
+std::vector<std::string> IqtTemplatePresenter::getGlobalParameters() const { return m_model->getGlobalParameters(); }
 
-QStringList IqtTemplatePresenter::getLocalParameters() const { return m_model->getLocalParameters(); }
+std::vector<std::string> IqtTemplatePresenter::getLocalParameters() const { return m_model->getLocalParameters(); }
 
-void IqtTemplatePresenter::setGlobalParameters(const QStringList &globals) {
+void IqtTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
   m_model->setGlobalParameters(globals);
   m_view->setGlobalParametersQuiet(globals);
 }
 
-void IqtTemplatePresenter::setGlobal(const QString &parName, bool on) {
-  m_model->setGlobal(parName, on);
+void IqtTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
+  m_model->setGlobal(parameterName, on);
   m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
@@ -189,6 +189,11 @@ void IqtTemplatePresenter::updateParameterEstimationData(DataForParameterEstimat
   m_model->updateParameterEstimationData(std::move(data));
 }
 
+void IqtTemplatePresenter::estimateFunctionParameters() {
+  m_model->estimateFunctionParameters();
+  updateView();
+}
+
 void IqtTemplatePresenter::setBackgroundA0(double value) {
   m_model->setBackgroundA0(value);
   m_view->setA0(value, 0.0);
@@ -215,28 +220,28 @@ QStringList IqtTemplatePresenter::getDatasetNames() const { return m_model->getD
 
 QStringList IqtTemplatePresenter::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
 
-double IqtTemplatePresenter::getLocalParameterValue(const QString &parName, int i) const {
-  return m_model->getLocalParameterValue(parName, i);
+double IqtTemplatePresenter::getLocalParameterValue(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterValue(parameterName, i);
 }
 
-bool IqtTemplatePresenter::isLocalParameterFixed(const QString &parName, int i) const {
-  return m_model->isLocalParameterFixed(parName, i);
+bool IqtTemplatePresenter::isLocalParameterFixed(std::string const &parameterName, int i) const {
+  return m_model->isLocalParameterFixed(parameterName, i);
 }
 
-QString IqtTemplatePresenter::getLocalParameterTie(const QString &parName, int i) const {
-  return m_model->getLocalParameterTie(parName, i);
+std::string IqtTemplatePresenter::getLocalParameterTie(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterTie(parameterName, i);
 }
 
-QString IqtTemplatePresenter::getLocalParameterConstraint(const QString &parName, int i) const {
-  return m_model->getLocalParameterConstraint(parName, i);
+std::string IqtTemplatePresenter::getLocalParameterConstraint(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterConstraint(parameterName, i);
 }
 
-void IqtTemplatePresenter::setLocalParameterValue(const QString &parName, int i, double value) {
-  m_model->setLocalParameterValue(parName, i, value);
+void IqtTemplatePresenter::setLocalParameterValue(std::string const &parameterName, int i, double value) {
+  m_model->setLocalParameterValue(parameterName, i, value);
 }
 
-void IqtTemplatePresenter::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
-  m_model->setLocalParameterTie(parName, i, tie);
+void IqtTemplatePresenter::setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) {
+  m_model->setLocalParameterTie(parameterName, i, tie);
 }
 
 void IqtTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(m_model->getParameterNameMap()); }
@@ -247,11 +252,11 @@ void IqtTemplatePresenter::updateView() {
   m_view->updateState();
 }
 
-void IqtTemplatePresenter::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
-  m_model->setLocalParameterFixed(parName, i, fixed);
+void IqtTemplatePresenter::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
+  m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
+void IqtTemplatePresenter::editLocalParameter(const std::string &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;
@@ -260,18 +265,18 @@ void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
   QStringList constraints;
   const int n = domainNames.size();
   for (int i = 0; i < n; ++i) {
-    const double value = getLocalParameterValue(parName, i);
+    const double value = getLocalParameterValue(parameterName, i);
     values.push_back(value);
-    const bool fixed = isLocalParameterFixed(parName, i);
+    const bool fixed = isLocalParameterFixed(parameterName, i);
     fixes.push_back(fixed);
-    const auto tie = getLocalParameterTie(parName, i);
-    ties.push_back(tie);
-    const auto constraint = getLocalParameterConstraint(parName, i);
-    constraints.push_back(constraint);
+    const auto tie = getLocalParameterTie(parameterName, i);
+    ties.push_back(QString::fromStdString(tie));
+    const auto constraint = getLocalParameterConstraint(parameterName, i);
+    constraints.push_back(QString::fromStdString(constraint));
   }
 
   m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames, values, fixes, ties, constraints);
+      new EditLocalParameterDialog(m_view, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();
 }
@@ -286,7 +291,7 @@ void IqtTemplatePresenter::editLocalParameterFinish(int result) {
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
       if (!ties[i].isEmpty()) {
-        setLocalParameterTie(parName, i, ties[i]);
+        setLocalParameterTie(parName, i, ties[i].toStdString());
       } else if (fixes[i]) {
         setLocalParameterFixed(parName, i, fixes[i]);
       } else {
@@ -299,21 +304,21 @@ void IqtTemplatePresenter::editLocalParameterFinish(int result) {
   emit functionStructureChanged();
 }
 
-void IqtTemplatePresenter::viewChangedParameterValue(const QString &parName, double value) {
-  if (parName.isEmpty())
+void IqtTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double const value) {
+  if (parameterName.empty())
     return;
-  if (m_model->isGlobal(parName)) {
+  if (m_model->isGlobal(parameterName)) {
     auto const n = getNumberOfDatasets();
     for (int i = 0; i < n; ++i) {
-      setLocalParameterValue(parName, i, value);
+      setLocalParameterValue(parameterName, i, value);
     }
   } else {
     auto const i = m_model->currentDomainIndex();
-    auto const oldValue = m_model->getLocalParameterValue(parName, i);
+    auto const oldValue = m_model->getLocalParameterValue(parameterName, i);
     if (fabs(value - oldValue) > 1e-6) {
       setErrorsEnabled(false);
     }
-    setLocalParameterValue(parName, i, value);
+    setLocalParameterValue(parameterName, i, value);
   }
   emit functionStructureChanged();
 }

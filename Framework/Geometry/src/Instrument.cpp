@@ -912,9 +912,9 @@ void Instrument::saveNexus(::NeXus::File *file, const std::string &group) const 
   }
 
   // Add physical detector and monitor data
-  auto detectorIDs = getDetectorIDs(true);
   auto detmonIDs = getDetectorIDs(false);
   if (!detmonIDs.empty()) {
+    auto detectorIDs = getDetectorIDs(true);
     // Add detectors group
     file->makeGroup("physical_detectors", "NXdetector", true);
     file->writeData("number_of_detectors", uint64_t(detectorIDs.size()));

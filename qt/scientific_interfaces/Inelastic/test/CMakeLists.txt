@@ -1,29 +1,36 @@
 # Testing
 set(TEST_FILES
-    ConvFitModelTest.h
-    ConvFunctionModelTest.h
-    IDAFunctionParameterEstimationTest.h
-    IqtFitModelTest.h
-    FqFitModelTest.h
-    FqFitDataPresenterTest.h
-    ConvFitDataPresenterTest.h
-    IndirectDataAnalysisTabTest.h
-    IndirectFitDataPresenterTest.h
-    IndirectFitDataTest.h
-    IndirectFitDataModelTest.h
-    IndirectFitOutputTest.h
-    IndirectFitOutputOptionsModelTest.h
-    IndirectFitOutputOptionsPresenterTest.h
-    IndirectFitPlotModelTest.h
-    IndirectFitPlotPresenterTest.h
-    IndirectFitPropertyBrowserTest.h
-    IndirectFittingModelTest.h
-    InelasticDataManipulationElwinTabModelTest.h
-    InelasticDataManipulationIqtTabModelTest.h
-    InelasticDataManipulationMomentsTabModelTest.h
-    InelasticDataManipulationSqwTabModelTest.h
-    InelasticDataManipulationSymmetriseTabModelTest.h
+    Analysis/ConvFitModelTest.h
+    Analysis/ConvFitDataPresenterTest.h
+    Analysis/ConvFunctionModelTest.h
+    Analysis/FqFitDataPresenterTest.h
+    Analysis/FqFitModelTest.h
+    Analysis/IDAFunctionParameterEstimationTest.h
+    Analysis/IndirectDataAnalysisTabTest.h
+    Analysis/IndirectFitDataPresenterTest.h
+    Analysis/IndirectFitDataTest.h
+    Analysis/IndirectFitDataModelTest.h
+    Analysis/IndirectFitOutputTest.h
+    Analysis/IndirectFitOutputOptionsModelTest.h
+    Analysis/IndirectFitOutputOptionsPresenterTest.h
+    Analysis/IndirectFitPlotModelTest.h
+    Analysis/IndirectFitPlotPresenterTest.h
+    Analysis/IndirectFitPropertyBrowserTest.h
+    Analysis/IndirectFittingModelTest.h
+    Analysis/IqtFitModelTest.h
+    Common/IndirectDataValidationHelperTest.h
+    Common/OutputPlotOptionsModelTest.h
+    Common/OutputPlotOptionsPresenterTest.h
+    Common/SettingsModelTest.h
+    Common/SettingsPresenterTest.h
+    Manipulation/InelasticDataManipulationElwinTabModelTest.h
+    Manipulation/InelasticDataManipulationIqtTabModelTest.h
+    Manipulation/InelasticDataManipulationMomentsTabModelTest.h
+    Manipulation/InelasticDataManipulationSqwTabModelTest.h
+    Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
 )
+
+set(TEST_HELPERS Analysis/MockObjects.h Common/MockObjects.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 
@@ -32,7 +39,7 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  TEST_HELPER_SRCS ../../Indirect/IndirectDataValidationHelper.cpp
+  TEST_HELPER_SRCS ${TEST_HELPERS}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock

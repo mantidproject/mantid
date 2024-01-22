@@ -257,8 +257,10 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     } else {
       if (level == 0)
         m_firstEntryNameType = (*it); // copy first entry name & type
-      file.openGroup(entryName, entryClass);
-      walkFile(file, entryPath, entryClass, pmap, level + 1);
+      if (!entryClass.empty()) {      // handles buggy files
+        file.openGroup(entryName, entryClass);
+        walkFile(file, entryPath, entryClass, pmap, level + 1);
+      }
     }
   }
   file.closeGroup();

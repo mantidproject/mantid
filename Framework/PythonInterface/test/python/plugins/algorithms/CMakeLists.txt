@@ -69,6 +69,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaksShoeboxTOFTest.py
     IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
     LoadAndMergeTest.py
@@ -115,6 +116,7 @@ set(TEST_PY_FILES
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py
+    SaveISISReflectometryORSOTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
@@ -127,6 +129,7 @@ set(TEST_PY_FILES
     CNCSSuggestTIBTest.py
     HYSPECSuggestTIBTest.py
     SymmetriseTest.py
+    SymmetriseMDHistoTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
     TOFTOFCropWorkspaceTest.py

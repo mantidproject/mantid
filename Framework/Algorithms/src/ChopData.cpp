@@ -149,9 +149,9 @@ void ChopData::exec() {
     PARALLEL_CHECK_INTERRUPT_REGION;
 
     // add the workspace to the AnalysisDataService
-    std::stringstream name;
-    name << output << "_" << wsCounter;
-    std::string wsname = name.str();
+    std::stringstream nameStream;
+    nameStream << output << "_" << wsCounter;
+    std::string wsname = nameStream.str();
 
     declareProperty(std::make_unique<WorkspaceProperty<>>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);

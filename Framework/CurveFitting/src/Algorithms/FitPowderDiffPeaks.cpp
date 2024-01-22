@@ -1540,9 +1540,9 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(const Workspace2D_sptr &dataws, size_t
   stringstream dbss;
   dbss << peakfunction->asString() << '\n';
   dbss << "Starting Value: ";
-  vector<string> names = peakfunction->getParameterNames();
-  for (auto &name : names)
-    dbss << name << "= " << peakfunction->getParameter(name) << ", \t";
+  vector<string> paramNames = peakfunction->getParameterNames();
+  for (auto &paramName : paramNames)
+    dbss << paramName << "= " << peakfunction->getParameter(paramName) << ", \t";
   for (size_t i = 0; i < dataws->x(workspaceindex).size(); ++i)
     dbss << dataws->x(workspaceindex)[i] << "\t\t" << dataws->y(workspaceindex)[i] << "\t\t"
          << dataws->e(workspaceindex)[i] << '\n';
@@ -1979,9 +1979,9 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(const Workspace2D_sptr &dataws, size_
   // 1. Debug output
   stringstream dbss0;
   dbss0 << "Starting Value: ";
-  vector<string> names = peaksfunc->getParameterNames();
-  for (auto &name : names)
-    dbss0 << name << "= " << peaksfunc->getParameter(name) << ", \t";
+  vector<string> paramNames = peaksfunc->getParameterNames();
+  for (auto &paramName : paramNames)
+    dbss0 << paramName << "= " << peaksfunc->getParameter(paramName) << ", \t";
   g_log.information() << "DBx430 " << dbss0.str() << '\n';
 
   // 2. Create fit

@@ -9,20 +9,17 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Mantid::API::IAlgorithm_sptr AsciiSaver::getSaveAlgorithm() {
-  return Mantid::API::AlgorithmManager::Instance().create("SaveReflectometryAscii");
-}
+AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
+    : m_saveAlgRunner(std::move(saveAlgRunner)), m_fileHandler(fileHandler) {}
 
 std::string AsciiSaver::extensionForFormat(NamedFormat format) {
-  // The algorithm is slightly inconsistent in that for the custom format the
-  // "extension" property is not really an extension but just the word "custom"
+  // For the custom format we need to pass just the word "custom" to the "extension" property of the save algorithm
   switch (format) {
   case NamedFormat::Custom:
     return "custom";
@@ -32,23 +29,14 @@ std::string AsciiSaver::extensionForFormat(NamedFormat format) {
     return ".txt";
   case NamedFormat::ILLCosmos:
     return ".mft";
+  case NamedFormat::ORSOAscii:
+    return ".ort";
   default:
     throw std::runtime_error("Unknown save format.");
   }
 }
 
-bool AsciiSaver::isValidSaveDirectory(std::string const &path) const {
-  if (!path.empty()) {
-    try {
-      auto pocoPath = Poco::Path().parseDirectory(path);
-      auto pocoFile = Poco::File(pocoPath);
-      return pocoFile.exists();
-    } catch (Poco::PathSyntaxException &) {
-      return false;
-    }
-  } else
-    return false;
-}
+bool AsciiSaver::isValidSaveDirectory(std::string const &path) const { return m_fileHandler->fileExists(path); }
 
 std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::string const &prefix,
                                          std::string const &name, std::string const &extension) const {
@@ -71,28 +59,30 @@ Mantid::API::Workspace_sptr AsciiSaver::workspace(std::string const &workspaceNa
   return ads.retrieveWS<Mantid::API::Workspace>(workspaceName);
 }
 
-Mantid::API::IAlgorithm_sptr AsciiSaver::setUpSaveAlgorithm(std::string const &saveDirectory,
-                                                            const Mantid::API::Workspace_sptr &workspace,
-                                                            std::vector<std::string> const &logParameters,
-                                                            FileFormatOptions const &fileFormat) const {
-  auto const saveAlg = getSaveAlgorithm();
-  auto const extension = extensionForFormat(fileFormat.format());
-  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
+void AsciiSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string const &extension,
+                                       const Mantid::API::Workspace_sptr &workspace,
+                                       std::vector<std::string> const &logParameters,
+                                       FileFormatOptions const &fileFormat) const {
+  m_saveAlgRunner->runSaveAsciiAlgorithm(workspace, savePath, extension, logParameters,
+                                         fileFormat.shouldIncludeHeader(), fileFormat.shouldIncludeQResolution(),
+                                         fileFormat.separator());
+}
 
-  saveAlg->setProperty("InputWorkspace", workspace);
-  saveAlg->setProperty("Filename", savePath);
-  saveAlg->setProperty("FileExtension", extension);
-  saveAlg->setProperty("LogList", logParameters);
-  saveAlg->setProperty("WriteHeader", fileFormat.shouldIncludeHeader());
-  saveAlg->setProperty("WriteResolution", fileFormat.shouldIncludeQResolution());
-  saveAlg->setProperty("Separator", fileFormat.separator());
-  return saveAlg;
+void AsciiSaver::runSaveORSOAlgorithm(std::string const &savePath, const Mantid::API::Workspace_sptr &workspace,
+                                      FileFormatOptions const &fileFormat) const {
+  m_saveAlgRunner->runSaveORSOAlgorithm(workspace, savePath, fileFormat.shouldIncludeQResolution());
 }
 
 void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
                       std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
-  auto alg = setUpSaveAlgorithm(saveDirectory, workspace, logParameters, fileFormat);
-  alg->execute();
+  auto const extension = extensionForFormat(fileFormat.format());
+  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
+
+  if (fileFormat.format() == NamedFormat::ORSOAscii) {
+    runSaveORSOAlgorithm(savePath, workspace, fileFormat);
+  } else {
+    runSaveAsciiAlgorithm(savePath, extension, workspace, logParameters, fileFormat);
+  }
 }
 
 void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,

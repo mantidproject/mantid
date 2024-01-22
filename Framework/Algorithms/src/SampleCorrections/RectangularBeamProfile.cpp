@@ -83,15 +83,15 @@ Geometry::BoundingBox RectangularBeamProfile::defineActiveRegion(const Geometry:
   // the active region to the width/height of beam
   const auto &sampleMin(sampleBox.minPoint());
   const auto &sampleMax(sampleBox.maxPoint());
-  V3D minPoint, maxPoint;
-  minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
-  maxPoint[m_horIdx] = std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_width);
-  minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
-  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_height);
-  minPoint[m_beamIdx] = sampleMin[m_beamIdx];
-  maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
+  V3D minPt, maxPt;
+  minPt[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
+  maxPt[m_horIdx] = std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_width);
+  minPt[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
+  maxPt[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_height);
+  minPt[m_beamIdx] = sampleMin[m_beamIdx];
+  maxPt[m_beamIdx] = sampleMax[m_beamIdx];
 
-  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(), minPoint.X(), minPoint.Y(), minPoint.Z());
+  return Geometry::BoundingBox(maxPt.X(), maxPt.Y(), maxPt.Z(), minPt.X(), minPt.Y(), minPt.Z());
 }
 
 } // namespace Algorithms

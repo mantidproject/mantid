@@ -212,23 +212,23 @@ void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
 /** Get the input workspaces as a list of names.
  */
 std::vector<std::string> PolarizationEfficiencyCor::getWorkspaceNameList() const {
-  std::vector<std::string> names;
+  std::vector<std::string> wsNames;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
-    names = getProperty(Prop::INPUT_WORKSPACES);
+    wsNames = getProperty(Prop::INPUT_WORKSPACES);
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
     auto const n = group->size();
     for (size_t i = 0; i < n; ++i) {
       auto ws = group->getItem(i);
-      auto const name = ws->getName();
-      if (name.empty()) {
+      auto const wsName = ws->getName();
+      if (wsName.empty()) {
         throw std::invalid_argument("Workspace from the input workspace group is not stored in the "
                                     "Analysis Data Service which is required by the Wildes method.");
       }
-      names.emplace_back(name);
+      wsNames.emplace_back(wsName);
     }
   }
-  return names;
+  return wsNames;
 }
 
 //----------------------------------------------------------------------------------------------

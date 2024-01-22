@@ -15,64 +15,59 @@ namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
-std::pair<QString, QString> splitParameterName(const QString &paramName) {
+std::pair<std::string, std::string> splitParameterName(std::string const &paramName) {
   QString functionIndex;
-  QString parameterName = paramName;
-  int j = paramName.lastIndexOf('.');
+  QString initialParamName = QString::fromStdString(paramName);
+  QString parameterName = QString::fromStdString(paramName);
+  int j = initialParamName.lastIndexOf('.');
   if (j > 0) {
     ++j;
-    functionIndex = paramName.mid(0, j);
-    parameterName = paramName.mid(j);
+    functionIndex = initialParamName.mid(0, j);
+    parameterName = initialParamName.mid(j);
   }
-  return std::make_pair(functionIndex, parameterName);
+  return std::make_pair(functionIndex.toStdString(), parameterName.toStdString());
 }
 
-IFunction_sptr getFunctionWithPrefix(const QString &prefix, const IFunction_sptr &fun) {
-  if (prefix.isEmpty() || !fun) {
+IFunction_sptr getFunctionWithPrefix(std::string const &prefix, const IFunction_sptr &fun) {
+  if (prefix.empty() || !fun) {
     return fun;
   }
   auto compFun = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (!compFun) {
     throw std::runtime_error("Function " + fun->name() + " is not composite");
   }
-  auto j = prefix.indexOf('.');
+  auto const functionPrefix(QString::fromStdString(prefix));
+  auto j = functionPrefix.indexOf('.');
   if (j < 0) {
-    throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() + "\nIt must end with a dot (.)");
+    throw std::runtime_error("Error in fit function prefix: " + prefix + "\nIt must end with a dot (.)");
   }
-  if (j < 2 || prefix[0] != 'f') {
-    throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() +
+  if (j < 2 || functionPrefix[0] != 'f') {
+    throw std::runtime_error("Error in fit function prefix: " + prefix +
                              "\nIt must start with an 'f' followed by an integer.");
   }
-  auto funIndex = prefix.mid(1, j - 1).toInt();
-  return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
+  auto funIndex = functionPrefix.mid(1, j - 1).toInt();
+  return getFunctionWithPrefix(functionPrefix.mid(j + 1).toStdString(), compFun->getFunction(funIndex));
 }
 
-std::pair<QString, int> splitFunctionPrefix(const std::string &prefix) {
-  return splitFunctionPrefix(QString::fromStdString(prefix));
-}
-
-std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
-  if (prefix.isEmpty())
+std::pair<std::string, int> splitFunctionPrefix(std::string const &prefix) {
+  if (prefix.empty())
     return std::make_pair("", -1);
-  auto j = prefix.lastIndexOf('.', -2);
-  auto parentPrefix = prefix.left(j > 0 ? j + 1 : 0);
-  auto funIndex = prefix.mid(j + 2, prefix.size() - j - 3).toInt();
-  return std::make_pair(parentPrefix, funIndex);
+  auto const functionPrefix(QString::fromStdString(prefix));
+  auto j = functionPrefix.lastIndexOf('.', -2);
+  auto parentPrefix = functionPrefix.left(j > 0 ? j + 1 : 0);
+  auto funIndex = functionPrefix.mid(j + 2, functionPrefix.size() - j - 3).toInt();
+  return std::make_pair(parentPrefix.toStdString(), funIndex);
 }
 
-std::pair<QString, std::pair<QString, QString>> splitConstraintString(const std::string &constraint) {
-  return splitConstraintString(QString::fromStdString(constraint));
-}
-
-std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QString &constraint) {
-  std::pair<QString, std::pair<QString, QString>> error;
-  if (constraint.isEmpty())
+std::pair<std::string, std::pair<std::string, std::string>> splitConstraintString(std::string const &constraint) {
+  std::pair<std::string, std::pair<std::string, std::string>> error;
+  if (constraint.empty())
     return error;
-  QString lowerBoundStr;
-  QString upperBoundStr;
-  QString paramName;
+  std::string lowerBoundStr;
+  std::string upperBoundStr;
+  std::string paramName;
   Mantid::API::Expression expr;
-  expr.parse(constraint.toStdString());
+  expr.parse(constraint);
   if (expr.name() != "==") {
     return error;
   }
@@ -82,13 +77,13 @@ std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QStr
       boost::lexical_cast<double>(expr[0].str());
       boost::lexical_cast<double>(expr[2].str());
       if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
-        lowerBoundStr = QString::fromStdString(expr[0].str());
-        upperBoundStr = QString::fromStdString(expr[2].str());
+        lowerBoundStr = expr[0].str();
+        upperBoundStr = expr[2].str();
       } else { // assume that the operators are ">"
-        lowerBoundStr = QString::fromStdString(expr[2].str());
-        upperBoundStr = QString::fromStdString(expr[0].str());
+        lowerBoundStr = expr[2].str();
+        upperBoundStr = expr[0].str();
       }
-      paramName = QString::fromStdString(expr[1].str());
+      paramName = expr[1].str();
     } catch (...) { // error in constraint
       return error;
     }
@@ -104,11 +99,11 @@ std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QStr
     std::string op = expr[1].operator_name();
     if (paramPos == 0) { // parameter goes first
       if (op == "<") {   // param < number
-        upperBoundStr = QString::fromStdString(expr[1].str());
+        upperBoundStr = expr[1].str();
       } else { // param > number
-        lowerBoundStr = QString::fromStdString(expr[1].str());
+        lowerBoundStr = expr[1].str();
       }
-      paramName = QString::fromStdString(expr[0].str());
+      paramName = expr[0].str();
     } else { // parameter is second
       try {
         boost::lexical_cast<double>(expr[0].name());
@@ -116,11 +111,11 @@ std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QStr
         return error;
       }
       if (op == "<") { // number < param
-        lowerBoundStr = QString::fromStdString(expr[0].str());
+        lowerBoundStr = expr[0].str();
       } else { // number > param
-        upperBoundStr = QString::fromStdString(expr[0].str());
+        upperBoundStr = expr[0].str();
       }
-      paramName = QString::fromStdString(expr[1].str());
+      paramName = expr[1].str();
     }
   }
   return std::make_pair(paramName, std::make_pair(lowerBoundStr, upperBoundStr));

@@ -188,15 +188,15 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
 
 /** Gives the total solid angle subtended by a group of detectors by summing the
  *  contributions from the individual detectors.
- *  @param observer :: The point from which the detector is being viewed
+ *  @param params :: The point from which the detector is being viewed, and number of cylinder slices
  *  @return The solid angle in steradians
  *  @throw NullPointerException If geometrical form of any detector has not been
  * provided in the instrument definition file
  */
-double DetectorGroup::solidAngle(const V3D &observer) const {
+double DetectorGroup::solidAngle(const Geometry::SolidAngleParams &params) const {
   double result =
       std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
-                      [&observer](double angle, const auto &det) { return angle + det.second->solidAngle(observer); });
+                      [&params](double angle, const auto &det) { return angle + det.second->solidAngle(params); });
   return result;
 }
 

@@ -421,11 +421,11 @@ TopoDS_Shape Plane::createShape() {
   if (norm2 == 0.0) {
     throw std::runtime_error("Cannot create a plane with zero normal");
   }
-  double distance = this->getDistance();
+  double distanceFromOrigin = this->getDistance();
   // Find point closest to origin
-  double t = distance / norm2;
+  double t = distanceFromOrigin / norm2;
   // Create Half Space
-  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1], normal[2], -distance)).Face();
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1], normal[2], -distanceFromOrigin)).Face();
 
   TopoDS_Shape Result =
       BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t), normal[2] * (1 + t))).Solid();

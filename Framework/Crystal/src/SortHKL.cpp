@@ -340,16 +340,16 @@ void SortHKL::insertStatisticsIntoTable(const ITableWorkspace_sptr &table, const
     throw std::runtime_error("Can't store statistics into Null-table.");
   }
 
-  std::string name = getProperty("RowName");
+  std::string rowName = getProperty("RowName");
   double completeness = 0.0;
-  if (name.substr(0, 4) != "bank") {
+  if (rowName.substr(0, 4) != "bank") {
     completeness = static_cast<double>(statistics.m_completeness);
   }
 
   // append to the table workspace
   API::TableRow newrow = table->appendRow();
 
-  newrow << name << statistics.m_uniqueReflections << statistics.m_dspacingMin << statistics.m_dspacingMax
+  newrow << rowName << statistics.m_uniqueReflections << statistics.m_dspacingMin << statistics.m_dspacingMax
          << statistics.m_redundancy << statistics.m_meanIOverSigma << 100.0 * statistics.m_rMerge
          << 100.0 * statistics.m_rPim << 100.0 * completeness;
 }

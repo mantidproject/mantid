@@ -391,11 +391,11 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent, const std::strin
   yrb -= ypos;
   ylb -= ypos;
 
-  std::shared_ptr<Mantid::Geometry::IObject> shape =
+  std::shared_ptr<Mantid::Geometry::IObject> detectorShape =
       ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
-  auto detector = new Detector(name, id, shape, parent);
+  auto detector = new Detector(name, id, detectorShape, parent);
 
   // Set detector position relative to parent
   V3D pos(xpos, ypos, 0);
@@ -467,7 +467,7 @@ int StructuredDetector::interceptSurface(Track & /*track*/) const {
 
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double StructuredDetector::solidAngle(const V3D & /*observer*/) const {
+double StructuredDetector::solidAngle(const Geometry::SolidAngleParams & /*params*/) const {
   throw Kernel::Exception::NotImplementedError("StructuredDetector::solidAngle() is not implemented.");
 }
 

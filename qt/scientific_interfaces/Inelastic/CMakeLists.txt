@@ -47,6 +47,24 @@ set(SRC_FILES
     BayesFitting/Quasi.cpp
     BayesFitting/ResNorm.cpp
     BayesFitting/Stretch.cpp
+    Common/IndirectAddWorkspaceDialog.cpp
+    Common/IndirectDataValidationHelper.cpp
+    Common/IndirectInterface.cpp
+    Common/OutputPlotOptionsModel.cpp
+    Common/OutputPlotOptionsPresenter.cpp
+    Common/OutputPlotOptionsView.cpp
+    Common/Settings.cpp
+    Common/SettingsHelper.cpp
+    Common/SettingsModel.cpp
+    Common/SettingsPresenter.cpp
+    Common/SettingsView.cpp
+    Common/IndirectTab.cpp
+    Corrections/AbsorptionCorrections.cpp
+    Corrections/ApplyAbsorptionCorrections.cpp
+    Corrections/CalculatePaalmanPings.cpp
+    Corrections/ContainerSubtraction.cpp
+    Corrections/Corrections.cpp
+    Corrections/CorrectionsTab.cpp
     Manipulation/InelasticDataManipulation.cpp
     Manipulation/InelasticDataManipulationElwinTab.cpp
     Manipulation/InelasticDataManipulationElwinTabModel.cpp
@@ -69,25 +87,18 @@ set(SRC_FILES
 set(MOC_FILES
     Analysis/ConvFitAddWorkspaceDialog.h
     Analysis/ConvFitDataView.h
-    Analysis/ConvFitDataPresenter.h
     Analysis/IndirectDataAnalysis.h
     Analysis/IndirectDataAnalysisTab.h
     Analysis/FqFitAddWorkspaceDialog.h
-    Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
     Analysis/FunctionTemplateBrowser.h
-    Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutputOptionsView.h
-    Analysis/IIndirectFitPlotView.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
-    Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitDataView.h
-    Analysis/IndirectFitOutputOptionsPresenter.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
-    Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
@@ -100,16 +111,25 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
+    Common/IAddWorkspaceDialog.h
+    Common/ISettingsView.h
+    Common/IndirectAddWorkspaceDialog.h
+    Common/IndirectInterface.h
+    Common/OutputPlotOptionsView.h
+    Common/Settings.h
+    Common/SettingsView.h
+    Common/IndirectTab.h
+    Corrections/AbsorptionCorrections.h
+    Corrections/ApplyAbsorptionCorrections.h
+    Corrections/CalculatePaalmanPings.h
+    Corrections/ContainerSubtraction.h
+    Corrections/Corrections.h
+    Corrections/CorrectionsTab.h
     Manipulation/InelasticDataManipulation.h
-    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
-    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationIqtTabView.h
-    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationMomentsTabView.h
-    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSqwTabView.h
-    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabView.h
     Manipulation/InelasticDataManipulationTab.h
 )
@@ -117,7 +137,9 @@ set(MOC_FILES
 set(INC_FILES
     DllConfig.h
     PrecompiledHeader.h
+    Analysis/ConvFitDataPresenter.h
     Analysis/DataAnalysisTabFactory.h
+    Analysis/FqFitDataPresenter.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
     Analysis/IqtFitModel.h
@@ -125,25 +147,44 @@ set(INC_FILES
     Analysis/ConvFitModel.h
     Analysis/FitTabConstants.h
     Analysis/IIndirectFitDataModel.h
-    Analysis/IndirectFitDataModel.h
+    Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutput.h
     Analysis/IIndirectFitOutputOptionsModel.h
+    Analysis/IIndirectFitPlotView.h
     Analysis/IIndirectFittingModel.h
     Analysis/IndirectFitData.h
+    Analysis/IndirectFitDataModel.h
+    Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitOutput.h
     Analysis/IndirectFitOutputOptionsModel.h
+    Analysis/IndirectFitOutputOptionsPresenter.h
     Analysis/IndirectFitPlotModel.h
+    Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Common/IndirectDataValidationHelper.h
+    Common/OutputPlotOptionsModel.h
+    Common/OutputPlotOptionsPresenter.h
+    Common/SettingsHelper.h
+    Common/SettingsPresenter.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
+    Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
+    Manipulation/InelasticDataManipulationIqtTab.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
+    Manipulation/InelasticDataManipulationMomentsTab.h
     Manipulation/InelasticDataManipulationSqwTabModel.h
+    Manipulation/InelasticDataManipulationSqwTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabModel.h
+    Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/ISqwView.h
+    Manipulation/IMomentsView.h
+    Manipulation/ISymmetriseView.h
+    Manipulation/IElwinView.h
+    Manipulation/IIqtView.h
 )
 
 set(UI_FILES
@@ -160,6 +201,14 @@ set(UI_FILES
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
+    Common/IndirectAddWorkspaceDialog.ui
+    Common/InterfaceSettings.ui
+    Common/OutputPlotOptions.ui
+    Corrections/AbsorptionCorrections.ui
+    Corrections/ApplyAbsorptionCorrections.ui
+    Corrections/CalculatePaalmanPings.ui
+    Corrections/ContainerSubtraction.ui
+    Corrections/Corrections.ui
     Manipulation/InelasticDataManipulation.ui
     Manipulation/InelasticDataManipulationElwinTab.ui
     Manipulation/InelasticDataManipulationIqtTab.ui
@@ -168,7 +217,7 @@ set(UI_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.ui
 )
 
-set(RES_FILES ../Indirect/IndirectInterfaceResources.qrc)
+set(RES_FILES Common/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
@@ -195,8 +244,7 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
-                   MantidScientificInterfacesIndirect
-  INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
+  INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )

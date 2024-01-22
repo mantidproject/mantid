@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSqwTabView.h"
-#include "IndirectDataValidationHelper.h"
+#include "Common/IndirectDataValidationHelper.h"
 #include "InelasticDataManipulationSqwTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -63,7 +63,7 @@ InelasticDataManipulationSqwTabView::~InelasticDataManipulationSqwTabView() {}
 
 void InelasticDataManipulationSqwTabView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
-IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+OutputPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 std::string InelasticDataManipulationSqwTabView::getDataName() const {
   return m_uiForm.dsInput->getCurrentDataName().toStdString();
@@ -120,6 +120,7 @@ void InelasticDataManipulationSqwTabView::setEnableOutputOptions(bool const enab
 }
 
 void InelasticDataManipulationSqwTabView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
+  m_uiForm.rqwPlot2D->clearPlot();
   m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
 }
 

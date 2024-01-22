@@ -15,7 +15,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "Poco/File.h"
-#include "Poco/Path.h"
 
 #include <boost/regex.hpp>
 
@@ -69,21 +68,26 @@ bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreduc
  */
 void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   auto const fileFormat = formatFromIndex(m_view->getFileFormatIndex());
-  // Enable/disable the log list for formats that include the header.
+  // Enable/disable the log list for formats that include the header from the SaveReflectometryAscii algorithm.
   // Note that at the moment the log list is used in SaveReflectometryAscii for
   // ILLCosmos (MFT) but I'm not sure if it should be.
   if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) || fileFormat == NamedFormat::ILLCosmos)
     m_view->enableLogList();
   else
     m_view->disableLogList();
+
+  // Enable/disable the Q resolution checkbox for formats that can optionally include resolution
+  if (fileFormat == NamedFormat::Custom || fileFormat == NamedFormat::ORSOAscii)
+    m_view->enableQResolutionCheckBox();
+  else
+    m_view->disableQResolutionCheckBox();
+
   // Everything else is enabled for Custom and disabled otherwise
   if (fileFormat == NamedFormat::Custom) {
     m_view->enableHeaderCheckBox();
-    m_view->enableQResolutionCheckBox();
     m_view->enableSeparatorButtonGroup();
   } else {
     m_view->disableHeaderCheckBox();
-    m_view->disableQResolutionCheckBox();
     m_view->disableSeparatorButtonGroup();
   }
 }
@@ -223,6 +227,8 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
     return NamedFormat::ANSTO;
   case 3:
     return NamedFormat::ILLCosmos;
+  case 4:
+    return NamedFormat::ORSOAscii;
   default:
     throw std::runtime_error("Unknown save format.");
   }
@@ -261,7 +267,9 @@ void SavePresenter::saveSelectedWorkspaces() {
   } else {
     try {
       saveWorkspaces(wkspNames);
-    } catch (std::exception &e) {
+    } catch (std::runtime_error const &e) {
+      m_view->cannotSaveWorkspaces(e.what());
+    } catch (std::exception const &e) {
       m_view->cannotSaveWorkspaces(e.what());
     } catch (...) {
       m_view->cannotSaveWorkspaces();

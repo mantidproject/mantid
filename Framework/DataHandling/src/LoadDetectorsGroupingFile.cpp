@@ -215,10 +215,10 @@ void LoadDetectorsGroupingFile::setByComponents() {
   for (auto &componentMap : m_groupComponentsMap) {
     g_log.debug() << "Group ID = " << componentMap.first << " With " << componentMap.second.size() << " Components\n";
 
-    for (auto &name : componentMap.second) {
+    for (auto &componentName : componentMap.second) {
 
       // a) get component
-      Geometry::IComponent_const_sptr component = m_instrument->getComponentByName(name);
+      Geometry::IComponent_const_sptr component = m_instrument->getComponentByName(componentName);
 
       // b) component -> component assembly --> children (more than detectors)
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -226,7 +226,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
-      g_log.debug() << "Component Name = " << name << "  Component ID = " << component->getComponentID()
+      g_log.debug() << "Component Name = " << componentName << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << '\n';
 
       for (const auto &child : children) {
@@ -611,13 +611,12 @@ LoadGroupMapFile::~LoadGroupMapFile() {
  * Creates a group -> [spectra list] map by parsing the input file.
  */
 void LoadGroupMapFile::parseFile() {
-  std::string line;
-
   try {
     // We don't use the total number of groups report at the top of the file but
     // we'll tell them
     // later if there is a problem with it for their diagnostic purposes
     size_t givenNoOfGroups;
+    std::string line;
 
     if (!nextDataLine(line))
       throw std::invalid_argument("The input file doesn't appear to contain any data");

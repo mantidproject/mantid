@@ -50,7 +50,7 @@ public:
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
   int interceptSurface(Track &track) const override;
-  double solidAngle(const Kernel::V3D &observer) const override;
+  double solidAngle(const Geometry::SolidAngleParams &params) const override;
   ///@todo This should go in favour of just the class related one.
   void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   /// get bounding box, which may or may not be axis aligned;

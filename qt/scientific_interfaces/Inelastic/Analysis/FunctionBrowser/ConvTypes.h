@@ -128,7 +128,7 @@ enum class ParamID {
   LINEAR_BG_A1,
 };
 
-QString paramName(ParamID id);
+std::string paramName(ParamID id);
 
 inline ParamID &operator++(ParamID &id) {
   id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
@@ -149,12 +149,12 @@ enum SubTypeIndex {
 };
 
 struct TemplateSubType {
-  virtual QString name() const = 0;
+  virtual std::string name() const = 0;
   virtual QStringList getTypeNames() const = 0;
   virtual int getTypeIndex(const QString &typeName) const = 0;
   virtual int getNTypes() const = 0;
   virtual QList<ParamID> getParameterIDs(int typeIndex) const = 0;
-  virtual QStringList getParameterNames(int typeIndex) const = 0;
+  virtual std::vector<std::string> getParameterNames(int typeIndex) const = 0;
   virtual QList<std::string> getParameterDescriptions(int typeIndex) const = 0;
   virtual ~TemplateSubType() = default;
 };
@@ -195,9 +195,9 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     applyToType(static_cast<Type>(typeIndex), fillIDs);
     return ids;
   }
-  QStringList getParameterNames(int typeIndex) const override {
-    QStringList names;
-    auto fillNames = [&names](ParamID id) { names << paramName(id); };
+  std::vector<std::string> getParameterNames(int typeIndex) const override {
+    std::vector<std::string> names;
+    auto fillNames = [&names](ParamID id) { names.emplace_back(paramName(id)); };
     applyToType(static_cast<Type>(typeIndex), fillNames);
     return names;
   }
@@ -208,7 +208,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     if (!function.empty()) {
       IFunction_sptr fun = FunctionFactory::Instance().createFunction(function);
       auto fillDescriptions = [&descriptions, &fun](ParamID id) {
-        descriptions << fun->parameterDescription(fun->parameterIndex(paramName(id).toStdString()));
+        descriptions << fun->parameterDescription(fun->parameterIndex(paramName(id)));
       };
       applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), fillDescriptions);
     }
@@ -226,23 +226,23 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
 GNU_DIAG_ON("undefined-var-template")
 
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
-  QString name() const override { return "Fit Type"; }
+  std::string name() const override { return "Fit Type"; }
 };
 
 struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
-  QString name() const override { return "Lorentzians"; }
+  std::string name() const override { return "Lorentzians"; }
 };
 
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
-  QString name() const override { return "Background"; }
+  std::string name() const override { return "Background"; }
 };
 
 struct DeltaSubType : public TemplateSubTypeImpl<bool> {
-  QString name() const override { return "Delta"; }
+  std::string name() const override { return "Delta"; }
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
-  QString name() const override { return "ConvTempCorrection"; }
+  std::string name() const override { return "ConvTempCorrection"; }
 };
 
 void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun);

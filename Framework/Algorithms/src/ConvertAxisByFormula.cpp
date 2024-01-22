@@ -178,8 +178,8 @@ void ConvertAxisByFormula::exec() {
         prog.report();
       }
       if (failedDetectorCount != 0) {
-        g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount
-                            << " spectra. Masking spectrum.\n";
+        g_log.warning() << "Unable to calculate sample-detector distance for " << failedDetectorCount
+                        << " spectra. Masking spectrum.\n";
       }
     } else {
       // common bins - we only have to calculate once

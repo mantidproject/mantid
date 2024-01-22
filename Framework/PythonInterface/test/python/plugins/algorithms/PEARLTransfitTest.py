@@ -56,6 +56,12 @@ class PEARLTransfitTest(unittest.TestCase):
         self.assertNotIn("S_fit_Parameters", mtd)
         self.assertNotIn("S_fit_Workspace", mtd)
 
+    def test_calibration_run_single_run_with_nexus_file(self):
+        # Test that the calibration run produces the correct workspaces for a single run
+        PEARLTransfit(Files="PEARL00112777.nxs", Calibration=True)
+        self.assertIn("S_fit_Parameters", mtd)
+        self.assertIn("S_fit_Workspace", mtd)
+
 
 if __name__ == "__main__":
     unittest.main()

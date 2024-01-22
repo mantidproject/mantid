@@ -117,8 +117,8 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
     }
   }
 
-  for (auto str : ops) {
-    for (char c : str) {
+  for (const auto &op : ops) {
+    for (char c : op) {
       if (c == ' ')
         continue;
       m_operators->symbols.insert(c);

@@ -347,7 +347,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   Geometry::ParameterMap paramMapForPosAndRot;
 
   // Get instrument and sample
-  auto &componentInfo = mutableComponentInfo();
+  auto &compInfo = mutableComponentInfo();
   const auto parInstrument = getInstrument();
   const auto instrument = parInstrument->baseInstrument();
   const auto &paramInfoFromIDF = instrument->getLogfileCache();
@@ -399,10 +399,10 @@ void ExperimentInfo::populateInstrumentParameters() {
   for (const auto &item : paramMapForPosAndRot) {
     if (isPositionParameter(item.second->name())) {
       const auto newRelPos = item.second->value<V3D>();
-      updatePosition(componentInfo, item.first, newRelPos);
+      updatePosition(compInfo, item.first, newRelPos);
     } else if (isRotationParameter(item.second->name())) {
       const auto newRelRot = item.second->value<Quat>();
-      updateRotation(componentInfo, item.first, newRelRot);
+      updateRotation(compInfo, item.first, newRelRot);
     }
     // Parameters for individual components (x,y,z) are ignored. ParameterMap
     // did compute the correct compound positions and rotations internally.
@@ -411,7 +411,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap) {
     if (isScaleParameter(item.second->name()))
-      adjustPositionsFromScaleFactor(componentInfo, item.first, item.second->name(), item.second->value<double>());
+      adjustPositionsFromScaleFactor(compInfo, item.first, item.second->name(), item.second->value<double>());
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
   // parameters of detectors (parameters for non-detector components have been
@@ -1173,8 +1173,8 @@ void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file, std::str
  */
 void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
-  auto &componentInfo = mutableComponentInfo();
-  auto &detectorInfo = mutableDetectorInfo();
+  auto &compInfo = mutableComponentInfo();
+  auto &detInfo = mutableDetectorInfo();
   const auto parInstrument = getInstrument();
   const auto instr = parInstrument->baseInstrument();
 
@@ -1232,14 +1232,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       auto value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
-        const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
-        if (!componentInfo.isDetector(componentIndex)) {
+        const auto componentIndex = compInfo.indexOf(comp->getComponentID());
+        if (!compInfo.isDetector(componentIndex)) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
         } else
-          detectorInfo.setMasked(componentIndex, value); // all detector indexes
-                                                         // have same component
-                                                         // index (guarantee)
+          detInfo.setMasked(componentIndex, value); // all detector indexes
+                                                    // have same component
+                                                    // index (guarantee)
       }
     } else if (isPositionParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
@@ -1247,19 +1247,19 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components below.
       const auto newRelPos = getParam<V3D>(paramType, paramValue);
-      updatePosition(componentInfo, comp, newRelPos);
+      updatePosition(compInfo, comp, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components below.
       const auto newRelRot = getParam<Quat>(paramType, paramValue);
-      updateRotation(componentInfo, comp, newRelRot);
+      updateRotation(compInfo, comp, newRelRot);
     } else if (!isRedundantPosOrRot(paramName)) {
       // Special case RectangularDetector: Parameters scalex and scaley affect
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
-        adjustPositionsFromScaleFactor(componentInfo, comp, paramName, getParam<double>(paramType, paramValue));
+        adjustPositionsFromScaleFactor(compInfo, comp, paramName, getParam<double>(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
     }
   }

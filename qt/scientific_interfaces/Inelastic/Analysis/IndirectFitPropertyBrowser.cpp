@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
 #include "FitStatusWidget.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -66,11 +67,11 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
   // Re-emit
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
-  connect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
+  connect(m_functionBrowser, SIGNAL(parameterChanged(std::string const &, std::string const &)), this,
           SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SIGNAL(functionChanged()));
-  connect(m_functionBrowser, SIGNAL(localParameterButtonClicked(const QString &)), this,
-          SIGNAL(localParameterEditRequested(const QString &)));
+  connect(m_functionBrowser, SIGNAL(localParameterButtonClicked(std::string const &)), this,
+          SIGNAL(localParameterEditRequested(std::string const &)));
 }
 
 void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
@@ -109,12 +110,12 @@ IFunction_sptr IndirectFitPropertyBrowser::getSingleFunction() const {
   return isFullFunctionBrowserActive() ? m_functionBrowser->getFunction() : m_templateBrowser->getFunction();
 }
 
-QStringList IndirectFitPropertyBrowser::getGlobalParameters() const {
+std::vector<std::string> IndirectFitPropertyBrowser::getGlobalParameters() const {
   return isFullFunctionBrowserActive() ? m_functionBrowser->getGlobalParameters()
                                        : m_templateBrowser->getGlobalParameters();
 }
 
-QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
+std::vector<std::string> IndirectFitPropertyBrowser::getLocalParameters() const {
   return isFullFunctionBrowserActive() ? m_functionBrowser->getLocalParameters()
                                        : m_templateBrowser->getLocalParameters();
 }
@@ -181,7 +182,7 @@ void IndirectFitPropertyBrowser::setFunctionTemplateBrowser(FunctionTemplateBrow
   connect(m_templateBrowser, SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
 }
 
-void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
+void IndirectFitPropertyBrowser::setFunction(std::string const &funStr) {
   if (isFullFunctionBrowserActive()) {
     m_functionBrowser->setFunction(funStr);
   } else {
@@ -255,6 +256,14 @@ void IndirectFitPropertyBrowser::updateParameters(const IFunction &fun) {
     m_functionBrowser->updateParameters(fun);
   else
     m_templateBrowser->updateParameters(fun);
+}
+
+void IndirectFitPropertyBrowser::updateFunctionListInBrowser(
+    const std::map<std::string, std::string> &functionStrings) {
+  auto singleFuncTemplate = dynamic_cast<SingleFunctionTemplateBrowser *>(m_templateBrowser);
+  if (singleFuncTemplate) {
+    singleFuncTemplate->updateAvailableFunctions(functionStrings);
+  }
 }
 
 void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const IFunction &fun) {

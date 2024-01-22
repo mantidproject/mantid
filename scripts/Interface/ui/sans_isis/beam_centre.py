@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 from qtpy import QtGui, QtCore, QtWidgets
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
-from sans.gui_logic.gui_common import get_detector_from_gui_selection, get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
+from sans.gui_logic.gui_common import get_detector_strings_for_gui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -102,15 +102,14 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
     def on_update_instrument(self, instrument):
         self.instrument = instrument
         component_list = get_detector_strings_for_gui(self.instrument)
-        self.set_component_options(component_list)
         if len(component_list) < 2:
             self.front_pos_1_line_edit.setEnabled(False)
             self.front_pos_2_line_edit.setEnabled(False)
-            self.update_front_check_box.setEnabled(False)
+            self.update_front_radio.setEnabled(False)
         else:
             self.front_pos_1_line_edit.setEnabled(True)
             self.front_pos_2_line_edit.setEnabled(True)
-            self.update_front_check_box.setEnabled(True)
+            self.update_front_radio.setEnabled(True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -148,10 +147,14 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.run_button.setEnabled(True)
 
     def enable_update_front(self, enabled):
-        self.update_front_check_box.setChecked(enabled)
+        self.update_front_radio.setChecked(enabled)
 
     def enable_update_rear(self, enabled):
-        self.update_rear_check_box.setChecked(enabled)
+        self.update_rear_radio.setChecked(enabled)
+
+    def set_position_unit(self, unit: str):
+        self.rear_centre_label.setText(f"Centre Position - Rear ({unit})")
+        self.front_centre_label.setText(f"Centre Position - Front ({unit})")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
@@ -269,46 +272,17 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.update_simple_line_edit_field(line_edit="front_pos_2_line_edit", value=value)
 
     @property
-    def component(self):
-        component_as_string = self.component_combo_box.currentText()
-        return get_detector_from_gui_selection(component_as_string)
-
-    @component.setter
-    def component(self, value):
-        # There are two types of values that can be passed:
-        # String: we look for string and we set it
-        # Convert the value to the correct GUI string
-
-        # Set the correct selection of reduction modes which are available
-        component_list = get_detector_strings_for_gui(self.instrument)
-        self.set_component_options(component_list)
-
-        component_as_string = get_string_for_gui_from_reduction_mode(value, self.instrument)
-        if component_as_string:
-            index = self.reduction_mode_combo_box.findText(component_as_string)
-            if index != -1:
-                self.component_combo_box.setCurrentIndex(index)
-
-    def set_component_options(self, component_list):
-        current_index = self.component_combo_box.currentIndex()
-        self.component_combo_box.clear()
-        for element in component_list:
-            self.component_combo_box.addItem(element)
-        if current_index != -1:
-            self.component_combo_box.setCurrentIndex(current_index)
-
-    @property
     def update_front(self):
-        return self.update_front_check_box.isChecked()
+        return self.update_front_radio.isChecked()
 
     @update_front.setter
     def update_front(self, value):
-        self.update_front_check_box.setChecked(value)
+        self.update_front_radio.setChecked(value)
 
     @property
     def update_rear(self):
-        return self.update_rear_check_box.isChecked()
+        return self.update_rear_radio.isChecked()
 
     @update_rear.setter
     def update_rear(self, value):
-        self.update_front_check_box.setChecked(value)
+        self.update_rear_radio.setChecked(value)

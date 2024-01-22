@@ -205,8 +205,6 @@ template <typename TYPE> void WorkspaceProperty<TYPE>::setPropertyMode(const Pro
  *  @returns A user level description of the problem or "" if it is valid.
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
-  // start with the no error condition
-  std::string error;
 
   // If an output workspace it must have a name, although it might not exist
   // in the ADS yet
@@ -236,9 +234,9 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
       // test whether it is a group
       if (std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
         return isValidGroup(std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
-      } else {
-        error = "Workspace " + this->value() + " is not of the correct type";
       }
+
+      std::string error = "Workspace " + this->value() + " is not of the correct type";
       return error;
     }
   }
@@ -395,10 +393,10 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(const std::shared_ptr<Workspac
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
   std::string error;
-  const std::string value = this->value();
-  if (!value.empty()) {
+  const std::string workspaceName = this->value();
+  if (!workspaceName.empty()) {
     // Will the ADS accept it
-    error = AnalysisDataService::Instance().isValid(value);
+    error = AnalysisDataService::Instance().isValid(workspaceName);
   } else {
     if (isOptional())
       error = ""; // Optional ones don't need a name

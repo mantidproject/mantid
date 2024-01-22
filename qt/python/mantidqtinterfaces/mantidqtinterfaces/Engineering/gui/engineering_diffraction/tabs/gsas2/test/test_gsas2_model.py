@@ -199,16 +199,8 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.number_of_regions = 2
         self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0, 18017.0])
 
-    @patch(model_path + ".GSAS2Model.determine_tof_min")
-    def test_determine_x_limits(self, mock_tof_min):
-        mock_tof_min.return_value = [17000, 19000]
-        self.model.x_min = [18000, 18000]
-        self.model.determine_x_limits()
-        self.assertEqual(self.model.x_min, [18000, 19000])
-
-    @patch(model_path + ".GSAS2Model.determine_tof_min")
     @patch(model_path + ".GSAS2Model.understand_data_structure")
-    def test_validate_x_limits(self, mock_understand_data, mock_tof_min):
+    def test_validate_x_limits(self, mock_understand_data):
         self.model.number_of_regions = 1
         self.model.instrument_files = ["inst1", "inst2"]
         self.model.data_files = ["data1", "data2", "data3"]
@@ -228,14 +220,13 @@ class TestGSAS2Model(unittest.TestCase):
         self.assertEqual(one_inst_one_hist_two_regions, True)
         self.assertEqual(self.model.limits, [[18000.0, 18000.0], [50000.0, 50000.0]])
 
-        mock_tof_min.return_value = [19000]
         self.model.data_x_min = [18000]
         self.model.data_x_max = [40000]
         self.model.instrument_files = ["inst1"]
         self.model.data_files = ["data1"]
         no_user_limits = self.model.validate_x_limits(None)
         self.assertEqual(no_user_limits, True)
-        self.assertEqual(self.model.limits, [[19000], [40000]])
+        self.assertEqual(self.model.limits, [[18000], [40000]])
 
     def test_read_gsas_lst(self):
         logged_lst_result = self.model.read_gsas_lst_and_print_wR(

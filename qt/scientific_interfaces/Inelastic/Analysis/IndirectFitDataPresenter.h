@@ -6,16 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
 #include "IndirectFitDataView.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
+#include "IndirectFitPropertyBrowser.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,10 +22,20 @@ namespace IDA {
 
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
-  Q_OBJECT
+class IIndirectDataAnalysisTab;
+
+class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
 public:
-  IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleRemoveClicked() = 0;
+  virtual void handleUnifyClicked() = 0;
+  virtual void handleCellChanged(int row, int column) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public IIndirectFitDataPresenter,
+                                                        public AnalysisDataServiceObserver {
+public:
+  IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
   std::vector<IndirectFitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog);
@@ -42,10 +51,7 @@ public:
   void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
 
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
-  QStringList getSampleWSSuffices() const;
-  QStringList getSampleFBSuffices() const;
-  QStringList getResolutionWSSuffices() const;
-  QStringList getResolutionFBSuffices() const;
+
   void updateTableFromModel();
   WorkspaceID getNumberOfWorkspaces() const;
   size_t getNumberOfDomains() const;
@@ -72,50 +78,29 @@ public:
     UNUSED_ARG(single);
   };
 
-protected slots:
-  void showAddWorkspaceDialog();
+  virtual void subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
-  virtual void closeDialog();
-
-signals:
-  void singleResolutionLoaded();
-  void dataAdded(IAddWorkspaceDialog const *);
-  void dataRemoved();
-  void dataChanged();
-  void startXChanged(double, WorkspaceID, WorkspaceIndex);
-  void startXChanged(double);
-  void endXChanged(double, WorkspaceID, WorkspaceIndex);
-  void endXChanged(double);
-  void requestedAddWorkspaceDialog();
+  void handleAddData(IAddWorkspaceDialog const *dialog) override;
+  void handleRemoveClicked() override;
+  void handleUnifyClicked() override;
+  void handleCellChanged(int row, int column) override;
 
 protected:
   IIndirectFitDataView const *getView() const;
-  void addData(IAddWorkspaceDialog const *dialog);
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
-  QStringList m_wsSampleSuffixes;
-  QStringList m_fbSampleSuffixes;
-  QStringList m_wsResolutionSuffixes;
-  QStringList m_fbResolutionSuffixes;
+
+  IIndirectDataAnalysisTab *m_tab;
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
 
-private slots:
-  void addData();
-  void handleCellChanged(int row, int column);
-  void removeSelectedData();
-  void unifyRangeToSelectedData();
-
 private:
-  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void setModelStartXAndEmit(double startX, FitDomainIndex row);
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
   void setTableStartXAndEmit(double X, int row, int column);
   void setTableEndXAndEmit(double X, int row, int column);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
-  bool m_emitCellChanged = true;
 };
 
 } // namespace IDA

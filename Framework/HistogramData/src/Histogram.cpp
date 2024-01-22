@@ -156,10 +156,10 @@ void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
 void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   // Setting a NULL Dx is fine, this disables x errors.
   // Note that we compare with m_x -- m_dx might be NULL.
-  PointStandardDeviations points(Dx);
-  if (points)
-    checkSize(points);
-  m_dx = points.cowData();
+  PointStandardDeviations pointsSD(Dx);
+  if (pointsSD)
+    checkSize(pointsSD);
+  m_dx = pointsSD.cowData();
 }
 
 /// Converts the histogram storage mode into YMode::Counts
