@@ -403,7 +403,7 @@ std::vector<std::string> InelasticDataManipulationElwinTab::getOutputWorkspaceNa
 }
 
 std::string InelasticDataManipulationElwinTab::getOutputBasename() {
-  return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName)).toStdString();
+  return getWorkspaceBasename(m_pythonExportWsName);
 }
 
 void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {

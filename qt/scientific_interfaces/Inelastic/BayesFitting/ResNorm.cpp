@@ -155,7 +155,7 @@ void ResNorm::run() {
   auto const eMin(getDoubleManagerProperty("EMin"));
   auto const eMax(getDoubleManagerProperty("EMax"));
 
-  auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  auto const outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
 
   auto resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
@@ -164,10 +164,10 @@ void ResNorm::run() {
   resNorm->setProperty("EnergyMin", eMin);
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
-  resNorm->setProperty("OutputWorkspace", outputWsName.toStdString());
-  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit").toStdString());
+  resNorm->setProperty("OutputWorkspace", outputWsName);
+  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit"));
   m_batchAlgoRunner->addAlgorithm(resNorm);
-  m_pythonExportWsName = outputWsName.toStdString();
+  m_pythonExportWsName = outputWsName;
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -193,9 +193,9 @@ void ResNorm::handleAlgorithmComplete(bool error) {
 
 void ResNorm::processLogs() {
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
-  auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  auto const outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
   auto const resolutionWorkspace = getADSMatrixWorkspace(resWsName.toStdString());
-  auto const resultWorkspace = getADSGroupWorkspace(outputWsName.toStdString());
+  auto const resultWorkspace = getADSGroupWorkspace(outputWsName);
 
   copyLogs(resolutionWorkspace, resultWorkspace);
   addAdditionalLogs(resultWorkspace);
@@ -299,7 +299,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 
   // Use the values from the instrument parameter file if we can
   // The maximum and minimum value of the plot
-  if (getResolutionRangeFromWs(filename, res)) {
+  if (getResolutionRangeFromWs(filename.toStdString(), res)) {
     // ResNorm resolution should be +/- 10 * the IPF resolution
     res.first = res.first * 10;
     res.second = res.second * 10;
@@ -465,10 +465,10 @@ void ResNorm::runClicked() {
 void ResNorm::saveClicked() {
 
   const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
-  const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  const auto outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
   addSaveWorkspaceToQueue(outputWsName);
 
-  m_pythonExportWsName = outputWsName.toStdString();
+  m_pythonExportWsName = outputWsName;
   // Check workspace exists
   IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
 

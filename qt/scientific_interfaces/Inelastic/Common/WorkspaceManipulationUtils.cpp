@@ -42,7 +42,7 @@ std::string getWorkspaceSuffix(const std::string &wsName) {
   auto const lastUnderscoreIndex = wsName.find_last_of("_");
   if (lastUnderscoreIndex == -1)
     return std::string();
-  return wsName.substr(lastUnderscoreIndex);
+  return wsName.substr(lastUnderscoreIndex + 1);
 }
 
 /**
@@ -54,12 +54,12 @@ std::string getWorkspaceSuffix(const std::string &wsName) {
  * @param wsName Name of workspace
  * @return Base name, or wsName if no underscore
  */
-QString getWorkspaceBasename(const QString &wsName) {
-  int lastUnderscoreIndex = wsName.lastIndexOf("_");
+std::string getWorkspaceBasename(const std::string &wsName) {
+  auto lastUnderscoreIndex = wsName.find_last_of("_");
   if (lastUnderscoreIndex == -1)
-    return QString(wsName);
+    return wsName;
 
-  return wsName.left(lastUnderscoreIndex);
+  return wsName.substr(0, lastUnderscoreIndex);
 }
 
 /* Extracts the labels from the axis at the specified index in the
@@ -97,7 +97,6 @@ std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws) {
   std::string xUnitName = xUnit->caption();
 
   g_log.debug() << "X unit name is: " << xUnitName << '\n';
-
   if (boost::algorithm::find_first(xUnitName, "d-Spacing"))
     return "Elastic";
 
@@ -139,9 +138,9 @@ double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
  * @param res :: The retrieved values for the resolution parameter (if one was
  *found)
  */
-bool getResolutionRangeFromWs(const QString &workspace, QPair<double, double> &res) {
-  auto const &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const ws = ads.retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
+bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res) {
+  auto const ws =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace);
   return getResolutionRangeFromWs(ws, res);
 }
 /**

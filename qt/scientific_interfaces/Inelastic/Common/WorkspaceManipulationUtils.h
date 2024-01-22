@@ -8,9 +8,6 @@
 #include "../DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "QPair"
-#include "QString"
-#include "QStringList"
-#include <boost/optional.hpp>
 #include <string>
 
 namespace MantidQt {
@@ -18,14 +15,14 @@ namespace CustomInterfaces {
 namespace WorkspaceManipulationUtils {
 
 MANTIDQT_INELASTIC_DLL std::string getWorkspaceSuffix(const std::string &wsName);
-MANTIDQT_INELASTIC_DLL QString getWorkspaceBasename(const QString &wsName);
+MANTIDQT_INELASTIC_DLL std::string getWorkspaceBasename(const std::string &wsName);
 MANTIDQT_INELASTIC_DLL std::unordered_map<std::string, size_t>
 extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace, const size_t &axisIndex);
 
 MANTIDQT_INELASTIC_DLL std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
 MANTIDQT_INELASTIC_DLL double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
-MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const QString &workspace, QPair<double, double> &res);
+MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res);
 MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspacee,
                                                      QPair<double, double> &res);
 
