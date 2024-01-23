@@ -81,8 +81,8 @@ euphonic:
 sip:
   - <=6.7.11
 
-libcurl:
-  - <=8.1.2
+krb5:
+  - <1.21
 
 pin_run_as_build:
     boost:

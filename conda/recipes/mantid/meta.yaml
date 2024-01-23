@@ -42,7 +42,7 @@ requirements:
     - hdf5 {{ hdf5 }}
     - jemalloc  # [unix]
     - jsoncpp
-    - libcurl {{ libcurl }}
+    - krb5 {{ krb5 }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka
     - lib3mf  # [win]
