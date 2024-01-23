@@ -10,7 +10,7 @@ on:
 jobs:
   merge-relase-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == release-next }}
+    if: ${{ github.ref_name == 'release-next' }}
     steps:
       - uses: actions/checkout@master
 
@@ -24,7 +24,7 @@ jobs:
 
   merge-ornl-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == ornl-next }}
+    if: ${{ github.ref_name == 'ornl-next' }}
     steps:
       - uses: actions/checkout@master
 
@@ -38,7 +38,7 @@ jobs:
 
   merge-release-into-ornl:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == release-next }}
+    if: ${{ github.ref_name == 'release-next' }}
     steps:
       - uses: actions/checkout@master
 
