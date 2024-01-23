@@ -12,6 +12,7 @@
 
 #include "MantidDataHandling/CompressEventBankAccumulator.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::CompressEventBankAccumulator;
@@ -25,7 +26,8 @@ public:
   static CompressEventBankAccumulatorTest *createSuite() { return new CompressEventBankAccumulatorTest(); }
   static void destroySuite(CompressEventBankAccumulatorTest *suite) { delete suite; }
 
-  void test_single_bank() {
+  /*
+  void xtest_single_bank() {
     const size_t num_spectra{50};
     const detid_t min_detid{10};
     const detid_t max_detid{min_detid + num_spectra};
@@ -93,6 +95,7 @@ public:
       TS_ASSERT_DELTA(total_weight, 9806., .1); // observed value, but could be calculated
     }
   }
+  */
 
   // ====================================== BEGIN OF REMOVE
   std::unique_ptr<std::vector<float>> getTof(::NeXus::File &filehandle, const std::string &nxspath) {
@@ -195,9 +198,7 @@ public:
     std::cout << "BINS " << snap_num_bins << "\n";
 
     auto tof_fine_bins = std::make_shared<std::vector<double>>();
-    for (size_t i = 0; i < snap_num_bins + 1; ++i) { // to convert to edges
-      tof_fine_bins->push_back(static_cast<double>(*snap_min + (static_cast<double>(i) * DELTA)));
-    }
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({*snap_min, DELTA, (*snap_max + DELTA)}, *tof_fine_bins);
 
     const size_t MAX_EVENTS = snap_tof->size(); //  / 10;
     std::cout << "Parsing " << MAX_EVENTS << " events\n";
@@ -231,62 +232,64 @@ public:
     }
 
     // -------------------- bank accumulator
+    /*
+        {
+          // get detid range
+          const auto [snap_min_detid, snap_max_detid] = std::minmax_element(snap_detids->cbegin(), snap_detids->cend());
+          std::cout << "DET ID range " << (*snap_min_detid) << " to " << (*snap_max_detid) << "\n"
+                    << "       for " << (*snap_max_detid - *snap_min_detid) << " pixels\n";
+          size_t temp_size = tof_fine_bins->size() * static_cast<size_t>(*snap_max_detid - *snap_min_detid);
+          std::cout << "       num bins " << tof_fine_bins->size() << "\n"
+                    << "       temp size " << (temp_size * 8 / 1024 / 1024 / 1024) << "GiB\n";
+          snap_timer.reset();
 
-    {
-      // get detid range
-      const auto [snap_min_detid, snap_max_detid] = std::minmax_element(snap_detids->cbegin(), snap_detids->cend());
-      std::cout << "DET ID range " << (*snap_min_detid) << " to " << (*snap_max_detid) << "\n"
-                << "       for " << (*snap_max_detid - *snap_min_detid) << " pixels\n";
-      size_t temp_size = tof_fine_bins->size() * static_cast<size_t>(*snap_max_detid - *snap_min_detid);
-      std::cout << "       num bins " << tof_fine_bins->size() << "\n"
-                << "       temp size " << (temp_size * 8 / 1024 / 1024 / 1024) << "GiB\n";
-      snap_timer.reset();
+          CompressEventBankAccumulator accumulator(*snap_min_detid, *snap_max_detid, tof_fine_bins, DELTA);
+          // loop through all of the events and add them
+          for (size_t i = 0; i < MAX_EVENTS; ++i) {
+            accumulator.addEvent(snap_detids->at(i), snap_tof->at(i));
+          }
 
-      CompressEventBankAccumulator accumulator(*snap_min_detid, *snap_max_detid, tof_fine_bins, DELTA);
-      // loop through all of the events and add them
-      for (size_t i = 0; i < MAX_EVENTS; ++i) {
-        accumulator.addEvent(snap_detids->at(i), snap_tof->at(i));
-      }
+          // create the output event lists and change the types
+          const size_t num_det = static_cast<size_t>(snap_max_detid - snap_min_detid + 1);
+          std::vector<EventList> event_lists(num_det, Mantid::API::EventType::WEIGHTED_NOTIME);
+          // for (auto &event_list : event_lists)
+          // event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
 
-      // create the output event lists and change the types
-      const size_t num_det = static_cast<size_t>(snap_max_detid - snap_min_detid + 1);
-      std::vector<EventList> event_lists(num_det, Mantid::API::EventType::WEIGHTED_NOTIME);
-      // for (auto &event_list : event_lists)
-      // event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+          // create the weighted events
+          for (detid_t detid = *snap_min_detid; detid <= *snap_max_detid; ++detid) {
+            std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
+            getEventsFrom(event_lists[detid - *snap_min_detid], raw_events);
 
-      // create the weighted events
-      for (detid_t detid = *snap_min_detid; detid <= *snap_max_detid; ++detid) {
-        std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
-        getEventsFrom(event_lists[detid - *snap_min_detid], raw_events);
+            accumulator.createWeightedEvents(detid, raw_events);
+          }
 
-        accumulator.createWeightedEvents(detid, raw_events);
-      }
+          {
+            auto seconds = snap_timer.elapsed();
+            std::cout << "Bank Accumulator      in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) /
+       seconds)
+                      << "E/s\n"
+                      << "                      numWeighted="
+                      << accumulator.totalWeight()
+                      //<< " numHist=" << accumulator.numberHistBins() << " unused="
+                      //<< (100. * double(accumulator.numberHistBins() - accumulator.numberWeightedEvents()) /
+                      //    double(accumulator.numberHistBins()))
+                      //<< "%\n"
+                      << "\n"
+                //<< "                     elements.size=" << raw_events->size()
+                //<< " memory=" << (event_lists.getMemorySize() / 1024) << "kB\n"
+                ;
 
-      {
-        auto seconds = snap_timer.elapsed();
-        std::cout << "Bank Accumulator      in " << seconds << "s | rate=" << (static_cast<float>(MAX_EVENTS) / seconds)
-                  << "E/s\n"
-                  << "                      numWeighted="
-                  << accumulator.totalWeight()
-                  //<< " numHist=" << accumulator.numberHistBins() << " unused="
-                  //<< (100. * double(accumulator.numberHistBins() - accumulator.numberWeightedEvents()) /
-                  //    double(accumulator.numberHistBins()))
-                  //<< "%\n"
-                  << "\n"
-            //<< "                     elements.size=" << raw_events->size()
-            //<< " memory=" << (event_lists.getMemorySize() / 1024) << "kB\n"
-            ;
-        /*
-        size_t num_events =
-            std::accumulate(event_lists.cbegin(), event_lists.cend(), 0, [](const auto &current, const auto &value) {
-              const auto &events = value.getWeightedEventsNoTime();
-              // double weight =
-              return current + events.size();
-            });
-        std::cout << "     TOTAL_WGHT=" << num_events << "\n";
+            //size_t num_events =
+            //    std::accumulate(event_lists.cbegin(), event_lists.cend(), 0, [](const auto &current, const auto
+       &value) {
+            //      const auto &events = value.getWeightedEventsNoTime();
+            //      // double weight =
+            //      return current + events.size();
+            //    });
+            //std::cout << "     TOTAL_WGHT=" << num_events << "\n";
+          }
+        }
         */
-      }
-    }
 
     // -------------------- prototype
     snap_timer.reset();

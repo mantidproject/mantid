@@ -65,6 +65,10 @@ public:
   /// in the event list.
   std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEvent> *>> weightedEventVectors;
 
+  /// Vector where index = event_id; value = ptr to std::vector<WeightedEventNoTime> in the
+  /// event list.
+  std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEventNoTime> *>> weightedNoTimeEventVectors;
+
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
   /// index)
   std::vector<size_t> pixelID_to_wi_vector;
