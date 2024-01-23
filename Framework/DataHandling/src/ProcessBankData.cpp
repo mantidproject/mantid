@@ -103,7 +103,7 @@ void ProcessBankData::run() {
   auto *alg = m_loader.alg;
 
   // Will we need to compress?
-  const bool compress = (alg->compressTolerance >= 0);
+  const bool compress = (alg->compressEvents);
 
   // Which detector IDs were touched?
   std::vector<bool> usedDetIds(m_max_detid - m_min_detid + 1, false);

@@ -81,8 +81,8 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
  */
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0), longest_tof(0), shortest_tof(0), bad_tofs(0),
-      discarded_events(0), compressTolerance(0), m_instrument_loaded_correctly(false), loadlogs(false),
-      event_id_is_spec(false) {}
+      discarded_events(0), compressTolerance(0), compressEvents(false), m_instrument_loaded_correctly(false),
+      loadlogs(false), event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -390,6 +390,7 @@ void LoadEventNexus::execLoader() {
   m_filename = getPropertyValue("Filename");
 
   compressTolerance = getProperty("CompressTolerance");
+  compressEvents = !isDefault("CompressTolerance");
 
   loadlogs = getProperty("LoadLogs");
 
