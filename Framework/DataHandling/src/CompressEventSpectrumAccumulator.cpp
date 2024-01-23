@@ -125,6 +125,13 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
   raw_events->shrink_to_fit();
 }
 
+// drop all memory from this
+void CompressEventSpectrumAccumulator::clear() {
+  m_tof.clear();
+  m_count.clear();
+  // m_histogram_edges->reset();
+}
+
 std::size_t CompressEventSpectrumAccumulator::numberHistBins() const { return m_count.size(); }
 double CompressEventSpectrumAccumulator::totalWeight() const { return static_cast<double>(m_tof.size()); }
 

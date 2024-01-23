@@ -26,6 +26,7 @@ public:
 
   void addEvent(const float tof);
   void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
+  void clear();
 
   std::size_t numberHistBins() const;
   double totalWeight() const;
