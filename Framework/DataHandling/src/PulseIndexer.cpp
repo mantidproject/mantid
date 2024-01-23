@@ -26,13 +26,13 @@ size_t PulseIndexer::getFirstPulseIndex() const {
   if (1 >= m_event_index->size())
     return 1;
 
-  // special case to stop from setting up temporary objects
+  // special case to stop from setting up temporary objects because the first event is in the first pulse
   if (m_firstEventIndex == 0)
     return 0;
 
-  // linear search is used because it is more likely that the next pulse index
-  // is the correct one to use the next one is because we are
-  // confirm that the next index is bigger, not the current
+  // linear search is used because it is more likely that the pulse index is earlier in the array.
+  // a bisecting search would win if most of the time the first event_index is much after the first quarter of the
+  // pulse_index array.
   const auto event_index_end = m_event_index->cend();
   auto event_index_iter = m_event_index->cbegin();
 
