@@ -16,7 +16,19 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** PulseIndexer : TODO: DESCRIPTION
+/**
+ * PulseIndexer contains information for mapping from pulse index/number to event index.
+ *
+ * The events come in two sets of parallel arrays:
+ * * pulse_time[NUM_PULSE] - wall-clock time of pulse - stored in event_time_zero
+ * * event_index[NUM_PULSE] - index into the event_detid and event_tof arrays - stored in event_index
+ * * event_detid[NUM_EVENT] - detector id of the individual event - stored in event_pixel_id or event_id
+ * * event_tof[NUM_EVENT] - time-of-flight of the individual event - stored in event_time_of_flight or event_time_offset
+ *
+ * In general, NUM_PULSE<NUM_EVENT, but this is not true for "dark count" measurements.
+ *
+ * Once configured, this allows for the caller to start at the first index into the pulse information,
+ * then get the range of event [inclusive, exclusive) detid and tof to iterate through.
  */
 class MANTID_DATAHANDLING_DLL PulseIndexer {
 public:
@@ -24,7 +36,7 @@ public:
                const std::size_t numEvents, const std::string &entry_name);
 
   /// Which element in the event_index array is the one to use
-  size_t getFirstPulseIndex(const size_t event_index) const;
+  size_t getFirstPulseIndex() const;
   /// The range of event(tof,detid) indices to read for this pulse
   std::pair<size_t, size_t> getEventIndexRange(const size_t pulseIndex) const;
   /**

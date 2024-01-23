@@ -20,12 +20,11 @@ public:
   static void destroySuite(PulseIndexerTest *suite) { delete suite; }
 
   void run_test(std::shared_ptr<std::vector<uint64_t>> eventIndices, const size_t start_event_index,
-                const size_t total_events) {
+                const size_t total_events, const size_t firstPulseIndex = 0) {
     PulseIndexer indexer(eventIndices, start_event_index, total_events, "junk_name");
 
     // test locating the first pulse entirely containing the event index
-    for (size_t pulse_index = 0; pulse_index < eventIndices->size(); ++pulse_index)
-      TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(eventIndices->operator[](pulse_index)), pulse_index);
+    TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(), firstPulseIndex);
 
     // test locating the first event index for the pulse
     // how start_event_index affects values is baked in from how code worked pre 2024
@@ -77,6 +76,6 @@ public:
 
     constexpr size_t total_events{20};
 
-    run_test(eventIndices, 2, total_events);
+    run_test(eventIndices, 2, total_events, 3);
   }
 };
