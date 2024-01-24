@@ -30,13 +30,14 @@ const unsigned int BankPulseTimes::FirstPeriod = 1;
  *  Handles a zero-sized vector
  *  @param times
  */
-BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) : pulseTimes(times) {
+BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times)
+    : pulseTimes(times), have_period_info(false), m_sorting_info(PulseSorting::UNKNOWN) {
   this->finalizePeriodNumbers();
 }
 
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times,
                                const std::vector<int> &periodNumbers)
-    : pulseTimes(times), periodNumbers(periodNumbers) {
+    : periodNumbers(periodNumbers), pulseTimes(times), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
   this->finalizePeriodNumbers();
 }
 
@@ -46,7 +47,7 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
  * @param pNumbers :: Period numbers to index into. Index via frame/pulse
  */
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
-    : periodNumbers(periodNumbers), m_sorting_info(PulseSorting::UNKNOWN) {
+    : periodNumbers(periodNumbers), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
   // If the offset is not present, use Unix epoch
@@ -104,10 +105,14 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
 }
 
 void BankPulseTimes::finalizePeriodNumbers() {
-  if (pulseTimes.empty()) // set periods to empty vector
+  if (pulseTimes.empty()) {
+    // set periods to empty vector
     periodNumbers = std::vector<int>();
-  else if (pulseTimes.size() != periodNumbers.size()) // something went wrong, everything is first period
-    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod);
+    have_period_info = true;
+  } else if (pulseTimes.size() != periodNumbers.size()) {
+    // something went wrong, everything is first period
+    have_period_info = false;
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -127,7 +132,12 @@ bool BankPulseTimes::arePulseTimesIncreasing() const {
   return m_sorting_info == PulseSorting::PULSETIME_SORT;
 }
 
-int BankPulseTimes::periodNumber(const size_t index) const { return this->periodNumbers[index]; }
+int BankPulseTimes::periodNumber(const size_t index) const {
+  if (have_period_info)
+    return this->periodNumbers[index];
+  else
+    return FirstPeriod;
+}
 
 const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t index) const {
   return this->pulseTimes[index];

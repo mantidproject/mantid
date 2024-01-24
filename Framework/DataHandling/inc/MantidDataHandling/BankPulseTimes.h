@@ -64,6 +64,8 @@ private:
   /// Array of the pulse times
   std::vector<Mantid::Types::Core::DateAndTime> pulseTimes;
 
+  bool have_period_info;
+
   mutable int8_t m_sorting_info;
   mutable std::mutex m_sortingMutex;
 };
