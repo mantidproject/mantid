@@ -67,7 +67,7 @@ void ProcessBankCompressed::collectEvents() {
     const auto NUM_PULSES = m_event_index->size();
     const PulseIndexer pulseIndexer(m_event_index, m_firstEventIndex, NUM_EVENTS, m_entry_name);
     for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(); pulseIndex < NUM_PULSES; pulseIndex++) {
-      const int logPeriodNumber = m_bankPulseTimes->periodNumbers[pulseIndex];
+      const int logPeriodNumber = m_bankPulseTimes->periodNumber(pulseIndex);
       const int periodIndex = logPeriodNumber - 1;
 
       // determine range of events for the pulse
