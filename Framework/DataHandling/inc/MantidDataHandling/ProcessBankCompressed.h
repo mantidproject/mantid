@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidDataHandling/CompressEventSpectrumAccumulator.h"
+#include "MantidDataHandling/CompressEventAccumulator.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Task.h"
@@ -65,7 +65,7 @@ private:
   const std::shared_ptr<BankPulseTimes> m_bankPulseTimes;
 
   /// objects holding individual spectra
-  std::vector<DataHandling::CompressEventSpectrumAccumulator> m_spectra_accum;
+  std::vector<DataHandling::CompressEventAccumulator> m_spectra_accum;
 
   // inclusive
   const detid_t m_detid_min;

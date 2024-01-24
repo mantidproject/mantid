@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/CompressEventSpectrumAccumulator.h"
+#include "MantidDataHandling/CompressEventAccumulator.h"
 #include "MantidDataObjects/EventList.h"
 
 #include <tbb/parallel_sort.h>
@@ -14,8 +14,8 @@ using Mantid::DataObjects::EventList;
 
 namespace Mantid {
 namespace DataHandling {
-CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
-    std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, CompressBinningMode bin_mode)
+CompressEventAccumulator::CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges,
+                                                   const double divisor, CompressBinningMode bin_mode)
     : m_histogram_edges(std::move(histogram_bin_edges)) {
   // divisor is applied to make it
 
@@ -42,7 +42,7 @@ CompressEventSpectrumAccumulator::CompressEventSpectrumAccumulator(
   numevents = 0;
 }
 
-void CompressEventSpectrumAccumulator::allocateFineHistogram() {
+void CompressEventAccumulator::allocateFineHistogram() {
   // create the fine histogram
   // all values start at zero because nothing has been accumulated
   m_tof.reserve(1678); // TODO
@@ -55,7 +55,7 @@ void CompressEventSpectrumAccumulator::allocateFineHistogram() {
 /**
  * This assumes that the event is within range of the fine histogram
  */
-void CompressEventSpectrumAccumulator::addEvent(const float tof) {
+void CompressEventAccumulator::addEvent(const float tof) {
   // if (tof < m_histogram_edges->front() || tof >= m_histogram_edges->back())
   // std::cout << "THIS SHOULD NOT GET PRINTED " << tof << "\n";
 
@@ -78,7 +78,7 @@ void CompressEventSpectrumAccumulator::addEvent(const float tof) {
   numevents++;
 }
 
-void CompressEventSpectrumAccumulator::createWeightedEvents(
+void CompressEventAccumulator::createWeightedEvents(
     std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const {
   if (m_tof.empty())
     return;
@@ -126,7 +126,7 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
 }
 
 // drop all memory from this
-void CompressEventSpectrumAccumulator::clear() {
+void CompressEventAccumulator::clear() {
   // swap is a stl trick to get the memory to really be released
   m_tof.clear();
   std::vector<float>().swap(m_tof);
@@ -136,8 +136,8 @@ void CompressEventSpectrumAccumulator::clear() {
   // m_histogram_edges->reset();
 }
 
-std::size_t CompressEventSpectrumAccumulator::numberHistBins() const { return m_count.size(); }
-double CompressEventSpectrumAccumulator::totalWeight() const { return static_cast<double>(m_tof.size()); }
+std::size_t CompressEventAccumulator::numberHistBins() const { return m_count.size(); }
+double CompressEventAccumulator::totalWeight() const { return static_cast<double>(m_tof.size()); }
 
 } // namespace DataHandling
 } // namespace Mantid

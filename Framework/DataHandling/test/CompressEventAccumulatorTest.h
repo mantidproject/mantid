@@ -10,26 +10,26 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
-#include "MantidDataHandling/CompressEventSpectrumAccumulator.h"
+#include "MantidDataHandling/CompressEventAccumulator.h"
 #include "MantidKernel/Timer.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::CompressBinningMode;
-using Mantid::DataHandling::CompressEventSpectrumAccumulator;
+using Mantid::DataHandling::CompressEventAccumulator;
 using Mantid::DataObjects::EventList;
 
 namespace {
 constexpr double TOF_MAX{10000000}; // 1e7
 } // namespace
 
-class CompressEventSpectrumAccumulatorTest : public CxxTest::TestSuite {
+class CompressEventAccumulatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CompressEventSpectrumAccumulatorTest *createSuite() { return new CompressEventSpectrumAccumulatorTest(); }
-  static void destroySuite(CompressEventSpectrumAccumulatorTest *suite) { delete suite; }
+  static CompressEventAccumulatorTest *createSuite() { return new CompressEventAccumulatorTest(); }
+  static void destroySuite(CompressEventAccumulatorTest *suite) { delete suite; }
 
-  size_t addEvents(CompressEventSpectrumAccumulator &accumulator, const float tof_min) {
+  size_t addEvents(CompressEventAccumulator &accumulator, const float tof_min) {
     const auto tof_max = static_cast<float>(TOF_MAX);
 
     float tof = tof_min;
@@ -44,7 +44,7 @@ public:
   void run_general_test(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double tof_min,
                         const double divisor, CompressBinningMode bin_mode, std::size_t num_wght_events) {
     // create the accumulator
-    CompressEventSpectrumAccumulator accumulator(histogram_bin_edges, divisor, bin_mode);
+    CompressEventAccumulator accumulator(histogram_bin_edges, divisor, bin_mode);
 
     // add a bunch of events
     const size_t NUM_RAW_EVENTS = addEvents(accumulator, static_cast<float>(tof_min));

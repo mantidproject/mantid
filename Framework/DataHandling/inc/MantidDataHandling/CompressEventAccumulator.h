@@ -16,13 +16,13 @@ namespace DataHandling {
 
 enum class CompressBinningMode { LINEAR, LOGARITHMIC };
 
-/** CompressEventSpectrumAccumulator : TODO: DESCRIPTION
+/** CompressEventAccumulator : TODO: DESCRIPTION
  */
-class MANTID_DATAHANDLING_DLL CompressEventSpectrumAccumulator {
+class MANTID_DATAHANDLING_DLL CompressEventAccumulator {
 public:
   // TODO parameter for expected number of events
-  CompressEventSpectrumAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
-                                   CompressBinningMode bin_mode);
+  CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
+                           CompressBinningMode bin_mode);
 
   void addEvent(const float tof);
   void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
@@ -33,7 +33,7 @@ public:
 
 private:
   /// Do not allow constructing
-  CompressEventSpectrumAccumulator();
+  CompressEventAccumulator();
   void allocateFineHistogram();
 
   // offset is applied after division
