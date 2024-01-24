@@ -2,6 +2,7 @@ set(SRC_FILES
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
+    src/CompressEventBankAccumulator.cpp
     src/CompressEventSpectrumAccumulator.cpp
     src/CompressEvents.cpp
     src/CreateChunkingFromInstrument.cpp
@@ -449,7 +450,6 @@ set(TEST_FILES
     ApplyDiffCalTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
-    CompressEventBankAccumulatorTest.h
     CompressEventSpectrumAccumulatorTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
