@@ -44,7 +44,7 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
 /** Constructor. Loads the pulse times from the bank entry of the file
  *
  * @param file :: nexus file open in the right bank entry
- * @param pNumbers :: Period numbers to index into. Index via frame/pulse
+ * @param periodNumbers :: Period numbers to index into. Index via frame/pulse
  */
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
     : periodNumbers(periodNumbers), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
