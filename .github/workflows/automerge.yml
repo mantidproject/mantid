@@ -20,7 +20,7 @@ jobs:
           type: now
           target_branch: main
           message: Merge release-next into main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
 
   merge-ornl-into-main:
     runs-on: ubuntu-latest
@@ -34,7 +34,7 @@ jobs:
           type: now
           target_branch: main
           message: Merge ornl-next into main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
 
   merge-release-into-ornl:
     runs-on: ubuntu-latest
@@ -48,4 +48,4 @@ jobs:
           type: now
           target_branch: ornl-next
           message: Merge release-next into ornl-next
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
