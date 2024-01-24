@@ -112,6 +112,8 @@ void BankPulseTimes::finalizePeriodNumbers() {
 
 //----------------------------------------------------------------------------------------------
 
+size_t BankPulseTimes::numberOfPulses() const { return pulseTimes.size(); }
+
 bool BankPulseTimes::arePulseTimesIncreasing() const {
   if (m_sorting_info == PulseSorting::UNKNOWN) {
     // only allow one thread to check sorting at a time
@@ -123,6 +125,12 @@ bool BankPulseTimes::arePulseTimesIncreasing() const {
       m_sorting_info = PulseSorting::UNSORTED;
   }
   return m_sorting_info == PulseSorting::PULSETIME_SORT;
+}
+
+int BankPulseTimes::periodNumber(const size_t index) const { return this->periodNumbers[index]; }
+
+const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t index) const {
+  return this->pulseTimes[index];
 }
 
 //----------------------------------------------------------------------------------------------

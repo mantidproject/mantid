@@ -45,14 +45,11 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times);
 
-    // TODO should have a method to get number of pulses
-    TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes.size(), pulse_times.size());
-    TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers.size(), pulse_times.size());
+    TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
-    // TODO should have a method to get this information
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
-      TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes[i], pulse_times[i]);
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers[i], BankPulseTimes::FirstPeriod);
+      TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FirstPeriod);
     }
   }
 
@@ -62,34 +59,25 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times, period_indices);
 
-    // TODO should have a method to get number of pulses
-    TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes.size(), pulse_times.size());
-    TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers.size(), pulse_times.size());
+    TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
-    // TODO should have a method to get this information
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
-      TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes[i], pulse_times[i]);
+      TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
       // coordinated with createPeriodIndices() above
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers[i], (i % 5) + 1);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), (i % 5) + 1);
     }
   }
 
   void test_empty() {
+    const size_t NUM_PULSES{0};
     // empty vector of pulse times
-    const auto pulse_times = createPulseTimes(0);
-    TS_ASSERT_EQUALS(pulse_times.size(), 0);
+    const auto pulse_times = createPulseTimes(NUM_PULSES);
+    TS_ASSERT_EQUALS(pulse_times.size(), NUM_PULSES);
 
     BankPulseTimes bank_pulse_times(pulse_times);
 
-    // TODO should have a method to get number of pulses
-    TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes.size(), pulse_times.size());
-    TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers.size(), pulse_times.size());
-
-    // TODO should have a method to get this information
-    for (std::size_t i = 0; i < pulse_times.size(); ++i) {
-      TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes[i], pulse_times[i]);
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers[i], BankPulseTimes::FirstPeriod);
-    }
+    // should be zero length
+    TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), NUM_PULSES);
   }
 
   void test_periods_not_parallel() {
@@ -98,14 +86,11 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times, period_indices);
 
-    // TODO should have a method to get number of pulses
-    TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes.size(), pulse_times.size());
-    TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers.size(), pulse_times.size());
+    TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
-    // TODO should have a method to get this information
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
-      TS_ASSERT_EQUALS(bank_pulse_times.pulseTimes[i], pulse_times[i]);
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumbers[i], BankPulseTimes::FirstPeriod);
+      TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FirstPeriod);
     }
   }
 };
