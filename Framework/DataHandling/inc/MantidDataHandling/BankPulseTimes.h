@@ -14,6 +14,7 @@ namespace NeXus {
 class File;
 }
 
+namespace Mantid::DataHandling {
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
  * this means that some banks have different lists of pulse times.
@@ -51,3 +52,4 @@ private:
   mutable int8_t m_sorting_info;
   mutable std::mutex m_sortingMutex;
 };
+} // namespace Mantid::DataHandling

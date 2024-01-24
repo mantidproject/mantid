@@ -15,15 +15,28 @@ using namespace Mantid::Kernel;
 // BankPulseTimes
 //===============================================================================================
 
-/// The first period
-const unsigned int BankPulseTimes::FirstPeriod = 1;
-
 namespace {
 // these values are simliar to those in EventList::EventSortType
 enum PulseSorting { UNKNOWN, UNSORTED, PULSETIME_SORT };
 } // namespace
 
+namespace Mantid::DataHandling {
+
+/// The first period
+const unsigned int BankPulseTimes::FirstPeriod = 1;
+
 //----------------------------------------------------------------------------------------------
+/** Constructor. Build from a vector of date and times.
+ *  Handles a zero-sized vector
+ *  @param times
+ */
+BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) : pulseTimes(times) {
+  if (times.empty())
+    periodNumbers = std::vector<int>();
+  else
+    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
+}
+
 /** Constructor. Loads the pulse times from the bank entry of the file
  *
  * @param file :: nexus file open in the right bank entry
@@ -91,6 +104,8 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
   }
 }
 
+//----------------------------------------------------------------------------------------------
+
 bool BankPulseTimes::arePulseTimesIncreasing() const {
   if (m_sorting_info == PulseSorting::UNKNOWN) {
     // only allow one thread to check sorting at a time
@@ -105,18 +120,7 @@ bool BankPulseTimes::arePulseTimesIncreasing() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor. Build from a vector of date and times.
- *  Handles a zero-sized vector
- *  @param times
- */
-BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) : pulseTimes(times) {
-  if (times.empty())
-    periodNumbers = std::vector<int>();
-  else
-    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
-}
 
-//----------------------------------------------------------------------------------------------
 /** Comparison. Is this bank's pulse times array the same as another one.
  *
  * @param otherNumPulse :: number of pulses in the OTHER bank event_time_zero.
@@ -128,3 +132,5 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
 bool BankPulseTimes::equals(size_t otherNumPulse, const std::string &otherStartTime) {
   return ((this->startTime == otherStartTime) && (this->pulseTimes.size() == otherNumPulse));
 }
+
+} // namespace Mantid::DataHandling
