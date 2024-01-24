@@ -31,10 +31,13 @@ const unsigned int BankPulseTimes::FirstPeriod = 1;
  *  @param times
  */
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) : pulseTimes(times) {
-  if (times.empty())
-    periodNumbers = std::vector<int>();
-  else
-    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
+  this->finalizePeriodNumbers();
+}
+
+BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times,
+                               const std::vector<int> &periodNumbers)
+    : pulseTimes(times), periodNumbers(periodNumbers) {
+  this->finalizePeriodNumbers();
 }
 
 /** Constructor. Loads the pulse times from the bank entry of the file
@@ -42,8 +45,8 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
  * @param file :: nexus file open in the right bank entry
  * @param pNumbers :: Period numbers to index into. Index via frame/pulse
  */
-BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers)
-    : periodNumbers(pNumbers), m_sorting_info(PulseSorting::UNKNOWN) {
+BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
+    : periodNumbers(periodNumbers), m_sorting_info(PulseSorting::UNKNOWN) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
   // If the offset is not present, use Unix epoch
@@ -73,11 +76,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
   }
   file.closeData();
 
-  // Ensure that we always have a consistency between nPulses and
-  // periodNumbers containers
-  if (pulseTimes.size() != pNumbers.size()) {
-    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod);
-  }
+  this->finalizePeriodNumbers();
 }
 
 template <typename ValueType>
@@ -102,6 +101,13 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
     // resize the vector
     rawData.resize(indexStep[0]);
   }
+}
+
+void BankPulseTimes::finalizePeriodNumbers() {
+  if (pulseTimes.empty()) // set periods to empty vector
+    periodNumbers = std::vector<int>();
+  else if (pulseTimes.size() != periodNumbers.size()) // something went wrong, everything is first period
+    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod);
 }
 
 //----------------------------------------------------------------------------------------------
