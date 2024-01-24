@@ -127,8 +127,12 @@ void CompressEventSpectrumAccumulator::createWeightedEvents(
 
 // drop all memory from this
 void CompressEventSpectrumAccumulator::clear() {
+  // swap is a stl trick to get the memory to really be released
   m_tof.clear();
+  std::vector<float>().swap(m_tof);
   m_count.clear();
+  std::vector<uint32_t>().swap(m_count);
+  // TODO should this release the shared pointer to the histogram
   // m_histogram_edges->reset();
 }
 
