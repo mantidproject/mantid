@@ -34,14 +34,20 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
 
   m_cost = static_cast<double>(m_event_detid->size());
 
-  // create the specra accumulators
-  m_spectra_accum.reserve(num_dets);
-  for (size_t det_index = 0; det_index <= num_dets; ++det_index) {
-    m_spectra_accum.emplace_back(histogram_bin_edges, abs(divisor), bin_mode);
+  const auto divisor_abs = abs(divisor);
+
+  // create the spetcra accumulators
+  const auto NUM_PERIODS = m_loader.m_ws.nPeriods();
+  m_spectra_accum.resize(NUM_PERIODS);
+  for (size_t periodIndex = 0; periodIndex < NUM_PERIODS; ++periodIndex) {
+    m_spectra_accum[periodIndex].reserve(num_dets);
+    for (size_t det_index = 0; det_index <= num_dets; ++det_index) {
+      m_spectra_accum[periodIndex].emplace_back(histogram_bin_edges, divisor_abs, bin_mode);
+    }
   }
 }
 
-void ProcessBankCompressed::addEvent(const detid_t detid, const float tof) {
+void ProcessBankCompressed::addEvent(const size_t period_index, const detid_t detid, const float tof) {
   // comparing to integers is cheapest
   if ((detid < m_detid_min) || detid > m_detid_max) {
     // std::cout << "Skipping detid: " << m_detid_min << " < " << detid << " < " << m_detid_max << "\n";
@@ -56,19 +62,19 @@ void ProcessBankCompressed::addEvent(const detid_t detid, const float tof) {
   }
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
-  m_spectra_accum[det_index].addEvent(tof_f);
+  m_spectra_accum[period_index][det_index].addEvent(tof_f);
 }
 
 void ProcessBankCompressed::collectEvents() {
-  auto *alg = m_loader.alg;
-
   const auto NUM_EVENTS = m_event_detid->size();
-  if (m_event_index) {
+
+  // iterate through all events in a single pulse
+  if (m_event_index || m_loader.m_ws.nPeriods() > 1) {
     const auto NUM_PULSES = m_event_index->size();
     const PulseIndexer pulseIndexer(m_event_index, m_firstEventIndex, NUM_EVENTS, m_entry_name);
     for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(); pulseIndex < NUM_PULSES; pulseIndex++) {
       const int logPeriodNumber = m_bankPulseTimes->periodNumber(pulseIndex);
-      const int periodIndex = logPeriodNumber - 1;
+      const auto periodIndex = static_cast<size_t>(logPeriodNumber - 1);
 
       // determine range of events for the pulse
       const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
@@ -79,19 +85,20 @@ void ProcessBankCompressed::collectEvents() {
 
       // add all events in this pulse
       for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
-        this->addEvent(static_cast<detid_t>(m_event_detid->operator[](eventIndex)),
+        this->addEvent(periodIndex, static_cast<detid_t>(m_event_detid->operator[](eventIndex)),
                        m_event_tof->operator[](eventIndex));
       }
     }
   } else {
-    // add all events in this pulse
+    // add all events in the list
     for (std::size_t eventIndex = 0; eventIndex < NUM_EVENTS; ++eventIndex) {
-      this->addEvent(static_cast<detid_t>(m_event_detid->operator[](eventIndex)), m_event_tof->operator[](eventIndex));
+      this->addEvent(0, static_cast<detid_t>(m_event_detid->operator[](eventIndex)),
+                     m_event_tof->operator[](eventIndex));
     }
   }
 }
 
-void ProcessBankCompressed::createWeightedEvents(const detid_t detid,
+void ProcessBankCompressed::createWeightedEvents(const size_t period_index, const detid_t detid,
                                                  std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) {
   if ((detid < m_detid_min) || detid > m_detid_max) {
     std::stringstream msg;
@@ -100,14 +107,17 @@ void ProcessBankCompressed::createWeightedEvents(const detid_t detid,
   }
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
-  m_spectra_accum[det_index].createWeightedEvents(raw_events);
-  m_spectra_accum[det_index].clear();
+  m_spectra_accum[period_index][det_index].createWeightedEvents(raw_events);
+  m_spectra_accum[period_index][det_index].clear();
 }
 
 void ProcessBankCompressed::addToEventLists() {
-  for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
-    // TODO 0 is for periodIndex = logPeriodNumber - 1
-    this->createWeightedEvents(detid, m_loader.weightedNoTimeEventVectors[0][detid]);
+  const auto num_periods = m_loader.m_ws.nPeriods();
+  for (size_t period_index = 0; period_index < num_periods; ++period_index) {
+    for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
+      this->createWeightedEvents(period_index, detid,
+                                 m_loader.weightedNoTimeEventVectors[period_index][static_cast<size_t>(detid)]);
+    }
   }
 }
 
@@ -134,9 +144,13 @@ void ProcessBankCompressed::run() {
 } // END-OF-RUN()
 
 double ProcessBankCompressed::totalWeight() const {
-  double totalWeightedEvents =
-      std::accumulate(m_spectra_accum.cbegin(), m_spectra_accum.cend(), 0.,
-                      [](const auto &current, const auto &value) { return current + value.totalWeight(); });
+  double totalWeightedEvents = std::accumulate(
+      m_spectra_accum.cbegin(), m_spectra_accum.cend(), 0., [](const auto &current, const auto &period_spectra) {
+        return current + std::accumulate(period_spectra.cbegin(), period_spectra.cend(), 0.,
+                                         [](const auto &current, const auto &spectra_accum) {
+                                           return current + spectra_accum.totalWeight();
+                                         });
+      });
   return totalWeightedEvents;
 }
 

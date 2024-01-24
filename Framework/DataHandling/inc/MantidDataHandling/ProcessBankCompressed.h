@@ -34,9 +34,10 @@ public:
 
   void run() override;
 
-  void addEvent(const detid_t detid, const float tof);
+  void addEvent(const size_t period_index, const detid_t detid, const float tof);
 
-  void createWeightedEvents(const detid_t detid, std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events);
+  void createWeightedEvents(const size_t period_index, const detid_t detid,
+                            std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events);
 
   /// method only intended for testing
   double totalWeight() const;
@@ -64,8 +65,10 @@ private:
   /// Pulse times for this bank
   const std::shared_ptr<BankPulseTimes> m_bankPulseTimes;
 
-  /// objects holding individual spectra
-  std::vector<DataHandling::CompressEventAccumulator> m_spectra_accum;
+  /**
+   * Objects holding individual spectra. This is accessed as [periodIndex][detidIndex]
+   */
+  std::vector<std::vector<DataHandling::CompressEventAccumulator>> m_spectra_accum;
 
   // inclusive
   const detid_t m_detid_min;
