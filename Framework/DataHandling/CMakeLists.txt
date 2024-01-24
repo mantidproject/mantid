@@ -2,7 +2,6 @@ set(SRC_FILES
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
-    src/CompressEventBankAccumulator.cpp
     src/CompressEventSpectrumAccumulator.cpp
     src/CompressEvents.cpp
     src/CreateChunkingFromInstrument.cpp
