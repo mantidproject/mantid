@@ -12,6 +12,7 @@
 #include "MantidDataHandling/PulseIndexer.h"
 #include "MantidKernel/Timer.h"
 
+#include "tbb/parallel_for.h"
 #include <iostream>
 
 namespace Mantid {
@@ -111,8 +112,33 @@ void ProcessBankCompressed::createWeightedEvents(const size_t period_index, cons
   m_spectra_accum[period_index][det_index].clear();
 }
 
+namespace { // anonymous
+// private class to allow TBB do a more controlled spreading out of sorting
+class TofSortingTask {
+public:
+  TofSortingTask(std::vector<CompressEventAccumulator> *accumulators) : m_accumulators(accumulators) {}
+
+  void operator()(const tbb::blocked_range<size_t> &range) const {
+    for (size_t index = range.begin(); index < range.end(); ++index) {
+      m_accumulators->operator[](index).sort();
+    }
+  }
+
+private:
+  std::vector<CompressEventAccumulator> *m_accumulators;
+};
+} // namespace
+
 void ProcessBankCompressed::addToEventLists() {
   const auto num_periods = m_loader.m_ws.nPeriods();
+  const auto num_dets = static_cast<size_t>(m_detid_max - m_detid_min + 1);
+  // sort all of the tofs
+  for (size_t period_index = 0; period_index < num_periods; ++period_index) {
+    TofSortingTask task(&(m_spectra_accum[period_index]));
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets), task);
+  }
+
+  // add create the events
   for (size_t period_index = 0; period_index < num_periods; ++period_index) {
     for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
       this->createWeightedEvents(period_index, detid,
@@ -135,6 +161,13 @@ void ProcessBankCompressed::run() {
   // create weighted events on the workspace
   this->addToEventLists();
   m_prog->report(m_entry_name + ": created events");
+
+  // set sort order on all of the EventLists since they were sorted by TOF
+  const size_t numEventLists = m_loader.m_ws.getNumberHistograms();
+  for (size_t wi = 0; wi < numEventLists; ++wi) {
+    auto &eventList = m_loader.m_ws.getSpectrum(wi);
+    eventList.setSortOrder(DataObjects::TOF_SORT);
+  }
 
   // log performance in debug mode
 #ifndef _WIN32

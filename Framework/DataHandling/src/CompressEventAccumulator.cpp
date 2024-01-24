@@ -16,7 +16,7 @@ namespace Mantid {
 namespace DataHandling {
 CompressEventAccumulator::CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges,
                                                    const double divisor, CompressBinningMode bin_mode)
-    : m_histogram_edges(std::move(histogram_bin_edges)) {
+    : m_is_sorted(false), m_histogram_edges(std::move(histogram_bin_edges)) {
   // divisor is applied to make it
 
   m_divisor = abs(divisor);
@@ -78,13 +78,27 @@ void CompressEventAccumulator::addEvent(const float tof) {
   numevents++;
 }
 
+// this is marked because it is mostly used by createWeightedEvents and m_tof is mutable
+void CompressEventAccumulator::sort() const {
+  if (m_is_sorted)
+    return;
+  if (m_tof.empty()) {
+    m_is_sorted = true;
+    return;
+  }
+
+  tbb::parallel_sort(m_tof.begin(), m_tof.end());
+  m_is_sorted = true;
+}
+
 void CompressEventAccumulator::createWeightedEvents(
     std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const {
   if (m_tof.empty())
     return;
 
   // code below assumes the tofs are sorted
-  tbb::parallel_sort(m_tof.begin(), m_tof.end());
+  if (!m_is_sorted)
+    this->sort();
 
   raw_events->clear();                    // clean out previous version
   raw_events->reserve(m_tof.size() / 10); // blindly assume 10 raw events get compressed on average

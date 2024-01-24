@@ -26,6 +26,7 @@ public:
 
   void addEvent(const float tof);
   void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
+  void sort() const;
   void clear();
 
   std::size_t numberHistBins() const;
@@ -40,6 +41,9 @@ private:
   // see EventList::findLinearBin for implementation on what that means
   double m_divisor;
   double m_offset;
+
+  // keep track if the m_tof is already sorted
+  mutable bool m_is_sorted;
 
   /// function pointer on how to find the bin boundaries
   boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double);
