@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/CompressEventBankAccumulator.h"
+#include "MantidDataHandling/ProcessBankCompressed.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -16,12 +16,14 @@
 
 namespace Mantid {
 namespace DataHandling {
-CompressEventBankAccumulator::CompressEventBankAccumulator(
-    DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
-    std::shared_ptr<std::vector<uint32_t>> event_detid, std::shared_ptr<std::vector<float>> event_tof, size_t startAt,
-    std::shared_ptr<std::vector<uint64_t>> event_index, std::shared_ptr<BankPulseTimes> bankPulseTimes,
-    detid_t min_detid, detid_t max_detid, std::shared_ptr<std::vector<double>> histogram_bin_edges,
-    const double divisor)
+ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const std::string &entry_name,
+                                             API::Progress *prog, std::shared_ptr<std::vector<uint32_t>> event_detid,
+                                             std::shared_ptr<std::vector<float>> event_tof, size_t startAt,
+                                             std::shared_ptr<std::vector<uint64_t>> event_index,
+                                             std::shared_ptr<BankPulseTimes> bankPulseTimes, detid_t min_detid,
+                                             detid_t max_detid,
+                                             std::shared_ptr<std::vector<double>> histogram_bin_edges,
+                                             const double divisor)
     : Task(), m_loader(m_loader), m_entry_name(entry_name), m_prog(prog), m_event_detid(std::move(event_detid)),
       m_event_tof(std::move(event_tof)), m_firstEventIndex(startAt), m_event_index(std::move(event_index)),
       m_bankPulseTimes(std::move(bankPulseTimes)), m_detid_min(min_detid), m_detid_max(max_detid),
@@ -39,7 +41,7 @@ CompressEventBankAccumulator::CompressEventBankAccumulator(
   }
 }
 
-void CompressEventBankAccumulator::addEvent(const detid_t detid, const float tof) {
+void ProcessBankCompressed::addEvent(const detid_t detid, const float tof) {
   // comparing to integers is cheapest
   if ((detid < m_detid_min) || detid > m_detid_max) {
     // std::cout << "Skipping detid: " << m_detid_min << " < " << detid << " < " << m_detid_max << "\n";
@@ -57,7 +59,7 @@ void CompressEventBankAccumulator::addEvent(const detid_t detid, const float tof
   m_spectra_accum[det_index].addEvent(tof_f);
 }
 
-void CompressEventBankAccumulator::collectEvents() {
+void ProcessBankCompressed::collectEvents() {
   auto *alg = m_loader.alg;
 
   const auto NUM_EVENTS = m_event_detid->size();
@@ -89,8 +91,8 @@ void CompressEventBankAccumulator::collectEvents() {
   }
 }
 
-void CompressEventBankAccumulator::createWeightedEvents(
-    const detid_t detid, std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) {
+void ProcessBankCompressed::createWeightedEvents(const detid_t detid,
+                                                 std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) {
   if ((detid < m_detid_min) || detid > m_detid_max) {
     std::stringstream msg;
     msg << "Encountered invalid detid=" << detid;
@@ -102,14 +104,14 @@ void CompressEventBankAccumulator::createWeightedEvents(
   m_spectra_accum[det_index].clear();
 }
 
-void CompressEventBankAccumulator::addToEventLists() {
+void ProcessBankCompressed::addToEventLists() {
   for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
     // TODO 0 is for periodIndex = logPeriodNumber - 1
     this->createWeightedEvents(detid, m_loader.weightedNoTimeEventVectors[0][detid]);
   }
 }
 
-void CompressEventBankAccumulator::run() {
+void ProcessBankCompressed::run() {
   // timer for performance
   Kernel::Timer timer;
   auto *alg = m_loader.alg;
@@ -131,7 +133,7 @@ void CompressEventBankAccumulator::run() {
 #endif
 } // END-OF-RUN()
 
-double CompressEventBankAccumulator::totalWeight() const {
+double ProcessBankCompressed::totalWeight() const {
   double totalWeightedEvents =
       std::accumulate(m_spectra_accum.cbegin(), m_spectra_accum.cend(), 0.,
                       [](const auto &current, const auto &value) { return current + value.totalWeight(); });

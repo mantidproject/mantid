@@ -21,16 +21,16 @@ class Progress; // forward declare
 namespace DataHandling {
 class DefaultEventLoader; // forward declare
 
-/** CompressEventBankAccumulator : TODO: DESCRIPTION
+/** ProcessBankCompressed : TODO: DESCRIPTION
  */
-class MANTID_DATAHANDLING_DLL CompressEventBankAccumulator : public Mantid::Kernel::Task {
+class MANTID_DATAHANDLING_DLL ProcessBankCompressed : public Mantid::Kernel::Task {
 public:
-  CompressEventBankAccumulator(DefaultEventLoader &m_loader, const std::string &entry_name, Mantid::API::Progress *prog,
-                               std::shared_ptr<std::vector<uint32_t>> event_detid,
-                               std::shared_ptr<std::vector<float>> event_tof, size_t startAt,
-                               std::shared_ptr<std::vector<uint64_t>> event_index,
-                               std::shared_ptr<BankPulseTimes> bankPulseTimes, detid_t min_detid, detid_t max_detid,
-                               std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor);
+  ProcessBankCompressed(DefaultEventLoader &m_loader, const std::string &entry_name, Mantid::API::Progress *prog,
+                        std::shared_ptr<std::vector<uint32_t>> event_detid,
+                        std::shared_ptr<std::vector<float>> event_tof, size_t startAt,
+                        std::shared_ptr<std::vector<uint64_t>> event_index,
+                        std::shared_ptr<BankPulseTimes> bankPulseTimes, detid_t min_detid, detid_t max_detid,
+                        std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor);
 
   void run() override;
 
@@ -46,7 +46,7 @@ private:
   void addToEventLists();
 
   // disable default constructor
-  CompressEventBankAccumulator();
+  ProcessBankCompressed();
   /// Algorithm being run
   DefaultEventLoader &m_loader;
   const std::string m_entry_name;

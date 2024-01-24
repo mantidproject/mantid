@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidDataHandling/CompressEventBankAccumulator.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/ProcessBankCompressed.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -479,12 +479,12 @@ void LoadBankFromDiskTask::run() {
                                                             *histogram_bin_edges);
 
     // create the tasks
-    std::shared_ptr<Task> newTask1 = std::make_shared<CompressEventBankAccumulator>(
+    std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankCompressed>(
         m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, startAt, event_index_shrd,
         thisBankPulseTimes, m_min_id, mid_id, histogram_bin_edges, m_loader.alg->compressTolerance);
     scheduler.push(newTask1);
     if (m_loader.splitProcessing && (mid_id < m_max_id)) {
-      std::shared_ptr<Task> newTask2 = std::make_shared<CompressEventBankAccumulator>(
+      std::shared_ptr<Task> newTask2 = std::make_shared<ProcessBankCompressed>(
           m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, startAt, event_index_shrd,
           thisBankPulseTimes, (mid_id + 1), m_max_id, histogram_bin_edges, m_loader.alg->compressTolerance);
       scheduler.push(newTask2);
