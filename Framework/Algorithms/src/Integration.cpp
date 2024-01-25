@@ -357,7 +357,9 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
   outSpec.mutableY()[0] = sumY;
   outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
   if (Fout) {
-    (*Fout)[0] = sumF / Fnor;
+    (*Fout)[0] = sumF;
+    if (Fnor != 0)
+      (*Fout)[0] /= Fnor;
   }
 }
 
