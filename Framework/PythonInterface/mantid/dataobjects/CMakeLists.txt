@@ -24,6 +24,7 @@ set(EXPORT_FILES
     src/Exports/SplittersWorkspace.cpp
     src/Exports/WorkspaceSingleValue.cpp
     src/Exports/NoShape.cpp
+    src/Exports/PeakShapeSpherical.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp)
