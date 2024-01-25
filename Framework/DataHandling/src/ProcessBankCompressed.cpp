@@ -109,7 +109,7 @@ void ProcessBankCompressed::createWeightedEvents(const size_t period_index, cons
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
   m_spectra_accum[period_index][det_index].createWeightedEvents(raw_events);
-  m_spectra_accum[period_index][det_index].clear();
+  // m_spectra_accum[period_index][det_index].clear();
 }
 
 namespace { // anonymous
@@ -140,9 +140,10 @@ void ProcessBankCompressed::addToEventLists() {
 
   // add create the events
   for (size_t period_index = 0; period_index < num_periods; ++period_index) {
-    for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
+    for (detid_t detid = m_detid_max; detid >= m_detid_min; --detid) {
       this->createWeightedEvents(period_index, detid,
                                  m_loader.weightedNoTimeEventVectors[period_index][static_cast<size_t>(detid)]);
+      m_spectra_accum[period_index].pop_back(); // delete the accumulator
     }
   }
 }
