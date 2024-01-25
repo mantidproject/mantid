@@ -68,7 +68,7 @@ private:
   /**
    * Objects holding individual spectra. This is accessed as [periodIndex][detidIndex]
    */
-  std::vector<std::vector<DataHandling::CompressEventAccumulator>> m_spectra_accum;
+  std::vector<std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>>> m_spectra_accum;
 
   // inclusive
   const detid_t m_detid_min;

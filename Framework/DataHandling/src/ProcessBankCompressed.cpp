@@ -39,11 +39,13 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
 
   // create the spetcra accumulators
   const auto NUM_PERIODS = m_loader.m_ws.nPeriods();
+  CompressEventAccumulatorFactory factory(histogram_bin_edges, divisor_abs, bin_mode);
   m_spectra_accum.resize(NUM_PERIODS);
   for (size_t periodIndex = 0; periodIndex < NUM_PERIODS; ++periodIndex) {
     m_spectra_accum[periodIndex].reserve(num_dets);
     for (size_t det_index = 0; det_index <= num_dets; ++det_index) {
-      m_spectra_accum[periodIndex].emplace_back(histogram_bin_edges, divisor_abs, bin_mode);
+      m_spectra_accum[periodIndex].push_back(factory.create());
+      // std::make_unique<CompressEventAccumulator>(histogram_bin_edges, divisor_abs, bin_mode));
     }
   }
 }
@@ -63,7 +65,7 @@ void ProcessBankCompressed::addEvent(const size_t period_index, const detid_t de
   }
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
-  m_spectra_accum[period_index][det_index].addEvent(tof_f);
+  m_spectra_accum[period_index][det_index]->addEvent(tof_f);
 }
 
 void ProcessBankCompressed::collectEvents() {
@@ -108,24 +110,24 @@ void ProcessBankCompressed::createWeightedEvents(const size_t period_index, cons
   }
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
-  m_spectra_accum[period_index][det_index].createWeightedEvents(raw_events);
-  // m_spectra_accum[period_index][det_index].clear();
+  m_spectra_accum[period_index][det_index]->createWeightedEvents(raw_events);
 }
 
 namespace { // anonymous
 // private class to allow TBB do a more controlled spreading out of sorting
 class TofSortingTask {
 public:
-  TofSortingTask(std::vector<CompressEventAccumulator> *accumulators) : m_accumulators(accumulators) {}
+  TofSortingTask(std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>> *accumulators)
+      : m_accumulators(accumulators) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t index = range.begin(); index < range.end(); ++index) {
-      m_accumulators->operator[](index).sort();
+      m_accumulators->operator[](index)->sort();
     }
   }
 
 private:
-  std::vector<CompressEventAccumulator> *m_accumulators;
+  std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>> *m_accumulators;
 };
 } // namespace
 
@@ -143,7 +145,7 @@ void ProcessBankCompressed::addToEventLists() {
     for (detid_t detid = m_detid_max; detid >= m_detid_min; --detid) {
       this->createWeightedEvents(period_index, detid,
                                  m_loader.weightedNoTimeEventVectors[period_index][static_cast<size_t>(detid)]);
-      m_spectra_accum[period_index].pop_back(); // delete the accumulator
+      m_spectra_accum[period_index].pop_back(); // drop last item off of the vector
     }
   }
 }
@@ -182,7 +184,7 @@ double ProcessBankCompressed::totalWeight() const {
       m_spectra_accum.cbegin(), m_spectra_accum.cend(), 0., [](const auto &current, const auto &period_spectra) {
         return current + std::accumulate(period_spectra.cbegin(), period_spectra.cend(), 0.,
                                          [](const auto &current, const auto &spectra_accum) {
-                                           return current + spectra_accum.totalWeight();
+                                           return current + spectra_accum->totalWeight();
                                          });
       });
   return totalWeightedEvents;

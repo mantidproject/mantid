@@ -139,19 +139,18 @@ void CompressEventAccumulator::createWeightedEvents(
   raw_events->shrink_to_fit();
 }
 
-// drop all memory from this
-void CompressEventAccumulator::clear() {
-  // swap is a stl trick to get the memory to really be released
-  m_tof.clear();
-  std::vector<float>().swap(m_tof);
-  m_count.clear();
-  std::vector<uint32_t>().swap(m_count);
-  // TODO should this release the shared pointer to the histogram
-  // m_histogram_edges->reset();
-}
-
 std::size_t CompressEventAccumulator::numberHistBins() const { return m_count.size(); }
 double CompressEventAccumulator::totalWeight() const { return static_cast<double>(m_tof.size()); }
+
+// ------------------------------------------------------------------------
+
+CompressEventAccumulatorFactory::CompressEventAccumulatorFactory(
+    std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, CompressBinningMode bin_mode)
+    : m_divisor(divisor), m_bin_mode(bin_mode), m_histogram_edges(std::move(histogram_bin_edges)) {}
+
+std::unique_ptr<CompressEventAccumulator> CompressEventAccumulatorFactory::create() {
+  return std::make_unique<CompressEventAccumulator>(m_histogram_edges, m_divisor, m_bin_mode);
+}
 
 } // namespace DataHandling
 } // namespace Mantid

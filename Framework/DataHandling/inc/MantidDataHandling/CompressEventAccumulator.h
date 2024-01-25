@@ -27,14 +27,11 @@ public:
   void addEvent(const float tof);
   void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
   void sort() const;
-  void clear();
 
   std::size_t numberHistBins() const;
   double totalWeight() const;
 
 private:
-  /// Do not allow constructing
-  CompressEventAccumulator();
   void allocateFineHistogram();
 
   // offset is applied after division
@@ -59,6 +56,22 @@ private:
 
 public:
   size_t numevents; // REMOVE
+};
+
+/**
+ * @brief The CompressEventAccumulatorFactory Factory object that will create the correct type of
+ * CompressEventAccumulator based on configuration information.
+ */
+class MANTID_DATAHANDLING_DLL CompressEventAccumulatorFactory {
+public:
+  CompressEventAccumulatorFactory(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
+                                  CompressBinningMode bin_mode);
+  std::unique_ptr<CompressEventAccumulator> create();
+
+private:
+  double m_divisor;
+  CompressBinningMode m_bin_mode;
+  const std::shared_ptr<std::vector<double>> m_histogram_edges;
 };
 
 } // namespace DataHandling
