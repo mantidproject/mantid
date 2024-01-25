@@ -23,6 +23,7 @@ set(EXPORT_FILES
     src/Exports/TableWorkspace.cpp
     src/Exports/SplittersWorkspace.cpp
     src/Exports/WorkspaceSingleValue.cpp
+    src/Exports/NoShape.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp)
