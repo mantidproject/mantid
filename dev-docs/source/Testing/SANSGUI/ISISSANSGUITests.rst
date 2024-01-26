@@ -136,8 +136,7 @@ Processing
 
 *2D reduction*
 
-#. Switch to 2D and manually untick CanSAS (since we have manually
-   changed the save options at this point)
+#. Switch to the 2D ``Reduction Mode``.
 #. Tick the ``Plot Results`` box.
 #. Click ``Process All``.
 #. A plot window will open; initially empty, then with a line.
