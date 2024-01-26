@@ -80,8 +80,8 @@ User files
 #. Re-load the user file and check the values you changed - they should have
    reverted to their original values.
 #. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
-   section should revert to their original values, apart from the ``Detector`` combobox.
-   The inputs in the ``Options`` section (such as the radius limits) should not revert.
+   section should revert to their original values. The inputs in the ``Options`` section (such as the radius limits)
+   should not revert.
 #. Ensure that you can load the old style ``MaskFile.txt`` user file from the sample data.
 
    - **Note:** In order to see this file, you may need to change the settings in the file browser window to look for
@@ -198,11 +198,11 @@ Beam centre finder
 
 In the ``Beam centre`` tab:
 
-#. Make a note of the four values representing the front/main detector centre positions.
-#. Check that detector is set to ``main-detector`` and click run.
+#. Make a note of the four values representing the rear/front detector centre positions.
+#. Check that the ``Find Rear Centre`` radio button is selected and click run.
 #. A plot should appear - make sure to show it if it is behind another window. It should be updated with four lines, which gradually get closer together. This might take a while to run.
 #. Check the values in the first two text boxes at the top (Centre Position - Rear) have changed when it has finished running.
-#. Change the detector to ``Hab`` and re-run the test.
+#. Select the ``Find Front Centre`` radio button and re-run the test.
 #. Four more lines should appear on the same plot. This time, in the values at the top, only the values for the front should have changed.
 
 Sum runs
