@@ -57,9 +57,8 @@ In the ``Runs`` tab:
    an output name, one row without.
 #. Try changing a random setting in the settings tab and remember what you set
    it to.
-#. Make some more edits to the table. Due to a known issue, the setting will change
-   back to its original value (once fixed, we expect the setting to keep showing
-   the value you changed it to).
+#. Make some more edits to the table. The settings will be reverted to the defaults
+   set in the User File.
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``. All
@@ -72,8 +71,6 @@ In the ``Runs`` tab:
 #. Try deleting and/or reordering some of the columns in the saved file and
    re-load it. All of the values in the file should be populated in the correct
    columns.
-#. Check again that the setting you changed is still showing the value you
-   changed it to, rather than the original.
 #. Re-load the original batch file.
 
 User files
