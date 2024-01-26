@@ -118,12 +118,14 @@ Processing
    Mode`` is ``All``.
 #. In the ``Runs`` tab, under ``Save Options``, select ``Both``, and tick
    ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)``.
+#. Select ``Save Can``.
 #. Click ``Process All``.
 #. After some seconds the rows should turn green.
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 8 workspaces (4 CanSAS ``.xml`` and 4 NXcanSAS ``.h5``) saved.
+   be saved. In total there should be 12 workspaces (6 CanSAS ``.xml`` and 6 NXcanSAS ``.h5``) saved. For each row and
+   file type there should be a reduced file (with no suffix), a sample, and a can workspace.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
