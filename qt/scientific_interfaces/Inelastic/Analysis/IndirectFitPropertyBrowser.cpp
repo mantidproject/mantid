@@ -179,8 +179,7 @@ void IndirectFitPropertyBrowser::setFunctionTemplatePresenter(std::unique_ptr<IT
   }
   m_templatePresenter = std::move(templatePresenter);
   m_templatePresenter->init();
-  // m_templatePresenter->setObjectName("templateBrowser");
-  // connect(m_templateBrowser, SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
+  connect(m_templatePresenter->browser(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
 }
 
 void IndirectFitPropertyBrowser::setFunction(std::string const &funStr) {

@@ -37,7 +37,6 @@ namespace MantidQt::CustomInterfaces::IDA {
  * @param parent :: The parent widget.
  */
 SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
-  // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
   init();
 }
 

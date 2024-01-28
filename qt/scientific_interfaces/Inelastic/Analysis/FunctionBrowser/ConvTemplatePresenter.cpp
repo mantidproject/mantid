@@ -55,7 +55,7 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setDeltaFunction(bool on) {
@@ -70,7 +70,7 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setTempCorrection(bool on) {
@@ -93,7 +93,7 @@ void ConvTemplatePresenter::setTempCorrection(bool on) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
@@ -116,7 +116,7 @@ void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 int ConvTemplatePresenter::getCurrentDataset() { return m_model->currentDomainIndex(); }
@@ -270,7 +270,7 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
   }
   m_editLocalParameterDialog = nullptr;
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double value) {
@@ -289,7 +289,7 @@ void ConvTemplatePresenter::viewChangedParameterValue(std::string const &paramet
     }
     setLocalParameterValue(parameterName, i, value);
   }
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const {

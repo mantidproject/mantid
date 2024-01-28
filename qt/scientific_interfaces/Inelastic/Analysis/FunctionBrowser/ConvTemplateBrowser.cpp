@@ -44,7 +44,6 @@ ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent) : FunctionTemplateBrow
   m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
   init();
-  // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
 }
 
 void ConvTemplateBrowser::createProperties() {

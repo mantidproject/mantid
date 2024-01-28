@@ -63,7 +63,6 @@ private:
 
   QtProperty *m_fitType;
   QMap<std::string, QtProperty *> m_parameterMap;
-  QMap<QtProperty *, std::string> m_parameterNames;
 
 private:
   bool m_emitParameterValueChange = true;

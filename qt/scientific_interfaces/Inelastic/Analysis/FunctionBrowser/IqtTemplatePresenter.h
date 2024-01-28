@@ -73,9 +73,6 @@ public:
 
   void handleEditLocalParameter(std::string const &parameterName) override;
 
-signals:
-  void functionStructureChanged();
-
 private slots:
   void editLocalParameterFinish(int result);
   void viewChangedParameterValue(std::string const &parameterName, double value);

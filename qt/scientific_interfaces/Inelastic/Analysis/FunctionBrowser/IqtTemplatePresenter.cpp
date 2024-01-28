@@ -66,7 +66,7 @@ void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   m_model->setNumberOfExponentials(n);
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setStretchExponential(bool on) {
@@ -80,7 +80,7 @@ void IqtTemplatePresenter::setStretchExponential(bool on) {
   m_model->setStretchExponential(on);
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setBackground(std::string const &name) {
@@ -95,7 +95,7 @@ void IqtTemplatePresenter::setBackground(std::string const &name) {
   }
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
@@ -120,7 +120,7 @@ void IqtTemplatePresenter::setFunction(std::string const &funStr) {
     m_view->addExponentialTwo();
   }
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 IFunction_sptr IqtTemplatePresenter::getGlobalFunction() const { return m_model->getFitFunction(); }
@@ -175,7 +175,7 @@ void IqtTemplatePresenter::tieIntensities(bool on) {
   if (on && !canTieIntensities())
     return;
   m_model->tieIntensities(on);
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 bool IqtTemplatePresenter::canTieIntensities() const {
@@ -302,7 +302,7 @@ void IqtTemplatePresenter::editLocalParameterFinish(int result) {
   }
   m_editLocalParameterDialog = nullptr;
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double const value) {
@@ -321,7 +321,7 @@ void IqtTemplatePresenter::viewChangedParameterValue(std::string const &paramete
     }
     setLocalParameterValue(parameterName, i, value);
   }
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

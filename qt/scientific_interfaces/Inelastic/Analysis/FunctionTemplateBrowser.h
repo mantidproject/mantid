@@ -78,6 +78,8 @@ public:
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 
+  void emitFunctionStructureChanged() { emit functionStructureChanged(); }
+
 signals:
   void functionStructureChanged();
   void parameterValueChanged(std::string const &parameterName, double value);

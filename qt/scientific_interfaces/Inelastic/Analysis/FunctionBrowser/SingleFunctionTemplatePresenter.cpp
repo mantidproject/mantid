@@ -46,7 +46,7 @@ void SingleFunctionTemplatePresenter::setFitType(std::string const &name) {
   }
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void SingleFunctionTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
@@ -68,7 +68,7 @@ void SingleFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->setEnumValue(m_model->getEnumIndex());
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 IFunction_sptr SingleFunctionTemplatePresenter::getGlobalFunction() const { return m_model->getFitFunction(); }
@@ -215,7 +215,7 @@ void SingleFunctionTemplatePresenter::editLocalParameterFinish(int result) {
   }
   m_editLocalParameterDialog = nullptr;
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void SingleFunctionTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double value) {
@@ -234,7 +234,7 @@ void SingleFunctionTemplatePresenter::viewChangedParameterValue(std::string cons
     }
     setLocalParameterValue(parameterName, i, value);
   }
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
