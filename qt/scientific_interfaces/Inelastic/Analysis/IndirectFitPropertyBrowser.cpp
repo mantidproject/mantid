@@ -173,11 +173,11 @@ void IndirectFitPropertyBrowser::init() {
   setWidget(w);
 }
 
-void IndirectFitPropertyBrowser::setFunctionTemplatePresenter(ITemplatePresenter *templatePresenter) {
+void IndirectFitPropertyBrowser::setFunctionTemplatePresenter(std::unique_ptr<ITemplatePresenter> templatePresenter) {
   if (m_templatePresenter) {
-    throw std::logic_error("Template browser already set.");
+    throw std::logic_error("Template presenter already set.");
   }
-  m_templatePresenter = templatePresenter;
+  m_templatePresenter = std::move(templatePresenter);
   m_templatePresenter->init();
   // m_templatePresenter->setObjectName("templateBrowser");
   // connect(m_templateBrowser, SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
@@ -261,10 +261,7 @@ void IndirectFitPropertyBrowser::updateParameters(const IFunction &fun) {
 
 void IndirectFitPropertyBrowser::updateFunctionListInBrowser(
     const std::map<std::string, std::string> &functionStrings) {
-  auto presenter = dynamic_cast<SingleFunctionTemplatePresenter *>(m_templatePresenter);
-  if (presenter) {
-    presenter->updateAvailableFunctions(functionStrings);
-  }
+  m_templatePresenter->updateAvailableFunctions(functionStrings);
 }
 
 void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const IFunction &fun) {

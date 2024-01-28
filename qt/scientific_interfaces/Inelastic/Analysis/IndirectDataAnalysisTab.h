@@ -67,8 +67,8 @@ public:
   void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false) {
     auto templateBrowser = new TemplateBrowser();
     auto functionModel = std::make_unique<FunctionModel>();
-    m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplatePresenter(
-        new TemplatePresenter(templateBrowser, std::move(functionModel)));
+    auto templatePresenter = std::make_unique<TemplatePresenter>(templateBrowser, std::move(functionModel));
+    m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplatePresenter(std::move(templatePresenter));
     m_uiForm->dockArea->m_fitPropertyBrowser->init();
     m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
     m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
