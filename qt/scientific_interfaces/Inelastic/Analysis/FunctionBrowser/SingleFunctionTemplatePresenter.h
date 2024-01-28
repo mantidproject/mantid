@@ -35,29 +35,34 @@ class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public QObject, p
 public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);
-  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
-  void setFitType(std::string const &name);
 
-  void init();
+  void init() override;
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
 
-  void setNumberOfDatasets(int);
-  int getNumberOfDatasets() const;
-  int getCurrentDataset();
-  void setFunction(std::string const &funStr);
-  IFunction_sptr getGlobalFunction() const;
-  IFunction_sptr getFunction() const;
-  std::vector<std::string> getGlobalParameters() const;
-  std::vector<std::string> getLocalParameters() const;
-  void setGlobalParameters(std::vector<std::string> const &globals);
-  void setGlobal(std::string const &parameterName, bool on);
-  void updateMultiDatasetParameters(const IFunction &fun);
-  void updateParameters(const IFunction &fun);
-  void setCurrentDataset(int i);
-  void setDatasets(const QList<FunctionModelDataset> &datasets);
-  void setErrorsEnabled(bool enabled);
-  EstimationDataSelector getEstimationDataSelector() const;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void estimateFunctionParameters();
+  void setNumberOfDatasets(int) override;
+  int getNumberOfDatasets() const override;
+  int getCurrentDataset() override;
+
+  void setFitType(std::string const &name) override;
+
+  void setFunction(std::string const &funStr) override;
+  IFunction_sptr getGlobalFunction() const override;
+  IFunction_sptr getFunction() const override;
+
+  std::vector<std::string> getGlobalParameters() const override;
+  std::vector<std::string> getLocalParameters() const override;
+  void setGlobalParameters(std::vector<std::string> const &globals) override;
+  void setGlobal(std::string const &parameterName, bool on) override;
+
+  void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateParameters(const IFunction &fun) override;
+
+  void setCurrentDataset(int i) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
+
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
 
   void handleEditLocalParameter(std::string const &parameterName) override;
 
@@ -69,6 +74,7 @@ private slots:
   void viewChangedParameterValue(std::string const &parameterName, double value);
 
 private:
+  void setErrorsEnabled(bool enabled);
   QStringList getDatasetNames() const;
   QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(std::string const &parameterName, int i) const;

@@ -27,7 +27,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(std::unique_ptr<IqtFunctionModel> functionModel, QWidget *parent = nullptr);
+  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();
@@ -103,12 +103,10 @@ private:
   QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
-  IqtTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
   bool m_emitIntChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
-  friend class IqtTemplatePresenter;
 };
 
 } // namespace IDA

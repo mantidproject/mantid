@@ -34,9 +34,8 @@ namespace MantidQt::CustomInterfaces::IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-IqtTemplateBrowser::IqtTemplateBrowser(std::unique_ptr<IqtFunctionModel> functionModel, QWidget *parent)
-    : FunctionTemplateBrowser(parent), m_presenter(this, std::move(functionModel)) {
-  connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
+IqtTemplateBrowser::IqtTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
+  // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
 }
 
 void IqtTemplateBrowser::createProperties() {
@@ -69,7 +68,7 @@ void IqtTemplateBrowser::createProperties() {
   m_parameterMap[m_stretchExpStretching] = 6;
   m_parameterMap[m_A0] = 7;
 
-  m_presenter.setViewParameterDescriptions();
+  m_presenter->setViewParameterDescriptions();
 
   m_parameterManager->setDescription(m_exp1Height, m_parameterDescriptions[m_exp1Height]);
   m_parameterManager->setDescription(m_exp1Lifetime, m_parameterDescriptions[m_exp1Lifetime]);
@@ -189,29 +188,31 @@ void IqtTemplateBrowser::setStretchStretching(double value, double error) {
 
 void IqtTemplateBrowser::setA0(double value, double error) { setParameterPropertyValue(m_A0, value, error); }
 
-void IqtTemplateBrowser::setFunction(std::string const &funStr) { m_presenter.setFunction(funStr); }
+void IqtTemplateBrowser::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
 
-IFunction_sptr IqtTemplateBrowser::getGlobalFunction() const { return m_presenter.getGlobalFunction(); }
+IFunction_sptr IqtTemplateBrowser::getGlobalFunction() const { return m_presenter->getGlobalFunction(); }
 
-IFunction_sptr IqtTemplateBrowser::getFunction() const { return m_presenter.getFunction(); }
+IFunction_sptr IqtTemplateBrowser::getFunction() const { return m_presenter->getFunction(); }
 
-void IqtTemplateBrowser::setNumberOfDatasets(int n) { m_presenter.setNumberOfDatasets(n); }
+void IqtTemplateBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatasets(n); }
 
-int IqtTemplateBrowser::getNumberOfDatasets() const { return m_presenter.getNumberOfDatasets(); }
+int IqtTemplateBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
 
-void IqtTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) { m_presenter.setDatasets(datasets); }
+void IqtTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  m_presenter->setDatasets(datasets);
+}
 
-std::vector<std::string> IqtTemplateBrowser::getGlobalParameters() const { return m_presenter.getGlobalParameters(); }
+std::vector<std::string> IqtTemplateBrowser::getGlobalParameters() const { return m_presenter->getGlobalParameters(); }
 
-std::vector<std::string> IqtTemplateBrowser::getLocalParameters() const { return m_presenter.getLocalParameters(); }
+std::vector<std::string> IqtTemplateBrowser::getLocalParameters() const { return m_presenter->getLocalParameters(); }
 
 void IqtTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
-  m_presenter.setGlobalParameters(globals);
+  m_presenter->setGlobalParameters(globals);
 }
 
 void IqtTemplateBrowser::intChanged(QtProperty *prop) {
   if (prop == m_numberOfExponentials && m_emitIntChange) {
-    m_presenter.setNumberOfExponentials(m_intManager->value(prop));
+    m_presenter->setNumberOfExponentials(m_intManager->value(prop));
   }
 }
 
@@ -220,10 +221,10 @@ void IqtTemplateBrowser::boolChanged(QtProperty *prop) {
     return;
   auto const on = m_boolManager->value(prop);
   if (prop == m_stretchExponential) {
-    m_presenter.setStretchExponential(on);
+    m_presenter->setStretchExponential(on);
   }
   if (prop == m_tieIntensities) {
-    m_presenter.tieIntensities(on);
+    m_presenter->tieIntensities(on);
   }
 }
 
@@ -232,7 +233,7 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
     return;
   if (prop == m_background) {
     auto background = m_enumManager->enumNames(prop)[m_enumManager->value(prop)];
-    m_presenter.setBackground(background.toStdString());
+    m_presenter->setBackground(background.toStdString());
   }
 }
 
@@ -240,25 +241,25 @@ void IqtTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
-  m_presenter.setGlobal(m_parameterNames[prop], isGlobal);
+  m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
   if (m_emitParameterValueChange) {
     emit parameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
   }
 }
 
 void IqtTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
-  m_presenter.updateMultiDatasetParameters(fun);
+  m_presenter->updateMultiDatasetParameters(fun);
 }
 
 void IqtTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_presenter.updateMultiDatasetParameters(paramTable);
+  m_presenter->updateMultiDatasetParameters(paramTable);
 }
 
-void IqtTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter.updateParameters(fun); }
+void IqtTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
 
-void IqtTemplateBrowser::setCurrentDataset(int i) { m_presenter.setCurrentDataset(i); }
+void IqtTemplateBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(i); }
 
-int IqtTemplateBrowser::getCurrentDataset() { return m_presenter.getCurrentDataset(); }
+int IqtTemplateBrowser::getCurrentDataset() { return m_presenter->getCurrentDataset(); }
 
 void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_parameterNames.clear();
@@ -294,16 +295,16 @@ void IqtTemplateBrowser::clear() {
 }
 
 EstimationDataSelector IqtTemplateBrowser::getEstimationDataSelector() const {
-  return m_presenter.getEstimationDataSelector();
+  return m_presenter->getEstimationDataSelector();
 }
 
 void IqtTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_presenter.updateParameterEstimationData(std::move(data));
+  m_presenter->updateParameterEstimationData(std::move(data));
 }
 
-void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter.estimateFunctionParameters(); }
+void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
-void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
+void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
 void IqtTemplateBrowser::popupMenu(const QPoint &) {}
 
@@ -343,7 +344,7 @@ void IqtTemplateBrowser::setTieIntensitiesQuiet(bool on) {
 }
 
 void IqtTemplateBrowser::updateState() {
-  auto const on = m_presenter.canTieIntensities();
+  auto const on = m_presenter->canTieIntensities();
   if (!on && m_boolManager->value(m_tieIntensities)) {
     ScopedFalse _false(m_emitBoolChange);
     m_boolManager->setValue(m_tieIntensities, false);
