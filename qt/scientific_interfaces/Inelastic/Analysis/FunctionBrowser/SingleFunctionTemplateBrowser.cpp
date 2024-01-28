@@ -38,6 +38,7 @@ namespace MantidQt::CustomInterfaces::IDA {
  */
 SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
   // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
+  init();
 }
 
 void SingleFunctionTemplateBrowser::createProperties() {
@@ -51,8 +52,6 @@ void SingleFunctionTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
-
-  m_presenter->init();
 }
 
 void SingleFunctionTemplateBrowser::setDataType(std::vector<std::string> const &allowedFunctionsList) {

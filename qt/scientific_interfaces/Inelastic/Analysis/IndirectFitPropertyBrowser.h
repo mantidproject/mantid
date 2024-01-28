@@ -40,6 +40,7 @@ using namespace MantidWidgets;
 
 class FunctionTemplateBrowser;
 class FitStatusWidget;
+class ITemplatePresenter;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {
 public:
@@ -53,7 +54,7 @@ public:
   IndirectFitPropertyBrowser(QWidget *parent = nullptr);
 
   void init();
-  void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
+  void setFunctionTemplatePresenter(ITemplatePresenter *templatePresenter);
   void setFunction(std::string const &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
@@ -124,7 +125,7 @@ private:
   QVBoxLayout *m_mainLayout;
   FunctionBrowser *m_functionBrowser;
   FitOptionsBrowser *m_fitOptionsBrowser;
-  FunctionTemplateBrowser *m_templateBrowser;
+  ITemplatePresenter *m_templatePresenter;
   FitStatusWidget *m_fitStatusWidget;
   QStackedWidget *m_functionWidget;
   QCheckBox *m_browserSwitcher;

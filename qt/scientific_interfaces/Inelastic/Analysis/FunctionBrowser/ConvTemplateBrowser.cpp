@@ -43,6 +43,7 @@ ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent) : FunctionTemplateBrow
   m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
+  init();
   // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
 }
 
@@ -81,11 +82,7 @@ void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
-  if (auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter)) {
-    presenter->setQValues(qValues);
-  }
-}
+void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
 
 void ConvTemplateBrowser::addDeltaFunction() {
   ScopedFalse _boolBlock(m_emitBoolChange);
@@ -156,9 +153,7 @@ void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
 }
 
 void ConvTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  if (auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter)) {
-    presenter->updateMultiDatasetParameters(paramTable);
-  }
+  m_presenter->updateMultiDatasetParameters(paramTable);
 }
 
 void ConvTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
@@ -312,16 +307,10 @@ void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimati
 
 void ConvTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
-void ConvTemplateBrowser::setBackgroundA0(double value) {
-  if (auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter)) {
-    presenter->setBackgroundA0(value);
-  }
-}
+void ConvTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
 void ConvTemplateBrowser::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  if (auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter)) {
-    presenter->setResolution(fitResolutions);
-  }
+  m_presenter->setResolution(fitResolutions);
 }
 
 void ConvTemplateBrowser::intChanged(QtProperty *prop) {

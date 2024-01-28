@@ -21,6 +21,8 @@ using namespace MantidWidgets;
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
+  setViewParameterDescriptions();
+  m_view->updateState();
   connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
           SLOT(viewChangedParameterValue(std::string const &, double)));
 }

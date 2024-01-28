@@ -36,6 +36,7 @@ namespace MantidQt::CustomInterfaces::IDA {
  */
 IqtTemplateBrowser::IqtTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
   // connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
+  init();
 }
 
 void IqtTemplateBrowser::createProperties() {
@@ -68,10 +69,6 @@ void IqtTemplateBrowser::createProperties() {
   m_parameterMap[m_stretchExpStretching] = 6;
   m_parameterMap[m_A0] = 7;
 
-  if (auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter)) {
-    presenter->setViewParameterDescriptions();
-  }
-
   m_parameterManager->setDescription(m_exp1Height, m_parameterDescriptions[m_exp1Height]);
   m_parameterManager->setDescription(m_exp1Lifetime, m_parameterDescriptions[m_exp1Lifetime]);
   m_parameterManager->setDescription(m_exp2Height, m_parameterDescriptions[m_exp2Height]);
@@ -101,7 +98,6 @@ void IqtTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
-  updateState();
 }
 
 void IqtTemplateBrowser::addExponentialOne() {
@@ -236,9 +232,7 @@ void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
 }
 
 void IqtTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  if (auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter)) {
-    presenter->updateMultiDatasetParameters(paramTable);
-  }
+  m_presenter->updateMultiDatasetParameters(paramTable);
 }
 
 void IqtTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
@@ -286,11 +280,7 @@ void IqtTemplateBrowser::updateParameterEstimationData(DataForParameterEstimatio
 
 void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
-void IqtTemplateBrowser::setBackgroundA0(double value) {
-  if (auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter)) {
-    presenter->setBackgroundA0(value);
-  }
-}
+void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
 void IqtTemplateBrowser::popupMenu(const QPoint &) {}
 

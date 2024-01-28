@@ -35,6 +35,7 @@ class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public QObject, p
 public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);
+  FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
 
   void init() override;
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
@@ -64,6 +65,8 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
 
+  void setErrorsEnabled(bool enabled) override;
+
   void handleEditLocalParameter(std::string const &parameterName) override;
 
 signals:
@@ -74,7 +77,6 @@ private slots:
   void viewChangedParameterValue(std::string const &parameterName, double value);
 
 private:
-  void setErrorsEnabled(bool enabled);
   QStringList getDatasetNames() const;
   QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(std::string const &parameterName, int i) const;
