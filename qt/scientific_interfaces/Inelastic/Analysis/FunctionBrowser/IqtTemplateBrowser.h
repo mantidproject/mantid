@@ -46,20 +46,8 @@ public:
   void setStretchStretching(double, double);
   void setA0(double, double);
 
-  void setFunction(std::string const &funStr) override;
-  IFunction_sptr getGlobalFunction() const override;
-  IFunction_sptr getFunction() const override;
-  void setNumberOfDatasets(int) override;
-  int getNumberOfDatasets() const override;
-  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
-  std::vector<std::string> getGlobalParameters() const override;
-  std::vector<std::string> getLocalParameters() const override;
-  void setGlobalParameters(std::vector<std::string> const &globals) override;
-  void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
-  void setCurrentDataset(int i) override;
-  int getCurrentDataset() override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
   void setErrorsEnabled(bool enabled) override;
@@ -107,6 +95,7 @@ private:
   bool m_emitIntChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
+  friend class IqtTemplatePresenter;
 };
 
 } // namespace IDA

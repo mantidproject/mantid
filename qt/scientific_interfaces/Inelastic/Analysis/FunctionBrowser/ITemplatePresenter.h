@@ -8,7 +8,7 @@
 
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
-#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
 #include <map>
@@ -33,19 +33,19 @@ public:
   virtual void setFitType(std::string const &name) = 0;
 
   virtual void setFunction(std::string const &funStr) = 0;
-  virtual IFunction_sptr getGlobalFunction() const = 0;
-  virtual IFunction_sptr getFunction() const = 0;
+  virtual Mantid::API::IFunction_sptr getGlobalFunction() const = 0;
+  virtual Mantid::API::IFunction_sptr getFunction() const = 0;
 
   virtual std::vector<std::string> getGlobalParameters() const = 0;
   virtual std::vector<std::string> getLocalParameters() const = 0;
   virtual void setGlobalParameters(std::vector<std::string> const &globals) = 0;
   virtual void setGlobal(std::string const &parameterName, bool on) = 0;
 
-  virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
-  virtual void updateParameters(const IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
+  virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
 
   virtual void setCurrentDataset(int i) = 0;
-  virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
+  virtual void setDatasets(const QList<MantidQt::MantidWidgets::FunctionModelDataset> &datasets) = 0;
 
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;

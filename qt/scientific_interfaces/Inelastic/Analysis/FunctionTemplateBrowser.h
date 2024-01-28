@@ -50,21 +50,25 @@ public:
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 
-  virtual void setFunction(std::string const &funStr) = 0;
-  virtual IFunction_sptr getGlobalFunction() const = 0;
-  virtual IFunction_sptr getFunction() const = 0;
-  virtual void setNumberOfDatasets(int) = 0;
-  virtual int getNumberOfDatasets() const = 0;
-  virtual void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) = 0;
-  virtual std::vector<std::string> getGlobalParameters() const = 0;
-  virtual std::vector<std::string> getLocalParameters() const = 0;
-  virtual void setGlobalParameters(std::vector<std::string> const &globals) = 0;
-  virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
+  void setFunction(std::string const &funStr);
+  IFunction_sptr getGlobalFunction() const;
+  IFunction_sptr getFunction() const;
+
+  int getCurrentDataset();
+  void setCurrentDataset(int i);
+  void setNumberOfDatasets(int);
+  int getNumberOfDatasets() const;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets);
+
+  std::vector<std::string> getGlobalParameters() const;
+  std::vector<std::string> getLocalParameters() const;
+  void setGlobalParameters(std::vector<std::string> const &globals);
+
+  void updateMultiDatasetParameters(const IFunction &fun);
   virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
-  virtual void setCurrentDataset(int i) = 0;
-  virtual int getCurrentDataset() = 0;
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
+
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;

@@ -101,6 +101,40 @@ void FunctionTemplateBrowser::subscribePresenter(ITemplatePresenter *presenter) 
 
 void FunctionTemplateBrowser::clear() { m_browser->clear(); }
 
+void FunctionTemplateBrowser::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
+
+IFunction_sptr FunctionTemplateBrowser::getGlobalFunction() const { return m_presenter->getGlobalFunction(); }
+
+IFunction_sptr FunctionTemplateBrowser::getFunction() const { return m_presenter->getFunction(); }
+
+void FunctionTemplateBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(i); }
+
+int FunctionTemplateBrowser::getCurrentDataset() { return m_presenter->getCurrentDataset(); }
+
+void FunctionTemplateBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatasets(n); }
+
+int FunctionTemplateBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
+
+void FunctionTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  m_presenter->setDatasets(datasets);
+}
+
+std::vector<std::string> FunctionTemplateBrowser::getGlobalParameters() const {
+  return m_presenter->getGlobalParameters();
+}
+
+std::vector<std::string> FunctionTemplateBrowser::getLocalParameters() const {
+  return m_presenter->getLocalParameters();
+}
+
+void FunctionTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
+  m_presenter->setGlobalParameters(globals);
+}
+
+void FunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
+  m_presenter->updateMultiDatasetParameters(fun);
+}
+
 void FunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
   m_presenter->handleEditLocalParameter(m_parameterNames[prop]);
 }

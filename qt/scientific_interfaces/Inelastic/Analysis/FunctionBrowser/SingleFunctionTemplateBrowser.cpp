@@ -77,34 +77,6 @@ void SingleFunctionTemplateBrowser::addParameter(std::string const &parameterNam
   m_parameterNames.insert(newParameter, parameterName);
 }
 
-int SingleFunctionTemplateBrowser::getCurrentDataset() { return m_presenter->getCurrentDataset(); }
-
-void SingleFunctionTemplateBrowser::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
-
-IFunction_sptr SingleFunctionTemplateBrowser::getGlobalFunction() const { return m_presenter->getGlobalFunction(); }
-
-IFunction_sptr SingleFunctionTemplateBrowser::getFunction() const { return m_presenter->getFunction(); }
-
-void SingleFunctionTemplateBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatasets(n); }
-
-int SingleFunctionTemplateBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
-
-void SingleFunctionTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
-  m_presenter->setDatasets(datasets);
-}
-
-std::vector<std::string> SingleFunctionTemplateBrowser::getGlobalParameters() const {
-  return m_presenter->getGlobalParameters();
-}
-
-std::vector<std::string> SingleFunctionTemplateBrowser::getLocalParameters() const {
-  return m_presenter->getLocalParameters();
-}
-
-void SingleFunctionTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
-  m_presenter->setGlobalParameters(globals);
-}
-
 void SingleFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
     return;
@@ -124,10 +96,6 @@ void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   }
 }
 
-void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
-  m_presenter->updateMultiDatasetParameters(fun);
-}
-
 void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &) {}
 
 void SingleFunctionTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
@@ -144,8 +112,6 @@ void SingleFunctionTemplateBrowser::setParameterValueQuietly(std::string const &
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
   m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }
-
-void SingleFunctionTemplateBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(i); }
 
 void SingleFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &) {}
 

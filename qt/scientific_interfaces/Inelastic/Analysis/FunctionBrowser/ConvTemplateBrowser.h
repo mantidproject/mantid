@@ -30,20 +30,8 @@ class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowse
   Q_OBJECT
 public:
   explicit ConvTemplateBrowser(QWidget *parent = nullptr);
-  void setFunction(std::string const &funStr) override;
-  IFunction_sptr getGlobalFunction() const override;
-  IFunction_sptr getFunction() const override;
-  void setNumberOfDatasets(int) override;
-  int getCurrentDataset() override;
-  int getNumberOfDatasets() const override;
-  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
-  std::vector<std::string> getGlobalParameters() const override;
-  std::vector<std::string> getLocalParameters() const override;
-  void setGlobalParameters(std::vector<std::string> const &globals) override;
-  void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
-  void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
@@ -104,6 +92,7 @@ private:
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
   bool m_emitIntChange = true;
+  friend class ConvTemplatePresenter;
 };
 
 } // namespace IDA

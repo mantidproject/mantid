@@ -30,19 +30,9 @@ class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemp
 public:
   explicit SingleFunctionTemplateBrowser(QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
-  void setFunction(std::string const &funStr) override;
-  IFunction_sptr getGlobalFunction() const override;
-  IFunction_sptr getFunction() const override;
-  void setNumberOfDatasets(int) override;
-  int getNumberOfDatasets() const override;
-  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
-  std::vector<std::string> getGlobalParameters() const override;
-  std::vector<std::string> getLocalParameters() const override;
-  void setGlobalParameters(std::vector<std::string> const &globals) override;
-  void updateMultiDatasetParameters(const IFunction &fun) override;
+
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
-  void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
   void setErrorsEnabled(bool enabled) override;
@@ -53,7 +43,6 @@ public:
   void setBackgroundA0(double) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
   void setQValues(const std::vector<double> &) override;
-  int getCurrentDataset() override;
   void addParameter(std::string const &parameterName, std::string const &parameterDescription);
   void setParameterValue(std::string const &parameterName, double parameterValue, double parameterError);
   void setParameterValueQuietly(std::string const &parameterName, double parameterValue, double parameterError);
@@ -80,6 +69,7 @@ private:
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
+  friend class SingleFunctionTemplatePresenter;
 };
 
 } // namespace IDA
