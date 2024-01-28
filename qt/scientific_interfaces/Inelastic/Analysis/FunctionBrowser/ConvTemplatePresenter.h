@@ -8,6 +8,7 @@
 
 #include "ConvFunctionModel.h"
 #include "DllConfig.h"
+#include "ITemplatePresenter.h"
 
 #include <QMap>
 #include <QWidget>
@@ -28,7 +29,7 @@ class ConvTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public QObject {
+class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public QObject, public ITemplatePresenter {
   Q_OBJECT
 public:
   explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> functionModel);
@@ -58,11 +59,12 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 
+  void handleEditLocalParameter(std::string const &parameterName) override;
+
 signals:
   void functionStructureChanged();
 
 private slots:
-  void editLocalParameter(std::string const &parameterName);
   void editLocalParameterFinish(int result);
   void viewChangedParameterValue(std::string const &parameterName, double value);
 

@@ -8,6 +8,7 @@
 
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
+#include "ITemplatePresenter.h"
 #include "IqtFunctionModel.h"
 
 #include <QWidget>
@@ -28,7 +29,7 @@ class IqtTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public QObject {
+class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public QObject, public ITemplatePresenter {
   Q_OBJECT
 public:
   explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
@@ -59,11 +60,12 @@ public:
   void estimateFunctionParameters();
   void setBackgroundA0(double value);
 
+  void handleEditLocalParameter(std::string const &parameterName) override;
+
 signals:
   void functionStructureChanged();
 
 private slots:
-  void editLocalParameter(std::string const &parameterName);
   void editLocalParameterFinish(int result);
   void viewChangedParameterValue(std::string const &parameterName, double value);
 

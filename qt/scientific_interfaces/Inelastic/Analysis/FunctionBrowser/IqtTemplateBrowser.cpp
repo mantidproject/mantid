@@ -240,14 +240,10 @@ void IqtTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
-  m_presenter.setGlobal(m_actualParameterNames[prop], isGlobal);
+  m_presenter.setGlobal(m_parameterNames[prop], isGlobal);
   if (m_emitParameterValueChange) {
-    emit parameterValueChanged(m_actualParameterNames[prop], m_parameterManager->value(prop));
+    emit parameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
   }
-}
-
-void IqtTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
-  emit localParameterButtonClicked(m_actualParameterNames[prop]);
 }
 
 void IqtTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
@@ -265,12 +261,12 @@ void IqtTemplateBrowser::setCurrentDataset(int i) { m_presenter.setCurrentDatase
 int IqtTemplateBrowser::getCurrentDataset() { return m_presenter.getCurrentDataset(); }
 
 void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
-  m_actualParameterNames.clear();
+  m_parameterNames.clear();
   ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[i];
-    m_actualParameterNames[prop] = name;
+    m_parameterNames[prop] = name;
     if (!name.empty()) {
       prop->setPropertyName(QString::fromStdString(name));
     }
@@ -327,7 +323,7 @@ void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const
   ScopedFalse _false(m_emitParameterValueChange);
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
-    auto const name = m_actualParameterNames[prop];
+    auto const name = m_parameterNames[prop];
     auto const findIter = std::find(globals.cbegin(), globals.cend(), name);
     if (findIter != globals.cend()) {
       m_parameterManager->setGlobal(prop, true);
@@ -335,7 +331,7 @@ void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const
     }
   }
   for (auto const prop : parameterProperies) {
-    if (!m_actualParameterNames[prop].empty()) {
+    if (!m_parameterNames[prop].empty()) {
       m_parameterManager->setGlobal(prop, false);
     }
   }

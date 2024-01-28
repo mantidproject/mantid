@@ -69,7 +69,6 @@ protected slots:
   void enumChanged(QtProperty *) override;
   void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
-  void parameterButtonClicked(QtProperty *) override;
 
 private:
   void createProperties() override;
@@ -99,7 +98,6 @@ private:
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
-  QMap<QtProperty *, std::string> m_actualParameterNames;
   QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:

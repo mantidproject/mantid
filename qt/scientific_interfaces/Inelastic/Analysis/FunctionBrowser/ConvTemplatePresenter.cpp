@@ -34,8 +34,7 @@ using namespace MantidWidgets;
 ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
                                              std::unique_ptr<ConvFunctionModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SLOT(editLocalParameter(std::string const &)));
+  m_view->subscribePresenter(this);
   connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
           SLOT(viewChangedParameterValue(std::string const &, double)));
 }
@@ -224,7 +223,7 @@ void ConvTemplatePresenter::setLocalParameterFixed(std::string const &parameterN
   m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void ConvTemplatePresenter::editLocalParameter(std::string const &parameterName) {
+void ConvTemplatePresenter::handleEditLocalParameter(std::string const &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;

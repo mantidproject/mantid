@@ -160,6 +160,7 @@ set(INC_FILES
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/FqFunctionModel.h
+    Analysis/FunctionBrowser/ITemplatePresenter.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h

@@ -20,8 +20,7 @@ using namespace MantidWidgets;
  */
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SLOT(editLocalParameter(std::string const &)));
+  m_view->subscribePresenter(this);
   connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
           SLOT(viewChangedParameterValue(std::string const &, double)));
 }
@@ -256,7 +255,7 @@ void IqtTemplatePresenter::setLocalParameterFixed(std::string const &parameterNa
   m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void IqtTemplatePresenter::editLocalParameter(const std::string &parameterName) {
+void IqtTemplatePresenter::handleEditLocalParameter(const std::string &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;

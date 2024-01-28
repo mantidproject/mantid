@@ -66,7 +66,6 @@ protected slots:
   void enumChanged(QtProperty *) override;
   void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
-  void parameterButtonClicked(QtProperty *) override;
 
 private:
   void createProperties() override;

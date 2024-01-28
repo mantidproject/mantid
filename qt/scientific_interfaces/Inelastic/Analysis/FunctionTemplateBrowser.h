@@ -35,6 +35,8 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
+class ITemplatePresenter;
+
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
@@ -46,6 +48,7 @@ public:
   FunctionTemplateBrowser(QWidget *parent = nullptr);
   virtual ~FunctionTemplateBrowser();
   void init();
+  void subscribePresenter(ITemplatePresenter *presenter);
 
   virtual void setFunction(std::string const &funStr) = 0;
   virtual IFunction_sptr getGlobalFunction() const = 0;
@@ -73,7 +76,6 @@ public:
 
 signals:
   void functionStructureChanged();
-  void localParameterButtonClicked(std::string const &parameterName);
   void parameterValueChanged(std::string const &parameterName, double value);
 
 protected slots:
@@ -83,7 +85,7 @@ protected slots:
   virtual void popupMenu(const QPoint &) = 0;
   virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
   virtual void parameterChanged(QtProperty *) = 0;
-  virtual void parameterButtonClicked(QtProperty *) = 0;
+  void parameterButtonClicked(QtProperty *);
 
 private:
   void createBrowser();
@@ -98,11 +100,16 @@ protected:
   QtGroupPropertyManager *m_groupManager;
   ParameterPropertyManager *m_parameterManager;
 
+  QMap<QtProperty *, std::string> m_parameterNames;
+
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;
 
   /// Precision of doubles in m_doubleManager
   const int m_decimals;
+
+  /// The corresponding template presenter
+  ITemplatePresenter *m_presenter;
 };
 
 } // namespace IDA

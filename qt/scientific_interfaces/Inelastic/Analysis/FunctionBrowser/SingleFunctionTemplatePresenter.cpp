@@ -20,8 +20,7 @@ using namespace MantidWidgets;
 SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view, std::unique_ptr<SingleFunctionTemplateModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SLOT(editLocalParameter(std::string const &)));
+  m_view->subscribePresenter(this);
   connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
           SLOT(viewChangedParameterValue(std::string const &, double)));
 }
@@ -171,7 +170,7 @@ void SingleFunctionTemplatePresenter::setLocalParameterFixed(std::string const &
   m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void SingleFunctionTemplatePresenter::editLocalParameter(std::string const &parameterName) {
+void SingleFunctionTemplatePresenter::handleEditLocalParameter(std::string const &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;

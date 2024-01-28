@@ -164,14 +164,10 @@ void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
-  m_presenter.setGlobal(m_actualParameterNames[prop], isGlobal);
+  m_presenter.setGlobal(m_parameterNames[prop], isGlobal);
   if (m_emitParameterValueChange) {
-    emit parameterValueChanged(m_actualParameterNames[prop], m_parameterManager->value(prop));
+    emit parameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
   }
-}
-
-void ConvTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
-  emit localParameterButtonClicked(m_actualParameterNames[prop]);
 }
 
 void ConvTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
@@ -187,12 +183,12 @@ void ConvTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter.u
 void ConvTemplateBrowser::setCurrentDataset(int i) { m_presenter.setCurrentDataset(i); }
 
 void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
-  m_actualParameterNames.clear();
+  m_parameterNames.clear();
   ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[static_cast<int>(i)];
-    m_actualParameterNames[prop] = name;
+    m_parameterNames[prop] = name;
     if (!name.empty()) {
       prop->setPropertyName(QString::fromStdString(name));
     }
@@ -220,14 +216,14 @@ void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
   ScopedFalse _(m_emitParameterValueChange);
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
-    auto const name = m_actualParameterNames[prop];
+    auto const name = m_parameterNames[prop];
     if (globals.contains(QString::fromStdString(name))) {
       m_parameterManager->setGlobal(prop, true);
       parameterProperies.removeOne(prop);
     }
   }
   for (auto const prop : parameterProperies) {
-    if (!m_actualParameterNames[prop].empty()) {
+    if (!m_parameterNames[prop].empty()) {
       m_parameterManager->setGlobal(prop, false);
     }
   }

@@ -126,10 +126,6 @@ void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   }
 }
 
-void SingleFunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
-  emit localParameterButtonClicked(m_parameterNames[prop]);
-}
-
 void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter.updateMultiDatasetParameters(fun);
 }
