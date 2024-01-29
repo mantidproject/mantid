@@ -19,7 +19,7 @@ using namespace MantidWidgets;
  */
 SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view, std::unique_ptr<SingleFunctionTemplateModel> functionModel)
-    : QObject(view), m_view(view), m_model(std::move(functionModel)) {
+    : m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
 }
 

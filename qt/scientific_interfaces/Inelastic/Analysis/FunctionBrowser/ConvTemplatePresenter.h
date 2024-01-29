@@ -11,7 +11,6 @@
 #include "ITemplatePresenter.h"
 
 #include <QMap>
-#include <QWidget>
 
 class QtProperty;
 
@@ -29,8 +28,7 @@ class ConvTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public QObject, public ITemplatePresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public ITemplatePresenter {
 public:
   explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }

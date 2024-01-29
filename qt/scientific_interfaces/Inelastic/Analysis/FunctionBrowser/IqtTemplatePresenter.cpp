@@ -19,7 +19,7 @@ using namespace MantidWidgets;
  * @param parent :: The parent widget.
  */
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
-    : QObject(view), m_view(view), m_model(std::move(functionModel)) {
+    : m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
   setViewParameterDescriptions();
   m_view->updateState();

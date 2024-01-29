@@ -99,11 +99,8 @@ set(MOC_FILES
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
-    Analysis/FunctionBrowser/ConvTemplatePresenter.h
     Analysis/FunctionBrowser/IqtTemplateBrowser.h
-    Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
-    Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
     BayesFitting/BayesFitting.h
     BayesFitting/BayesFittingTab.h
     BayesFitting/Quasi.h
@@ -159,9 +156,12 @@ set(INC_FILES
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
+    Analysis/FunctionBrowser/ConvTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/ITemplatePresenter.h
+    Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h
     Common/OutputPlotOptionsModel.h

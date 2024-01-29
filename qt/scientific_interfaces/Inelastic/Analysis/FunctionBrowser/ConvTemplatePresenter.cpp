@@ -33,7 +33,7 @@ using namespace MantidWidgets;
  */
 ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
                                              std::unique_ptr<ConvFunctionModel> functionModel)
-    : QObject(view), m_view(view), m_model(std::move(functionModel)) {
+    : m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
 }
 

@@ -12,7 +12,6 @@
 #include "ITemplatePresenter.h"
 #include "SingleFunctionTemplateModel.h"
 #include <QMap>
-#include <QWidget>
 
 class QtProperty;
 
@@ -30,8 +29,7 @@ class SingleFunctionTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public QObject, public ITemplatePresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public ITemplatePresenter {
 public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);

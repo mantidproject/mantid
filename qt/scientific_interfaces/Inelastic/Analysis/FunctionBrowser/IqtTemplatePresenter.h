@@ -11,8 +11,6 @@
 #include "ITemplatePresenter.h"
 #include "IqtFunctionModel.h"
 
-#include <QWidget>
-
 class QtProperty;
 
 namespace MantidQt {
@@ -29,8 +27,7 @@ class IqtTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public QObject, public ITemplatePresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public ITemplatePresenter {
 public:
   explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
