@@ -123,7 +123,6 @@ void InelasticDataManipulationElwinTab::runFileInput() {
 
   QFileInfo firstFileInfo(inputFilenames[0]);
   const auto filename = firstFileInfo.baseName().toStdString();
-
   auto workspaceBaseName = filename.substr(0, filename.find_last_of("_"));
 
   if (inputFilenames.size() > 1) {
@@ -141,8 +140,8 @@ void InelasticDataManipulationElwinTab::runFileInput() {
     // reassemble workspace base name with additional run number
     runNumber = runNumber.substr(runNumberStart, strLength);
     auto baseName = firstFileInfo.baseName().toStdString();
-    const auto prefix = baseName.substr(baseName.find_last_of("_"));
-    const auto suffix = baseName.substr(baseName.length() - baseName.find_last_of("_"));
+    const auto prefix = baseName.substr(0, baseName.find_first_of("_"));
+    const auto suffix = baseName.substr(baseName.find_first_of("_"));
     workspaceBaseName = prefix + "-" + runNumber + suffix;
   }
 
@@ -155,7 +154,6 @@ void InelasticDataManipulationElwinTab::runFileInput() {
     m_model->setupLoadAlgorithm(m_batchAlgoRunner, inputFilename.toStdString(), workspaceName);
     inputWorkspacesString += workspaceName + ",";
   }
-
   m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
   m_model->setupElasticWindowMultiple(m_batchAlgoRunner, workspaceBaseName, inputGroupWsName, m_view->getLogName(),
                                       m_view->getLogValue());
