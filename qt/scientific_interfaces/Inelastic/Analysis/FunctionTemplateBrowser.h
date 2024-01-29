@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
@@ -80,6 +81,10 @@ public:
 
   void emitFunctionStructureChanged() { emit functionStructureChanged(); }
 
+  void openEditLocalParameterDialog(std::string const &parameterName, QStringList const &datasetNames,
+                                    QStringList const &domainNames, QList<double> const &values,
+                                    QList<bool> const &fixes, QStringList const &ties, QStringList const &constraints);
+
 signals:
   void functionStructureChanged();
 
@@ -91,6 +96,7 @@ protected slots:
   virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
   virtual void parameterChanged(QtProperty *) = 0;
   void parameterButtonClicked(QtProperty *);
+  void editLocalParameterFinished(int result);
 
 private:
   void createBrowser();
@@ -115,6 +121,9 @@ protected:
 
   /// The corresponding template presenter
   ITemplatePresenter *m_presenter;
+
+  /// The Edit local parameter dialog
+  EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
 } // namespace IDA

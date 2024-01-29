@@ -273,34 +273,25 @@ void IqtTemplatePresenter::handleEditLocalParameter(const std::string &parameter
     const auto constraint = getLocalParameterConstraint(parameterName, i);
     constraints.push_back(QString::fromStdString(constraint));
   }
-
-  m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
-  m_editLocalParameterDialog->open();
+  m_view->openEditLocalParameterDialog(parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
 }
 
-void IqtTemplatePresenter::editLocalParameterFinish(int result) {
-  if (result == QDialog::Accepted) {
-    auto parName = m_editLocalParameterDialog->getParameterName();
-    auto values = m_editLocalParameterDialog->getValues();
-    auto fixes = m_editLocalParameterDialog->getFixes();
-    auto ties = m_editLocalParameterDialog->getTies();
-    assert(values.size() == getNumberOfDatasets());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      if (!ties[i].isEmpty()) {
-        setLocalParameterTie(parName, i, ties[i].toStdString());
-      } else if (fixes[i]) {
-        setLocalParameterFixed(parName, i, fixes[i]);
-      } else {
-        setLocalParameterTie(parName, i, "");
-      }
+void IqtTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
+                                                            QList<double> const &values, QList<bool> const &fixes,
+                                                            QStringList const &ties, QStringList const &constraints) {
+  (void)constraints;
+  assert(values.size() == getNumberOfDatasets());
+  for (int i = 0; i < values.size(); ++i) {
+    setLocalParameterValue(parameterName, i, values[i]);
+    if (!ties[i].isEmpty()) {
+      setLocalParameterTie(parameterName, i, ties[i].toStdString());
+    } else if (fixes[i]) {
+      setLocalParameterFixed(parameterName, i, fixes[i]);
+    } else {
+      setLocalParameterTie(parameterName, i, "");
     }
   }
-  m_editLocalParameterDialog = nullptr;
   updateViewParameters();
-  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double const value) {

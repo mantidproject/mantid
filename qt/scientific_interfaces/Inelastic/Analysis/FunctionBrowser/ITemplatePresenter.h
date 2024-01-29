@@ -72,6 +72,9 @@ public:
 
   virtual void handleEditLocalParameter(std::string const &parameterName) = 0;
   virtual void handleParameterValueChanged(std::string const &parameterName, double value) = 0;
+  virtual void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
+                                                QList<bool> const &fixes, QStringList const &ties,
+                                                QStringList const &constraints) = 0;
 };
 
 } // namespace IDA

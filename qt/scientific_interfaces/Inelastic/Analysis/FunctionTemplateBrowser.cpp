@@ -135,8 +135,30 @@ void FunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun)
   m_presenter->updateMultiDatasetParameters(fun);
 }
 
+void FunctionTemplateBrowser::openEditLocalParameterDialog(std::string const &parameterName,
+                                                           QStringList const &datasetNames,
+                                                           QStringList const &domainNames, QList<double> const &values,
+                                                           QList<bool> const &fixes, QStringList const &ties,
+                                                           QStringList const &constraints) {
+  m_editLocalParameterDialog =
+      new EditLocalParameterDialog(this, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
+  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinished(int)));
+  m_editLocalParameterDialog->open();
+}
+
 void FunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
   m_presenter->handleEditLocalParameter(m_parameterNames[prop]);
+}
+
+void FunctionTemplateBrowser::editLocalParameterFinished(int result) {
+  if (result == QDialog::Accepted) {
+    m_presenter->handleEditLocalParameterFinished(
+        m_editLocalParameterDialog->getParameterName(), m_editLocalParameterDialog->getValues(),
+        m_editLocalParameterDialog->getFixes(), m_editLocalParameterDialog->getTies(),
+        m_editLocalParameterDialog->getConstraints());
+  }
+  m_editLocalParameterDialog = nullptr;
+  emitFunctionStructureChanged();
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

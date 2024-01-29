@@ -71,9 +71,9 @@ public:
 
   void handleEditLocalParameter(std::string const &parameterName) override;
   void handleParameterValueChanged(std::string const &parameterName, double value) override;
-
-private slots:
-  void editLocalParameterFinish(int result);
+  void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
+                                        QList<bool> const &fixes, QStringList const &ties,
+                                        QStringList const &constraints) override;
 
 private:
   void updateViewParameters();
@@ -89,7 +89,6 @@ private:
   void updateViewParameterNames();
   ConvTemplateBrowser *m_view;
   std::unique_ptr<ConvFunctionModel> m_model;
-  EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
 } // namespace IDA

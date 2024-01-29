@@ -186,34 +186,27 @@ void SingleFunctionTemplatePresenter::handleEditLocalParameter(std::string const
     const auto constraint = getLocalParameterConstraint(parameterName, i);
     constraints.push_back(QString::fromStdString(constraint));
   }
-
-  m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
-  m_editLocalParameterDialog->open();
+  m_view->openEditLocalParameterDialog(parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
 }
 
-void SingleFunctionTemplatePresenter::editLocalParameterFinish(int result) {
-  if (result == QDialog::Accepted) {
-    const auto parName = m_editLocalParameterDialog->getParameterName();
-    const auto values = m_editLocalParameterDialog->getValues();
-    const auto fixes = m_editLocalParameterDialog->getFixes();
-    const auto ties = m_editLocalParameterDialog->getTies();
-    assert(values.size() == getNumberOfDatasets());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      if (!ties[i].isEmpty()) {
-        setLocalParameterTie(parName, i, ties[i].toStdString());
-      } else if (fixes[i]) {
-        setLocalParameterFixed(parName, i, fixes[i]);
-      } else {
-        setLocalParameterTie(parName, i, "");
-      }
+void SingleFunctionTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
+                                                                       QList<double> const &values,
+                                                                       QList<bool> const &fixes,
+                                                                       QStringList const &ties,
+                                                                       QStringList const &constraints) {
+  (void)constraints;
+  assert(values.size() == getNumberOfDatasets());
+  for (int i = 0; i < values.size(); ++i) {
+    setLocalParameterValue(parameterName, i, values[i]);
+    if (!ties[i].isEmpty()) {
+      setLocalParameterTie(parameterName, i, ties[i].toStdString());
+    } else if (fixes[i]) {
+      setLocalParameterFixed(parameterName, i, fixes[i]);
+    } else {
+      setLocalParameterTie(parameterName, i, "");
     }
   }
-  m_editLocalParameterDialog = nullptr;
   updateView();
-  m_view->emitFunctionStructureChanged();
 }
 
 void SingleFunctionTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double value) {
