@@ -134,7 +134,7 @@ class GAUSSIANLoader(AbInitioLoader):
         If the calculation uses frozen atoms, these will be a subset of the structure
         which was previously read.
         """
-        block_start = "Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z"
+        HEADER_RE = r"\s+Atom\s+AN\s+X      Y      Z        X      Y      Z        X      Y      Z"
         INT_RE = r"\d+"
         FLOAT_RE = r"-?\d+\.\d+"
         row_re = re.compile(bytes(rf"\s+({INT_RE})\s+{INT_RE}" + 9 * rf"\s+{FLOAT_RE}", "utf8"))
@@ -142,7 +142,7 @@ class GAUSSIANLoader(AbInitioLoader):
         active_atoms = []
 
         with TextParser.save_excursion(file_obj):
-            TextParser.find_first(file_obj=file_obj, msg=block_start)
+            TextParser.find_first(file_obj=file_obj, regex=HEADER_RE)
 
             while re_match := row_re.match(file_obj.readline()):
                 active_atoms.append(int(re_match.groups()[0]))
