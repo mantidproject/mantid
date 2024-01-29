@@ -5,6 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import io
+from io import BufferedReader
+import re
+from typing import List
+
 import numpy as np
 
 from .abinitioloader import AbInitioLoader
@@ -24,6 +28,7 @@ class GAUSSIANLoader(AbInitioLoader):
         """
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "GAUSSIAN"
+        self._active_atoms = None
         self._parser = TextParser()
         self._num_atoms = None
         self._num_read_freq = 0
@@ -53,6 +58,9 @@ class GAUSSIANLoader(AbInitioLoader):
             # read frequencies, corresponding atomic displacements for a molecule
             self._parser.find_first(file_obj=gaussian_file, msg="Harmonic frequencies (cm**-1), IR intensities (KM/Mole), Raman scattering")
             self._read_modes(file_obj=gaussian_file, data=data)
+
+            # Check if atoms were frozen and remove from structure if so
+            self._remove_frozen_atoms(active_atoms=self._active_atoms, data=data)
 
             # save data to hdf file
             self.save_ab_initio_data(data=data)
@@ -95,6 +103,22 @@ class GAUSSIANLoader(AbInitioLoader):
         self._num_atoms = len(atoms)
         data["atoms"] = atoms
 
+    @staticmethod
+    def _remove_frozen_atoms(*, active_atoms: List[int], data: dict) -> None:
+        """Modify data in-place, removing atoms that are missing from active_atoms and re-indexing"""
+
+        # Do nothing if there are no frozen atoms
+        # if len(active_atoms) == len(data["atoms"]):
+        #     return None
+
+        new_atoms = {}
+
+        for data_index, atom_index in enumerate(active_atoms):
+            new_atoms[f"atom_{data_index}"] = data["atoms"][f"atom_{atom_index - 1}"]
+            new_atoms[f"atom_{data_index}"]["sort"] = data_index
+
+        data["atoms"] = new_atoms
+
     def _generates_lattice_vectors(self, data=None):
         """
         Generates dummy lattice vectors. Gaussian is only for molecular calculations.
@@ -103,16 +127,54 @@ class GAUSSIANLoader(AbInitioLoader):
         """
         data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
-    def _read_modes(self, file_obj=None, data=None):
+    @staticmethod
+    def _read_active_atoms(file_obj: BufferedReader) -> List[int]:
+        """Get indices of rows from atomic displacement data block
+
+        If the calculation uses frozen atoms, these will be a subset of the structure
+        which was previously read.
+        """
+        block_start = "Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z"
+        INT_RE = r"\d+"
+        FLOAT_RE = r"-?\d+\.\d+"
+        row_re = re.compile(bytes(rf"\s+({INT_RE})\s+{INT_RE}" + 9 * rf"\s+{FLOAT_RE}", "utf8"))
+
+        active_atoms = []
+
+        with TextParser.save_excursion(file_obj):
+            TextParser.find_first(file_obj=file_obj, msg=block_start)
+
+            while re_match := row_re.match(file_obj.readline()):
+                active_atoms.append(int(re_match.groups()[0]))
+
+        return active_atoms
+
+    def _read_modes(self, *, file_obj: BufferedReader, data: dict):
         """
         Reads vibrational modes (frequencies and atomic displacements).
         :param file_obj: file object from which we read
         :param data: Python dictionary to which k-point data should be added
+
+        This includes a check for frozen atoms, which sets self._active_atoms
+        and updates self._num_atoms to reflect the number of non-frozen atoms
         """
-        freq = []
-        # it is a molecule so we subtract 3 translations and 3 rotations
-        num_freq = 3 * self._num_atoms - ROTATIONS_AND_TRANSLATIONS
+        num_all_atoms = self._num_atoms
+        self._active_atoms = self._read_active_atoms(file_obj)
+        self._num_atoms = len(self._active_atoms)
+
+        # Usually there will be 3N-6 modes, as rotations and translations are
+        # removed. However, if some atoms are frozen then we will get the full
+        # set of 3N modes as translation is blocked. (Gaussian doesn't seem to
+        # account for the case that one atom is frozen and rotation is free.)
+
+        if self._num_atoms == num_all_atoms:
+            num_freq = 3 * self._num_atoms - ROTATIONS_AND_TRANSLATIONS
+        else:
+            num_freq = 3 * len(self._active_atoms)
+
         dim = 3
+
+        freq = []
         atomic_disp = np.zeros(shape=(num_freq, self._num_atoms, dim), dtype=COMPLEX_TYPE)
         end_msg = ["-------------------"]
         # Next block is:
@@ -192,19 +254,19 @@ class GAUSSIANLoader(AbInitioLoader):
 
     def _read_masses_from_file(self, file_obj=None):
         masses = []
-        pos = file_obj.tell()
-        self._parser.find_first(file_obj=file_obj, msg="Thermochemistry")
+        with TextParser.save_excursion(file_obj):
+            self._parser.find_first(file_obj=file_obj, msg="Thermochemistry")
 
-        end_msg = "Molecular mass:"
-        key = "Atom"
-        end_msg = bytes(end_msg, "utf8")
-        key = bytes(key, "utf8")
+            end_msg = "Molecular mass:"
+            key = "Atom"
+            end_msg = bytes(end_msg, "utf8")
+            key = bytes(key, "utf8")
 
-        while not self._parser.file_end(file_obj=file_obj):
-            line = file_obj.readline()
-            if end_msg in line:
-                break
-            if key in line:
-                masses.append(float(line.split()[-1]))
-        file_obj.seek(pos)
+            while not self._parser.file_end(file_obj=file_obj):
+                line = file_obj.readline()
+                if end_msg in line:
+                    break
+                if key in line:
+                    masses.append(float(line.split()[-1]))
+
         return masses
