@@ -95,7 +95,7 @@ private slots:
   void notifySelectedSpectrumChanged(int);
   void notifyPreviewIndexChanged(int);
   void notifyAddWorkspaceDialog();
-  void notifyAddData();
+  void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
   void notifyRemoveDataClicked();
 
 private:
@@ -121,7 +121,6 @@ private:
 
   IElwinPresenter *m_presenter;
   QtTreePropertyBrowser *m_elwTree;
-  MantidWidgets::IAddWorkspaceDialog *m_addWorkspaceDialog;
 
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtDoublePropertyManager *m_dblManager;

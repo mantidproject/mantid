@@ -1425,7 +1425,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferValidator.cpp:100
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:99
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:23
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:43
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:42
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:127
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:93
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IqtFitModel.cpp:47

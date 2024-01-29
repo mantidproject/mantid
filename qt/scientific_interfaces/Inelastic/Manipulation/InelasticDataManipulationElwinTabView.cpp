@@ -83,7 +83,7 @@ public:
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTabView::InelasticDataManipulationElwinTabView(QWidget *parent)
-    : m_presenter(), m_elwTree(nullptr), m_addWorkspaceDialog(nullptr) {
+    : m_presenter(), m_elwTree(nullptr) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -204,22 +204,20 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  if (m_addWorkspaceDialog)
-    return;
-
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(getSampleWSSuffices());
   dialog->setFBSuffices(getSampleFBSuffices());
   dialog->updateSelectedSpectra();
   dialog->show();
-
-  m_addWorkspaceDialog = dialog;
 }
 
-void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m_addWorkspaceDialog); }
+void InelasticDataManipulationElwinTabView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  addDataWksOrFile(dialog);
+}
 
 /** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
  * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is
