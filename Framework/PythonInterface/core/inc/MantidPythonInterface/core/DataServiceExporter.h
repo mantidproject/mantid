@@ -117,8 +117,11 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param self A reference to the calling object
    */
   static void clearItems(SvcType &self) {
-    PyErr_Warn(PyExc_Warning, "Running ADS.clear() also removes all hidden workspaces.\n"
-                              "Mantid interfaces might still need some of these, for instance, MSlice.");
+    if (self.size() > 0) {
+      PyErr_Warn(PyExc_Warning, "Running ADS.clear() also removes all hidden workspaces.\n"
+                                "Mantid interfaces might still need some of these, for instance, MSlice.");
+    }
+
     ReleaseGlobalInterpreterLock releaseGIL;
     self.clear();
   }
