@@ -70,10 +70,10 @@ public:
   void setErrorsEnabled(bool enabled) override;
 
   void handleEditLocalParameter(std::string const &parameterName) override;
+  void handleParameterValueChanged(std::string const &parameterName, double value) override;
 
 private slots:
   void editLocalParameterFinish(int result);
-  void viewChangedParameterValue(std::string const &parameterName, double value);
 
 private:
   void updateViewParameters();

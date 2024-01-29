@@ -21,8 +21,6 @@ SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
     SingleFunctionTemplateBrowser *view, std::unique_ptr<SingleFunctionTemplateModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
-  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
-          SLOT(viewChangedParameterValue(std::string const &, double)));
 }
 
 void SingleFunctionTemplatePresenter::init() {
@@ -218,7 +216,7 @@ void SingleFunctionTemplatePresenter::editLocalParameterFinish(int result) {
   m_view->emitFunctionStructureChanged();
 }
 
-void SingleFunctionTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double value) {
+void SingleFunctionTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double value) {
   if (parameterName.empty())
     return;
   if (m_model->isGlobal(parameterName)) {

@@ -71,6 +71,7 @@ public:
   virtual void setQValues(const std::vector<double> &qValues) { (void)qValues; }
 
   virtual void handleEditLocalParameter(std::string const &parameterName) = 0;
+  virtual void handleParameterValueChanged(std::string const &parameterName, double value) = 0;
 };
 
 } // namespace IDA

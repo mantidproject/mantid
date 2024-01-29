@@ -82,7 +82,6 @@ public:
 
 signals:
   void functionStructureChanged();
-  void parameterValueChanged(std::string const &parameterName, double value);
 
 protected slots:
   virtual void intChanged(QtProperty *) {}

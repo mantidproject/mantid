@@ -23,8 +23,6 @@ IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique
   m_view->subscribePresenter(this);
   setViewParameterDescriptions();
   m_view->updateState();
-  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
-          SLOT(viewChangedParameterValue(std::string const &, double)));
 }
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
@@ -305,7 +303,7 @@ void IqtTemplatePresenter::editLocalParameterFinish(int result) {
   m_view->emitFunctionStructureChanged();
 }
 
-void IqtTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double const value) {
+void IqtTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double const value) {
   if (parameterName.empty())
     return;
   if (m_model->isGlobal(parameterName)) {

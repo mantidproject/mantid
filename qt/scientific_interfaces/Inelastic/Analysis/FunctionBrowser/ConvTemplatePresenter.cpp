@@ -35,8 +35,6 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
                                              std::unique_ptr<ConvFunctionModel> functionModel)
     : QObject(view), m_view(view), m_model(std::move(functionModel)) {
   m_view->subscribePresenter(this);
-  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
-          SLOT(viewChangedParameterValue(std::string const &, double)));
 }
 
 // This function creates a Qt thread to run the model updates
@@ -273,7 +271,7 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
   m_view->emitFunctionStructureChanged();
 }
 
-void ConvTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double value) {
+void ConvTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double value) {
   if (parameterName.empty())
     return;
   if (m_model->isGlobal(parameterName)) {
