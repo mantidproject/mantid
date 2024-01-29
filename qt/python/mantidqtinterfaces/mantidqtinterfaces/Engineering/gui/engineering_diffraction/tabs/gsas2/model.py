@@ -272,7 +272,13 @@ class GSAS2Model(object):
                 universal_newlines=True,
                 env=env,
             )
+
             shell_output = shell_process.communicate(timeout=self.timeout)
+
+            if shell_process.returncode != 0:
+                logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+                return None
+
             return shell_output
         except subprocess.TimeoutExpired:
             shell_process.terminate()
