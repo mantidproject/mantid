@@ -16,7 +16,6 @@
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
-#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
