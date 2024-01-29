@@ -199,9 +199,9 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) {
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
 void IndirectFitDataView::showAddWorkspaceDialog() {
-  auto dialog = std::make_unique<MantidWidgets::AddWorkspaceDialog>(parentWidget());
-  connect(dialog.get(), SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::AddWorkspaceDialog *)));
+  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(m_wsSampleSuffixes);
