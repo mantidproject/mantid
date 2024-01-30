@@ -1,0 +1,2 @@
+- Fixes a bug caused by division by 0 when normalizing
+- Adds a unit test for this
