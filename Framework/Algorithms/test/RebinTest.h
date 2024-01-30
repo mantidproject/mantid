@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -846,7 +847,10 @@ public:
     // ensure failure with log binning from neg to pos with modeset
     Rebin rebin;
     rebin.initialize();
+    auto ws1 = Create1DWorkspace(10);
+    AnalysisDataService::Instance().add("ws1", ws1);
     rebin.setRethrows(true);
+    rebin.setProperty("InputWorkspace", "ws1");
     rebin.setProperty("Params", std::vector<double>{-1.0, 1.0, 1000.0});
     rebin.setProperty("BinningMode", "Logarithmic");
     auto errmsgs = rebin.validateInputs();
@@ -854,6 +858,7 @@ public:
     auto errmsg = errmsgs.find("Params");
     TS_ASSERT(errmsg != errmsgs.end());
     TS_ASSERT(errmsg->second.substr(0, 33) == "Cannot create logarithmic binning");
+    AnalysisDataService::Instance().remove("ws1");
   }
 
   void do_test_property_unchanged(
@@ -1420,6 +1425,30 @@ public:
     TS_ASSERT(rebin.isExecuted());
 
     TS_ASSERT_EQUALS(test_in->getSpectrum(0).isSortedByTof(), expectSorted);
+  }
+
+  void test_group_workspace_validation() {
+    auto ws1 = Create1DWorkspace(10);
+    auto ws2 = Create1DWorkspace(10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+    const std::string groupWsName = "group";
+    GroupWorkspaces group;
+    group.initialize();
+    group.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2"});
+    group.setProperty("OutputWorkspace", groupWsName);
+    group.execute();
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace", groupWsName);
+    rebin.setPropertyValue("OutputWorkspace", "output");
+    rebin.setProperty("Params", "1,1,10");
+    auto errors = rebin.validateInputs();
+    TS_ASSERT_EQUALS(0, errors.size());
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
   }
 
 private:
