@@ -66,9 +66,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             f"creator:\n#     name: {self._SAVE_ALG}\n#     affiliation: {MantidORSODataset.SOFTWARE_NAME}\n#",
         ]
         self._runs_and_angles = {
-            "INTER00013460.nxs": "0.5",
-            "INTER00013461.nxs": "0.5",
-            "INTER00013462.nxs": "0.5",
+            "INTER00013460": "0.5",
+            "INTER00013469": "0.5",
+            "INTER00013462": "0.5",
         }
 
     def tearDown(self):
@@ -83,16 +83,19 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_create_file_from_workspace_with_reduction_history(self):
         # Check that relevant information is extracted from the history produced by the ISIS Reflectometry GUI reduction
         resolution = 0.02
+        # One of the input runs should be an already loaded workspace as this appears differently in the history
+        input_ws_name = "Test_ws"
+        LoadNexus("13469", OutputWorkspace=input_ws_name)
         reduced_ws = self._get_ws_from_reduction(
-            "INTER13460, 13461, 13462.nxs", resolution, "IvsQ_13460+13461+13462", "13463", "13464, 13462"
+            f"0000013460, {input_ws_name}, inter13462.nxs", resolution, f"IvsQ_13460+{input_ws_name}+13462", "13463", "13464, 13462"
         )
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_data_files = ["INTER00013460.nxs", "INTER00013461.nxs", "INTER00013462.nxs"]
+        expected_data_files = ["INTER00013460", "INTER00013469", "INTER00013462"]
         expected_additional_file_entries = {
-            "INTER00013463.nxs": self._FIRST_TRANS_COMMENT,
-            "INTER00013464.nxs": self._SECOND_TRANS_COMMENT,
-            "INTER00013462.nxs": self._SECOND_TRANS_COMMENT,
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "INTER00013462": self._SECOND_TRANS_COMMENT,
         }
         metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
         metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
@@ -104,14 +107,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         # Testing the stitched reduction output helps to ensure that we're not getting duplicates in the metadata
         # because there will be multiple calls to ReflectometryISISLoadAndProcess in the history
         resolution = 0.02
-        reduced_ws = self._get_ws_from_stitched_reduction(["13460", "13461"], resolution, "13463", "13464, 13462")
+        reduced_ws = self._get_ws_from_stitched_reduction(["13460", "13469"], resolution, "13463", "13464, 13462")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_data_files = ["INTER00013460.nxs", "INTER00013461.nxs"]
+        expected_data_files = ["INTER00013460", "INTER00013469"]
         expected_additional_file_entries = {
-            "INTER00013463.nxs": self._FIRST_TRANS_COMMENT,
-            "INTER00013464.nxs": self._SECOND_TRANS_COMMENT,
-            "INTER00013462.nxs": self._SECOND_TRANS_COMMENT,
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "INTER00013462": self._SECOND_TRANS_COMMENT,
         }
         metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
         metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
