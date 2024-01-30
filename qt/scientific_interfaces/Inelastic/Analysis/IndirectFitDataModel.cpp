@@ -176,20 +176,12 @@ std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   return names;
 }
 
-void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
-  if (spectra.empty())
-    throw std::runtime_error("Fitting Data must consist of one or more spectra.");
+void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
   if (workspaceName.empty() || !m_adsInstance.doesExist(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
+  if (spectra.empty())
+    throw std::runtime_error("Fitting Data must consist of one or more spectra.");
 
-  try {
-    addWorkspace(workspaceName, FunctionModelSpectra(spectra));
-  } catch (std::logic_error &e) {
-    throw std::runtime_error(e.what());
-  }
-}
-
-void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
   auto ws = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
   addWorkspace(ws, spectra);
 }

@@ -33,15 +33,18 @@ ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : 
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-IAddWorkspaceDialog *ConvFitDataView::getAddWorkspaceDialog() {
-  m_addWorkspaceDialog = new ConvFitAddWorkspaceDialog(parentWidget());
-  if (auto dialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(m_addWorkspaceDialog)) {
-    dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
-    dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
-  }
-  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+void ConvFitDataView::showAddWorkspaceDialog() {
+  auto dialog = new ConvFitAddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
-  return m_addWorkspaceDialog;
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(m_wsSampleSuffixes);
+  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
+  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  dialog->updateSelectedSpectra();
+  dialog->show();
 }
 
 void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
