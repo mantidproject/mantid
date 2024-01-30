@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import IFunction
-from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
+from mantid.simpleapi import CopyLogs
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
     create_fitted_workspace_name,
@@ -341,7 +341,12 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
             return None
 
         parameters = self._get_parameters_for_tf_asymmetry_conversion(fit_function, workspace_names)
-        return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **parameters)
+        alg = AlgorithmManager.createUnmanaged("ConvertFitFunctionForMuonTFAsymmetry")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperties(parameters)
+        alg.execute()
+        return alg.getProperty("OutputFunction").value
 
     def _get_parameters_for_tf_asymmetry_conversion(self, fit_function: IFunction, workspace_names: list) -> dict:
         """Returns the parameters used to convert a normal function to a TF Asymmetry fit function."""

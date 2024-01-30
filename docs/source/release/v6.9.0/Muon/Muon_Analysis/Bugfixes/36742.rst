@@ -1,0 +1,1 @@
+- Fixed intermittent crash in the `Muon Analysis` window when performing simultaneous fitting on certain files
