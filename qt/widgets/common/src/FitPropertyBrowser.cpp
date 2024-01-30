@@ -944,16 +944,11 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
       menu->addAction(action);
     } else if (count() > 0 && isParameter) {
       bool hasTies;
+      bool hasFixes;
       bool hasBounds;
-      hasConstraints(ci->property(), hasTies, hasBounds);
+      hasConstraints(ci->property(), hasTies, hasFixes, hasBounds);
 
-      if (!hasTies && !hasBounds) {
-        action = new QAction("Fix", this);
-        connect(action, SIGNAL(triggered()), this, SLOT(addFixTie()));
-        menu->addAction(action);
-      }
-
-      if (!hasTies) {
+      if (!hasTies && !hasFixes) {
         QMenu *constraintMenu = menu->addMenu("Constraint");
 
         QMenu *detailMenu = constraintMenu->addMenu("Lower Bound");
@@ -1003,7 +998,11 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
         menu->addAction(action);
       }
 
-      if (!hasTies && !hasBounds) {
+      if (!hasTies && !hasFixes && !hasBounds) {
+        action = new QAction("Fix", this);
+        connect(action, SIGNAL(triggered()), this, SLOT(addFixTie()));
+        menu->addAction(action);
+
         if (count() == 1) {
           action = new QAction("Tie", this);
           connect(action, SIGNAL(triggered()), this, SLOT(addTie()));
@@ -1021,6 +1020,10 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
         }
       } else if (hasTies) {
         action = new QAction("Remove tie", this);
+        connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
+        menu->addAction(action);
+      } else if (hasFixes) {
+        action = new QAction("Remove fix", this);
         connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
         menu->addAction(action);
       }
@@ -2276,23 +2279,26 @@ void FitPropertyBrowser::deleteTie() {
   }
 }
 
-/** Does a parameter have a tie
+/** Does a parameter have a tie, is fixed, or has bounds
  * @param parProp :: The property for a function parameter
  * @param hasTie :: Parameter has a tie
+ * @param hasFix :: Parameter is fixed
  * @param hasBounds :: Parameter has bounds
  */
-void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const {
+void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasFix, bool &hasBounds) const {
   hasTie = false;
+  hasFix = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
   for (const auto *sub : subs) {
-    if (sub->propertyName() == "Tie") {
+    const auto propName = sub->propertyName();
+    if (propName == "Tie") {
       hasTie = true;
-    }
-    if (sub->propertyName() == "LowerBound") {
+    } else if (propName == "Fix") {
+      hasFix = true;
+    } else if (propName == "LowerBound") {
       hasBounds = true;
-    }
-    if (sub->propertyName() == "UpperBound") {
+    } else if (propName == "UpperBound") {
       hasBounds = true;
     }
   }
