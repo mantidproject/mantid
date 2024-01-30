@@ -435,15 +435,15 @@ public:
   }
 
 private:
-  void addWorkspaceToModel(std::string workspaceName, int numberOfSpectra, std::string spectra) {
+  void addWorkspaceToModel(std::string workspaceName, int numberOfSpectra, std::string const &spectra) {
     SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
-    m_model->getFitDataModel()->addWorkspace(workspaceName, spectra);
+    m_model->getFitDataModel()->addWorkspace(workspaceName, FunctionModelSpectra(spectra));
     m_model->addDefaultParameters();
   }
 
-  void addInstrumentWorkspaceToModel(std::string workspaceName, int xLength, int yLength, std::string spectra) {
+  void addInstrumentWorkspaceToModel(std::string workspaceName, int xLength, int yLength, std::string const &spectra) {
     SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInstrument(xLength, yLength));
-    m_model->getFitDataModel()->addWorkspace(workspaceName, spectra);
+    m_model->getFitDataModel()->addWorkspace(workspaceName, FunctionModelSpectra(spectra));
     m_model->addDefaultParameters();
   }
 

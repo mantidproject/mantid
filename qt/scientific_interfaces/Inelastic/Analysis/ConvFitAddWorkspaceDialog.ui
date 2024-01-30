@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Data Selection</string>
+   <string>Data Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -146,6 +146,5 @@
  <connections/>
  <slots>
   <slot>addData()</slot>
-  <slot>closeDialog()</slot>
  </slots>
 </ui>

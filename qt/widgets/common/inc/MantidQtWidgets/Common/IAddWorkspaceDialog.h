@@ -6,31 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-#include <QDialog>
-#include <QObject>
+#include "DllOption.h"
+
+#include <string>
+
+#include <QStringList>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidWidgets {
 
-class MANTIDQT_INELASTIC_DLL IAddWorkspaceDialog : public QDialog {
-  Q_OBJECT
+class EXPORT_OPT_MANTIDQT_COMMON IAddWorkspaceDialog {
 public:
-  IAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {}
   virtual std::string workspaceName() const = 0;
   virtual void setWSSuffices(const QStringList &suffices) = 0;
   virtual void setFBSuffices(const QStringList &suffices) = 0;
 
   virtual void updateSelectedSpectra() = 0;
-
-  void closeEvent(QCloseEvent *) override { emit closeDialog(); }
-
-signals:
-  void addData();
-  void closeDialog();
 };
 
-} // namespace IDA
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

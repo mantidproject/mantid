@@ -29,7 +29,6 @@ public:
   virtual ~IndirectFitDataModel() = default;
   std::vector<IndirectFitData> *getFittingData() override;
 
-  void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;

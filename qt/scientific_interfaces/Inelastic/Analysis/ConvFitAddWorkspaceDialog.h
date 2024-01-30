@@ -5,22 +5,25 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
+
+#include <QDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit ConvFitAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   std::string resolutionName() const;
-  std::string workspaceIndices() const;
+  MantidWidgets::FunctionModelSpectra workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
@@ -29,9 +32,13 @@ public:
 
   void updateSelectedSpectra() override;
 
+signals:
+  void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
+
 private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);
+  void emitAddData();
 
 private:
   void setWorkspace(const std::string &workspace);

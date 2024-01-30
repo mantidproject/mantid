@@ -129,7 +129,7 @@ Usage Example for Sequential Fitting
 
 4. In the ``Workspace Indices`` field enter '0-3'.
 
-5. Untick ``Keep Open`` and click ``Ok``.
+5. Click ``Add`` and the ``Close``.
 
 6. Right click on the ``Function Browser`` and add a ``Lorentzian`` function.
 
@@ -173,7 +173,7 @@ Usage Example for Simultaneous Fitting
 
 3. In the ``Workspace Indices`` field enter '0-3'.
 
-4. Untick ``Keep Open`` and click ``Ok``.
+4. Click ``Add`` and the ``Close``.
 
 5. Change the ``Fitting Mode`` to Simultaneous.
 
