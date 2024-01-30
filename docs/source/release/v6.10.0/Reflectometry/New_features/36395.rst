@@ -1,0 +1,1 @@
+- Algorithm :ref:`algm-SaveISISReflectometryORSO` now outputs the individual angle and transmission files in the ORSO file metadata.
