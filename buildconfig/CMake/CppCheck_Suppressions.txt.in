@@ -887,7 +887,7 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exp
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/IsNone.h:26
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLogValue.cpp:216
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Statistics.cpp:109
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/DataServiceExporter.h:159
+constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/DataServiceExporter.h:160
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Component.cpp:23
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/DetectorGroup.cpp:34
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Goniometer.cpp:30

@@ -116,6 +116,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   /**
    * Remove an item from the service
    * @param self A reference to the calling object
+   * @param silent A flag to silence the warning message
    */
   static void clearItems(SvcType &self, const bool silent) {
     if (self.size() > 0 && !silent) {
