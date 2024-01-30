@@ -29,7 +29,6 @@ class GAUSSIANLoader(AbInitioLoader):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "GAUSSIAN"
         self._active_atoms = None
-        self._parser = TextParser()
         self._num_atoms = None
         self._num_read_freq = 0
 
@@ -47,16 +46,16 @@ class GAUSSIANLoader(AbInitioLoader):
             "rb",
         ) as gaussian_file:
             # create dummy lattice vectors
-            self._generates_lattice_vectors(data=data)
+            self._generate_lattice_vectors(data=data)
 
             masses = self._read_masses_from_file(file_obj=gaussian_file)
             # move file pointer to the last optimized atomic positions, in standard orientation
             # (i.e. the reference structure for reported atomic displacements)
-            self._parser.find_last(file_obj=gaussian_file, regex=r"^\s+(Standard orientation|Input orientation):\s+$")
+            TextParser.find_last(file_obj=gaussian_file, regex=r"^\s+(Standard orientation|Input orientation):\s+$")
             self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
-            self._parser.find_first(file_obj=gaussian_file, msg="Harmonic frequencies (cm**-1), IR intensities (KM/Mole), Raman scattering")
+            TextParser.find_first(file_obj=gaussian_file, msg="Harmonic frequencies (cm**-1), IR intensities (KM/Mole), Raman scattering")
             self._read_modes(file_obj=gaussian_file, data=data)
 
             # Check if atoms were frozen and remove from structure if so
@@ -89,7 +88,7 @@ class GAUSSIANLoader(AbInitioLoader):
         for i in range(header_lines):
             file_obj.readline()
 
-        while not self._parser.block_end(file_obj=file_obj, msg=end_msgs):
+        while not TextParser.block_end(file_obj=file_obj, msg=end_msgs):
             line = file_obj.readline()
             entries = line.split()
             z_number = int(entries[1])
@@ -119,9 +118,10 @@ class GAUSSIANLoader(AbInitioLoader):
 
         data["atoms"] = new_atoms
 
-    def _generates_lattice_vectors(self, data=None):
+    @staticmethod
+    def _generate_lattice_vectors(*, data) -> None:
         """
-        Generates dummy lattice vectors. Gaussian is only for molecular calculations.
+        Generate dummy lattice vectors. Gaussian is only for molecular calculations.
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
@@ -183,7 +183,7 @@ class GAUSSIANLoader(AbInitioLoader):
         # -------------------
 
         # parse block with frequencies and atomic displacements
-        while not (self._parser.block_end(file_obj=file_obj, msg=end_msg) or self._parser.file_end(file_obj=file_obj)):
+        while not (TextParser.block_end(file_obj=file_obj, msg=end_msg) or TextParser.file_end(file_obj=file_obj)):
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp)
 
@@ -224,7 +224,7 @@ class GAUSSIANLoader(AbInitioLoader):
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        line = self._parser.find_first(file_obj=file_obj, msg="Frequencies --")
+        line = TextParser.find_first(file_obj=file_obj, msg="Frequencies --")
         line = line.split()
         freq.extend([float(i) for i in line[2:]])
 
@@ -235,7 +235,7 @@ class GAUSSIANLoader(AbInitioLoader):
         :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
         """
         sub_block_start = "X      Y      Z        X      Y      Z        X      Y      Z"
-        self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
+        TextParser.find_first(file_obj=file_obj, msg=sub_block_start)
 
         num_atom = 0
         #   Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
@@ -255,14 +255,14 @@ class GAUSSIANLoader(AbInitioLoader):
     def _read_masses_from_file(self, file_obj=None):
         masses = []
         with TextParser.save_excursion(file_obj):
-            self._parser.find_first(file_obj=file_obj, msg="Thermochemistry")
+            TextParser.find_first(file_obj=file_obj, msg="Thermochemistry")
 
             end_msg = "Molecular mass:"
             key = "Atom"
             end_msg = bytes(end_msg, "utf8")
             key = bytes(key, "utf8")
 
-            while not self._parser.file_end(file_obj=file_obj):
+            while not TextParser.file_end(file_obj=file_obj):
                 line = file_obj.readline()
                 if end_msg in line:
                     break
