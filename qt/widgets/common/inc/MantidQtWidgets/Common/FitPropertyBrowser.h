@@ -598,7 +598,7 @@ private:
   virtual void workspaceChange(const QString &wsName);
 
   /// Does a parameter have a tie
-  void hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const;
+  void hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasFix, bool &hasBounds) const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty *getTieProperty(QtProperty *parProp) const;
 
