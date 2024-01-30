@@ -80,9 +80,6 @@ private:
 
   bool have_period_info;
 
-  /// Ensure that we always have a consistency between nPulses and periodNumbers containers
-  void finalizePeriodNumbers();
-
   mutable int8_t m_sorting_info;
   mutable std::mutex m_sortingMutex;
 };
