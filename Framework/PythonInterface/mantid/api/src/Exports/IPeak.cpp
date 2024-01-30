@@ -29,7 +29,7 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(const IPeak &peak) {
   // Use clone to make a copy of the PeakShape.
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }
-void setPeakShape(IPeak &peak, Mantid::Geometry::PeakShape_sptr shape) { peak.setPeakShape(shape); }
+void setPeakShape(IPeak &peak, Mantid::Geometry::PeakShape_sptr shape) { peak.setPeakShape(shape->clone()); }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
   // Set the q lab frame. No explicit detector distance.
   return peak.setQLabFrame(qLabFrame, boost::none);
