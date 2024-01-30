@@ -40,7 +40,7 @@ AnalysisDataServiceImpl &instance() {
   std::call_once(INIT_FLAG, []() {
     PyRun_SimpleString("import atexit\n"
                        "from mantid.api import AnalysisDataService\n"
-                       "atexit.register(lambda: AnalysisDataService.clear())");
+                       "atexit.register(lambda: AnalysisDataService.clear(), True)");
   });
   return ads;
 }
