@@ -43,8 +43,9 @@ AlgorithmManagerImpl &instance() {
 }
 
 IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, const int &version = -1) {
+  self->removeFinishedAlgorithms();
   ReleaseGlobalInterpreterLock releaseGIL;
-  return self->create(algName, version);
+  return self->createFromPython(algName, version);
 }
 
 std::shared_ptr<Algorithm> createUnmanaged(AlgorithmManagerImpl *self, const std::string &algName,

@@ -59,10 +59,38 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const i
   try {
     alg = AlgorithmFactory::Instance().create(algName,
                                               version); // Throws on fail:
-    auto count = removeFinishedAlgorithms();
-    g_log.debug() << count << " Finished algorithms removed from the managed algorithms list. " << m_managed_algs.size()
-                  << " remaining.\n";
+    removeFinishedAlgorithms();
 
+    // Add to list of managed ones
+    m_managed_algs.emplace_back(alg);
+    alg->initialize();
+  } catch (std::runtime_error &ex) {
+    g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName << ' ' << ex.what() << '\n';
+    throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName + ' ' + ex.what());
+  }
+  return alg;
+}
+
+/** Creates and initialises an instance of an algorithm.
+ *
+ * The algorithm gets tracked in the list of "managed" algorithms,
+ * which is shown in GUI for cancelling, etc.
+ *
+ * @param  algName :: The name of the algorithm required
+ * @param  version :: The version of the algorithm required, if not defined most
+ * recent version is used -> version =-1
+ * @return A pointer to the created algorithm
+ * @throw  NotFoundError Thrown if algorithm requested is not registered
+ * @throw  std::runtime_error Thrown if properties string is ill-formed
+ * This function is the same as the create function but doesn't remove finished algorithms
+ * It has been introduced because removing algorithms requires the GIL to be held
+ */
+IAlgorithm_sptr AlgorithmManagerImpl::createFromPython(const std::string &algName, const int &version) {
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  IAlgorithm_sptr alg;
+  try {
+    alg = AlgorithmFactory::Instance().create(algName,
+                                              version); // Throws on fail:
     // Add to list of managed ones
     m_managed_algs.emplace_back(alg);
     alg->initialize();
@@ -170,7 +198,7 @@ void AlgorithmManagerImpl::cancelAll() {
 /// Removes all of the finished algorithms
 /// this does not lock the mutex as the locking is already assumed to be in
 /// place
-size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
+void AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::vector<IAlgorithm_const_sptr> theCompletedInstances;
   std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theCompletedInstances),
                [](const auto &algorithm) { return (algorithm->isReadyForGarbageCollection()); });
@@ -183,7 +211,9 @@ size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
       }
     }
   }
-  return theCompletedInstances.size();
+
+  g_log.debug() << theCompletedInstances.size() << " Finished algorithms removed from the managed algorithms list. "
+                << m_managed_algs.size() << " remaining.\n";
 }
 
 void AlgorithmManagerImpl::shutdown() {

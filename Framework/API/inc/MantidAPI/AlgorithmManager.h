@@ -44,6 +44,8 @@ public:
   IAlgorithm_sptr create(const std::string &algName, const int &version = -1);
   /// Creates an unmanaged algorithm with the option of choosing a version
   std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName, const int &version = -1) const;
+  /// Creates a managed algorithm with the option of choosing a version (used by python interface)
+  IAlgorithm_sptr createFromPython(const std::string &algName, const int &version = -1);
 
   std::size_t size() const;
 
@@ -59,6 +61,9 @@ public:
   Poco::NotificationCenter notificationCenter;
   void notifyAlgorithmStarting(AlgorithmID id);
 
+  /// Removes any finished algorithms from the list of managed algorithms
+  void removeFinishedAlgorithms();
+
   void clear();
   void cancelAll();
   void shutdown();
@@ -73,9 +78,6 @@ private:
   AlgorithmManagerImpl(const AlgorithmManagerImpl &);
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
-
-  /// Removes any finished algorithms from the list of managed algorithms
-  size_t removeFinishedAlgorithms();
 
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
