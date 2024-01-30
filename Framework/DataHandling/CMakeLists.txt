@@ -442,6 +442,7 @@ set(INC_FILES
 
 set(TEST_FILES
     ApplyDiffCalTest.h
+    BankPulseTimesTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h

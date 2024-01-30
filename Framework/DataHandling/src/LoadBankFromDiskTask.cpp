@@ -341,7 +341,7 @@ void LoadBankFromDiskTask::run() {
 
       // The event_index should be the same length as the pulse times from DAS
       // logs.
-      if (event_index->size() != thisBankPulseTimes->pulseTimes.size())
+      if (event_index->size() != thisBankPulseTimes->numberOfPulses())
         m_loader.alg->getLogger().warning() << "Bank " << entry_name
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";
