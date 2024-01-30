@@ -288,7 +288,7 @@ def _update_show_figure(fig):
     except AttributeError:
         pass
 
-    fig.canvas.draw()
+    fig.canvas.draw_idle()
     # This displays the figure, but only works if a manager is attached to the figure.
     # The try catch is in case a figure manager is not present
     try:
