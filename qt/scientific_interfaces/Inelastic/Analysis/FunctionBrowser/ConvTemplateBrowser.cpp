@@ -71,13 +71,10 @@ void ConvTemplateBrowser::createProperties() {
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
-  auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter);
-  if (!presenter)
-    return;
   if (prop == m_deltaFunctionOn) {
-    presenter->setDeltaFunction(m_boolManager->value(prop));
+    m_presenter->setDeltaFunction(m_boolManager->value(prop));
   } else if (prop == m_tempCorrectionOn) {
-    presenter->setTempCorrection(m_boolManager->value(prop));
+    m_presenter->setTempCorrection(m_boolManager->value(prop));
   }
 }
 
@@ -130,14 +127,11 @@ void ConvTemplateBrowser::removeTempCorrection() {
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
     return;
-  auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter);
-  if (!presenter)
-    return;
   auto const index = m_enumManager->value(prop);
   auto propIt = std::find(m_subTypeProperties.begin(), m_subTypeProperties.end(), prop);
   if (propIt != m_subTypeProperties.end()) {
     auto const subTypeIndex = std::distance(m_subTypeProperties.begin(), propIt);
-    presenter->setSubType(subTypeIndex, index);
+    m_presenter->setSubType(subTypeIndex, index);
   }
 }
 
@@ -313,11 +307,8 @@ void ConvTemplateBrowser::setResolution(const std::vector<std::pair<std::string,
 }
 
 void ConvTemplateBrowser::intChanged(QtProperty *prop) {
-  if (prop != m_subTypeProperties[SubTypeIndex::Lorentzian] || !m_emitIntChange) {
-    return;
-  }
-  if (auto presenter = dynamic_cast<ConvTemplatePresenter *>(m_presenter)) {
-    presenter->setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
+  if (prop == m_subTypeProperties[SubTypeIndex::Lorentzian] && m_emitIntChange) {
+    m_presenter->setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
   }
 }
 } // namespace MantidQt::CustomInterfaces::IDA

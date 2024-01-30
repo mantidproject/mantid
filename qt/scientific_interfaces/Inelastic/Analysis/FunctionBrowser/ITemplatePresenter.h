@@ -64,6 +64,18 @@ public:
 
   virtual void setErrorsEnabled(bool enabled) = 0;
 
+  virtual void setNumberOfExponentials(int nExponentials) { (void)nExponentials; }
+  virtual void setStretchExponential(bool on) { (void)on; }
+  virtual void setBackground(std::string const &name) { (void)name; }
+  virtual void tieIntensities(bool on) { (void)on; }
+  virtual bool canTieIntensities() const { return true; }
+
+  virtual void setSubType(std::size_t subTypeIndex, int typeIndex) {
+    (void)subTypeIndex;
+    (void)typeIndex;
+  }
+  virtual void setDeltaFunction(bool on) { (void)on; }
+  virtual void setTempCorrection(bool on) { (void)on; }
   virtual void setBackgroundA0(double value) { (void)value; }
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
     (void)fitResolutions;

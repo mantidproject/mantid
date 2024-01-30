@@ -184,26 +184,20 @@ void IqtTemplateBrowser::setStretchStretching(double value, double error) {
 void IqtTemplateBrowser::setA0(double value, double error) { setParameterPropertyValue(m_A0, value, error); }
 
 void IqtTemplateBrowser::intChanged(QtProperty *prop) {
-  if (prop != m_numberOfExponentials || !m_emitIntChange) {
-    return;
-  }
-  if (auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter)) {
-    presenter->setNumberOfExponentials(m_intManager->value(prop));
+  if (prop == m_numberOfExponentials && m_emitIntChange) {
+    m_presenter->setNumberOfExponentials(m_intManager->value(prop));
   }
 }
 
 void IqtTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
-  auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter);
-  if (!presenter)
-    return;
   auto const on = m_boolManager->value(prop);
   if (prop == m_stretchExponential) {
-    presenter->setStretchExponential(on);
+    m_presenter->setStretchExponential(on);
   }
   if (prop == m_tieIntensities) {
-    presenter->tieIntensities(on);
+    m_presenter->tieIntensities(on);
   }
 }
 
@@ -212,9 +206,7 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
     return;
   if (prop == m_background) {
     auto background = m_enumManager->enumNames(prop)[m_enumManager->value(prop)];
-    if (auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter)) {
-      presenter->setBackground(background.toStdString());
-    }
+    m_presenter->setBackground(background.toStdString());
   }
 }
 
@@ -317,10 +309,7 @@ void IqtTemplateBrowser::setTieIntensitiesQuiet(bool on) {
 }
 
 void IqtTemplateBrowser::updateState() {
-  auto presenter = dynamic_cast<IqtTemplatePresenter *>(m_presenter);
-  if (!presenter)
-    return;
-  auto const on = presenter->canTieIntensities();
+  auto const on = m_presenter->canTieIntensities();
   if (!on && m_boolManager->value(m_tieIntensities)) {
     ScopedFalse _false(m_emitBoolChange);
     m_boolManager->setValue(m_tieIntensities, false);

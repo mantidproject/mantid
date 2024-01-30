@@ -32,9 +32,9 @@ public:
   explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
 
-  void setNumberOfExponentials(int);
-  void setStretchExponential(bool);
-  void setBackground(std::string const &name);
+  void setNumberOfExponentials(int) override;
+  void setStretchExponential(bool) override;
+  void setBackground(std::string const &name) override;
 
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
@@ -57,8 +57,8 @@ public:
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
 
   void setViewParameterDescriptions();
-  void tieIntensities(bool on);
-  bool canTieIntensities() const;
+  void tieIntensities(bool on) override;
+  bool canTieIntensities() const override;
 
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;

@@ -33,9 +33,9 @@ public:
   explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
 
-  void setSubType(size_t subTypeIndex, int typeIndex);
-  void setDeltaFunction(bool);
-  void setTempCorrection(bool);
+  void setSubType(size_t subTypeIndex, int typeIndex) override;
+  void setDeltaFunction(bool) override;
+  void setTempCorrection(bool) override;
 
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
