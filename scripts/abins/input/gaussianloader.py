@@ -108,8 +108,8 @@ class GAUSSIANLoader(AbInitioLoader):
         """Modify data in-place, removing atoms that are missing from active_atoms and re-indexing"""
 
         # Do nothing if there are no frozen atoms
-        # if len(active_atoms) == len(data["atoms"]):
-        #     return None
+        if len(active_atoms) == len(data["atoms"]):
+            return None
 
         new_atoms = {}
 
