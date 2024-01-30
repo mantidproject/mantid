@@ -383,7 +383,13 @@ class WorkspaceWidget(PluginWidget):
                     plot_kwargs = {"axis": MantidAxType.BIN}
                     plot([ws], errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)
             else:
-                plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+                try:
+                    plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+                except RuntimeError as err:
+                    if "Variable invalidated" in str(err):
+                        logger.error(str(err))
+                    else:
+                        raise err
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
