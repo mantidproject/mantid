@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Data Selection</string>
+   <string>F(Q) Fit Data Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -149,5 +149,6 @@
  <connections/>
  <slots>
   <slot>addData()</slot>
+  <slot>closeDialog()</slot>
  </slots>
 </ui>

@@ -17,12 +17,11 @@
 #include <QTabWidget>
 
 namespace MantidQt {
-namespace MantidWidgets {
-class IAddWorkspaceDialog;
-}
 namespace CustomInterfaces {
 namespace IDA {
 
+class IAddWorkspaceDialog;
+class IndirectAddWorkspaceDialog;
 class IIndirectFitDataPresenter;
 
 class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public QTabWidget, public IIndirectFitDataView {
@@ -53,10 +52,11 @@ public:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
-  void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
+  void notifyAddData();
 
 protected:
   IndirectFitDataView(const QStringList &headers, QWidget *parent);
+  virtual IAddWorkspaceDialog *getAddWorkspaceDialog();
 
   std::unique_ptr<Ui::IndirectFitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
@@ -66,12 +66,11 @@ protected:
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
 
+  IAddWorkspaceDialog *m_addWorkspaceDialog;
   IIndirectFitDataPresenter *m_presenter;
 
-protected slots:
-  virtual void showAddWorkspaceDialog();
-
 private slots:
+  void showAddWorkspaceDialog();
   void notifyRemoveClicked();
   void notifyUnifyClicked();
   void notifyCellChanged(int row, int column);

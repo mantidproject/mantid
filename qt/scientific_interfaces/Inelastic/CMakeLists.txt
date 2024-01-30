@@ -47,6 +47,7 @@ set(SRC_FILES
     BayesFitting/Quasi.cpp
     BayesFitting/ResNorm.cpp
     BayesFitting/Stretch.cpp
+    Common/IndirectAddWorkspaceDialog.cpp
     Common/IndirectDataValidationHelper.cpp
     Common/IndirectInterface.cpp
     Common/OutputPlotOptionsModel.cpp
@@ -92,6 +93,7 @@ set(MOC_FILES
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
     Analysis/FunctionTemplateBrowser.h
+    Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
     Analysis/IndirectFitDataView.h
@@ -109,6 +111,9 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
+    Common/IAddWorkspaceDialog.h
+    Common/ISettingsView.h
+    Common/IndirectAddWorkspaceDialog.h
     Common/IndirectInterface.h
     Common/OutputPlotOptionsView.h
     Common/Settings.h
@@ -145,7 +150,6 @@ set(INC_FILES
     Analysis/IIndirectFitDataView.h
     Analysis/IIndirectFitOutput.h
     Analysis/IIndirectFitOutputOptionsModel.h
-    Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IIndirectFitPlotView.h
     Analysis/IIndirectFittingModel.h
     Analysis/IndirectFitData.h
@@ -162,7 +166,6 @@ set(INC_FILES
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Common/IndirectDataValidationHelper.h
-    Common/ISettingsView.h
     Common/OutputPlotOptionsModel.h
     Common/OutputPlotOptionsPresenter.h
     Common/SettingsHelper.h
@@ -198,6 +201,7 @@ set(UI_FILES
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
+    Common/IndirectAddWorkspaceDialog.ui
     Common/InterfaceSettings.ui
     Common/OutputPlotOptions.ui
     Corrections/AbsorptionCorrections.ui

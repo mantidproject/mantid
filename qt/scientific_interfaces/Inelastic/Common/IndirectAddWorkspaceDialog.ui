@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConvFitAddWorkspaceDialog</class>
- <widget class="QDialog" name="ConvFitAddWorkspaceDialog">
+ <class>IndirectAddWorkspaceDialog</class>
+ <widget class="QDialog" name="IndirectAddWorkspaceDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,27 +22,6 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QGridLayout" name="loInput">
-        <item row="0" column="0">
-         <widget class="QLabel" name="lbWorkspace">
-          <property name="text">
-           <string>Workspace</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lbResolution">
-          <property name="text">
-           <string>Resolution</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QCheckBox" name="ckAllSpectra">
-          <property name="text">
-           <string>All Spectra</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="MantidQt::MantidWidgets::DataSelector" name="dsWorkspace" native="true">
           <property name="ShowGroups" stdset="0">
@@ -56,28 +35,29 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
-          <property name="ShowGroups" stdset="0">
-           <bool>false</bool>
-          </property>
-          <property name="showLoad" stdset="0">
-           <bool>false</bool>
-          </property>
-          <property name="autoLoad" stdset="0">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item row="1" column="0">
          <widget class="QLabel" name="lbWorkspaceIndices">
           <property name="text">
            <string>Workspace Indices</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="0" column="0">
+         <widget class="QLabel" name="lbWorkspace">
+          <property name="text">
+           <string>Workspace</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
          <widget class="QLineEdit" name="leWorkspaceIndices"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="ckAllSpectra">
+          <property name="text">
+           <string>All Spectra</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -100,7 +80,16 @@
    <item>
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>

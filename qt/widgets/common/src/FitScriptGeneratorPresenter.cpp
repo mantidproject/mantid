@@ -50,6 +50,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[mayb
   case ViewEvent::AddDomainClicked:
     handleAddDomainClicked();
     return;
+  case ViewEvent::AddDomainAccepted:
+    handleAddDomainAccepted();
+    return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
     return;
@@ -145,8 +148,10 @@ void FitScriptGeneratorPresenter::handleRemoveDomainClicked() { removeDomains(m_
 
 void FitScriptGeneratorPresenter::handleAddDomainClicked() { m_view->openAddWorkspaceDialog(); }
 
-void FitScriptGeneratorPresenter::handleAddDomainAccepted(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
-                                                          FunctionModelSpectra const &workspaceIndices) {
+void FitScriptGeneratorPresenter::handleAddDomainAccepted() {
+  auto const workspaces = m_view->getDialogWorkspaces();
+  auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
+
   if (!workspaces.empty() && !workspaceIndices.empty())
     addWorkspaces(workspaces, workspaceIndices);
 }
@@ -273,14 +278,11 @@ void FitScriptGeneratorPresenter::setWorkspaces(QStringList const &workspaceName
 }
 
 void FitScriptGeneratorPresenter::addWorkspaces(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
-                                                FunctionModelSpectra const &workspaceIndices) {
+                                                std::vector<WorkspaceIndex> const &workspaceIndices) {
   for (auto const &workspace : workspaces) {
-    auto const maxIndex = workspace->getNumberHistograms() - 1u;
     for (auto const &workspaceIndex : workspaceIndices) {
-      if (workspaceIndex.value <= maxIndex) {
-        auto const xData = workspace->x(workspaceIndex.value);
-        addWorkspace(workspace, workspaceIndex, xData.front(), xData.back());
-      }
+      auto const xData = workspace->x(workspaceIndex.value);
+      addWorkspace(workspace, workspaceIndex, xData.front(), xData.back());
     }
   }
   checkForWarningMessages();
