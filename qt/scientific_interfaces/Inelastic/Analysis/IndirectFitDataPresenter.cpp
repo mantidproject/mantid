@@ -10,7 +10,7 @@
 #include <map>
 #include <utility>
 
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -27,16 +27,17 @@ std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { retur
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
-bool IndirectFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
     return true;
   }
   return false;
 }
 
-void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
-  m_model->addWorkspace(workspaceName, spectra);
+void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName,
+                                            const FunctionModelSpectra &workspaceIndices) {
+  m_model->addWorkspace(workspaceName, workspaceIndices);
 }
 
 void IndirectFitDataPresenter::setResolution(const std::string &name) {
@@ -94,12 +95,14 @@ UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &valid
   return m_view->validate(validator);
 }
 
-void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     m_tab->handleDataAdded(dialog);
     updateTableFromModel();
     m_tab->handleDataChanged();
   } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  } catch (const std::invalid_argument &ex) {
     displayWarning(ex.what());
   }
 }
