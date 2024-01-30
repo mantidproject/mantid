@@ -14,6 +14,7 @@ import numpy as np
 from .abinitioloader import AbInitioLoader
 from .textparser import TextParser
 from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, ROTATIONS_AND_TRANSLATIONS
+from abins.abinsdata import AbinsData
 from mantid.kernel import Atom
 
 
@@ -22,7 +23,7 @@ class GAUSSIANLoader(AbInitioLoader):
     Class for loading GAUSSIAN ab initio vibrational data.
     """
 
-    def __init__(self, input_ab_initio_filename):
+    def __init__(self, input_ab_initio_filename) -> None:
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.log or foo.LOG)
         """
@@ -32,11 +33,11 @@ class GAUSSIANLoader(AbInitioLoader):
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_vibrational_or_phonon_data(self):
+    def read_vibrational_or_phonon_data(self) -> AbinsData:
         """
         Reads vibrational data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of file with vibrational data to <>.hdf5.
-        :returns: object of type AbinsData.
+        :returns: structure, frequency and displacement data from file
         """
 
         data = {}  # container to store read data
@@ -67,9 +68,9 @@ class GAUSSIANLoader(AbInitioLoader):
             # return AbinsData object
             return self._rearrange_data(data=data)
 
-    def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
+    def _read_atomic_coordinates(self, *, file_obj: BufferedReader, data: dict, masses_from_file: List[float]) -> None:
         """
-        Reads atomic coordinates from .log GAUSSIAN file.
+        Read atomic coordinates from .log GAUSSIAN file and update data dict
 
         :param file_obj: file object from which we read
         :param data: Python dictionary to which atoms data should be added
@@ -128,7 +129,7 @@ class GAUSSIANLoader(AbInitioLoader):
         data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
     @staticmethod
-    def _read_active_atoms(file_obj: BufferedReader) -> List[int]:
+    def _read_active_atoms(*, file_obj: BufferedReader) -> List[int]:
         """Get indices of rows from atomic displacement data block
 
         If the calculation uses frozen atoms, these will be a subset of the structure
@@ -159,7 +160,7 @@ class GAUSSIANLoader(AbInitioLoader):
         and updates self._num_atoms to reflect the number of non-frozen atoms
         """
         num_all_atoms = self._num_atoms
-        self._active_atoms = self._read_active_atoms(file_obj)
+        self._active_atoms = self._read_active_atoms(file_obj=file_obj)
         self._num_atoms = len(self._active_atoms)
 
         # Usually there will be 3N-6 modes, as rotations and translations are
@@ -218,7 +219,8 @@ class GAUSSIANLoader(AbInitioLoader):
         # [num_freq, num_atoms, dim] ->  [num_k, num_atoms, num_freq, dim]
         data["atomic_displacements"] = np.asarray([np.transpose(a=atomic_disp, axes=(1, 0, 2))])
 
-    def _read_freq_block(self, file_obj=None, freq=None):
+    @staticmethod
+    def _read_freq_block(*, file_obj: BufferedReader, freq: List[float]) -> None:
         """
         Parses block with frequencies.
         :param file_obj: file object from which we read
@@ -228,11 +230,11 @@ class GAUSSIANLoader(AbInitioLoader):
         line = line.split()
         freq.extend([float(i) for i in line[2:]])
 
-    def _read_atomic_disp_block(self, file_obj=None, disp=None):
+    def _read_atomic_disp_block(self, *, file_obj: BufferedReader, disp: np.ndarray) -> None:
         """
         Parses block with atomic displacements.
         :param file_obj: file object from which we read
-        :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
+        :param disp: Complex-valued array [num_freq, num_atoms, dim] to be updated with displacement data
         """
         sub_block_start = "X      Y      Z        X      Y      Z        X      Y      Z"
         TextParser.find_first(file_obj=file_obj, msg=sub_block_start)
@@ -252,7 +254,8 @@ class GAUSSIANLoader(AbInitioLoader):
             num_atom += 1
         self._num_read_freq += freq_per_line
 
-    def _read_masses_from_file(self, file_obj=None):
+    @staticmethod
+    def _read_masses_from_file(file_obj: BufferedReader) -> List[float]:
         masses = []
         with TextParser.save_excursion(file_obj):
             TextParser.find_first(file_obj=file_obj, msg="Thermochemistry")
