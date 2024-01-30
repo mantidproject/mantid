@@ -6,17 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_FqFitAddWorkspaceDialog.h"
-
-#include <QDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit FqFitAddWorkspaceDialog(QWidget *parent);
@@ -35,15 +33,13 @@ public:
 
   void updateSelectedSpectra() override{};
 
-signals:
-  void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
-  void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
-  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
-
-private slots:
+public slots:
   void emitWorkspaceChanged(const QString &name);
   void emitParameterTypeChanged(const QString &index);
-  void emitAddData();
+
+signals:
+  void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
+  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
 
 private:
   Ui::FqFitAddWorkspaceDialog m_uiForm;

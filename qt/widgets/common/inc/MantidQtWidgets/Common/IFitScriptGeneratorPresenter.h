@@ -8,10 +8,8 @@
 
 #include "DllOption.h"
 #include "IFitScriptGeneratorView.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
-#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 
 #include <string>
 #include <vector>
@@ -29,8 +27,6 @@ public:
                                [[maybe_unused]] std::string const &arg2 = "") = 0;
   virtual void notifyPresenter(ViewEvent const &event, std::vector<std::string> const &vec) = 0;
   virtual void notifyPresenter(ViewEvent const &event, FittingMode fittingMode) = 0;
-  virtual void handleAddDomainAccepted(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
-                                       FunctionModelSpectra const &workspaceIndices) = 0;
 
   virtual void openFitScriptGenerator() = 0;
 

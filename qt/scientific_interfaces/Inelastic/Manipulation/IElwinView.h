@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IAddWorkspaceDialog.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
-#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include <QModelIndexList>
 #include <QStringList>
 

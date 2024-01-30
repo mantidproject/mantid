@@ -18,7 +18,7 @@
 #include "Analysis/IIndirectFitPlotView.h"
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "Common/IAddWorkspaceDialog.h"
 
 #include <string>
 #include <utility>
@@ -32,7 +32,7 @@ class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
 public:
   virtual ~MockIndirectDataAnalysisTab() = default;
 
-  MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
+  MOCK_METHOD1(handleDataAdded, void(MantidQt::CustomInterfaces::IDA::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());
   MOCK_METHOD0(handleDataRemoved, void());
   MOCK_METHOD3(handleTableStartXChanged, void(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
@@ -183,6 +183,7 @@ public:
   virtual ~MockIndirectFitDataModel() = default;
 
   MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
+  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));

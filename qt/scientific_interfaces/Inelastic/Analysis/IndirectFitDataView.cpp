@@ -7,7 +7,7 @@
 #include "IndirectFitDataView.h"
 #include "IndirectFitDataPresenter.h"
 
-#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
 #include <QItemDelegate>
@@ -103,6 +103,7 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
   setHorizontalHeaders(headers);
 
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
+  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveClicked()));
   connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SLOT(notifyUnifyClicked()));
   connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
@@ -199,10 +200,7 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) {
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
 void IndirectFitDataView::showAddWorkspaceDialog() {
-  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
-
+  auto dialog = getAddWorkspaceDialog();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(m_wsSampleSuffixes);
   dialog->setFBSuffices(m_fbSampleSuffixes);
@@ -210,9 +208,15 @@ void IndirectFitDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
-void IndirectFitDataView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
-  m_presenter->handleAddData(dialog);
+IAddWorkspaceDialog *IndirectFitDataView::getAddWorkspaceDialog() {
+  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(parentWidget());
+
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
+  return m_addWorkspaceDialog;
 }
+
+void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
 
 void IndirectFitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
 

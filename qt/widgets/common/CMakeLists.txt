@@ -278,7 +278,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
-    inc/MantidQtWidgets/Common/IAddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -358,6 +357,7 @@ set(QT5_UI_FILES
 )
 
 set(MOC_FILES
+    inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -720,6 +720,7 @@ set(TEST_FILES
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES
+    test/AddWorkspaceDialogTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h

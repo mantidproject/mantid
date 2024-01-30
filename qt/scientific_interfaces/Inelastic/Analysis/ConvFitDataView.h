@@ -16,6 +16,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IAddWorkspaceDialog;
+class ConvFitAddWorkspaceDialog;
+
 /**
 Presenter for a table of convolution fitting data.
 */
@@ -27,9 +30,7 @@ public:
 
 protected:
   ConvFitDataView(const QStringList &headers, QWidget *parent = nullptr);
-
-protected slots:
-  void showAddWorkspaceDialog() override;
+  IAddWorkspaceDialog *getAddWorkspaceDialog() override;
 };
 
 } // namespace IDA

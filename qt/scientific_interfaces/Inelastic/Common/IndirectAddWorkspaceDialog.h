@@ -5,29 +5,29 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/IAddWorkspaceDialog.h"
+
 #include "DllConfig.h"
-#include "ui_ConvFitAddWorkspaceDialog.h"
+#include "IAddWorkspaceDialog.h"
+#include "ui_IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL IndirectAddWorkspaceDialog : public IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit ConvFitAddWorkspaceDialog(QWidget *parent);
+  explicit IndirectAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
-  std::string resolutionName() const;
   std::string workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
 
   void updateSelectedSpectra() override;
+
+  std::string getFileName() const;
 
 private slots:
   void selectAllSpectra(int state);
@@ -37,7 +37,7 @@ private:
   void setWorkspace(const std::string &workspace);
   void setAllSpectraSelectionEnabled(bool doEnable);
 
-  Ui::ConvFitAddWorkspaceDialog m_uiForm;
+  Ui::IndirectAddWorkspaceDialog m_uiForm;
 };
 
 } // namespace IDA

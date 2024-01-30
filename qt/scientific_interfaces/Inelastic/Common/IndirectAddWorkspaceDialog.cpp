@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitAddWorkspaceDialog.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -36,8 +36,11 @@ boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace)
 
 QString getIndexString(const MatrixWorkspace_sptr &workspace) {
   const auto maximum = maximumIndex(workspace);
-  if (maximum)
-    return QString("0-%1").arg(*maximum);
+  if (maximum) {
+    if (*maximum > 0)
+      return QString("0-%1").arg(*maximum);
+    return "0";
+  }
   return "";
 }
 
@@ -51,7 +54,6 @@ QString OR(const QString &lhs, const QString &rhs) { return "(" + lhs + "|" + rh
 
 QString NATURAL_NUMBER(std::size_t digits) { return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}"); }
 
-namespace Regexes {
 const QString EMPTY = "^$";
 const QString SPACE = "(\\s)*";
 const QString COMMA = SPACE + "," + SPACE;
@@ -61,14 +63,13 @@ const QString NUMBER = NATURAL_NUMBER(4);
 const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
 const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
-} // namespace Regexes
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
+IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.leWorkspaceIndices->setValidator(createValidator(Regexes::SPECTRA_LIST, this).release());
+  m_uiForm.leWorkspaceIndices->setValidator(createValidator(SPECTRA_LIST, this).release());
   setAllSpectraSelectionEnabled(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
@@ -77,40 +78,28 @@ ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : IAddWork
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-std::string ConvFitAddWorkspaceDialog::workspaceName() const {
+std::string IndirectAddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-std::string ConvFitAddWorkspaceDialog::resolutionName() const {
-  return m_uiForm.dsResolution->getCurrentDataName().toStdString();
-}
-
-std::string ConvFitAddWorkspaceDialog::workspaceIndices() const {
+std::string IndirectAddWorkspaceDialog::workspaceIndices() const {
   return m_uiForm.leWorkspaceIndices->text().toStdString();
 }
 
-void ConvFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
+void IndirectAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setWSSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
+void IndirectAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::setResolutionWSSuffices(const QStringList &suffices) {
-  m_uiForm.dsResolution->setWSSuffixes(suffices);
-}
-
-void ConvFitAddWorkspaceDialog::setResolutionFBSuffices(const QStringList &suffices) {
-  m_uiForm.dsResolution->setFBSuffixes(suffices);
-}
-
-void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
+void IndirectAddWorkspaceDialog::updateSelectedSpectra() {
   auto const state = m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
   selectAllSpectra(state);
 }
 
-void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
+void IndirectAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
   if (validWorkspace(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
@@ -119,7 +108,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
     m_uiForm.leWorkspaceIndices->setEnabled(true);
 }
 
-void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
+void IndirectAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
   const auto workspace = getWorkspace(name);
   if (workspace)
@@ -128,7 +117,7 @@ void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
     setAllSpectraSelectionEnabled(false);
 }
 
-void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
+void IndirectAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
   if (m_uiForm.ckAllSpectra->isChecked()) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
@@ -136,8 +125,12 @@ void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   }
 }
 
-void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
+void IndirectAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
+}
+
+std::string IndirectAddWorkspaceDialog::getFileName() const {
+  return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

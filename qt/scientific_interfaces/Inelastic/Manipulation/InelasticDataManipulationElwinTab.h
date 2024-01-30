@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
+#include "Common/IAddWorkspaceDialog.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"
@@ -14,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
-#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
@@ -34,8 +34,8 @@ public:
   virtual void handleFilesFound() = 0;
   virtual void handlePreviewSpectrumChanged(int spectrum) = 0;
   virtual void handlePreviewIndexChanged(int index) = 0;
-  virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
-  virtual void handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleAddDataFromFile(IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveSelectedData() = 0;
   virtual void updateAvailableSpectra() = 0;
 };
@@ -60,15 +60,15 @@ public:
   void handleFilesFound() override;
   void handlePreviewSpectrumChanged(int spectrum) override;
   void handlePreviewIndexChanged(int index) override;
-  void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
-  void handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
+  void handleAddData(IAddWorkspaceDialog const *dialog) override;
+  void handleAddDataFromFile(IAddWorkspaceDialog const *dialog) override;
   void handleRemoveSelectedData() override;
   void updateAvailableSpectra() override;
 
 protected:
   void runComplete(bool error) override;
-  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
-  virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
+  void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
+  virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
 
 private:
   void runFileInput();

@@ -15,6 +15,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+class IAddWorkspaceDialog;
 class FqFitAddWorkspaceDialog;
 
 /**
@@ -28,9 +29,7 @@ public:
 
 protected:
   FqFitDataView(const QStringList &headers, QWidget *parent = nullptr);
-
-protected slots:
-  void showAddWorkspaceDialog() override;
+  IAddWorkspaceDialog *getAddWorkspaceDialog() override;
 
 private slots:
   void notifyAddClicked();
