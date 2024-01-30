@@ -47,6 +47,8 @@ public:
   MOCK_METHOD3(notifyPresenterImpl, void(ViewEvent const &ev, std::string const &arg1, std::string const &arg2));
   MOCK_METHOD2(notifyPresenter, void(ViewEvent const &ev, std::vector<std::string> const &vec));
   MOCK_METHOD2(notifyPresenter, void(ViewEvent const &ev, FittingMode fittingMode));
+  MOCK_METHOD2(handleAddDomainAccepted, void(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+                                             FunctionModelSpectra const &workspaceIndices));
 
   MOCK_METHOD0(openFitScriptGenerator, void());
 
@@ -84,8 +86,8 @@ public:
                void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
 
   MOCK_METHOD0(openAddWorkspaceDialog, void());
-  MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
-  MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<WorkspaceIndex>());
+  MOCK_METHOD1(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>(
+                                        MantidQt::MantidWidgets::IAddWorkspaceDialog *dialog));
 
   MOCK_METHOD7(openEditLocalParameterDialog,
                void(std::string const &parameter, std::vector<std::string> const &workspaceNames,

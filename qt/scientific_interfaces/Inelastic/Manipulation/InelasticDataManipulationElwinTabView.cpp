@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -83,7 +83,7 @@ public:
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTabView::InelasticDataManipulationElwinTabView(QWidget *parent)
-    : m_presenter(), m_elwTree(nullptr), m_addWorkspaceDialog(nullptr) {
+    : m_presenter(), m_elwTree(nullptr) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -203,39 +203,29 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
-std::unique_ptr<IAddWorkspaceDialog>
-InelasticDataManipulationElwinTabView::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(this->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
+  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(getSampleWSSuffices());
+  dialog->setFBSuffices(getSampleFBSuffices());
+  dialog->updateSelectedSpectra();
+  dialog->show();
 }
 
-void InelasticDataManipulationElwinTabView::notifyCloseDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
+void InelasticDataManipulationElwinTabView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  addDataWksOrFile(dialog);
 }
-
-void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m_addWorkspaceDialog.get()); }
 
 /** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
  * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is
  * already filtered.
  */
-void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
-    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog);
     if (indirectDialog) {
       // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
       if (indirectDialog->getFileName().empty()) {
@@ -243,7 +233,7 @@ void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog
       } else
         m_presenter->handleAddDataFromFile(dialog);
     } else
-      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
+      (throw std::invalid_argument("Unable to access AddWorkspaceDialog"));
 
   } catch (const std::runtime_error &ex) {
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
@@ -344,11 +334,11 @@ void InelasticDataManipulationElwinTabView::newInputFiles() {
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
     filename = QString::fromStdString(indirectDialog->getFileName());
   }
