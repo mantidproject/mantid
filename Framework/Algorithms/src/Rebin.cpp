@@ -141,8 +141,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     // a group workspace. In that case we don't want a validation error for the
     // Rebin parameters.
     std::string inputWsName = getProperty(PropertyNames::INPUT_WKSP);
-    const auto &ws = AnalysisDataService::Instance().retrieve(inputWsName);
-    if (ws == nullptr)
+    const bool wsExists = AnalysisDataService::Instance().doesExist(inputWsName);
+    if (!wsExists)
       helpMessages[PropertyNames::INPUT_WKSP] = "Input workspace not in ADS.";
   } else {
     try {
