@@ -17,7 +17,7 @@ from functools import wraps
 import matplotlib
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.collections import LineCollection, PathCollection
+from matplotlib.collections import PathCollection, LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
@@ -33,6 +33,7 @@ from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresente
 from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
+from mantidqt.plotting.figuretype import FigureType, figure_type
 from workbench.config import get_window_config
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.plotting.mantidfigurecanvas import (  # noqa: F401
@@ -572,12 +573,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
     def change_line_collection_colour(self, colour):
-        for col in self.canvas.figure.get_axes()[0].collections:
-            if isinstance(col, LineCollection):
-                col.set_color(colour.name())
-            elif isinstance(col, PathCollection):
-                col.set_edgecolor(colour.name())
+        if figure_type(self.canvas.figure) == FigureType.Contour:
+            path_cols = self.canvas.figure.findobj(PathCollection)
+            for path in path_cols:
+                path.set_edgecolor(colour.name())
 
+        if figure_type(self.canvas.figure) == FigureType.Wireframe:
+            line_cols = self.canvas.figure.findobj(LineCollection)
+            for line in line_cols:
+                line.set_color(colour.name())
         self.canvas.draw()
 
     @staticmethod
