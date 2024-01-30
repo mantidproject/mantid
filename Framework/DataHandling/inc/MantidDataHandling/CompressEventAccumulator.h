@@ -24,38 +24,30 @@ public:
   CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
                            CompressBinningMode bin_mode);
 
-  void addEvent(const float tof);
-  void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const;
-  void sort() const;
+  virtual void addEvent(const float tof) = 0;
+  virtual void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const = 0;
+  virtual void sort() const = 0;
 
   std::size_t numberHistBins() const;
-  double totalWeight() const;
+  virtual double totalWeight() const = 0;
 
-private:
-  void allocateFineHistogram();
-
+protected:
+  template <typename INT_TYPE> double getBinCenter(const INT_TYPE bin) const;
+  /// shared pointer for the histogram bin boundaries
+  const std::shared_ptr<std::vector<double>> m_histogram_edges;
+  /// keep track if the m_tof is already sorted
   // offset is applied after division
   // see EventList::findLinearBin for implementation on what that means
   double m_divisor;
   double m_offset;
-
-  // keep track if the m_tof is already sorted
-  mutable bool m_is_sorted;
-
   /// function pointer on how to find the bin boundaries
   boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double);
 
-  /// shared pointer for the histogram bin boundaries
-  const std::shared_ptr<std::vector<double>> m_histogram_edges;
-  /// sum of all time-of-flight within the bin
-  mutable std::vector<float> m_tof;
-  /// sum of all events seen in an individual bin
-  std::vector<uint32_t> m_count;
   /// track
-  bool initialized;
+  bool m_initialized;
 
 public:
-  size_t numevents; // REMOVE
+  size_t m_numevents; // REMOVE
 };
 
 /**

@@ -55,15 +55,15 @@ private:
   API::Progress *m_prog;
 
   /// event pixel ID array
-  const std::shared_ptr<std::vector<uint32_t>> m_event_detid;
+  std::shared_ptr<std::vector<uint32_t>> m_event_detid;
   /// event TOF array
-  const std::shared_ptr<std::vector<float>> m_event_tof;
+  std::shared_ptr<std::vector<float>> m_event_tof;
   /// index of the first event from event_index
   const size_t m_firstEventIndex;
   /// vector of event index (length of # of pulses)
-  const std::shared_ptr<std::vector<uint64_t>> m_event_index;
+  std::shared_ptr<std::vector<uint64_t>> m_event_index;
   /// Pulse times for this bank
-  const std::shared_ptr<BankPulseTimes> m_bankPulseTimes;
+  std::shared_ptr<BankPulseTimes> m_bankPulseTimes;
 
   /**
    * Objects holding individual spectra. This is accessed as [periodIndex][detidIndex]

@@ -86,7 +86,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
 
   if (!file.getInfo().dims.empty())
-    thispulseTimes = file.getInfo().dims[0];
+    thispulseTimes = static_cast<size_t>(file.getInfo().dims[0]);
   file.closeData();
 
   // Now, we look through existing ones to see if it is already loaded
@@ -473,6 +473,21 @@ void LoadBankFromDiskTask::run() {
     // TODO should this be created elsewhere?
     const auto [tof_min, tof_max] =
         std::minmax_element(event_time_of_flight_shrd->cbegin(), event_time_of_flight_shrd->cend());
+    // Join back up the tof limits to the global ones
+    // This is not thread safe, so only one thread at a time runs this.
+    {
+      std::lock_guard<std::mutex> _lock(m_loader.alg->m_tofMutex);
+      if (*tof_min < m_loader.alg->shortest_tof) {
+        m_loader.alg->shortest_tof = *tof_min;
+      }
+      if (*tof_max > m_loader.alg->longest_tof) {
+        m_loader.alg->longest_tof = *tof_max;
+      }
+      // TODO
+      // m_loader.alg->bad_tofs += badTofs;
+      // m_loader.alg->discarded_events += my_discarded_events;
+    }
+
     const double delta = m_loader.alg->compressTolerance;
     auto histogram_bin_edges = std::make_shared<std::vector<double>>();
     Mantid::Kernel::VectorHelper::createAxisFromRebinParams({*tof_min, delta, (*tof_max + delta)},
