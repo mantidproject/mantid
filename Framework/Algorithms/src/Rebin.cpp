@@ -74,7 +74,7 @@ using HistogramData::Exception::InvalidBinEdgesError;
  */
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                std::string binModeName) {
+                                                const std::string &binModeName) {
   // EnumeratedString<Rebin::BinningMode, binningModeNames> binMode = binModeName;
   std::vector<double> rbParams;
   // The validator only passes parameters with size 2n+1. No need to check again here
@@ -141,7 +141,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     // a group workspace. In that case we don't want a validation error for the
     // Rebin parameters.
     std::string inputWsName = getProperty(PropertyNames::INPUT_WKSP);
-    auto &ws = AnalysisDataService::Instance().retrieve(inputWsName);
+    const auto &ws = AnalysisDataService::Instance().retrieve(inputWsName);
     if (ws == nullptr)
       helpMessages[PropertyNames::INPUT_WKSP] = "Input workspace not in ADS.";
   } else {

@@ -240,7 +240,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RadiusSum.cpp:
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:325
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ReadGroupsFromFile.cpp:134
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ReadGroupsFromFile.cpp:229
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Rebin.cpp:76
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RecordPythonScript.cpp:83
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RemoveBackground.cpp:235
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RemoveBackground.cpp:236
