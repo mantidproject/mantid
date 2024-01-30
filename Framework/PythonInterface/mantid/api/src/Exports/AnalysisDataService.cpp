@@ -38,6 +38,8 @@ AnalysisDataServiceImpl &instance() {
   // start the framework (if necessary)
   auto &ads = AnalysisDataService::Instance();
   std::call_once(INIT_FLAG, []() {
+    // Passing True as an argument suppresses a warning that is normally
+    // displayed when calling AnalysisDataService.clear()
     PyRun_SimpleString("import atexit\n"
                        "from mantid.api import AnalysisDataService\n"
                        "atexit.register(lambda: AnalysisDataService.clear(), True)");
