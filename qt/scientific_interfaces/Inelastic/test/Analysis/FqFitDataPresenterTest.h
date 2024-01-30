@@ -16,8 +16,8 @@
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
-#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;
@@ -93,7 +93,7 @@ public:
   }
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
-    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 

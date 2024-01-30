@@ -8,7 +8,6 @@
 
 #include "Analysis/IndirectFitDataModel.h"
 
-#include "Common/IAddWorkspaceDialog.h"
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"
@@ -16,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
@@ -46,7 +46,7 @@ public:
 
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void newInputFiles() override;
-  void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) override;
+  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
   void setRunIsRunning(const bool running) override;
@@ -95,9 +95,8 @@ private slots:
   void notifySelectedSpectrumChanged(int);
   void notifyPreviewIndexChanged(int);
   void notifyAddWorkspaceDialog();
-  void notifyAddData();
+  void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
   void notifyRemoveDataClicked();
-  void notifyCloseDialog();
 
 private:
   void setHorizontalHeaders();
@@ -118,13 +117,10 @@ private:
   void setButtonsEnabled(const bool enabled);
   void setRunEnabled(const bool enabled);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
-  void addDataWksOrFile(IAddWorkspaceDialog const *dialog);
-
-  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
+  void addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   IElwinPresenter *m_presenter;
   QtTreePropertyBrowser *m_elwTree;
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
 
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtDoublePropertyManager *m_dblManager;

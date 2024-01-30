@@ -15,7 +15,7 @@
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "Analysis/ParameterEstimation.h"
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -52,10 +52,9 @@ private:
   double m_dbl;
 };
 
-class FakeDialog : public IAddWorkspaceDialog {
+class MockDialog : public IAddWorkspaceDialog {
 
 public:
-  FakeDialog() : IAddWorkspaceDialog(nullptr) {}
   virtual std::string workspaceName() const override { return "Name"; }
   virtual void setWSSuffices(const QStringList &suffices) override { (void)suffices; }
   virtual void setFBSuffices(const QStringList &suffices) override { (void)suffices; }
@@ -129,18 +128,19 @@ public:
   ///----------------------------------------------------------------------
 
   void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_indirect() {
-    auto dialog = new FakeDialog();
+    auto dialog = new MockDialog();
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
-    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspace_with_spectra_calls_to_model() {
-    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", "0-3")).Times(Exactly(1));
-    m_presenter->addWorkspace("WorkspaceName", "0-3");
+    auto workpaceIndices = FunctionModelSpectra("0-3");
+    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", workpaceIndices)).Times(Exactly(1));
+    m_presenter->addWorkspace("WorkspaceName", workpaceIndices);
   }
 
   void test_setResolution_calls_to_model() {

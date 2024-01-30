@@ -36,16 +36,20 @@ FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : Indi
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-IAddWorkspaceDialog *FqFitDataView::getAddWorkspaceDialog() {
-  m_addWorkspaceDialog = new FqFitAddWorkspaceDialog(parentWidget());
-
-  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
-  connect(m_addWorkspaceDialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
+void FqFitDataView::showAddWorkspaceDialog() {
+  auto dialog = new FqFitAddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+  connect(dialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
           SLOT(notifyWorkspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)));
-  connect(m_addWorkspaceDialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
+  connect(dialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
           SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
-  return m_addWorkspaceDialog;
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(m_wsSampleSuffixes);
+  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->updateSelectedSpectra();
+  dialog->show();
 }
 
 void FqFitDataView::notifyAddClicked() {

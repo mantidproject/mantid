@@ -38,6 +38,8 @@ public:
                        [[maybe_unused]] std::string const &arg2 = "") override;
   void notifyPresenter(ViewEvent const &event, std::vector<std::string> const &vec) override;
   void notifyPresenter(ViewEvent const &event, FittingMode fittingMode) override;
+  void handleAddDomainAccepted(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+                               FunctionModelSpectra const &workspaceIndices) override;
 
   void openFitScriptGenerator() override;
 
@@ -50,7 +52,6 @@ private:
   void handleADSRenameEvent(std::string const &workspaceName, std::string const &newName);
   void handleRemoveDomainClicked();
   void handleAddDomainClicked();
-  void handleAddDomainAccepted();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
@@ -72,7 +73,7 @@ private:
 
   void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
   void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
-                     std::vector<WorkspaceIndex> const &workspaceIndices);
+                     FunctionModelSpectra const &workspaceIndices);
   void addWorkspace(std::string const &workspaceName, double startX, double endX);
   void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, double startX, double endX);
   void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, WorkspaceIndex workspaceIndex,

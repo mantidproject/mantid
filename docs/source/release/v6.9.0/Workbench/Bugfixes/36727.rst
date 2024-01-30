@@ -1,0 +1,1 @@
+- Fix bug with ``plotSpectrum`` where quickly over-plotting could cause Workbench to hang.
