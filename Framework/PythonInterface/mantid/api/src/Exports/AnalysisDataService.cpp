@@ -42,7 +42,7 @@ AnalysisDataServiceImpl &instance() {
     // displayed when calling AnalysisDataService.clear()
     PyRun_SimpleString("import atexit\n"
                        "from mantid.api import AnalysisDataService\n"
-                       "atexit.register(lambda: AnalysisDataService.clear(), True)");
+                       "atexit.register(lambda: AnalysisDataService.clear(True))");
   });
   return ads;
 }
