@@ -23,7 +23,7 @@ boost:
 
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.22.*
+  - 1.23.*
 
 matplotlib:
   - 3.7.*
