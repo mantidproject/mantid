@@ -44,7 +44,6 @@ AlgorithmManagerImpl &instance() {
 }
 
 IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, const int &version = -1) {
-  GlobalInterpreterLock gil;
   self->removeFinishedAlgorithms();
   ReleaseGlobalInterpreterLock releaseGIL;
   return self->createGILSafe(algName, version);
