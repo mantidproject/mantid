@@ -490,7 +490,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   from matplotlib import colormaps
 
   Cmap_Name = 'Beach' # Colormap name
-  Loaded_Cmap = np.loadtxt("C:\Path\to\File\Filename.txt")
+  Loaded_Cmap = np.loadtxt("/Path/to/file/Filename.txt")
   # Register the Loaded Colormap
   Listed_CustomCmap = ListedColormap(Loaded_Cmap, name=Cmap_Name)
   colormaps.register(name=Cmap_Name, cmap= Listed_CustomCmap)
