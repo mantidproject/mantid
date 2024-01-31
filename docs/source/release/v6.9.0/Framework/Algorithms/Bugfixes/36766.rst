@@ -1,2 +1,1 @@
-- Fixes a bug caused by division by 0 when normalizing
-- Adds a unit test for this
+- Fixes a bug in the :ref:`Integration <algm-Integration>` algorithm caused by division by 0 when normalizing.
