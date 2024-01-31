@@ -487,12 +487,13 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   import matplotlib.pyplot as plt
   import numpy as np
   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+  from matplotlib import colormaps
 
   Cmap_Name = 'Beach' # Colormap name
   Loaded_Cmap = np.loadtxt("C:\Path\to\File\Filename.txt")
   # Register the Loaded Colormap
   Listed_CustomCmap = ListedColormap(Loaded_Cmap, name=Cmap_Name)
-  plt.register_cmap(name=Cmap_Name, cmap= Listed_CustomCmap)
+  colormaps.register(name=Cmap_Name, cmap= Listed_CustomCmap)
 
   # Create and register the reverse colormap
   Res = len(Loaded_Cmap)
