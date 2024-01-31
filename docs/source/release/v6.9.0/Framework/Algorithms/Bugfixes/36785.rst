@@ -1,0 +1,1 @@
+- Fix a GIL error that happens when algorithm manager tries to remove python objects parameters
