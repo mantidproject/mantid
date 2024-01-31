@@ -9,7 +9,7 @@
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
-#include "ITemplatePresenter.h"
+#include "FunctionTemplatePresenter.h"
 #include "SingleFunctionTemplateModel.h"
 #include <QMap>
 
@@ -29,7 +29,7 @@ class SingleFunctionTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public ITemplatePresenter {
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);

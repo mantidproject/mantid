@@ -34,6 +34,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
     Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
@@ -157,6 +158,7 @@ set(INC_FILES
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/FunctionTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/ITemplatePresenter.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h

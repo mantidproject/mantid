@@ -8,7 +8,7 @@
 
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
-#include "ITemplatePresenter.h"
+#include "FunctionTemplatePresenter.h"
 #include "IqtFunctionModel.h"
 
 class QtProperty;
@@ -27,7 +27,7 @@ class IqtTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public ITemplatePresenter {
+class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public FunctionTemplatePresenter {
 public:
   explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
