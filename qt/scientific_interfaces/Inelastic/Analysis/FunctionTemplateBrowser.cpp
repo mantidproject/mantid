@@ -15,6 +15,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
@@ -100,6 +101,32 @@ void FunctionTemplateBrowser::init() {
 void FunctionTemplateBrowser::subscribePresenter(ITemplatePresenter *presenter) { m_presenter = presenter; }
 
 void FunctionTemplateBrowser::clear() { m_browser->clear(); }
+
+void FunctionTemplateBrowser::setEnumSilent(QtProperty *prop, int enumIndex) {
+  MantidQt::MantidWidgets::ScopedFalse _enumBlock(m_emitEnumChange);
+  m_enumManager->setValue(prop, enumIndex);
+}
+
+void FunctionTemplateBrowser::setIntSilent(QtProperty *prop, int value) {
+  MantidQt::MantidWidgets::ScopedFalse _intBlock(m_emitIntChange);
+  m_intManager->setValue(prop, value);
+}
+
+void FunctionTemplateBrowser::setBoolSilent(QtProperty *prop, bool value) {
+  MantidQt::MantidWidgets::ScopedFalse _boolBlock(m_emitBoolChange);
+  m_boolManager->setValue(prop, value);
+}
+
+void FunctionTemplateBrowser::setParameterSilent(QtProperty *prop, double value, double error) {
+  MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
+  m_parameterManager->setValue(prop, value);
+  m_parameterManager->setError(prop, error);
+}
+
+void FunctionTemplateBrowser::setErrorsEnabled(bool enabled) {
+  MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
+  m_parameterManager->setErrorsEnabled(enabled);
+}
 
 void FunctionTemplateBrowser::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
 

@@ -50,7 +50,6 @@ public:
   void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
-  void setErrorsEnabled(bool enabled) override;
   void clear() override;
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
@@ -70,7 +69,6 @@ private:
   void createProperties() override;
   void popupMenu(const QPoint &) override;
   double getParameterPropertyValue(QtProperty *prop) const;
-  void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void setTieIntensitiesQuiet(bool on);
   void updateState();
@@ -91,10 +89,6 @@ private:
   QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
-  bool m_emitParameterValueChange = true;
-  bool m_emitIntChange = true;
-  bool m_emitBoolChange = true;
-  bool m_emitEnumChange = true;
   friend class IqtTemplatePresenter;
 };
 

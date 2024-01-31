@@ -54,15 +54,12 @@ void SingleFunctionTemplateBrowser::createProperties() {
 }
 
 void SingleFunctionTemplateBrowser::setDataType(std::vector<std::string> const &allowedFunctionsList) {
-  ScopedFalse _false(m_emitEnumChange);
+  MantidQt::MantidWidgets::ScopedFalse _enumBlock(m_emitEnumChange);
   m_enumManager->setEnumNames(m_fitType, stdVectorToQStringList(allowedFunctionsList));
   m_enumManager->setValue(m_fitType, 0);
 }
 
-void SingleFunctionTemplateBrowser::setEnumValue(int enumIndex) {
-  ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setValue(m_fitType, enumIndex);
-}
+void SingleFunctionTemplateBrowser::setEnumValue(int enumIndex) { setEnumSilent(m_fitType, enumIndex); }
 
 void SingleFunctionTemplateBrowser::addParameter(std::string const &parameterName,
                                                  std::string const &parameterDescription) {
@@ -89,6 +86,7 @@ void SingleFunctionTemplateBrowser::globalChanged(QtProperty *, const QString &,
 void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
   m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
+
   if (m_emitParameterValueChange) {
     m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
   }
@@ -106,9 +104,7 @@ void SingleFunctionTemplateBrowser::setParameterValue(std::string const &paramet
 
 void SingleFunctionTemplateBrowser::setParameterValueQuietly(std::string const &parameterName, double parameterValue,
                                                              double parameterError) {
-  ScopedFalse _(m_emitParameterValueChange);
-  m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
-  m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
+  setParameterSilent(m_parameterMap[parameterName], parameterValue, parameterError);
 }
 
 void SingleFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &) {}
@@ -118,11 +114,6 @@ void SingleFunctionTemplateBrowser::updateParameterDescriptions(const QMap<int, 
 void SingleFunctionTemplateBrowser::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
   m_presenter->updateAvailableFunctions(functionInitialisationStrings);
-}
-
-void SingleFunctionTemplateBrowser::setErrorsEnabled(bool enabled) {
-  ScopedFalse _false(m_emitParameterValueChange);
-  m_parameterManager->setErrorsEnabled(enabled);
 }
 
 void SingleFunctionTemplateBrowser::clear() {
@@ -143,16 +134,8 @@ void SingleFunctionTemplateBrowser::estimateFunctionParameters() { m_presenter->
 
 void SingleFunctionTemplateBrowser::popupMenu(const QPoint &) {}
 
-void SingleFunctionTemplateBrowser::setParameterPropertyValue(QtProperty *prop, double value, double error) {
-  if (prop) {
-    ScopedFalse _false(m_emitParameterValueChange);
-    m_parameterManager->setValue(prop, value);
-    m_parameterManager->setError(prop, error);
-  }
-}
-
 void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
-  ScopedFalse _false(m_emitParameterValueChange);
+  MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   for (auto const &parameterName : m_parameterMap.keys()) {
     auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
     m_parameterManager->setGlobal(m_parameterMap[parameterName], findIter != globals.cend());

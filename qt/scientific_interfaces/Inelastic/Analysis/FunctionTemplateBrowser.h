@@ -51,6 +51,12 @@ public:
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 
+  void setEnumSilent(QtProperty *prop, int fitType);
+  void setIntSilent(QtProperty *prop, int value);
+  void setBoolSilent(QtProperty *prop, bool value);
+  void setParameterSilent(QtProperty *prop, double value, double error);
+  void setErrorsEnabled(bool enabled);
+
   void setFunction(std::string const &funStr);
   IFunction_sptr getGlobalFunction() const;
   IFunction_sptr getFunction() const;
@@ -70,7 +76,6 @@ public:
   virtual void updateParameters(const IFunction &fun) = 0;
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
 
-  virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
@@ -103,6 +108,11 @@ private:
   virtual void createProperties() = 0;
 
 protected:
+  bool m_emitParameterValueChange = true;
+  bool m_emitBoolChange = true;
+  bool m_emitEnumChange = true;
+  bool m_emitIntChange = true;
+
   QtBoolPropertyManager *m_boolManager;
   QtIntPropertyManager *m_intManager;
   QtDoublePropertyManager *m_doubleManager;

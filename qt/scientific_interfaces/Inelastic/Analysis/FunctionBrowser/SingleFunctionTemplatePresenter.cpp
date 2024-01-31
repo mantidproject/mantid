@@ -39,7 +39,7 @@ void SingleFunctionTemplatePresenter::setFitType(std::string const &name) {
   m_view->clear();
   m_model->setFitType(name);
   auto functionParameters = m_model->getParameterNames();
-  for (auto &parameter : functionParameters) {
+  for (auto const &parameter : functionParameters) {
     m_view->addParameter(parameter, m_model->getParameterDescription(parameter));
   }
   setErrorsEnabled(false);
@@ -60,7 +60,7 @@ void SingleFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   if (m_model->getFitType() == "None")
     return;
   auto functionParameters = m_model->getParameterNames();
-  for (auto &parameter : functionParameters) {
+  for (auto const &parameter : functionParameters) {
     m_view->addParameter(parameter, m_model->getParameterDescription(parameter));
   }
   m_view->setEnumValue(m_model->getEnumIndex());

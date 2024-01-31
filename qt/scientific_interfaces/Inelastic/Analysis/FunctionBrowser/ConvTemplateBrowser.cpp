@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
@@ -23,21 +24,6 @@
 #include <limits>
 
 namespace MantidQt::CustomInterfaces::IDA {
-
-namespace {
-
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  // this sets the input bool to false whilst this object is in scope and then
-  // resets it to its old value when this object drops out of scope.
-  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-
-} // namespace
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
   m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
@@ -81,31 +67,27 @@ void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
 void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
 
 void ConvTemplateBrowser::addDeltaFunction() {
-  ScopedFalse _boolBlock(m_emitBoolChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionCenter);
-  m_boolManager->setValue(m_deltaFunctionOn, true);
+  setBoolSilent(m_deltaFunctionOn, true);
 }
 
 void ConvTemplateBrowser::removeDeltaFunction() {
   m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
   m_deltaFunctionOn->removeSubProperty(m_deltaFunctionCenter);
-  ScopedFalse _false(m_emitBoolChange);
-  m_boolManager->setValue(m_deltaFunctionOn, false);
+  setBoolSilent(m_deltaFunctionOn, false);
 }
 
 void ConvTemplateBrowser::addTempCorrection(double value) {
-  ScopedFalse _boolBlock(m_emitBoolChange);
-
   m_tempCorrectionOn->addSubProperty(m_temperature);
-  m_boolManager->setValue(m_tempCorrectionOn, true);
+  setBoolSilent(m_tempCorrectionOn, true);
   m_parameterManager->setValue(m_temperature, value);
   m_parameterManager->setGlobal(m_temperature, true);
 }
 
 void ConvTemplateBrowser::updateTemperatureCorrectionAndDelta(bool tempCorrection, bool deltaFunction) {
-  ScopedFalse _boolBlock(m_emitBoolChange);
-  ScopedFalse _paramBlock(m_emitParameterValueChange);
+  MantidQt::MantidWidgets::ScopedFalse _boolBlock(m_emitBoolChange);
+  MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
 
   if (tempCorrection)
     addTempCorrection(100.0);
@@ -120,8 +102,7 @@ void ConvTemplateBrowser::updateTemperatureCorrectionAndDelta(bool tempCorrectio
 
 void ConvTemplateBrowser::removeTempCorrection() {
   m_tempCorrectionOn->removeSubProperty(m_temperature);
-  ScopedFalse _false(m_emitBoolChange);
-  m_boolManager->setValue(m_tempCorrectionOn, false);
+  setBoolSilent(m_tempCorrectionOn, false);
 }
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
@@ -153,7 +134,7 @@ void ConvTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->
 
 void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_parameterNames.clear();
-  ScopedFalse _false(m_emitParameterValueChange);
+  MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[static_cast<int>(i)];
@@ -164,25 +145,12 @@ void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &par
   }
 }
 
-void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
-  ScopedFalse _(m_emitParameterValueChange);
-  m_parameterManager->setErrorsEnabled(enabled);
-}
-
 void ConvTemplateBrowser::clear() {}
 
 void ConvTemplateBrowser::popupMenu(const QPoint &) {}
 
-void ConvTemplateBrowser::setParameterPropertyValue(QtProperty *prop, double value, double error) {
-  if (prop) {
-    ScopedFalse _(m_emitParameterValueChange);
-    m_parameterManager->setValue(prop, value);
-    m_parameterManager->setError(prop, error);
-  }
-}
-
 void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
-  ScopedFalse _(m_emitParameterValueChange);
+  MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
     auto const name = m_parameterNames[prop];
@@ -236,13 +204,11 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
 }
 
 void ConvTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
-  ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setValue(m_subTypeProperties[subTypeIndex], enumIndex);
+  setEnumSilent(m_subTypeProperties[subTypeIndex], enumIndex);
 }
 
 void ConvTemplateBrowser::setInt(size_t subTypeIndex, int value) {
-  ScopedFalse _false(m_emitIntChange);
-  m_intManager->setValue(m_subTypeProperties[subTypeIndex], value);
+  setIntSilent(m_subTypeProperties[subTypeIndex], value);
 }
 
 void ConvTemplateBrowser::createDeltaFunctionProperties() {
@@ -284,10 +250,8 @@ void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {
 }
 
 void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value, double error) {
-  ScopedFalse _(m_emitParameterValueChange);
   auto prop = m_parameterReverseMap[id];
-  m_parameterManager->setValue(prop, value);
-  m_parameterManager->setError(prop, error);
+  setParameterSilent(prop, value, error);
 }
 
 EstimationDataSelector ConvTemplateBrowser::getEstimationDataSelector() const {

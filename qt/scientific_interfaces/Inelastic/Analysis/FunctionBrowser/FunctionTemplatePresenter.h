@@ -13,6 +13,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class FunctionTemplateBrowser;
+
 class MANTIDQT_INELASTIC_DLL FunctionTemplatePresenter : public ITemplatePresenter {
 public:
   FunctionTemplatePresenter();

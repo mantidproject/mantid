@@ -100,88 +100,76 @@ void IqtTemplateBrowser::createProperties() {
 void IqtTemplateBrowser::addExponentialOne() {
   m_numberOfExponentials->addSubProperty(m_exp1Height);
   m_numberOfExponentials->addSubProperty(m_exp1Lifetime);
-  ScopedFalse _false(m_emitIntChange);
-  m_intManager->setValue(m_numberOfExponentials, 1);
+  setIntSilent(m_numberOfExponentials, 1);
 }
 
 void IqtTemplateBrowser::removeExponentialOne() {
   m_numberOfExponentials->removeSubProperty(m_exp1Height);
   m_numberOfExponentials->removeSubProperty(m_exp1Lifetime);
-  ScopedFalse _false(m_emitIntChange);
-  m_intManager->setValue(m_numberOfExponentials, 0);
+  setIntSilent(m_numberOfExponentials, 0);
 }
 
 void IqtTemplateBrowser::addExponentialTwo() {
   m_numberOfExponentials->addSubProperty(m_exp2Height);
   m_numberOfExponentials->addSubProperty(m_exp2Lifetime);
-  ScopedFalse _false(m_emitIntChange);
-  m_intManager->setValue(m_numberOfExponentials, 2);
+  setIntSilent(m_numberOfExponentials, 2);
 }
 
 void IqtTemplateBrowser::removeExponentialTwo() {
   m_numberOfExponentials->removeSubProperty(m_exp2Height);
   m_numberOfExponentials->removeSubProperty(m_exp2Lifetime);
-  ScopedFalse _false(m_emitIntChange);
-  m_intManager->setValue(m_numberOfExponentials, 1);
+  setIntSilent(m_numberOfExponentials, 1);
 }
 
 void IqtTemplateBrowser::addStretchExponential() {
   m_stretchExponential->addSubProperty(m_stretchExpHeight);
   m_stretchExponential->addSubProperty(m_stretchExpLifetime);
   m_stretchExponential->addSubProperty(m_stretchExpStretching);
-  ScopedFalse _false(m_emitBoolChange);
-  m_boolManager->setValue(m_stretchExponential, true);
+  setBoolSilent(m_stretchExponential, true);
 }
 
 void IqtTemplateBrowser::removeStretchExponential() {
   m_stretchExponential->removeSubProperty(m_stretchExpHeight);
   m_stretchExponential->removeSubProperty(m_stretchExpLifetime);
   m_stretchExponential->removeSubProperty(m_stretchExpStretching);
-  ScopedFalse _false(m_emitBoolChange);
-  m_boolManager->setValue(m_stretchExponential, false);
+  setBoolSilent(m_stretchExponential, false);
 }
 
 void IqtTemplateBrowser::addFlatBackground() {
   m_background->addSubProperty(m_A0);
-  ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setValue(m_background, 1);
+  setEnumSilent(m_background, 1);
 }
 
 void IqtTemplateBrowser::removeBackground() {
   m_background->removeSubProperty(m_A0);
-  ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setValue(m_background, 0);
+  setEnumSilent(m_background, 0);
 }
 
-void IqtTemplateBrowser::setExp1Height(double value, double error) {
-  setParameterPropertyValue(m_exp1Height, value, error);
-}
+void IqtTemplateBrowser::setExp1Height(double value, double error) { setParameterSilent(m_exp1Height, value, error); }
 
 void IqtTemplateBrowser::setExp1Lifetime(double value, double error) {
-  setParameterPropertyValue(m_exp1Lifetime, value, error);
+  setParameterSilent(m_exp1Lifetime, value, error);
 }
 
-void IqtTemplateBrowser::setExp2Height(double value, double error) {
-  setParameterPropertyValue(m_exp2Height, value, error);
-}
+void IqtTemplateBrowser::setExp2Height(double value, double error) { setParameterSilent(m_exp2Height, value, error); }
 
 void IqtTemplateBrowser::setExp2Lifetime(double value, double error) {
-  setParameterPropertyValue(m_exp2Lifetime, value, error);
+  setParameterSilent(m_exp2Lifetime, value, error);
 }
 
 void IqtTemplateBrowser::setStretchHeight(double value, double error) {
-  setParameterPropertyValue(m_stretchExpHeight, value, error);
+  setParameterSilent(m_stretchExpHeight, value, error);
 }
 
 void IqtTemplateBrowser::setStretchLifetime(double value, double error) {
-  setParameterPropertyValue(m_stretchExpLifetime, value, error);
+  setParameterSilent(m_stretchExpLifetime, value, error);
 }
 
 void IqtTemplateBrowser::setStretchStretching(double value, double error) {
-  setParameterPropertyValue(m_stretchExpStretching, value, error);
+  setParameterSilent(m_stretchExpStretching, value, error);
 }
 
-void IqtTemplateBrowser::setA0(double value, double error) { setParameterPropertyValue(m_A0, value, error); }
+void IqtTemplateBrowser::setA0(double value, double error) { setParameterSilent(m_A0, value, error); }
 
 void IqtTemplateBrowser::intChanged(QtProperty *prop) {
   if (prop == m_numberOfExponentials && m_emitIntChange) {
@@ -227,8 +215,8 @@ void IqtTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &par
 void IqtTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
 
 void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
+  MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterNames.clear();
-  ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
     auto const name = parameterNames[i];
@@ -245,11 +233,6 @@ void IqtTemplateBrowser::updateParameterDescriptions(const QMap<int, std::string
     auto const i = m_parameterMap[prop];
     m_parameterDescriptions[prop] = parameterDescriptions[i];
   }
-}
-
-void IqtTemplateBrowser::setErrorsEnabled(bool enabled) {
-  ScopedFalse _false(m_emitParameterValueChange);
-  m_parameterManager->setErrorsEnabled(enabled);
 }
 
 void IqtTemplateBrowser::clear() {
@@ -277,16 +260,8 @@ double IqtTemplateBrowser::getParameterPropertyValue(QtProperty *prop) const {
   return prop ? m_parameterManager->value(prop) : 0.0;
 }
 
-void IqtTemplateBrowser::setParameterPropertyValue(QtProperty *prop, double value, double error) {
-  if (prop) {
-    ScopedFalse _false(m_emitParameterValueChange);
-    m_parameterManager->setValue(prop, value);
-    m_parameterManager->setError(prop, error);
-  }
-}
-
 void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
-  ScopedFalse _false(m_emitParameterValueChange);
+  MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
     auto const name = m_parameterNames[prop];
@@ -303,16 +278,12 @@ void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const
   }
 }
 
-void IqtTemplateBrowser::setTieIntensitiesQuiet(bool on) {
-  ScopedFalse _false(m_emitBoolChange);
-  m_boolManager->setValue(m_tieIntensities, on);
-}
+void IqtTemplateBrowser::setTieIntensitiesQuiet(bool on) { setBoolSilent(m_tieIntensities, on); }
 
 void IqtTemplateBrowser::updateState() {
   auto const on = m_presenter->canTieIntensities();
   if (!on && m_boolManager->value(m_tieIntensities)) {
-    ScopedFalse _false(m_emitBoolChange);
-    m_boolManager->setValue(m_tieIntensities, false);
+    setBoolSilent(m_tieIntensities, false);
   }
   m_tieIntensities->setEnabled(on);
 }
