@@ -62,7 +62,7 @@ class MANTID_DATAHANDLING_DLL CompressEventAccumulatorFactory {
 public:
   CompressEventAccumulatorFactory(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
                                   CompressBinningMode bin_mode);
-  std::unique_ptr<CompressEventAccumulator> create();
+  std::unique_ptr<CompressEventAccumulator> create(const std::size_t num_events);
 
 private:
   double m_divisor;

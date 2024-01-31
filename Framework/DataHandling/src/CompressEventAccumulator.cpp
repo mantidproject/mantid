@@ -404,11 +404,12 @@ CompressEventAccumulatorFactory::CompressEventAccumulatorFactory(
     std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, CompressBinningMode bin_mode)
     : m_divisor(divisor), m_bin_mode(bin_mode), m_histogram_edges(std::move(histogram_bin_edges)) {}
 
-std::unique_ptr<CompressEventAccumulator> CompressEventAccumulatorFactory::create() {
-  // return std::make_unique<CompressSparse>(m_histogram_edges, m_divisor, m_bin_mode);
-  return std::make_unique<CompressSparseInt>(m_histogram_edges, m_divisor, m_bin_mode);
-  // return std::make_unique<CompressIntMap>(m_histogram_edges, m_divisor, m_bin_mode);
-  // return std::make_unique<CompressDense>(m_histogram_edges, m_divisor, m_bin_mode);
+std::unique_ptr<CompressEventAccumulator> CompressEventAccumulatorFactory::create(const std::size_t num_events) {
+  if (num_events < m_histogram_edges->size()) {
+    return std::make_unique<CompressSparseInt>(m_histogram_edges, m_divisor, m_bin_mode);
+  } else {
+    return std::make_unique<CompressDense>(m_histogram_edges, m_divisor, m_bin_mode);
+  }
 }
 
 } // namespace DataHandling

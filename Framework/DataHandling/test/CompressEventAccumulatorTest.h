@@ -46,7 +46,7 @@ public:
                         const double divisor, CompressBinningMode bin_mode, std::size_t num_wght_events) {
     // create the accumulator
     CompressEventAccumulatorFactory factory(histogram_bin_edges, divisor, bin_mode);
-    auto accumulator = factory.create();
+    auto accumulator = factory.create(1); // TODO force sparse version
 
     // add a bunch of events
     const size_t NUM_RAW_EVENTS = addEvents(accumulator.get(), static_cast<float>(tof_min));

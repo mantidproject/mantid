@@ -40,19 +40,37 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
   m_factory = std::make_unique<CompressEventAccumulatorFactory>(histogram_bin_edges, divisor_abs, bin_mode);
 }
 
+namespace {
+size_t estimate_avg_events(const size_t num_events, const size_t num_dets, const size_t num_periods) {
+  double result = static_cast<double>(num_events) / static_cast<double>(num_dets) / static_cast<double>(num_periods);
+  return static_cast<size_t>(result);
+}
+} // namespace
+
 void ProcessBankCompressed::createAccumulators(const bool precount) {
   const auto NUM_PERIODS = m_loader.m_ws.nPeriods();
   const auto NUM_DETS = static_cast<size_t>(m_detid_max - m_detid_min) + 1;
+  const auto NUM_EVENTS_AVG = estimate_avg_events(m_event_detid->size(), NUM_DETS, NUM_PERIODS);
 
+  std::vector<size_t> counts;
   if (precount) {
-    std::cout << "Should do something with the precount\n"; // TODO
+    const auto detid_min = static_cast<size_t>(m_detid_min);
+    const auto detid_max = static_cast<size_t>(m_detid_max);
+    counts.assign(NUM_DETS + 1, 0);
+    for (const auto &detid : *m_event_detid) {
+      if (!(detid < detid_min || detid > detid_max)) // or allows for skipping out early
+        counts[detid - detid_min]++;
+    }
   }
 
   m_spectra_accum.resize(NUM_PERIODS);
   for (size_t periodIndex = 0; periodIndex < NUM_PERIODS; ++periodIndex) {
     m_spectra_accum[periodIndex].reserve(NUM_DETS);
     for (size_t det_index = 0; det_index <= NUM_DETS; ++det_index) {
-      m_spectra_accum[periodIndex].push_back(m_factory->create());
+      if (precount)
+        m_spectra_accum[periodIndex].push_back(m_factory->create(counts[det_index]));
+      else
+        m_spectra_accum[periodIndex].push_back(m_factory->create(NUM_EVENTS_AVG));
     }
   }
 
@@ -151,8 +169,6 @@ public:
     for (size_t index = range.begin(); index < range.end(); ++index) {
       auto &accumulator = m_accumulators->operator[](index);
       if (accumulator->m_numevents > 0) {
-        // sort by time-of-flight
-        // m_accumulators->operator[](index)->sort();
         // create the events on the correct event list
         m_accumulators->operator[](index)->createWeightedEvents(m_eventlists->operator[](index + m_detid_min));
       }
