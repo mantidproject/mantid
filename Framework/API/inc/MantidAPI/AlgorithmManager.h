@@ -45,7 +45,7 @@ public:
   /// Creates an unmanaged algorithm with the option of choosing a version
   std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName, const int &version = -1) const;
   /// Creates a managed algorithm with the option of choosing a version (used by python interface)
-  IAlgorithm_sptr createFromPython(const std::string &algName, const int &version = -1);
+  IAlgorithm_sptr createGILSafe(const std::string &algName, const int &version = -1);
 
   std::size_t size() const;
 
@@ -74,6 +74,9 @@ private:
   AlgorithmManagerImpl();
   ~AlgorithmManagerImpl();
 
+  // Common code used by create and createGILSafe to create a managed algorithm
+  IAlgorithm_sptr create(const std::string &algName, const int &version = -1, const bool &removeFinished = true);
+
   /// Unimplemented copy constructor
   AlgorithmManagerImpl(const AlgorithmManagerImpl &);
   /// Unimplemented assignment operator
@@ -82,7 +85,7 @@ private:
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
   /// Mutex for modifying/accessing the m_managed_algs member.
-  mutable std::mutex m_managedMutex;
+  mutable std::recursive_mutex m_managedMutex;
 };
 
 using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;

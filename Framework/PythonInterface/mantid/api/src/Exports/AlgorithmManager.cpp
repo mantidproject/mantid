@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
@@ -43,9 +44,10 @@ AlgorithmManagerImpl &instance() {
 }
 
 IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, const int &version = -1) {
+  GlobalInterpreterLock gil;
   self->removeFinishedAlgorithms();
   ReleaseGlobalInterpreterLock releaseGIL;
-  return self->createFromPython(algName, version);
+  return self->createGILSafe(algName, version);
 }
 
 std::shared_ptr<Algorithm> createUnmanaged(AlgorithmManagerImpl *self, const std::string &algName,
