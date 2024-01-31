@@ -8,6 +8,7 @@
 #include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Rebin.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -73,7 +74,7 @@ using HistogramData::Exception::InvalidBinEdgesError;
  */
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                std::string binModeName) {
+                                                const std::string &binModeName) {
   // EnumeratedString<Rebin::BinningMode, binningModeNames> binMode = binModeName;
   std::vector<double> rbParams;
   // The validator only passes parameters with size 2n+1. No need to check again here
@@ -135,15 +136,25 @@ std::map<std::string, std::string> Rebin::validateInputs() {
   // validate the rebin params, and outside default mode, reset them
   MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
   std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
-  try {
-    std::vector<double> validParams = rebinParamsFromInput(rbParams, *inputWS, g_log, binMode);
-    // if the binmode has been set, force the rebin params to be consistent
-    if (binMode != BinningMode::DEFAULT) {
-      setProperty(PropertyNames::PARAMS, validParams);
-      rbParams = validParams;
+  if (inputWS == nullptr) {
+    // The workspace could exist, but not be a MatrixWorkspace, e.g. it might be
+    // a group workspace. In that case we don't want a validation error for the
+    // Rebin parameters.
+    const std::string &inputWsName = getProperty(PropertyNames::INPUT_WKSP);
+    if (!AnalysisDataService::Instance().doesExist(inputWsName)) {
+      helpMessages[PropertyNames::INPUT_WKSP] = "Input workspace not in ADS.";
     }
-  } catch (std::exception &err) {
-    helpMessages[PropertyNames::PARAMS] = err.what();
+  } else {
+    try {
+      std::vector<double> validParams = rebinParamsFromInput(rbParams, *inputWS, g_log, binMode);
+      // if the binmode has been set, force the rebin params to be consistent
+      if (binMode != BinningMode::DEFAULT) {
+        setProperty(PropertyNames::PARAMS, validParams);
+        rbParams = validParams;
+      }
+    } catch (std::exception &err) {
+      helpMessages[PropertyNames::PARAMS] = err.what();
+    }
   }
 
   // if user specifies a binning mode, set this flag for them
