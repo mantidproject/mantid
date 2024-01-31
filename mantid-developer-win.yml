@@ -6,7 +6,7 @@ channels:
 dependencies:
   - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
-  - cmake>= 3.27.9
+  - cmake>= 3.28.*
   - conda-wrappers
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
