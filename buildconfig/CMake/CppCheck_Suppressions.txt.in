@@ -913,10 +913,10 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:287
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Axis.cpp:44
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IEventWorkspace.cpp:58
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:32
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:36
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:41
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:46
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:33
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:37
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:42
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeak.cpp:47
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:251
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceFactory.cpp:58
