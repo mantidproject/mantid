@@ -54,7 +54,8 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
  * @throw  std::runtime_error Thrown if properties string is ill-formed
  */
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const int &version) {
-  return create(algName, version, true);
+  removeFinishedAlgorithms();
+  return createGILSafe(algName, version);
 }
 
 /** Creates and initialises an instance of an algorithm.
@@ -72,19 +73,11 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const i
  * It has been introduced because removing algorithms requires the GIL to be held
  */
 IAlgorithm_sptr AlgorithmManagerImpl::createGILSafe(const std::string &algName, const int &version) {
-  return create(algName, version, false);
-}
-
-IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const int &version,
-                                             const bool &removeFinished) {
   std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
     alg = AlgorithmFactory::Instance().create(algName,
                                               version); // Throws on fail:
-    if (removeFinished) {
-      removeFinishedAlgorithms();
-    }
 
     // Add to list of managed ones
     m_managed_algs.emplace_back(alg);

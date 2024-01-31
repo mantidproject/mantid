@@ -74,9 +74,6 @@ private:
   AlgorithmManagerImpl();
   ~AlgorithmManagerImpl();
 
-  // Common code used by create and createGILSafe to create a managed algorithm
-  IAlgorithm_sptr create(const std::string &algName, const int &version = -1, const bool &removeFinished = true);
-
   /// Unimplemented copy constructor
   AlgorithmManagerImpl(const AlgorithmManagerImpl &);
   /// Unimplemented assignment operator
