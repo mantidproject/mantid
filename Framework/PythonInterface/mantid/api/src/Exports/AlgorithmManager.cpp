@@ -7,7 +7,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>

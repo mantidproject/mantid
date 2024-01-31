@@ -287,9 +287,9 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/WeightedMeanOfWorksp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:230
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:274
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:112
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:116
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:180
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:128
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:132
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:197
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:138
 knownPointerToBool:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:386
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:620
@@ -897,7 +897,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/sr
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IAlgorithm.cpp:254
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:74
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:155
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:127
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:128
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Workspace.cpp:71
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ITableWorkspace.cpp:251
