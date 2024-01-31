@@ -30,7 +30,6 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
       m_bankPulseTimes(std::move(bankPulseTimes)), m_detid_min(min_detid), m_detid_max(max_detid),
       m_tof_min(static_cast<float>(histogram_bin_edges->front())),
       m_tof_max(static_cast<float>(histogram_bin_edges->back())) {
-  const auto num_dets = static_cast<size_t>(m_detid_max - m_detid_min) + 1;
   const auto bin_mode = (divisor >= 0) ? CompressBinningMode::LINEAR : CompressBinningMode::LOGARITHMIC;
 
   m_cost = static_cast<double>(m_event_detid->size());
@@ -38,16 +37,27 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
   const auto divisor_abs = abs(divisor);
 
   // create the spetcra accumulators
+  m_factory = std::make_unique<CompressEventAccumulatorFactory>(histogram_bin_edges, divisor_abs, bin_mode);
+}
+
+void ProcessBankCompressed::createAccumulators(const bool precount) {
   const auto NUM_PERIODS = m_loader.m_ws.nPeriods();
-  CompressEventAccumulatorFactory factory(histogram_bin_edges, divisor_abs, bin_mode);
+  const auto NUM_DETS = static_cast<size_t>(m_detid_max - m_detid_min) + 1;
+
+  if (precount) {
+    std::cout << "Should do something with the precount\n"; // TODO
+  }
+
   m_spectra_accum.resize(NUM_PERIODS);
   for (size_t periodIndex = 0; periodIndex < NUM_PERIODS; ++periodIndex) {
-    m_spectra_accum[periodIndex].reserve(num_dets);
-    for (size_t det_index = 0; det_index <= num_dets; ++det_index) {
-      m_spectra_accum[periodIndex].push_back(factory.create());
-      // std::make_unique<CompressEventAccumulator>(histogram_bin_edges, divisor_abs, bin_mode));
+    m_spectra_accum[periodIndex].reserve(NUM_DETS);
+    for (size_t det_index = 0; det_index <= NUM_DETS; ++det_index) {
+      m_spectra_accum[periodIndex].push_back(m_factory->create());
     }
   }
+
+  // the factory is no longer needed so drop the pointer
+  m_factory.reset();
 }
 
 void ProcessBankCompressed::addEvent(const size_t period_index, const detid_t detid, const float tof) {
@@ -179,9 +189,7 @@ void ProcessBankCompressed::run() {
   Kernel::Timer timer;
   auto *alg = m_loader.alg;
 
-  if (m_loader.precount) {
-    std::cout << "Should do something with the precount\n"; // TODO
-  }
+  this->createAccumulators(m_loader.precount);
   m_prog->report();
 
   // parse the events

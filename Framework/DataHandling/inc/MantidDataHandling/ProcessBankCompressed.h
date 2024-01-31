@@ -20,6 +20,7 @@ class Progress; // forward declare
 }
 namespace DataHandling {
 class DefaultEventLoader; // forward declare
+class CompressEventAccumulatorFactory;
 
 /** ProcessBankCompressed : TODO: DESCRIPTION
  */
@@ -43,6 +44,7 @@ public:
   double totalWeight() const;
 
 private:
+  void createAccumulators(const bool precount);
   void collectEvents();
   void addToEventLists();
 
@@ -53,6 +55,9 @@ private:
   const std::string m_entry_name;
   /// Progress reporting
   API::Progress *m_prog;
+
+  /// factory for creating accumulators
+  std::unique_ptr<CompressEventAccumulatorFactory> m_factory;
 
   /// event pixel ID array
   std::shared_ptr<std::vector<uint32_t>> m_event_detid;
