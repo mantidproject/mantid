@@ -29,6 +29,7 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(const IPeak &peak) {
   // Use clone to make a copy of the PeakShape.
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }
+void setPeakShape(IPeak &peak, Mantid::Geometry::PeakShape_sptr shape) { peak.setPeakShape(shape->clone()); }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
   // Set the q lab frame. No explicit detector distance.
   return peak.setQLabFrame(qLabFrame, boost::none);
@@ -181,6 +182,7 @@ void export_IPeak() {
            "Return the L2 flight path length (:class:`~mantid.api.Sample` to "
            ":class:`~mantid.geometry.Detector`), in meters.")
       .def("getPeakShape", getPeakShape, arg("self"), "Get the peak shape")
+      .def("setPeakShape", setPeakShape, (arg("self"), arg("shape")), "Set the peak shape")
       .def("getAbsorptionWeightedPathLength", &IPeak::getAbsorptionWeightedPathLength, arg("self"),
            "Get the absorption weighted path length")
       .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame>(IPeak::*)()) & IPeak::getReferenceFrame,
