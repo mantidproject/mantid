@@ -9,7 +9,7 @@
 
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -22,19 +22,10 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
-using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
 
 std::vector<std::string> getOutputWorkspaceSuffices() { return {"_eq", "_eq2", "_elf", "_elt"}; }
 
@@ -218,7 +209,7 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
 
 void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   auto const workspaceName = getOutputBasename() + "_elt";
-  if (!doesExistInADS(workspaceName))
+  if (!WorkspaceUtils::doesExistInADS(workspaceName))
     m_view->showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
                            "was not produced - temperatures were not found.");
 }
@@ -250,7 +241,7 @@ bool InelasticDataManipulationElwinTab::validate() {
 
 void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   auto const tabName("Elwin");
-  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
 }
 
 void InelasticDataManipulationElwinTab::handleValueChanged(std::string const &propName, double value) {
@@ -283,7 +274,7 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
   m_view->newInputFiles();
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = getADSMatrixWorkspace(wsname);
+  auto const inputWs = WorkspaceUtils::getADSMatrixWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -300,7 +291,7 @@ void InelasticDataManipulationElwinTab::newInputFilesFromDialog(MantidWidgets::I
   m_view->newInputFilesFromDialog(dialog);
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = getADSMatrixWorkspace(wsname);
+  auto const inputWs = WorkspaceUtils::getADSMatrixWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -328,7 +319,7 @@ void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string
                                                                const std::string &filename) {
   auto loadHistory = m_view->isLoadHistory();
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-    auto const workspace = getADSMatrixWorkspace(workspaceName);
+    auto const workspace = WorkspaceUtils::getADSMatrixWorkspace(workspaceName);
 
     setInputWorkspace(workspace);
 
@@ -340,7 +331,7 @@ void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string
 
 void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const std::string &workspaceName) {
   if (m_view->getCurrentInputIndex() == 1) {
-    auto const workspace = getADSMatrixWorkspace(workspaceName);
+    auto const workspace = WorkspaceUtils::getADSMatrixWorkspace(workspaceName);
     setInputWorkspace(workspace);
     updateAvailableSpectra();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
@@ -371,7 +362,7 @@ void InelasticDataManipulationElwinTab::updateIntegrationRange() {
         m_view->setBackgroundStart(-10 * res);
         m_view->setBackgroundEnd(-9 * res);
       } else {
-        auto range = getXRangeFromWorkspace(getInputWorkspace());
+        auto range = WorkspaceUtils::getXRangeFromWorkspace(getInputWorkspace());
         m_view->setIntegrationStart(range.first);
         m_view->setIntegrationEnd(range.second);
       }
@@ -398,12 +389,13 @@ void InelasticDataManipulationElwinTab::handleSaveClicked() {
 
 std::vector<std::string> InelasticDataManipulationElwinTab::getOutputWorkspaceNames() {
   auto outputNames = attachPrefix(getOutputWorkspaceSuffices(), getOutputBasename());
-  removeElementsIf(outputNames, [](std::string const &workspaceName) { return !doesExistInADS(workspaceName); });
+  removeElementsIf(outputNames,
+                   [](std::string const &workspaceName) { return !WorkspaceUtils::doesExistInADS(workspaceName); });
   return outputNames;
 }
 
 std::string InelasticDataManipulationElwinTab::getOutputBasename() {
-  return getWorkspaceBasename(m_pythonExportWsName);
+  return WorkspaceUtils::getWorkspaceBasename(m_pythonExportWsName);
 }
 
 void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {

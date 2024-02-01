@@ -154,6 +154,16 @@ QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVe
   return resultVec;
 }
 
+QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple) {
+  return QPair<double, double>(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
+}
+
+std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple) {
+  return std::make_pair(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
+}
+
+QString makeQStringNumber(double value, double precision) { return QString::number(value, 'f', precision); }
+
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt

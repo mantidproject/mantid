@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"

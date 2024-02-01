@@ -8,7 +8,7 @@
 
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,8 +21,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
-using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
@@ -54,7 +52,7 @@ void InelasticDataManipulationIqtTab::handleSampDataReady(const std::string &wsn
 
   m_view->setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  m_view->setRangeSelectorDefault(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
+  m_view->setRangeSelectorDefault(getInputWorkspace(), WorkspaceUtils::getXRangeFromWorkspace(getInputWorkspace()));
   m_view->updateDisplayedBinParameters();
 }
 
@@ -159,10 +157,12 @@ bool InelasticDataManipulationIqtTab::validate() { return m_view->validate(); }
 void InelasticDataManipulationIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
-  m_view->setSampleFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setSampleWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_view->setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_view->setSampleFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                     : InterfaceUtils::getExtensions(tabName));
+  m_view->setSampleWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setResolutionFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
+                                         : InterfaceUtils::getExtensions(tabName));
+  m_view->setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void InelasticDataManipulationIqtTab::setButtonsEnabled(bool enabled) {

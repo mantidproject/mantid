@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataReductionTab.h"
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,7 +16,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
+using namespace MantidQt::CustomInterfaces;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
@@ -235,7 +235,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   loadParamAlg->execute();
   energyWs = loadParamAlg->getProperty("Workspace");
 
-  double efixed = getEFixed(energyWs);
+  double efixed = WorkspaceUtils::getEFixed(energyWs);
   auto spectraMinDbl = energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
   Mantid::specnum_t spectraMin = boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 

@@ -6,24 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitAddWorkspaceDialog.h"
 
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
 #include <boost/optional.hpp>
 #include <utility>
 
+using namespace MantidQt::CustomInterfaces;
+
 namespace {
 using namespace Mantid::API;
-
-MatrixWorkspace_sptr getWorkspace(const std::string &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
+bool validWorkspace(std::string const &name) { return !name.empty() && WorkspaceUtils::doesExistInADS(name); }
 
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
@@ -41,7 +34,9 @@ QString getIndexString(const MatrixWorkspace_sptr &workspace) {
   return "";
 }
 
-QString getIndexString(const std::string &workspaceName) { return getIndexString(getWorkspace(workspaceName)); }
+QString getIndexString(const std::string &workspaceName) {
+  return getIndexString(WorkspaceUtils::getADSMatrixWorkspace(workspaceName));
+}
 
 std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
   return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
@@ -121,7 +116,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
 
 void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
-  const auto workspace = getWorkspace(name);
+  const auto workspace = WorkspaceUtils::getADSMatrixWorkspace(name);
   if (workspace)
     setWorkspace(name);
   else

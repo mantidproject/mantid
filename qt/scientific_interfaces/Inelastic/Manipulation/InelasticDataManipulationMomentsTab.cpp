@@ -7,7 +7,7 @@
 #include "InelasticDataManipulationMomentsTab.h"
 #include "Common/IndirectDataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -17,8 +17,7 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
-using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
+using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt::CustomInterfaces {
 
@@ -67,7 +66,7 @@ bool InelasticDataManipulationMomentsTab::validate() { return true; }
 void InelasticDataManipulationMomentsTab::plotNewData(std::string const &filename) {
 
   m_view->plotNewData(filename);
-  auto const range = getXRangeFromWorkspace(filename);
+  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename);
   m_view->setPlotPropertyRange(range);
   m_view->setRangeSelector(range);
   m_view->replot();
@@ -113,8 +112,8 @@ void InelasticDataManipulationMomentsTab::runComplete(bool error) {
 void InelasticDataManipulationMomentsTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Moments");
-  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

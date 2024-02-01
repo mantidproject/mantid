@@ -14,7 +14,6 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("InelasticDataManipulationSymmetriseTab");
@@ -118,8 +117,8 @@ void InelasticDataManipulationSymmetriseTab::runComplete(bool error) {
 void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Symmetrise");
-  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void InelasticDataManipulationSymmetriseTab::handleReflectTypeChanged(int value) {

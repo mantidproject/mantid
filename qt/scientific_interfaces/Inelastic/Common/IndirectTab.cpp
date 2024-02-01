@@ -44,41 +44,6 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
   if (condition)
     algorithm->setPropertyValue(propName, value);
 }
-
-std::string getAttributeFromTag(QDomElement const &tag, QString const &attribute, QString const &defaultValue) {
-  if (tag.hasAttribute(attribute))
-    return tag.attribute(attribute, defaultValue).toStdString();
-  return defaultValue.toStdString();
-}
-
-bool hasCorrectAttribute(QDomElement const &child, std::string const &attributeName, std::string const &searchValue) {
-  auto const name = QString::fromStdString(attributeName);
-  return child.hasAttribute(name) && child.attribute(name).toStdString() == searchValue;
-}
-
-std::string getInterfaceAttribute(QDomElement const &root, std::string const &interfaceName,
-                                  std::string const &propertyName, std::string const &attribute) {
-  // Loop through interfaces
-  auto interfaceChild = root.firstChild().toElement();
-  while (!interfaceChild.isNull()) {
-    if (hasCorrectAttribute(interfaceChild, "id", interfaceName)) {
-
-      // Loop through interface properties
-      auto propertyChild = interfaceChild.firstChild().toElement();
-      while (!propertyChild.isNull()) {
-
-        // Return value of an attribute of the property if it is found
-        if (propertyChild.tagName().toStdString() == propertyName)
-          return getAttributeFromTag(propertyChild, QString::fromStdString(attribute), "");
-
-        propertyChild = propertyChild.nextSibling().toElement();
-      }
-    }
-    interfaceChild = interfaceChild.nextSibling().toElement();
-  }
-  return "";
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {

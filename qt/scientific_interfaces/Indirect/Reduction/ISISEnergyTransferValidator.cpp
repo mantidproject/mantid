@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferValidator.h"
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -21,11 +21,6 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &ou
   loader->setProperty("OutputWorkspace", outputName);
   return loader;
 }
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -70,7 +65,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
         errors.push_back("Background Start must be less than Background End");
       }
 
-      auto tempWs = getADSMatrixWorkspace(name);
+      auto tempWs = WorkspaceUtils::getADSMatrixWorkspace(name);
 
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();

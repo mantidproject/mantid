@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/WorkspaceManipulationUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -15,7 +15,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::WorkspaceManipulationUtils;
+using namespace MantidQt::CustomInterfaces::WorkspaceUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
 namespace {
 
@@ -46,9 +46,13 @@ MatrixWorkspace_sptr createWorkspaceWithInstrumentAndParameters() {
 }
 } // namespace
 
-class WorkspaceManipulationUtilsTest : public CxxTest::TestSuite {
+class WorkspaceUtilsTest : public CxxTest::TestSuite {
 public:
-  WorkspaceManipulationUtilsTest() = default;
+  static WorkspaceUtilsTest *createSuite() { return new WorkspaceUtilsTest(); }
+
+  static void destroySuite(WorkspaceUtilsTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_getXRangeFromWorkspace_returns_valid_range_within_default_precision() {
     auto const testWorkspace = createWorkspace(1, 5);

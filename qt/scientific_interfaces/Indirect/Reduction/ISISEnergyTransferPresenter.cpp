@@ -21,7 +21,7 @@
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 bool doesExistInADS(std::string const &workspaceName) {
@@ -260,8 +260,9 @@ void IETPresenter::notifyRunFinished() {
 void IETPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ISISEnergyTransfer");
-  auto fbSuffixes = filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName);
-  auto wsSuffixes = filter ? getCalibrationWSSuffixes(tabName) : noSuffixes;
+  auto fbSuffixes =
+      filter ? InterfaceUtils::getCalibrationFBSuffixes(tabName) : InterfaceUtils::getCalibrationExtensions(tabName);
+  auto wsSuffixes = filter ? InterfaceUtils::getCalibrationWSSuffixes(tabName) : noSuffixes;
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }

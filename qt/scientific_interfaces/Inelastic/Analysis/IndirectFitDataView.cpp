@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
+#include "Common/InterfaceUtils.h"
 #include "IndirectFitDataPresenter.h"
-
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
@@ -15,7 +15,7 @@
 #include <QStyledItemDelegate>
 
 using namespace Mantid::API;
-
+using namespace MantidQt::CustomInterfaces;
 constexpr auto NUMERICAL_PRECISION = 6;
 
 namespace {
@@ -29,8 +29,6 @@ const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
 const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
-
-QString makeNumber(double d) { return QString::number(d, 'f', NUMERICAL_PRECISION); }
 
 class ExcludeRegionDelegate : public QItemDelegate {
 public:
@@ -75,7 +73,7 @@ public:
 
   void setEditorData(QWidget *editor, const QModelIndex &index) const override {
     const auto value = index.model()->data(index, Qt::EditRole).toDouble();
-    static_cast<QLineEdit *>(editor)->setText(makeNumber(value));
+    static_cast<QLineEdit *>(editor)->setText(InterfaceUtils::makeQStringNumber(value, NUMERICAL_PRECISION));
   }
 };
 
@@ -150,10 +148,10 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   cell->setFlags(flags);
   setCell(std::move(cell), row, getColumnIndexFromName("WS Index"));
 
-  cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.startX));
+  cell = std::make_unique<QTableWidgetItem>(InterfaceUtils::makeQStringNumber(newRow.startX, NUMERICAL_PRECISION));
   setCell(std::move(cell), row, getColumnIndexFromName("StartX"));
 
-  cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.endX));
+  cell = std::make_unique<QTableWidgetItem>(InterfaceUtils::makeQStringNumber(newRow.endX, NUMERICAL_PRECISION));
   setCell(std::move(cell), row, getColumnIndexFromName("EndX"));
 
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
@@ -163,7 +161,7 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
 void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
   QTableWidgetItem *selectedItem;
   selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
-  selectedItem->setText(makeNumber(numEntry));
+  selectedItem->setText(InterfaceUtils::makeQStringNumber(numEntry, NUMERICAL_PRECISION));
 }
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
