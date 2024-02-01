@@ -30,13 +30,17 @@ ProcessBankCompressed::ProcessBankCompressed(DefaultEventLoader &m_loader, const
       m_bankPulseTimes(std::move(bankPulseTimes)), m_detid_min(min_detid), m_detid_max(max_detid),
       m_tof_min(static_cast<float>(histogram_bin_edges->front())),
       m_tof_max(static_cast<float>(histogram_bin_edges->back())) {
-  const auto bin_mode = (divisor >= 0) ? CompressBinningMode::LINEAR : CompressBinningMode::LOGARITHMIC;
 
   m_cost = static_cast<double>(m_event_detid->size());
 
-  const auto divisor_abs = abs(divisor);
+  // setup the vector with sorting information
+  const auto NUM_DETS = static_cast<size_t>(m_detid_max - m_detid_min) + 1;
+  m_sorting.clear();
+  m_sorting.resize(NUM_DETS, DataObjects::UNSORTED);
 
   // create the spetcra accumulators
+  const auto bin_mode = (divisor >= 0) ? CompressBinningMode::LINEAR : CompressBinningMode::LOGARITHMIC;
+  const auto divisor_abs = abs(divisor);
   m_factory = std::make_unique<CompressEventAccumulatorFactory>(histogram_bin_edges, divisor_abs, bin_mode);
 }
 
@@ -161,8 +165,9 @@ class EventCreationTask {
 public:
   EventCreationTask(std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>> *accumulators,
                     std::vector<std::vector<Mantid::DataObjects::WeightedEventNoTime> *> *eventlists,
-                    const detid_t detid_min)
-      : m_accumulators(accumulators), m_eventlists(eventlists), m_detid_min(static_cast<size_t>(detid_min)) {}
+                    const detid_t detid_min, std::vector<DataObjects::EventSortType> *sorting)
+      : m_accumulators(accumulators), m_eventlists(eventlists), m_sorting(sorting),
+        m_detid_min(static_cast<size_t>(detid_min)) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t index = range.begin(); index < range.end(); ++index) {
@@ -171,6 +176,8 @@ public:
         // create the events on the correct event list
         m_accumulators->operator[](index)->createWeightedEvents(m_eventlists->operator[](index + m_detid_min));
       }
+      // get the sorting type back
+      m_sorting->operator[](index) = m_accumulators->operator[](index)->getSortType();
       // let go of the unique_ptr to free up memory
       m_accumulators->operator[](index).reset();
     }
@@ -179,6 +186,7 @@ public:
 private:
   std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>> *m_accumulators;
   std::vector<std::vector<Mantid::DataObjects::WeightedEventNoTime> *> *m_eventlists;
+  std::vector<DataObjects::EventSortType> *m_sorting;
   const size_t m_detid_min;
 };
 
@@ -192,7 +200,7 @@ void ProcessBankCompressed::addToEventLists() {
   for (size_t period_index = 0; period_index < num_periods; ++period_index) {
     // create the events and add them to the EventLists
     EventCreationTask create_task(&(m_spectra_accum[period_index]), &m_loader.weightedNoTimeEventVectors[period_index],
-                                  m_detid_min);
+                                  m_detid_min, &m_sorting);
     // grainsize selected to balance overhead of creating threads with how much work is done in a thread
     const size_t grainsize = std::min<size_t>(20, num_dets / 20);
     tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets, grainsize), create_task);
@@ -217,14 +225,21 @@ void ProcessBankCompressed::run() {
   this->addToEventLists();
   m_prog->report(m_entry_name + ": created events");
 
-  /* TODO need to coordinate with accumulators to find out if they were sorted
+  // TODO need to coordinate with accumulators to find out if they were sorted
   // set sort order on all of the EventLists since they were sorted by TOF
+  const auto pixelID_to_wi_offset = m_loader.pixelID_to_wi_offset;
+  auto &outputWS = m_loader.m_ws;
   const size_t numEventLists = m_loader.m_ws.getNumberHistograms();
-  for (size_t wi = 0; wi < numEventLists; ++wi) {
-    auto &eventList = m_loader.m_ws.getSpectrum(wi);
-    eventList.setSortOrder(DataObjects::TOF_SORT);
+  for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
+    const detid_t detid_offset = detid + pixelID_to_wi_offset;
+    if (!(detid_offset < 0 || detid_offset > static_cast<detid_t>(m_loader.pixelID_to_wi_vector.size()))) {
+      const auto wi = m_loader.pixelID_to_wi_vector[detid_offset];
+      if (wi < numEventLists) {
+        const auto sortOrder = m_sorting[static_cast<size_t>(detid - m_detid_min)];
+        outputWS.getSpectrum(wi).setSortOrder(sortOrder);
+      }
+    }
   }
-  */
 
   std::cout << "Time to ProcessBankCompressed   " << m_entry_name << " " << timer << "\n";
   // log performance in debug mode

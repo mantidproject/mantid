@@ -75,6 +75,11 @@ private:
    */
   std::vector<std::vector<std::unique_ptr<DataHandling::CompressEventAccumulator>>> m_spectra_accum;
 
+  /*
+   * After events are added, this will contain the sorting information to set out the output event lists
+   */
+  std::vector<DataObjects::EventSortType> m_sorting;
+
   // inclusive
   const detid_t m_detid_min;
   // inclusive
