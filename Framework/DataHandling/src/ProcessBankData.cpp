@@ -153,7 +153,7 @@ void ProcessBankData::run() {
             auto *eventVector = m_loader.eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-              eventVector->emplace_back(tof, pulsetime);
+              eventVector->emplace_back(std::move(tof), pulsetime);
             } else {
               ++my_discarded_events;
             }
