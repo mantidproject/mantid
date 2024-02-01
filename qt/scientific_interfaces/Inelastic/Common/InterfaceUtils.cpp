@@ -10,9 +10,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QtXml>
-
-using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
+#include <boost/algorithm/string.hpp>
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");

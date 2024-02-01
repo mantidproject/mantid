@@ -13,9 +13,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("WorkspaceUtils");
