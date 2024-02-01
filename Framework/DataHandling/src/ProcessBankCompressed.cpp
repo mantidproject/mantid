@@ -194,7 +194,7 @@ void ProcessBankCompressed::addToEventLists() {
     EventCreationTask create_task(&(m_spectra_accum[period_index]), &m_loader.weightedNoTimeEventVectors[period_index],
                                   m_detid_min);
     // grainsize selected to balance overhead of creating threads with how much work is done in a thread
-    constexpr size_t grainsize{20};
+    const size_t grainsize = std::min<size_t>(20, num_dets / 20);
     tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets, grainsize), create_task);
   }
 
