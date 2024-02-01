@@ -26,7 +26,6 @@ public:
 
   virtual void addEvent(const float tof) = 0;
   virtual void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const = 0;
-  virtual void sort() const = 0;
 
   std::size_t numberHistBins() const;
   virtual double totalWeight() const = 0;
@@ -47,7 +46,7 @@ private:
   boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 
 protected:
-  /// track
+  /// track whether this has allocated the "big" memory objects
   bool m_initialized;
 
 public:
