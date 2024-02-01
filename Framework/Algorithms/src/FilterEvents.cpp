@@ -638,6 +638,7 @@ void FilterEvents::createOutputWorkspaces() {
   std::shared_ptr<EventWorkspace> templateWorkspace = create<EventWorkspace>(*m_eventWS);
   templateWorkspace->setSharedRun(Kernel::make_cow<Run>()); // clear the run object
   templateWorkspace->clearMRU();
+  templateWorkspace->switchEventType(m_eventWS->getEventType());
 
   // Set up target workspaces
   size_t number_of_output_workspaces{0};
