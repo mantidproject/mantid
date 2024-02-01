@@ -112,27 +112,33 @@ public:
     raw_events->clear();
 
     if (m_tof_bin.empty()) {
+      m_is_sorted = true;
       return; // nothing to do
     } else if (m_tof_bin.size() == 1) {
+      m_is_sorted = true;
       // don't bother with temporary objects and such if there is only one event
       const auto tof = this->getBinCenter(m_tof_bin.front());
       raw_events->emplace_back(std::move(tof), 1., 1.);
-    } else if (m_tof_bin.size() < 100) {
+    } else if (m_tof_bin.size() < 1000) {
       // this branch removes events as it accumulates them. It does not assume that the time-of-flight is sorted before
       // starting so the output will not be sorted either
-      while (m_tof_bin.size() > 0) {
-        // start with the last value so there is less movement since remove_if moves everything to the end
-        const auto bin = m_tof_bin.back();
-        const auto tof = this->getBinCenter(bin);
+      auto last_end = m_tof_bin.end();
+      while (std::distance(m_tof_bin.begin(), last_end) > 1) {
+        // start with the last value so there is less movement since remove moves everything to the end of the range
+        const auto bin = *(last_end - 1); // one before the last end
 
         // move everything with this value to the end
-        auto new_end = std::remove(m_tof_bin.begin(), m_tof_bin.end(), bin);
+        // vector::erase would finally remove the elements, but that takes more time
+        auto new_end = std::remove(m_tof_bin.begin(), last_end, bin);
+
         // number of values moved is the number of counts - which are stored as float
-        const auto counts = static_cast<float>(std::distance(new_end, m_tof_bin.end()));
-        // erase the elements so the next iteration is smaller
-        m_tof_bin.erase(new_end, m_tof_bin.end());
+        const auto counts = static_cast<float>(std::distance(new_end, last_end));
+
+        // move the end to the new location
+        last_end = new_end;
 
         // add the event
+        const auto tof = this->getBinCenter(bin);
         raw_events->emplace_back(std::move(tof), counts, counts);
       }
     } else {
@@ -162,6 +168,13 @@ public:
     // drop extra space if the capacity is more than 10% of what is needed
     if (static_cast<double>(raw_events->capacity()) > 1.1 * static_cast<double>(raw_events->size()))
       raw_events->shrink_to_fit();
+  }
+
+  DataObjects::EventSortType getSortType() const override {
+    if (m_is_sorted)
+      return DataObjects::TOF_SORT;
+    else
+      return DataObjects::UNSORTED;
   }
 
 private:
@@ -219,6 +232,8 @@ public:
     }
     std::cout << "createWeightedEvents " << m_numevents << " -> " << raw_events->size() << "\n";
   }
+
+  DataObjects::EventSortType getSortType() const override { return DataObjects::TOF_SORT; }
 
 private:
   void allocateFineHistogram() {

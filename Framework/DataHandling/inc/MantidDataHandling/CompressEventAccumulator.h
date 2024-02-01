@@ -29,6 +29,7 @@ public:
 
   std::size_t numberHistBins() const;
   virtual double totalWeight() const = 0;
+  virtual DataObjects::EventSortType getSortType() const = 0;
 
 protected:
   template <typename INT_TYPE> double getBinCenter(const INT_TYPE bin) const;
