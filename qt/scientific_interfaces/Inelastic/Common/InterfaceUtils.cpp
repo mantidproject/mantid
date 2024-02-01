@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QtXml>
 #include <boost/algorithm/string.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
@@ -160,7 +161,7 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &d
   return std::make_pair(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
 }
 
-QString makeQStringNumber(double value, double precision) { return QString::number(value, 'f', precision); }
+QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces

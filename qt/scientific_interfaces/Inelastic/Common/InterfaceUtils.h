@@ -41,7 +41,7 @@ MANTIDQT_INELASTIC_DLL QStringList getCorrectionsWSSuffixes(std::string const &i
 MANTIDQT_INELASTIC_DLL QVector<QString> convertStdStringVector(std::vector<std::string> const &stringVec);
 MANTIDQT_INELASTIC_DLL QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple);
-MANTIDQT_INELASTIC_DLL QString makeQStringNumber(double value, double precision);
+MANTIDQT_INELASTIC_DLL QString makeQStringNumber(double value, int precision);
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt
