@@ -86,14 +86,13 @@ void ProcessBankCompressed::addEvent(const size_t period_index, const detid_t de
   }
 
   // check if the tof is within range
-  const auto tof_f = static_cast<float>(tof);
-  if (((tof_f - m_tof_min) * (tof_f - m_tof_max) > 0.)) {
+  if (((tof - m_tof_min) * (tof - m_tof_max) > 0.)) {
     // std::cout << "Skipping tof: " << tof_f << "\n";
     return; // early
   }
 
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
-  m_spectra_accum[period_index][det_index]->addEvent(tof_f);
+  m_spectra_accum[period_index][det_index]->addEvent(tof);
 }
 
 void ProcessBankCompressed::collectEvents() {
@@ -194,7 +193,9 @@ void ProcessBankCompressed::addToEventLists() {
     // create the events and add them to the EventLists
     EventCreationTask create_task(&(m_spectra_accum[period_index]), &m_loader.weightedNoTimeEventVectors[period_index],
                                   m_detid_min);
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets), create_task);
+    // grainsize selected to balance overhead of creating threads with how much work is done in a thread
+    constexpr size_t grainsize{20};
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets, grainsize), create_task);
   }
 
   std::cout << "Time to addToEventLists.append: " << m_entry_name << " " << timer << "\n";
