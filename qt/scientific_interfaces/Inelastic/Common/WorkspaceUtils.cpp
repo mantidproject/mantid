@@ -40,7 +40,7 @@ namespace WorkspaceUtils {
  */
 std::string getWorkspaceSuffix(const std::string &wsName) {
   auto const lastUnderscoreIndex = wsName.find_last_of("_");
-  if (lastUnderscoreIndex == -1)
+  if (lastUnderscoreIndex == wsName.npos)
     return std::string();
   return wsName.substr(lastUnderscoreIndex + 1);
 }
@@ -56,7 +56,7 @@ std::string getWorkspaceSuffix(const std::string &wsName) {
  */
 std::string getWorkspaceBasename(const std::string &wsName) {
   auto lastUnderscoreIndex = wsName.find_last_of("_");
-  if (lastUnderscoreIndex == -1)
+  if (lastUnderscoreIndex == wsName.npos)
     return wsName;
 
   return wsName.substr(0, lastUnderscoreIndex);
