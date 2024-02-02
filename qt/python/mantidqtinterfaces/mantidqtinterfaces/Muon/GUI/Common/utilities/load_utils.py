@@ -337,7 +337,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    message = "Could not load the following files : \n "
+    message = "Could not load the following files:\n"
     for failure in failed_file_list:
-        message += f"{os.path.split(failure[0])[-1]} ; {failure[1]}".replace("\n", "")
+        message += f"- {os.path.split(failure[0])[-1]} : {failure[1]}".replace("\n", "")
     return message
