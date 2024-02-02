@@ -15,7 +15,6 @@
 namespace {
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-bool validWorkspace(std::string const &name) { return !name.empty() && WorkspaceUtils::doesExistInADS(name); }
 
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
@@ -106,7 +105,7 @@ void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
 
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
-  if (validWorkspace(name) && state == Qt::Checked) {
+  if (WorkspaceUtils::doesExistInADS(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   } else
