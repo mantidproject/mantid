@@ -148,4 +148,23 @@ We can check that the factor :math:`1/n` is needed by looking at the special cas
 weights are all set to :math:`F_i = 1`. In this case, the result of the integral yields
 :math:`\sum_i Y_i`, which is what we expect for an integral over bins with no fractional area weights.
 
+.. _FractionalRebinning-Notes:
+
+Notes
+-----
+
+.. tip::
+  For correct handling of the fractional weights in rebinning, the user
+  is recommended to use the :ref:`algm-Rebin2D` algorithm in preference
+  to :ref:`algm-Integration` or :ref:`algm-SumSpectra` although the other
+  algorithms do account for the fractional weights.
+
+.. warning::
+  All binary and unary operations on
+  workspaces will ignore the fractional weights. Thus it is important
+  to handle all background subtractions and scaling in the original
+  reduced dataset(s) **before** conversion using
+  :ref:`algm-SofQWNormalisedPolygon`.
+
+
 .. categories:: Concepts
