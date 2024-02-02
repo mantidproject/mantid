@@ -27,6 +27,8 @@ class FunctionTemplateBrowser;
 
 class MANTIDQT_INELASTIC_DLL ITemplatePresenter {
 public:
+  virtual ~ITemplatePresenter() = default;
+
   virtual FunctionTemplateBrowser *browser() = 0;
 
   virtual void init() = 0;
