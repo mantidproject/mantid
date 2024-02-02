@@ -48,8 +48,10 @@ public:
 
 signals:
   void logOptionsChecked(bool /*_t1*/);
+  void dialogFinished(int /*result*/, EditLocalParameterDialog * /*dialog*/);
 
 private slots:
+  void emitDialogFinished(int /*result*/);
   void valueChanged(int /*row*/, int /*col*/);
   void setAllValues(double /*value*/);
   void fixParameter(int /*index*/, bool /*fix*/);

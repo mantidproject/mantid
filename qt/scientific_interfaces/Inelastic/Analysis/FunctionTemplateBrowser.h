@@ -9,7 +9,6 @@
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
@@ -30,6 +29,9 @@ class QtTreePropertyBrowser;
 class QtProperty;
 
 namespace MantidQt {
+namespace MantidWidgets {
+class EditLocalParameterDialog;
+}
 namespace CustomInterfaces {
 namespace IDA {
 
@@ -101,7 +103,7 @@ protected slots:
   virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
   virtual void parameterChanged(QtProperty *) = 0;
   void parameterButtonClicked(QtProperty *);
-  void editLocalParameterFinished(int result);
+  void editLocalParameterFinished(int result, EditLocalParameterDialog *dialog);
 
 private:
   void createBrowser();
@@ -131,9 +133,6 @@ protected:
 
   /// The corresponding template presenter
   ITemplatePresenter *m_presenter;
-
-  /// The Edit local parameter dialog
-  EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
 } // namespace IDA

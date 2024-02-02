@@ -15,6 +15,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
@@ -167,24 +168,22 @@ void FunctionTemplateBrowser::openEditLocalParameterDialog(std::string const &pa
                                                            QStringList const &domainNames, QList<double> const &values,
                                                            QList<bool> const &fixes, QStringList const &ties,
                                                            QStringList const &constraints) {
-  m_editLocalParameterDialog =
+  auto dialog =
       new EditLocalParameterDialog(this, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinished(int)));
-  m_editLocalParameterDialog->open();
+  connect(dialog, SIGNAL(dialogFinished(int, EditLocalParameterDialog *)), this,
+          SLOT(editLocalParameterFinished(int, EditLocalParameterDialog *)));
+  dialog->open();
 }
 
 void FunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
   m_presenter->handleEditLocalParameter(m_parameterNames[prop]);
 }
 
-void FunctionTemplateBrowser::editLocalParameterFinished(int result) {
+void FunctionTemplateBrowser::editLocalParameterFinished(int result, EditLocalParameterDialog *dialog) {
   if (result == QDialog::Accepted) {
-    m_presenter->handleEditLocalParameterFinished(
-        m_editLocalParameterDialog->getParameterName(), m_editLocalParameterDialog->getValues(),
-        m_editLocalParameterDialog->getFixes(), m_editLocalParameterDialog->getTies(),
-        m_editLocalParameterDialog->getConstraints());
+    m_presenter->handleEditLocalParameterFinished(dialog->getParameterName(), dialog->getValues(), dialog->getFixes(),
+                                                  dialog->getTies(), dialog->getConstraints());
   }
-  m_editLocalParameterDialog = nullptr;
   emitFunctionStructureChanged();
 }
 
