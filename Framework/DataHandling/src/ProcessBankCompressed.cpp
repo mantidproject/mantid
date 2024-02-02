@@ -82,19 +82,20 @@ void ProcessBankCompressed::createAccumulators(const bool precount) {
   m_factory.reset();
 }
 
-void ProcessBankCompressed::addEvent(const size_t period_index, const detid_t detid, const float tof) {
+void ProcessBankCompressed::addEvent(const size_t period_index, const size_t event_index) {
   // comparing to integers is cheapest
-  if ((detid < m_detid_min) || detid > m_detid_max) {
-    // std::cout << "Skipping detid: " << m_detid_min << " < " << detid << " < " << m_detid_max << "\n";
-    return; // early
+  const auto detid = static_cast<detid_t>(m_event_detid->operator[](event_index));
+  if ((detid < m_detid_min) || (detid > m_detid_max)) {
+    return;
   }
 
   // check if the tof is within range
+  const auto tof = m_event_tof->operator[](event_index);
   if (((tof - m_tof_min) * (tof - m_tof_max) > 0.)) {
-    // std::cout << "Skipping tof: " << tof_f << "\n";
-    return; // early
+    return;
   }
 
+  // accumulators are zero indexed
   const auto det_index = static_cast<size_t>(detid - m_detid_min);
   m_spectra_accum[period_index][det_index]->addEvent(tof);
 }
@@ -120,15 +121,13 @@ void ProcessBankCompressed::collectEvents() {
 
       // add all events in this pulse
       for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
-        this->addEvent(periodIndex, static_cast<detid_t>(m_event_detid->operator[](eventIndex)),
-                       m_event_tof->operator[](eventIndex));
+        this->addEvent(periodIndex, eventIndex);
       }
     }
   } else {
-    // add all events in the list
+    // add all events in the list which are all in the first period
     for (std::size_t eventIndex = 0; eventIndex < NUM_EVENTS; ++eventIndex) {
-      this->addEvent(0, static_cast<detid_t>(m_event_detid->operator[](eventIndex)),
-                     m_event_tof->operator[](eventIndex));
+      this->addEvent(0, eventIndex);
     }
   }
 
@@ -172,9 +171,13 @@ public:
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t index = range.begin(); index < range.end(); ++index) {
       auto &accumulator = m_accumulators->operator[](index);
-      if (accumulator->m_numevents > 0) {
+      if (accumulator->totalWeight() > 0.) {
+        auto *raw_events = m_eventlists->operator[](index + m_detid_min);
         // create the events on the correct event list
-        m_accumulators->operator[](index)->createWeightedEvents(m_eventlists->operator[](index + m_detid_min));
+        m_accumulators->operator[](index)->createWeightedEvents(raw_events);
+        // drop extra space if the capacity is more than 10% of what is needed
+        if (static_cast<double>(raw_events->capacity()) > 1.1 * static_cast<double>(raw_events->size()))
+          raw_events->shrink_to_fit();
       }
       // get the sorting type back
       m_sorting->operator[](index) = m_accumulators->operator[](index)->getSortType();

@@ -35,7 +35,7 @@ public:
 
   void run() override;
 
-  void addEvent(const size_t period_index, const detid_t detid, const float tof);
+  void addEvent(const size_t period_index, const size_t event_index);
 
   void createWeightedEvents(const size_t period_index, const detid_t detid,
                             std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events);
