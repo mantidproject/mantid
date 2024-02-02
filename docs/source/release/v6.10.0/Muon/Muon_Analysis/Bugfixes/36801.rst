@@ -1,0 +1,1 @@
+- Fixed a crash caused by unselecting all loaded data in the Grouping tab before adding a Fit Function.
