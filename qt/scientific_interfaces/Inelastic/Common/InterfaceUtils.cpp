@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InterfaceUtils.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -23,17 +24,11 @@ namespace InterfaceUtils {
 /**
  * General functions used in inelastic/indirect tabs.
  */
-static QStringList toQStringList(std::vector<std::string> const &strings) {
-  QStringList list;
-  for (auto const &str : strings)
-    list << QString::fromStdString(str);
-  return list;
-}
 
 static QStringList toQStringList(std::string const &str, std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
-  return toQStringList(subStrings);
+  return MantidWidgets::stdVectorToQStringList(subStrings);
 }
 
 static std::string getAttributeFromTag(QDomElement const &tag, QString const &attribute, QString const &defaultValue) {
