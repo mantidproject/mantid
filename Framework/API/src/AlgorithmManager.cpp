@@ -54,7 +54,7 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
  * @throw  std::runtime_error Thrown if properties string is ill-formed
  */
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const int &version) {
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
     alg = AlgorithmFactory::Instance().create(algName,
@@ -77,7 +77,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const i
  * Clears all managed algorithm objects that are not currently running.
  */
 void AlgorithmManagerImpl::clear() {
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   for (auto itAlg = m_managed_algs.begin(); itAlg != m_managed_algs.end();) {
     if (!(*itAlg)->isRunning()) {
       itAlg = m_managed_algs.erase(itAlg);
@@ -95,7 +95,7 @@ std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }
  * @returns A shared pointer to the algorithm or nullptr if not found
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   const auto found = std::find_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
                                   [id](const auto &algorithm) { return algorithm->getAlgorithmID() == id; });
   if (found == m_managed_algs.cend()) {
@@ -110,7 +110,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
  * @param id :: The ID of the algorithm
  */
 void AlgorithmManagerImpl::removeById(AlgorithmID id) {
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   auto itend = m_managed_algs.end();
   for (auto it = m_managed_algs.begin(); it != itend; ++it) {
     if ((**it).getAlgorithmID() == id) {
@@ -141,7 +141,7 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   std::copy_if(
       m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theRunningInstances),
       [&algorithmName](const auto &algorithm) { return algorithm->name() == algorithmName && algorithm->isRunning(); });
@@ -152,7 +152,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(cons
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstances() const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theRunningInstances),
                [](const auto &algorithm) { return algorithm->isRunning(); });
   return theRunningInstances;
@@ -160,7 +160,7 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstances() cons
 
 /// Requests cancellation of all running algorithms
 void AlgorithmManagerImpl::cancelAll() {
-  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   for (auto &managed_alg : m_managed_algs) {
     if (managed_alg->isRunning())
       managed_alg->cancel();
@@ -168,10 +168,9 @@ void AlgorithmManagerImpl::cancelAll() {
 }
 
 /// Removes all of the finished algorithms
-/// this does not lock the mutex as the locking is already assumed to be in
-/// place
 size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::vector<IAlgorithm_const_sptr> theCompletedInstances;
+  std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
   std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theCompletedInstances),
                [](const auto &algorithm) { return (algorithm->isReadyForGarbageCollection()); });
   for (auto completedAlg : theCompletedInstances) {
