@@ -76,7 +76,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.handle_ads_clear_or_remove_workspace_event()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_ads_clear_or_remove_workspace_event_will_disable_the_tab_if_no_data_is_loaded(self):
         self.mock_model_number_of_datasets = mock.PropertyMock(return_value=0)
@@ -85,7 +84,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.handle_ads_clear_or_remove_workspace_event()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.view.disable_view.assert_called_once_with()
 
     def test_that_handle_gui_changes_made_will_reset_the_start_and_end_x_in_the_model_and_view(self):
         self.presenter.handle_gui_changes_made({"FirstGoodDataFromFile": True})
@@ -105,7 +103,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
-        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_new_data_loaded_will_disable_the_tab_if_no_data_is_loaded(self):
         self.presenter.clear_undo_data = mock.Mock()
@@ -118,7 +115,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
-        self.view.disable_view.assert_called_once_with()
 
     def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
@@ -472,6 +468,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.model.get_workspace_names_to_display_from_context.assert_called_once_with()
         self.view.set_datasets_in_function_browser.assert_called_once_with(self.dataset_names)
+        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_update_fit_function_in_view_from_model_will_update_the_function_and_index_in_the_view(self):
         self.presenter.update_fit_function_in_view_from_model()
