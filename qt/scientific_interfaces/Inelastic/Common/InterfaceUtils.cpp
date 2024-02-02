@@ -134,20 +134,6 @@ QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) {
   return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "corrections"), ",");
 }
 
-/*
- * Converts a standard vector of standard strings to a QVector of QStrings.
- *
- * @param stringVec The standard vector of standard strings to convert.
- * @return          A QVector of QStrings.
- */
-QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) {
-  QVector<QString> resultVec;
-  resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
-  std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
-                 [](const auto &str) { return QString::fromStdString(str); });
-  return resultVec;
-}
-
 QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple) {
   return QPair<double, double>(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
 }

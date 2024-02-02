@@ -26,13 +26,6 @@ public:
   void test_interface_property_empty_if_no_interface_found() {
     TS_ASSERT_EQUALS(getInterfaceProperty("Empty", "EXTENSIONS", "all"), "");
   }
-  void test_conversion_toVectorOfQString() {
-    std::vector<std::string> testVec = {"First", "Last"};
-
-    TS_ASSERT_EQUALS(convertStdStringVector(testVec).first(), "First");
-    TS_ASSERT_EQUALS(convertStdStringVector(testVec).last(), "Last");
-    TS_ASSERT_EQUALS(convertStdStringVector(testVec).size(), testVec.size());
-  }
 
   void test_get_FB_WS_suffixes_function_returns_proper_interface_suffixes() {
     // There are many similar functions in the interface, this test will try only one pair of such functions
