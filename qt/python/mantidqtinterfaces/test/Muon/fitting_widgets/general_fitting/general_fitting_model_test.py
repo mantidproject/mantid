@@ -63,7 +63,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_simultaneous_fit_function_to_an_ifunction_will_raise_if_the_number_of_datasets_is_zero(self):
         self.assertEqual(self.model.number_of_datasets, 0)
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.simultaneous_fit_function = self.simultaneous_fit_function
 
     def test_that_setting_the_simultaneous_fit_function_to_a_none_will_not_raise_if_the_number_of_datasets_is_zero(self):
