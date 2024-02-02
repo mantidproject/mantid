@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");

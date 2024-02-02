@@ -29,7 +29,6 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::CustomInterfaces;
 
 namespace {
 /// Logger

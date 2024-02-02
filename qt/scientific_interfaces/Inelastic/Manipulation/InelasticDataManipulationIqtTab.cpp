@@ -20,7 +20,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");

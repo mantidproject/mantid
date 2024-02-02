@@ -18,7 +18,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DeltaEMode;
-using namespace MantidQt::CustomInterfaces;
 
 /**
  * Determines whether an input has a value of zero

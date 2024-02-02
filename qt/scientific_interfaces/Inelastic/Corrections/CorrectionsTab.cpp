@@ -12,7 +12,6 @@
 #include <QSettings>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt::CustomInterfaces {
 /**

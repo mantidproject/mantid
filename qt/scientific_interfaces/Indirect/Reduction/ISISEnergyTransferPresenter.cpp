@@ -7,6 +7,7 @@
 #include "ISISEnergyTransferPresenter.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
@@ -21,13 +22,6 @@
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
-using namespace MantidQt::CustomInterfaces;
-
-namespace {
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
@@ -223,7 +217,7 @@ void IETPresenter::plotRawComplete(bool error) {
 void IETPresenter::notifySaveClicked() {
   IETSaveData saveData = m_view->getSaveData();
   for (auto const &workspaceName : m_outputWorkspaces)
-    if (doesExistInADS(workspaceName))
+    if (WorkspaceUtils::doesExistInADS(workspaceName))
       m_model->saveWorkspace(workspaceName, saveData);
 }
 
@@ -238,7 +232,7 @@ void IETPresenter::notifySaveCustomGroupingClicked() {
     m_view->displayWarning("The custom grouping is empty.");
   }
 
-  if (doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
+  if (WorkspaceUtils::doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
     auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     m_view->showSaveCustomGroupingDialog(IETGroupingConstants::GROUPING_WS_NAME,
                                          IETGroupingConstants::DEFAULT_GROUPING_FILENAME, saveDirectory);

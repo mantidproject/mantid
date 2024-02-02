@@ -12,10 +12,9 @@
 #include <boost/optional.hpp>
 #include <utility>
 
-using namespace MantidQt::CustomInterfaces;
-
 namespace {
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 bool validWorkspace(std::string const &name) { return !name.empty() && WorkspaceUtils::doesExistInADS(name); }
 
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {

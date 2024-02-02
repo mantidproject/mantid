@@ -15,10 +15,10 @@
 #include <QStyledItemDelegate>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
 constexpr auto NUMERICAL_PRECISION = 6;
 
 namespace {
+using namespace MantidQt::CustomInterfaces;
 
 namespace Regexes {
 const QString EMPTY = "^$";

@@ -22,7 +22,6 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");

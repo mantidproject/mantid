@@ -19,7 +19,6 @@
 #include <QFileInfo>
 
 using namespace IndirectDataValidationHelper;
-using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
