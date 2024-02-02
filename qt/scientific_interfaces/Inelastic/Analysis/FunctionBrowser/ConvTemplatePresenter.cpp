@@ -149,8 +149,8 @@ void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_model->updateMultiDatasetParameters(paramTable);
+void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_model->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 

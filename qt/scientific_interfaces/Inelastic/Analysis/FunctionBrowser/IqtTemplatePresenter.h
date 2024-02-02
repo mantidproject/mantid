@@ -49,8 +49,8 @@ public:
   void setGlobalParameters(std::vector<std::string> const &globals) override;
   void setGlobal(std::string const &parameterName, bool on) override;
 
-  void updateMultiDatasetParameters(const IFunction &fun) override;
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
+  void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
   void updateParameters(const IFunction &fun) override;
 
   void setCurrentDataset(int i) override;

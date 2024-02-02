@@ -31,6 +31,8 @@ class SingleFunctionTemplateBrowser;
  */
 class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
+  using FunctionTemplatePresenter::updateMultiDatasetParameters;
+
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> functionModel);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
@@ -53,7 +55,7 @@ public:
   void setGlobalParameters(std::vector<std::string> const &globals) override;
   void setGlobal(std::string const &parameterName, bool on) override;
 
-  void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
   void updateParameters(const IFunction &fun) override;
 
   void setCurrentDataset(int i) override;

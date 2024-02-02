@@ -144,8 +144,8 @@ void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_model->updateMultiDatasetParameters(paramTable);
+void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_model->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 

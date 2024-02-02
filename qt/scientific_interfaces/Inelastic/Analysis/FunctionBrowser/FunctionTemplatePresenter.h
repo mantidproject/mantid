@@ -17,6 +17,8 @@ class FunctionTemplateBrowser;
 
 class MANTIDQT_INELASTIC_DLL FunctionTemplatePresenter : public ITemplatePresenter {
 public:
+  using ITemplatePresenter::updateMultiDatasetParameters;
+
   FunctionTemplatePresenter();
 
   virtual void init() override;
