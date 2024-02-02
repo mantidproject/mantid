@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/FDA/Bugfixes
+
 
 
 Muon Analysis
@@ -19,7 +19,7 @@ Muon Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
+- Fixed a bug where the parameters for a UserFunction after a simultaneous fit were not being updated.
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
+
 
 
 ALC
@@ -35,7 +35,7 @@ ALC
 
 Bugfixes
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
+
 
 
 Elemental Analysis
@@ -43,7 +43,7 @@ Elemental Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+
 
 
 Algorithms
@@ -51,6 +51,7 @@ Algorithms
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Algorithms/Bugfixes
+- Fixed an index error when loading data with three periods but only two histograms with the :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` algorithm.
+- Fixed the :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` algorithm when loading a Nexus file with no grouping info so that it loads the grouping from the IDF.
 
 :ref:`Release 6.9.0 <v6.9.0>`
