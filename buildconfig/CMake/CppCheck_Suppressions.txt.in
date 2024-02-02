@@ -288,7 +288,7 @@ operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:23
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:274
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:112
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:116
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:180
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:179
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:138
 knownPointerToBool:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:386
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:620
@@ -920,7 +920,7 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Expor
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:251
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceFactory.cpp:58
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IFunction.cpp:90
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IFunction.cpp:150
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmProperty.cpp:30
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
