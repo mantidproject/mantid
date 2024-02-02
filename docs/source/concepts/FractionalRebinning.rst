@@ -1,7 +1,11 @@
 .. _FractionalRebinning:
 
-Fractional Rebinning (Rebinned Output Workspaces)
-=================================================
+================================================
+Fractional Rebinning (RebinnedOutput Workspaces)
+================================================
+
+.. contents::
+  :local:
 
 In some instances of rebinning data, the information of the counts in the bins
 prior rebinning should be preserved in the output of rebinning in some way.
@@ -73,11 +77,11 @@ As mentioned before, the distinction between Fractional Rebinning
 and normal Rebinning lies in the storage of the fractional weights relative to the original data.
 
 **RebinnedOutput** workspaces have the fractional weight resulting from previous rebins stored
-for each input bin. When :ref:`algm-Rebin` is called on RebinnedOutput workspaces, the argument
+for each input bin. When :ref:`algm-Rebin2D` is called on RebinnedOutput workspaces, the argument
 *UseFractionalArea* is always automatically turned on, to ensure the weight fractions are alwasy propagated accross
 several rebins and that the best possible signal and error estimates are achieved.
 
-On the other hand, when :ref:`algm-Rebin` is called on a **Workspace2D** workspace,
+On the other hand, when :ref:`algm-Rebin2D` is called on a **Workspace2D** workspace,
 by default the argument *UseFractionalArea* is set to False, and no fractional weights
 relative to the original bins are used. If you explicitly set *UseFractionalArea* to True,
 then the algorithm assumes that the Rebin being performed is the very first Rebin on the
@@ -123,8 +127,9 @@ that in places where there are no counts (:math:`Y=0`) and no acceptance
 (no fractional areas, :math:`F=0`), :math:`Y/F=`\ **nan**\ -s will
 result.
 
-Integration
------------
+Integration on RebinnedOutput workspaces
+----------------------------------------
+
 The :ref:`algm-Integration` algorithm operates differently on **RebinnedOutput** workspaces and
 **Workspace2D** workspaces. For **Workspace2D** workspaces, the integrated counts per spectra is simply the
 sum of the counts in the bins within the Integration range:
