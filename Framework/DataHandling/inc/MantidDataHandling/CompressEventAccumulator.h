@@ -49,9 +49,6 @@ private:
 protected:
   /// track whether this has allocated the "big" memory objects
   bool m_initialized;
-
-public:
-  size_t m_numevents; // REMOVE
 };
 
 /**
