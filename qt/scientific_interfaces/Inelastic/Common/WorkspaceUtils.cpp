@@ -8,7 +8,6 @@
 #include "InterfaceUtils.h"
 #include "MantidKernel/Logger.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"

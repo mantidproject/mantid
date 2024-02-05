@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../DllConfig.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -34,7 +35,8 @@ MANTIDQT_INELASTIC_DLL QPair<double, double> getXRangeFromWorkspace(std::string 
                                                                     double precision = 0.000001);
 MANTIDQT_INELASTIC_DLL bool doesExistInADS(std::string const &workspaceName);
 
-template <typename T = MatrixWorkspace> std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+template <typename T = Mantid::API::MatrixWorkspace>
+std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
