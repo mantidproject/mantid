@@ -709,10 +709,10 @@ cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BoxControllerNeXusIO
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:972
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1068
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3848
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3995
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4122
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4123
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3863
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4010
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4137
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4138
 derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1533
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/test/NXcanSASTestHelper.cpp:51
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDBoxSaveable.cpp:0
@@ -1437,4 +1437,3 @@ postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/
 postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFittingModel.cpp:187
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:45
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:66
-
