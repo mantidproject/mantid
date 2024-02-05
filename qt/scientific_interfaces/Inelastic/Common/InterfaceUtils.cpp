@@ -12,7 +12,6 @@
 #include <QMessageBox>
 #include <QtXml>
 #include <boost/algorithm/string.hpp>
-#include <boost/numeric/conversion/cast.hpp>
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");

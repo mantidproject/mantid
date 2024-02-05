@@ -9,6 +9,7 @@
 
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <vector>
