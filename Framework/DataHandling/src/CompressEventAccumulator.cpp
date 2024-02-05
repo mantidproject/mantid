@@ -28,12 +28,12 @@ CompressEventAccumulator::CompressEventAccumulator(std::shared_ptr<std::vector<d
   // look in EventList for why
   if (bin_mode == CompressBinningMode::LINEAR) {
     m_findBin = EventList::findLinearBin;
-    m_divisor = abs(divisor);
-    m_offset = tof_min / m_divisor;
+    m_divisor = 1. / abs(divisor);
+    m_offset = tof_min * m_divisor;
   } else if (bin_mode == CompressBinningMode::LOGARITHMIC) {
     m_findBin = EventList::findLogBin;
-    m_divisor = log1p(abs(divisor)); // use this to do change of base
-    m_offset = log(tof_min) / m_divisor;
+    m_divisor = 1. / log1p(abs(divisor)); // use this to do change of base
+    m_offset = log(tof_min) * m_divisor;
   } else {
     throw std::runtime_error("Haven't implemented this compression binning strategy");
   }
@@ -55,12 +55,12 @@ boost::optional<size_t> CompressEventAccumulator::findBin(const float tof) const
 // ------------------------------------------------------------------------
 namespace { // anonymous
 
-constexpr size_t MAX_EVENTS_FOR_SPARSE_INT{2000};
+constexpr size_t MAX_EVENTS_FOR_SPARSE_INT{20000};
 
 // minimum size of a vector to bother doing parallel_sort
 // the grain size shouldn't get too small or the overhead of threading/sync overwhelms everything else
-// TODO this can be tuned, but it is currently 2x size minimum size for CompressSparseInt
-constexpr size_t MIN_VEC_LENGTH_PARALLEL_SORT{2 * MAX_EVENTS_FOR_SPARSE_INT};
+// TODO this can be tuned
+constexpr size_t MIN_VEC_LENGTH_PARALLEL_SORT{5000};
 
 /**
  * Private class for implementation details of sparse event collection, when there are less events than bins
