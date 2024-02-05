@@ -197,6 +197,13 @@ class AbstractInst(object):
         """
         return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
+    def _check_sample_details(self):
+        if self._sample_details is None:
+            raise ValueError(
+                "Absorption corrections cannot be run without sample details."
+                " Please set sample details using set_sample before running absorption corrections."
+            )
+
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
         Generates absorption corrections to compensate for the container. The overriding instrument
