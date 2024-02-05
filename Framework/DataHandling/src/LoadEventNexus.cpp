@@ -59,6 +59,10 @@ using Types::Core::DateAndTime;
 namespace {
 // detnotes the end of iteration for NeXus::getNextEntry
 const std::string NULL_STR("NULL");
+
+namespace PropertyNames {
+const std::string COMPRESS_TOL("CompressTolerance");
+}
 } // namespace
 
 /**
@@ -81,8 +85,10 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
  */
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0), longest_tof(0), shortest_tof(0), bad_tofs(0),
-      discarded_events(0), compressTolerance(0), compressEvents(false), m_instrument_loaded_correctly(false),
-      loadlogs(false), event_id_is_spec(false) {}
+      discarded_events(0), compressEvents(false), m_instrument_loaded_correctly(false), loadlogs(false),
+      event_id_is_spec(false) {
+  compressTolerance = EMPTY_DBL();
+}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -170,11 +176,11 @@ void LoadEventNexus::init() {
                   "This can significantly reduce memory use and memory fragmentation; it "
                   "may also speed up loading.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("CompressTolerance", -1.0, Direction::Input),
-                  "Run CompressEvents while loading (optional, leave blank or "
-                  "negative to not do). "
-                  "This specified the tolerance to use (in microseconds) when "
-                  "compressing.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOL, EMPTY_DBL(), Direction::Input),
+      "CompressEvents while loading (optional, leave blank to not do). "
+      "This specified the tolerance to use (in microseconds) when compressing where positive is linear tolerance, "
+      "negative is logorithmic tolerance, and zero is that time-of-flight must be identical to compress.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
@@ -191,7 +197,7 @@ void LoadEventNexus::init() {
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
-  setPropertyGroup("CompressTolerance", grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_TOL, grp3);
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
@@ -389,8 +395,8 @@ void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  compressTolerance = getProperty("CompressTolerance");
-  compressEvents = !isDefault("CompressTolerance");
+  compressTolerance = getProperty(PropertyNames::COMPRESS_TOL);
+  compressEvents = !isDefault(PropertyNames::COMPRESS_TOL);
 
   loadlogs = getProperty("LoadLogs");
 
@@ -1655,7 +1661,7 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
   noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
   noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
                                 filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+  noParallelConstrictions &= !((!isDefault(PropertyNames::COMPRESS_TOL) || !isDefault("SpectrumMin") ||
                                 !isDefault("SpectrumMax") || !isDefault("SpectrumList") || !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 
