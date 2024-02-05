@@ -131,12 +131,13 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
 /**
  * Filter the managed properties by the given boolean property mask. It replaces
  * all time series properties with filtered time series properties
- * @param filter :: A boolean time series to filter each property on
+ * @param logFilter :: A LogFilter instance to filter each log on
  * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
  */
-void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &filter,
+void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
                                        const std::vector<std::string> &excludedFromFiltering) {
+  auto filter = logFilter->filter();
   for (auto &orderedProperty : m_orderedProperties) {
     if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
         excludedFromFiltering.cend()) {
@@ -153,7 +154,6 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
 
         // add the filter to the passed in filters
-        auto logFilter = std::make_unique<LogFilter>(filter);
         auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
         auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
         if (!tspFilterProp)
@@ -161,9 +161,9 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         logFilter->addFilter(*tspFilterProp);
 
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
-      } else if (filter.size() > 0) {
+      } else if (filter->size() > 0) {
         // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *filter);
       }
       if (filtered) {
         // Now replace in the map

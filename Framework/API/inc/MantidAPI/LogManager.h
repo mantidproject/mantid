@@ -31,6 +31,7 @@ template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 using SplittingIntervalVec = std::vector<SplittingInterval>;
 class PropertyManager;
+class LogFilter;
 class TimeROI;
 struct TimeSeriesPropertyStatistics;
 } // namespace Kernel
@@ -83,7 +84,7 @@ public:
   void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
 
   /// Filter the run by the given boolean log
-  void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
+  void filterByLog(Mantid::Kernel::LogFilter *filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
 
   /// Return an approximate memory size for the object in bytes
