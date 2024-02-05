@@ -14,8 +14,6 @@ This section will show some advance fitting and plotting features of the GUI.
 It would be worth closing the muon GUI and clearing the ADS before doing the second test.
 This is to give a clean state so it is easier to find the correct results table.
 
-To use the **Model Analysis** see the :ref:`Muon_Feature_Flags-ref` documentation.
-
 -------------------------
 
 .. _emu_ionic_diffusion_test:
@@ -76,6 +74,9 @@ Superconducting Copper Test
 ---------------------------
 
 **Time required 5 - 10 minutes**
+
+To use the **Model Fitting** tab see the :ref:`Muon_Feature_Flags-ref` documentation. You will
+need to set `model_analysis:2` before opening Workbench and starting this test.
 
 - Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
 - Change *Instrument* to **EMU**, found in the *Home* tab
