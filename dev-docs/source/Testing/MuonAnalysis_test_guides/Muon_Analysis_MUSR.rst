@@ -120,7 +120,6 @@ Rebin and Fitting
 -----------------
 - In the load bar enter ``62260``
 - On the **home tab** set ``Rebin`` to ``Fixed`` and enter a value of ``10``
-- To see all of the data press the ``select plot data`` button and select all of the rows in the pop-up
 - If you tick the ``Plot raw`` option the data will change
 - Go to the **fitting tab**
 	- Add a ``GuasOsc``
