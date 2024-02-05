@@ -28,6 +28,9 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._scale = None
         self._setting = None
 
+        # Save a copy of bin_width for cleanup after it is mutated
+        self._initial_parameters_bin_width = abins.parameters.sampling["bin_width"]
+
     def category(self) -> str:
         return "Simulation"
 
@@ -116,6 +119,9 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
+
+        # Clean up parameter modified by _get_properties()
+        abins.parameters.sampling["bin_width"] = self._initial_parameters_bin_width
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
