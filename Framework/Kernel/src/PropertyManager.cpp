@@ -139,22 +139,22 @@ void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
                                        const std::vector<std::string> &excludedFromFiltering) {
   auto filter = logFilter->filter();
   for (auto &orderedProperty : m_orderedProperties) {
-    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
+    auto const propName = orderedProperty->name();
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), propName) !=
         excludedFromFiltering.cend()) {
       // this log should be excluded from filtering
       continue;
     }
 
-    Property *currentProp = orderedProperty;
-    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
+    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(orderedProperty)) {
       // don't filter the invalid values filters
-      if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
+      if (PropertyManager::isAnInvalidValuesFilterLog(propName))
         break;
       std::unique_ptr<Property> filtered(nullptr);
-      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(propName))) {
 
         // add the filter to the passed in filters
-        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
+        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(propName));
         auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
         if (!tspFilterProp)
           break;
@@ -168,7 +168,7 @@ void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
       if (filtered) {
         // Now replace in the map
         orderedProperty = filtered.get();
-        this->m_properties[createKey(currentProp->name())] = std::move(filtered);
+        this->m_properties[createKey(propName)] = std::move(filtered);
       }
     }
   }

@@ -81,8 +81,8 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1352
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1476
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1733
-invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:141
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyManager.h:105
+invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyManager.h:106
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:158
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:189
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:538
@@ -333,7 +333,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowder
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-danglingTemporaryLifetime:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:661
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:205
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:235
 knownPointerToBool:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:108

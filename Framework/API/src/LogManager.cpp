@@ -652,8 +652,7 @@ void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5D
   // Only load from NXlog entries
   const auto &allEntries = fileInfo.getAllEntries();
   auto itNxLogEntries = allEntries.find("NXlog");
-  const std::set<std::string> &nxLogEntries =
-      (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
+  const auto nxLogEntries = (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
 
   const auto levels = std::count(prefix.begin(), prefix.end(), '/');
 
