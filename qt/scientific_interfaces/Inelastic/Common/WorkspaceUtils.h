@@ -37,7 +37,7 @@ MANTIDQT_INELASTIC_DLL bool doesExistInADS(std::string const &workspaceName);
 
 template <typename T = Mantid::API::MatrixWorkspace>
 std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 template MANTIDQT_INELASTIC_DLL std::shared_ptr<Mantid::API::MatrixWorkspace_sptr>
