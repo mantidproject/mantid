@@ -335,7 +335,7 @@ void InelasticDataManipulationElwinTabView::clearPreviewFile() { m_uiForm.cbPrev
 void InelasticDataManipulationElwinTabView::setPreviewToDefault() {
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
   QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = WorkspaceUtils::getADSMatrixWorkspace(wsname.toStdString());
+  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname.toStdString());
   const auto range = WorkspaceUtils::getXRangeFromWorkspace(inputWs);
 
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],

@@ -186,18 +186,6 @@ QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
-Mantid::API::MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-Mantid::API::WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
-
-Mantid::API::ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(workspaceName);
-}
-
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }

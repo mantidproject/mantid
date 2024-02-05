@@ -118,7 +118,7 @@ std::string InelasticDataManipulationSqwTabModel::getOutputWorkspace() { return 
 MatrixWorkspace_sptr InelasticDataManipulationSqwTabModel::getRqwWorkspace() {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
-  return WorkspaceUtils::getADSMatrixWorkspace(outputName);
+  return WorkspaceUtils::getADSWorkspace(outputName);
 }
 
 UserInputValidator InelasticDataManipulationSqwTabModel::validate(std::tuple<double, double> const qRange,

@@ -65,7 +65,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
         errors.push_back("Background Start must be less than Background End");
       }
 
-      auto tempWs = WorkspaceUtils::getADSMatrixWorkspace(name);
+      auto tempWs = WorkspaceUtils::getADSWorkspace(name);
 
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();

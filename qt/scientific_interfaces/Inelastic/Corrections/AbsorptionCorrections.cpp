@@ -153,7 +153,7 @@ AbsorptionCorrections::~AbsorptionCorrections() = default;
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return WorkspaceUtils::doesExistInADS(name) ? WorkspaceUtils::getADSMatrixWorkspace(name) : nullptr;
+  return WorkspaceUtils::doesExistInADS(name) ? WorkspaceUtils::getADSWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -492,7 +492,7 @@ void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto correctionsWs = WorkspaceUtils::getADSWorkspaceGroup(m_pythonExportWsName);
+  auto correctionsWs = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
   if (correctionsWs) {
     correctionsWs = convertUnits(correctionsWs, "Wavelength");
     addWorkspaceToADS(m_pythonExportWsName, correctionsWs);
@@ -503,7 +503,7 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
 
 void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &correctionsWs) {
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  convertSpectrumAxes(correctionsWs, WorkspaceUtils::getADSMatrixWorkspace(sampleWsName));
+  convertSpectrumAxes(correctionsWs, WorkspaceUtils::getADSWorkspace(sampleWsName));
   setYAxisLabels(correctionsWs, "", "Attenuation Factor");
 }
 
@@ -549,7 +549,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs = WorkspaceUtils::getADSMatrixWorkspace(dataName.toStdString());
+  auto const sampleWs = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else

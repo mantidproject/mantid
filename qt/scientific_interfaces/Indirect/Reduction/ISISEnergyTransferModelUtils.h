@@ -98,7 +98,7 @@ double loadSampleLog(std::string const &filename, std::vector<std::string> const
   double value(defaultValue);
 
   if (WorkspaceUtils::doesExistInADS(temporaryWorkspace)) {
-    auto workspace = WorkspaceUtils::getADSMatrixWorkspace(temporaryWorkspace);
+    auto workspace = WorkspaceUtils::getADSWorkspace(temporaryWorkspace);
     value = getSampleLog(workspace, logNames, defaultValue);
     deleteWorkspace(workspace->getName());
   }

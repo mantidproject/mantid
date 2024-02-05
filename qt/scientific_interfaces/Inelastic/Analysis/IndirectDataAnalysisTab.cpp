@@ -485,7 +485,7 @@ void IndirectDataAnalysisTab::setPDFWorkspace(std::string const &workspaceName) 
   auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && fabMinimizer;
 
   if (enablePDFOptions) {
-    m_outOptionsPresenter->setPDFWorkspace(WorkspaceUtils::getADSWorkspaceGroup(workspaceName));
+    m_outOptionsPresenter->setPDFWorkspace(WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(workspaceName));
     m_outOptionsPresenter->setPlotWorkspaces();
   } else
     m_outOptionsPresenter->removePDFWorkspace();

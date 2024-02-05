@@ -33,7 +33,7 @@ QString getIndexString(const MatrixWorkspace_sptr &workspace) {
 }
 
 QString getIndexString(const std::string &workspaceName) {
-  return getIndexString(WorkspaceUtils::getADSMatrixWorkspace(workspaceName));
+  return getIndexString(WorkspaceUtils::getADSWorkspace(workspaceName));
 }
 
 std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
@@ -114,7 +114,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
 
 void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
-  const auto workspace = WorkspaceUtils::getADSMatrixWorkspace(name);
+  const auto workspace = WorkspaceUtils::getADSWorkspace(name);
   if (workspace)
     setWorkspace(name);
   else

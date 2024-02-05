@@ -184,7 +184,7 @@ void Stretch::algorithmComplete(const bool &error) {
 
 void Stretch::populateContourWorkspaceComboBox() {
   m_uiForm.cbPlotContour->clear();
-  auto const contourGroup = WorkspaceUtils::getADSWorkspaceGroup(m_contourWorkspaceName);
+  auto const contourGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_contourWorkspaceName);
   auto const contourNames = contourGroup->getNames();
   for (auto const &name : contourNames)
     m_uiForm.cbPlotContour->addItem(QString::fromStdString(name));
@@ -247,7 +247,7 @@ int Stretch::displaySaveDirectoryMessage() {
  */
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspace = WorkspaceUtils::getADSWorkspaceGroup(m_fitWorkspaceName);
+  WorkspaceGroup_sptr fitWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
@@ -311,7 +311,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   eRangeSelector->setMaximum(range.second);
 
   // set the max spectrum
-  MatrixWorkspace_const_sptr sampleWs = WorkspaceUtils::getADSMatrixWorkspace(filename.toStdString());
+  MatrixWorkspace_const_sptr sampleWs = WorkspaceUtils::getADSWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }

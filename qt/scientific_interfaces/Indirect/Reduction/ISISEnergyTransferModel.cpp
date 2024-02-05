@@ -322,7 +322,7 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
   std::vector<std::string> outputWorkspaces;
 
   if (WorkspaceUtils::doesExistInADS(groupName)) {
-    if (auto const outputGroup = WorkspaceUtils::getADSWorkspaceGroup(groupName)) {
+    if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
       outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {

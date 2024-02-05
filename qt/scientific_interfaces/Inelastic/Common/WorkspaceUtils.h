@@ -32,11 +32,18 @@ MANTIDQT_INELASTIC_DLL QPair<double, double>
 getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace, double precision = 0.00001);
 MANTIDQT_INELASTIC_DLL QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName,
                                                                     double precision = 0.000001);
-
-MANTIDQT_INELASTIC_DLL Mantid::API::MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName);
-MANTIDQT_INELASTIC_DLL Mantid::API::WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName);
-MANTIDQT_INELASTIC_DLL Mantid::API::ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName);
 MANTIDQT_INELASTIC_DLL bool doesExistInADS(std::string const &workspaceName);
+
+template <typename T = MatrixWorkspace> std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+}
+
+template MANTIDQT_INELASTIC_DLL std::shared_ptr<Mantid::API::MatrixWorkspace_sptr>
+getADSWorkspace(std::string const &workspaceName);
+template MANTIDQT_INELASTIC_DLL std::shared_ptr<Mantid::API::WorkspaceGroup_sptr>
+getADSWorkspace(std::string const &workspaceName);
+template MANTIDQT_INELASTIC_DLL std::shared_ptr<Mantid::API::ITableWorkspace_sptr>
+getADSWorkspace(std::string const &workspaceName);
 
 } // namespace WorkspaceUtils
 } // namespace CustomInterfaces

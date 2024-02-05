@@ -61,7 +61,7 @@ public:
     auto loader = loadAlgorithm("iris26184_multi_graphite002_red", "iris26184");
     loader->execute();
 
-    MatrixWorkspace_sptr workspace = WorkspaceUtils::getADSMatrixWorkspace("iris26184");
+    MatrixWorkspace_sptr workspace = WorkspaceUtils::getADSWorkspace("iris26184");
 
     TS_ASSERT_EQUALS(getSampleLog(workspace, {"sample", "sample_top", "sample_bottom"}, 300.0), 300.0);
     TS_ASSERT_EQUALS(getSampleLog(workspace, {"nchannels", "nspectra", "sample"}, 300.0), 2000.0);

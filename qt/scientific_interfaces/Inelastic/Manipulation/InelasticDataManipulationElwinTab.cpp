@@ -273,7 +273,7 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
   m_view->newInputFiles();
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = WorkspaceUtils::getADSMatrixWorkspace(wsname);
+  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -290,7 +290,7 @@ void InelasticDataManipulationElwinTab::newInputFilesFromDialog(MantidWidgets::I
   m_view->newInputFilesFromDialog(dialog);
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = WorkspaceUtils::getADSMatrixWorkspace(wsname);
+  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -318,7 +318,7 @@ void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string
                                                                const std::string &filename) {
   auto loadHistory = m_view->isLoadHistory();
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-    auto const workspace = WorkspaceUtils::getADSMatrixWorkspace(workspaceName);
+    auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
 
     setInputWorkspace(workspace);
 
@@ -330,7 +330,7 @@ void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string
 
 void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const std::string &workspaceName) {
   if (m_view->getCurrentInputIndex() == 1) {
-    auto const workspace = WorkspaceUtils::getADSMatrixWorkspace(workspaceName);
+    auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
     setInputWorkspace(workspace);
     updateAvailableSpectra();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());

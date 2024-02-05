@@ -102,8 +102,8 @@ bool ResNorm::validate() {
     if (resValid) {
       // Check that Res file is still in ADS if not, load it
       auto const resolutionWs =
-          WorkspaceUtils::getADSMatrixWorkspace(m_uiForm.dsResolution->getCurrentDataName().toStdString());
-      auto const vanadiumWs = WorkspaceUtils::getADSMatrixWorkspace(vanName.toStdString());
+          WorkspaceUtils::getADSWorkspace(m_uiForm.dsResolution->getCurrentDataName().toStdString());
+      auto const vanadiumWs = WorkspaceUtils::getADSWorkspace(vanName.toStdString());
 
       int const resRun = resolutionWs->getRunNumber();
       int const vanRun = vanadiumWs->getRunNumber();
@@ -181,8 +181,8 @@ void ResNorm::handleAlgorithmComplete(bool error) {
 void ResNorm::processLogs() {
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
   auto const outputWsName = WorkspaceUtils::getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
-  auto const resolutionWorkspace = WorkspaceUtils::getADSMatrixWorkspace(resWsName.toStdString());
-  auto const resultWorkspace = WorkspaceUtils::getADSWorkspaceGroup(outputWsName);
+  auto const resolutionWorkspace = WorkspaceUtils::getADSWorkspace(resWsName.toStdString());
+  auto const resultWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(outputWsName);
 
   copyLogs(resolutionWorkspace, resultWorkspace);
   addAdditionalLogs(resultWorkspace);
@@ -278,7 +278,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   QPair<double, double> res;
   auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
 
-  auto const vanWs = WorkspaceUtils::getADSMatrixWorkspace(filename.toStdString());
+  auto const vanWs = WorkspaceUtils::getADSWorkspace(filename.toStdString());
   if (vanWs)
     m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
@@ -387,12 +387,12 @@ void ResNorm::previewSpecChanged(int value) {
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
   std::string fitParamsName(m_pythonExportWsName + "_Fit");
   if (AnalysisDataService::Instance().doesExist(fitWsGroupName)) {
-    auto const fitWorkspaces = WorkspaceUtils::getADSWorkspaceGroup(fitWsGroupName);
-    auto const fitParams = WorkspaceUtils::getADSTableWorkspace(fitParamsName);
+    auto const fitWorkspaces = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(fitWsGroupName);
+    auto const fitParams = WorkspaceUtils::getADSWorkspace<ITableWorkspace>(fitParamsName);
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
       std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
-      auto const fitWs = WorkspaceUtils::getADSMatrixWorkspace(fitWsName);
+      auto const fitWs = WorkspaceUtils::getADSWorkspace(fitWsName);
 
       auto fit = WorkspaceFactory::Instance().create(fitWs, 1);
       fit->setSharedX(0, fitWs->sharedX(1));

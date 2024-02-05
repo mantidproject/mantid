@@ -7,8 +7,6 @@
 #pragma once
 
 #include "Common/WorkspaceUtils.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 #include <QPair>
@@ -17,34 +15,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::WorkspaceUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
-namespace {
-
-MatrixWorkspace_sptr createWorkspaceWithInstrumentAndParameters() {
-
-  auto testWorkspace = createWorkspace(1, 5);
-  std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-  // IRIS instrument with graphite detector.
-  auto const ipfFilename = idfdirectory + "IRIS" + "_" + "graphite" + "_" + "002" + "_Parameters.xml";
-
-  auto loadInst = AlgorithmManager::Instance().create("LoadInstrument");
-  loadInst->setLogging(true);
-  loadInst->initialize();
-  loadInst->setProperty("Workspace", testWorkspace);
-  loadInst->setProperty("InstrumentName", "IRIS");
-  loadInst->setProperty("RewriteSpectraMap", "False");
-  loadInst->execute();
-
-  auto loadParams = AlgorithmManager::Instance().create("LoadParameterFile");
-  loadParams->setChild(true);
-  loadParams->setLogging(true);
-  loadParams->initialize();
-  loadParams->setProperty("Workspace", testWorkspace);
-  loadParams->setProperty("Filename", ipfFilename);
-  loadParams->execute();
-
-  return testWorkspace;
-}
-} // namespace
 
 class WorkspaceUtilsTest : public CxxTest::TestSuite {
 public:
@@ -86,7 +56,7 @@ public:
   }
   void test_getResolutionFromWs_returns_res_for_instrument_workspace() {
     auto res = QPair<double, double>(0, 0);
-    auto const testWorkspace = createWorkspaceWithInstrumentAndParameters();
+    auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters();
     getResolutionRangeFromWs(testWorkspace, res);
 
     TS_ASSERT_DELTA(res.first, -0.0175, 1e-5);
