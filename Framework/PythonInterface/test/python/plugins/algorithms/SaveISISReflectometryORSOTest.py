@@ -9,6 +9,7 @@ import unittest
 import tempfile
 import numpy as np
 from datetime import datetime, timezone
+from unittest.mock import Mock, patch
 
 from mantid import config
 from mantid.simpleapi import (
@@ -33,15 +34,18 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     _LOG_RB_NUMBER = "rb_proposal"
     _LOG_EXP_IDENTIFIER = "experiment_identifier"
+    _LOG_RUN_NUM = "run_number"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
     _SAVE_ALG = "SaveISISReflectometryORSO"
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    _STITCH_ALG = "Stitch1DMany"
     _Q_UNIT = "MomentumTransfer"
     _FIRST_TRANS_COMMENT = "First transmission run"
     _SECOND_TRANS_COMMENT = "Second transmission run"
 
     # Metadata headings
+    _DATA_FILES_HEADING = "#     data_files:"
     _ADDITIONAL_FILES_HEADING = "#     additional_files:\n"
     _REDUCTION_HEADING = "# reduction:\n"
     _REDUCTION_CALL_HEADING = "#   call:"
@@ -66,11 +70,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             "facility: ISIS",
             f"creator:\n#     name: {self._SAVE_ALG}\n#     affiliation: {MantidORSODataset.SOFTWARE_NAME}\n#",
         ]
-        self._runs_and_angles = {
-            "INTER00013460": "0.5",
-            "INTER00038393": "0.5",
-            "INTER00038415": "0.5",
-        }
 
     def tearDown(self):
         """
@@ -91,7 +90,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         reduced_ws = self._get_ws_from_reduction(input_runs, resolution, f"IvsQ_13460+{input_ws_name}+38415", "13463", "13464, 38415")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_data_files = ["INTER00013460", "INTER00038393", "INTER00038415"]
+        expected_data_files = [("INTER00013460", "0.5"), ("INTER00038393", "0.5"), ("INTER00038415", "0.5")]
         expected_additional_file_entries = {
             "INTER00013463": self._FIRST_TRANS_COMMENT,
             "INTER00013464": self._SECOND_TRANS_COMMENT,
@@ -113,7 +112,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         reduced_ws = self._get_ws_from_stitched_reduction(["13460", "38393"], resolution, "13463", "13464, 38415")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_data_files = ["INTER00013460", "INTER00038393"]
+        expected_data_files = [("INTER00013460", "0.5"), ("INTER00038393", "0.5")]
         expected_additional_file_entries = {
             "INTER00013463": self._FIRST_TRANS_COMMENT,
             "INTER00013464": self._SECOND_TRANS_COMMENT,
@@ -140,18 +139,18 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
     def test_create_file_from_workspace_with_no_reduction_history(self):
-        ws = LoadNexus("INTER13460")
-        self._set_units_as_momentum_transfer(ws)
+        ws = self._create_sample_workspace()
 
         SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
         self._check_data_in_file(ws, None)
 
-    def test_create_file_for_workspace_with_empty_history(self):
-        # The TOF workspace created from the ISIS Reflectometry reduction does not have any history
-        input_ws = self._get_ws_from_reduction("INTER13460", 0.02, "TOF_13460")
-        assert input_ws.getHistory().empty()
-        self._set_units_as_momentum_transfer(input_ws)
+    @patch("mantid.api.WorkspaceHistory.empty")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_create_file_for_workspace_with_empty_history(self, mock_alg_histories, mock_history_empty):
+        input_ws = self._create_sample_workspace()
+        self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {"Params": "0.02"})])
+        mock_history_empty.return_value = True
 
         SaveISISReflectometryORSO(InputWorkspace=input_ws, Filename=self._output_filename)
 
@@ -191,8 +190,174 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header([self._INVALID_HEADER_COMMENT])
 
-    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER):
-        ws = CreateSampleWorkspace()
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_input_run_data_files_are_formatted_correctly(self, mock_alg_histories):
+        test_cases = [
+            "0000013460.nxs",
+            "INTER00013460.nxs",
+            "INTER13460.nxs",
+            "13460.nxs",
+            "0000013460",
+            "INTER00013460",
+            "INTER13460",
+            "13460",
+        ]
+        for test_case in test_cases:
+            with self.subTest(test_case=test_case):
+                theta = "0.5"
+                expected_file_name = ("INTER00013460", theta)
+                ws = self._create_sample_workspace(instrument_name="INTER")
+                property_values = {
+                    "InputRunList": test_case,
+                    "ThetaIn": theta,
+                }
+                self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+                SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+                self._check_file_header([self._get_expected_data_file_metadata([expected_file_name], self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_transmission_run_additional_files_are_formatted_correctly(self, mock_alg_histories):
+        test_cases = [
+            ("0000013460.nxs", "0000038393.nxs"),
+            ("INTER00013460.nxs", "INTER00038393.nxs"),
+            ("INTER13460.nxs", "INTER00038393.nxs"),
+            ("13460.nxs", "38393.nxs"),
+            ("0000013460", "38393.nxs"),
+            ("INTER00013460", "INTER00038393"),
+            ("INTER13460", "INTER38393"),
+            ("13460", "38393"),
+        ]
+        for first_test, second_test in test_cases:
+            with self.subTest(first_test=first_test, second_test=second_test):
+                expected_additional_file_entries = {
+                    "INTER00013460": self._FIRST_TRANS_COMMENT,
+                    "INTER00038393": self._SECOND_TRANS_COMMENT,
+                }
+                ws = self._create_sample_workspace(instrument_name="INTER")
+                property_values = {
+                    "FirstTransmissionRunList": first_test,
+                    "SecondTransmissionRunList": second_test,
+                }
+                self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+                SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+                self._check_file_header(
+                    [self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)]
+                )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_merged_runs_are_formatted_correctly(self, mock_alg_histories):
+        theta = "0.5"
+        expected_file_names = [("INTER00013460", theta), ("INTER00038393", theta)]
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        property_values = {
+            "InputRunList": "13460,38393",
+            "ThetaIn": theta,
+        }
+        self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_old_SURF_runs_are_formatted_correctly(self, mock_alg_histories):
+        theta = "0.5"
+        expected_file_names = [("SRF79239", theta)]
+        ws = self._create_sample_workspace(instrument_name="SURF")
+        property_values = {
+            "InputRunList": "79239",
+            "ThetaIn": theta,
+        }
+        self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_run_is_ws_name_retrieves_run_number_from_log(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        ws.mutableRun().addProperty(self._LOG_RUN_NUM, "12345", True)
+        theta = "0.5"
+        expected_file_names = [("INTER00012345", theta)]
+        property_values = {
+            "InputRunList": "ws",
+            "ThetaIn": theta,
+        }
+        self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_run_is_ws_name_without_run_num_log_omits_datafiles(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        property_values = {
+            "InputRunList": "ws",
+            "ThetaIn": "0.5",
+        }
+        self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header([f"{self._DATA_FILES_HEADING} []\n{self._REDUCTION_HEADING}"])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_input_run_cannot_convert_to_filename_omits_datafiles(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        property_values = {
+            "InputRunList": "test",
+            "ThetaIn": "0.5",
+        }
+        self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header([f"{self._DATA_FILES_HEADING} []\n{self._REDUCTION_HEADING}"])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_stitched_reduction_history_creates_correct_input_file_entries(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        histories_to_create = [
+            (self._REDUCTION_WORKFLOW_ALG, {"InputRunList": "13460", "ThetaIn": "0.5"}),
+            (self._REDUCTION_WORKFLOW_ALG, {"InputRunList": "13460", "ThetaIn": "1.0"}),
+            (self._REDUCTION_WORKFLOW_ALG, {"InputRunList": "38393", "ThetaIn": "2.3"}),
+        ]
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        expected_data_files = [("INTER00013460", "0.5"), ("INTER00013460", "1.0"), ("INTER00038393", "2.3")]
+
+        self._check_file_header([self._get_expected_data_file_metadata(expected_data_files, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_stitched_reduction_history_creates_correct_transmission_file_entries(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        histories_to_create = [
+            (self._REDUCTION_WORKFLOW_ALG, {"FirstTransmissionRunList": "13463", "SecondTransmissionRunList": "13464"}),
+            (self._REDUCTION_WORKFLOW_ALG, {"FirstTransmissionRunList": "13463", "SecondTransmissionRunList": "13464"}),
+            (self._REDUCTION_WORKFLOW_ALG, {"FirstTransmissionRunList": "13463", "SecondTransmissionRunList": "38415"}),
+        ]
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        expected_additional_file_entries = {
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "INTER00038415": self._SECOND_TRANS_COMMENT,
+        }
+
+        self._check_file_header([self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)])
+
+    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name=""):
+        ws = CreateSampleWorkspace(InstrumentName=instrument_name)
         self._set_units_as_momentum_transfer(ws)
         if rb_num_log_name:
             ws.mutableRun().addProperty(rb_num_log_name, self._rb_number, True)
@@ -257,11 +422,11 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         return expected_header_values
 
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
-        files_entry = ["#     data_files:\n"]
+        files_entry = [f"{self._DATA_FILES_HEADING}\n"]
 
-        for run_file in expected_entries:
+        for run_file, theta in expected_entries:
             files_entry.append(f"#     - file: {run_file}\n")
-            files_entry.append(f"#       comment: Incident angle {self._runs_and_angles[run_file]}\n")
+            files_entry.append(f"#       comment: Incident angle {theta}\n")
 
         files_entry.append(expected_section_end)
         return "".join(files_entry)
@@ -287,6 +452,28 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                         return child_history
 
         return None
+
+    def _configure_mock_alg_history(self, mock_alg_histories, histories_to_create):
+        histories = []
+        for alg_name, property_values in histories_to_create:
+            histories.append(self._create_mock_alg_history(alg_name, property_values))
+
+        mock_alg_histories.return_value = histories
+
+    @staticmethod
+    def _create_mock_alg_history(alg_name, property_values):
+        history = Mock()
+        history.name = Mock(return_value=alg_name)
+        history.getChildHistories = Mock(return_value=[])
+
+        def mock_get_property_value(key):
+            try:
+                return property_values[key]
+            except KeyError:
+                return ""
+
+        history.getPropertyValue = Mock(side_effect=mock_get_property_value)
+        return history
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
