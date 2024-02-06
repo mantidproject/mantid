@@ -38,7 +38,9 @@ If a resolution value cannot be found from the workspace history then a warning 
 Header Metadata
 ---------------
 
-Some of the metadata for the ORSO file header is retrieved directly from the input workspace, as described below:
+Some of the metadata for the ORSO file header is retrieved directly from the input workspace, as detailed below.
+For values retrieved from the workspace history, if any information cannot be extracted from the history then
+a warning is logged and the file is saved without this metadata included.
 
 +---------------------+-----------------------------------------------------------------------------------------------+
 | Header value        | Workspace location                                                                            |
@@ -53,6 +55,13 @@ Some of the metadata for the ORSO file header is retrieved directly from the inp
 +---------------------+-----------------------------------------------------------------------------------------------+
 | reduction timestamp | The execution time of the last occurrence of :ref:`algm-ReflectometryReductionOneAuto` in the |
 |                     | workspace history.                                                                            |
++---------------------+-----------------------------------------------------------------------------------------------+
+| measurement         | The individual file names for all of the run numbers passed to the ``InputRunList`` parameter |
+| data_files          | from all calls to :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.       |
++---------------------+-----------------------------------------------------------------------------------------------+
+| measurement         | The individual file names for all of the run numbers passed to parameters                     |
+| additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              |
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
 +---------------------+-----------------------------------------------------------------------------------------------+
 
 Usage

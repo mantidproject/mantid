@@ -224,8 +224,92 @@ class MantidORSODatasetTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Cannot parse datetime string"):
             MantidORSODataset.create_local_datetime_from_utc_string("23-10-18T12:30:45")
 
+    def test_add_data_file_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filename = "test.nxs"
+        timestamp = datetime.now()
+        comment = "A test comment"
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        dataset.add_measurement_data_file(filename, timestamp, comment)
+
+        self._check_files_are_created(dataset, [filename], 1, 0, True)
+        data_file = dataset.dataset.info.data_source.measurement.data_files[0]
+        self.assertEqual(timestamp, data_file.timestamp)
+        self.assertEqual(comment, data_file.comment)
+
+    def test_add_data_file_with_name_only_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filename = "test.nxs"
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        dataset.add_measurement_data_file(filename)
+
+        self._check_files_are_created(dataset, [filename], 1, 0, True)
+        data_file = dataset.dataset.info.data_source.measurement.data_files[0]
+        self.assertEqual(None, data_file.timestamp)
+        self.assertEqual(None, data_file.comment)
+
+    def test_add_multiple_data_files_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filenames = ["test1.nxs", "test2.nxs", "test3.nxs"]
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        for filename in filenames:
+            dataset.add_measurement_data_file(filename)
+
+        self._check_files_are_created(dataset, filenames, len(filenames), 0, True)
+
+    def test_add_additional_file_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filename = "test_additional.nxs"
+        timestamp = datetime.now()
+        comment = "A test comment"
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        dataset.add_measurement_additional_file(filename, timestamp, comment)
+
+        self._check_files_are_created(dataset, [filename], 0, 1, False)
+        data_file = dataset.dataset.info.data_source.measurement.additional_files[0]
+        self.assertEqual(timestamp, data_file.timestamp)
+        self.assertEqual(comment, data_file.comment)
+
+    def test_add_additional_file_with_name_only_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filename = "test_additional.nxs"
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        dataset.add_measurement_additional_file(filename)
+
+        self._check_files_are_created(dataset, [filename], 0, 1, False)
+        data_file = dataset.dataset.info.data_source.measurement.additional_files[0]
+        self.assertEqual(None, data_file.timestamp)
+        self.assertEqual(None, data_file.comment)
+
+    def test_add_multiple_additional_files_to_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset()
+        filenames = ["test_additional1.nxs", "test_additional2.nxs", "test_additional3.nxs"]
+
+        self._check_num_data_files(dataset, 0)
+        self._check_num_additional_files(dataset, 0)
+
+        for filename in filenames:
+            dataset.add_measurement_additional_file(filename)
+
+        self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
+
     def _create_test_dataset(self):
-        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), None, None)
+        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "")
 
     def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
         """Check that the default header contains only the information that can be shared
@@ -262,6 +346,29 @@ class MantidORSODatasetTest(unittest.TestCase):
         )
 
         self.assertEqual(expected_header, orso_dataset.header())
+
+    def _check_num_data_files(self, dataset, expected_number):
+        self.assertTrue(len(dataset.dataset.info.data_source.measurement.data_files) == expected_number)
+
+    def _check_num_additional_files(self, dataset, expected_number):
+        additional_files = dataset.dataset.info.data_source.measurement.additional_files
+        if expected_number == 0:
+            self.assertIsNone(additional_files)
+        else:
+            self.assertTrue(len(additional_files) == expected_number)
+
+    def _check_files_are_created(self, dataset, filenames, num_data_files, num_additional_files, is_data_files):
+        self._check_num_data_files(dataset, num_data_files)
+        self._check_num_additional_files(dataset, num_additional_files)
+
+        created_files = (
+            dataset.dataset.info.data_source.measurement.data_files
+            if is_data_files
+            else dataset.dataset.info.data_source.measurement.additional_files
+        )
+        for i, filename in enumerate(filenames):
+            created_file = created_files[i]
+            self.assertEqual(filename, created_file.file)
 
     def _check_data(self, orso_dataset):
         self.assertTrue(np.array_equal(self._data_columns.data, orso_dataset.data))
