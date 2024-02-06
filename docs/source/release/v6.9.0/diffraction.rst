@@ -10,11 +10,11 @@ Powder Diffraction
 
 New features
 ############
-- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` will no longer sort events prior to doing :ref:`RebinRagged <algm-RebinRagged>` when ``PreserveEvents=False``. This enables it to ultilize a performance improvement to :ref:`Rebin <algm-Rebin>`.
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` will no longer sort events prior to doing :ref:`RebinRagged <algm-RebinRagged>` when ``PreserveEvents=False``. This enables it to utilize a performance improvement to :ref:`Rebin <algm-Rebin>`.
 - Allow the passing of height information to the donor workspace ``mantid.utils.absorptioncorrutils`` so that the absorption calculation can be performed without the experimental data.
 - Only crop in time-of-flight if a finite range is supplied in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`. The time difference is minimal, but users will no longer see a log for a function that isn't being run.
 - By utilizing new methods in EventList, :ref:`DiffractionFocussing <algm-DiffractionFocussing>` has an improved performance when using EventWorkspaces and ``PreserveEvents=False``.
-- Added a new options to estimate background parameters, or manually set them in :ref:`PEARLTransfit <algm-PEARLTransfit>`
+- Added a new option to estimate background parameters, or manually set them in :ref:`PEARLTransfit <algm-PEARLTransfit>`
 - Added the temperature sample log to the workspace title when using the :ref:`LoadWAND <algm-LoadWAND>` or :ref:`WANDPowderReduction <algm-WANDPowderReduction>` algorithm to process a group of datasets for HB2C (a.k.a. WAND^2) at HFIR.
 - Make the ``CalibrationWorkspace`` property optional for the :ref:`SaveDiffCal <algm-SaveDiffCal>` algorithm. It can be used in this mode to save the grouping information.
 - Add a new property ``MinimumPeakTotalCount`` to :ref:`PDCalibration <algm-PDCalibration>` and :ref:`FitPeaks <algm-FitPeaks>`. This relieves ``MinimumPeakHeight`` property from checking the total count and limits to just checking the peak height.
@@ -61,7 +61,7 @@ Bugfixes
 ############
 - Fixed the slow creation of a ``CrystalStructure`` object when loading a CIF file with many atoms. A new method to add many scatterers at a time is added from ``CompositeBraggScatterer`` to ``CrystalStructure`` rather than one atom at a time.
 - Fixed a typo in the argument name of the :ref:`WISH reduction class <isis-single-crystal-diffraction-wish-ref>` method ``WishSX.find_sx_peaks`` that was causing a method to fail.
-- Renamed arguments of ``WishSX.remove_peaks_on_edge`` to be consistent with ``SXD.remove_peaks_on_edge`` (renamed ``nedge_pix`` to and ``nedge_tube`` to ``ntubes``).
+- Renamed arguments of ``WishSX.remove_peaks_on_edge`` to be consistent with ``SXD.remove_peaks_on_edge`` (renamed ``nedge_pix`` to ``nedge`` and ``nedge_tube`` to ``ntubes``).
 - Fixed a bug when a workspace object is passed to ``BaseSX.convert_ws_to_MD``. ``BaseSX`` is the base class for the :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`.
 - Set default number density units as formula units per cubic Angstrom in the ISIS single crystal reduction classes. The units can be changed by passing the ``NumberDensityUnit`` argument in the material dictionary in ``set_sample`` - see :ref:`SetSampleMaterial<algm-SetSampleMaterial>` for details.
 
