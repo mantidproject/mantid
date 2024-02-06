@@ -47,7 +47,7 @@ dependencies:
   - versioningit>=2.1
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.12.1
+  - cppcheck==2.13.1
   - pre-commit>=2.12.0
   - joblib
   - orsopy
