@@ -95,8 +95,11 @@ class BasicFittingPresenter:
         self.model.evaluation_type = self.view.evaluation_type
         self.model.fit_to_raw = self.view.fit_to_raw
 
-    def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
+    def handle_ads_clear_or_remove_workspace_event(self, name: str) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
+        if name not in self.model.dataset_names:
+            return
+
         self.update_and_reset_all_data()
 
         if self.model.number_of_datasets == 0:
