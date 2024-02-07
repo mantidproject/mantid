@@ -119,7 +119,7 @@ public:
     // ------ hand written version
 
     const auto optional_bin =
-        m_findBin(*m_histogram_edges.get(), static_cast<double>(m_tof.front()), m_divisor, m_offset);
+        m_findBin(*m_histogram_edges.get(), static_cast<double>(m_tof.front()), m_divisor, m_offset, false);
     size_t lastBin = optional_bin.get();
     double nextTof = m_histogram_edges->at(lastBin + 1);
     double counts = 0;
@@ -152,7 +152,8 @@ public:
           lastBin += 1;
         } else {
           // find the bin to use
-          const auto optional_bin = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset);
+          const auto optional_bin =
+              m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
           lastBin = optional_bin.get();
         }
         nextTof = m_histogram_edges->at(lastBin + 1);
@@ -209,7 +210,7 @@ public:
     }
 
     // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset);
+    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
     if (bin_optional) {
       const auto bin = static_cast<uint32_t>(bin_optional.get());
       m_tof_bin.push_back(bin);
@@ -354,7 +355,7 @@ public:
     }
 
     // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset);
+    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
     if (bin_optional) {
       const auto bin = static_cast<uint32_t>(bin_optional.get());
 
@@ -415,7 +416,7 @@ public:
     }
 
     // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset);
+    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
     if (bin_optional) {
       const auto bin = bin_optional.get();
       m_count[bin] += 1;

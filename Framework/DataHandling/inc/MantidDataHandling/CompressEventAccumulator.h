@@ -41,7 +41,7 @@ protected:
   double m_divisor;
   double m_offset;
   /// function pointer on how to find the bin boundaries
-  boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double);
+  boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 
   /// track
   bool m_initialized;
