@@ -15,7 +15,10 @@ New Features
 - Switching between a custom output file and an automatically-generated one can now be performed using the
   ``Enter Custom Filename`` checkbox on the :ref:`Sum Runs tab <ISIS_SANS_Sum_Runs_Tab-ref>` in the
   :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>`
-- The :ref:`algm-SANSTubeCalibration` algorithm now takes a filepath to optionally save out the list of calibrated tubes that exceed the cvalue threshold. Additionally, the cvalues workspace in the Workspaces list is now suffixed with the detector name. The algorithm has also been changed to allow a directory to be specified for saving the integrated input workspaces, rather than simply saving to the user's default Mantid save directory.
+- The :ref:`algm-SANSTubeCalibration` algorithm now takes a filepath to optionally save out the list of calibrated tubes
+  that exceed the ``CValueThreshold``. Additionally, the ``cvalues`` workspace in the Workspaces list is now suffixed
+  with the detector name. The algorithm has also been changed to allow a directory to be specified for saving the
+  integrated input workspaces, rather than simply saving to the user's default Mantid save directory.
 - To improve clarity of metadata, :ref:`algm-SaveCanSAS1D` and :ref:`algm-SaveNXcanSAS` will now save the aperture
   shape as ``Unknown`` if it is not explicitly given in the algorithm parameters.
 
@@ -30,7 +33,7 @@ Bugfixes
   between 1D and 2D.
 - Background Subtracted (``_bgsub``) workspaces are now correctly deleted when ``File`` is selected as the save
   location in the ISIS SANS GUI.
-- Fixes a crash when a sample run cannot be found in the Mask tab of the :ref:`ISIS_SANS_Settings_Tab-ref`.
+- Fixed a crash when a sample run cannot be found in the Mask tab of the :ref:`ISIS_SANS_Settings_Tab-ref`.
 - The Beam Centre Finder's bank selector has been simplified to remove unneeded checkboxes.
 - When the instrument is set to LARMOR, the Beam Centre Finder's position labels now indicate that the given values
   should be in meters (m).
