@@ -33,8 +33,11 @@ public:
 
 protected:
   template <typename INT_TYPE> double getBinCenter(const INT_TYPE bin) const;
+  boost::optional<size_t> findBin(const float tof) const;
   /// shared pointer for the histogram bin boundaries
   const std::shared_ptr<std::vector<double>> m_histogram_edges;
+
+private:
   /// keep track if the m_tof is already sorted
   // offset is applied after division
   // see EventList::findLinearBin for implementation on what that means
@@ -43,6 +46,7 @@ protected:
   /// function pointer on how to find the bin boundaries
   boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 
+protected:
   /// track
   bool m_initialized;
 

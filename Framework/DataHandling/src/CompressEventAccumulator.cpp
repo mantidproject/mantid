@@ -46,6 +46,12 @@ template <typename INT_TYPE> double CompressEventAccumulator::getBinCenter(const
   return 0.5 * (m_histogram_edges->operator[](bin) + m_histogram_edges->operator[](bin + 1));
 }
 
+boost::optional<size_t> CompressEventAccumulator::findBin(const float tof) const {
+  // last parameter being false means don't find exact bin
+  // for raw events coming out of the file it
+  return m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
+}
+
 // ------------------------------------------------------------------------
 namespace { // anonymous
 
@@ -118,8 +124,7 @@ public:
 
     // ------ hand written version
 
-    const auto optional_bin =
-        m_findBin(*m_histogram_edges.get(), static_cast<double>(m_tof.front()), m_divisor, m_offset, false);
+    const auto optional_bin = this->findBin(m_tof.front());
     size_t lastBin = optional_bin.get();
     double nextTof = m_histogram_edges->at(lastBin + 1);
     double counts = 0;
@@ -152,8 +157,7 @@ public:
           lastBin += 1;
         } else {
           // find the bin to use
-          const auto optional_bin =
-              m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
+          const auto optional_bin = this->findBin(tof);
           lastBin = optional_bin.get();
         }
         nextTof = m_histogram_edges->at(lastBin + 1);
@@ -210,7 +214,7 @@ public:
     }
 
     // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
+    const auto bin_optional = this->findBin(tof);
     if (bin_optional) {
       const auto bin = static_cast<uint32_t>(bin_optional.get());
       m_tof_bin.push_back(bin);
@@ -260,7 +264,7 @@ public:
     const auto size_raw = m_tof_bin.size();
 
     // accumulation method is different for "large" number of events
-    if (m_tof_bin.size() > 1000000) { // TODO this number should be tuned somewhat
+    if (m_tof_bin.size() > 10000) { // TODO this number should be tuned somewhat
       // std::cout << "creating weighted events from " << m_tof_bin.size() << "\n";
       this->sort(); // sort big lists
 
@@ -332,68 +336,6 @@ private:
 /**
  * Private class for implementation details of dense event collection, when there are more events than bins
  */
-class CompressIntMap : public CompressEventAccumulator {
-public:
-  // pass all arguments to the parent
-  CompressIntMap(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
-                 CompressBinningMode bin_mode)
-      : CompressEventAccumulator(histogram_bin_edges, divisor, bin_mode) {}
-
-  double totalWeight() const override { return 0.; } // TODO
-  void sort() const override {}                      // intentionally does nothing
-
-  /**
-   * This assumes that the event is within range of the fine histogram
-   */
-  void addEvent(const float tof) override {
-    // if (tof < m_histogram_edges->front() || tof >= m_histogram_edges->back())
-    //  std::cout << "THIS SHOULD NOT GET PRINTED " << tof << "\n";
-
-    if (!m_initialized) {
-      // this->allocateFineHistogram();
-      m_initialized = true;
-    }
-
-    // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
-    if (bin_optional) {
-      const auto bin = static_cast<uint32_t>(bin_optional.get());
-
-      // from https://stackoverflow.com/questions/1409454/c-map-find-to-possibly-insert-how-to-optimize-operations
-      auto iter = m_data.insert({bin, static_cast<uint32_t>(1)});
-      if (!iter.second) {
-        // update the value
-        iter.first->second++;
-      }
-      m_numevents++;
-    }
-  }
-
-  void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const override {
-    if (m_data.empty())
-      return;
-
-    raw_events->clear(); // clean out previous version
-
-    // don't bother with temporary objects and such if there is only one event
-    if (m_data.size() == 1) {
-      const auto [bin, counts_i] = *m_data.begin();
-      const auto counts = static_cast<double>(counts_i);
-      const auto tof = this->getBinCenter(bin);
-      raw_events->emplace_back(tof, counts, counts);
-
-      return;
-    }
-  }
-
-private:
-  // bin number to number of counts
-  std::unordered_map<uint32_t, uint32_t> m_data;
-};
-
-/**
- * Private class for implementation details of dense event collection, when there are more events than bins
- */
 class CompressDense : public CompressEventAccumulator {
 public:
   // pass all arguments to the parent
@@ -416,11 +358,10 @@ public:
     }
 
     // add events
-    const auto bin_optional = m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
+    const auto bin_optional = this->findBin(tof);
     if (bin_optional) {
       const auto bin = bin_optional.get();
       m_count[bin] += 1;
-      // m_tof[bin] += tof;
       m_numevents++;
     }
   }
@@ -433,12 +374,11 @@ public:
     if (m_count.empty())
       return;
 
-    const auto NUM_BINS = m_tof.size();
+    const auto NUM_BINS = m_count.size();
     for (size_t i = 0; i < NUM_BINS; ++i) {
-      if (m_count[i] > 0) {
-        const auto counts = static_cast<double>(m_count[i]);
-        // const auto tof = static_cast<double>(m_tof[i]) / counts;
-        const auto tof = 0.5 * (m_histogram_edges->operator[](i) + m_histogram_edges->operator[](i + 1));
+      const auto counts = static_cast<double>(m_count[i]);
+      if (counts > 0.) {
+        const auto tof = this->getBinCenter(i);
         raw_events->emplace_back(tof, counts, counts);
       }
     }
@@ -454,7 +394,6 @@ private:
 
   /// sum of all events seen in an individual bin
   std::vector<uint8_t> m_count;
-  mutable std::vector<float> m_tof;
 };
 
 } // namespace
