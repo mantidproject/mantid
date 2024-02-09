@@ -52,7 +52,7 @@ Filter Events
 #. Back to the filter events interface, without changing anything else from previous interaction, go to ``Advanced Setup`` tab and tick the ``Fast Log`` checkbox. Go back to ``Filter by Time`` and click
    on ``Filter`` button again. Workspace ending in ``_splitters`` should be a 2D workspace, all other workspaces should remain the same.
 #. Now on ``Algorithms`` select ``FilterEvents`` algorithm and click on ``Execute``. As ``InputWorkspace`` select ``FilteredTemp_0`` workspace. On Splitter workspace select ``FilteredTemp_0_splitters``,
-   and on ``Information Workspace`` select ``FilteredTemp_0_info``. Check on ``GroupWorkspaces`` checkbox. And name the ``OutputWorkspaceBaseName`` as ``FilteredTimeRedux``.
-#. ``Run`` the algorithm. On the ADS, a new group event workspace named ``FilteredTimeRedux`` should appear. The two event workspaces that it contains should be equal to the two event workspace previuosly generated
+   and on ``Information Workspace`` select ``FilteredTemp_0_info``. Tick on ``GroupWorkspaces`` checkbox. And name the ``OutputWorkspaceBaseName`` as ``FilteredTimeRedux``.
+#. ``Run`` the algorithm  with ``Group Workspaces`` checked. On the ADS, a new group event workspace named ``FilteredTimeRedux`` should appear. The two event workspaces that it contains should be equal to the two event workspace previuosly generated
    through the interface, ``FilteredTime_0`` and ``FilteredTime_1``.
 #. Back to the Filter Events interface. Click on ``Refresh`` button again, and make sure it updates with the list of all event workspaces on the ADS.
