@@ -129,7 +129,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         reflectivity_error = point_data.extractE()[0]
         q_resolution = resolution if resolution is None else q_data * resolution
 
-        data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution)
+        data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
         return data_columns
 
@@ -191,7 +191,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if not self.getProperty(Prop.WRITE_RESOLUTION).value:
             return None
 
-        # Attempt to get the resolution from the workspace history if it hasn't been passed in
+        # Attempt to get the resolution from the workspace history
         history = ws.getHistory()
         if not history.empty():
             for history in reversed(history.getAlgorithmHistories()):

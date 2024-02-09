@@ -244,6 +244,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         expected_header_values.append(f"data_set: {reduced_ws.name()}")
 
+        # We currently want the resolution unit to be left blank. This will be populated at some point in the future.
+        expected_header_values.append("- {error_of: Qz, error_type: resolution}\n")
+
         return expected_header_values
 
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
