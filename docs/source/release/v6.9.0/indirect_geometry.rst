@@ -10,7 +10,7 @@ New Features
 - A few unused options such as ``Scale factor by`` have been removed from the :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>`.
 - Based on the selected instrument, only relevant options are now shown on the :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>`.
 
-.. image::  ../../images/indirect_option_visibility.png
+.. image::  ../../images/6_9_release/Indirect/indirect_option_visibility.png
     :align: center
 
 - The ``Plot Contour`` option in the external plot options has been replaced with an option to ``Open Slice Viewer`` for the result workspace.
