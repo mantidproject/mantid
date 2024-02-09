@@ -32,6 +32,8 @@ Bugfixes
 - The available fit functions in the :ref:`Data Analysis <interface-inelastic-data-analysis>` ``FqFit`` tab changes depending on whether a WIDTH or EISF parameter is being analysed.
 - The full fit function names are now used in the :ref:`Data Analysis <interface-inelastic-data-analysis>` ``ConvFit`` tab to avoid confusion with similarly named functions.
 - The ``Plot Current Preview`` and Sample Environment options in the :ref:`Data Manipulation <interface-inelastic-data-manipulation>` ``Elwin`` tab have been moved above the ``Run`` button.
+- Added a missing import line in the :ref:`BayesStretch <algm-BayesStretch>` algorithm for checking installed packages on pip.
+- Fixed an issue in the :ref:`Quasi <algm-BayesQuasi2>` algorithm where the algorithm wouldn't accept *_red* files as resolution files when using the QSE option.
 - Fixed a bug in the :ref:`Elwin Tab <elwin>` where the integration and background limits would not updated correctly using the Instrument Parameter File.
 - Fixed a bug where the ``Run`` and ``Output Options`` appeared squished on Indirect interfaces.
 
