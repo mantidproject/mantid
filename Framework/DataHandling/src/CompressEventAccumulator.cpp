@@ -243,8 +243,7 @@ public:
     raw_events->clear();
 
     if (m_tof_bin.empty()) {
-      m_is_sorted = true;
-      return; // nothing to do
+      m_is_sorted = true; // nothing to do
     } else if (m_tof_bin.size() == 1) {
       m_is_sorted = true;
       // don't bother with temporary objects and such if there is only one event
@@ -254,7 +253,7 @@ public:
       // this branch removes events as it accumulates them. It does not assume that the time-of-flight is sorted before
       // starting so the output will not be sorted either
       auto last_end = m_tof_bin.end();
-      while (std::distance(m_tof_bin.begin(), last_end) > 1) {
+      while (std::distance(m_tof_bin.begin(), last_end) > 0) {
         // start with the last value so there is less movement since remove moves everything to the end of the range
         const auto bin = *(last_end - 1); // one before the last end
 

@@ -805,34 +805,70 @@ public:
   }
 
   void test_Load_And_CompressEvents() {
-    Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    std::string outws_name = "cncs_compressed";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    ld.setPropertyValue("Precount", "0");
-    ld.setPropertyValue("CompressTolerance", "0.05");
-    ld.setProperty<bool>("LoadMonitors",
-                         true);              // For the next test, saving a load
-    ld.setProperty<bool>("LoadLogs", false); // Time-saver
-    ld.execute();
-    TS_ASSERT(ld.isExecuted());
+    constexpr std::size_t NUM_HIST{51200};
+    const std::string filename{"CNCS_7860_event.nxs"};
 
-    EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
-    // Valid WS and it is an EventWorkspace
-    TS_ASSERT(WS);
-    // Pixels have to be padded
-    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 51200);
-    // Events
-    TS_ASSERT_EQUALS(WS->getNumberEvents(),
-                     111274); // There are (slightly) fewer events
-    for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      // Pixels with at least one event will have switched
-      if (WS->getSpectrum(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string ouputws_uncompressed = "cncs_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", ouputws_uncompressed);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+      ld.setProperty<bool>("LoadLogs", false);    // Time-saver
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
     }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ouputws_uncompressed));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string ouputws_compressed = "cncs_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", ouputws_compressed);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+      ld.setProperty<bool>("LoadLogs", false);    // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ouputws_compressed));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace did not lose events compared to uncompressed
+    // Pixels have to be padded
+    TS_ASSERT_EQUALS(ws_compressed->getNumberHistograms(), NUM_HIST);
+
+    // Compressed should have smaller number of events
+    TS_ASSERT_LESS_THAN(ws_compressed->getNumberEvents(), ws_uncompressed->getNumberEvents());
+
+    for (size_t wi = 0; wi < NUM_HIST; wi++) {
+      // total counts in uncompressed and compressed should be equal
+      TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
+
+      // Pixels with at least one event will have switched
+      if (ws_compressed->getSpectrum(wi).getNumberEvents() > 0)
+        TS_ASSERT_EQUALS(ws_compressed->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
+    }
+
+    // cleanup - intentionally leave compressed workspace behind for test_Monitors
+    AnalysisDataService::Instance().remove(ouputws_uncompressed);
   }
 
   void test_Monitors() {
