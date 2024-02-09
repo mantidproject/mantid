@@ -64,6 +64,29 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         )
         self._check_column_data(columns, col_values, col_length)
 
+    def test_error_columns_with_empty_units(self):
+        col_length = 5
+        col_values = [1, 2, 3, 4]
+
+        columns = MantidORSODataColumns(
+            np.full(col_length, col_values[0]),
+            np.full(col_length, col_values[1]),
+            np.full(col_length, col_values[2]),
+            np.full(col_length, col_values[3]),
+            q_unit=MantidORSODataColumns.Unit.Nm,
+            r_error_value_is=None,
+            q_error_value_is=None,
+        )
+
+        self._check_default_header(
+            columns,
+            len(col_values),
+            MantidORSODataColumns.Unit.Nm,
+            None,
+            None,
+        )
+        self._check_column_data(columns, col_values, col_length)
+
     def test_adding_additional_columns(self):
         col_length = 5
         col_values = [1, 2, 3, 4, 5, 6]
@@ -150,7 +173,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self.assertIsInstance(column, ErrorColumn)
         self.assertEqual(error_of, column.error_of)
         self.assertEqual(error_is.value, column.error_type)
-        self.assertEqual(value_is.value, column.value_is)
+        self.assertEqual(None if value_is is None else value_is.value, column.value_is)
 
     def _check_column_data(self, columns, col_values, col_length):
         """Checks the data returned from the MantidORSODataColumns class.
