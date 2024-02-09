@@ -48,6 +48,9 @@ public:
     // the factory can create a variety of accumulators
     CompressEventAccumulatorFactory factory(histogram_bin_edges, divisor, bin_mode);
 
+    // value outside of the loop to make sure that all the accumulators give same answers
+    std::vector<DataObjects::WeightedEventNoTime> events;
+
     // create the accumulator - these values are special and selected in concert with the factory implementation to
     // insure that all kinds are found
     const auto num_edges{histogram_bin_edges->size()};
@@ -69,13 +72,34 @@ public:
       TS_ASSERT_EQUALS(raw_events->size(), num_wght_events);
 
       // the first event has the weight of the fine histogram width
-      // TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
+      TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
 
       // confim that all events were added
       const double total_weight =
           std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
                           [](const auto &current, const auto &value) { return current + value.weight(); });
       TS_ASSERT_DELTA(total_weight, static_cast<double>(NUM_RAW_EVENTS), .1);
+
+      // make sure the various versions give the same answer
+      if (events.empty()) {
+        // copy first list created
+        events.assign(raw_events->cbegin(), raw_events->cend());
+      } else {
+        // verify the others match
+        TS_ASSERT_EQUALS(events.size(), raw_events->size());
+        if (events.size() != raw_events->size())
+          throw std::runtime_error(
+              "Stop trying to verify results match because they don't have same number of elements");
+        for (size_t i = 0; i < events.size(); ++i) {
+          const auto &obs = raw_events->operator[](i);
+          const auto &exp = events[i];
+          // weight and error squared are integers
+          TS_ASSERT_EQUALS(obs.weight(), exp.weight());
+          TS_ASSERT_EQUALS(obs.errorSquared(), exp.errorSquared());
+          // this is a float, but the comparison should be an exact match
+          TS_ASSERT_EQUALS(obs.tof(), exp.tof())
+        }
+      }
     }
   }
 
