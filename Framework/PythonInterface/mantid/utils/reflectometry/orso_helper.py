@@ -155,8 +155,8 @@ class MantidORSODataColumns:
         reflectivity_error: Optional[np.ndarray] = None,
         q_resolution: Optional[np.ndarray] = None,
         q_unit: Unit = Unit.Angstrom,
-        r_error_value_is: ErrorValue = ErrorValue.Sigma,
-        q_error_value_is: ErrorValue = ErrorValue.Sigma,
+        r_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
+        q_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
     ):
         self._header_info = []
         self._data = []
@@ -197,8 +197,10 @@ class MantidORSODataColumns:
         self._header_info.append(Column(name=name, unit=unit, physical_quantity=physical_quantity))
         self._data.append(data)
 
-    def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray) -> None:
-        self._header_info.append(ErrorColumn(error_of=error_of, error_type=error_type.value, value_is=value_is.value))
+    def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: Optional[ErrorValue], data: np.ndarray) -> None:
+        self._header_info.append(
+            ErrorColumn(error_of=error_of, error_type=error_type.value, value_is=None if value_is is None else value_is.value)
+        )
         self._data.append(data)
 
     def _ensure_recommended_columns_are_present(self, data: np.ndarray) -> None:
