@@ -8,7 +8,7 @@ Filter Events Interface Testing
 
 *Prerequisites*
 
-- Download the `Usage Examples <http://download.mantidproject.org>`_
+- Download the `Usage Examples <https://www.mantidproject.org/installation/index#sample-data>`
 
 *Note: At the time of writing this test, there's an issue pending with data validation on this interface(#36073); if this issue hasn't been
 corrected yet, please remind the team about it, else update documentation and remove this note.*
@@ -23,13 +23,11 @@ Filter Events
 
 #. Open ``Interfaces`` > ``Utility`` > ``Filter Events``
 #. Browse for file 'CNCS_7860_Event.nxs' from the Usage Data set.
-#. Click ``Load``. After few seconds, plot should be updated with a graph of summed up Counts vs.Time.
+#. Click ``Load``. After a few seconds, plot should be updated with a graph of summed up Counts vs.Time.
 #. ``_Summed_..`` workspace should be generated on the ADS, as well as ``CNCS_7860_Event`` workspace.
-#. Clicking on ``Refresh`` button should update the drop-down list with the name of the loaded workspace.
+#. Clicking on the ``Refresh`` button should update the drop-down list with the name of the loaded workspace.
 #. Check Vertical Range Sliders work properly. You can't overlap the sliders or cross the sliders.
-   Additionally, placing lower slider at the bottom of the range allows the other slider to move freely on the whole range.
 #. Check Horizontal Range Sliders work properly. You can't overlap or cross the sliders.
-   Additionally, having left slider at the leftmost part of the range allows the other slider to move on the whole range.
 #. Check that the Text Edits for ``Starting Time`` and ``Stopping Time`` work correctly:
 
    - Position of vertical bars on the plot are updated appropiately when changing the numerical value of the edits and clicking ``Set``.
@@ -43,9 +41,9 @@ Filter Events
 #. Move the upper vertical range slider to be at approximately ``279.95`` degrees and the lower vertical range slider to be at approximately ``279.91`` degrees.
 #. Click on ``Filter`` button. That should generate several workspaces in the ADS. Two table workspaces ending with ``_info``, ``_splitters`` and a group workspace named ``FilteredTemp`` containing one
    event workspace named ``FilteredTemp_0``, as well as a ``TOFCorrTable`` 2D workspace.
-#. Click second-mouse button on ``FilteredTemp_0`` and select ``Show Sample Logs``. On Sample Log Window, check the ``SampleTemp`` entry and make sure the temperature range is approximately
+#. Right-click on ``FilteredTemp_0`` and select ``Show Sample Logs``. On Sample Log Window, check the ``SampleTemp`` entry and make sure the temperature range is approximately
    the same as selected with the sliders in the interface.
-#. Back to the filter events interface, click on ``Refresh`` button. The drop-down list should refresh with the available event workspaces on the ADS (``CNCS_7860_Event`` and ``FilteredTemp_0``).
+#. Back to the filter events interface, click on the ``Refresh`` button. The drop-down list should refresh with the available event workspaces on the ADS (``CNCS_7860_Event`` and ``FilteredTemp_0``).
 #. Select ``FilteredTemp_0`` and click on ``Use`` button. Plot should update accordingly.
 #. On output name write `FilteredTime`, on ``Starting Time`` text edit write ``80`` and then click ``Set``. On ``Stopping Time`` text edit write ``100`` and then click ``Set``.
 #. Select ``Filtered by Time`` tab and on ``Time Interval`` text edit write ``10``. Then click on ``Filter`` button. Two table workspaces ending with ``_info``, ``_splitters`` and a group workspace named ``FilteredTime`` containing two
