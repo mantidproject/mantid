@@ -18,10 +18,6 @@ namespace DataHandling {
 CompressEventAccumulator::CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges,
                                                    const double divisor, CompressBinningMode bin_mode)
     : m_histogram_edges(std::move(histogram_bin_edges)), m_initialized(false) {
-  // divisor is applied to make it
-
-  m_divisor = abs(divisor);
-
   const auto tof_min = static_cast<double>(m_histogram_edges->front());
 
   // setup function pointer  and parameters for finding bins
@@ -330,9 +326,6 @@ public:
    * This assumes that the event is within range of the fine histogram
    */
   void addEvent(const float tof) override {
-    // if (tof < m_histogram_edges->front() || tof >= m_histogram_edges->back())
-    // std::cout << "THIS SHOULD NOT GET PRINTED " << tof << "\n";
-
     if (!m_initialized) {
       this->allocateFineHistogram();
       m_initialized = true;
@@ -369,7 +362,7 @@ private:
   }
 
   /// sum of all events seen in an individual bin
-  std::vector<uint8_t> m_count;
+  std::vector<uint32_t> m_count;
 };
 
 } // namespace

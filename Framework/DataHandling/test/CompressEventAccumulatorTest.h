@@ -12,6 +12,7 @@
 
 #include "MantidDataHandling/CompressEventAccumulator.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::CompressBinningMode;
@@ -44,31 +45,38 @@ public:
 
   void run_general_test(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double tof_min,
                         const double divisor, CompressBinningMode bin_mode, std::size_t num_wght_events) {
-    // create the accumulator
+    // the factory can create a variety of accumulators
     CompressEventAccumulatorFactory factory(histogram_bin_edges, divisor, bin_mode);
-    auto accumulator = factory.create(1); // TODO force sparse version
 
-    // add a bunch of events
-    const size_t NUM_RAW_EVENTS = addEvents(accumulator.get(), static_cast<float>(tof_min));
+    // create the accumulator - these values are special and selected in concert with the factory implementation to
+    // insure that all kinds are found
+    const auto num_edges{histogram_bin_edges->size()};
+    const std::vector<size_t> num_events_for_factory{1, num_edges / 2, num_edges + 1};
+    for (const auto &event_factory : num_events_for_factory) {
+      auto accumulator = factory.create(event_factory); // force different accumulator versions
 
-    // set up an EventList to add weighted events to
-    EventList event_list;
-    event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
-    std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
-    getEventsFrom(event_list, raw_events);
+      // add a bunch of events
+      const size_t NUM_RAW_EVENTS = addEvents(accumulator.get(), static_cast<float>(tof_min));
 
-    // write the events
-    accumulator->createWeightedEvents(raw_events);
-    TS_ASSERT_EQUALS(raw_events->size(), num_wght_events);
+      // set up an EventList to add weighted events to
+      EventList event_list;
+      event_list.switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+      std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events;
+      getEventsFrom(event_list, raw_events);
 
-    // the first event has the weight of the fine histogram width
-    // TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
+      // write the events
+      accumulator->createWeightedEvents(raw_events);
+      TS_ASSERT_EQUALS(raw_events->size(), num_wght_events);
 
-    // confim that all events were added
-    const double total_weight =
-        std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
-                        [](const auto &current, const auto &value) { return current + value.weight(); });
-    TS_ASSERT_DELTA(total_weight, static_cast<double>(NUM_RAW_EVENTS), .1);
+      // the first event has the weight of the fine histogram width
+      // TS_ASSERT_DELTA(raw_events->front().weight(), divisor, .1);
+
+      // confim that all events were added
+      const double total_weight =
+          std::accumulate(raw_events->cbegin(), raw_events->cend(), 0.,
+                          [](const auto &current, const auto &value) { return current + value.weight(); });
+      TS_ASSERT_DELTA(total_weight, static_cast<double>(NUM_RAW_EVENTS), .1);
+    }
   }
 
   void run_linear_test(const double tof_min, const double tof_delta_hist) {
@@ -109,20 +117,14 @@ public:
   }
 
   void run_logorithm_test(const double tof_min, const double tof_delta_hist, const size_t num_bins) {
-    std::cout << "run_logorithm_test\n";
     if (tof_min <= 0.)
       throw std::runtime_error("Cannot have tof_min <= 0");
 
     // set up the fine histogram
     auto tof_fine_bins = std::make_shared<std::vector<double>>();
-    {
-      tof_fine_bins->push_back(tof_min);
-      double tof = tof_min;
-      while (tof < 10000000 + tof_delta_hist) {
-        tof = (1 + tof_delta_hist) * tof;
-        tof_fine_bins->push_back(tof);
-      }
-    }
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({tof_min, -1. * tof_delta_hist, 10000000. + tof_delta_hist},
+                                                            *tof_fine_bins);
+
     TS_ASSERT_EQUALS(tof_fine_bins->size(), num_bins + 1);
     TS_ASSERT_EQUALS(tof_fine_bins->front(), tof_min);
     TS_ASSERT_EQUALS(tof_fine_bins->at(1), tof_min * (1. + tof_delta_hist));
