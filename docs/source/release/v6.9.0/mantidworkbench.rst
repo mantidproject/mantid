@@ -24,7 +24,7 @@ Bugfixes
 - Fixed a bug where overplotting group workspaces would cause an unhandled exception.
 - Fixed a bug where dragging a plot's legend could cause the plot to resize.
 - Fixed a bug where double clicking a 3D plot to edit an axis label would grab hold of the plot for rotation and not release when the dialog was closed.
-- Line Colour selection button is reenabled in the toolbar of contour plots.
+- Line Colour selection button is re-enabled in the toolbar of contour plots.
 - Fixed a crash which could happen if workspaces are deleted while the project saves. Save now fails in a controlled way.
 - Fixed an unhandled exception thrown when attempting to remove a curve from a plot that has a badly formatted label.
 - Fixed a bug where it was not possible to remove the grid lines on a plot once they had been added.
@@ -54,7 +54,7 @@ New features
 
 Bugfixes
 ############
-- Fixed an intermittent crash caused by a project recovery save happening while the InstrumentViewer was opening.
+- Fixed an intermittent crash caused by a project recovery save happening while the :ref:`Instrument Viewer <InstrumentViewer>` was opening.
 - Fixed a problem where spurious peaks could be added when picking single peaks.
 
 
@@ -70,7 +70,7 @@ Bugfixes
 - Fixed a bug where adding peaks was not taking into account the projection matrix when calculating HKL.
 - Fixed a memory leak in the colour bar.
 - Fixed a bug where the spin box showed an incorrect value when a peak was selected that was outside the range of the data.
-- Fixed an error when trying to click on the 2D plot after the `Add Peak` option is selected, but the peaks workspace has already been deleted.
+- Fixed an error when trying to click on the 2D plot after the ``Add Peak`` option is selected, but the peaks workspace has already been deleted.
 
 
 :ref:`Release 6.9.0 <v6.9.0>`
