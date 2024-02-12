@@ -5,8 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationElwinTabView.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidGeometry/Instrument.h"
-
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -22,25 +23,6 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
-  auto const xValues = workspace->x(0);
-  return QPair<double, double>(xValues.front(), xValues.back());
-}
-
-QStringList getSampleWSSuffices() {
-  QStringList const wsSampleSuffixes{"red", "sqw"};
-  return wsSampleSuffixes;
-}
-
-QStringList getSampleFBSuffices() {
-  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
-  return fbSampleSuffixes;
-}
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -207,10 +189,10 @@ void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
-
+  auto const tabName("Elwin");
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(getSampleWSSuffices());
-  dialog->setFBSuffices(getSampleFBSuffices());
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }
@@ -353,8 +335,8 @@ void InelasticDataManipulationElwinTabView::clearPreviewFile() { m_uiForm.cbPrev
 void InelasticDataManipulationElwinTabView::setPreviewToDefault() {
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
   QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
-  const auto range = getXRangeFromWorkspace(inputWs);
+  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname.toStdString());
+  const auto range = WorkspaceUtils::getXRangeFromWorkspace(inputWs);
 
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
                    m_properties["IntegrationEnd"], range);

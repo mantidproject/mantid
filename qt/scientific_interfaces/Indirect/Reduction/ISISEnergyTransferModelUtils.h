@@ -6,31 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/algorithm/string.hpp>
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include <boost/algorithm/string.hpp>
 
 #include <filesystem>
 
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
 
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
   auto loader = AlgorithmManager::Instance().create("Load");
@@ -111,8 +97,8 @@ double loadSampleLog(std::string const &filename, std::vector<std::string> const
 
   double value(defaultValue);
 
-  if (doesExistInADS(temporaryWorkspace)) {
-    auto workspace = getADSMatrixWorkspace(temporaryWorkspace);
+  if (WorkspaceUtils::doesExistInADS(temporaryWorkspace)) {
+    auto workspace = WorkspaceUtils::getADSWorkspace(temporaryWorkspace);
     value = getSampleLog(workspace, logNames, defaultValue);
     deleteWorkspace(workspace->getName());
   }

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferModel.h"
+#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferModelUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
@@ -320,8 +321,8 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
                                                    std::string const &groupOption, bool const shouldGroup) {
   std::vector<std::string> outputWorkspaces;
 
-  if (doesExistInADS(groupName)) {
-    if (auto const outputGroup = getADSWorkspaceGroup(groupName)) {
+  if (WorkspaceUtils::doesExistInADS(groupName)) {
+    if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
       outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {
