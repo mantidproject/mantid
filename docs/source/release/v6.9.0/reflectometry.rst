@@ -9,6 +9,9 @@ New Features
 ------------
 - Algorithm :ref:`algm-SaveISISReflectometryORSO` has been added to allow reduced Reflectometry data from experiments at the ISIS facility to be saved into the ORSO ASCII format.
 
+.. image::  ../../images/6_9_release/Reflectometry/SaveISISReflectometryORSO.png
+    :align: center
+
 Bugfixes
 --------
 - Fixed a bug where live data reduction via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` would not work if ROI Detector IDs had been specified in the interface.
