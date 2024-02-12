@@ -41,7 +41,7 @@ Bugfixes
 - Resolved the out of sync observation between the fit algorithm parameters returned by the :ref:`Fitting tab <ui engineering fitting>` and the Parameters table after completing a fit.
 - Added validation of the characters entered in the RB Number box in the :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` prior to creating a custom directory structure to write the artifacts in Calibration, Focus, and GSAS II tabs.
 - Cropping the range of TOF data in the GSAS-II tab of the :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` from its original TOF range is now avoided.
-- Updated the dmax value used to generate ``Pawley Refinement`` from ``3 Ang`` into ``4.2 Ang`` since ENGIN-X has a wavelength range of up to ``6 Ang``.
+- Updated the dmax value used to generate ``Pawley Refinement`` from 3 :math:`\mathrm{\AA{}}` into 4.2 :math:`\mathrm{\AA{}}` since ENGIN-X has a wavelength range of up to 6 :math:`\mathrm{\AA{}}`.
 - Avoid writing invalid background estimation parameters in the :ref:`Fitting tab <ui engineering fitting>`.
 - When invalid parameters are entered for the background estimation in the :ref:`Fitting tab <ui engineering fitting>` they are overwritten with the last valid parameters used when the background is next calculated (immediately if ``Subtract BG`` is checked in the table).
 - Prevented a crash when errors are raised from GSASIIscriptable module in the GSAS-II tab.
@@ -54,14 +54,14 @@ New features
 ############
 - Added the :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` algorithm for single-crystal Bragg peaks.
 
-.. image::  ../../images/release_6_9/Diffraction/integrate_peaks_shoebox_tof.png
+.. image::  ../../images/6_9_release/Diffraction/integrate_peaks_shoebox_tof.png
     :align: center
 
 - Added an option to clear instrument calibration from a peaks workspace in addition to a Workspace2D in ``SXD.undo_calibration``.
 - Added documentation for :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`.
 - Added the :ref:`SymmetriseMDHisto <algm-SymmetriseMDHisto>` algorithm for symmetrising :ref:`MDHistoWorkspaces <MDHistoWorkspace>` by operations in the Laue class of the point group.
 
-.. image::  ../../images/release_6_9/Diffraction/slices_symmetrised_mdhisto.png
+.. image::  ../../images/6_9_release/Diffraction/slices_symmetrised_mdhisto.png
     :align: center
 
 Bugfixes
