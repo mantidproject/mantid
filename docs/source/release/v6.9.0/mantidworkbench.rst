@@ -8,7 +8,7 @@ Mantid Workbench Changes
 New Features
 ------------
 - Added extra tooltip for ISIS Linux users to help out anybody on IDAaaS who has not mounted the archive. This is due to a change in early 2024 that will require users to mount the archive on IDAaaS themselves using their federal ID.
-- Added new options in the plot settings which let users set default X and Y ranges for spectra plots effectively zooming in on open.
+- Added new options in the plot settings which let users set default X and Y ranges for spectra plots, effectively zooming in on open.
 - Editing a plot's title will now automatically update its name in the plot selector (and vice versa).
 - Monitor for external changes to script files that are open in Mantid to prevent loss of work.
 - An email is now required to submit an error report.
@@ -39,7 +39,7 @@ Bugfixes
 - Fixed a crash which could occur when opening a file with unicode characters.
 - Fixed a bug where changing waterfall x and y offsets would not update the plot axes limits.
 - Fixed a bug where double clicking a plot to open the settings dialog would not end a pan/zoom event if either tool was selected.
-- Fixed a crash when opening the :ref:`algm-Rebin` algorithm dialog when a group workspace is selected as the input workspace.
+- Fixed a crash when opening the :ref:`Rebin <algm-Rebin>` algorithm dialog when a group workspace is selected as the input workspace.
 - Fixed a bug in the plot settings axes tab where editing an axis title and clicking ``Apply to all`` would clear your changes. The UI has been slightly reworked to make it clearer what ``Apply to all`` interacts with.
 - Fixed a crash that could occur when an editor tab was closed while executing.
 - Fixed a crash from setting both waterfall plot offsets to 0.
@@ -50,7 +50,11 @@ InstrumentViewer
 
 New features
 ############
-- Widgets in the collapsible stack in the pick tab are now resizable so users can change the height of the plot relative to the height of the info box.
+- Widgets in the collapsible stack in the Pick tab are now resizable so users can change the height of the plot relative to the height of the info box.
+
+.. image::  ../../images/6_9_release/Workbench/CollapsibleStack.gif
+    :width: 800px
+    :align: center
 
 Bugfixes
 ############
@@ -63,7 +67,7 @@ SliceViewer
 
 Bugfixes
 ############
-- Fixed an intermittent error when reopening SliceViewer after a change in support for non-orthogonal axes.
+- Fixed an intermittent error when reopening :ref:`SliceViewer <sliceviewer>` after a change in support for non-orthogonal axes.
 - Fixed an error when exporting 'y' cuts for event workspaces in line plot and ROI modes.
 - Fixed a bug in the cut viewer where the plot would not update after changing plot settings until the window had been resized.
 - Fixed a layout bug when toggling the peaks overlays interface on/off.
