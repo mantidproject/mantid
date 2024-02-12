@@ -16,7 +16,7 @@ New Features
 - The :ref:`Symmetrise tab <inelastic-symmetrise>` in the :ref:`Data Manipulation interface <interface-inelastic-data-manipulation>` has been modified with better input data validation. Selection markers can now be moved to the negative region upon changing the ``ReflectType`` property, and when the central marker is fixed.
 - The ``Plot Contour`` option in the external plot options has been replaced with an option to ``Open Slice Viewer`` for the result workspace.
 
-.. image::  ../../images/open_slice_viewer_option.png
+.. image::  ../../images/6_9_release/Inelastic/open_slice_viewer_option.png
     :align: center
 
 
