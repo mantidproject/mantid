@@ -47,8 +47,6 @@ Data Objects
 
 New features
 ############
-- Added a new C++ method, ``Mantid::Kernel::Logger::isDebug()``, to allow for finding out if debug logs should even be sent to the logger for printing.
-- Added an additional timer in :ref:`LoadEventNexus <algm-LoadEventNexus>` to give more information when profiling code using the `Algorithm Profiler <https://developer.mantidproject.org/AlgorithmProfiler.html>`_.
 - The ``AnalysisDataService::clear()`` function now displays a warning that workspaces might be removed even though they are still used by one of the interfaces.
 
 
