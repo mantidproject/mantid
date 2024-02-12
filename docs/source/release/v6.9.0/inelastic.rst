@@ -7,7 +7,7 @@ Inelastic Changes
 
 New Features
 ------------
-- The :ref:`Interface Settings <interface-indirect-settings>` has a new advanced option called ``Developer Feature Flags``. When developing a large new feature, developers will create a flag that can be used by advanced software users for purposes of rapid prototyping and allowing a faster feedback loop.
+- The :ref:`Interface Settings <inelastic-interface-settings>` has a new advanced option called ``Developer Feature Flags``. When developing a large new feature, developers will create a flag that can be used by advanced software users for purposes of rapid prototyping and allowing a faster feedback loop.
 - Moved the :ref:`Corrections <interface-inelastic-corrections>` interface from the Indirect interface category into the Inelastic interface category.
 - Moved the :ref:`Bayes fitting <interface-inelastic-bayes-fitting>` interface from the Indirect interface category into the Inelastic interface category.
 - Moved the :ref:`Data Analysis <interface-inelastic-data-analysis>` interface from the Indirect and Direct interface categories into the Inelastic interface category.

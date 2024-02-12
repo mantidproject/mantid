@@ -1,4 +1,4 @@
-﻿.. _interface-indirect-settings:
+﻿.. _inelastic-interface-settings:
 
 Indirect Settings
 =================
