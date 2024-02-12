@@ -10,40 +10,36 @@ Algorithms
 
 New features
 ############
-- :ref:`RebinRagged <algm-RebinRagged>` has been converted from a python algorithm to a c++ algorithm. This should improve the performance of the algorithm. You can still use the Python version of :ref:`RebinRagged <algm-RebinRagged-v1>` by adding the option ``Version=1``.
-- A new method was added the histogram Event data without sorting the events first, which the :ref:`Rebin <algm-Rebin>` algorithm now uses when ``PreserveEvents=False``, giving a performance improvement.
-- Add support for fine-grained gitHub access tokens for authenticated calls. Can be set via ``network.github.api_token`` in Mantid.user.properties.
-- Add a new option (AppendYAxisLabels) to :ref:`AppendSpectra <algm-AppendSpectra>` to append y-axis values from input workspaces to the output workspace
-- Added the option to change the number of points used in the `SolidAngle` algorithm when triangulating a cylinder, which is what happens for tube detectors. The new argument is called `NumberOfCylinderSlices` and will default to `10`, which is the current number of slices used.
-- Improve the error messages when calling Algorithms with either missing arguments or invalid arguments. The type of the exceptions is changed from ``RuntimeError`` to ``TypeError`` to be more consistent with python itself.
+- The :ref:`RebinRagged <algm-RebinRagged>` algorithm has been converted from a Python algorithm to a C++ algorithm. This should improve the performance of the algorithm. You can still use the Python version of :ref:`RebinRagged <algm-RebinRagged-v1>` by adding the option ``Version=1``.
+- The ``PreserveEvents=False`` option in the :ref:`Rebin <algm-Rebin>` algorithm allows you to skip the sorting of events before rebinning. This gives a performance improvement.
+- Added support for fine-grained GitHub access tokens for authenticated calls. These tokens can be set via the ``network.github.api_token`` option in the ``Mantid.user.properties`` file.
+- Added the ``AppendYAxisLabels`` option to the :ref:`AppendSpectra <algm-AppendSpectra>` algorithm. This will append y-axis values from input workspaces to the output workspace when True.
+- Added the option to change the number of points used in the :ref:`SolidAngle <algm-SolidAngle>` algorithm when triangulating a cylinder, which is what happens for tube detectors. The new argument is called ``NumberOfCylinderSlices`` and will default to ``10``, which is the current number of slices used.
+- Improved the error messages when calling Algorithms with either missing arguments or invalid arguments. The type of the exceptions is changed from ``RuntimeError`` to ``TypeError`` to be more consistent with the convention in Python.
 - The ``OutputWorkspace`` for the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm is now allowed to be the same name as one of the ``InputWorkspaces``. In this case, the new group workspace will supplant the old workspace, and ``_1`` will be appended to the name of the old workspace.
-- When the `StoreInADS` algorithm property is False, it is now optional to provide a value for `OutputWorkspace`.
+- When the ``StoreInADS`` algorithm property is False, it is now optional to provide a value for ``OutputWorkspace``.
 
 Bugfixes
 ############
 - Added warning message when ``ConvertUnits`` or ``ConvertAxisByFormula`` fails to do the conversion for certain detectors. Previously the warning was an information message.
-- Fixed potential error if algorithms are still running in the background when a python script finishes.
-- Fixed an issue in :ref:`Quasi <algm-BayesQuasi2>` where when using the QSE option the algorithm won't accept red files as resolution files
-- Sped up the `LoadAscii` algorithm by at least one order of magnitude.
-- Performance of :ref:`FilterEvents <algm-FilterEvents>` algorithm has been significantly improved for a use case with fast changing logs.
-  The REF_M_40380 was acquired with a 10 kHz trigger (on/off). It has 1.3 M events and 30 M splitters. The execution time of :ref:`MRFilterCrossSections <algm-MRFilterCrossSections>`
-  on this data set has been reduced from 50+ hours to 3 minutes.
-- Add missing import line in BayesStretch for checking installed packages on pip.
-- Improve parameter validation to check for the case of the bin width being too large when specifying bins in the Sample Transmision Calculator.
-- Fixes a bug in the :ref:`Integration <algm-Integration>` algorithm caused by division by 0 when normalizing.
-- Fix miscalculated Debye-Waller factor in :ref:`ComputeIncoherentDos <algm-ComputeIncoherentDos>`
-- Algorithm DSFinterp, which is not registered because of a missing dependency, has been marked for deprecation.
+- Fixed an error if algorithms are still running in the background when a python script finishes.
+- The :ref:`LoadAscii <algm-LoadAscii>` algorithm has been sped up by at least one order of magnitude.
+- The performance of the :ref:`FilterEvents <algm-FilterEvents>` algorithm has been significantly improved for a use case with fast changing logs. The ``REF_M_40380`` was acquired with a 10 kHz trigger (on/off). It has 1.3 M events and 30 M splitters. The execution time of the :ref:`MRFilterCrossSections <algm-MRFilterCrossSections>` algorithm on this data has been reduced from 50+ hours to 3 minutes.
+- Improved parameter validation to check for the case of the bin width being too large when specifying bins in the :ref:`sample_transmission_calculator`.
+- Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm caused by division by 0 when normalizing.
+- Fixed a miscalculated Debye-Waller factor in the :ref:`ComputeIncoherentDos <algm-ComputeIncoherentDos>` algorithm.
+- The ``DSFinterp`` algorithm has been deprecated. It was not being registered due to a missing dependency.
 
 Fit Functions
 -------------
 
 New features
 ############
-- A new 1D peak finding Algorithm `FindPeaksConvolve` has been added to the Framework and is available in the `FitPropertyBrowser`. It has been added as an alternative to the `FindPeaks` algorithm with the intention of increasing the range of spectra we can sucessfully find peaks for.
+- A new 1D peak finding Algorithm :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` has been added to the Framework and is available in the ``FitPropertyBrowser``. It has been added as an alternative to the :ref:`FindPeaks <algm-FindPeaks>` algorithm with the intention of improving peak finding.
 
 Bugfixes
 ############
-- Fit Function DSFinterp1DFit, which is not registered because of a missing dependency has been marked for deprecation.
+- The ``DSFinterp1DFit`` fit function has been deprecated. It was not being registered due to a missing dependency.
 
 
 Data Objects
@@ -51,13 +47,7 @@ Data Objects
 
 New features
 ############
-- New C++ method ``Mantid::Kernel::Logger::isDebug()`` to allow for finding out if debug logs should even be sent to the logger for printing.
-- Additional timer in `LoadEventNexus <algm-LoadEventNexus>` to give more information when profiling code using `Algorithm Profiler <https://developer.mantidproject.org/AlgorithmProfiler.html>`_
-- The ``clear()`` function for the ADS now displays a warning that workspaces might get removed that are still used by one of the interfaces.
-
-Bugfixes
-############
-
+- The ``AnalysisDataService::clear()`` function now displays a warning that workspaces might be removed even though they are still used by one of the interfaces.
 
 
 Python
@@ -65,18 +55,18 @@ Python
 
 New features
 ############
-- New pytest fixtures that can be used in other projects to make testing with mantid more convenient and intuitive. :ref:`pytest_fixtures`
-- New algorithm available, :ref:`HFIRGoniometerIndependentBackground <algm-HFIRGoniometerIndependentBackground>`, used to generate background workspace from a 3 dimensional MDHistoWorkspace
-- :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` now accepts a background MDHistoWorkspace to be converted and subtracted from the input workspace.
-- :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` can now perform Symmetry Operations from a provided SpaceGroup, PointGroup or list of Symmetry Operations.
-- added custom matplotlib backend for PyCharm to the backend cast function
-- :ref:`amend_config <Amend Config>` is a new context manager available that allows you to temporarily change :ref:`Mantid User Properties <Properties File>` in a safe and efficient way.
-- New function :ref:`assert_almost_equal <mantid.testing.assert_almost_equal>` to make testing equality between workspaces more convenient.
-- `unique_name` and `unique_hidden_name` now available as part of :ref:`AnalysisDataServiceImpl <mantid.api.AnalysisDataServiceImpl>` to assist in creating unique names for workspaces that avoid collision.
+- Added new pytest fixtures that can be used in other projects to make testing with mantid more convenient and intuitive. :ref:`pytest_fixtures`
+- Added the :ref:`HFIRGoniometerIndependentBackground <algm-HFIRGoniometerIndependentBackground>` algorithm for generating a background workspace from a 3 dimensional MDHistoWorkspace.
+- The :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` algorithm now accepts a background MDHistoWorkspace - to be converted and subtracted from the input workspace.
+- The :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` algorithm can now perform Symmetry Operations from a provided SpaceGroup, PointGroup or list of Symmetry Operations.
+- Added a custom matplotlib backend for PyCharm to the backend cast function.
+- Added a new context manager, :ref:`amend_config <Amend Config>`, that allows you to temporarily change :ref:`Mantid User Properties <Properties File>` in a safe and efficient way.
+- Added a new testing function :ref:`assert_almost_equal <mantid.testing.assert_almost_equal>` to make testing equality between workspaces more convenient.
+- Added the ``unique_name`` and ``unique_hidden_name`` function to the :ref:`AnalysisDataServiceImpl <mantid.api.AnalysisDataServiceImpl>` class to assist in creating unique workspace names.
 
 Bugfixes
 ############
-- Fix a deadlock that occured when using debug level logging and PythonStdoutChannel or PythonLoggingChannel
+- Fixed a deadlock that occured when using debug level logging and PythonStdoutChannel or PythonLoggingChannel.
 
 
 Dependencies
@@ -84,15 +74,7 @@ Dependencies
 
 New features
 ############
-- Update boost to 1.78
-
-Bugfixes
-############
-
-
-
-MantidWorkbench
----------------
+- Updated boost to 1.78.
 
 See :doc:`mantidworkbench`.
 :ref:`Release 6.9.0 <v6.9.0>`
