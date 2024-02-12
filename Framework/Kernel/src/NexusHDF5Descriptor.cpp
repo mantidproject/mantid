@@ -105,6 +105,7 @@ std::pair<std::string, herr_t> readStringAttributeN(hid_t attr) {
   if (iRet >= 0) {
     attrData = vdat;
   }
+  free(vdat);
   return std::make_pair(attrData, iRet);
 }
 
