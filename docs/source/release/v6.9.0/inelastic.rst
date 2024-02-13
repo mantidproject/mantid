@@ -43,6 +43,6 @@ Algorithms
 
 Bugfixes
 ############
-- Fixed a bug in the :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` algorithm that meant the order of the output spectra was not guaranteed. This largely affected instances of mantid on linux machines.
+- Fixed a bug in the :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` algorithm that meant the order of the output spectra was not guaranteed. This largely affected instances of Mantid on linux machines.
 
 :ref:`Release 6.9.0 <v6.9.0>`
