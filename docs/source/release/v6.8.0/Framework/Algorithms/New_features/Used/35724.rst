@@ -1,1 +1,0 @@
-- :ref:`RemovePromptPulse <algm-RemovePromptPulse>` now has options to specify the time range of the data. This can speed up workflows which already know the data range such as :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.

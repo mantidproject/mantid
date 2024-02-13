@@ -1,1 +1,0 @@
-- Prevent segmentation fault by only accessing FWHM values when the corresponding vector is not empty.

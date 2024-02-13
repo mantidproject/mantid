@@ -1,1 +1,0 @@
-- fixed bug in ``TimeSplitter`` where workspace rows with zero-length time were corrupting the time intervals map.

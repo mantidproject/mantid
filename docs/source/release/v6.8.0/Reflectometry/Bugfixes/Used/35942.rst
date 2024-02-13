@@ -1,1 +1,0 @@
-- The row state on the :ref:`Runs tab <refl_runs>` is now reset when settings are updated in the :ref:`Experiment tab<refl_exp_instrument_settings>` lookup table by using the Apply button on the :ref:`Preview tab <refl_preview>`.

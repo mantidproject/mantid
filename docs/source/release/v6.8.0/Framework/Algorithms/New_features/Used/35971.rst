@@ -1,1 +1,0 @@
-- New algorithm :ref:`GenerateGoniometerIndependentBackground <algm-GenerateGoniometerIndependentBackground>` extract the background from a dataset where sample is rotated through multiple positions.
