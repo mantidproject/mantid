@@ -49,6 +49,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _ADDITIONAL_FILES_HEADING = "#     additional_files:\n"
     _REDUCTION_HEADING = "# reduction:\n"
     _REDUCTION_CALL_HEADING = "#   call:"
+    _DATA_SET_HEADING = "# data_set:"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -355,6 +356,17 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
 
         self._check_file_header([self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)])
+
+    def test_file_populates_reduction_call_from_ws_history(self):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header(
+            [
+                f"{self._REDUCTION_CALL_HEADING} CreateSampleWorkspace(OutputWorkspace='ws', InstrumentName='INTER')\n{self._DATA_SET_HEADING}"
+            ]
+        )
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name=""):
         ws = CreateSampleWorkspace(InstrumentName=instrument_name)
