@@ -41,8 +41,10 @@ AnalysisDataServiceImpl &instance() {
     // Passing True as an argument suppresses a warning that is normally
     // displayed when calling AnalysisDataService.clear()
     PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import AnalysisDataService\n"
-                       "atexit.register(lambda: AnalysisDataService.clear(True))");
+                       "def cleanup_ADS():\n"
+                       "    from mantid.api import AnalysisDataService\n"
+                       "    AnalysisDataService.clear(True)\n"
+                       "atexit.register(cleanup_ADS)");
   });
   return ads;
 }
