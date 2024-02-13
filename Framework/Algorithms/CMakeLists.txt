@@ -240,6 +240,7 @@ set(SRC_FILES
     src/PolarizationCorrectionFredrikze.cpp
     src/PolarizationCorrectionWildes.cpp
     src/PolarizationEfficiencyCor.cpp
+    src/PolarisedSANS/SANSCalculateAnalyserTransmission.cpp
     src/PolynomialCorrection.cpp
     src/Power.cpp
     src/PowerLawCorrection.cpp
@@ -588,6 +589,7 @@ set(INC_FILES
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
     inc/MantidAlgorithms/PoissonErrors.h
+    inc/MantidAlgorithms/PolarisedSANS/SANSCalculateAnalyserTransmission.h
     inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
     inc/MantidAlgorithms/PolarizationCorrectionWildes.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
@@ -934,6 +936,7 @@ set(TEST_FILES
     PlusTest.h
     PointByPointVCorrectionTest.h
     PoissonErrorsTest.h
+    PolarisedSANS/SANSCalculateAnalyserTransmissionTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
     PolarizationEfficiencyCorTest.h
