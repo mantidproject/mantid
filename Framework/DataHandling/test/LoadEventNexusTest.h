@@ -168,6 +168,34 @@ private:
     }
   }
 
+  /*
+   * Verify that the compressed and uncompressed workspaces have the same number of counts per pixel and reasonable
+   * number of events.
+   */
+  void validateUncompressedCompressed(EventWorkspace_sptr ws_uncompressed, EventWorkspace_sptr ws_compressed,
+                                      const std::size_t NUM_HIST) {
+    TS_ASSERT_EQUALS(ws_uncompressed->getNumberHistograms(), NUM_HIST);
+    TS_ASSERT_EQUALS(ws_compressed->getNumberHistograms(), NUM_HIST);
+
+    // Compressed should no more events than the uncompressed
+    TS_ASSERT_LESS_THAN_EQUALS(ws_compressed->getNumberEvents(), ws_uncompressed->getNumberEvents());
+
+    for (size_t wi = 0; wi < NUM_HIST; wi++) {
+      // total counts in uncompressed and compressed should be equal
+      TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
+
+      // all uncompressed spectra should be raw events
+      TS_ASSERT_EQUALS(ws_uncompressed->getSpectrum(wi).getEventType(), EventType::TOF);
+
+      // pixels with at least one event will have switched to weighted
+      if (ws_compressed->getSpectrum(wi).getNumberEvents() > 0)
+        TS_ASSERT_EQUALS(ws_compressed->getSpectrum(wi).getEventType(), EventType::WEIGHTED_NOTIME);
+    }
+
+    std::cout << "Uncompressed " << ws_uncompressed->getMemorySizeAsStr() << " vs Compressed "
+              << ws_compressed->getMemorySizeAsStr() << "\n";
+  }
+
 public:
   void test_load_event_nexus_v20_ess() {
     const std::string file = "V20_ESS_example.nxs";
@@ -811,12 +839,12 @@ public:
     Mantid::API::FrameworkManager::Instance();
 
     // create uncompressed - first so turning off compression isn't needed
-    std::string ouputws_uncompressed = "cncs_uncompressed";
+    std::string uncompressed_name = "cncs_uncompressed";
     {
       LoadEventNexus ld;
       ld.initialize();
       ld.setPropertyValue("Filename", filename);
-      ld.setPropertyValue("OutputWorkspace", ouputws_uncompressed);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
       ld.setProperty<bool>("Precount", false);
       ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
       ld.setProperty<bool>("LoadLogs", false);    // Time-saver
@@ -827,16 +855,16 @@ public:
     // get a reference to the uncompressed workspace
     EventWorkspace_sptr ws_uncompressed;
     TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
-                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ouputws_uncompressed));
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name));
     TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
 
     // create compressed
-    std::string ouputws_compressed = "cncs_compressed";
+    std::string compressed_name = "cncs_compressed";
     {
       LoadEventNexus ld;
       ld.initialize();
       ld.setPropertyValue("Filename", filename);
-      ld.setPropertyValue("OutputWorkspace", ouputws_compressed);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
       ld.setProperty<bool>("Precount", false);
       ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
       ld.setProperty<bool>("LoadLogs", false);    // Time-saver
@@ -848,27 +876,14 @@ public:
     // get a reference to the uncompressed workspace
     EventWorkspace_sptr ws_compressed;
     TS_ASSERT_THROWS_NOTHING(ws_compressed =
-                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ouputws_compressed));
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
     TS_ASSERT(ws_compressed); // it is an EventWorkspace
 
-    // validate the compressed workspace did not lose events compared to uncompressed
-    // Pixels have to be padded
-    TS_ASSERT_EQUALS(ws_compressed->getNumberHistograms(), NUM_HIST);
-
-    // Compressed should have smaller number of events
-    TS_ASSERT_LESS_THAN(ws_compressed->getNumberEvents(), ws_uncompressed->getNumberEvents());
-
-    for (size_t wi = 0; wi < NUM_HIST; wi++) {
-      // total counts in uncompressed and compressed should be equal
-      TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
-
-      // Pixels with at least one event will have switched
-      if (ws_compressed->getSpectrum(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS(ws_compressed->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
-    }
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST);
 
     // cleanup - intentionally leave compressed workspace behind for test_Monitors
-    AnalysisDataService::Instance().remove(ouputws_uncompressed);
+    AnalysisDataService::Instance().remove(uncompressed_name);
   }
 
   void test_Monitors() {
