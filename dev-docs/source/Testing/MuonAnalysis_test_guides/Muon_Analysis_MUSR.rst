@@ -122,7 +122,7 @@ Rebin and Fitting
 - On the **home tab** set ``Rebin`` to ``Fixed`` and enter a value of ``10``
 - If you tick the ``Plot raw`` option the data will change
 - Go to the **fitting tab**
-	- Add a ``GuasOsc``
+	- Add a ``GausOsc``
 	- Set ``Frequency = 1.3``
 	- Make sure that ``Fit to Raw`` is ticked and the ``Plot raw`` option is unticked
 	- Press fit, the fit will be much smoother than the data

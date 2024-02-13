@@ -97,10 +97,10 @@ need to set `model_analysis:2` before opening Workbench and starting this test.
 - Go to the **Model Fitting** tab
 	- In the ``Results table`` combobox you will see that two options are listed
 	- Pick "Results2"
-	- Set the ``Select Data`` to ``field_danfysik`` and ``Lambda``
-	- The plot will look similar to the one below
+	- Set the ``Select Data`` to "Field_Danfysik" and "Lambda"
+	- The plot will look similar to the one below (but a scatter plot)
 	- Add a peak function (e.g. Gaussian)
-	- Move the peak centre to around 75
+	- Move the peak centre to around 79
 	- You should be able to fit to the data
 	- Pressing the ``Covariance Matrix`` button will give a pop up containing it
 	- Ticking the ``Errors`` box below the plot will show the error bars on the data along with a shaded region
