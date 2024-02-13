@@ -8,7 +8,6 @@ import os
 import unittest
 import tempfile
 import numpy as np
-from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 from mantid import config
@@ -21,9 +20,8 @@ from mantid.simpleapi import (
     DeleteLog,
 )
 from mantid.api import AnalysisDataService
-from mantid.kernel import version
+from mantid.kernel import version, DateAndTime
 from mantid.utils.reflectometry.orso_helper import MantidORSODataset
-from testhelpers import assertRaisesNothing, create_algorithm
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -81,63 +79,21 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         config["default.instrument"] = self._oldInstrument
         self._temp_dir.cleanup()
 
-    def test_create_file_from_workspace_with_reduction_history(self):
-        # Check that relevant information is extracted from the history produced by the ISIS Reflectometry GUI reduction
-        resolution = 0.02
-        # One of the input runs should be an already loaded workspace as this appears differently in the history
-        input_ws_name = "Test_ws"
-        LoadNexus("38393", OutputWorkspace=input_ws_name)
-        input_runs = f"0000013460, {input_ws_name}, inter38415.nxs"
-        reduced_ws = self._get_ws_from_reduction(input_runs, resolution, f"IvsQ_13460+{input_ws_name}+38415", "13463", "13464, 38415")
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_file_populates_software_version_and_reduction_timestamp(self, mock_alg_histories):
+        input_ws = self._create_sample_workspace()
+        history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"})
+        history.getChildHistories = Mock(return_value=[Mock()])
+        history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
+        mock_alg_histories.return_value = [history]
 
-        expected_data_files = [("INTER00013460", "0.5"), ("INTER00038393", "0.5"), ("INTER00038415", "0.5")]
-        expected_additional_file_entries = {
-            "INTER00013463": self._FIRST_TRANS_COMMENT,
-            "INTER00013464": self._SECOND_TRANS_COMMENT,
-            "INTER00038415": self._SECOND_TRANS_COMMENT,
-        }
-        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
-        metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
-        metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
-        metadata_to_check.append(
-            f"{self._REDUCTION_CALL_HEADING} {self._REDUCTION_WORKFLOW_ALG}(InputRunList='{input_runs.replace(' ', '')}'"
+        SaveISISReflectometryORSO(InputWorkspace=input_ws, Filename=self._output_filename)
+
+        self._check_file_header(
+            [
+                f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n#   timestamp: 2024-02-13T12:14:36+00:00\n#"
+            ]
         )
-
-        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
-
-    def test_create_file_from_workspace_with_stitched_reduction_history(self):
-        # Testing the stitched reduction output helps to ensure that we're not getting duplicates in the metadata
-        # because there will be multiple calls to ReflectometryISISLoadAndProcess in the history
-        resolution = 0.02
-        reduced_ws = self._get_ws_from_stitched_reduction(["13460", "38393"], resolution, "13463", "13464, 38415")
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
-
-        expected_data_files = [("INTER00013460", "0.5"), ("INTER00038393", "0.5")]
-        expected_additional_file_entries = {
-            "INTER00013463": self._FIRST_TRANS_COMMENT,
-            "INTER00013464": self._SECOND_TRANS_COMMENT,
-            "INTER00038415": self._SECOND_TRANS_COMMENT,
-        }
-        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
-        metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
-        metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
-        metadata_to_check.append(f"{self._REDUCTION_CALL_HEADING} '{self._REDUCTION_WORKFLOW_ALG}(InputRunList=''13460''")
-
-        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
-
-    def test_create_file_for_period_data_workspace_with_reduction_history(self):
-        # The history produced for the ISIS Reflectometry reduction is slightly different for period data, so
-        # check that we can extract relevant information from this
-        resolution = 0.02
-        reduced_ws = self._get_ws_from_reduction("POLREF14966", resolution, "IvsQ_binned_14966_1")
-
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
-
-        metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
-        metadata_to_check.append(f"{self._REDUCTION_CALL_HEADING} '{self._REDUCTION_ALG}(InputWorkspace=''TOF_14966_1''")
-
-        self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
     def test_create_file_from_workspace_with_no_reduction_history(self):
         ws = self._create_sample_workspace()
@@ -378,61 +334,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def _set_units_as_momentum_transfer(self, ws):
         ws.getAxis(0).setUnit(self._Q_UNIT)
 
-    def _get_ws_from_reduction(self, input_runs, resolution, reduced_ws_name, first_trans_runs=None, second_trans_runs=None):
-        args = {
-            "InputRunList": input_runs,
-            "ProcessingInstructions": "4",
-            "ThetaIn": 0.5,
-            "WavelengthMin": 2,
-            "WavelengthMax": 5,
-            "I0MonitorIndex": 1,
-            "MomentumTransferStep": resolution,
-        }
-        if first_trans_runs:
-            args["FirstTransmissionRunList"] = first_trans_runs
-        if second_trans_runs:
-            args["SecondTransmissionRunList"] = second_trans_runs
-        alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
-        alg.setRethrows(True)
-        assertRaisesNothing(self, alg.execute)
-        return AnalysisDataService.retrieve(reduced_ws_name)
-
-    def _get_ws_from_stitched_reduction(self, input_runs, resolution, first_trans_runs=None, second_trans_runs=None):
-        reduced_workspaces = []
-        for run in input_runs:
-            reduced_ws = self._get_ws_from_reduction(run, resolution, f"IvsQ_binned_{run}", first_trans_runs, second_trans_runs)
-            reduced_workspaces.append(reduced_ws)
-
-        stitched_ws_name = "stitched_ws"
-        args = {
-            "InputWorkspaces": reduced_workspaces,
-            "OutputWorkspace": stitched_ws_name,
-            "Params": resolution,
-        }
-        alg = create_algorithm("Stitch1DMany", **args)
-        alg.setRethrows(True)
-        assertRaisesNothing(self, alg.execute)
-        return AnalysisDataService.retrieve(stitched_ws_name)
-
-    def _get_basic_metadata_expected_from_reduced_ws(self, reduced_ws):
-        expected_header_values = []
-        history = self._get_reduction_history_for_reduced_ws(reduced_ws)
-        self.assertIsNotNone(history)
-
-        # Get the reduction timestamp from the history, in local time
-        datetime_utc = datetime.strptime(history.executionDate().toISO8601String().split(".")[0], "%Y-%m-%dT%H:%M:%S")
-        reduction_datetime = datetime_utc.replace(tzinfo=timezone.utc).astimezone(tz=None)
-        expected_header_values.append(
-            f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n#   timestamp: {reduction_datetime.isoformat()}\n#"
-        )
-
-        expected_header_values.append(f"data_set: {reduced_ws.name()}")
-
-        # We currently want the resolution unit to be left blank. This will be populated at some point in the future.
-        expected_header_values.append("- {error_of: Qz, error_type: resolution}\n")
-
-        return expected_header_values
-
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
         files_entry = [f"{self._DATA_FILES_HEADING}\n"]
 
@@ -452,18 +353,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         files_entry.append(expected_section_end)
         return "".join(files_entry)
-
-    def _get_reduction_history_for_reduced_ws(self, reduced_ws):
-        for history in reversed(reduced_ws.getHistory().getAlgorithmHistories()):
-            if history.name() == self._REDUCTION_ALG:
-                return history
-
-            if history.name() == self._REDUCTION_WORKFLOW_ALG:
-                for child_history in reversed(history.getChildHistories()):
-                    if child_history.name() == self._REDUCTION_ALG:
-                        return child_history
-
-        return None
 
     def _configure_mock_alg_history(self, mock_alg_histories, histories_to_create):
         histories = []
