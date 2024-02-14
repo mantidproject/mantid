@@ -9,12 +9,11 @@
 # another part of AbinsModules.
 from math import isnan
 import os
-from operator import attrgetter, itemgetter
 from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
 import textwrap
-from typing import Dict, Iterable, List, Literal, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Literal, Tuple, Union
 
 import yaml
 
@@ -23,6 +22,8 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
+from euphonic import Quantity
+from euphonic.spectra import Spectrum
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
 from mantid.kernel import ConfigService, Direction, StringListValidator, StringArrayProperty, logger
@@ -33,6 +34,7 @@ from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PRE
 from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
 import abins.parameters
+from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection
 
 
 class AbinsAlgorithm:
@@ -432,7 +434,15 @@ class AbinsAlgorithm:
 
         return masses
 
-    def create_workspaces(self, atoms_symbols=None, atom_numbers=None, *, s_data, atoms_data, max_quantum_order):
+    def create_workspaces(
+        self,
+        atoms_symbols: Optional[Iterable[str]] = None,
+        atom_numbers: Optional[Iterable[int]] = None,
+        *,
+        spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        max_quantum_order,
+        atoms_data,
+    ):
         """
         Creates workspaces for all types of atoms. Creates both partial and total workspaces for given types of atoms.
 
@@ -457,12 +467,10 @@ class AbinsAlgorithm:
         from abins.constants import FLOAT_TYPE
 
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
-        shape = [max_quantum_order]
-        shape.extend(list(s_data[0]["order_1"].shape))
-        s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
-        temp_s_atom_data = np.copy(s_atom_data)
+        shape = [max_quantum_order] + list(self.get_s(spectra[0]).shape)
 
-        num_atoms = len(s_data)
+        s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
+
         masses = self.get_masses_table(atoms_data)
 
         result = []
@@ -472,18 +480,15 @@ class AbinsAlgorithm:
                 for m in masses[symbol]:
                     result.extend(
                         self._atom_type_s(
-                            num_atoms=num_atoms,
                             mass=m,
-                            s_data=s_data,
-                            atoms_data=atoms_data,
+                            spectra=spectra,
                             element_symbol=symbol,
-                            temp_s_atom_data=temp_s_atom_data,
                             s_atom_data=s_atom_data,
                         )
                     )
         if atom_numbers is not None:
             for atom_number in atom_numbers:
-                result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data, s_atom_data=s_atom_data, atoms_data=atoms_data))
+                result.extend(self._atom_number_s(atom_number=atom_number, spectra=spectra, s_atom_data=s_atom_data))
         return result
 
     def _create_workspace(self, *, species: AtomInfo, s_points: np.ndarray, label: str | None = None):
@@ -508,47 +513,40 @@ class AbinsAlgorithm:
         )
         return ws_name
 
-    def _atom_number_s(self, *, atom_number, s_data, s_atom_data, atoms_data):
+    def get_s(self, spectrum: Spectrum) -> Quantity:
+        """Get spectral quantity array, from y or z axis of Spectrum as appropriate"""
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            return spectrum.y_data
+        else:
+            return spectrum.z_data
+
+    def _atom_number_s(
+        self, *, atom_number: int, spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection, s_atom_data: np.ndarray
+    ) -> List[str]:
         """
         Helper function for calculating S for the given atomic index
 
-        :param atom_number: One-based index of atom in s_data e.g. 1 to select first element 'atom_1'
-        :type atom_number: int
-
-        :param s_data: Precalculated S for all atoms and quantum orders
-        :type s_data: abins.SData
-
+        :param atom_number: One-based index of atom in spectra e.g. 1 to select 'atom_1' (atom_index=0)
+        :param spectra: Precalculated S for all atoms and quantum orders
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays. First dimension is quantum
             order; following dimensions should match arrays in s_data.
-        :type s_atom_data: numpy.ndarray
-
-        :param
 
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
-        :returntype: list of Workspace2D
         """
-        from abins.constants import ATOM_PREFIX, ONE_DIMENSIONAL_INSTRUMENTS
-
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            get_s = attrgetter("y_data")
-        else:
-            get_s = attrgetter("z_data")
+        from abins.constants import ATOM_PREFIX
 
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
 
-        atom_data = atoms_data[atom_number - 1]
-        species = AtomInfo(symbol=atom_data["symbol"], mass=atom_data["mass"])
-
-        symbols = map(itemgetter("symbol"), atoms_data)
-        masses = map(itemgetter("mass"), atoms_data)
-        spectra = s_data.get_spectrum_collection(symbols=symbols, masses=masses)
-
         filtered_spectra = spectra.select(atom_index=(atom_number - 1), quantum_order=list(range(1, self._max_event_order + 1)))
         for spectrum in filtered_spectra:
-            s_atom_data[spectrum.metadata["quantum_order"] - 1] = get_s(spectrum).to("barn / (1/cm)").magnitude
-        total_s_atom_data = get_s(filtered_spectra.sum()).to("barn / (1/cm)").magnitude
+            s_atom_data[spectrum.metadata["quantum_order"] - 1] = self.get_s(spectrum).to("barn / (1/cm)").magnitude
+        total_s_atom_data = self.get_s(filtered_spectra.sum()).to("barn / (1/cm)").magnitude
+
+        species = AtomInfo(spectrum.metadata["symbol"], float(spectrum.metadata["mass"]))
 
         atom_workspaces = [
             self._create_workspace(
@@ -562,44 +560,30 @@ class AbinsAlgorithm:
 
     def _atom_type_s(
         self,
-        num_atoms=None,
-        mass=None,
-        s_data=None,
-        atoms_data=None,
-        element_symbol=None,
-        temp_s_atom_data=None,
-        s_atom_data=None,
+        *,
+        mass: float,
+        spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        element_symbol: str,
+        s_atom_data: np.ndarray,
     ):
         """
         Helper function for calculating S for the given type of atom
 
-        :param num_atoms: number of atoms in the system
         :param s_data: Precalculated S for all atoms and quantum orders
         :type s_data: abins.SData
         :param atoms_data: Atomic position/mass data
         :type atoms_data: abins.AtomsData
         :param element_symbol: label for the type of atom
-        :param temp_s_atom_data: helper array to accumulate S (inner loop over quantum order); does not transport
-            information but is used in-place to save on time instantiating large arrays.
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
         """
-        from abins.constants import MASS_EPS, ONE_DIMENSIONAL_INSTRUMENTS
-
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            get_s = attrgetter("y_data")
-        else:
-            get_s = attrgetter("z_data")
+        from abins.constants import MASS_EPS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
         species = AtomInfo(symbol=element_symbol, mass=mass)
 
-        symbols = map(itemgetter("symbol"), atoms_data)
-        masses = map(itemgetter("mass"), atoms_data)
-
-        spectra = s_data.get_spectrum_collection(symbols=symbols, masses=masses)
         spectrum_collection_constructor = spectra.from_spectra
 
         filters = [
@@ -616,9 +600,9 @@ class AbinsAlgorithm:
         order_spectra = spectra.group_by("quantum_order")
 
         for order_spectrum in order_spectra:
-            s_atom_data[order_spectrum.metadata["quantum_order"] - 1] = get_s(order_spectrum).to("barn / (1/cm)").magnitude
+            s_atom_data[order_spectrum.metadata["quantum_order"] - 1] = self.get_s(order_spectrum).to("barn / (1/cm)").magnitude
 
-        total_s_atom_data = get_s(spectra.sum()).to("barn / (1/cm)").magnitude
+        total_s_atom_data = self.get_s(spectra.sum()).to("barn / (1/cm)").magnitude
 
         atom_workspaces.append(
             self._create_workspace(
