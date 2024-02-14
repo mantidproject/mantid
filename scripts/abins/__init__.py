@@ -22,7 +22,6 @@ from .kpointsdata import KpointsData
 from .atomsdata import AtomsData
 from .abinsdata import AbinsData
 from .powderdata import PowderData
-from .sdata import SData
 
 # Calculating modules
 from .powdercalculator import PowderCalculator
