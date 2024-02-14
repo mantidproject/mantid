@@ -7,12 +7,11 @@
 
 from typing import Dict, Optional
 
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress
+from mantid.api import AlgorithmFactory, PythonAlgorithm, Progress
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
-from mantid.kernel import Direction
+from mantid.simpleapi import ConvertUnits, GroupWorkspaces
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 from abins.logging import get_logger, Logger
@@ -23,8 +22,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._experimental_file = None
-        self._scale = None
         self._setting = None
 
         # Save a copy of bin_width for cleanup after it is mutated
@@ -55,14 +52,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # Declare properties for all Abins Algorithms
         self.declare_common_properties(version=2)
 
-        # Declare properties specific to 1D
-        self.declareProperty(
-            FileProperty("ExperimentalFile", "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["raw", "dat"]),
-            doc="File with the experimental inelastic spectrum to compare.",
-        )
-
-        self.declareProperty(name="Scale", defaultValue=1.0, doc="Scale the intensity by the given factor. Default is no scaling.")
-
         # Declare Instrument-related properties
         self.declare_instrument_properties(
             default="TOSCA",
@@ -74,10 +63,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         issues = dict()
         issues = self.validate_common_inputs(issues)
         issues.update(self._validate_instrument_settings())
-
-        scale = self.getProperty("Scale").value
-        if scale < 0:
-            issues["Scale"] = "Scale must be positive."
 
         self._check_advanced_parameter()
 
@@ -141,7 +126,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
         prog_reporter.report("Dynamical structure factors have been determined.")
         # Now determine number of remaining messages and set reporter for rest of run:
-        n_messages = 3 + bool(self._sum_contributions) + bool(self._experimental_file) + bool(self._save_ascii)
+        n_messages = 3 + bool(self._sum_contributions) + bool(self._save_ascii)
         prog_reporter.resetNumSteps(n_messages, 0.8, 1)
 
         # 4) get atoms for which S should be plotted
@@ -167,14 +152,8 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             self.create_total_workspace(workspaces)
             prog_reporter.report("Workspace with total S has been constructed.")
 
-        # 7) add experimental data if available to the collection of workspaces
-        if self._experimental_file != "":
-            workspaces.insert(0, self._create_experimental_data_workspace().name())
-            prog_reporter.report("Workspace with the experimental data has been constructed.")
-
+        # 7) Convert units
         gws = GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
-
-        # 7b) Convert units
         if self._energy_units == "meV":
             ConvertUnits(InputWorkspace=gws, OutputWorkspace=gws, EMode="Indirect", Target="DeltaE")
 
@@ -239,12 +218,8 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         :param workspace: workspace to be filled with S
         """
         if protons_number is not None:
-            s_points = (
-                s_points
-                * self._scale
-                * self.get_cross_section(
-                    scattering=self._scale_by_cross_section, protons_number=protons_number, nucleons_number=nucleons_number
-                )
+            s_points = s_points * self.get_cross_section(
+                scattering=self._scale_by_cross_section, protons_number=protons_number, nucleons_number=nucleons_number
             )
         dim = 1
         length = s_points.size
@@ -258,16 +233,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         # Set correct units on workspace
         self.set_workspace_units(workspace, layout="1D")
-
-    def _create_experimental_data_workspace(self):
-        """
-        Loads experimental data into workspaces.
-        :returns: workspace with experimental data
-        """
-        experimental_wrk = Load(self._experimental_file)
-        self.set_workspace_units(experimental_wrk.name(), energy_units=self._energy_units)
-
-        return experimental_wrk
 
     def _check_advanced_parameter(self):
         """
@@ -287,9 +252,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
-
-        self._experimental_file = self.getProperty("ExperimentalFile").value
-        self._scale = self.getProperty("Scale").value
 
         self._bins = self.get_instrument().get_energy_bins()
 

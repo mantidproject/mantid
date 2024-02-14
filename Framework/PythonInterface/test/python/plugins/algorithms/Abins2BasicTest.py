@@ -28,7 +28,6 @@ class AbinsBasicTest(unittest.TestCase):
     _squaricn = "squaricn_sum_Abins"
     _ab_initio_program = "CASTEP"
     _temperature = 10.0  # temperature 10 K
-    _scale = 1.0
     _instrument_name = "TOSCA"
     _atoms = ""  # if no atoms are specified then all atoms are taken into account
     _sum_contributions = True
@@ -63,10 +62,8 @@ class AbinsBasicTest(unittest.TestCase):
                 "default",
                 "total",
                 "squaricn_sum_Abins",
-                "squaricn_scale",
                 "benzene_exp",
                 "benzene_Abins",
-                "experimental",
                 "numbered",
             ]
         )
@@ -166,14 +163,6 @@ class AbinsBasicTest(unittest.TestCase):
                 TemperatureInKelvin=-1.0,
                 OutputWorkspace=self._workspace_name,
             )
-
-        # negative scale
-        with (
-            self.assertRaisesRegex(RuntimeError, "Scale must be positive."),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
-        ):
-
-            Abins(Version=2, VibrationalOrPhononFile=self._si2 + ".phonon", Scale=-0.2, OutputWorkspace=self._workspace_name)
 
         # unknown instrument
         with (
@@ -280,45 +269,6 @@ class AbinsBasicTest(unittest.TestCase):
                 OutputWorkspace=self._workspace_name,
             )
 
-    def test_scale(self):
-        """
-        Test if scaling is correct.
-        @return:
-        """
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            wrk_ref = Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                TemperatureInKelvin=self._temperature,
-                Instrument=self._instrument_name,
-                Atoms=self._atoms,
-                Scale=self._scale,
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace=self._squaricn + "_ref",
-            )
-
-            wrk = Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                TemperatureInKelvin=self._temperature,
-                Instrument=self._instrument_name,
-                Atoms=self._atoms,
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                Scale=10,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace="squaricn_scale",
-            )
-
-        ref = Scale(wrk_ref, Factor=10)
-
-        (result, messages) = CompareWorkspaces(wrk, ref, Tolerance=self._tolerance)
-        self.assertEqual(result, True)
-
     def test_lagrange_exists(self):
         with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
             Abins(
@@ -329,57 +279,23 @@ class AbinsBasicTest(unittest.TestCase):
                 Instrument="Lagrange",
                 Setting="Cu(331) (Lagrange)",
                 Atoms=self._atoms,
-                Scale=self._scale,
                 SumContributions=self._sum_contributions,
                 QuantumOrderEventsNumber=self._quantum_order_events_number,
                 ScaleByCrossSection=self._cross_section_factor,
                 OutputWorkspace="squaricn-lagrange",
             )
 
-    def test_exp(self):
-        """
-        Tests if experimental data is loaded correctly.
-        @return:
-        """
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile="benzene_Abins.phonon",
-                ExperimentalFile="benzene_Abins.dat",
-                TemperatureInKelvin=self._temperature,
-                Instrument=self._instrument_name,
-                Atoms=self._atoms,
-                Scale=self._scale,
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace="benzene_exp",
-            )
-
-            # load experimental data
-            Load(Filename="benzene.dat", OutputWorkspace="benzene_only_exp")
-
-            (result, messages) = CompareWorkspaces(
-                Workspace1=mtd["experimental_wrk"], Workspace2=mtd["benzene_only_exp"], CheckAxes=False, Tolerance=self._tolerance
-            )
-            self.assertEqual(result, True)
-
     def test_partial_by_element(self):
         """Check results of INS spectrum resolved by elements: default should match explicit list of elements"""
-
-        experimental_file = ""
 
         with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
             wrk_ref = Abins(
                 Version=2,
                 AbInitioProgram=self._ab_initio_program,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
-                ExperimentalFile=experimental_file,
                 TemperatureInKelvin=self._temperature,
                 Instrument=self._instrument_name,
                 Atoms=self._atoms,
-                Scale=self._scale,
                 SumContributions=self._sum_contributions,
                 QuantumOrderEventsNumber=self._quantum_order_events_number,
                 ScaleByCrossSection=self._cross_section_factor,
