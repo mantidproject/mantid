@@ -11,6 +11,7 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_almost_equal
+from pydantic import ValidationError
 
 import abins
 from abins import AbinsData
@@ -52,7 +53,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             good_data = AbinsData.from_dict(json.load(fp))
 
         # invalid filename
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             abins.SCalculatorFactory.init(
                 filename=1,
                 temperature=self._temperature,
@@ -63,7 +64,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid temperature
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=-1,
@@ -85,7 +86,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid abins data: content of abins data instead of object abins_data
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=self._temperature,
@@ -96,7 +97,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid instrument
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=self._temperature,

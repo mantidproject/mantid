@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import numbers
 from typing import Optional, Union
 
 import numpy as np
+from pydantic import Field, validate_call
+from pydantic.types import PositiveFloat
 from scipy.special import factorial
 
-from abins import AbinsData, FrequencyPowderGenerator, SData, SDataByAngle
+from abins import FrequencyPowderGenerator, SData, SDataByAngle
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
@@ -23,42 +24,15 @@ class SPowderSemiEmpiricalCalculator:
     Class for calculating S(Q, omega)
     """
 
-    @staticmethod
-    def _check_parameters(**kwargs):
-        from abins.constants import FUNDAMENTALS, HIGHER_ORDER_QUANTUM_EVENTS
-
-        if isinstance(kwargs.get("filename"), str):
-            if kwargs.get("filename").strip() == "":
-                raise ValueError("Name of the file cannot be an empty string!")
-        else:
-            raise ValueError("Invalid name of input file. String was expected!")
-
-        if not isinstance(kwargs.get("temperature"), numbers.Real):
-            raise ValueError("Invalid value of the temperature. Number was expected.")
-        if kwargs.get("temperature") < 0:
-            raise ValueError("Temperature cannot be negative.")
-
-        if not isinstance(kwargs.get("abins_data"), AbinsData):
-            raise ValueError("Object of type AbinsData was expected.")
-
-        min_order = FUNDAMENTALS
-        max_order = FUNDAMENTALS + HIGHER_ORDER_QUANTUM_EVENTS
-        quantum_order_num = kwargs.get("quantum_order_num")
-
-        if not (isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order):
-            raise ValueError("Invalid number of quantum order events.")
-
-        if not isinstance(kwargs.get("instrument"), Instrument):
-            raise ValueError("Unknown instrument %s" % kwargs.get("instrument"))
-
+    @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(
         self,
         *,
-        filename: str,
-        temperature: numbers.Real,
+        filename: str = Field(min_length=1),
+        temperature: PositiveFloat,
         abins_data: abins.AbinsData,
         instrument: Instrument,
-        quantum_order_num: int,
+        quantum_order_num: int = Field(ge=1, le=2),
         autoconvolution_max: int = 0,
     ) -> None:
         """
@@ -71,8 +45,6 @@ class SPowderSemiEmpiricalCalculator:
             approximate spectra up to this order using auto-convolution
         """
         from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
-
-        self._check_parameters(**locals())
 
         # Expose input parameters
         self._input_filename = filename
