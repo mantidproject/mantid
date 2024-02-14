@@ -233,12 +233,10 @@ class AbinsSDataTest(unittest.TestCase):
         good_temperature = 10.5
         s_data_good_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=good_temperature)
         self.assertAlmostEqual(good_temperature, s_data_good_temperature.get_temperature())
-        # Wrong type should get a TypeError at init
-        with self.assertRaises(TypeError):
+        # Check some validation cases
+        with self.assertRaises(ValidationError):
             SData(frequencies=self.frequencies, data=self.sample_data, temperature="10")
 
-        # Non-finite values should get a ValueError when explicitly checked
         for bad_temperature in (-20.0, 0):
-            s_data_bad_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=bad_temperature)
-            with self.assertRaises(ValueError):
-                s_data_bad_temperature.check_finite_temperature()
+            with self.assertRaises(ValidationError):
+                s_data_bad_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=bad_temperature)
