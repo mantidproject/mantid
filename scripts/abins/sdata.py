@@ -364,29 +364,6 @@ class SData(collections.abc.Sequence, BaseModel):
 
         return order_index - 1
 
-    def add_autoconvolution_spectra(self, max_order: Optional[int] = None) -> None:
-        """
-        Atom-by-atom, add higher order spectra by convolution with fundamentals
-
-        Strictly this is only autoconvolution when forming order-2 from order-1;
-        higher orders are formed by repeated convolution with the fundamentals.
-
-        Data should not have been broadened before applying this operation,
-        or this will lead to repeated broadening of higher orders.
-
-        The process will begin with the highest existing order, and repeat until
-        a spectrum of MAX_ORDER is obtained.
-        """
-        if max_order is None:
-            max_order = abins.parameters.autoconvolution["max_order"]
-
-        for atom_key, atom_data in self._data.items():
-            fundamental_spectrum = atom_data["s"]["order_1"]
-
-            for order_index in range(self._get_highest_existing_order(atom_data), max_order):
-                spectrum = convolve(atom_data["s"][f"order_{order_index}"], fundamental_spectrum, mode="full")[: fundamental_spectrum.size]
-                self._data[atom_key]["s"][f"order_{order_index + 1}"] = spectrum
-
     def check_thresholds(self, logger: Optional[Logger] = None, logging_level: str = "warning") -> List[Tuple[int, int, float]]:
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
