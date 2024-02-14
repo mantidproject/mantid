@@ -7,7 +7,7 @@
 import collections.abc
 from copy import deepcopy
 from itertools import repeat
-from numbers import Integral
+from numbers import Integral, Real
 import re
 from typing import (
     Any,
@@ -17,7 +17,6 @@ from typing import (
     Literal,
     Optional,
     overload,
-    Real,
     Sequence,
     Tuple,
     TypeVar,
@@ -900,9 +899,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         if metadata and "line_data" in metadata.keys():
             if len(metadata["line_data"]) != len(z_data):
                 raise ValueError(
-                    f"y_data contains {len(y_data)} spectra, but "
-                    f'metadata["line_data"] contains '
-                    f'{len(metadata["line_data"])} entries'
+                    f'y_data contains {len(y_data)} spectra, but metadata["line_data"] contains {len(metadata["line_data"])} entries'
                 )
         self.metadata = {} if metadata is None else metadata
 
@@ -966,7 +963,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
                 if not all([isinstance(i, Integral) for i in item]):
                     raise TypeError
             except TypeError:
-                raise TypeError(f'Index "{item}" should be an integer, slice ' f"or sequence of ints")
+                raise TypeError(f'Index "{item}" should be an integer, slice or sequence of ints')
             new_metadata.update(self._combine_metadata([line_metadata[i] for i in item]))
         return type(self)(self.x_data, self.y_data, self.z_data[item, :, :], x_tick_labels=self.x_tick_labels, metadata=new_metadata)
 
