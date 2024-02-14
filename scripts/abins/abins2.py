@@ -29,7 +29,11 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
     @classmethod
     def subscribe(cls, logger: Optional[Logger] = None) -> None:
+        """Register Abins v2 with Algorithm Factory
 
+        You may need to importlib.reload(mantid.simpleapi) to make v2 the default version of the Algorithm.
+        Otherwise, provide a ``Version=2`` parameter when calling Abins to use this version.
+        """
         logger = get_logger(logger=logger)
         logger.warning("Registering Abins v2 algorithm. This is work-in-progress: breaking changes are expected until full release.")
         AlgorithmFactory.subscribe(cls)
