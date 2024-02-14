@@ -25,6 +25,7 @@ from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
+from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
 
 
@@ -98,7 +99,7 @@ class AbinsAlgorithm:
             name="AbInitioProgram",
             direction=Direction.Input,
             defaultValue="CASTEP",
-            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "VASP"]),
+            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "JSON", "VASP"]),
             doc="An ab initio program which was used for vibrational or phonon calculation.",
         )
 
@@ -223,6 +224,7 @@ class AbinsAlgorithm:
             "DMOL3": self._validate_dmol3_input_file,
             "FORCECONSTANTS": self._validate_euphonic_input_file,
             "GAUSSIAN": self._validate_gaussian_input_file,
+            "JSON": self._validate_json_input_file,
             "VASP": self._validate_vasp_input_file,
         }
         ab_initio_program = self.getProperty("AbInitioProgram").value
@@ -805,6 +807,22 @@ class AbinsAlgorithm:
 
         # Did not return already: No problems found
         return dict(Invalid=False, Comment="")
+
+    @classmethod
+    def _validate_json_input_file(cls, filename_full_path: str) -> dict:
+        logger.information("Validate JSON file with vibrational or phonon data.")
+        output = cls._validate_ab_initio_file_extension(
+            ab_initio_program="JSON", filename_full_path=filename_full_path, expected_file_extension=".json"
+        )
+        if output["Invalid"]:
+            output["Comment"] = ".json extension is expected for a JSON file"
+            return output
+
+        json_format = JSONLoader.check_json_format(filename_full_path)
+        if json_format in abins_supported_json_formats:
+            return dict(Invalid=False, Comment=f"Found JSON file format: {json_format.name}")
+
+        return dict(Invalid=True, Comment=f"Found unsupported JSON file format: {json_format.name}")
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:

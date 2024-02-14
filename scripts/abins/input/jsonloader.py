@@ -33,6 +33,9 @@ class PhononJSON(Enum):
     UNKNOWN = auto()
 
 
+abins_supported_json_formats = {PhononJSON.EUPHONIC_MODES, PhononJSON.EUPHONIC_FORCE_CONSTANTS, PhononJSON.ABINS_DATA}
+
+
 class JSONLoader(AbInitioLoader):
     """Get frequencies/eigenvalues from a JSON file using Euphonic"""
 
@@ -47,7 +50,7 @@ class JSONLoader(AbInitioLoader):
         for class_key in "__euphonic_class__", "__abins_class__":
             with open(json_file, "r") as fd:
                 data = json_load(fd)
-                data_class = data.get(class_key, default=None)
+                data_class = data.get(class_key)
 
             if data_class is not None:
                 break
@@ -73,8 +76,8 @@ class JSONLoader(AbInitioLoader):
         construct AbinsData. Sometimes it makes sense to do it the other way
         around, so this method provides the reverse operation.
         """
-        data = abins_data.get_atoms_data.extract()
-        data.update(abins_data.get_kpoints_data.extract())
+        data = abins_data.get_atoms_data().extract()
+        data.update(abins_data.get_kpoints_data().extract())
         self.save_ab_initio_data(data=data)
 
     def read_vibrational_or_phonon_data(self) -> AbinsData:
