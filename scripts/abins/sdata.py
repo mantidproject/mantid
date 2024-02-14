@@ -7,7 +7,7 @@
 import collections.abc
 from copy import deepcopy
 from itertools import repeat
-from numbers import Integral
+from numbers import Integral, Real
 import re
 from typing import (
     Any,
@@ -17,7 +17,6 @@ from typing import (
     Literal,
     Optional,
     overload,
-    Real,
     Sequence,
     Tuple,
     TypeVar,
