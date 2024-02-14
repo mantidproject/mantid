@@ -9,6 +9,7 @@
 # another part of AbinsModules.
 from math import isnan
 import os
+from operator import itemgetter
 from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
@@ -22,6 +23,7 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
+from euphonic import Spectrum1DCollection
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
 from mantid.kernel import ConfigService, Direction, StringListValidator, StringArrayProperty, logger
@@ -528,7 +530,6 @@ class AbinsAlgorithm:
         :returntype: list of Workspace2D
         """
         from abins.constants import ATOM_PREFIX, FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS
-        from operator import itemgetter
 
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
@@ -546,7 +547,6 @@ class AbinsAlgorithm:
             for spectrum in filtered_spectra:
                 s_atom_data[spectrum.metadata["quantum_order"] - 1] = spectrum.y_data.to("barn / (1/cm)").magnitude
             total_s_atom_data = filtered_spectra.sum().y_data.to("barn / (1/cm)").magnitude
-            symbol = filtered_spectra[0].metadata["symbol"]
 
         # Spectrum2DCollection not implemented yet, fall back on direct SData access
         else:
@@ -554,9 +554,6 @@ class AbinsAlgorithm:
                 s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
 
             total_s_atom_data = np.sum(s_atom_data, axis=0)
-            symbol = atoms_data[atom_number - 1]["symbol"]
-
-        z_number = species.z_number
 
         atom_workspaces = [
             self._create_workspace(
@@ -592,25 +589,59 @@ class AbinsAlgorithm:
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
         """
-        from abins.constants import FINE_MASS_EPS
+        from abins.constants import MASS_EPS, ONE_DIMENSIONAL_INSTRUMENTS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
         species = AtomInfo(symbol=element_symbol, mass=mass)
 
-        for atom_index in range(num_atoms):
-            if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < FINE_MASS_EPS:
-                temp_s_atom_data.fill(0.0)
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            # Use Spectrum1DCollection implementation
+            symbols = map(itemgetter("symbol"), atoms_data)
+            masses = map(itemgetter("mass"), atoms_data)
+            spectra = s_data.get_spectrum_collection(symbols=symbols, masses=masses)
 
-                for order in range(1, self._max_event_order + 1):
-                    order_indx = order - 1
-                    temp_s_order = s_data[atom_index]["order_%s" % order]
-                    temp_s_atom_data[order_indx] = temp_s_order
+            filters = [
+                lambda spectrum: spectrum.metadata["symbol"] == element_symbol,
+                lambda spectrum: (spectrum.metadata["quantum_order"] is None)
+                or (spectrum.metadata["quantum_order"] <= self._max_event_order),
+            ]
+            if mass is not None:
+                filters.append(lambda spectrum: abs(float(spectrum.metadata["mass"]) - mass) < MASS_EPS)
 
-                s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
+            all_metadata = spectra.metadata
 
-        total_s_atom_data = np.sum(s_atom_data, axis=0)
+            for key in filters:
+                spectra = filter(key, spectra)
+
+            spectra = Spectrum1DCollection.from_spectra(list(spectra))
+
+            if "quantum_order" in spectra.metadata:
+                # All lines have same quantum_order: no need to group, just sum everything.
+                # Ideally Euphonic would handle this case nicely for use, needs an upstream tweak...
+                order_spectra = Spectrum1DCollection.from_spectra([spectra.sum()])
+            else:
+                order_spectra = spectra.group_by("quantum_order")
+
+            for order_spectrum in order_spectra:
+                s_atom_data[order_spectrum.metadata["quantum_order"] - 1] = order_spectrum.y_data.to("barn / (1/cm)").magnitude
+
+            total_s_atom_data = spectra.sum().y_data.to("barn / (1/cm)").magnitude
+
+        else:
+            for atom_index in range(num_atoms):
+                if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS:
+                    temp_s_atom_data.fill(0.0)
+
+                    for order in range(1, self._max_event_order + 1):
+                        order_indx = order - 1
+                        temp_s_order = s_data[atom_index]["order_%s" % order]
+                        temp_s_atom_data[order_indx] = temp_s_order
+
+                    s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
+
+            total_s_atom_data = np.sum(s_atom_data, axis=0)
 
         atom_workspaces.append(
             self._create_workspace(
@@ -619,6 +650,7 @@ class AbinsAlgorithm:
                 label=f"{species.name}_total",
             )
         )
+
         atom_workspaces.append(
             self._create_workspace(
                 species=species,

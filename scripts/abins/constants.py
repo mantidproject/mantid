@@ -328,6 +328,9 @@ FINE_MASS_EPS = 1e-8
 # the same mass
 ONLY_ONE_MASS = 1
 
+# String formatter for mass when used in Spectrum metadata
+MASS_STR_FORMAT = "{:.3f}"
+
 DIGITS_NUM = 5
 S_PLOT_SPACING = 4.0
 ENERGY_PLOT_STEP = 500.0
