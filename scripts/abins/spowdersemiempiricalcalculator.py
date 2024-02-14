@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from pathlib import Path
+from operator import itemgetter
 from typing import Optional, Union
 
 import numpy as np
@@ -17,7 +18,10 @@ from abins import FrequencyPowderGenerator, SData, SDataByAngle
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
+from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection
 from mantid.api import Progress
+
+SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
 
 
 class SPowderSemiEmpiricalCalculator:
@@ -118,26 +122,31 @@ class SPowderSemiEmpiricalCalculator:
             self._q_bins = None
             self._q_bin_centres = None
 
-    def get_formatted_data(self) -> SData:
+    def get_formatted_data(self) -> SpectrumCollection:
         """
         Get structure factor, from cache or calculated as necessary
         :returns: obtained data
         """
         try:
             self._clerk.check_previous_data()
-            data = self.load_formatted_data()
-            self._report_progress(f"{data} has been loaded from the HDF file.", reporter=self.progress_reporter)
+            spectra = self.load_formatted_data()
+            self._report_progress(f"{spectra} has been loaded from the HDF file.", reporter=self.progress_reporter)
 
         except (IOError, ValueError):
             self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
             data = self.calculate_data()
 
             self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
+            data.check_thresholds(logging_level="information")
 
-        data.check_thresholds(logging_level="information")
-        return data
+            atoms_data = self._abins_data.get_atoms_data()
+            spectra = data.get_spectrum_collection(
+                symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
+            )
 
-    def load_formatted_data(self) -> SData:
+        return spectra
+
+    def load_formatted_data(self) -> SpectrumCollection:
         """
         Loads S from an hdf file.
         :returns: object of type SData.
@@ -183,7 +192,10 @@ class SPowderSemiEmpiricalCalculator:
         if s_data.get_bin_width is None:
             raise Exception("Loaded data does not have consistent frequency spacing")
 
-        return s_data
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+
+        return spectra
 
     def calculate_data(self) -> SData:
         """
