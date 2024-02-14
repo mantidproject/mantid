@@ -147,7 +147,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         )
         s_calculator.progress_reporter = prog_reporter
         spectra = s_calculator.get_formatted_data()
-        self._q_bins = spectra.get_bin_edges(bin_axis="x").to("1/angstrom").magnitude
+
+        self._q_bins = spectra.get_bin_edges(bin_ax="x").to("1/angstrom").magnitude
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
