@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Dict, List, Optional, overload, Union, TypedDict
+from typing import Dict, List, Optional, overload, TypedDict, Union
 import re
+
 import numpy as np
 
 import abins
@@ -146,12 +147,10 @@ class AtomsData(collections.abc.Sequence):
         return len(self._data)
 
     @overload
-    def __getitem__(self, item: int) -> _AtomData:
-        ...
+    def __getitem__(self, item: int) -> _AtomData: ...
 
     @overload
-    def __getitem__(self, item: slice) -> List[_AtomData]:
-        ...
+    def __getitem__(self, item: slice) -> List[_AtomData]: ...
 
     def __getitem__(self, item):
         return self._data[item]
