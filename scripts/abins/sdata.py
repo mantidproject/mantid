@@ -6,13 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from copy import deepcopy
-from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
+import re
+from typing import Any, Dict, List, Optional, overload, Sequence, TypeVar, Union
+from typing_extensions import Self
+
+from pydantic import BaseModel, ConfigDict, PositiveFloat, validate_call
 import numpy as np
-from numbers import Real
 from scipy.signal import convolve
 
 import abins
-from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
+from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ALL_SAMPLE_FORMS_TYPE, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 from abins.instruments.directinstrument import DirectInstrument
 from abins.logging import get_logger, Logger
 import abins.parameters
@@ -20,11 +23,14 @@ import abins.parameters
 # Type annotation for atom items e.g. data['atom_1']
 OneAtomSData = Dict[str, np.ndarray]
 
+# Type annotation for dat input {'atom_0': {'s': {'order_1': array( ...
+SDataInputDict = Dict[str, Dict[str, Dict[str, np.ndarray]]]
+
 SD = TypeVar("SD", bound="SData")
 SDBA = TypeVar("SDBA", bound="SDataByAngle")
 
 
-class SData(collections.abc.Sequence):
+class SData(collections.abc.Sequence, BaseModel):
     """
     Class for storing S(Q, omega) with relevant metadata
 
@@ -46,40 +52,32 @@ class SData(collections.abc.Sequence):
 
     """
 
-    def __init__(
-        self,
-        *,
-        data: dict,
-        frequencies: np.ndarray,
-        temperature: Optional[float] = None,
-        sample_form: str = "",
-        q_bins: Optional[np.ndarray] = None,
-    ) -> None:
-        super().__init__()
+    model_config = ConfigDict(arbitrary_types_allowed=True, strict=True)
 
-        if temperature is None:
-            self._temperature = None
-        elif isinstance(temperature, Real):
-            self._temperature = float(temperature)
-        else:
-            raise TypeError("Temperature must be a real number or None")
+    from pydantic import PrivateAttr
 
-        if isinstance(sample_form, str):
-            self._sample_form = sample_form
-        else:
-            raise TypeError("Sample form must be a string. Use '' (default) if unspecified.")
+    _data: Dict[str, Any] = PrivateAttr()
 
-        self._frequencies = np.asarray(frequencies, dtype=FLOAT_TYPE)
-        self._check_frequencies()
+    frequencies: np.ndarray
+    temperature: Optional[PositiveFloat] = None
+    sample_form: ALL_SAMPLE_FORMS_TYPE = "Powder"
+    q_bins: Optional[np.ndarray] = None
 
-        if q_bins is not None:
-            self._q_bins = np.asarray(q_bins, dtype=FLOAT_TYPE)
-        else:
-            self._q_bins = None
-        self._check_q_bins()
-
+    # Usually the custom validation steps go into model_post_init(), but this
+    # would run before we assigned self._data so here we use __init__ to sequence things
+    @validate_call(config=ConfigDict(arbitrary_types_allowed=True, strict=True))
+    def __init__(self, data: SDataInputDict, **kwargs):
+        super().__init__(**kwargs)
         self._data = data
         self._check_data()
+
+    def model_post_init(self, __context):
+        self.frequencies = np.asarray(self.frequencies, dtype=FLOAT_TYPE)
+        self._check_frequencies()
+
+        if self.q_bins is not None:
+            self.q_bins = np.asarray(self.q_bins, dtype=FLOAT_TYPE)
+        self._check_q_bins()
 
     def update(self, sdata: "SData") -> None:
         """Update the data by atom and order
@@ -95,7 +93,7 @@ class SData(collections.abc.Sequence):
                   new entries to the old data
         """
 
-        if not np.allclose(self._frequencies, sdata.get_frequencies()):
+        if not np.allclose(self.frequencies, sdata.get_frequencies()):
             raise ValueError("Cannot update SData with inconsistent frequencies")
 
         for atom_key, atom_data in sdata._data.items():
@@ -178,13 +176,13 @@ class SData(collections.abc.Sequence):
         return cls(data=data, frequencies=frequencies, **kwargs)
 
     def get_frequencies(self) -> np.ndarray:
-        return self._frequencies.copy()
+        return self.frequencies.copy()
 
     def get_q_bins(self) -> np.ndarray:
-        if self._q_bins is None:
+        if self.q_bins is None:
             return None
         else:
-            return self._q_bins.copy()
+            return self.q_bins.copy()
 
     def get_q_bin_centres(self) -> np.ndarray:
         q_bins = self.get_q_bins()
@@ -202,15 +200,15 @@ class SData(collections.abc.Sequence):
                  corresponding to q =1 to 2 Å^-1, q =2 to 3 Å^-1; typically these
                  are evaluated at the bin centres 1.5, 2.5 Å^-1.)
         """
-        self._q_bins = q_bins
+        self.q_bins = q_bins
         self._check_q_bins()
         self._check_data()
 
     def get_temperature(self) -> Union[float, None]:
-        return self._temperature
+        return self.temperature
 
     def get_sample_form(self) -> str:
-        return self._sample_form
+        return self.sample_form
 
     def get_bin_width(self) -> Union[float, None]:
         """Check frequency series and return the bin size
@@ -218,9 +216,9 @@ class SData(collections.abc.Sequence):
         If the frequency series does not have a consistent step size, return None
         """
         self._check_frequencies()
-        step_size = (self._frequencies[-1] - self._frequencies[0]) / (self._frequencies.size - 1)
+        step_size = (self.frequencies[-1] - self.frequencies[0]) / (self.frequencies.size - 1)
 
-        if np.allclose(step_size, self._frequencies[1:] - self._frequencies[:-1]):
+        if np.allclose(step_size, self.frequencies[1:] - self.frequencies[:-1]):
             return step_size
         else:
             return None
@@ -240,63 +238,39 @@ class SData(collections.abc.Sequence):
                 total += data
         return total
 
-    def check_finite_temperature(self):
-        """Raise an error if Temperature is not greater than zero"""
-        temperature = self.get_temperature()
-        if not (isinstance(temperature, (float, int)) and temperature > 0):
-            raise ValueError("Invalid value of temperature.")
-
-    def check_known_sample_form(self):
-        """Raise an error if sample form is not known to Abins"""
-        sample_form = self.get_sample_form()
-        if sample_form not in ALL_SAMPLE_FORMS:
-            raise ValueError(f"Invalid sample form {sample_form}: known sample forms are {ALL_SAMPLE_FORMS}")
-
     def _check_frequencies(self):
         # Check frequencies are ordered low to high
-        if not np.allclose(np.sort(self._frequencies), self._frequencies):
+        if not np.allclose(np.sort(self.frequencies), self.frequencies):
             raise ValueError("Frequencies not sorted low to high")
 
     def _check_q_bins(self):
-        if (self._q_bins is not None) and (len(self._q_bins.shape) != 1):
+        if (self.q_bins is not None) and (len(self.q_bins.shape) != 1):
             raise IndexError("Q-bins should be a 1-D array")
 
     def _check_data(self):
         """Check data set is consistent and has correct types"""
-        if not isinstance(self._data, dict):
-            raise ValueError("New value of S  should have a form of a dict.")
-
-        n_frequencies = self._frequencies.size
-        if self._q_bins is None:
+        n_frequencies = self.frequencies.size
+        if self.q_bins is None:
             expected_shapes = [(n_frequencies,), (1, n_frequencies)]
         else:
             expected_shapes = [
-                (self._q_bins.size - 1, n_frequencies),
+                (self.q_bins.size - 1, n_frequencies),
             ]
 
         for key, item in self._data.items():
-            if ATOM_LABEL in key:
-                if not isinstance(item, dict):
-                    raise ValueError("New value of item from S data should have a form of dictionary.")
+            if not re.match(rf"{ATOM_LABEL}_\d+", key):
+                raise ValueError("Data keys must have form {ATOM_LABEL}_1, {ATOM_LABEL}_2, ...")
 
-                if sorted(item.keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
-                    raise ValueError("Invalid structure of the dictionary.")
+            if sorted(item.keys()) != sorted(ALL_KEYWORDS_ATOMS_S_DATA):
+                raise ValueError("Invalid structure of the dictionary.")
 
-                for order in item[S_LABEL]:
-                    if not isinstance(item[S_LABEL][order], np.ndarray):
-                        raise ValueError("Numpy array was expected.")
-                    elif item[S_LABEL][order].shape not in expected_shapes:
-                        raise ValueError(
-                            f"SData not dimensionally consistent with frequencies / q-bins "
-                            f"for {key}, {order}. "
-                            f"Expected shape " + " or ".join(map(str, expected_shapes)) + f"; got shape {item[S_LABEL][order].shape}"
-                        )
-
-            elif item == "frequencies":
-                raise Exception("The Abins SData format is changed, do not put frequencies in this dict")
-
-            else:
-                raise ValueError("Invalid keyword " + item)
+            for order in item[S_LABEL]:
+                if item[S_LABEL][order].shape not in expected_shapes:
+                    raise ValueError(
+                        f"SData not dimensionally consistent with frequencies / q-bins "
+                        f"for {key}, {order}. "
+                        f"Expected shape " + " or ".join(map(str, expected_shapes)) + f"; got shape {item[S_LABEL][order].shape}"
+                    )
 
     def extract(self):
         """
@@ -305,9 +279,9 @@ class SData(collections.abc.Sequence):
         """
         # Use a shallow copy so that 'frequencies' is not added to self._data
         full_data = self._data.copy()
-        full_data.update({"frequencies": self._frequencies})
-        if self._q_bins is not None:
-            full_data.update({"q_bins": self._q_bins})
+        full_data.update({"frequencies": self.frequencies})
+        if self.q_bins is not None:
+            full_data.update({"q_bins": self.q_bins})
         return full_data
 
     def rebin(self, bins: np.array) -> "SData":
@@ -533,7 +507,7 @@ class SDataByAngle(collections.abc.Sequence):
         angles: Sequence[float],
         frequencies: np.ndarray,
         temperature: Optional[float] = None,
-        sample_form: str = "",
+        sample_form: ALL_SAMPLE_FORMS = "Powder",
     ) -> None:
         """Container for scattering spectra resolved by angle and atom
 
@@ -674,7 +648,8 @@ class SDataByAngle(collections.abc.Sequence):
                     self._data[atom_key]["s"][order_key][angle_index, :] = order_data
 
     @classmethod
-    def from_sdata_series(cls: SDBA, data: Sequence[SData], *, angles: Sequence[float]) -> SDBA:
+    @validate_call(config=ConfigDict(arbitrary_types_allowed=True, strict=True))
+    def from_sdata_series(cls, data: Sequence[SData], *, angles: Sequence[float]) -> Self:
         metadata = {}
 
         if len(data) != len(angles):
@@ -692,9 +667,6 @@ class SDataByAngle(collections.abc.Sequence):
 
         # First loop over data: collect and check metadata
         for sdata in data:
-            if not isinstance(sdata, SData):
-                raise TypeError("data must be a sequence of SData")
-
             for key in ("frequencies", "temperature", "sample_form"):
                 if key not in metadata:
                     metadata[key] = getattr(sdata, f"get_{key}")()
