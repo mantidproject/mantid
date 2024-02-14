@@ -20,7 +20,13 @@ from abins import AbinsData, FrequencyPowderGenerator
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
-from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection, add_autoconvolution_spectra, check_thresholds
+from abins.sdata import (
+    AbinsSpectrum1DCollection,
+    AbinsSpectrum2DCollection,
+    add_autoconvolution_spectra,
+    apply_kinematic_constraints,
+    check_thresholds,
+)
 from mantid.api import Progress
 
 SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
@@ -139,13 +145,13 @@ class SPowderSemiEmpiricalCalculator:
         try:
             self._clerk.check_previous_data()
             spectra = self.load_formatted_data()
-            self._report_progress(f"{spectra} has been loaded from the HDF file.", reporter=self.progress_reporter)
+            self._report_progress("Spectrum data has been loaded from the HDF file.", reporter=self.progress_reporter)
 
         except (IOError, ValueError):
             self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
             spectra = self.calculate_data()
 
-            self._report_progress(f"{spectra} has been calculated.", reporter=self.progress_reporter)
+            self._report_progress("Spectrum data has been calculated.", reporter=self.progress_reporter)
 
             check_thresholds(
                 ((spectrum.metadata["atom_index"], spectrum.metadata["quantum_order"], self._get_s(spectrum)) for spectrum in spectra),
@@ -193,8 +199,6 @@ class SPowderSemiEmpiricalCalculator:
 
         2-D writing is currently slow compared to 2-D calculation, so only 1-D
         results will be cached.
-
-        :returns: object of type SData and dictionary with total S.
         """
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
@@ -273,8 +277,6 @@ class SPowderSemiEmpiricalCalculator:
             )
 
     def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
-        from abins.sdata import apply_kinematic_constraints
-
         spectra = self._calculate_s_powder_over_k_and_q()
         apply_kinematic_constraints(spectra, self._instrument)
 
@@ -283,8 +285,6 @@ class SPowderSemiEmpiricalCalculator:
     def _calculate_s_powder_1d(self) -> AbinsSpectrum1DCollection:
         """
         Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
-
-        :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
 
@@ -359,7 +359,7 @@ class SPowderSemiEmpiricalCalculator:
         else:
             raise IndexError("q2 should be 1-D or 2-D array")
 
-        # Collect SData at q = 1/Å without DW factors
+        # Collect S(w) at q = 1/Å without DW factors
         bins = self._fine_bins if self._use_autoconvolution else self._bins
         bin_centres = self._fine_bin_centres if self._use_autoconvolution else self._bin_centres
         s_by_atom_and_order: SByAtomAndOrder = defaultdict(lambda: np.zeros_like(bin_centres, dtype=FLOAT_TYPE))
@@ -410,7 +410,7 @@ class SPowderSemiEmpiricalCalculator:
         if self._use_autoconvolution:
             max_dw_order = self._autoconvolution_max
             self._report_progress(
-                f"Finished calculating SData to order {self._quantum_order_num} by "
+                f"Finished calculating S(q,ω) to order {self._quantum_order_num} by "
                 f"analytic powder-averaging. "
                 f"Adding autoconvolution data up to order {max_dw_order}.",
                 reporter=self.progress_reporter,
@@ -423,7 +423,7 @@ class SPowderSemiEmpiricalCalculator:
             # (order, q, energy)
             max_dw_order = self._quantum_order_num
 
-        # # Compute appropriate q-dependence for each order, along with 1/(n!) term
+        # Compute appropriate q-dependence for each order, along with 1/(n!) term
         factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
         q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[order_expansion_slice] / factorials
 
@@ -475,10 +475,7 @@ class SPowderSemiEmpiricalCalculator:
         broadening is applied in 1D before q-dependence is applied. For fundamentals with
         mode-dependent Debye-Waller factor, broadening must be calculated for each q bin.
 
-        In the resulting SData, spectra have the shape (n_qpts, n_ebins)
-
-        Returns:
-            SData
+        The resulting spectra have the shape (n_qpts, n_ebins)
         """
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
@@ -507,9 +504,6 @@ class SPowderSemiEmpiricalCalculator:
 
         Args:
             angle: Scattering angle used to determine energy-q relationship
-
-        Returns:
-            SData
         """
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
@@ -720,7 +714,7 @@ class SPowderSemiEmpiricalCalculator:
 
         :param k_index: Index of k-point from calculated phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :param bins: Frequency bins consistent with sdata
+        :param bins: Frequency bins
         :param min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
@@ -741,7 +735,7 @@ class SPowderSemiEmpiricalCalculator:
         :param atom_index: number of atom
         :param k_index: Index of k-point in phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :bins: Frequency bins consistent with sdata
+        :bins: Frequency bins
         :min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
@@ -777,7 +771,6 @@ class SPowderSemiEmpiricalCalculator:
             )
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
 
-            # sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
             results[(atom_index, order)] = rebinned_spectrum
 
             # Prune modes with low intensity; these are assumed not to contribute to higher orders
