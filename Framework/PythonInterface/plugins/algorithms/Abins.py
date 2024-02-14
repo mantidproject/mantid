@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from operator import itemgetter
 from typing import Dict
 
 import numpy as np
@@ -136,9 +135,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         )
         s_calculator.progress_reporter = prog_reporter
 
-        atoms_data = ab_initio_data.get_atoms_data()
-        s_data = s_calculator.get_formatted_data()
-        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        spectra = s_calculator.get_formatted_data()
 
         # Clean up parameter modified by _get_properties()
         abins.parameters.sampling["bin_width"] = self._initial_parameters_bin_width
@@ -151,6 +148,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         prog_reporter.resetNumSteps(n_messages, 0.8, 1)
 
         # 4) get atoms for which S should be plotted
+        atoms_data = ab_initio_data.get_atoms_data()
         atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data, selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
