@@ -411,28 +411,43 @@ class AbinsAlgorithm:
         return sorted(atom_numbers), atom_symbols
 
     @staticmethod
-    def get_masses_table(atoms_data):
-        """
-        Collect masses associated with each element in atoms_data
+    def _iter_line_metadata(metadata: Dict[str, int | str | List[Dict[str, int | str]]]):
+        """Iterate over spectrum metadata as though all data were in line_data"""
+        common_data = {
+            key: metadata[key]
+            for key in metadata.keys()
+            - {
+                "line_data",
+            }
+        }
 
-        :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
-        :type num_atoms: int
+        for row in metadata["line_data"]:
+            yield common_data | row
+
+    @classmethod
+    def get_masses_table(cls, spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection) -> Dict[str, List[float]]:
+        """
+        Collect masses associated with each element in SpectrumNDCollection
+
+        Requires metadata keys "mass" and "symbol"
 
         :returns: Mass data in form ``{el1: [m1, ...], ... }``
         """
-        masses = {}
-        for atom in atoms_data:
-            symbol = atom["symbol"]
-            mass = atom["mass"]
-            if symbol not in masses:
-                masses[symbol] = set()
-            masses[symbol].add(mass)
+        from collections import defaultdict
 
-        # convert set to list to fix order
-        for s in masses:
-            masses[s] = sorted(list(set(masses[s])))
+        if "line_data" not in spectra.metadata:
+            # Only one kind of atom
+            return {spectra.metadata["symbol"]: [float(spectra.metadata["mass"])]}
 
-        return masses
+        masses_table = defaultdict(set)
+        for row in cls._iter_line_metadata(spectra.metadata):
+            masses_table[row["symbol"]].add(row["mass"])
+
+        # convert sets to sorted lists to fix order
+        for symbol, masses in masses_table.items():
+            masses_table[symbol] = sorted(list(map(float, masses)))
+
+        return masses_table
 
     def create_workspaces(
         self,
@@ -440,27 +455,16 @@ class AbinsAlgorithm:
         atom_numbers: Optional[Iterable[int]] = None,
         *,
         spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
-        max_quantum_order,
-        atoms_data,
+        max_quantum_order: int,
     ):
         """
         Creates workspaces for all types of atoms. Creates both partial and total workspaces for given types of atoms.
 
         :param atoms_symbols: atom types (i.e. element symbols) for which S should be created.
-        :type iterable of str:
-
         :param atom_numbers:
             indices of individual atoms for which S should be created. (One-based numbering; 1 <= I <= NUM_ATOMS)
-        :type iterable of int:
-
-        :param s_data: dynamical factor data
-        :type abins.SData
-
-        :param atoms_data: atom positions/masses
-        :type abins.AtomsData:
-
+        :param spectra: Collection of S as spectra with metadata
         :param max_quantum_order: maximum quantum order to include
-        :type int:
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
@@ -470,8 +474,7 @@ class AbinsAlgorithm:
         shape = [max_quantum_order] + list(self.get_s(spectra[0]).shape)
 
         s_atom_data = np.zeros(shape=tuple(shape), dtype=FLOAT_TYPE)
-
-        masses = self.get_masses_table(atoms_data)
+        masses = self.get_masses_table(spectra)
 
         result = []
 
@@ -571,8 +574,6 @@ class AbinsAlgorithm:
 
         :param s_data: Precalculated S for all atoms and quantum orders
         :type s_data: abins.SData
-        :param atoms_data: Atomic position/mass data
-        :type atoms_data: abins.AtomsData
         :param element_symbol: label for the type of atom
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
