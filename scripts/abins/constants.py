@@ -191,6 +191,9 @@ COMPLEX_TYPE = np.dtype(complex)
 INT_ID = np.dtype(np.uint32).num
 INT_TYPE = np.dtype(np.uint32)
 
+# Valid types for hdf5 attr read/write
+HDF5_ATTR_TYPE = np.int64 | int | np.float64 | float | str | bytes | bool
+
 HIGHER_ORDER_QUANTUM_EVENTS = 3  # number of quantum order effects taken into account
 HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS
 
