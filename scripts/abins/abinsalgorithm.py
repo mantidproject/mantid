@@ -8,6 +8,7 @@
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
 import os
+from pathlib import Path
 import re
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
@@ -792,18 +793,29 @@ class AbinsAlgorithm:
     def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
         logger.information("Validate force constants file for interpolation.")
 
-        from pathlib import Path
+        path = Path(filename_full_path)
 
-        if (suffix := Path(filename_full_path).suffix) == ".castep_bin":
+        if (suffix := path.suffix) == ".castep_bin":
             # Assume any .castep_bin file is valid choice
             pass
 
         elif suffix == ".yaml":
             # Check .yaml files have expected keys for Phonopy force constants
-            with open(filename, "r") as yaml_file:
+            with open(filename_full_path, "r") as yaml_file:
                 phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
-            if not {"phonopy", "force_constants"}.issubset(phonon_data):
-                return dict(Invalid=True, Comment=f"{filename_full_path} does not seem to be a valid phonopy.yaml with force constants")
+
+            if {"phonopy", "force_constants"}.issubset(phonon_data):
+                pass
+
+            elif "phonopy" in phonon_data:
+                # Phonon file without force constants included: they could be in
+                # a FORCE_CONSTANTS or force_constants.hdf5 file so check if one exists
+                fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
+                if not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
+                    return dict(
+                        Invalid=True,
+                        Comment=f"Could not find force constants in {filename_full_path}, or find data file {' or '.join(fc_filenames)}",
+                    )
 
         # Did not return already: No problems found
         return dict(Invalid=False, Comment="")
