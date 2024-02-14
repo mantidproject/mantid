@@ -286,6 +286,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.resize(width, height + self._status_and_tool_height)
 
     def show(self):
+        self._set_up_axes_title_change_callbacks()
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
@@ -302,7 +303,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        self._set_up_axes_title_change_callbacks()
 
         if self.toolbar:
             self.toolbar.set_buttons_visibility(self.canvas.figure)
@@ -319,9 +319,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if not title_text:
             return
         title_text_with_number = title_text + "-" + str(self.num)
-        current_title_text = self.get_window_title()
-        if current_title_text not in {title_text_with_number, title_text}:
+        if self.get_window_title() not in {title_text_with_number, title_text}:
             self.set_window_title(title_text)
+            # Title was not updating if the plot is already open so calling draw
+            # Font properties are still not updating (until you interact with the title in another way
+            # i.e double-clicking)
+            self.canvas.draw_idle()
 
     def _axes_that_are_not_colour_bars(self):
         return [ax for ax in self.canvas.figure.get_axes() if not hasattr(ax, "_colorbar")]
@@ -464,6 +467,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         plot_axes = self._axes_that_are_not_colour_bars()
         if len(plot_axes) == 1:
             plot_axes[0].set_title(title)
+            self.canvas.draw_idle()
 
     def fig_visibility_changed(self):
         """
