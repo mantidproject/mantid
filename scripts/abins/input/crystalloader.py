@@ -35,7 +35,9 @@ class CRYSTALLoader(AbInitioLoader):
         self._inv_expansion_matrix = np.eye(3, dtype=FLOAT_TYPE)
         self._parser = TextParser()
 
-        self._ab_initio_program = "CRYSTAL"
+    @property
+    def _ab_initio_program(self) -> str:
+        return "CRYSTAL"
 
     def read_vibrational_or_phonon_data(self):
         """

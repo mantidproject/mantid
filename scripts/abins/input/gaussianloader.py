@@ -28,12 +28,15 @@ class GAUSSIANLoader(AbInitioLoader):
         :param input_ab_initio_filename: name of file with vibrational data (foo.log or foo.LOG)
         """
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "GAUSSIAN"
         self._active_atoms = None
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_vibrational_or_phonon_data(self) -> AbinsData:
+    @property
+    def _ab_initio_program(self) -> str:
+        return "GAUSSIAN"
+
+    def read_vibrational_or_phonon_data(self):
         """
         Reads vibrational data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of file with vibrational data to <>.hdf5.

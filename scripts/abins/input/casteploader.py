@@ -17,13 +17,9 @@ class CASTEPLoader(AbInitioLoader):
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, input_ab_initio_filename):
-        """
-
-        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "CASTEP"
+    @property
+    def _ab_initio_program(self) -> str:
+        return "CASTEP"
 
     def read_vibrational_or_phonon_data(self) -> AbinsData:
         """

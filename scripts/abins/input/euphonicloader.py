@@ -18,13 +18,9 @@ from dos.load_euphonic import euphonic_calculate_modes
 class EuphonicLoader(AbInitioLoader):
     """Get frequencies/eigenvalues from force constants using Euphonic"""
 
-    def __init__(self, input_ab_initio_filename):
-        """
-
-        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "FORCECONSTANTS"
+    @property
+    def _ab_initio_program(self) -> str:
+        return "FORCECONSTANTS"
 
     @staticmethod
     def data_dict_from_modes(modes: QpointPhononModes) -> Dict[str, Any]:

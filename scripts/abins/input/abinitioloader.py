@@ -31,13 +31,18 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     """
 
     def __init__(self, input_ab_initio_filename: str = None):
+        """An object for loading phonon data from ab initio output files"""
+
         if not isinstance(input_ab_initio_filename, str):
             raise TypeError("Filename must be a string")
         elif not Path(input_ab_initio_filename).is_file():
             raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
 
-        self._ab_initio_program = None
         self._clerk = abins.IO(input_filename=input_ab_initio_filename, group_name=abins.parameters.hdf_groups["ab_initio_data"])
+
+    @property
+    @abstractmethod
+    def _ab_initio_program(self) -> str: ...
 
     @abstractmethod
     def read_vibrational_or_phonon_data(self) -> abins.AbinsData:
