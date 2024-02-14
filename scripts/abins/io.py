@@ -423,25 +423,22 @@ class IO(BaseModel):
         if name in group:
             hdf_group = group[name]
         else:
-            raise ValueError("Invalid name of the dataset.")
+            raise ValueError(f"Dataset {name} not found in group {group.name}.")
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
         if isinstance(hdf_group, h5py.Dataset):
             return hdf_group[()]
         elif all([self._get_subgrp_name(hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
-            structured_dataset_list = []
-            # here we require that numerical keys are always a sequence 0, 1, 2, 3 ...
-            num_keys = len(hdf_group.keys())
-            for item in range(num_keys):
-                structured_dataset_list.append(
-                    self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name + "/%s" % item)
-                )
+            structured_dataset_list = [
+                self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=f"{hdf_group.name}/{key}")
+                for key in sorted(hdf_group.keys(), key=int)
+            ]
             return structured_dataset_list
         else:
             return self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=hdf_group.name + "/")
 
     @classmethod
-    def _recursively_load_dict_contents_from_group(cls, hdf_file=None, path=None):
+    def _recursively_load_dict_contents_from_group(cls, *, hdf_file: h5py.File, path: str):
         """
         Loads structure dataset which has form of Python dictionary.
         :param hdf_file:  hdf file object from which dataset is loaded
@@ -455,7 +452,7 @@ class IO(BaseModel):
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item[()]
             elif isinstance(item, h5py._hl.group.Group):
-                ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file, path + key + "/")
+                ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=f"{path}{key}/")
         return ans
 
     def load(self, list_of_attributes=None, list_of_datasets=None):
