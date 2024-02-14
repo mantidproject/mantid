@@ -1137,15 +1137,6 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
     def copy(self: Self) -> Self:
         return Spectrum2D.copy(self)
 
-    def get_bin_edges(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
-        return Spectrum2D.get_bin_edges(self, bin_ax=bin_ax)
-
-    def get_bin_centres(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
-        return Spectrum2D.get_bin_centres(self, bin_ax=bin_ax)
-
-    def get_bin_widths(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
-        return Spectrum2D.get_bin_widths(self, bin_ax=bin_ax)
-
     def assert_regular_bins(self, bin_ax: Literal["x", "y"], message: str = "", rtol: float = 1e-5, atol: float = 0.0) -> None:
         return Spectrum2D.assert_regular_bins(self, message=message, rtol=rtol, atol=atol)
 
@@ -1155,3 +1146,14 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> Self:
         return Spectrum2D.from_dict(d)
+
+    # These methods are _slightly_ modified from Spectrum2D and could be more
+    # efficient at the cost of increased verbosity
+    def get_bin_edges(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
+        return Spectrum2D.get_bin_edges(self[0], bin_ax=bin_ax)
+
+    def get_bin_centres(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
+        return Spectrum2D.get_bin_centres(self[0], bin_ax=bin_ax)
+
+    def get_bin_widths(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
+        return Spectrum2D.get_bin_widths(self[0], bin_ax=bin_ax)
