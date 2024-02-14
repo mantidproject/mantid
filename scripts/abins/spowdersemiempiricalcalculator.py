@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from pathlib import Path
+import json
 from operator import itemgetter
+from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
@@ -149,51 +150,33 @@ class SPowderSemiEmpiricalCalculator:
     def load_formatted_data(self) -> SpectrumCollection:
         """
         Loads S from an hdf file.
-        :returns: object of type SData.
         """
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
-        frequencies = data["datasets"]["data"]["frequencies"]
 
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError(
                 "User requested a larger number of quantum events to be included in the simulation "
                 "than in the previous calculations. S cannot be loaded from the hdf file."
             )
-        if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
-            self._report_progress(
-                """
-                         User requested a smaller number of quantum events than in the previous calculations.
-                         S Data from hdf file which corresponds only to requested quantum order events will be
-                         loaded."""
-            )
 
-            atoms_s = {}
+        data_dict = data["datasets"]["data"]
+        data_dict["metadata"] = json.loads(data_dict["metadata"])
 
-            # load atoms_data
-            n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
-            for i in range(n_atom):
-                atoms_s[f"atom_{i}"] = {"s": dict()}
-                for j in range(1, self._quantum_order_num + 1):
-                    temp_val = data["datasets"]["data"][f"atom_{i}"]["s"][f"order_{j}"]
-                    atoms_s[f"atom_{i}"]["s"].update({f"order_{j}": temp_val})
+        def _stringify(key: str | bytes) -> str:
+            if isinstance(key, bytes):
+                return key.decode("utf8")
+            else:
+                return key
 
-            # reduce the data which is loaded to only this data which is required by the user
-            data["datasets"]["data"] = atoms_s
+        # Some of the strings get stored as bytes, safer to just parse strings
+        data_dict = {key: _stringify(value) for key, value in data_dict.items()}
 
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            spectra = AbinsSpectrum1DCollection.from_dict(data_dict)
         else:
-            atoms_s = {key: value for key, value in data["datasets"]["data"].items() if key not in ("frequencies", "q_bins")}
-
-        q_bins = data["datasets"]["data"].get("q_bins", None)
-
-        s_data = abins.SData(
-            temperature=self._temperature, sample_form=self._sample_form, data=atoms_s, frequencies=frequencies, q_bins=q_bins
-        )
-
-        if s_data.get_bin_width is None:
-            raise Exception("Loaded data does not have consistent frequency spacing")
-
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+            spectra = AbinsSpectrum2DCollection.from_dict(data_dict)
 
         return spectra
 
@@ -209,10 +192,17 @@ class SPowderSemiEmpiricalCalculator:
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
         data = self._calculate_s()
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+
+        spectra_dict = spectra.to_dict()
+        # Metadata dict is not very HDF5-friendly, dump to string
+        spectra_dict["metadata"] = json.dumps(spectra_dict["metadata"])
+
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             self._clerk.add_file_attributes()
             self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
-            self._clerk.add_data("data", data.extract())
+            self._clerk.add_data("data", spectra_dict)
             self._clerk.save()
         return data
 
