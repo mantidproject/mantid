@@ -17,6 +17,66 @@ from abins import SData
 from abins.sdata import SDataByAngle
 
 
+class AbinsSpectraTest(unittest.TestCase):
+    """Test operations on euphonic-derived Spectrum classes"""
+
+    def test_autoconvolution(self):
+        from abins.sdata import AbinsSpectrum1DCollection, add_autoconvolution_spectra
+        from euphonic import ureg
+
+        # Check a trivial case: starting with a single peak,
+        # expect evenly-spaced sequence of same intensity
+        #
+        # _|____ .... -> _|_|_|_|_ ...
+        #
+        y_data = np.zeros((1, 50)) * ureg("1 / meV")
+        y_data[0, 2] = 1.0 * ureg("1 / meV")
+        expected_y_data = np.zeros((10, 50)) * ureg("1 / meV")
+        for i in range(10):
+            expected_y_data[i][2 * (i + 1)] = 1.0 * ureg("1 / meV")
+
+        spectra = AbinsSpectrum1DCollection(
+            x_data=(np.linspace(0, 10, 50) * ureg("meV")),
+            y_data=y_data,
+            metadata={"test_key": "test_value", "line_data": [{"atom_index": 0, "quantum_order": 1}]},
+        )
+
+        spectra = add_autoconvolution_spectra(spectra)
+
+        assert_almost_equal(spectra.y_data.magnitude, expected_y_data.magnitude)
+        for i, row in enumerate(spectra):
+            self.assertEqual(row.metadata, {"atom_index": 0, "quantum_order": i + 1, "test_key": "test_value"})
+
+        # Check range restriction works, and beginning with more orders
+        #
+        # O1 _|____ ... + O2 __|___ ... -> O3 ___|___ ... + O4 ____|__ ...
+
+        y_data = np.zeros((2, 50)) * ureg("1 / meV")
+        y_data[0, 2] = 1.0 * ureg("1 / meV")
+        y_data[1, 3] = 1.0 * ureg("1 / meV")
+        spectra = AbinsSpectrum1DCollection(
+            x_data=(np.linspace(0, 10, 50) * ureg("meV")),
+            y_data=y_data,
+            metadata={
+                "test_key": "test_value",
+                "line_data": [{"atom_index": 0, "quantum_order": 1}, {"atom_index": 0, "quantum_order": 2}],
+            },
+        )
+        output_spectra = add_autoconvolution_spectra(spectra, max_order=4)
+
+        # Check only the approriate orders were included
+        assert set(spectrum.metadata["quantum_order"] for spectrum in output_spectra) == set(range(1, 5))
+        for order in 1, 2:
+            selection = output_spectra.select(quantum_order=order)
+            self.assertEqual(len(selection), 1)
+            assert_almost_equal(spectra.select(quantum_order=order).y_data.magnitude, selection.y_data.magnitude)
+
+        for order in 3, 4:
+            expected = np.zeros((1, 50))
+            expected[0, (order - 2) * 2 + 3] = 1.0
+            assert_almost_equal(output_spectra.select(quantum_order=order).y_data.magnitude, expected)
+
+
 class AbinsSDataTest(unittest.TestCase):
     def setUp(self):
         self.default_threshold_value = abins.parameters.sampling["s_absolute_threshold"]
@@ -168,47 +228,6 @@ class AbinsSDataTest(unittest.TestCase):
         shuffled_frequencies = np.concatenate([self.frequencies[3:], self.frequencies[:3]])
         with self.assertRaises(ValueError):
             SData(data=self.sample_data, frequencies=shuffled_frequencies)
-
-    def test_s_data_autoconvolution(self):
-        # Check a trivial case: starting with a single peak,
-        # expect evenly-spaced sequence of same intensity
-        #
-        # _|____ .... -> _|_|_|_|_ ...
-        #
-        frequencies = np.linspace(0, 10, 50)
-        data_o1 = {"atom_0": {"s": {"order_1": np.zeros(50)}}}
-        data_o1["atom_0"]["s"]["order_1"][2] = 1.0
-        expected_o1 = {"atom_0": {"s": {f"order_{i}": np.zeros(50) for i in range(1, 11)}}}
-        for i in range(1, 11):
-            expected_o1["atom_0"]["s"][f"order_{i}"][(2 * i)] = 1.0
-
-        s_data_o1 = SData(data=data_o1, frequencies=frequencies)
-        s_data_o1.add_autoconvolution_spectra()
-
-        expected_s_data = SData(data=expected_o1, frequencies=frequencies)
-
-        for i in range(1, 11):
-            assert_almost_equal(s_data_o1[0][f"order_{i}"], expected_s_data[0][f"order_{i}"])
-
-        # Check range restriction works, and beginning with more orders
-        #
-        # O1 _|____ ... + O2 __|___ ... -> O3 ___|___ ... + O4 ____|__ ...
-
-        data_o2 = {"atom_0": {"s": {"order_1": np.zeros(50), "order_2": np.zeros(50)}}}
-        data_o2["atom_0"]["s"]["order_1"][2] = 1.0
-        data_o2["atom_0"]["s"]["order_2"][3] = 1.0
-        s_data_o2 = SData(data=data_o2, frequencies=frequencies)
-        s_data_o2.add_autoconvolution_spectra(max_order=4)
-
-        # Check only the approriate orders were included
-        assert set(s_data_o2[0].keys()) == set([f"order_{i}" for i in range(1, 5)])
-        for order_key in ("order_1", "order_2"):
-            assert_almost_equal(s_data_o2[0][order_key], data_o2["atom_0"]["s"][order_key])
-        for order in range(3, 5):
-            expected = np.zeros(50)
-            #         ac steps    o1  o2
-            expected[(order - 2) * 2 + 3] = 1.0
-            assert_almost_equal(s_data_o2[0][f"order_{order}"], expected)
 
     def test_s_data_temperature(self):
         # Good temperature should pass without issue
