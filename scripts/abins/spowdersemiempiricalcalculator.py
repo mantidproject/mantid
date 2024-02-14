@@ -630,7 +630,7 @@ class SPowderSemiEmpiricalCalculator:
             SpectrumCollection for fundamentals including mode-dependent Debye-Waller factor
 
         """
-        from abins.constants import FLOAT_TYPE
+        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
 
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor.", reporter=self.progress_reporter)
 
@@ -689,9 +689,6 @@ class SPowderSemiEmpiricalCalculator:
                 s_array[atom_index] += rebinned_s_with_dw
 
         atoms_data = self._abins_data.get_atoms_data()
-
-        from abins.constants import MASS_STR_FORMAT
-
         metadata = {
             "scattering": "incoherent",
             "quantum_order": 1,
