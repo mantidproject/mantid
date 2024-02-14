@@ -83,13 +83,15 @@ class SData(collections.abc.Sequence, BaseModel):
         self._check_q_bins()
 
     def get_spectrum_collection(self, symbols: Iterable[str] = None, masses: Iterable[float] = None) -> Spectrum1DCollection:
+        from abins.constants import MASS_STR_FORMAT
+
         if symbols is None:
             symbols = repeat(None)
 
         if masses is None:
             masses = repeat(None)
         else:
-            masses = (f"{mass:.3f}" for mass in masses)
+            masses = (MASS_STR_FORMAT.format(mass) for mass in masses)
 
         frequencies = self.get_frequencies() * ureg("1/cm")
         metadata = {"scattering": "incoherent", "line_data": []}
