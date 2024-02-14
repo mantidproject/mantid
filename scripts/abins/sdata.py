@@ -820,8 +820,9 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
         """
         line_data = self.metadata["line_data"]
         line_data_vals = []
-        for data in line_data:
-            line_data_vals.append(tuple([data[key] for key in line_data_keys]))
+        for line in line_data:
+            all_metadata = line | self.metadata
+            line_data_vals.append(tuple([all_metadata[key] for key in line_data_keys]))
         return line_data_vals
 
 
