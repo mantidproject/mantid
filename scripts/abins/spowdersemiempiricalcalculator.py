@@ -143,14 +143,9 @@ class SPowderSemiEmpiricalCalculator:
 
         except (IOError, ValueError):
             self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
-            data = self.calculate_data()
+            spectra = self.calculate_data()
 
-            self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
-
-            atoms_data = self._abins_data.get_atoms_data()
-            spectra = data.get_spectrum_collection(
-                symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
-            )
+            self._report_progress(f"{spectra} has been calculated.", reporter=self.progress_reporter)
 
             check_thresholds(
                 ((spectrum.metadata["atom_index"], spectrum.metadata["quantum_order"], self._get_s(spectrum)) for spectrum in spectra),
@@ -192,7 +187,7 @@ class SPowderSemiEmpiricalCalculator:
 
         return spectra
 
-    def calculate_data(self) -> SData:
+    def calculate_data(self) -> SpectrumCollection:
         """
         Calculates dynamical structure factor S.
 
@@ -203,9 +198,7 @@ class SPowderSemiEmpiricalCalculator:
         """
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
-        data = self._calculate_s()
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        spectra = self._calculate_s()
 
         spectra_dict = spectra.to_dict()
         # Metadata dict is not very HDF5-friendly, dump to string
@@ -216,7 +209,8 @@ class SPowderSemiEmpiricalCalculator:
             self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
             self._clerk.add_data("data", spectra_dict)
             self._clerk.save()
-        return data
+
+        return spectra
 
     @property
     def progress_reporter(self) -> Union[None, Progress]:
@@ -254,7 +248,7 @@ class SPowderSemiEmpiricalCalculator:
         else:
             logger.information(msg)
 
-    def _calculate_s(self) -> SData:
+    def _calculate_s(self) -> SpectrumCollection:
         """Calculate structure factor by dispatching to appropriate 1d or 2d workflow
 
         If self._isotropic_fundamentals is True, order-1 will use the same Debye-Waller approximation
@@ -278,14 +272,17 @@ class SPowderSemiEmpiricalCalculator:
                 'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
             )
 
-    def _calculate_s_powder_2d(self) -> SData:
+    def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
         s_data = self._calculate_s_powder_over_k_and_q()
 
         s_data.apply_kinematic_constraints(self._instrument)
 
-        return s_data
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
 
-    def _calculate_s_powder_1d(self) -> SData:
+        return spectra
+
+    def _calculate_s_powder_1d(self) -> AbinsSpectrum1DCollection:
         """
         Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
 
@@ -312,7 +309,10 @@ class SPowderSemiEmpiricalCalculator:
         s_data = sdata_by_angle.sum_over_angles(average=True)
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
         s_data = self._broaden_sdata(s_data, broadening_scheme=broadening_scheme)
-        return s_data
+
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        return spectra
 
     def _calculate_s_isotropic(self, q2: np.ndarray, broaden: bool = False) -> SData:
         """Calculate S(q,ω) components that use isotropic Debye-Waller term
