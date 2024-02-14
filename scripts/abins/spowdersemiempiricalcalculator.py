@@ -21,7 +21,7 @@ from abins import AbinsData, FrequencyPowderGenerator, SData
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
-from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection, check_thresholds
+from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection, add_autoconvolution_spectra, check_thresholds
 from mantid.api import Progress
 
 SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
@@ -360,6 +360,9 @@ class SPowderSemiEmpiricalCalculator:
                     min_order=min_order,
                 )
 
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+
         # Get numpy broadcasting right: we need to convert an array from (order,)
         # to (order, energy) or (order, q, energy) format.
         if len(q2.shape) == 1:
@@ -370,11 +373,6 @@ class SPowderSemiEmpiricalCalculator:
             is_2d = True
         else:
             raise IndexError("q2 should be 1-D or 2-D array")
-
-        from abins.sdata import add_autoconvolution_spectra
-
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
 
         if self._use_autoconvolution:
             max_dw_order = self._autoconvolution_max
