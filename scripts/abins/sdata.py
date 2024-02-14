@@ -6,7 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from copy import deepcopy
-from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
+from itertools import repeat
+from typing import Dict, Iterable, List, Optional, overload, Sequence, TypeVar, Union
+
+from euphonic import ureg
+from euphonic.spectra import Spectrum1DCollection
 import numpy as np
 from numbers import Real
 from scipy.signal import convolve
@@ -80,6 +84,29 @@ class SData(collections.abc.Sequence):
 
         self._data = data
         self._check_data()
+
+    def get_spectrum_collection(self, symbols: Iterable[str] = None, masses: Iterable[float] = None) -> Spectrum1DCollection:
+        if symbols is None:
+            symbols = repeat(None)
+
+        if masses is None:
+            masses = repeat(None)
+        else:
+            masses = (f"{mass:.3f}" for mass in masses)
+
+        frequencies = self.get_frequencies() * ureg("1/cm")
+        metadata = {"scattering": "incoherent", "line_data": []}
+        y_data = []
+
+        for atom_index, symbol, mass in zip(range(len(self)), symbols, masses):
+            atom_data = self[atom_index]
+            for order, order_data in atom_data.items():
+                y_data.append(order_data)
+                metadata["line_data"].append(
+                    {"atom_index": atom_index, "symbol": symbol, "mass": mass, "quantum_order": int(order.split("_")[-1])}
+                )
+
+        return Spectrum1DCollection(x_data=frequencies, y_data=np.asarray(y_data) * ureg("barn / (1/cm)"), metadata=metadata)
 
     def update(self, sdata: "SData") -> None:
         """Update the data by atom and order
