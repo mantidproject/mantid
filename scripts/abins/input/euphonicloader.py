@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from pathlib import Path
 from typing import Any, Dict
 
 from euphonic import QpointPhononModes
@@ -24,11 +23,6 @@ class EuphonicLoader(AbInitioLoader):
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
-        if not isinstance(input_ab_initio_filename, str):
-            raise TypeError("Filename must be a string")
-        elif not Path(input_ab_initio_filename).is_file():
-            raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
-
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "FORCECONSTANTS"
 
