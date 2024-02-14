@@ -74,8 +74,6 @@ public:
 
   int size() const override;
 
-  HeldType firstValue() const override;
-
   /// Access the unfiltered log
   const TimeSeriesProperty<HeldType> *unfiltered() const;
 

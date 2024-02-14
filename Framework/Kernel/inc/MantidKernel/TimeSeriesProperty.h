@@ -250,7 +250,7 @@ public:
   /// Returns the last time
   Types::Core::DateAndTime lastTime() const;
   /// Returns the first value regardless of filter
-  virtual TYPE firstValue() const;
+  TYPE firstValue() const;
   /// Returns the first value in the TimeROI
   TYPE firstValue(const Kernel::TimeROI &roi) const;
   /// Returns the first time regardless of filter
@@ -360,6 +360,7 @@ private:
   /// Calculate the time-weighted average and std-deviation of a property in a filtered range
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
   void createFilteredData(const TimeROI &timeROI, std::vector<TimeValueUnit<TYPE>> &filteredData) const;
+  TYPE firstValueInFilter(const std::vector<TimeInterval> &filter) const;
 
 protected:
   //----------------------------------------------------------------------------------------------

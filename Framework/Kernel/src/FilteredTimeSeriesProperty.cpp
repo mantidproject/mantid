@@ -429,11 +429,6 @@ template <typename TYPE> std::vector<TimeInterval> FilteredTimeSeriesProperty<TY
   }
 }
 
-template <typename TYPE> TYPE FilteredTimeSeriesProperty<TYPE>::firstValue() const {
-  auto roi = getTimeROI();
-  return TimeSeriesProperty<TYPE>::firstValue(roi);
-}
-
 template <typename HeldType>
 bool FilteredTimeSeriesProperty<HeldType>::operator==(const TimeSeriesProperty<HeldType> &right) const {
   const bool time_and_value_compare = TimeSeriesProperty<HeldType>::operator==(right);
