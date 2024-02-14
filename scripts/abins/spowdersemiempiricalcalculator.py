@@ -690,11 +690,13 @@ class SPowderSemiEmpiricalCalculator:
 
         atoms_data = self._abins_data.get_atoms_data()
 
+        from abins.constants import MASS_STR_FORMAT
+
         metadata = {
             "scattering": "incoherent",
             "quantum_order": 1,
             "line_data": [
-                {"atom_index": atom_index, "symbol": atom_data["symbol"], "mass": atom_data["mass"]}
+                {"atom_index": atom_index, "symbol": atom_data["symbol"], "mass": MASS_STR_FORMAT.format(atom_data["mass"])}
                 for atom_index, atom_data in enumerate(atoms_data)
             ],
         }
