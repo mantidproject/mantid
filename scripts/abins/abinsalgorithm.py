@@ -506,8 +506,8 @@ class AbinsAlgorithm:
     def _atom_type_s(
         self,
         *,
-        mass: float,
         spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        mass: float,
         element_symbol: str,
         s_atom_data: np.ndarray,
         substitution: bool,
@@ -515,8 +515,8 @@ class AbinsAlgorithm:
         """
         Helper function for calculating S for the given type of atom
 
-        :param s_data: Precalculated S for all atoms and quantum orders
-        :type s_data: abins.SData
+        :spectra: collection of simulated intensity contributions
+        :param mass: mass for the type of atom
         :param element_symbol: label for the type of atom
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
