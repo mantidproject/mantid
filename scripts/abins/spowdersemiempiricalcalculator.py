@@ -8,7 +8,7 @@
 import json
 from operator import attrgetter, itemgetter
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Optional, Tuple, Union
 
 from euphonic import ureg
 from euphonic.spectra import Spectrum1D, Spectrum2D
@@ -340,6 +340,8 @@ class SPowderSemiEmpiricalCalculator:
             Debye-Waller corrected scattering intensities at the calculated
             orders, for all atoms.
         """
+        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
+        from collections import defaultdict
 
         # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
         if self._quantum_order_num == 1 or self._use_autoconvolution:
@@ -348,20 +350,49 @@ class SPowderSemiEmpiricalCalculator:
             min_order = 2  # Skip fundamentals to be calculated separately
 
         # Collect SData at q = 1/Å without DW factors
-        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num, shape="1d")
+        bins = self._fine_bins if self._use_autoconvolution else self._bins
+        bin_centres = self._fine_bin_centres if self._use_autoconvolution else self._bin_centres
+        s_by_atom_and_order: SByAtomAndOrder = defaultdict(lambda: np.zeros_like(bin_centres, dtype=FLOAT_TYPE))
+
+        atoms_data = self._abins_data.get_atoms_data()
 
         if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._use_autoconvolution:
             for k_index in range(self._num_k):
-                _ = self._calculate_s_powder_over_atoms(
-                    k_index=k_index,
-                    q2=1.0,
-                    bins=(self._fine_bins if self._use_autoconvolution else self._bins),
-                    sdata=sdata,
-                    min_order=min_order,
+                s_by_atom_and_order = self._add_s_contributions(
+                    self._calculate_s_powder_over_atoms(
+                        k_index=k_index,
+                        q2=1.0,
+                        bins=bins,
+                        min_order=min_order,
+                    ),
+                    s_by_atom_and_order,
                 )
 
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+            spectra = AbinsSpectrum1DCollection(
+                x_data=(bin_centres * self.freq_unit),
+                y_data=np.array([value for value in s_by_atom_and_order.values()]) * self.s_unit,
+                metadata={
+                    "scattering": "incoherent",
+                    "line_data": [
+                        {
+                            "atom_index": atom_index,
+                            "quantum_order": order,
+                            "symbol": atoms_data[atom_index]["symbol"],
+                            "mass": MASS_STR_FORMAT.format(atoms_data[atom_index]["mass"]),
+                        }
+                        for atom_index, order in s_by_atom_and_order.keys()
+                    ],
+                },
+            )
+        else:
+            # Nothing to calculate, return empty-ish data structure
+            # return AbinsSpectrum1DCollection(x_data=(bin_centres * self.freq_unit),
+            #                                  y_data=np.zeros((1, len(bin_centres)))*self.s_unit,
+            #                                  metadata={"quantum_order": 1})
+            sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num, shape="1d")
+            spectra = sdata.get_spectrum_collection(
+                symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
+            )
 
         # Get numpy broadcasting right: we need to convert an array from (order,)
         # to (order, energy) or (order, q, energy) format.
@@ -389,8 +420,6 @@ class SPowderSemiEmpiricalCalculator:
         else:
             # (order, q, energy)
             max_dw_order = self._quantum_order_num
-
-        # raise Exception(spectra.x_data.shape, spectra.y_data.shape)
 
         # # Compute appropriate q-dependence for each order, along with 1/(n!) term
         factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
@@ -466,7 +495,6 @@ class SPowderSemiEmpiricalCalculator:
             AbinsSpectrum2DCollection.from_spectra([spectrum for spectrum in isotropic_spectra if spectrum.metadata["quantum_order"] > 1])
             + fundamentals_spectra_with_dw
         )
-
         return spectra
 
     def _calculate_s_powder_over_k(self, *, angle: float) -> SpectrumCollection:
@@ -703,7 +731,18 @@ class SPowderSemiEmpiricalCalculator:
             case _:
                 raise ValueError("Unexpected shape of q2 array")
 
-    def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1) -> None:
+    # Pass around raw S contributions as a dict keyed by (atom_index, quantum_order)
+    SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
+
+    @staticmethod
+    def _add_s_contributions(a: SByAtomAndOrder, b: SByAtomAndOrder) -> SByAtomAndOrder:
+        """Combine contributions to S(atom, order) from different calculations
+
+        a and b are assumed to have the same set of keys: this is not checked
+        """
+        return {key: a[key] + b[key] for key in a}
+
+    def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, bins: np.ndarray, min_order: int = 1) -> SByAtomAndOrder:
         """
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
 
@@ -713,29 +752,32 @@ class SPowderSemiEmpiricalCalculator:
 
         :param k_index: Index of k-point from calculated phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :param sdata: Data container to which results will be summed in-place
         :param bins: Frequency bins consistent with sdata
         :param min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
         assert min_order in (1, 2)  # Cannot start higher than 2; need information about combinations
 
+        results: SByAtomAndOrder = {}
+
         for atom_index in range(self._num_atoms):
             self._report_progress(msg=f"Calculating S for atom {atom_index}, k-point {k_index}", reporter=self.progress_reporter)
-            self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, q2=q2, sdata=sdata, bins=bins, min_order=min_order)
+            results.update(self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, q2=q2, bins=bins, min_order=min_order))
+
+        return results
 
     def _calculate_s_powder_one_atom(
-        self, *, atom_index: int, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1
-    ) -> None:
+        self, *, atom_index: int, k_index: int, q2: np.ndarray, bins: np.ndarray, min_order: int = 1
+    ) -> SByAtomAndOrder:
         """
         :param atom_index: number of atom
         :param k_index: Index of k-point in phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :sdata: Data container to which results will be summed in-place
         :bins: Frequency bins consistent with sdata
         :min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
+        results: SByAtomAndOrder = {}
         kpoint_weight = self._abins_data.get_kpoints_data()[k_index].weight
 
         fundamentals = self._powder_data.get_frequencies()[k_index]
@@ -766,10 +808,14 @@ class SPowderSemiEmpiricalCalculator:
                 q2=q2, frequencies=frequencies, indices=coefficients, a_tensor=a_tensor, a_trace=a_trace, b_tensor=b_tensor, b_trace=b_trace
             )
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
-            sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
+
+            # sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
+            results[(atom_index, order)] = rebinned_spectrum
 
             # Prune modes with low intensity; these are assumed not to contribute to higher orders
             frequencies, coefficients = self._calculate_s_over_threshold(scattering_intensities, freq=frequencies, coeff=coefficients)
+
+        return results
 
     @staticmethod
     def _calculate_s_over_threshold(s=None, freq=None, coeff=None):
