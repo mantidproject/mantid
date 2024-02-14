@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import json
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 from pathlib import Path
 from typing import Optional, Union
 
@@ -398,16 +398,26 @@ class SPowderSemiEmpiricalCalculator:
         sdata *= q2_order_corrections
         sdata.set_q_bins(self._q_bins)
 
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+
         if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution:
             self._report_progress(
                 f"Applying isotropic Debye-Waller factor to orders {min_order} and above.", reporter=self.progress_reporter
             )
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
 
-            sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
+            if isinstance(spectra, AbinsSpectrum1DCollection):
+                get_raw_s = attrgetter("_y_data")
+            else:
+                get_raw_s = attrgetter("_z_data")
 
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+            for i, spectrum in enumerate(spectra):
+                if spectrum.metadata["quantum_order"] < min_order:
+                    continue
+
+                atom_index = spectrum.metadata["atom_index"]
+                get_raw_s(spectra)[i] *= iso_dw[atom_index]
 
         return spectra
 
