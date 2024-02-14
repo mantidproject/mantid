@@ -292,7 +292,7 @@ class SPowderSemiEmpiricalCalculator:
             return self._calculate_s_powder_2d()
         else:
             raise ValueError(
-                'Instrument "{}" is not recognised, cannot perform semi-empirical ' "powder averaging.".format(self._instrument.get_name())
+                'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
             )
 
     def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
