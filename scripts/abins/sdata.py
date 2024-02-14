@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from copy import deepcopy
-from itertools import repeat
+from itertools import chain, groupby, repeat
 from numbers import Integral, Real
 from operator import itemgetter
 import re
@@ -27,7 +27,7 @@ from typing import (
 from typing_extensions import Self
 
 from euphonic import Quantity, ureg
-from euphonic.spectra import Spectrum, Spectrum1DCollection, Spectrum2D
+from euphonic.spectra import Spectrum, Spectrum1D, Spectrum1DCollection, Spectrum2D
 from euphonic.validate import _check_constructor_inputs, _check_unit_conversion
 import numpy as np
 from pydantic import BaseModel, ConfigDict, PositiveFloat, validate_call
@@ -1141,3 +1141,101 @@ def apply_kinematic_constraints(spectra: AbinsSpectrum2DCollection, instrument: 
 
     # Applying NaN to spectra.z_data doesn't seem to work? Use private attribute
     spectra._z_data[:, mask] = float("nan")
+
+
+def add_autoconvolution_spectra(
+    spectra: AbinsSpectrum1DCollection, max_order: Optional[int] = None, output_bins: Optional[Quantity] = None
+) -> AbinsSpectrum1DCollection:
+    """
+    Atom-by-atom, add higher order spectra by convolution with fundamentals
+
+    Strictly this is only autoconvolution when forming order-2 from order-1;
+    higher orders are formed by repeated convolution with the fundamentals.
+
+    Data should not have been broadened before applying this operation,
+    or this will lead to repeated broadening of higher orders.
+
+    The process will begin with the highest existing order, and repeat until
+    a spectrum of MAX_ORDER is obtained.
+
+    Results are rebinned into ``output_bins`` if this is provided
+
+    Arguments:
+        spectra: spectra with "atom_index" and "quantum_order" metadata to
+            which higher orders will be added by convolution with
+            quantum_order=1 data
+        max_order: highest required quantum order
+        output_bins: if provided, output spectra are re-binned to these x-values.
+
+    """
+
+    if max_order is None:
+        max_order = abins.parameters.autoconvolution["max_order"]
+
+    assert isinstance(spectra, AbinsSpectrum1DCollection)
+
+    # group spectra by atom (using sort and itertools groupby)
+    spectra_by_atom = groupby(
+        sorted(spectra, key=(lambda spec: (spec.metadata["atom_index"], spec.metadata["quantum_order"]))),
+        key=(lambda spec: spec.metadata["atom_index"]),
+    )
+
+    # create new spectra using first and last spectra in initial group, iterating until order = max_order
+
+    output_spectra = []
+    for _, atom_spectra in spectra_by_atom:
+        autoconvolved_atom_spectra: Spectrum1DCollection = _autoconvolve_atom_spectra(list(atom_spectra), max_order=max_order)
+
+        if output_bins is not None:
+            autoconvolved_atom_spectra = _resample_spectra(autoconvolved_atom_spectra, output_bins)
+
+        output_spectra.append(autoconvolved_atom_spectra)
+
+    return AbinsSpectrum1DCollection.from_spectra(list(chain(*output_spectra)))
+
+
+def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], *, max_order: int) -> AbinsSpectrum1DCollection:
+    """
+    Autoconvolve pre-sorted list of spectra; convolve first element with last until order reaches max_order
+    """
+
+    assert atom_spectra[0].metadata["quantum_order"] == 1
+    fundamentals = atom_spectra[0].y_data.magnitude
+    y_units = atom_spectra[0].y_data.units
+
+    highest_initial_order = atom_spectra[-1].metadata["quantum_order"]
+    for order in range(highest_initial_order, max_order):
+        autoconv_spectrum = convolve(atom_spectra[-1].y_data.magnitude, fundamentals, mode="full")[: fundamentals.size]
+
+        atom_spectra.append(
+            Spectrum1D(
+                x_data=atom_spectra[0].x_data,
+                y_data=(autoconv_spectrum * y_units),
+                metadata=(atom_spectra[0].metadata | {"quantum_order": order + 1}),
+            )
+        )
+
+    return AbinsSpectrum1DCollection.from_spectra(atom_spectra)
+
+
+def _resample_spectra(spectra: AbinsSpectrum1DCollection, bins: Quantity) -> AbinsSpectrum1DCollection:
+    """
+    Naive resampling by rebuilding histogram on new bins
+
+    The intensity is not corrected for change in bin size: that happens elsewhere for now
+
+    Approaches not used here:
+    - for good performance when downsampling by an integer factor, consider reshaping array and summing over new axis
+    - for more accurate final shape, apply some antialiasing filtering (at simplest level, linear binning)
+    """
+
+    output_ydata = [
+        np.histogram(spectra.x_data.to(bins.units).magnitude, bins=bins.magnitude, weights=weights, density=0)[0]
+        for weights in spectra.y_data.magnitude
+    ]
+
+    return Spectrum1DCollection(
+        x_data=bins,
+        y_data=(np.asarray(output_ydata, dtype=FLOAT_TYPE) * spectra.y_data.units * spectra.x_data.units / bins.units),
+        metadata=spectra.metadata,
+    )

@@ -364,10 +364,17 @@ class SPowderSemiEmpiricalCalculator:
         # to (order, energy) or (order, q, energy) format.
         if len(q2.shape) == 1:
             order_expansion_slice = np.s_[:, np.newaxis]
+            is_2d = False
         elif len(q2.shape) == 2:
             order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
+            is_2d = True
         else:
             raise IndexError("q2 should be 1-D or 2-D array")
+
+        from abins.sdata import add_autoconvolution_spectra
+
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
 
         if self._use_autoconvolution:
             max_dw_order = self._autoconvolution_max
@@ -377,13 +384,15 @@ class SPowderSemiEmpiricalCalculator:
                 f"Adding autoconvolution data up to order {max_dw_order}.",
                 reporter=self.progress_reporter,
             )
-
-            sdata.add_autoconvolution_spectra(max_order=self._autoconvolution_max)
-            sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
+            spectra = add_autoconvolution_spectra(spectra, max_order=self._autoconvolution_max, output_bins=(self._bins * self.freq_unit))
+            # Tweak x-axis definition for compatibility with other objects
+            spectra.x_data = self._bin_centres * self.freq_unit
 
         else:
             # (order, q, energy)
             max_dw_order = self._quantum_order_num
+
+        # raise Exception(spectra.x_data.shape, spectra.y_data.shape)
 
         # # Compute appropriate q-dependence for each order, along with 1/(n!) term
         factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
@@ -392,25 +401,31 @@ class SPowderSemiEmpiricalCalculator:
         if broaden:
             self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
             broadening_scheme = abins.parameters.sampling["broadening_scheme"]
-            sdata = self._broaden_sdata(sdata, broadening_scheme=broadening_scheme)
+            spectra = self._broaden_spectra(spectra, broadening_scheme=broadening_scheme)
 
         self._report_progress("Applying q^2n / n! q-dependence")
-        sdata *= q2_order_corrections
-        sdata.set_q_bins(self._q_bins)
+        if is_2d:
+            z_data = np.empty((spectra.y_data.shape[0], q2.shape[0], spectra.y_data.shape[1]), dtype=FLOAT_TYPE) * ureg(spectra.y_data_unit)
+            for i, spectrum in enumerate(spectra):
 
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+                z_data[i] = spectrum.y_data * q2_order_corrections[spectrum.metadata["quantum_order"] - 1]
+            spectra = AbinsSpectrum2DCollection(
+                x_data=(self._q_bins * self.q_unit), y_data=spectra.x_data, z_data=z_data, metadata=spectra.metadata
+            )
+        else:
+            for i, spectrum in enumerate(spectra):
+                spectra._y_data[i] *= q2_order_corrections[spectrum.metadata["quantum_order"] - 1]
+
+        if isinstance(spectra, AbinsSpectrum1DCollection):
+            get_raw_s = attrgetter("_y_data")
+        else:
+            get_raw_s = attrgetter("_z_data")
 
         if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution:
             self._report_progress(
                 f"Applying isotropic Debye-Waller factor to orders {min_order} and above.", reporter=self.progress_reporter
             )
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
-
-            if isinstance(spectra, AbinsSpectrum1DCollection):
-                get_raw_s = attrgetter("_y_data")
-            else:
-                get_raw_s = attrgetter("_z_data")
 
             for i, spectrum in enumerate(spectra):
                 if spectrum.metadata["quantum_order"] < min_order:
@@ -557,64 +572,30 @@ class SPowderSemiEmpiricalCalculator:
         broadened_spectra = []
 
         if isinstance(spectra, AbinsSpectrum1DCollection):
-            frequencies = spectra.x_data.to("1/cm").magnitude
+            frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
             for spectrum in spectra:
-                y_data = spectrum.y_data.to("barn / (1/cm)").magnitude
+                y_data = spectrum.y_data.to(self.s_unit).magnitude
                 _, y_data = self._instrument.convolve_with_resolution_function(
                     frequencies=frequencies, bins=self._bins, s_dft=y_data, scheme=broadening_scheme
                 )
-                spectrum.y_data = y_data * ureg("barn / (1/cm)")
+                spectrum.y_data = y_data * self.s_unit
                 broadened_spectra.append(spectrum)
 
             return AbinsSpectrum1DCollection.from_spectra(broadened_spectra)
 
         else:  # 2-D data, broaden one column  at time
-            frequencies = spectra.get_bin_centres(bin_ax="y").to("1/cm").magnitude
+            frequencies = spectra.get_bin_centres(bin_ax="y").to(self.freq_unit).magnitude
 
             for spectrum in spectra:
-                for q_i, s_dft_row in enumerate(spectrum.z_data.to("barn / (1/cm)").magnitude):
+                for q_i, s_dft_row in enumerate(spectrum.z_data.to(self.s_unit).magnitude):
                     _, z_data = self._instrument.convolve_with_resolution_function(
                         frequencies=frequencies, bins=self._bins, s_dft=s_dft_row, scheme=broadening_scheme
                     )
-                    spectrum._z_data[q_i] = (z_data * ureg("barn / (1/cm)")).to(spectrum._internal_z_data_unit)
+                    spectrum._z_data[q_i] = (z_data * self.s_unit).to(spectrum._internal_z_data_unit)
                 broadened_spectra.append(spectrum)
 
             return AbinsSpectrum2DCollection.from_spectra(broadened_spectra)
-
-    def _broaden_sdata(self, sdata: SData, broadening_scheme: str = "auto") -> SData:
-        """
-        Apply instrumental broadening to scattering data
-
-        If the data is 2D, process line-by-line.
-        (There is room for improvement, by reworking all the broadening
-        implementations to accept 2-D input.)
-        """
-        sdata_dict = sdata.extract()
-        frequencies = sdata_dict["frequencies"]
-        del sdata_dict["frequencies"]
-        if "q_bins" in sdata_dict:
-            del sdata_dict["q_bins"]
-
-        for atom_key in sdata_dict:
-            for order_key, s_dft in sdata_dict[atom_key]["s"].items():
-                if len(s_dft.shape) == 1:
-                    _, sdata_dict[atom_key]["s"][order_key] = self._instrument.convolve_with_resolution_function(
-                        frequencies=frequencies, bins=self._bins, s_dft=s_dft, scheme=broadening_scheme
-                    )
-                else:  # 2-D data, broaden one line at a time
-                    for q_i, s_dft_row in enumerate(sdata_dict[atom_key]["s"][order_key]):
-                        _, sdata_dict[atom_key]["s"][order_key][q_i] = self._instrument.convolve_with_resolution_function(
-                            frequencies=frequencies, bins=self._bins, s_dft=s_dft_row, scheme=broadening_scheme
-                        )
-
-        return SData(
-            data=sdata_dict,
-            frequencies=self._bin_centres,
-            temperature=sdata.get_temperature(),
-            sample_form=sdata.get_sample_form(),
-            q_bins=sdata.get_q_bins(),
-        )
 
     def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SpectrumCollection:
         """
