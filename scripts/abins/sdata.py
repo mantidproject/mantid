@@ -93,6 +93,11 @@ def check_thresholds(
     return warning_cases
 
 
+XTickLabels = Sequence[Tuple[int, str]]
+LineData = Sequence[Dict[str, Union[str, int]]]
+Metadata = Dict[str, Union[str, int, LineData]]
+
+
 class AbinsSpectrum1DCollection(Spectrum1DCollection):
     """Minor patch to euphonic Spectrum1DCollection, to be moved upstream"""
 
@@ -137,10 +142,41 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
             line_data_vals.append(tuple([all_metadata[key] for key in line_data_keys]))
         return line_data_vals
 
+    def __add__(self, other: Self) -> Self:
+        """
+        Appends the y_data of 2 Spectrum1DCollection objects,
+        creating a single Spectrum1DCollection that contains
+        the spectra from both objects. The two objects must
+        have equal x_data axes, and their y_data must
+        have compatible units and the same number of y_data
+        entries
 
-XTickLabels = Sequence[Tuple[int, str]]
-LineData = Sequence[Dict[str, Union[str, int]]]
-Metadata = Dict[str, Union[str, int, LineData]]
+        Any metadata key/value pairs that are common to both
+        spectra are retained in the top level dictionary, any
+        others are put in the individual 'line_data' entries
+        """
+        assert np.allclose(self.x_data.magnitude, other.x_data.magnitude)
+        assert self.x_data_unit == other.x_data_unit
+
+        return type(self)(
+            x_data=self.x_data,
+            y_data=np.concatenate((self.y_data, other.y_data)),
+            metadata=self._concatenate_metadata(self.metadata, other.metadata),
+        )
+
+    @staticmethod
+    def _concatenate_metadata(a: Metadata, b: Metadata) -> Metadata:
+        """
+        Common top-level key-value pairs are retained at top level, while
+        differing top-level key-value pairs are added to line_data
+        """
+        common_items = {key: value for (key, value) in a.items() if key != "line_data" and b.get(key) == value}
+        a_only_items = {key: a[key] for key in a if key != "line_data" and key not in common_items}
+        b_only_items = {key: b[key] for key in b if key != "line_data" and key not in common_items}
+
+        line_data = [entry | a_only_items for entry in a["line_data"]] + [entry | b_only_items for entry in b["line_data"]]
+
+        return common_items | {"line_data": line_data}
 
 
 class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
@@ -250,7 +286,17 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         retained in the top level dictionary, any others are put in the
         individual 'line_data' entries
         """
-        return type(self).from_spectra([*self, *other])
+        assert np.allclose(self.x_data.magnitude, other.x_data.magnitude)
+        assert np.allclose(self.y_data.magnitude, other.y_data.magnitude)
+        assert self.x_data_unit == other.x_data_unit
+        assert self.y_data_unit == other.y_data_unit
+
+        return type(self)(
+            x_data=self.x_data,
+            y_data=self.y_data,
+            z_data=np.concatenate((self.z_data, other.z_data)),
+            metadata=AbinsSpectrum1DCollection._concatenate_metadata(self.metadata, other.metadata),
+        )
 
     def __len__(self):
         return self.z_data.shape[0]
