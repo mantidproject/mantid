@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+from typing import Literal
 import warnings
 
 import numpy as np
@@ -164,6 +165,7 @@ M_2_HARTREE = constants.value("atomic mass unit-hartree relationship")  # amu * 
 
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
+ALL_SAMPLE_FORMS_TYPE = Literal["Powder"]
 
 # keywords which define data structure of KpointsData
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements", "unit_cell"]
