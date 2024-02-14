@@ -75,6 +75,8 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes
+    - pydantic
+
   run_constrained:
     - matplotlib {{ matplotlib }}
 
