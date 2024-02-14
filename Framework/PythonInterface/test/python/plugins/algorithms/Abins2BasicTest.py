@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import logging
 import os
 import tempfile
 import unittest
@@ -16,7 +17,6 @@ from abins.abins2 import Abins as Abins2
 Abins2.subscribe()
 
 import mantid.kernel
-from mantid import logger
 from mantid.simpleapi import mtd, Scale, CompareWorkspaces, Load, DeleteWorkspace, Abins
 import abins
 from abins.constants import ATOM_PREFIX, FUNDAMENTALS
@@ -53,6 +53,9 @@ class AbinsBasicTest(unittest.TestCase):
     def tearDownClass(cls):
         cls._tmp_cache_dir.cleanup()
 
+    def setUp(self):
+        self.logger = logging.getLogger("abins2-basic-test")
+
     def tearDown(self):
         abins.test_helpers.remove_output_files(
             list_of_names=[
@@ -68,6 +71,13 @@ class AbinsBasicTest(unittest.TestCase):
             ]
         )
         mtd.clear()
+
+    def test_subscribe_warning(self):
+        """Test that subscribing work-in-progress algorithm raises warning"""
+        with self.assertLogs(logger=self.logger, level="WARNING") as log_context:
+            Abins2.subscribe(logger=self.logger)
+
+            self.assertIn("breaking changes", log_context.output[0])
 
     def test_wrong_input(self):
         """Test if the correct behaviour of algorithm in case input is not valid"""

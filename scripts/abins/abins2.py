@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Dict
+from typing import Dict, Optional
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress
 from mantid.api import WorkspaceFactory, AnalysisDataService
@@ -15,6 +15,7 @@ from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
 from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
+from abins.logging import get_logger, Logger
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -30,7 +31,10 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._initial_parameters_bin_width = abins.parameters.sampling["bin_width"]
 
     @classmethod
-    def subscribe(cls) -> None:
+    def subscribe(cls, logger: Optional[Logger] = None) -> None:
+
+        logger = get_logger(logger=logger)
+        logger.warning("Registering Abins v2 algorithm. This is work-in-progress: breaking changes are expected until full release.")
         AlgorithmFactory.subscribe(cls)
 
     def category(self) -> str:
