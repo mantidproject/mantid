@@ -557,23 +557,24 @@ class AbinsAlgorithm:
                 s_points=np.copy(total_s_atom_data),
                 label=output_atom_label + "_total",
             ),
-            self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label)]
+            self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label),
+        ]
 
         return atom_workspaces
 
     def _atom_type_s(
         self,
         *,
-        mass: float,
         spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        mass: float,
         element_symbol: str,
         s_atom_data: np.ndarray,
     ):
         """
         Helper function for calculating S for the given type of atom
 
-        :param s_data: Precalculated S for all atoms and quantum orders
-        :type s_data: abins.SData
+        :spectra: collection of simulated intensity contributions
+        :param mass: mass for the type of atom
         :param element_symbol: label for the type of atom
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
