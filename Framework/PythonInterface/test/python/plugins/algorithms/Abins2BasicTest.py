@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,6 +12,7 @@ from unittest.mock import patch
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
+# Register Abins2 before importing mantid modules
 from abins.abins2 import Abins as Abins2
 
 Abins2.subscribe()
@@ -24,6 +25,7 @@ import abins.io
 
 
 class AbinsBasicTest(unittest.TestCase):
+    # Define typical values for parameters
     _si2 = "Si2-sc_Abins"
     _squaricn = "squaricn_sum_Abins"
     _ab_initio_program = "CASTEP"
@@ -31,14 +33,13 @@ class AbinsBasicTest(unittest.TestCase):
     _instrument_name = "TOSCA"
     _atoms = ""  # if no atoms are specified then all atoms are taken into account
     _sum_contributions = True
-
-    # this is a string; once it is read it is converted internally to  integer
-    _quantum_order_events_number = str(FUNDAMENTALS)
+    _quantum_order_events_number = "1"
 
     _cross_section_factor = "Incoherent"
     _workspace_name = "output_workspace"
-    _tolerance = 0.0001
 
+    # Test-related parameters
+    _tolerance = 0.0001
     _tmp_cache_dir = None
 
     def get_cache_dir(self):
