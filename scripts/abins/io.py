@@ -10,46 +10,39 @@ import json
 import os
 import subprocess
 import shutil
+
 import h5py
 import numpy as np
+from pydantic import BaseModel, ConfigDict, Field, validate_call
 
 import abins
-from abins.constants import AB_INITIO_FILE_EXTENSIONS, BUF
+from abins.constants import AB_INITIO_FILE_EXTENSIONS, BUF, HDF5_ATTR_TYPE
 from mantid.kernel import logger, ConfigService
 
 
-class IO(object):
+class IO(BaseModel):
     """
     Class for Abins I/O HDF file operations.
     """
 
-    def __init__(self, input_filename=None, group_name=None, setting="", autoconvolution: bool = False, temperature: float = None):
-        self._setting = setting
-        self._autoconvolution = autoconvolution
-        self._temperature = temperature
+    model_config = ConfigDict(strict=True)
 
-        if isinstance(input_filename, str):
-            self._input_filename = input_filename
-            try:
-                self._hash_input_filename = self.calculate_ab_initio_file_hash()
-            except IOError as err:
-                logger.error(str(err))
-            except ValueError as err:
-                logger.error(str(err))
+    input_filename: str = Field(min_length=1)
+    group_name: str = Field(min_length=1)
+    setting: str = ""
+    autoconvolution: int = 10
+    temperature: float = None
 
-            # extract name of file from the full path in the platform independent way
-            filename = os.path.basename(self._input_filename)
+    def model_post_init(self, __context):
+        try:
+            self._hash_input_filename = self.calculate_ab_initio_file_hash()
+        except IOError as err:
+            logger.error(str(err))
+        except ValueError as err:
+            logger.error(str(err))
 
-            if filename.strip() == "":
-                raise ValueError("Name of the file cannot be an empty string.")
-
-        else:
-            raise ValueError("Invalid name of input file. String was expected.")
-
-        if isinstance(group_name, str):
-            self._group_name = group_name
-        else:
-            raise ValueError("Invalid name of the group. String was expected.")
+        # extract name of file from the full path in the platform independent way
+        filename = os.path.basename(self.input_filename)
 
         if filename.split(".")[-1] in AB_INITIO_FILE_EXTENSIONS:
             core_name = filename[0 : filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
@@ -85,7 +78,7 @@ class IO(object):
         :returns: True if consistent, otherwise False.
         """
         saved_setting = self.load(list_of_attributes=["setting"])
-        return self._setting == saved_setting["attributes"]["setting"]
+        return self.setting == saved_setting["attributes"]["setting"]
 
     def _valid_autoconvolution(self):
         """
@@ -93,7 +86,7 @@ class IO(object):
         :returns: True if consistent, otherwise False
         """
         saved_autoconvolution = self.load(list_of_attributes=["autoconvolution"])
-        return self._autoconvolution == saved_autoconvolution["attributes"]["autoconvolution"]
+        return self.autoconvolution == saved_autoconvolution["attributes"]["autoconvolution"]
 
     def _valid_temperature(self):
         """
@@ -104,7 +97,7 @@ class IO(object):
 
         :returns: True if consistent or temperature not set for Clerk, otherwise False
         """
-        if self._temperature is None:
+        if self.temperature is None:
             return True
 
         else:
@@ -115,7 +108,7 @@ class IO(object):
                 return False
 
             else:
-                return np.abs(self._temperature - saved_temperature["attributes"]["temperature"]) < T_THRESHOLD
+                return np.abs(self.temperature - saved_temperature["attributes"]["temperature"]) < T_THRESHOLD
 
     @classmethod
     def _close_enough(cls, previous, new):
@@ -215,7 +208,8 @@ class IO(object):
         with h5py.File(self._hdf_filename, "w") as hdf_file:
             hdf_file.close()
 
-    def add_attribute(self, name=None, value=None):
+    @validate_call(config=ConfigDict(arbitrary_types_allowed=True, strict=True))
+    def add_attribute(self, name: str, value: HDF5_ATTR_TYPE | None) -> None:
         """
         Adds attribute to the dictionary with other attributes.
         :param name: name of the attribute
@@ -228,10 +222,10 @@ class IO(object):
         Add attributes for input data filename, hash of file, advanced parameters to data for HDF5 file
         """
         self.add_attribute("hash", self._hash_input_filename)
-        self.add_attribute("setting", self._setting)
-        self.add_attribute("autoconvolution", self._autoconvolution)
-        self.add_attribute("temperature", self._temperature)
-        self.add_attribute("filename", self._input_filename)
+        self.add_attribute("setting", self.setting)
+        self.add_attribute("autoconvolution", self.autoconvolution)
+        self.add_attribute("temperature", self.temperature)
+        self.add_attribute("filename", self.input_filename)
         self.add_attribute("advanced_parameters", json.dumps(abins.parameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
@@ -250,7 +244,7 @@ class IO(object):
         :param group: group to which attributes should be saved.
         """
         for name in self._attributes:
-            if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes, bool)):
+            if isinstance(self._attributes[name], HDF5_ATTR_TYPE):
                 group.attrs[name] = self._attributes[name]
             elif self._attributes[name] is None:
                 group.attrs[name] = "None"
@@ -317,9 +311,9 @@ class IO(object):
         """
 
         with h5py.File(self._hdf_filename, "a") as hdf_file:
-            if self._group_name not in hdf_file:
-                hdf_file.create_group(self._group_name)
-            group = hdf_file[self._group_name]
+            if self.group_name not in hdf_file:
+                hdf_file.create_group(self.group_name)
+            group = hdf_file[self.group_name]
 
             if len(self._attributes.keys()) > 0:
                 self._save_attributes(group=group)
@@ -484,10 +478,10 @@ class IO(object):
 
         results = {}
         with h5py.File(self._hdf_filename, "r") as hdf_file:
-            if self._group_name not in hdf_file:
-                raise ValueError("No group %s in hdf file." % self._group_name)
+            if self.group_name not in hdf_file:
+                raise ValueError("No group %s in hdf file." % self.group_name)
 
-            group = hdf_file[self._group_name]
+            group = hdf_file[self.group_name]
 
             if self._list_of_str(list_str=list_of_attributes):
                 results["attributes"] = self._load_attributes(list_of_attributes=list_of_attributes, group=group)
@@ -521,7 +515,7 @@ class IO(object):
         return hash_calculator.hexdigest()
 
     def get_input_filename(self):
-        return self._input_filename
+        return self.input_filename
 
     def calculate_ab_initio_file_hash(self):
         """
@@ -530,4 +524,4 @@ class IO(object):
         :returns: string representation of hash for file with vibrational data which contains only hexadecimal digits
         """
 
-        return self._calculate_hash(filename=self._input_filename)
+        return self._calculate_hash(filename=self.input_filename)
