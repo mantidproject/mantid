@@ -527,28 +527,45 @@ class AbinsAlgorithm:
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         :returntype: list of Workspace2D
         """
-        from abins.constants import ATOM_PREFIX, FUNDAMENTALS
+        from abins.constants import ATOM_PREFIX, FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS
+        from operator import itemgetter
 
-        atom_workspaces = []
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
+
         atom_data = atoms_data[atom_number - 1]
         species = AtomInfo(symbol=atom_data["symbol"], mass=atom_data["mass"])
 
-        for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
-            s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            # Use Spectrum1DCollection implementation
+            symbols = map(itemgetter("symbol"), atoms_data)
+            masses = map(itemgetter("mass"), atoms_data)
+            spectra = s_data.get_spectrum_collection(symbols=symbols, masses=masses)
 
-        total_s_atom_data = np.sum(s_atom_data, axis=0)
+            filtered_spectra = spectra.select(atom_index=(atom_number - 1), quantum_order=list(range(1, self._max_event_order + 1)))
+            for spectrum in filtered_spectra:
+                s_atom_data[spectrum.metadata["quantum_order"] - 1] = spectrum.y_data.to("barn / (1/cm)").magnitude
+            total_s_atom_data = filtered_spectra.sum().y_data.to("barn / (1/cm)").magnitude
+            symbol = filtered_spectra[0].metadata["symbol"]
 
-        atom_workspaces = []
-        atom_workspaces.append(
+        # Spectrum2DCollection not implemented yet, fall back on direct SData access
+        else:
+            for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
+                s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
+
+            total_s_atom_data = np.sum(s_atom_data, axis=0)
+            symbol = atoms_data[atom_number - 1]["symbol"]
+
+        z_number = species.z_number
+
+        atom_workspaces = [
             self._create_workspace(
                 species=species,
                 s_points=np.copy(total_s_atom_data),
                 label=output_atom_label + "_total",
-            )
-        )
-        atom_workspaces.append(self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label))
+            ),
+            self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label)]
+
         return atom_workspaces
 
     def _atom_type_s(
