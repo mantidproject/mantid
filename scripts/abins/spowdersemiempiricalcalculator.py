@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import json
-from operator import attrgetter, itemgetter
+from operator import attrgetter
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Tuple, Union
 
 from euphonic import ureg
 from euphonic.spectra import Spectrum1D, Spectrum2D
@@ -17,7 +17,7 @@ from pydantic import Field, validate_call
 from pydantic.types import PositiveFloat
 from scipy.special import factorial
 
-from abins import AbinsData, FrequencyPowderGenerator, SData
+from abins import AbinsData, FrequencyPowderGenerator
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
@@ -31,6 +31,10 @@ class SPowderSemiEmpiricalCalculator:
     """
     Class for calculating S(Q, omega)
     """
+
+    q_unit = ureg("1 / angstrom")
+    freq_unit = ureg("1 / cm")
+    s_unit = ureg("barn") / freq_unit
 
     @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(
@@ -349,6 +353,17 @@ class SPowderSemiEmpiricalCalculator:
         else:
             min_order = 2  # Skip fundamentals to be calculated separately
 
+        # Get numpy broadcasting right: we need to convert an array from (order,)
+        # to (order, energy) or (order, q, energy) format.
+        if len(q2.shape) == 1:
+            order_expansion_slice = np.s_[:, np.newaxis]
+            is_2d = False
+        elif len(q2.shape) == 2:
+            order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
+            is_2d = True
+        else:
+            raise IndexError("q2 should be 1-D or 2-D array")
+
         # Collect SData at q = 1/Å without DW factors
         bins = self._fine_bins if self._use_autoconvolution else self._bins
         bin_centres = self._fine_bin_centres if self._use_autoconvolution else self._bin_centres
@@ -384,26 +399,18 @@ class SPowderSemiEmpiricalCalculator:
                     ],
                 },
             )
-        else:
-            # Nothing to calculate, return empty-ish data structure
-            # return AbinsSpectrum1DCollection(x_data=(bin_centres * self.freq_unit),
-            #                                  y_data=np.zeros((1, len(bin_centres)))*self.s_unit,
-            #                                  metadata={"quantum_order": 1})
-            sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num, shape="1d")
-            spectra = sdata.get_spectrum_collection(
-                symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
+        # Otherwise there is nothing to calculate, return suitable empty-ish data structure
+        elif is_2d:
+            return AbinsSpectrum2DCollection(
+                x_data=(bin_centres * self.freq_unit),
+                y_data=self._q_bins * self.q_unit,
+                z_data=np.zeros((1, len(self._q_bin_centres), len(bin_centres))) * self.s_unit,
+                metadata={"quantum_order": 1},
             )
-
-        # Get numpy broadcasting right: we need to convert an array from (order,)
-        # to (order, energy) or (order, q, energy) format.
-        if len(q2.shape) == 1:
-            order_expansion_slice = np.s_[:, np.newaxis]
-            is_2d = False
-        elif len(q2.shape) == 2:
-            order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
-            is_2d = True
         else:
-            raise IndexError("q2 should be 1-D or 2-D array")
+            return AbinsSpectrum1DCollection(
+                x_data=(bin_centres * self.freq_unit), y_data=np.zeros((1, len(bin_centres))) * self.s_unit, metadata={"quantum_order": 1}
+            )
 
         if self._use_autoconvolution:
             max_dw_order = self._autoconvolution_max
@@ -552,40 +559,6 @@ class SPowderSemiEmpiricalCalculator:
     def _isotropic_dw(*, q2, a_trace):
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
-
-    def _get_empty_sdata(self, use_fine_bins: bool = False, max_order: Optional[int] = None, shape=None) -> SData:
-        """
-        Initialise an appropriate SData object for this calculation
-
-        Args:
-            shape:
-                '1d', '2d', or None. If '1d', spectra are 1-D (corresponding to
-                energy). If '2d', spectra have rows corresponding to q bin
-                centres. If None, detect dimensions based on presence of
-                self._q_bin_centres.
-
-        """
-        bin_centres = self._fine_bin_centres if use_fine_bins else self._bin_centres
-
-        if max_order is None:
-            max_order = self._quantum_order_num
-
-        if (shape and shape.lower() == "1d") or (shape is None and self._q_bin_centres is None):
-            n_rows = None
-            q_bins = None
-        else:
-            n_rows = len(self._q_bin_centres)
-            q_bins = self._q_bins
-
-        return SData.get_empty(
-            frequencies=bin_centres,
-            atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
-            order_keys=[f"order_{n}" for n in range(1, max_order + 1)],
-            n_rows=n_rows,
-            temperature=self._temperature,
-            sample_form=self._sample_form,
-            q_bins=q_bins,
-        )
 
     def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
         """
