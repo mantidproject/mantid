@@ -51,16 +51,6 @@ class AbinsBasicTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Debugging: save the dir ls output so I can check it is actually used
-        import subprocess
-
-        process = subprocess.run(["ls", "-l", cls._tmp_cache_dir.name], capture_output=True)
-
-        with open("/home/prg49555/Desktop/cachedir.txt", "w") as f:
-            f.write(cls._tmp_cache_dir.name)
-            f.write("\n")
-            f.write(process.stdout.decode())
-
         cls._tmp_cache_dir.cleanup()
 
     def tearDown(self):
