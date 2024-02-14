@@ -273,12 +273,13 @@ class SPowderSemiEmpiricalCalculator:
             )
 
     def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
-        s_data = self._calculate_s_powder_over_k_and_q()
+        from abins.sdata import apply_kinematic_constraints
 
-        s_data.apply_kinematic_constraints(self._instrument)
+        s_data = self._calculate_s_powder_over_k_and_q()
 
         atoms_data = self._abins_data.get_atoms_data()
         spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        apply_kinematic_constraints(spectra, self._instrument)
 
         return spectra
 

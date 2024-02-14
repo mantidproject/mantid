@@ -428,26 +428,6 @@ class SData(collections.abc.Sequence, BaseModel):
                 order_index = int(order_key.split("_")[-1])
                 yield (atom_index, order_index, s)
 
-    def apply_kinematic_constraints(self, instrument: DirectInstrument) -> None:
-        """Replace inaccessible intensity bins with NaN
-
-        This passes frequencies to instrument.get_abs_q_limits() method to get
-        accessible q-range at each energy, and masks out other bins with NaN.
-        Data must be 2-D and q_bins must be available.
-
-        Values will be modified in-place.
-
-        Args:
-            instrument - this must have the get_abs_q_limits() method
-                (i.e. inherit DirectInstrument).
-        """
-        q_lower, q_upper = instrument.get_abs_q_limits(self.get_frequencies())
-        q_values = self.get_q_bin_centres()
-        mask = np.logical_or(q_values[:, np.newaxis] < q_lower[np.newaxis, :], q_values[:, np.newaxis] > q_upper[np.newaxis, :])
-        for atom_data in self:
-            for _, order_data in atom_data.items():
-                order_data[mask] = float("nan")
-
     def __mul__(self, other: np.ndarray) -> "SData":
         """Multiply S data by an array over energies and orders
 
@@ -1157,3 +1137,24 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
 
     def get_bin_widths(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
         return Spectrum2D.get_bin_widths(self[0], bin_ax=bin_ax)
+
+
+def apply_kinematic_constraints(spectra: AbinsSpectrum2DCollection, instrument: DirectInstrument) -> None:
+    """Replace inaccessible intensity bins with NaN
+
+    This passes frequencies to instrument.get_abs_q_limits() method to get
+    accessible q-range at each energy, and masks out other bins with NaN.
+    Data must be 2-D and q_bins must be available.
+
+    Values will be modified in-place.
+
+    Args:
+        instrument - this must have the get_abs_q_limits() method
+            (i.e. inherit DirectInstrument).
+    """
+    q_lower, q_upper = instrument.get_abs_q_limits(spectra.y_data.to("1/cm").magnitude)
+    q_values = spectra.get_bin_centres(bin_ax="x").to("1/angstrom").magnitude
+    mask = np.logical_or(q_values[:, np.newaxis] < q_lower[np.newaxis, :], q_values[:, np.newaxis] > q_upper[np.newaxis, :])
+
+    # Applying NaN to spectra.z_data doesn't seem to work? Use private attribute
+    spectra._z_data[:, mask] = float("nan")
