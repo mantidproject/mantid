@@ -49,7 +49,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
         # Declare properties for all Abins Algorithms
-        self.declare_common_properties()
+        self.declare_common_properties(version=2)
 
         # Declare properties specific to 1D
         self.declareProperty(
