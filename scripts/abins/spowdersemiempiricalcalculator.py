@@ -567,15 +567,17 @@ class SPowderSemiEmpiricalCalculator:
         if isinstance(spectra, AbinsSpectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
-            for spectrum in spectra:
-                y_data = spectrum.y_data.to(self.s_unit).magnitude
-                _, y_data = self._instrument.convolve_with_resolution_function(
-                    frequencies=frequencies, bins=self._bins, s_dft=y_data, scheme=broadening_scheme
+            for s_row in spectra.y_data.to(self.s_unit).magnitude:
+                broadened_spectra.append(
+                    self._instrument.convolve_with_resolution_function(
+                        frequencies=frequencies, bins=self._bins, s_dft=s_row, scheme=broadening_scheme
+                    )[1]
                 )
-                spectrum.y_data = y_data * self.s_unit
-                broadened_spectra.append(spectrum)
-
-            return AbinsSpectrum1DCollection.from_spectra(broadened_spectra)
+            return AbinsSpectrum1DCollection(
+                x_data=spectra.x_data,
+                y_data=(np.asarray(broadened_spectra, dtype=FLOAT_TYPE) * spectra.y_data.units),
+                metadata=spectra.metadata,
+            )
 
         else:  # 2-D data, broaden one column  at time
             frequencies = spectra.get_bin_centres(bin_ax="y").to(self.freq_unit).magnitude
@@ -585,7 +587,7 @@ class SPowderSemiEmpiricalCalculator:
                     _, z_data = self._instrument.convolve_with_resolution_function(
                         frequencies=frequencies, bins=self._bins, s_dft=s_dft_row, scheme=broadening_scheme
                     )
-                    spectrum._z_data[q_i] = (z_data * self.s_unit).to(spectrum._internal_z_data_unit)
+                    spectrum._z_data[q_i] = (z_data * self.s_unit).to(spectrum._internal_z_data_unit).magnitude
                 broadened_spectra.append(spectrum)
 
             return AbinsSpectrum2DCollection.from_spectra(broadened_spectra)
