@@ -11,7 +11,7 @@ Overview
 
 Provides Bayesian analysis routines primarily for use with QENS data.
 
-.. interface:: Bayes
+.. interface:: Bayes Fitting
   :align: right
   :width: 350
 
