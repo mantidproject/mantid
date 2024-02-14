@@ -51,7 +51,7 @@ class IOTest(unittest.TestCase):
     def _save_wrong_dataset(self):
         poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_data("BadPassengers", 4)
-        self.assertRaises(ValueError, poor_saver.save)
+        self.assertRaises(TypeError, poor_saver.save)
 
     def _wrong_filename_type(self):
         self.assertRaises(ValidationError, IO, input_filename=1, group_name="goodgroup")
