@@ -328,64 +328,65 @@ class AbinsAlgorithm:
         all_atms_smbls = list(set([atoms_data[atom_index]["symbol"] for atom_index in range(num_atoms)]))
         all_atms_smbls.sort()
 
+        # Exit early if nothing was selected: default is to return no numbers, all symbols
         if len(selection) == 0:  # case: all atoms
-            atom_symbols = all_atms_smbls
-            atom_numbers = []
-        else:  # case selected atoms
-            # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
-            # A regular expression match is used to make the underscore separator optional and check the index format
+            return [], all_atms_smbls
 
-            # Acceptable formats for index: atom_1 atom1 1
-            numbered_atom_test = re.compile(
-                f"""^                  # No arbitrary prefixes
-                    ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
-                    _?                 # optional underscore
-                    (?P<index>[0-9]+)  # capture digits as "index"
-                    $                  # No suffix
-                 """,
-                re.VERBOSE,
+        # case selected atoms
+        # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
+        # A regular expression match is used to make the underscore separator optional and check the index format
+
+        # Acceptable formats for index: atom_1 atom1 1
+        numbered_atom_test = re.compile(
+            f"""^                  # No arbitrary prefixes
+                ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
+                _?                 # optional underscore
+                (?P<index>[0-9]+)  # capture digits as "index"
+                $                  # No suffix
+             """,
+            re.VERBOSE,
+        )
+        atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
+
+        # Acceptable formats for range: 1-2
+        atom_range_test = re.compile(
+            """^                  # No prefix
+               (?P<start>\\d+)  # Capture starting index
+               (-|\\.\\.)
+            # range indicated with "-" or ".."
+               (?P<end>\\d+)    # Capture ending index
+               $                  # No suffix
+            """,
+            re.VERBOSE,
+        )
+        atom_ranges = [
+            (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
+        ]
+
+        # Acceptable formats for symbol: Ca
+        element_symbol_test = re.compile(
+            f"""^(?!{ATOM_PREFIX})  # Must not start with ATOM_PREFIX (i.e. "atom")
+                [a-zA-Z]+$           # Must contain only letters
+             """,
+            re.VERBOSE,
+        )
+        atom_symbols = [item for item in selection if element_symbol_test.match(item)]
+
+        if len(atom_numbers) != len(set(atom_numbers)):
+            raise ValueError(
+                "User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                " cannot create multiple workspaces with the same name."
             )
-            atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
 
-            # Acceptable formats for range: 1-2
-            atom_range_test = re.compile(
-                """^                  # No prefix
-                   (?P<start>\\d+)  # Capture starting index
-                   (-|\\.\\.)
-                # range indicated with "-" or ".."
-                   (?P<end>\\d+)    # Capture ending index
-                   $                  # No suffix
-                """,
-                re.VERBOSE,
-            )
-            atom_ranges = [
-                (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
-            ]
-
-            # Acceptable formats for symbol: Ca
-            element_symbol_test = re.compile(
-                f"""^(?!{ATOM_PREFIX})  # Must not start with ATOM_PREFIX (i.e. "atom")
-                    [a-zA-Z]+$           # Must contain only letters
-                 """,
-                re.VERBOSE,
-            )
-            atom_symbols = [item for item in selection if element_symbol_test.match(item)]
-
-            if len(atom_numbers) != len(set(atom_numbers)):
+        for atom_number in atom_numbers:
+            if atom_number < 1 or atom_number > num_atoms:
                 raise ValueError(
-                    "User atom selection (by number) contains repeated atom. This is not permitted as Abins"
-                    " cannot create multiple workspaces with the same name."
+                    "Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" % (ATOM_PREFIX, atom_number, 1, num_atoms)
                 )
 
-            for atom_number in atom_numbers:
-                if atom_number < 1 or atom_number > num_atoms:
-                    raise ValueError(
-                        "Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" % (ATOM_PREFIX, atom_number, 1, num_atoms)
-                    )
-
-            for atom_symbol in atom_symbols:
-                if atom_symbol not in all_atms_smbls:
-                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
+        for atom_symbol in atom_symbols:
+            if atom_symbol not in all_atms_smbls:
+                raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
 
             if len(atom_symbols) != len(set(atom_symbols)):  # only different types
                 raise ValueError(
@@ -393,19 +394,19 @@ class AbinsAlgorithm:
                     "Abins cannot create multiple workspaces with the same name."
                 )
 
-            # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
-                elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
-                numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
-                ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
-                raise ValueError(
-                    "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
-                )
+        # Final sanity check that everything in "atoms" field was understood
+        if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
+            elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
+            numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
+            ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
+            raise ValueError(
+                "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
+            )
 
-            for start, end in atom_ranges:
-                if start > end:
-                    start, end = end, start
-                atom_numbers = atom_numbers + list(range(start, end + 1))
+        for start, end in atom_ranges:
+            if start > end:
+                start, end = end, start
+            atom_numbers = atom_numbers + list(range(start, end + 1))
 
         return sorted(atom_numbers), atom_symbols
 
@@ -529,28 +530,45 @@ class AbinsAlgorithm:
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         :returntype: list of Workspace2D
         """
-        from abins.constants import ATOM_PREFIX, FUNDAMENTALS
+        from abins.constants import ATOM_PREFIX, FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS
+        from operator import itemgetter
 
-        atom_workspaces = []
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
+
         atom_data = atoms_data[atom_number - 1]
         species = AtomInfo(symbol=atom_data["symbol"], mass=atom_data["mass"])
 
-        for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
-            s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            # Use Spectrum1DCollection implementation
+            symbols = map(itemgetter("symbol"), atoms_data)
+            masses = map(itemgetter("mass"), atoms_data)
+            spectra = s_data.get_spectrum_collection(symbols=symbols, masses=masses)
 
-        total_s_atom_data = np.sum(s_atom_data, axis=0)
+            filtered_spectra = spectra.select(atom_index=(atom_number - 1), quantum_order=list(range(1, self._max_event_order + 1)))
+            for spectrum in filtered_spectra:
+                s_atom_data[spectrum.metadata["quantum_order"] - 1] = spectrum.y_data.to("barn / (1/cm)").magnitude
+            total_s_atom_data = filtered_spectra.sum().y_data.to("barn / (1/cm)").magnitude
+            symbol = filtered_spectra[0].metadata["symbol"]
 
-        atom_workspaces = []
-        atom_workspaces.append(
+        # Spectrum2DCollection not implemented yet, fall back on direct SData access
+        else:
+            for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
+                s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
+
+            total_s_atom_data = np.sum(s_atom_data, axis=0)
+            symbol = atoms_data[atom_number - 1]["symbol"]
+
+        z_number = species.z_number
+
+        atom_workspaces = [
             self._create_workspace(
                 species=species,
                 s_points=np.copy(total_s_atom_data),
                 label=output_atom_label + "_total",
-            )
-        )
-        atom_workspaces.append(self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label))
+            ),
+            self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label)]
+
         return atom_workspaces
 
     def _atom_type_s(
