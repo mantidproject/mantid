@@ -8,10 +8,12 @@ import collections.abc
 from copy import deepcopy
 from itertools import repeat
 from numbers import Integral, Real
+from operator import itemgetter
 import re
 from typing import (
     Any,
     Dict,
+    Generator,
     Iterable,
     List,
     Literal,
@@ -403,59 +405,28 @@ class SData(collections.abc.Sequence, BaseModel):
                 spectrum = convolve(atom_data["s"][f"order_{order_index}"], fundamental_spectrum, mode="full")[: fundamental_spectrum.size]
                 self._data[atom_key]["s"][f"order_{order_index + 1}"] = spectrum
 
-    def check_thresholds(self, return_cases: bool = False, logger: Optional[Logger] = None, logging_level: str = "warning"):
+    def check_thresholds(self, logger: Optional[Logger] = None, logging_level: str = "warning") -> List[Tuple[int, int, float]]:
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
         Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These
         thresholds are defined in the abins.parameters.sampling dictionary.
 
-        :param return_cases: If True, return a list of cases where S was small compared to threshold.
-        :type return_cases: bool
         :param logger: Alternative logging object. (Defaults to Mantid logger)
         :param logging_level: logging level of warnings that a significant
             portion of S is being removed. Usually this will be 'information' or 'warning'.
 
-        :returns: If return_cases=True, this method returns a list of cases which failed the test, as tuples of
-            ``(atom_key, order_number, max(S))``. Otherwise, the method returns ``None``.
+        :returns: a list of cases which failed the test, as tuples of
+            ``(atom_key, order_number, max(S))``.
 
         """
+        return check_thresholds(self._unpack_data(), logger=logger, logging_level=logging_level)
 
-        logger = get_logger(logger=logger)
-        logger_call = getattr(logger, logging_level)
-
-        warning_cases = []
-
-        absolute_threshold = abins.parameters.sampling["s_absolute_threshold"]
-        relative_threshold = abins.parameters.sampling["s_relative_threshold"]
-        for key, entry in self._data.items():
-            if ATOM_LABEL in key:
-                for order, s in entry["s"].items():
-                    if max(s.flatten()) * relative_threshold < absolute_threshold:
-                        warning_cases.append((key, order, max(s.flatten())))
-
-        if len(warning_cases) > 0:
-            logger_call("Warning: some contributions had small S compared to threshold.")
-            logger_call(
-                "The minimum S threshold ({}) is greater than {}% of the maximum S for the following:".format(
-                    absolute_threshold, relative_threshold * 100
-                )
-            )
-
-            # Sort the warnings by atom number, order number
-            # Assuming that keys will be of form "atom_1", "atom_2", ...
-            # and "order_1", "order_2", ...
-            def int_key(case):
-                key, order, _ = case
-                return (int(key.split("_")[-1]), int(order.split("_")[-1]))
-
-            for case in sorted(warning_cases, key=int_key):
-                logger_call("{0}, {1}: max S {2:10.4E}".format(*case))
-
-        if return_cases:
-            return warning_cases
-        else:
-            return None
+    def _unpack_data(self) -> Generator[Tuple[int, int, np.ndarray], None, None]:
+        for atom_index, OneAtomSData in enumerate(self):
+            for order_key, s in OneAtomSData.items():
+                order_index = int(order_key.split("_")[-1])
+                yield (atom_index, order_index, s)
 
     def apply_kinematic_constraints(self, instrument: DirectInstrument) -> None:
         """Replace inaccessible intensity bins with NaN
@@ -549,6 +520,59 @@ class SData(collections.abc.Sequence, BaseModel):
             return [self[i] for i in range(len(self))[item]]
         else:
             raise TypeError("Indices must be integers or slices, not {}.".format(type(item)))
+
+
+def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float], None, None]:
+    """Compare S data values to minimum thresholds, return items with low intensity
+
+    Items have form (atom_index, quantum_order_index, s_array)
+
+    returned items have form (atom_index, quantum_order, max(s_array))
+    """
+
+    absolute_threshold = abins.parameters.sampling["s_absolute_threshold"]
+    relative_threshold = abins.parameters.sampling["s_relative_threshold"]
+
+    for atom_index, quantum_order, s in items:
+        if (max_s := max(s.flatten())) * relative_threshold < absolute_threshold:
+            yield (atom_index, quantum_order, max_s)
+
+
+def check_thresholds(
+    items: Iterable[Tuple[int, int, np.ndarray]], logger: Optional[Logger] = None, logging_level: str = "warning"
+) -> List[Tuple[int, int, float]]:
+    """
+    Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
+
+    Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These
+    thresholds are defined in the abins.parameters.sampling dictionary.
+
+    :param return_cases: If True, return a list of cases where S was small compared to threshold.
+    :type return_cases: bool
+    :param logger: Alternative logging object. (Defaults to Mantid logger)
+    :param logging_level: logging level of warnings that a significant
+        portion of S is being removed. Usually this will be 'information' or 'warning'.
+
+    """
+    absolute_threshold = abins.parameters.sampling["s_absolute_threshold"]
+    relative_threshold = abins.parameters.sampling["s_relative_threshold"]
+
+    logger = get_logger(logger=logger)
+    logger_call = getattr(logger, logging_level)
+
+    warning_cases = list(_iter_check_thresholds(items))
+
+    if len(warning_cases) > 0:
+        logger_call("Warning: some contributions had small S compared to threshold.")
+        logger_call(
+            f"The minimum S threshold ({absolute_threshold}) is greater than "
+            f"{relative_threshold * 100}% of the maximum S for the following:"
+        )
+
+    for case in sorted(warning_cases, key=itemgetter(0, 1)):
+        logger_call("{0}, {1}: max S {2:10.4E}".format(*case))
+
+    return warning_cases
 
 
 class SDataByAngle(collections.abc.Sequence):
