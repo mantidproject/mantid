@@ -166,24 +166,6 @@ class SData(collections.abc.Sequence, BaseModel):
             for order, order_data in atom_data["s"].items():
                 self._data[atom_key]["s"][order] += order_data
 
-    def apply_dw(self, dw: np.array, min_order=1, max_order=2) -> None:
-        """Multiply S by frequency-dependent scale factor for all atoms
-
-        Args:
-            dw: Numpy array with dimensions (N_atoms, N_frequencies)
-            min_order: Lowest quantum order of data to process
-            max_order: Highest quantum order of data to process
-        """
-        for atom_index, dw_row in enumerate(dw):
-            atom_key = f"atom_{atom_index}"
-            atom_data = self._data.get(atom_key)
-            if atom_data is None:
-                raise IndexError("Atoms in SData do not match dimensions of Debye-Waller data")
-
-            for order in range(min_order, max_order + 1):
-                order_key = f"order_{order}"
-                self._data[atom_key]["s"][order_key] *= dw_row
-
     @classmethod
     def get_empty(
         cls: SD, *, frequencies: np.ndarray, atom_keys: Sequence[str], order_keys: Sequence[str], n_rows: Optional[int] = None, **kwargs
