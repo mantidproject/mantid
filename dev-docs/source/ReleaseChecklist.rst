@@ -201,9 +201,10 @@ Just before release
 
 * As one of the final steps in preparing to tag the release:
 
-  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have been merged into the wrong branch)
-  * Remove unused headings from the main release note pages.
-  * Remove all separate release note files and sub-file structure to leave just the main release note pages.
+  * Check for uncollected release notes using the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__.
+  * Check ``main`` for any release notes that have been merged into the wrong branch.
+  * Remove any unused headings which have not already been removed from the release notes.
+  * Remove all the "Used" release note files and their sub-structure.
 
 .. _release-manager-checklist:
 

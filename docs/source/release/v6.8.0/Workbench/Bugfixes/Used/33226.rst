@@ -1,1 +1,0 @@
-- Fixed a bug which was causing the plot script generator button to not be shown on tiled plots with a non-square number of plots.

@@ -8,6 +8,7 @@ Mantid Workbench Changes
 New Features
 ------------
 - :ref:`SimpleScanViewer <SimpleScanViewer-ref>` now fits Gaussian peaks to data in each new ROI to estimate peak centre positions, instead of calculating a centre-of-mass.
+- The Error Reporter will now prompt the user to upgrade to the latest version of Mantid if a new version is available.
 
 
 Bugfixes

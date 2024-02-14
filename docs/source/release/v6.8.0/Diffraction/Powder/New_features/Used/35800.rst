@@ -1,2 +1,0 @@
-- Add the ability for :ref:`CombineDiffCal <algm-CombineDiffCal>` to have a partial ``GroupedCalibration`` workspace.
-  Detectors that do not appear in the ``GroupedCalibration`` have calibration constants copied directly from the ``PixelCalibration`` workspace without change.

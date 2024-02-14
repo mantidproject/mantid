@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, when it calls :ref:`LoadDiffCal <algm-LoadDiffCal>`, it will pass through the `TMin` parameter. In the case of non-zero `TZERO` values existing in the calibration constant, the implementation of current PR will suppress the warning message about minimum TOF value shfit.

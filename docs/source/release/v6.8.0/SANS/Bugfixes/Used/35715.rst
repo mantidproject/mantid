@@ -1,1 +1,0 @@
-- Additional parameter ``IntegrationRadius`` in :ref:`FindCenterOfMassPosition <algm-FindCenterOfMassPosition>` allows reasonable results for asymmetric detector arrays (e.g. BioSANS with midrange and wing detectors)

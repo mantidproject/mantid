@@ -1,1 +1,0 @@
-- :ref:`ConvertDiffCal <algm-ConvertDiffCal>` and :ref:`CalculateDIFC <algm-CalculateDIFC>` now have the option to specify Offset Mode, by selecting `Signed` you can calculate the offset for logarithmically binned data.

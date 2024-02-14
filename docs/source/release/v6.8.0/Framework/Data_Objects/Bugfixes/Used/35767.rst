@@ -1,1 +1,0 @@
-- Fixed bug in ``mantid.kernel.LogFilter`` usage case from the tutorial site
