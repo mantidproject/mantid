@@ -402,8 +402,8 @@ class SPowderSemiEmpiricalCalculator:
         # Otherwise there is nothing to calculate, return suitable empty-ish data structure
         elif is_2d:
             return AbinsSpectrum2DCollection(
-                x_data=(bin_centres * self.freq_unit),
-                y_data=self._q_bins * self.q_unit,
+                x_data=(self._q_bins * self.q_unit),
+                y_data=(bin_centres * self.freq_unit),
                 z_data=np.zeros((1, len(self._q_bin_centres), len(bin_centres))) * self.s_unit,
                 metadata={"quantum_order": 1},
             )
