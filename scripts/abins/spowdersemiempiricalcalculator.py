@@ -436,6 +436,7 @@ class SPowderSemiEmpiricalCalculator:
 
         self._report_progress("Broadening fundamentals", reporter=self.progress_reporter)
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
+
         fundamentals_spectra_with_dw = self._broaden_spectra(fundamentals_spectra_with_dw, broadening_scheme=broadening_scheme)
 
         spectra = (
@@ -457,10 +458,6 @@ class SPowderSemiEmpiricalCalculator:
         Returns:
             SData
         """
-        # Initialize the main data container
-        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num)
-        sdata.set_q_bins(self._q_bins)
-
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
 
@@ -563,7 +560,7 @@ class SPowderSemiEmpiricalCalculator:
             return AbinsSpectrum1DCollection.from_spectra(broadened_spectra)
 
         else:  # 2-D data, broaden one column  at time
-            frequencies = spectra.y_data.to("1/cm").magnitude
+            frequencies = spectra.get_bin_centres(bin_ax="y").to("1/cm").magnitude
 
             for spectrum in spectra:
                 for q_i, s_dft_row in enumerate(spectrum.z_data.to("barn / (1/cm)").magnitude):
@@ -633,12 +630,22 @@ class SPowderSemiEmpiricalCalculator:
             SpectrumCollection for fundamentals including mode-dependent Debye-Waller factor
 
         """
+        from abins.constants import FLOAT_TYPE
+
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor.", reporter=self.progress_reporter)
 
         if (angle is None) == (q2 is None):  # XNOR
             raise ValueError("Exactly one should be set: angle or q2")
 
-        fundamentals_sdata_with_dw = self._get_empty_sdata(use_fine_bins=False, max_order=1)
+        atoms_data = self._abins_data.get_atoms_data()
+
+        if angle is not None:
+            s_array = np.zeros((len(atoms_data), len(self._bin_centres)))
+        elif len(q2.shape) == 2:
+            n_q, _ = q2.shape
+            s_array = np.zeros((len(atoms_data), n_q, len(self._bin_centres)), dtype=FLOAT_TYPE)
+        else:
+            raise Exception("Expected a scattering angle or 2-D q array")
 
         for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data()):
             frequencies = self._powder_data.get_frequencies()[k_index]
@@ -679,14 +686,34 @@ class SPowderSemiEmpiricalCalculator:
                 if len(rebinned_s_with_dw) == 1:
                     rebinned_s_with_dw = rebinned_s_with_dw[0]
 
-                fundamentals_sdata_with_dw.add_dict({atom_label: {"s": {"order_1": rebinned_s_with_dw}}})
+                s_array[atom_index] += rebinned_s_with_dw
 
         atoms_data = self._abins_data.get_atoms_data()
-        spectra = fundamentals_sdata_with_dw.get_spectrum_collection(
-            symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
-        )
 
-        return spectra
+        metadata = {
+            "scattering": "incoherent",
+            "quantum_order": 1,
+            "line_data": [
+                {"atom_index": atom_index, "symbol": atom_data["symbol"], "mass": atom_data["mass"]}
+                for atom_index, atom_data in enumerate(atoms_data)
+            ],
+        }
+
+        match q2.shape:
+            case (n_q, 1):
+                return AbinsSpectrum2DCollection(
+                    x_data=(self._q_bins * ureg("1/angstrom")),
+                    y_data=(self._bin_centres * ureg("1/cm")),
+                    z_data=(s_array * ureg("barn / (1/cm)")),
+                    metadata=metadata,
+                )
+
+            case (n_q,):
+                return AbinsSpectrum1DCollection(
+                    x_data=(self._bin_centres * ureg("1/cm")), y_data=(s_array * ureg("barn / (1/cm)")), metadata=metadata
+                )
+            case _:
+                raise ValueError("Unexpected shape of q2 array")
 
     def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1) -> None:
         """
