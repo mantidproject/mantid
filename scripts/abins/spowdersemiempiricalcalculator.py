@@ -10,13 +10,14 @@ from operator import itemgetter
 from pathlib import Path
 from typing import Optional, Union
 
+from euphonic import ureg
 from euphonic.spectra import Spectrum1D, Spectrum2D
 import numpy as np
 from pydantic import Field, validate_call
 from pydantic.types import PositiveFloat
 from scipy.special import factorial
 
-from abins import FrequencyPowderGenerator, SData, SDataByAngle
+from abins import AbinsData, FrequencyPowderGenerator, SData
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
@@ -37,7 +38,7 @@ class SPowderSemiEmpiricalCalculator:
         *,
         filename: str = Field(min_length=1),
         temperature: PositiveFloat,
-        abins_data: abins.AbinsData,
+        abins_data: AbinsData,
         instrument: Instrument,
         quantum_order_num: int = Field(ge=1, le=2),
         autoconvolution_max: int = 0,
@@ -275,10 +276,7 @@ class SPowderSemiEmpiricalCalculator:
     def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
         from abins.sdata import apply_kinematic_constraints
 
-        s_data = self._calculate_s_powder_over_k_and_q()
-
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        spectra = self._calculate_s_powder_over_k_and_q()
         apply_kinematic_constraints(spectra, self._instrument)
 
         return spectra
@@ -289,6 +287,8 @@ class SPowderSemiEmpiricalCalculator:
 
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
+        broadening_scheme = abins.parameters.sampling["broadening_scheme"]
+
         if self.progress_reporter:
             self.progress_reporter.setNumSteps(
                 len(self._instrument.get_angles()) * (self._num_k * self._num_atoms + 1)
@@ -298,24 +298,23 @@ class SPowderSemiEmpiricalCalculator:
                 + (1 if (self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution) else 0)
             )
 
-        sdata_by_angle = []
+        spectra_by_angle = []
         for angle in self._instrument.get_angles():
             self._report_progress(msg=f"Calculating S for angle: {angle:} degrees", reporter=self.progress_reporter)
-            sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle))
-
-        # Complete set of scattering intensity data including Debye-Waller factors and autocorrelation orders
-        sdata_by_angle = SDataByAngle.from_sdata_series(sdata_by_angle, angles=self._instrument.get_angles())
+            one_angle_spectra = self._calculate_s_powder_over_k(angle=angle)
+            one_angle_spectra.metadata["angle"] = str(angle)
+            spectra_by_angle.append(one_angle_spectra)
 
         # Sum and broaden to single set of s_data with instrumental corrections
-        s_data = sdata_by_angle.sum_over_angles(average=True)
-        broadening_scheme = abins.parameters.sampling["broadening_scheme"]
-        s_data = self._broaden_sdata(s_data, broadening_scheme=broadening_scheme)
+        _iter_spectra_by_angle = iter(spectra_by_angle)
+        spectra = sum(_iter_spectra_by_angle, start=next(_iter_spectra_by_angle))
+        spectra = spectra.group_by("atom_index", "quantum_order")
 
-        atoms_data = self._abins_data.get_atoms_data()
-        spectra = s_data.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
+        spectra = self._broaden_spectra(spectra, broadening_scheme=broadening_scheme)
+
         return spectra
 
-    def _calculate_s_isotropic(self, q2: np.ndarray, broaden: bool = False) -> SData:
+    def _calculate_s_isotropic(self, q2: np.ndarray, broaden: bool = False) -> SpectrumCollection:
         """Calculate S(q,ω) components that use isotropic Debye-Waller term
 
         This is:
@@ -407,9 +406,12 @@ class SPowderSemiEmpiricalCalculator:
 
             sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
-        return sdata
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = sdata.get_spectrum_collection(symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data))
 
-    def _calculate_s_powder_over_k_and_q(self):
+        return spectra
+
+    def _calculate_s_powder_over_k_and_q(self) -> AbinsSpectrum2DCollection:
         """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -426,19 +428,24 @@ class SPowderSemiEmpiricalCalculator:
         """
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
-        sdata = self._calculate_s_isotropic(q2, broaden=True)
+        isotropic_spectra = self._calculate_s_isotropic(q2, broaden=True)
 
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor", reporter=self.progress_reporter)
 
-        fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
+        fundamentals_spectra_with_dw = self._calculate_fundamentals_over_k(q2=q2)
+
         self._report_progress("Broadening fundamentals", reporter=self.progress_reporter)
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
-        fundamentals_sdata_with_dw = self._broaden_sdata(fundamentals_sdata_with_dw, broadening_scheme=broadening_scheme)
+        fundamentals_spectra_with_dw = self._broaden_spectra(fundamentals_spectra_with_dw, broadening_scheme=broadening_scheme)
 
-        sdata.update(fundamentals_sdata_with_dw)
-        return sdata
+        spectra = (
+            AbinsSpectrum2DCollection.from_spectra([spectrum for spectrum in isotropic_spectra if spectrum.metadata["quantum_order"] > 1])
+            + fundamentals_spectra_with_dw
+        )
 
-    def _calculate_s_powder_over_k(self, *, angle: float) -> SData:
+        return spectra
+
+    def _calculate_s_powder_over_k(self, *, angle: float) -> SpectrumCollection:
         """Calculate S for a given angle in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -457,14 +464,18 @@ class SPowderSemiEmpiricalCalculator:
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
 
-        sdata = self._calculate_s_isotropic(q2, broaden=False)
+        spectra = self._calculate_s_isotropic(q2, broaden=False)
 
         # Finally we (re)calculate the first-order spectrum with more accurate DW method
         if not self._isotropic_fundamentals:
-            fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(angle=angle)
-            sdata.update(fundamentals_sdata_with_dw)
+            fundamentals_spectra_with_dw = self._calculate_fundamentals_over_k(angle=angle)
+            isotropic_multiphonon_spectra = [spectrum for spectrum in spectra if spectrum.metadata["quantum_order"] > 1]
+            if isotropic_multiphonon_spectra:
+                spectra = type(spectra).from_spectra(isotropic_multiphonon_spectra) + fundamentals_spectra_with_dw
+            else:
+                spectra = fundamentals_spectra_with_dw
 
-        return sdata
+        return spectra
 
     def calculate_isotropic_dw(self, *, q2: np.ndarray) -> np.ndarray:
         """Compute Debye-Waller factor in isotropic approximation for current system
@@ -528,6 +539,42 @@ class SPowderSemiEmpiricalCalculator:
             q_bins=q_bins,
         )
 
+    def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
+        """
+        Apply instrumental broadening to scattering data
+
+        If the data is 2D, process line-by-line.
+        (There is room for improvement, by reworking all the broadening
+        implementations to accept 2-D input.)
+        """
+        broadened_spectra = []
+
+        if isinstance(spectra, AbinsSpectrum1DCollection):
+            frequencies = spectra.x_data.to("1/cm").magnitude
+
+            for spectrum in spectra:
+                y_data = spectrum.y_data.to("barn / (1/cm)").magnitude
+                _, y_data = self._instrument.convolve_with_resolution_function(
+                    frequencies=frequencies, bins=self._bins, s_dft=y_data, scheme=broadening_scheme
+                )
+                spectrum.y_data = y_data * ureg("barn / (1/cm)")
+                broadened_spectra.append(spectrum)
+
+            return AbinsSpectrum1DCollection.from_spectra(broadened_spectra)
+
+        else:  # 2-D data, broaden one column  at time
+            frequencies = spectra.y_data.to("1/cm").magnitude
+
+            for spectrum in spectra:
+                for q_i, s_dft_row in enumerate(spectrum.z_data.to("barn / (1/cm)").magnitude):
+                    _, z_data = self._instrument.convolve_with_resolution_function(
+                        frequencies=frequencies, bins=self._bins, s_dft=s_dft_row, scheme=broadening_scheme
+                    )
+                    spectrum._z_data[q_i] = (z_data * ureg("barn / (1/cm)")).to(spectrum._internal_z_data_unit)
+                broadened_spectra.append(spectrum)
+
+            return AbinsSpectrum2DCollection.from_spectra(broadened_spectra)
+
     def _broaden_sdata(self, sdata: SData, broadening_scheme: str = "auto") -> SData:
         """
         Apply instrumental broadening to scattering data
@@ -562,7 +609,7 @@ class SPowderSemiEmpiricalCalculator:
             q_bins=sdata.get_q_bins(),
         )
 
-    def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SData:
+    def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SpectrumCollection:
         """
         Calculate order-1 incoherent S with mode-dependent DW correction
 
@@ -583,7 +630,7 @@ class SPowderSemiEmpiricalCalculator:
                 energies, column vector adds q-sampling dimension).
 
         returns:
-            SData for fundamentals including mode-dependent Debye-Waller factor
+            SpectrumCollection for fundamentals including mode-dependent Debye-Waller factor
 
         """
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor.", reporter=self.progress_reporter)
@@ -634,7 +681,12 @@ class SPowderSemiEmpiricalCalculator:
 
                 fundamentals_sdata_with_dw.add_dict({atom_label: {"s": {"order_1": rebinned_s_with_dw}}})
 
-        return fundamentals_sdata_with_dw
+        atoms_data = self._abins_data.get_atoms_data()
+        spectra = fundamentals_sdata_with_dw.get_spectrum_collection(
+            symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
+        )
+
+        return spectra
 
     def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1) -> None:
         """
