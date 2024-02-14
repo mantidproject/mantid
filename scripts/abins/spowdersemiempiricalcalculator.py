@@ -10,6 +10,7 @@ import numbers
 from operator import itemgetter
 from typing import Optional, Union
 
+from euphonic.spectra import Spectrum1D, Spectrum2D
 import numpy as np
 from scipy.special import factorial
 
@@ -17,7 +18,7 @@ from abins import AbinsData, FrequencyPowderGenerator, SData, SDataByAngle
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
-from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection
+from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection, check_thresholds
 from mantid.api import Progress
 
 SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
@@ -146,6 +147,13 @@ class SPowderSemiEmpiricalCalculator:
             self._q_bins = None
             self._q_bin_centres = None
 
+    @staticmethod
+    def _get_s(spectrum: Spectrum1D | Spectrum2D) -> np.ndarray:
+        if isinstance(spectrum, Spectrum1D):
+            return spectrum.y_data.magnitude
+        else:
+            return spectrum.z_data.magnitude
+
     def get_formatted_data(self) -> SpectrumCollection:
         """
         Get structure factor, from cache or calculated as necessary
@@ -161,11 +169,15 @@ class SPowderSemiEmpiricalCalculator:
             data = self.calculate_data()
 
             self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
-            data.check_thresholds(logging_level="information")
 
             atoms_data = self._abins_data.get_atoms_data()
             spectra = data.get_spectrum_collection(
                 symbols=map(itemgetter("symbol"), atoms_data), masses=map(itemgetter("mass"), atoms_data)
+            )
+
+            check_thresholds(
+                ((spectrum.metadata["atom_index"], spectrum.metadata["quantum_order"], self._get_s(spectrum)) for spectrum in spectra),
+                logging_level="information",
             )
 
         return spectra
