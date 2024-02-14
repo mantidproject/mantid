@@ -10,8 +10,10 @@ import json
 import os
 import subprocess
 import shutil
+from typing import List, Optional
 
 import h5py
+
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, validate_call
 
@@ -244,15 +246,10 @@ class IO(BaseModel):
         :param group: group to which attributes should be saved.
         """
         for name in self._attributes:
-            if isinstance(self._attributes[name], HDF5_ATTR_TYPE):
-                group.attrs[name] = self._attributes[name]
-            elif self._attributes[name] is None:
+            if self._attributes[name] is None:
                 group.attrs[name] = "None"
             else:
-                raise ValueError(
-                    "Invalid value of attribute. String, "
-                    "int, bool or bytes was expected! " + name + "= (invalid type : %s) " % type(self._attributes[name])
-                )
+                group.attrs[name] = self._attributes[name]
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -303,7 +300,7 @@ class IO(BaseModel):
             elif isinstance(self._data[item], dict):
                 self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/", dic=self._data[item])
             else:
-                raise ValueError("Invalid structured dataset. Cannot save %s type" % type(item))
+                raise TypeError("Invalid structured dataset. Cannot save %s type" % type(item))
 
     def save(self):
         """
@@ -336,7 +333,8 @@ class IO(BaseModel):
             pass
 
     @staticmethod
-    def _list_of_str(list_str=None):
+    @validate_call
+    def _list_of_str(list_str: Optional[List[str]]) -> bool:
         """
         Checks if all elements of the list are strings.
         :param list_str: list to check
@@ -344,9 +342,6 @@ class IO(BaseModel):
         """
         if list_str is None:
             return False
-
-        if not (isinstance(list_str, list) and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
-            raise ValueError("Invalid list of items to load!")
 
         return True
 
@@ -416,7 +411,8 @@ class IO(BaseModel):
         else:
             return item
 
-    def _load_dataset(self, hdf_file=None, name=None, group=None):
+    @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
+    def _load_dataset(self, *, hdf_file: h5py.File, name: str, group: h5py.Group):
         """
         Loads one structured dataset.
         :param hdf_file:  hdf file object from which structured dataset should be loaded.
@@ -424,20 +420,17 @@ class IO(BaseModel):
         :param group: name of the main group
         :returns: loaded dataset
         """
-        if not isinstance(name, str):
-            raise ValueError("Invalid name of the dataset.")
-
         if name in group:
             hdf_group = group[name]
         else:
             raise ValueError("Invalid name of the dataset.")
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
-        if isinstance(hdf_group, h5py._hl.dataset.Dataset):
+        if isinstance(hdf_group, h5py.Dataset):
             return hdf_group[()]
         elif all([self._get_subgrp_name(hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
             structured_dataset_list = []
-            # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
+            # here we require that numerical keys are always a sequence 0, 1, 2, 3 ...
             num_keys = len(hdf_group.keys())
             for item in range(num_keys):
                 structured_dataset_list.append(

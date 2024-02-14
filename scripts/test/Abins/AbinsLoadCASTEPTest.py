@@ -27,7 +27,7 @@ class LoadCastepUsingEuphonicTest(unittest.TestCase):
 
         try:
             reader.read_vibrational_or_phonon_data()
-        except ValueError:
+        except TypeError:
             pass  # Clerk will freak out when passed mocked data to serialise
 
         from_castep.assert_called_with(filename, prefer_non_loto=True)
