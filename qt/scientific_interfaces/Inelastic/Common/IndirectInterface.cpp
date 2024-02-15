@@ -22,7 +22,11 @@ void IndirectInterface::initLayout() {
 }
 
 void IndirectInterface::help() {
-  HelpWindow::showCustomInterface(QString::fromStdString(documentationPage()), QString("indirect"));
+  auto const docPageName = QString::fromStdString(documentationPage());
+  // Extract the category
+  auto const category = docPageName.left(docPageName.indexOf(' ')).toLower();
+
+  HelpWindow::showCustomInterface(docPageName, category);
 }
 
 void IndirectInterface::settings() {

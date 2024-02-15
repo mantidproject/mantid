@@ -19,7 +19,7 @@ shown, this page describes all the tabs which can possibly be shown.
 
 .. interface:: Data Reduction
   :align: right
-  :width: 350
+  :width: 750
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
