@@ -29,7 +29,7 @@ public:
   void notifySaveClicked() override;
   void notifyRunClicked() override;
   void notifyPlotRawClicked() override;
-  void notifySaveCustomGroupingClicked() override;
+  void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
 
 public slots:

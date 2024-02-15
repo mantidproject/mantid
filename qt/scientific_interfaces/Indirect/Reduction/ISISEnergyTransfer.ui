@@ -184,174 +184,13 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbGrouping">
-     <property name="title">
-      <string>Detector Grouping</string>
+    <widget class="QFrame" name="fDetectorGrouping">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
-      <item>
-       <widget class="QLabel" name="lbGroupingMode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="text">
-         <string>Grouping:</string>
-        </property>
-        <property name="buddy">
-         <cstring>cbGroupingOptions</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cbGroupingOptions">
-        <property name="toolTip">
-         <string>Select type of detector grouping to apply.</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Individual</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Custom</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Groups</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>File</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QStackedWidget" name="swGrouping">
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="pgMapFile">
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="MantidQt::API::FileFinderWidget" name="dsMapFile" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>41</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="findRunFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="label" stdset="0">
-             <string/>
-            </property>
-            <property name="multipleFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="algorithmAndProperty" stdset="0">
-             <string/>
-            </property>
-            <property name="fileExtensions" stdset="0">
-             <stringlist>
-              <string>.map</string>
-              <string>.xml</string>
-             </stringlist>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="pgMappingGroups">
-         <layout class="QHBoxLayout" name="horizontalLayout_26">
-          <item>
-           <widget class="QLabel" name="lbNoGroups">
-            <property name="text">
-             <string>Number of Groups: </string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spNumberGroups">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="pgMappingCustom">
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QLineEdit" name="leCustomGroups">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>, allows you to specify additional indices. 1,2,4 will keep indices 1, 2 and 4 only.
-: indicates a continuous range of indices. For example, 1:5 is the same as 1,2,3,4,5.
-+ sums two spectra together. 7+9 will produce a single spectra listing the sum of 7 and 9, ignoring any others.
-- sums a range of spectra together. For example, 3-8 is the same as 3+4+5+6+7+8.
-              </string>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="maxLength">
-             <number>6000</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbSaveCustomGrouping">
-            <property name="text">
-             <string>Save Grouping</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="pgMappingBlank"/>
-       </widget>
-      </item>
-     </layout>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -1021,11 +860,11 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckGroupOutput">
-          <property name="text">
-           <string>Group Output Workspace</string>
-          </property>
           <property name="visible">
            <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Group Output Workspace</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -1164,8 +1003,6 @@
   <tabstop>spEfixed</tabstop>
   <tabstop>spSpectraMin</tabstop>
   <tabstop>spSpectraMax</tabstop>
-  <tabstop>cbGroupingOptions</tabstop>
-  <tabstop>spNumberGroups</tabstop>
   <tabstop>ckBackgroundRemoval</tabstop>
   <tabstop>spBackgroundStart</tabstop>
   <tabstop>spBackgroundEnd</tabstop>

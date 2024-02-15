@@ -15,13 +15,15 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class DetectorGroupingOptions;
+
 class MANTIDQT_INDIRECT_DLL IETViewSubscriber {
 public:
   virtual void notifyNewMessage(const QString &message) = 0;
   virtual void notifySaveClicked() = 0;
   virtual void notifyRunClicked() = 0;
   virtual void notifyPlotRawClicked() = 0;
-  virtual void notifySaveCustomGroupingClicked() = 0;
+  virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
   virtual void notifyRunFinished() = 0;
 };
 
@@ -35,8 +37,6 @@ public:
   IETRunData getRunData() const;
   IETPlotData getPlotData() const;
   IETSaveData getSaveData() const;
-
-  std::string getCustomGrouping() const;
 
   std::string getGroupOutputOption() const;
   OutputPlotOptionsView *getPlotOptionsView() const;
@@ -85,21 +85,15 @@ private slots:
   void saveClicked();
   void runClicked();
   void plotRawClicked();
-  void saveCustomGroupingClicked();
+  void saveCustomGroupingClicked(std::string const &customGrouping);
   void pbRunFinished();
 
   void handleDataReady();
-
-  void mappingOptionSelected(const QString &groupType);
 
   void pbRunEditing();
   void pbRunFinding();
 
 private:
-  int getGroupingOptionIndex(QString const &option);
-  bool isOptionHidden(QString const &option);
-  void includeExtraGroupingOption(bool includeOption, QString const &option);
-
   void setRunEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
   void setButtonsEnabled(bool enable);
@@ -107,6 +101,7 @@ private:
   std::vector<std::string> m_outputWorkspaces;
   Ui::ISISEnergyTransfer m_uiForm;
   IETViewSubscriber *m_subscriber;
+  DetectorGroupingOptions *m_groupingWidget;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
