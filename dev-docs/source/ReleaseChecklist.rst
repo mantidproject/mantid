@@ -451,12 +451,9 @@ have been fixed. Then:
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
-  job, which will do the following:
-
-  * Disable the job that periodically merges ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``. This will re-enable
-    package publishing for the ``main`` nightly pipeline.
+* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
