@@ -17,7 +17,7 @@ processes in, for example, the :ref:`Inelastic Data Analysis <interface-inelasti
 
 .. interface:: Data Manipulation
   :align: right
-  :width: 350
+  :width: 750
 
 Action Buttons
 ~~~~~~~~~~~~~~

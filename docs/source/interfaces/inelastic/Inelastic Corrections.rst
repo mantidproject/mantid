@@ -16,7 +16,7 @@ These interfaces do not support GroupWorkspace's as input.
 
 .. interface:: Corrections
   :align: right
-  :width: 350
+  :width: 750
 
 Action Buttons
 ~~~~~~~~~~~~~~
