@@ -19,6 +19,10 @@ double constexpr LAMBDA_CONVERSION_FACTOR = 0.0733;
 // Register the algorithm in the AlgorithmFactory
 DECLARE_ALGORITHM(SANSCalcDepolarisedAnalyserTransmission)
 
+std::string const SANSCalcDepolarisedAnalyserTransmission::summary() const {
+  return "Calculate the transmission rate through a depolarised He3 cell.";
+}
+
 void SANSCalcDepolarisedAnalyserTransmission::init() {}
 
 void SANSCalcDepolarisedAnalyserTransmission::exec() {}

@@ -13,15 +13,16 @@ namespace Mantid::Algorithms {
 
 class MANTID_ALGORITHMS_DLL SANSCalcDepolarisedAnalyserTransmission : public API::Algorithm {
 public:
-  /// The string identifier for the algorithm.
+  /// The string identifier for the algorithm. @see Algorithm::name
   std::string const name() const override { return "SANSCalcDepolarisedAnalyserTransmission"; }
 
-  /// A summary of the algorithm's purpose.
-  std::string const summary() const override {
-    return "Calculate the transmission rate through a depolarised He3 cell.";
-  }
+  /// A summary of the algorithm's purpose. @see Algorithm::summary
+  std::string const summary() const override;
 
-  /// The version number of the algorithm.
+  /// The category of the algorithm. @see Algorithm::category
+  std::string const category() const { return "SANS\\PolarisationCorrections"; }
+
+  /// The version number of the algorithm. @see Algorithm::version
   int version() const override { return 1; }
 
 private:
