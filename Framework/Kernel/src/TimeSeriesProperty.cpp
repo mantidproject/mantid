@@ -746,7 +746,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<TimeInte
 
   // If there's just a single value in the log, return that.
   if (size() == 1) {
-    return static_cast<double>(firstValueInFilter(filter));
+    return static_cast<double>(this->firstValue());
   }
 
   // First of all, if the log or the filter is empty, return NaN
@@ -1157,12 +1157,6 @@ template <typename TYPE> DateAndTime TimeSeriesProperty<TYPE>::lastTime() const 
   sortIfNecessary();
 
   return m_values.rbegin()->time();
-}
-
-template <typename TYPE>
-TYPE TimeSeriesProperty<TYPE>::firstValueInFilter(const std::vector<TimeInterval> &filter) const {
-  const TimeROI roi{filter.front().start(), filter.front().stop()};
-  return firstValue(roi);
 }
 
 /** Returns the first value regardless of filter

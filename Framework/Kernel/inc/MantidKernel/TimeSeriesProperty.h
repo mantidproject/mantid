@@ -360,7 +360,6 @@ private:
   /// Calculate the time-weighted average and std-deviation of a property in a filtered range
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
   void createFilteredData(const TimeROI &timeROI, std::vector<TimeValueUnit<TYPE>> &filteredData) const;
-  TYPE firstValueInFilter(const std::vector<TimeInterval> &filter) const;
 
 protected:
   //----------------------------------------------------------------------------------------------
