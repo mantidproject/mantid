@@ -37,3 +37,4 @@ creation is outlined in :ref:`issue_tracking`.
    SANSGUI/ISISSANSGUITests
    General/SampleTransmissionCalculatorTestGuide
    Utility/FilterEventsInterfaceTest
+   Documentation/DocumentationTest
