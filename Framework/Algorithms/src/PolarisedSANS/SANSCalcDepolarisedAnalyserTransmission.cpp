@@ -8,6 +8,14 @@
 
 namespace Mantid::Algorithms {
 
+namespace {
+namespace FitStartValues {
+double constexpr T_E = 0.9;
+double constexpr PXD = 12.6;
+} // namespace FitStartValues
+double constexpr LAMBDA_CONVERSION_FACTOR = 0.0733;
+} // namespace
+
 // Register the algorithm in the AlgorithmFactory
 DECLARE_ALGORITHM(SANSCalcDepolarisedAnalyserTransmission)
 
