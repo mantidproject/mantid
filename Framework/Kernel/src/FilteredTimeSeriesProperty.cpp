@@ -432,7 +432,7 @@ template <typename TYPE> std::vector<TimeInterval> FilteredTimeSeriesProperty<TY
 
 template <typename HeldType>
 double FilteredTimeSeriesProperty<HeldType>::timeAverageValue(const TimeROI *timeRoi) const {
-  auto roi = intersectFilterWithOther(timeRoi);
+  const TimeROI *roi = intersectFilterWithOther(timeRoi);
 
   if (size() == 1)
     return static_cast<double>(TimeSeriesProperty<HeldType>::firstValue(*roi));
