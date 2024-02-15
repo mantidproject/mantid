@@ -11,7 +11,7 @@ Overview
 
 Provides Bayesian analysis routines primarily for use with QENS data.
 
-.. interface:: Bayes
+.. interface:: Bayes Fitting
   :align: right
   :width: 350
 
@@ -45,7 +45,7 @@ additional suffices of *_Intensity* & *_Stretch*.
 The processing on this tab is provided by the :ref:`ResNorm <algm-ResNorm>`
 algorithm.
 
-.. interface:: Bayes
+.. interface:: Bayes Fitting
   :widget: ResNorm
 
 Options
@@ -105,7 +105,7 @@ that of an elastic component and the stretched exponential and the program gives
 the best estimate for the :math:`\beta` parameter and the width for each group
 of spectra.
 
-.. interface:: Bayes
+.. interface:: Bayes Fitting
   :widget: Quasi
 
 Options
@@ -169,7 +169,7 @@ This is a variation of the stretched exponential option of Quasi. For each
 spectrum, a fit is performed for a grid of β and σ values. The distribution of
 goodness of fit values is plotted.
 
-.. interface:: Bayes
+.. interface:: Bayes Fitting
   :widget: Stretch
 
 Options

@@ -21,7 +21,7 @@ layout. These tabs are documented in :ref:`QENS Fitting <QENS-fitting-ref>`.
 
 These interfaces do not support GroupWorkspaces as input.
 
-.. image:: ../../images/Inelastic_Data_Analysis_GUI.png
+.. interface:: Data Analysis
   :width: 750
   :align: center
 
