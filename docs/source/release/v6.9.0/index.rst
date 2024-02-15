@@ -4,7 +4,7 @@
 Mantid 6.9.0 Release Notes
 ===========================
 
-.. figure:: ../../images/6_9_release/ImageNotFound.png
+.. figure:: ../../images/6_9_release/MajorChanges.png
    :class: screenshot
    :width: 385px
    :align: right
