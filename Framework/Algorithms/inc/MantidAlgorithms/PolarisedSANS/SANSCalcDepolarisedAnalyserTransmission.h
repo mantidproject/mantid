@@ -17,7 +17,9 @@ public:
   std::string const name() const override { return "SANSCalcDepolarisedAnalyserTransmission"; }
 
   /// A summary of the algorithm's purpose.
-  std::string const summary() const { return ""; }
+  std::string const summary() const override {
+    return "Calculate the transmission rate through a depolarised He3 cell.";
+  }
 
   /// The version number of the algorithm.
   int version() const override { return 1; }

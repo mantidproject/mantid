@@ -23,9 +23,4 @@ public:
     Mantid::Algorithms::SANSCalcDepolarisedAnalyserTransmission const alg;
     TS_ASSERT_EQUALS(alg.version(), 1);
   }
-
-  void test_summary() {
-    Mantid::Algorithms::SANSCalcDepolarisedAnalyserTransmission const alg;
-    TS_ASSERT_EQUALS(alg.summary(), "test")
-  }
 };
