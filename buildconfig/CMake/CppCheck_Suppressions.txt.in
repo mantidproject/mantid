@@ -72,7 +72,7 @@ cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:58
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:61
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:68
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:85
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:225
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:226
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:280
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:863
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1047
