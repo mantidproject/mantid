@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "ui_DetectorGroupingOptions.h"
 
 #include <string>
@@ -29,6 +30,8 @@ public:
   std::string mapFile() const;
   std::string customGrouping() const;
   int nGroups() const;
+
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() const;
 
 signals:
   void saveCustomGrouping(std::string const &customGrouping);

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include <boost/algorithm/string.hpp>
 
 /*
@@ -81,25 +82,6 @@ public:
   static inline const std::string IPF = "IPF";
   static inline const std::string ALL = "All";
   static inline const std::string INDIVIDUAL = "Individual";
-};
-
-class IETGroupingData {
-public:
-  IETGroupingData(const std::string &groupingType = IETGroupingType::DEFAULT, const int &nGroups = 0,
-                  const std::string &groupingMapFile = "", const std::string &customGroups = "")
-      : m_groupingType(groupingType), m_nGroups(nGroups), m_groupingMapFile(groupingMapFile),
-        m_customGroups(customGroups) {}
-
-  std::string getGroupingType() const { return m_groupingType; }
-  int getNGroups() const { return m_nGroups; }
-  std::string getGroupingMapFile() const { return m_groupingMapFile; }
-  std::string getCustomGroups() const { return m_customGroups; }
-
-private:
-  std::string m_groupingType;
-  int m_nGroups;
-  std::string m_groupingMapFile;
-  std::string m_customGroups;
 };
 
 class IETBackgroundData {
@@ -214,15 +196,17 @@ private:
 class IETRunData {
 public:
   IETRunData(const IETInputData &inputData, const IETConversionData &conversionData,
-             const IETGroupingData &groupingData, const IETBackgroundData &backgroundData,
-             const IETAnalysisData &analysisData, const IETRebinData &rebinData, const IETOutputData &outputData)
-      : m_inputData(inputData), m_conversionData(conversionData), m_groupingData(groupingData),
+             std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties,
+             const IETBackgroundData &backgroundData, const IETAnalysisData &analysisData,
+             const IETRebinData &rebinData, const IETOutputData &outputData)
+      : m_inputData(inputData), m_conversionData(conversionData), m_groupingProperties(std::move(groupingProperties)),
         m_backgroundData(backgroundData), m_analysisData(analysisData), m_rebinData(rebinData),
         m_outputData(outputData) {}
 
   IETInputData getInputData() const { return m_inputData; }
   IETConversionData getConversionData() const { return m_conversionData; }
-  IETGroupingData getGroupingData() const { return m_groupingData; }
+  Mantid::API::AlgorithmRuntimeProps *groupingPropertiesRaw() const { return m_groupingProperties.get(); }
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() { return std::move(m_groupingProperties); }
   IETBackgroundData getBackgroundData() const { return m_backgroundData; }
   IETAnalysisData getAnalysisData() const { return m_analysisData; }
   IETRebinData getRebinData() const { return m_rebinData; }
@@ -231,7 +215,7 @@ public:
 private:
   IETInputData m_inputData;
   IETConversionData m_conversionData;
-  IETGroupingData m_groupingData;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> m_groupingProperties;
   IETBackgroundData m_backgroundData;
   IETAnalysisData m_analysisData;
   IETRebinData m_rebinData;

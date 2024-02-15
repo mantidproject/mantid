@@ -28,7 +28,7 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, st
   std::string firstFileName = inputFiles.substr(0, inputFiles.find(','));
 
   std::string detectorError =
-      validator.validateDetectorGrouping(runData.getGroupingData(), defaultSpectraMin, defaultSpectraMax);
+      validator.validateDetectorGrouping(runData.groupingPropertiesRaw(), defaultSpectraMin, defaultSpectraMax);
   if (!detectorError.empty()) {
     errors.push_back(detectorError);
   }
@@ -109,19 +109,6 @@ void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAna
   }
 }
 
-void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData) {
-  std::pair<std::string, std::string> grouping = createGrouping(groupingData);
-
-  reductionAlg->setProperty("GroupingMethod", grouping.first);
-
-  if (grouping.first == "File")
-    reductionAlg->setProperty("MapFile", grouping.second);
-  else if (grouping.first == "Custom")
-    reductionAlg->setProperty("GroupingString", grouping.second);
-  else if (grouping.first == "Groups")
-    reductionAlg->setProperty("NGroups", grouping.second);
-}
-
 void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
                                    std::string const &outputGroupName) {
   if (outputData.getUseDeltaEInWavenumber()) {
@@ -141,42 +128,26 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
 }
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                      InstrumentData const &instData, IETRunData const &runData) {
+                                      InstrumentData const &instData, IETRunData &runData) {
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
+  API::IConfiguredAlgorithm_sptr configuredAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), runData.groupingProperties());
 
+  // Need to sort out these properties
   setInstrumentProperties(reductionAlg, instData);
   setInputProperties(reductionAlg, runData.getInputData());
   setConversionProperties(reductionAlg, runData.getConversionData(), instData.getInstrument());
   setBackgroundProperties(reductionAlg, runData.getBackgroundData());
   setRebinProperties(reductionAlg, runData.getRebinData());
   setAnalysisProperties(reductionAlg, runData.getAnalysisData());
-  setGroupingProperties(reductionAlg, runData.getGroupingData());
 
   std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
 
-  batchAlgoRunner->addAlgorithm(reductionAlg);
-  batchAlgoRunner->executeBatchAsync();
+  batchAlgoRunner->executeAlgorithmAsync(std::move(configuredAlg));
 
   return outputGroupName;
-}
-
-std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingData &groupingData) {
-  auto groupType = groupingData.getGroupingType();
-
-  if (groupType == IETGroupingType::FILE) {
-    return std::make_pair(IETGroupingType::FILE, groupingData.getGroupingMapFile());
-  } else if (groupType == IETGroupingType::GROUPS) {
-    return std::make_pair(IETGroupingType::GROUPS, std::to_string(groupingData.getNGroups()));
-  } else if (groupType == IETGroupingType::DEFAULT) {
-    return std::make_pair(IETGroupingType::IPF, "");
-  } else if (groupType == IETGroupingType::CUSTOM)
-    return std::make_pair(IETGroupingType::CUSTOM, groupingData.getCustomGroups());
-  else {
-    // Catch All and Individual
-    return std::make_pair(groupType, "");
-  }
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {

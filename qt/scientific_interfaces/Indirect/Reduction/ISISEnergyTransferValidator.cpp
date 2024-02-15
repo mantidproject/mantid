@@ -92,15 +92,16 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
   return "";
 }
 
-std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingData,
+std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRuntimeProps *groupingProperties,
                                                        std::size_t const &defaultSpectraMin,
                                                        std::size_t const &defaultSpectraMax) {
-  std::string groupingType = groupingData.getGroupingType();
+  std::string groupingType = groupingProperties->getProperty("GroupingMethod");
   if (groupingType == "File") {
-    if (groupingData.getGroupingMapFile().empty())
+    std::string mapFile = groupingProperties->getProperty("MapFile");
+    if (mapFile.empty())
       return "Mapping file is invalid.";
   } else if (groupingType == "Custom") {
-    const std::string customString = groupingData.getCustomGroups();
+    std::string customString = groupingProperties->getProperty("GroupingString");
     if (customString.empty())
       return "Please supply a custom grouping for detectors.";
     else

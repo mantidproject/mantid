@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorGroupingOptions.h"
+#include "MantidAPI/AlgorithmProperties.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -54,6 +55,30 @@ std::string DetectorGroupingOptions::mapFile() const { return m_uiForm.dsMapFile
 std::string DetectorGroupingOptions::customGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
 int DetectorGroupingOptions::nGroups() const { return m_uiForm.spNumberGroups->value(); }
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::groupingProperties() const {
+  auto const method = groupingMethod();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  if (method == "File") {
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
+    Mantid::API::AlgorithmProperties::update("MapFile", mapFile(), *properties);
+  } else if (method == "Custom") {
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingString", customGrouping(), *properties);
+  } else if (method == "Default") {
+    // If Default is IPF, why not just default this for the TOSCA instrument?
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", "IPF", *properties);
+  } else if (method == "Groups") {
+    // This should probably be on the algorithm. i.e. a property called NGroups, and GroupingMethod called 'Groups'
+    std::string groupingString = createDetectorGroupingString(
+        static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups()), static_cast<std::size_t>(spectraMin));
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", "Custom", *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingString", groupingString, *properties);
+  } else {
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
+  }
+  return properties;
+}
 
 void DetectorGroupingOptions::emitSaveCustomGrouping() { emit saveCustomGrouping(customGrouping()); }
 

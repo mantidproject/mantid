@@ -49,9 +49,6 @@ IETRunData IETView::getRunData() const {
   IETConversionData conversionDetails(m_uiForm.spEfixed->value(), m_uiForm.spSpectraMin->value(),
                                       m_uiForm.spSpectraMax->value());
 
-  IETGroupingData groupingDetails(m_groupingWidget->groupingMethod(), m_groupingWidget->nGroups(),
-                                  m_groupingWidget->mapFile());
-
   IETBackgroundData backgroundDetails(m_uiForm.ckBackgroundRemoval->isChecked(), m_uiForm.spBackgroundStart->value(),
                                       m_uiForm.spBackgroundEnd->value());
 
@@ -63,8 +60,8 @@ IETRunData IETView::getRunData() const {
 
   IETOutputData outputDetails(m_uiForm.ckCm1Units->isChecked(), m_uiForm.ckFold->isChecked());
 
-  IETRunData runParams(inputDetails, conversionDetails, groupingDetails, backgroundDetails, analysisDetails,
-                       rebinDetails, outputDetails);
+  IETRunData runParams(inputDetails, conversionDetails, m_groupingWidget->groupingProperties(), backgroundDetails,
+                       analysisDetails, rebinDetails, outputDetails);
 
   return runParams;
 }
