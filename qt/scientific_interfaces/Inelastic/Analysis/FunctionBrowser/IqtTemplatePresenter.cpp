@@ -19,11 +19,10 @@ using namespace MantidWidgets;
  * @param parent :: The parent widget.
  */
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
-    : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SLOT(editLocalParameter(std::string const &)));
-  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
-          SLOT(viewChangedParameterValue(std::string const &, double)));
+    : m_view(view), m_model(std::move(functionModel)) {
+  m_view->subscribePresenter(this);
+  setViewParameterDescriptions();
+  m_view->updateState();
 }
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
@@ -65,7 +64,7 @@ void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   m_model->setNumberOfExponentials(n);
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setStretchExponential(bool on) {
@@ -79,7 +78,7 @@ void IqtTemplatePresenter::setStretchExponential(bool on) {
   m_model->setStretchExponential(on);
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setBackground(std::string const &name) {
@@ -94,7 +93,7 @@ void IqtTemplatePresenter::setBackground(std::string const &name) {
   }
   setErrorsEnabled(false);
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
@@ -119,7 +118,7 @@ void IqtTemplatePresenter::setFunction(std::string const &funStr) {
     m_view->addExponentialTwo();
   }
   updateView();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 IFunction_sptr IqtTemplatePresenter::getGlobalFunction() const { return m_model->getFitFunction(); }
@@ -145,8 +144,8 @@ void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_model->updateMultiDatasetParameters(paramTable);
+void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_model->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 
@@ -174,7 +173,7 @@ void IqtTemplatePresenter::tieIntensities(bool on) {
   if (on && !canTieIntensities())
     return;
   m_model->tieIntensities(on);
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 bool IqtTemplatePresenter::canTieIntensities() const {
@@ -256,7 +255,7 @@ void IqtTemplatePresenter::setLocalParameterFixed(std::string const &parameterNa
   m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void IqtTemplatePresenter::editLocalParameter(const std::string &parameterName) {
+void IqtTemplatePresenter::handleEditLocalParameter(const std::string &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;
@@ -274,37 +273,28 @@ void IqtTemplatePresenter::editLocalParameter(const std::string &parameterName) 
     const auto constraint = getLocalParameterConstraint(parameterName, i);
     constraints.push_back(QString::fromStdString(constraint));
   }
-
-  m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
-  m_editLocalParameterDialog->open();
+  m_view->openEditLocalParameterDialog(parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
 }
 
-void IqtTemplatePresenter::editLocalParameterFinish(int result) {
-  if (result == QDialog::Accepted) {
-    auto parName = m_editLocalParameterDialog->getParameterName();
-    auto values = m_editLocalParameterDialog->getValues();
-    auto fixes = m_editLocalParameterDialog->getFixes();
-    auto ties = m_editLocalParameterDialog->getTies();
-    assert(values.size() == getNumberOfDatasets());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      if (!ties[i].isEmpty()) {
-        setLocalParameterTie(parName, i, ties[i].toStdString());
-      } else if (fixes[i]) {
-        setLocalParameterFixed(parName, i, fixes[i]);
-      } else {
-        setLocalParameterTie(parName, i, "");
-      }
+void IqtTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
+                                                            QList<double> const &values, QList<bool> const &fixes,
+                                                            QStringList const &ties, QStringList const &constraints) {
+  (void)constraints;
+  assert(values.size() == getNumberOfDatasets());
+  for (int i = 0; i < values.size(); ++i) {
+    setLocalParameterValue(parameterName, i, values[i]);
+    if (!ties[i].isEmpty()) {
+      setLocalParameterTie(parameterName, i, ties[i].toStdString());
+    } else if (fixes[i]) {
+      setLocalParameterFixed(parameterName, i, fixes[i]);
+    } else {
+      setLocalParameterTie(parameterName, i, "");
     }
   }
-  m_editLocalParameterDialog = nullptr;
   updateViewParameters();
-  emit functionStructureChanged();
 }
 
-void IqtTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double const value) {
+void IqtTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double const value) {
   if (parameterName.empty())
     return;
   if (m_model->isGlobal(parameterName)) {
@@ -320,7 +310,7 @@ void IqtTemplatePresenter::viewChangedParameterValue(std::string const &paramete
     }
     setLocalParameterValue(parameterName, i, value);
   }
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

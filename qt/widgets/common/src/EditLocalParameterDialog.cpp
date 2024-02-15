@@ -102,7 +102,11 @@ void EditLocalParameterDialog::doSetup(const std::string &parName, const QString
   connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
+
+  connect(this, SIGNAL(finished(int)), this, SLOT(emitDialogFinished(int)));
 }
+
+void EditLocalParameterDialog::emitDialogFinished(int result) { emit dialogFinished(result, this); }
 
 /// Slot. Called when a value changes.
 /// @param row :: Row index of the changed cell.

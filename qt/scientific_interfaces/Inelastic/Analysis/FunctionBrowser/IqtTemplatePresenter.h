@@ -8,9 +8,8 @@
 
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
+#include "FunctionTemplatePresenter.h"
 #include "IqtFunctionModel.h"
-
-#include <QWidget>
 
 class QtProperty;
 
@@ -28,44 +27,52 @@ class IqtTemplateBrowser;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public FunctionTemplatePresenter {
 public:
   explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
-  void setNumberOfExponentials(int);
-  void setStretchExponential(bool);
-  void setBackground(std::string const &name);
-  void setNumberOfDatasets(int);
-  int getNumberOfDatasets() const;
-  void setFunction(std::string const &funStr);
-  IFunction_sptr getGlobalFunction() const;
-  IFunction_sptr getFunction() const;
-  std::vector<std::string> getGlobalParameters() const;
-  std::vector<std::string> getLocalParameters() const;
-  void setGlobalParameters(std::vector<std::string> const &globals);
-  void setGlobal(std::string const &parameterName, bool on);
-  void updateMultiDatasetParameters(const IFunction &fun);
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
-  void updateParameters(const IFunction &fun);
-  void setCurrentDataset(int i);
-  int getCurrentDataset();
-  void setDatasets(const QList<FunctionModelDataset> &datasets);
+  FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
+
+  void setNumberOfExponentials(int) override;
+  void setStretchExponential(bool) override;
+  void setBackground(std::string const &name) override;
+
+  void setNumberOfDatasets(int) override;
+  int getNumberOfDatasets() const override;
+  int getCurrentDataset() override;
+
+  void setFunction(std::string const &funStr) override;
+  IFunction_sptr getGlobalFunction() const override;
+  IFunction_sptr getFunction() const override;
+
+  std::vector<std::string> getGlobalParameters() const override;
+  std::vector<std::string> getLocalParameters() const override;
+  void setGlobalParameters(std::vector<std::string> const &globals) override;
+  void setGlobal(std::string const &parameterName, bool on) override;
+
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
+  void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
+  void updateParameters(const IFunction &fun) override;
+
+  void setCurrentDataset(int i) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
+
   void setViewParameterDescriptions();
-  void setErrorsEnabled(bool enabled);
-  void tieIntensities(bool on);
-  bool canTieIntensities() const;
-  EstimationDataSelector getEstimationDataSelector() const;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void estimateFunctionParameters();
-  void setBackgroundA0(double value);
+  void tieIntensities(bool on) override;
+  bool canTieIntensities() const override;
 
-signals:
-  void functionStructureChanged();
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
 
-private slots:
-  void editLocalParameter(std::string const &parameterName);
-  void editLocalParameterFinish(int result);
-  void viewChangedParameterValue(std::string const &parameterName, double value);
+  void setErrorsEnabled(bool enabled) override;
+
+  void setBackgroundA0(double value) override;
+
+  void handleEditLocalParameter(std::string const &parameterName) override;
+  void handleParameterValueChanged(std::string const &parameterName, double value) override;
+  void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
+                                        QList<bool> const &fixes, QStringList const &ties,
+                                        QStringList const &constraints) override;
 
 private:
   void updateViewParameters();
@@ -82,7 +89,6 @@ private:
   void updateView();
   IqtTemplateBrowser *m_view;
   std::unique_ptr<IqtFunctionModel> m_model;
-  EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
 } // namespace IDA

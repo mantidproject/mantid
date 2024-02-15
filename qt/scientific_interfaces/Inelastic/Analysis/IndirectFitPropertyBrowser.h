@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "FunctionBrowser/ITemplatePresenter.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -53,7 +54,7 @@ public:
   IndirectFitPropertyBrowser(QWidget *parent = nullptr);
 
   void init();
-  void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
+  void setFunctionTemplatePresenter(std::unique_ptr<ITemplatePresenter> templatePresenter);
   void setFunction(std::string const &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
@@ -73,7 +74,6 @@ public:
   void updateFitStatus(const FitDomainIndex index);
   void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
   FittingMode getFittingMode() const;
-  QString selectedFitType() const;
   void setConvolveMembers(bool convolveEnabled);
   void setOutputCompositeMembers(bool outputEnabled);
   void setFitEnabled(bool enable);
@@ -124,7 +124,7 @@ private:
   QVBoxLayout *m_mainLayout;
   FunctionBrowser *m_functionBrowser;
   FitOptionsBrowser *m_fitOptionsBrowser;
-  FunctionTemplateBrowser *m_templateBrowser;
+  std::unique_ptr<ITemplatePresenter> m_templatePresenter;
   FitStatusWidget *m_fitStatusWidget;
   QStackedWidget *m_functionWidget;
   QCheckBox *m_browserSwitcher;

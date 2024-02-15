@@ -33,11 +33,8 @@ using namespace MantidWidgets;
  */
 ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
                                              std::unique_ptr<ConvFunctionModel> functionModel)
-    : QObject(view), m_view(view), m_model(std::move(functionModel)) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SLOT(editLocalParameter(std::string const &)));
-  connect(m_view, SIGNAL(parameterValueChanged(std::string const &, double)), this,
-          SLOT(viewChangedParameterValue(std::string const &, double)));
+    : m_view(view), m_model(std::move(functionModel)) {
+  m_view->subscribePresenter(this);
 }
 
 // This function creates a Qt thread to run the model updates
@@ -56,7 +53,7 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setDeltaFunction(bool on) {
@@ -71,7 +68,7 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setTempCorrection(bool on) {
@@ -94,7 +91,7 @@ void ConvTemplatePresenter::setTempCorrection(bool on) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 void ConvTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
@@ -117,7 +114,7 @@ void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 int ConvTemplatePresenter::getCurrentDataset() { return m_model->currentDomainIndex(); }
@@ -152,8 +149,8 @@ void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_model->updateMultiDatasetParameters(paramTable);
+void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_model->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 
@@ -224,7 +221,7 @@ void ConvTemplatePresenter::setLocalParameterFixed(std::string const &parameterN
   m_model->setLocalParameterFixed(parameterName, i, fixed);
 }
 
-void ConvTemplatePresenter::editLocalParameter(std::string const &parameterName) {
+void ConvTemplatePresenter::handleEditLocalParameter(std::string const &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
   QList<double> values;
@@ -242,39 +239,28 @@ void ConvTemplatePresenter::editLocalParameter(std::string const &parameterName)
     const auto constraint = getLocalParameterConstraint(parameterName, i);
     constraints.push_back(QString::fromStdString(constraint));
   }
-
-  m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
-  m_editLocalParameterDialog->open();
+  m_view->openEditLocalParameterDialog(parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
 }
 
-void ConvTemplatePresenter::editLocalParameterFinish(int result) {
-  if (result == QDialog::Accepted) {
-    auto parName = m_editLocalParameterDialog->getParameterName();
-    auto values = m_editLocalParameterDialog->getValues();
-    auto fixes = m_editLocalParameterDialog->getFixes();
-    auto ties = m_editLocalParameterDialog->getTies();
-    auto constraints = m_editLocalParameterDialog->getConstraints();
-    assert(values.size() == getNumberOfDatasets());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      if (!ties[i].isEmpty()) {
-        setLocalParameterTie(parName, i, ties[i].toStdString());
-      } else if (fixes[i]) {
-        setLocalParameterFixed(parName, i, fixes[i]);
-      } else {
-        setLocalParameterTie(parName, i, "");
-      }
-      m_model->setLocalParameterConstraint(parName, i, constraints[i].toStdString());
+void ConvTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
+                                                             QList<double> const &values, QList<bool> const &fixes,
+                                                             QStringList const &ties, QStringList const &constraints) {
+  assert(values.size() == getNumberOfDatasets());
+  for (int i = 0; i < values.size(); ++i) {
+    setLocalParameterValue(parameterName, i, values[i]);
+    if (!ties[i].isEmpty()) {
+      setLocalParameterTie(parameterName, i, ties[i].toStdString());
+    } else if (fixes[i]) {
+      setLocalParameterFixed(parameterName, i, fixes[i]);
+    } else {
+      setLocalParameterTie(parameterName, i, "");
     }
+    m_model->setLocalParameterConstraint(parameterName, i, constraints[i].toStdString());
   }
-  m_editLocalParameterDialog = nullptr;
   updateViewParameters();
-  emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::viewChangedParameterValue(std::string const &parameterName, double value) {
+void ConvTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double value) {
   if (parameterName.empty())
     return;
   if (m_model->isGlobal(parameterName)) {
@@ -290,7 +276,7 @@ void ConvTemplatePresenter::viewChangedParameterValue(std::string const &paramet
     }
     setLocalParameterValue(parameterName, i, value);
   }
-  emit functionStructureChanged();
+  m_view->emitFunctionStructureChanged();
 }
 
 EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const {

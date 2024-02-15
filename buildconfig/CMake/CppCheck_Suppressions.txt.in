@@ -1435,5 +1435,3 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Anal
 accessMoved:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFittingModel.cpp:278
 postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFittingModel.cpp:123
 postfixOperator:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFittingModel.cpp:187
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:45
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:66

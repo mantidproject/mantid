@@ -14,6 +14,7 @@
 #include "ParameterEstimation.h"
 
 #include <QList>
+#include <QMap>
 #include <QPair>
 #include <QString>
 #include <QWidget>
@@ -29,11 +30,16 @@ class QtTreePropertyBrowser;
 class QtProperty;
 
 namespace MantidQt {
+namespace MantidWidgets {
+class EditLocalParameterDialog;
+}
 namespace CustomInterfaces {
 namespace IDA {
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
+
+class ITemplatePresenter;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
@@ -46,23 +52,33 @@ public:
   FunctionTemplateBrowser(QWidget *parent = nullptr);
   virtual ~FunctionTemplateBrowser();
   void init();
+  void subscribePresenter(ITemplatePresenter *presenter);
 
-  virtual void setFunction(std::string const &funStr) = 0;
-  virtual IFunction_sptr getGlobalFunction() const = 0;
-  virtual IFunction_sptr getFunction() const = 0;
-  virtual void setNumberOfDatasets(int) = 0;
-  virtual int getNumberOfDatasets() const = 0;
-  virtual void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) = 0;
-  virtual std::vector<std::string> getGlobalParameters() const = 0;
-  virtual std::vector<std::string> getLocalParameters() const = 0;
-  virtual void setGlobalParameters(std::vector<std::string> const &globals) = 0;
-  virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
+  void setEnumSilent(QtProperty *prop, int fitType);
+  void setIntSilent(QtProperty *prop, int value);
+  void setBoolSilent(QtProperty *prop, bool value);
+  void setParameterSilent(QtProperty *prop, double value, double error);
+  void setErrorsEnabled(bool enabled);
+
+  void setFunction(std::string const &funStr);
+  IFunction_sptr getGlobalFunction() const;
+  IFunction_sptr getFunction() const;
+
+  int getCurrentDataset();
+  void setCurrentDataset(int i);
+  void setNumberOfDatasets(int);
+  int getNumberOfDatasets() const;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets);
+
+  std::vector<std::string> getGlobalParameters() const;
+  std::vector<std::string> getLocalParameters() const;
+  void setGlobalParameters(std::vector<std::string> const &globals);
+
+  void updateMultiDatasetParameters(const IFunction &fun);
   virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
-  virtual void setCurrentDataset(int i) = 0;
-  virtual int getCurrentDataset() = 0;
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
-  virtual void setErrorsEnabled(bool enabled) = 0;
+
   virtual void clear() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
@@ -71,10 +87,14 @@ public:
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 
+  void emitFunctionStructureChanged() { emit functionStructureChanged(); }
+
+  void openEditLocalParameterDialog(std::string const &parameterName, QStringList const &datasetNames,
+                                    QStringList const &domainNames, QList<double> const &values,
+                                    QList<bool> const &fixes, QStringList const &ties, QStringList const &constraints);
+
 signals:
   void functionStructureChanged();
-  void localParameterButtonClicked(std::string const &parameterName);
-  void parameterValueChanged(std::string const &parameterName, double value);
 
 protected slots:
   virtual void intChanged(QtProperty *) {}
@@ -83,13 +103,19 @@ protected slots:
   virtual void popupMenu(const QPoint &) = 0;
   virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
   virtual void parameterChanged(QtProperty *) = 0;
-  virtual void parameterButtonClicked(QtProperty *) = 0;
+  void parameterButtonClicked(QtProperty *);
+  void editLocalParameterFinished(int result, EditLocalParameterDialog *dialog);
 
 private:
   void createBrowser();
   virtual void createProperties() = 0;
 
 protected:
+  bool m_emitParameterValueChange = true;
+  bool m_emitBoolChange = true;
+  bool m_emitEnumChange = true;
+  bool m_emitIntChange = true;
+
   QtBoolPropertyManager *m_boolManager;
   QtIntPropertyManager *m_intManager;
   QtDoublePropertyManager *m_doubleManager;
@@ -98,11 +124,16 @@ protected:
   QtGroupPropertyManager *m_groupManager;
   ParameterPropertyManager *m_parameterManager;
 
+  QMap<QtProperty *, std::string> m_parameterNames;
+
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;
 
   /// Precision of doubles in m_doubleManager
   const int m_decimals;
+
+  /// The corresponding template presenter
+  ITemplatePresenter *m_presenter;
 };
 
 } // namespace IDA
