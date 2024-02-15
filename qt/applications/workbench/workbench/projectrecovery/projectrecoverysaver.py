@@ -165,24 +165,26 @@ class ProjectRecoverySaver(object):
         alg = AlgorithmManager.createUnmanaged(alg_name, 1)
         alg.setChild(True)
         alg.setLogging(False)
+        script_texts = []
 
         for index, ws in enumerate(ws_list):
             if self._empty_group_workspace(ws):
                 continue
 
-            filename = str(index) + ".py"
-            filename = os.path.join(directory, filename)
-
             alg.initialize()
             alg.setProperty("AppendTimestamp", True)
             alg.setProperty("AppendExecCount", True)
             alg.setProperty("InputWorkspace", ws)
-            alg.setPropertyValue("Filename", filename)
+            alg.setProperty("IncludeGenerationComment", False)
             alg.setPropertyValue("StartTimestamp", start_time)
             alg.setProperty("IgnoreTheseAlgs", ALGS_TO_IGNORE)
             alg.setProperty("IgnoreTheseAlgProperties", ALG_PROPERTIES_TO_IGNORE)
 
             alg.execute()
+            script_texts.append(alg.getPropertyValue("ScriptText") + "\n")
+
+        with open(os.path.join(directory, "load_workspaces.py"), "w") as writer:
+            writer.writelines(script_texts)
 
     @staticmethod
     def _empty_group_workspace(ws):
