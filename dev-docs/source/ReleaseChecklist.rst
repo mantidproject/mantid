@@ -448,8 +448,9 @@ have been fixed. Then:
 * On the ``release-next`` branch, check whether the `git SHA
   <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
   for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
-* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually trigger the `Jenkins job
-  <https://builds.mantidproject.org/job/merge_release-next_into_main/>`__ to merge the changes.
+* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
+  <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
+  merge the changes.
 * Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
   job, which will do the following:
 
