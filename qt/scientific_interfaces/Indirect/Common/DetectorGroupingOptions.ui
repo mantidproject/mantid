@@ -63,7 +63,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Custom</string>
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>File</string>
          </property>
         </item>
         <item>
@@ -73,12 +78,7 @@
         </item>
         <item>
          <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>File</string>
+          <string>Custom</string>
          </property>
         </item>
        </widget>
@@ -89,8 +89,9 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
+        <widget class="QWidget" name="pgMappingBlank"/>
         <widget class="QWidget" name="pgMapFile">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
@@ -191,7 +192,6 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pgMappingBlank"/>
        </widget>
       </item>
      </layout>

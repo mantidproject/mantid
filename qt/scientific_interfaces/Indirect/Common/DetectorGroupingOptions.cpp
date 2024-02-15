@@ -27,20 +27,22 @@ void DetectorGroupingOptions::includeOption(QString const &option, bool include)
     m_uiForm.cbGroupingOptions->addItem(option);
     m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
   } else if (!include && !isOptionHidden(option)) {
-    m_uiForm.cbGroupingOptions->setCurrentIndex(0);
-    m_uiForm.cbGroupingOptions->removeItem(optionIndex(option));
+    auto const previousIndex = optionIndex(option);
+    m_uiForm.cbGroupingOptions->removeItem(previousIndex);
+    m_uiForm.cbGroupingOptions->setCurrentIndex(previousIndex < m_uiForm.cbGroupingOptions->count() ? previousIndex
+                                                                                                    : 0);
   }
 }
 
 void DetectorGroupingOptions::handleGroupingMethodChanged(QString const &method) {
   if (method == "File")
-    m_uiForm.swGrouping->setCurrentIndex(0);
-  else if (method == "Groups")
     m_uiForm.swGrouping->setCurrentIndex(1);
-  else if (method == "Custom")
+  else if (method == "Groups")
     m_uiForm.swGrouping->setCurrentIndex(2);
-  else
+  else if (method == "Custom")
     m_uiForm.swGrouping->setCurrentIndex(3);
+  else
+    m_uiForm.swGrouping->setCurrentIndex(0);
 }
 
 std::string DetectorGroupingOptions::groupingMethod() const {
