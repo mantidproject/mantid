@@ -446,7 +446,7 @@ have been fixed. Then:
   index page has been removed. Remove the paragraph if it still exists.
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
 * On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
   for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually trigger the `Jenkins job
   <https://builds.mantidproject.org/job/merge_release-next_into_main/>`__ to merge the changes.
