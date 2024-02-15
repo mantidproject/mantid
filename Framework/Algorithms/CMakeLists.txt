@@ -237,6 +237,7 @@ set(SRC_FILES
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
     src/PoissonErrors.cpp
+    src/PolarisedSANS/HeliumAnalyserEfficiency.cpp
     src/PolarizationCorrectionFredrikze.cpp
     src/PolarizationCorrectionWildes.cpp
     src/PolarizationEfficiencyCor.cpp
@@ -590,6 +591,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PointByPointVCorrection.h
     inc/MantidAlgorithms/PoissonErrors.h
     inc/MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h
+    inc/MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h
     inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
     inc/MantidAlgorithms/PolarizationCorrectionWildes.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
@@ -937,6 +939,7 @@ set(TEST_FILES
     PointByPointVCorrectionTest.h
     PoissonErrorsTest.h
     PolarizationCorrections/DepolarizedAnalyserTransmissionTest.h
+    PolarisedSANS/HeliumAnalyserEfficiencyTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
     PolarizationEfficiencyCorTest.h
