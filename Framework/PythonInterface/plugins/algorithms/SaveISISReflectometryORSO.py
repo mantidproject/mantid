@@ -43,6 +43,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     _STITCH_ALG = "Stitch1DMany"
     _REBIN_ALG = "Rebin"
+    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _Q_UNIT = "MomentumTransfer"
 
     def category(self):
@@ -111,7 +112,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         reduction_history = self._get_reduction_alg_history(ws)
         data_columns = self._create_data_columns(ws, reduction_history)
         dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_history, data_columns)
-        self._add_optional_header_info(dataset, ws)
+        self._add_optional_header_info(dataset, ws, reduction_history)
         return dataset
 
     def _create_data_columns(self, ws, reduction_history) -> MantidORSODataColumns:
@@ -148,7 +149,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, ws) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, ws, reduction_history) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -175,6 +176,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         for file in second_trans_files:
             dataset.add_measurement_additional_file(file, comment="Second transmission run")
+
+        flood_entry = self._get_flood_correction_entry(reduction_workflow_histories, reduction_history)
+        if flood_entry:
+            dataset.add_measurement_additional_file(flood_entry[0], comment=flood_entry[1])
 
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
@@ -320,6 +325,23 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             return f"{inst_prefix}{run_num.rjust(run_num_width, '0')}"
         except OverflowError:
             raise_error()
+
+    def _get_flood_correction_entry(self, reduction_workflow_histories, reduction_history) -> Optional[tuple[str, str]]:
+        """
+        Get the flood correction file or workspace name from the reduction history.
+        """
+        # The flood correction may have been passed either as a full filepath or workspace name
+        # The FloodCorrection parameter says Workspace in both cases, so we don't know which we have
+        flood_name = reduction_workflow_histories[0].getPropertyValue("FloodWorkspace")
+        if flood_name:
+            return Path(flood_name).name, "Flood correction workspace or file"
+
+        # It's possible that a flood workspace was created as the first step in the reduction
+        flood_history = reduction_history.getChildHistories()[0]
+        if flood_history.name() == self._CREATE_FLOOD_ALG:
+            return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
+
+        return None
 
     def _get_reduction_script(self, ws) -> Optional[str]:
         """
