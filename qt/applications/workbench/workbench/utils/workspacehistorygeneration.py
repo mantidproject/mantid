@@ -116,6 +116,8 @@ def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):
 
 
 def guarantee_unique_lines(script):
+    if not script:
+        return script
     alg_name = "OrderWorkspaceHistory"
     alg = AlgorithmManager.createUnmanaged(alg_name, 1)
     alg.setChild(True)
