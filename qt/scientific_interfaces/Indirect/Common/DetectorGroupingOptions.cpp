@@ -67,13 +67,14 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
     Mantid::API::AlgorithmProperties::update("GroupingString", customGrouping(), *properties);
   } else if (method == "Default") {
     // If Default is IPF, why not just default this for the TOSCA instrument?
-    Mantid::API::AlgorithmProperties::update("GroupingMethod", "IPF", *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("IPF"), *properties);
   } else if (method == "Groups") {
     // This should probably be on the algorithm. i.e. a property called NGroups, and GroupingMethod called 'Groups'
-    std::string groupingString = createDetectorGroupingString(
-        static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups()), static_cast<std::size_t>(spectraMin));
-    Mantid::API::AlgorithmProperties::update("GroupingMethod", "Custom", *properties);
-    Mantid::API::AlgorithmProperties::update("GroupingString", groupingString, *properties);
+    // std::string groupingString = createDetectorGroupingString(
+    //    static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups()),
+    //    static_cast<std::size_t>(spectraMin));
+    Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("Custom"), *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingString", std::string(""), *properties);
   } else {
     Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
   }

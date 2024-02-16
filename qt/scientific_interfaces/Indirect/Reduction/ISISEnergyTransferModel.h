@@ -22,14 +22,14 @@ public:
   IETModel();
   ~IETModel() = default;
 
-  void setInstrumentProperties(IAlgorithm_sptr const &reductionAlg, InstrumentData const &instData);
-  void setInputProperties(IAlgorithm_sptr const &reductionAlg, IETInputData const &inputData);
-  void setConversionProperties(IAlgorithm_sptr const &reductionAlg, IETConversionData const &conversionData,
+  void setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData);
+  void setInputProperties(IAlgorithmRuntimeProps &properties, IETInputData const &inputData);
+  void setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                std::string const &instrument);
-  void setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETBackgroundData const &backgroundData);
-  void setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData);
-  void setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAnalysisData const &analysisData);
-  void setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
+  void setBackgroundProperties(IAlgorithmRuntimeProps &properties, IETBackgroundData const &backgroundData);
+  void setRebinProperties(IAlgorithmRuntimeProps &properties, IETRebinData const &rebinData);
+  void setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData);
+  void setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                            std::string const &outputGroupName);
   std::string getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 

@@ -12,7 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid::API {
-class MANTID_API_DLL AlgorithmRuntimeProps final : private Mantid::Kernel::PropertyManager,
+class MANTID_API_DLL AlgorithmRuntimeProps final : public Mantid::Kernel::PropertyManager,
                                                    public Mantid::API::IAlgorithmRuntimeProps {
 public:
   AlgorithmRuntimeProps() = default;
