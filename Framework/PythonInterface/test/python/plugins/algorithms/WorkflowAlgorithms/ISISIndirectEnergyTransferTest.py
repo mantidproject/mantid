@@ -111,6 +111,23 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
             self.assertEqual(reduced_workspace.getItem(0).getNumberHistograms(), expected_size)
 
+    def test_ISISIndirectEnergyTransfer_with_different_number_of_groups(self):
+        # Non-divisible numbers will have an extra group with the remaining detectors
+        results = {5: 5, 10: 10, 4: 5, 12: 13}
+
+        for number_of_groups, expected_size in results.items():
+            reduced_workspace = ISISIndirectEnergyTransfer(
+                InputFiles=["IRS26176.RAW"],
+                Instrument="IRIS",
+                Analyser="graphite",
+                Reflection="002",
+                SpectraRange=[3, 52],
+                GroupingMethod="Groups",
+                NGroups=number_of_groups,
+            )
+
+            self.assertEqual(expected_size, reduced_workspace.getItem(0).getNumberHistograms())
+
     def test_reduction_with_background_subtraction(self):
         """
         Tests running a reduction with a background subtraction.

@@ -754,7 +754,8 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Mask detectors if required
         if len(masked_detectors) > 0:
             _mask_detectors(workspace, masked_detectors)
-        group_string = "0,{number_of_groups}"
+
+        group_string = create_detector_grouping_string(number_of_groups, 0, workspace.getNumberHistograms() - 1)
         return group_on_string(group_detectors, group_string)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
@@ -762,6 +763,29 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
+
+
+def create_range_string(minimum: int, maximum: int) -> str:
+    return f"{minimum}-{maximum}"
+
+
+def create_grouping_string(group_size: int, number_of_groups: int, spectra_min: int) -> str:
+    grouping_string = create_range_string(spectra_min, spectra_min + group_size - 1)
+    for i in range(spectra_min + group_size, spectra_min + group_size * number_of_groups, group_size):
+        grouping_string += "," + create_range_string(i, i + group_size - 1)
+    return grouping_string
+
+
+def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spectra_max: int) -> str:
+    assert number_of_groups > 0, "Number of groups must be greater than zero."
+    assert spectra_min <= spectra_max, "Spectra min cannot be larger than spectra max."
+    number_of_spectra = 1 + spectra_max - spectra_min
+
+    grouping_string = create_grouping_string(int(number_of_spectra / number_of_groups), number_of_groups, spectra_min)
+    remainder = number_of_spectra % number_of_groups
+    if remainder != 0:
+        grouping_string += f",{create_range_string(spectra_min + number_of_spectra - remainder, spectra_min + number_of_spectra - 1)}"
+    return grouping_string
 
 
 # -------------------------------------------------------------------------------
