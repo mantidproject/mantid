@@ -4,7 +4,7 @@
 Mantid 6.9.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_9_release/MajorChanges.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -12,11 +12,16 @@ Mantid 6.9.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.9.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes a wide array of updates, bugfixes, and new features.
+
+We would like to highlight the following improvements:
+
+- The performance of the :ref:`LoadAscii <algm-LoadAscii-v2>` algorithm has significantly improved, achieving at least a one order of magnitude speedup.
+- The :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` algorithm has been added for integrating single-crystal Bragg peaks in a workspace with an x-unit of TOF using a shoebox.
+- The :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` algorithm has been added for 1D peak finding, and is available in the ``FitPropertyBrowser``. It provides improved peak finding when compared to the :ref:`FindPeaks <algm-FindPeaks>` algorithm.
+- The option to open the :ref:`sliceviewer` directly from the Indirect and Inelastic interfaces for the output data has been added.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
