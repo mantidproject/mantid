@@ -34,6 +34,7 @@ Bugfixes
 - Fixed a bug where data gets distorted from setting log scale to x axis and then setting it to linear again.
 - Deleted hidden workspaces are now also removed from the ADS to avoid memory issues.
 - Added import for Mantid algorithm wrappers back into the command line interface.
+- Fixed a bug that caused crashes when saving a cut workspace with a changed intensity correction to Mantid Workbench.
 
 DNS_Reduction
 -------------
