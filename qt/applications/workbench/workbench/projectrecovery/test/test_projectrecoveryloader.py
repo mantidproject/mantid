@@ -97,7 +97,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         checkpoints = os.listdir(self.pr.recovery_directory_pid)
         checkpoint = os.path.join(self.pr.recovery_directory_pid, checkpoints[0])
 
-        self.pr_loader._compile_recovery_script(checkpoint)
+        self.pr_loader._copy_in_recovery_script(checkpoint)
 
         self.assertTrue(os.path.exists(self.pr.recovery_order_workspace_history_file))
 
