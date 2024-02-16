@@ -121,7 +121,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="IPF",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom"]),
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
             doc="Method used to group spectra.",
         )
         self.declareProperty(
@@ -132,7 +132,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]), doc="Workspace containing spectra grouping."
         )
-
+        self.declareProperty(
+            name="NGroups", defaultValue=1, direction=Direction.Input, doc="The number of groups for grouping the spectra."
+        )
         # Output properties
         self.declareProperty(
             name="UnitX",
@@ -275,6 +277,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     group_file=self._grouping_map_file,
                     group_ws=self._grouping_ws,
                     group_string=self._grouping_string,
+                    number_of_groups=self._number_of_groups,
                 )
 
             if self._fold_multiple_frames and is_multi_frame:
@@ -378,6 +381,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        self._number_of_groups = self.getProperty("NGroups").value
 
         self._output_x_units = self.getPropertyValue("UnitX")
 

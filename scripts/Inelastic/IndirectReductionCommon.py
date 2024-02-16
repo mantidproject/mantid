@@ -651,7 +651,7 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
+def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -662,14 +662,15 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
+    @param number_of_groups The number of groups to split the spectra into
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string, number_of_groups)
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
 
 
-def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -680,6 +681,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
+    @param number_of_groups The number of groups to split the spectra into
     """
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
@@ -748,7 +750,12 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         if len(masked_detectors) > 0:
             _mask_detectors(workspace, masked_detectors)
         return group_on_string(group_detectors, group_string)
-
+    elif grouping_method == "Groups":
+        # Mask detectors if required
+        if len(masked_detectors) > 0:
+            _mask_detectors(workspace, masked_detectors)
+        group_string = "0,{number_of_groups}"
+        return group_on_string(group_detectors, group_string)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 
