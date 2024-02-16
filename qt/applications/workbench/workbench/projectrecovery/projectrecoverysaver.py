@@ -11,79 +11,11 @@ import datetime
 import os
 from threading import Timer
 
-from mantid.api import AnalysisDataService as ADS, WorkspaceGroup, AlgorithmManager
-from mantid.kernel import logger, UsageService
+from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
+from mantid.kernel import logger
 from mantidqt.project.projectsaver import ProjectSaver
 from workbench.utils.windowfinder import find_all_windows_that_are_savable
-
-
-# To ignore an algorithm in project recovery please put it's name here, this is done to stop these algorithm
-# calls from being saved. e.g. MonitorLiveData is ignored because StartLiveData is the only one that is needed
-# to restart this workspace.
-ALGS_TO_IGNORE = [
-    "MonitorLiveData",
-    "EnggSaveGSASIIFitResultsToHDF5",
-    "EnggSaveSinglePeakFitResultsToHDF5",
-    "ExampleSaveAscii",
-    "SANSSave",
-    "SaveAscii",
-    "SaveBankScatteringAngles",
-    "SaveCSV",
-    "SaveCalFile",
-    "SaveCanSAS1D",
-    "SaveDaveGrp",
-    "SaveDetectorsGrouping",
-    "SaveDiffCal",
-    "SaveDiffFittingAscii",
-    "SaveDspacemap",
-    "SaveFITS",
-    "SaveFocusedXYE",
-    "SaveFullprofResolution",
-    "SaveGDA",
-    "SaveGEMMAUDParamFile",
-    "SaveGSASInstrumentFile",
-    "SaveGSS",
-    "SaveHKL",
-    "SaveISISNexus",
-    "SaveIsawDetCal",
-    "SaveIsawPeaks",
-    "SaveIsawQvector",
-    "SaveIsawUB",
-    "SaveLauenorm",
-    "SaveMD",
-    "SaveMask",
-    "SaveNISTDAT",
-    "SaveNXSPE",
-    "SaveNXTomo",
-    "SaveNXcanSAS",
-    "SaveNexus",
-    "SaveNexusPD",
-    "SaveNexusProcessed",
-    "SaveOpenGenieAscii",
-    "SavePAR",
-    "SavePDFGui",
-    "SavePHX",
-    "SaveParameterFile",
-    "SavePlot1D",
-    "SavePlot1DAsJson",
-    "SaveRKH",
-    "SaveReflections",
-    "SaveReflectometryAscii",
-    "SaveSESANS",
-    "SaveSPE",
-    "SaveTBL",
-    "SaveToSNSHistogramNexus",
-    "SaveVTK",
-    "SaveVulcanGSS",
-    "SaveYDA",
-    "SaveZODS",
-]
-
-# If you want to ignore an algorithms' property, then add to the string below in the format:
-# "AlgorithmName + PropertyName". The final string should look like "a + b , c + d, ...".
-# This uses string representation to pass to the C++ algorithm. The outer delimiter is `,`
-# and the inner delimiter is `+` for the list of lists. e.g. [[a, b],[c, d]] = "a + b , c + d".
-ALG_PROPERTIES_TO_IGNORE = "StartLiveData + MonitorLiveData"
+from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads
 
 
 class ProjectRecoverySaver(object):
@@ -153,36 +85,12 @@ class ProjectRecoverySaver(object):
         Save all workspaces present in the ADS to the given directory
         :param directory: String; Path to where to save the workspaces
         """
-        # Get all present workspaces
-        ws_list = ADS.getObjectNames()
+        ws_history = get_all_workspace_history_from_ads()
+        if ws_history:
+            script_text = "from mantid.simpleapi import *\n\n" + ws_history
 
-        if len(ws_list) == 0:
-            return
-
-        start_time = UsageService.getStartTime().toISO8601String()
-
-        alg_name = "GeneratePythonScript"
-        alg = AlgorithmManager.createUnmanaged(alg_name, 1)
-        alg.setChild(True)
-        alg.setLogging(False)
-
-        for index, ws in enumerate(ws_list):
-            if self._empty_group_workspace(ws):
-                continue
-
-            filename = str(index) + ".py"
-            filename = os.path.join(directory, filename)
-
-            alg.initialize()
-            alg.setProperty("AppendTimestamp", True)
-            alg.setProperty("AppendExecCount", True)
-            alg.setProperty("InputWorkspace", ws)
-            alg.setPropertyValue("Filename", filename)
-            alg.setPropertyValue("StartTimestamp", start_time)
-            alg.setProperty("IgnoreTheseAlgs", ALGS_TO_IGNORE)
-            alg.setProperty("IgnoreTheseAlgProperties", ALG_PROPERTIES_TO_IGNORE)
-
-            alg.execute()
+            with open(os.path.join(directory, "load_workspaces.py"), "w") as writer:
+                writer.write(script_text)
 
     @staticmethod
     def _empty_group_workspace(ws):
