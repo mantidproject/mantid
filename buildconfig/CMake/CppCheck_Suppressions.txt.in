@@ -53,7 +53,7 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LibraryManager.cpp:119
-returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:407
+returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:408
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:148
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:149
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:150
