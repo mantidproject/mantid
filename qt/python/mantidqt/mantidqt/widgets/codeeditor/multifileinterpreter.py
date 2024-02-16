@@ -392,7 +392,7 @@ class MultiPythonFileInterpreter(QWidget):
         if not filename:
             return
         self.add_file_to_watcher(filename)
-        self.files_that_we_have_changed[filename] = osp.getmtime(filename)
+        self.mark_file_change_as_ours(filename)
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
@@ -407,6 +407,9 @@ class MultiPythonFileInterpreter(QWidget):
             self.close_tab(tab_index)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
+        self.mark_file_change_as_ours(filename)
+
+    def mark_file_change_as_ours(self, filename):
         self.files_that_we_have_changed[filename] = osp.getmtime(filename)
 
     def spaces_to_tabs_current(self):
