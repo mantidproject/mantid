@@ -43,6 +43,7 @@ Bugfixes
 - Fixed a bug in the plot settings axes tab where editing an axis title and clicking ``Apply to all`` would clear your changes. The UI has been slightly reworked to make it clearer what ``Apply to all`` interacts with.
 - Fixed a crash that could occur when an editor tab was closed while executing.
 - Fixed a crash from setting both waterfall plot offsets to 0.
+- Fixed in project recovery where sometimes an older recovery script would be run.
 
 
 InstrumentViewer
