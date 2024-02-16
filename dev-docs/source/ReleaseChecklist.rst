@@ -446,16 +446,14 @@ have been fixed. Then:
   index page has been removed. Remove the paragraph if it still exists.
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
 * On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
   for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
-* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually trigger the `Jenkins job
-  <https://builds.mantidproject.org/job/merge_release-next_into_main/>`__ to merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
-  job, which will do the following:
-
-  * Disable the job that periodically merges ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``. This will re-enable
-    package publishing for the ``main`` nightly pipeline.
+* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
+  <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
+  merge the changes.
+* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -468,7 +466,8 @@ We are now ready to create the release candidates for Smoke testing.
   * set ``BUILD_DEVEL`` to ``all``
   * set ``BUILD_PACKAGE`` to ``all``
   * set ``PACKAGE_SUFFIX`` to an **empty string**
-  * tick the ``PUBLISH_PACKAGES`` checkbox
+  * tick the ``PUBLISH_TO_ANACONDA`` checkbox
+  * tick the ``PUBLISH_TO_GITHUB`` checkbox
   * set the ``ANACONDA_CHANNEL`` to ``mantid``
   * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
@@ -493,7 +492,8 @@ with the following parameters (most are already defaulted to the correct values)
 * set ``BUILD_DEVEL`` to ``all``
 * set ``BUILD_PACKAGE`` to ``all``
 * set ``PACKAGE_SUFFIX`` to an **empty string**
-* tick the ``PUBLISH_PACKAGES`` checkbox
+* tick the ``PUBLISH_TO_ANACONDA`` checkbox
+* tick the ``PUBLISH_TO_GITHUB`` checkbox
 * set the ``ANACONDA_CHANNEL`` to ``mantid``
 * set the ``ANACONDA_CHANNEL_LABEL`` to ``draft-vX.Y.Z`` where ``X.Y.Z`` is the release number
 * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
