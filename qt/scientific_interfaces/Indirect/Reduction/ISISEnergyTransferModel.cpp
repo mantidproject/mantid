@@ -109,9 +109,8 @@ void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAna
   }
 }
 
-void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,
-                                     IETConversionData const &conversionData) {
-  std::pair<std::string, std::string> grouping = createGrouping(groupingData, conversionData);
+void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData) {
+  std::pair<std::string, std::string> grouping = createGrouping(groupingData);
 
   reductionAlg->setProperty("GroupingMethod", grouping.first);
 
@@ -119,6 +118,8 @@ void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGro
     reductionAlg->setProperty("MapFile", grouping.second);
   else if (grouping.first == "Custom")
     reductionAlg->setProperty("GroupingString", grouping.second);
+  else if (grouping.first == "Groups")
+    reductionAlg->setProperty("NGroups", grouping.second);
 }
 
 void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
@@ -150,7 +151,7 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   setBackgroundProperties(reductionAlg, runData.getBackgroundData());
   setRebinProperties(reductionAlg, runData.getRebinData());
   setAnalysisProperties(reductionAlg, runData.getAnalysisData());
-  setGroupingProperties(reductionAlg, runData.getGroupingData(), runData.getConversionData());
+  setGroupingProperties(reductionAlg, runData.getGroupingData());
 
   std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
@@ -161,16 +162,13 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   return outputGroupName;
 }
 
-std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingData &groupingData,
-                                                             const IETConversionData &conversionData) {
+std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingData &groupingData) {
   auto groupType = groupingData.getGroupingType();
 
   if (groupType == IETGroupingType::FILE) {
     return std::make_pair(IETGroupingType::FILE, groupingData.getGroupingMapFile());
   } else if (groupType == IETGroupingType::GROUPS) {
-    std::string groupingString = getDetectorGroupingString(conversionData.getSpectraMin(),
-                                                           conversionData.getSpectraMax(), groupingData.getNGroups());
-    return std::make_pair(IETGroupingType::CUSTOM, groupingString);
+    return std::make_pair(IETGroupingType::GROUPS, std::to_string(groupingData.getNGroups()));
   } else if (groupType == IETGroupingType::DEFAULT) {
     return std::make_pair(IETGroupingType::IPF, "");
   } else if (groupType == IETGroupingType::CUSTOM)
@@ -179,12 +177,6 @@ std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingDa
     // Catch All and Individual
     return std::make_pair(groupType, "");
   }
-}
-
-std::string IETModel::getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups) {
-  const unsigned int nSpectra = 1 + spectraMax - spectraMin;
-  return createDetectorGroupingString(static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups),
-                                      static_cast<std::size_t>(spectraMin));
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {

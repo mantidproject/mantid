@@ -45,40 +45,6 @@ std::vector<int> createDetectorList(int const spectraMin, int const spectraMax) 
   return detectorList;
 }
 
-std::string createRangeString(std::size_t const &from, std::size_t const &to) {
-  return std::to_string(from) + "-" + std::to_string(to);
-}
-
-std::string createGroupString(std::size_t const &start, std::size_t const &size) {
-  return createRangeString(start, start + size - 1);
-}
-
-std::string createGroupingString(std::size_t const &groupSize, std::size_t const &numberOfGroups,
-                                 std::size_t const &spectraMin) {
-  auto groupingString = createRangeString(spectraMin, spectraMin + groupSize - 1);
-  for (auto i = spectraMin + groupSize; i < spectraMin + groupSize * numberOfGroups; i += groupSize)
-    groupingString += "," + createGroupString(i, groupSize);
-  return groupingString;
-}
-
-std::string createDetectorGroupingString(std::size_t const &groupSize, std::size_t const &numberOfGroups,
-                                         std::size_t const &numberOfDetectors, std::size_t const &spectraMin) {
-  const auto groupingString = createGroupingString(groupSize, numberOfGroups, spectraMin);
-  const auto remainder = numberOfDetectors % numberOfGroups;
-  if (remainder == 0)
-    return groupingString;
-  return groupingString + "," +
-         createRangeString(spectraMin + numberOfDetectors - remainder, spectraMin + numberOfDetectors - 1);
-}
-
-std::string createDetectorGroupingString(std::size_t const &numberOfDetectors, std::size_t const &numberOfGroups,
-                                         std::size_t const &spectraMin) {
-  const auto groupSize = numberOfDetectors / numberOfGroups;
-  if (groupSize == 0)
-    return createRangeString(spectraMin, spectraMin + numberOfDetectors - 1);
-  return createDetectorGroupingString(groupSize, numberOfGroups, numberOfDetectors, spectraMin);
-}
-
 double getSampleLog(const MatrixWorkspace_const_sptr &workspace, std::vector<std::string> const &logNames,
                     double const &defaultValue) {
   for (auto const &logName : logNames) {

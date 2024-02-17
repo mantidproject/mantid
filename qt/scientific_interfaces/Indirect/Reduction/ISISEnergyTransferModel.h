@@ -29,8 +29,7 @@ public:
   void setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETBackgroundData const &backgroundData);
   void setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData);
   void setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAnalysisData const &analysisData);
-  void setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,
-                             IETConversionData const &conversionData);
+  void setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData);
   void setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
                            std::string const &outputGroupName);
   std::string getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles);
@@ -51,10 +50,8 @@ public:
   void save(std::string const &algorithmName, std::string const &workspaceName, std::string const &outputName,
             int const version = -1, std::string const &separator = "");
 
-  std::pair<std::string, std::string> createGrouping(IETGroupingData const &groupingData,
-                                                     IETConversionData const &conversionParams);
+  std::pair<std::string, std::string> createGrouping(IETGroupingData const &groupingData);
 
-  std::string getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups);
   void createGroupingWorkspace(std::string const &instrumentName, std::string const &analyser,
                                std::string const &customGrouping, std::string const &outputName);
   double loadDetailedBalance(std::string const &filename);

@@ -133,7 +133,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]), doc="Workspace containing spectra grouping."
         )
         self.declareProperty(
-            name="NGroups", defaultValue=1, direction=Direction.Input, doc="The number of groups for grouping the spectra."
+            name="NGroups",
+            defaultValue=1,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of groups for grouping the detectors.",
         )
         # Output properties
         self.declareProperty(

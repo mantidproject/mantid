@@ -56,6 +56,7 @@ private:
     declareProperty("GroupingMethod", "");
     declareProperty("GroupingString", "");
     declareProperty("MapFile", "");
+    declareProperty("NGroups", 1);
   };
 
   void exec() override {
@@ -302,8 +303,7 @@ public:
     auto reductionAlgorithm = makeReductionAlgorithm();
 
     IETGroupingData groupingData(IETGroupingType::FILE, 2, "map_file", "1,2,3");
-    IETConversionData conversionData(1.0, 1, 5);
-    model->setGroupingProperties(reductionAlgorithm, groupingData, conversionData);
+    model->setGroupingProperties(reductionAlgorithm, groupingData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("GroupingString"), "");
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("MapFile"), "map_file");
@@ -314,8 +314,7 @@ public:
     auto reductionAlgorithm = makeReductionAlgorithm();
 
     IETGroupingData groupingData(IETGroupingType::CUSTOM, 2, "map_file", "1,2,3");
-    IETConversionData conversionData(1.0, 1, 5);
-    model->setGroupingProperties(reductionAlgorithm, groupingData, conversionData);
+    model->setGroupingProperties(reductionAlgorithm, groupingData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("GroupingString"), "1,2,3");
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("MapFile"), "");
@@ -326,8 +325,7 @@ public:
     auto reductionAlgorithm = makeReductionAlgorithm();
 
     IETGroupingData groupingData(IETGroupingType::DEFAULT, 2, "map_file", "1,2,3");
-    IETConversionData conversionData(1.0, 1, 5);
-    model->setGroupingProperties(reductionAlgorithm, groupingData, conversionData);
+    model->setGroupingProperties(reductionAlgorithm, groupingData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("GroupingString"), "");
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("MapFile"), "");
@@ -338,10 +336,9 @@ public:
     auto reductionAlgorithm = makeReductionAlgorithm();
 
     IETGroupingData groupingData(IETGroupingType::GROUPS, 2, "map_file", "1,2,3");
-    IETConversionData conversionData(1.0, 1, 5);
-    model->setGroupingProperties(reductionAlgorithm, groupingData, conversionData);
+    model->setGroupingProperties(reductionAlgorithm, groupingData);
 
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("GroupingString"), "1-2,3-4,5-5");
+    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("NGroups"), "2");
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("MapFile"), "");
   }
 
@@ -411,62 +408,51 @@ public:
   }
 
   void testCreateGroupingWithFileGrouping() {
-    IETConversionData conversionData;
     IETGroupingData fileData(IETGroupingType::FILE, 2, "map_file");
 
-    std::pair<std::string, std::string> fileGrouping = m_model->createGrouping(fileData, conversionData);
+    std::pair<std::string, std::string> fileGrouping = m_model->createGrouping(fileData);
     TS_ASSERT_EQUALS(fileGrouping.first, IETGroupingType::FILE);
     TS_ASSERT_EQUALS(fileGrouping.second, "map_file");
   }
 
   void testCreateGroupingWithGroupsGrouping() {
     IETGroupingData groupsData(IETGroupingType::GROUPS, 2, "map_file");
-    IETConversionData groupsConversion(1.0, 1, 5);
 
-    std::pair<std::string, std::string> groupsGrouping = m_model->createGrouping(groupsData, groupsConversion);
-    TS_ASSERT_EQUALS(groupsGrouping.first, IETGroupingType::CUSTOM);
-    TS_ASSERT_EQUALS(groupsGrouping.second, "1-2,3-4,5-5");
+    std::pair<std::string, std::string> groupsGrouping = m_model->createGrouping(groupsData);
+    TS_ASSERT_EQUALS(groupsGrouping.first, IETGroupingType::GROUPS);
+    TS_ASSERT_EQUALS(groupsGrouping.second, "2");
   }
 
   void testCreateGroupingWithDefaultGrouping() {
-    IETConversionData conversionData;
     IETGroupingData defaultData(IETGroupingType::DEFAULT, 2, "map_file");
 
-    std::pair<std::string, std::string> defaultGrouping = m_model->createGrouping(defaultData, conversionData);
+    std::pair<std::string, std::string> defaultGrouping = m_model->createGrouping(defaultData);
     TS_ASSERT_EQUALS(defaultGrouping.first, IETGroupingType::IPF);
     TS_ASSERT_EQUALS(defaultGrouping.second, "");
   }
 
   void testCreateGroupingWithCustomGrouping() {
-    IETConversionData conversionData;
     IETGroupingData customData(IETGroupingType::CUSTOM, 2, "map_file", "1,2-4,5");
 
-    std::pair<std::string, std::string> customGrouping = m_model->createGrouping(customData, conversionData);
+    std::pair<std::string, std::string> customGrouping = m_model->createGrouping(customData);
     TS_ASSERT_EQUALS(customGrouping.first, IETGroupingType::CUSTOM);
     TS_ASSERT_EQUALS(customGrouping.second, "1,2-4,5");
   }
 
   void testCreateGroupingWithAllGrouping() {
-    IETConversionData conversionData;
     IETGroupingData allData(IETGroupingType::ALL, 2, "map_file");
 
-    std::pair<std::string, std::string> allGrouping = m_model->createGrouping(allData, conversionData);
+    std::pair<std::string, std::string> allGrouping = m_model->createGrouping(allData);
     TS_ASSERT_EQUALS(allGrouping.first, IETGroupingType::ALL);
     TS_ASSERT_EQUALS(allGrouping.second, "");
   }
 
   void testCreateGroupingWithIndividualGrouping() {
-    IETConversionData conversionData;
     IETGroupingData individualData(IETGroupingType::INDIVIDUAL, 2, "map_file");
 
-    std::pair<std::string, std::string> individualGrouping = m_model->createGrouping(individualData, conversionData);
+    std::pair<std::string, std::string> individualGrouping = m_model->createGrouping(individualData);
     TS_ASSERT_EQUALS(individualGrouping.first, IETGroupingType::INDIVIDUAL);
     TS_ASSERT_EQUALS(individualGrouping.second, "");
-  }
-
-  void testGetDetectorGroupingString() {
-    std::string groupingString = m_model->getDetectorGroupingString(1, 10, 2);
-    TS_ASSERT_EQUALS(groupingString, "1-5,6-10");
   }
 
   void testValidateRunDataGroupingInvalid() {
