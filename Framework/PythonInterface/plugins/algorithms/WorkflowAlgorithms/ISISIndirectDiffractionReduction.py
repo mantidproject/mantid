@@ -135,7 +135,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingPolicy",
             defaultValue="All",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom"]),
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
             doc="The method used to group spectra.",
         )
         self.declareProperty(
@@ -146,6 +146,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
             doc="A map file containing a spectra grouping.",
+        )
+        self.declareProperty(
+            name="NGroups",
+            defaultValue=1,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of groups for grouping the detectors.",
         )
 
         self.declareProperty(
@@ -343,6 +350,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                     group_file=self._grouping_map_file,
                     group_ws=self._grouping_workspace,
                     group_string=self._grouping_string,
+                    number_of_groups=self._number_of_groups,
                 )
 
             if is_multi_frame:
@@ -387,6 +395,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        self._number_of_groups = self.getProperty("NGroups").value
 
         if self._rebin_string == "":
             self._rebin_string = None
