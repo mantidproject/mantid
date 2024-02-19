@@ -41,6 +41,12 @@ Bugfixes
 ############
 - The ``DSFinterp1DFit`` fit function has been deprecated. It was not being registered due to a missing dependency.
 
+Data Handling
+-------------
+
+Bugfixes
+########
+- Fixed a bug where ``FilteredTimeSeriesProperty::timeAverageValue`` would return an incorrect value for datasets with only one data point in the filter.
 
 Data Objects
 ------------
