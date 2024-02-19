@@ -111,7 +111,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_ads_clear_or_remove_workspace_event("Name")
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 1)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 1)
 
@@ -125,7 +124,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_ads_clear_or_remove_workspace_event("Name")
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.view.disable_view.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
         self.mock_model_tf_asymmetry_mode.assert_called_with(False)
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
@@ -141,7 +139,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
-        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 1)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 1)
 
@@ -157,7 +154,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
-        self.view.disable_view.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
         self.mock_model_tf_asymmetry_mode.assert_called_with(False)
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)

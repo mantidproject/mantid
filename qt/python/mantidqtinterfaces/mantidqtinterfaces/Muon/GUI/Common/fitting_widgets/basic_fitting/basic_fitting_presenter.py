@@ -102,11 +102,6 @@ class BasicFittingPresenter:
 
         self.update_and_reset_all_data()
 
-        if self.model.number_of_datasets == 0:
-            self.view.disable_view()
-        else:
-            self.enable_editing_notifier.notify_subscribers()
-
     def handle_gui_changes_made(self, changed_values: dict) -> None:
         """Handle when the good data checkbox is changed in the home tab."""
         for key in changed_values.keys():
@@ -119,11 +114,6 @@ class BasicFittingPresenter:
 
         self.view.plot_guess, self.model.plot_guess = False, False
         self.clear_undo_data()
-
-        if self.model.number_of_datasets == 0:
-            self.view.disable_view()
-        else:
-            self.enable_editing_notifier.notify_subscribers()
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
@@ -402,6 +392,11 @@ class BasicFittingPresenter:
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
         self.view.update_dataset_name_combo_box(self.model.dataset_names)
         self.model.current_dataset_index = self.view.current_dataset_index
+
+        if self.model.number_of_datasets == 0:
+            self.view.disable_view()
+        else:
+            self.enable_editing_notifier.notify_subscribers()
 
     def update_fit_statuses_and_chi_squared_in_model(self, fit_status: str, chi_squared: float) -> None:
         """Updates the fit status and chi squared stored in the model. This is used after a fit."""
