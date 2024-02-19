@@ -27,9 +27,14 @@ through the technique of *NormalisedPolygon*.
 
 NormalisedPolygon Technique
 ---------------------------
+*NormalisedPolygon* is the technique used by :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm
+and it performs a coordinate transformation (from scattering angle theta to momentum transfer Q) followed by the
+(fractional) rebinning in the new coordinate system.
 
-*NormalisedPolygon* constructs
-a polygon using the boundaries of the input bin, and transforms that polygon
+The fractional rebinning is not unique to this technique, as it could be applied even if there was no coordinate transformation
+(this is what Rebin2D does). However, while in Rebin2D the input and output grid lines are parallel to each other (no coordinate transformation),
+the input and output grid lines for *NormalisedPolygon* are **not** parallel, resulting in parallelpiped output bins.
+The algorithm constructs the polygon using the boundaries of the input bin and transforming that polygon
 into the output coordinates. In the output coordinates, we look for the intersections
 between the transformed input bin and the output bin:
 
