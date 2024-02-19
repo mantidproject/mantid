@@ -30,7 +30,7 @@ the input **RebinnedOutput** workspace. A more detailed explanation of this
 appproach is described in :ref:`FractionalRebinning <FractionalRebinning>`.
 
 If the `UseFractionalArea` option is set to `True` and the input workspace
-is not of type **RebinnedOutput**, the algorithm will be correct if the intput
+is not of type **RebinnedOutput**, the algorithm will be correct if the input
 workspace has not been previously rebinned, but will give incorrect
 error (standard deviation) estimates if it has been rebinned. You can find more
 information on why this is the case in :ref:`FractionalRebinning <FractionalRebinning>`.

@@ -88,11 +88,11 @@ Fractional Rebinning
 ####################
 
 Some algorithms create a special type of :ref:`Workspace2D <Workspace2D>` called a ``RebinnedOutput`` workspace,
-in which each bin contains both a value and the fractional overlap area of the this bin over
+in which each bin contains both a value and the fractional overlap area of this bin over
 that of the original data. There is more discussion of this in the :ref:`FractionalRebinning <FractionalRebinning>`
 concepts page.
 
-The Integration algorithm for **RebinnedOutput** follows a formula than for a normal **Workspace2D**, please consult the
+The Integration algorithm differs for **RebinnedOutput** workspaces, please consult the
 page :ref:`FractionalRebinning <FractionalRebinning>` for more information.
 
 

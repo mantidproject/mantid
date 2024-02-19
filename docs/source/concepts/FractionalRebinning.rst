@@ -17,7 +17,7 @@ is called a **RebinnedOutput**. Some algorithms, such as
 :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
 and :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`, create this special type of
 :ref:`Workspace2D <Workspace2D>` workspace in which
-each bin contains both a value and the fractional overlap area of the this bin over
+each bin contains both a value and the fractional overlap area of this bin over
 that of the original data. This fractional overlap area value is referred to as
 a fractional weight, since it has the role of controlling the proportion of the counts
 in output bins that underwent some coordinate transformation.
@@ -78,7 +78,7 @@ and normal Rebinning lies in the storage of the fractional weights relative to t
 
 **RebinnedOutput** workspaces have the fractional weight resulting from previous rebins stored
 for each input bin. When :ref:`algm-Rebin2D` is called on RebinnedOutput workspaces, the argument
-*UseFractionalArea* is always automatically turned on, to ensure the weight fractions are alwasy propagated accross
+*UseFractionalArea* is always automatically turned on, to ensure the weight fractions are always propagated accross
 several rebins and that the best possible signal and error estimates are achieved.
 
 On the other hand, when :ref:`algm-Rebin2D` is called on a **Workspace2D** workspace,
