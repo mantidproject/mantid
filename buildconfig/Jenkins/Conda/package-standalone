@@ -60,7 +60,7 @@ done
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-standalone"
-mamba install --yes conda-build mamba
+mamba install --yes mamba conda-build=3.28.4
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
