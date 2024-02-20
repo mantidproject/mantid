@@ -126,12 +126,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         )
         self.declareProperty(
             WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="A workspace containing a spectra grouping.",
+            doc="A workspace containing a detector grouping.",
         )
-        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Spectra to group as a string")
+        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
         self.declareProperty(
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
-            doc="A map file containing a spectra grouping.",
+            doc="A map file containing a detector grouping.",
         )
         self.declareProperty(
             name="NGroups",
