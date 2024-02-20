@@ -73,17 +73,6 @@ private:
   int m_spectraMax;
 };
 
-class IETGroupingType {
-public:
-  static inline const std::string DEFAULT = "Default";
-  static inline const std::string FILE = "File";
-  static inline const std::string GROUPS = "Groups";
-  static inline const std::string CUSTOM = "Custom";
-  static inline const std::string IPF = "IPF";
-  static inline const std::string ALL = "All";
-  static inline const std::string INDIVIDUAL = "Individual";
-};
-
 class IETBackgroundData {
 public:
   IETBackgroundData(const bool &removeBackground = false, const int &backgroundStart = 0, const int &backgroundEnd = 0)

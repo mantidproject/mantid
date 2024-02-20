@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "ui_DetectorGroupingOptions.h"
 
+#include <memory>
 #include <string>
 
 #include <QObject>
@@ -17,6 +18,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+enum class GroupingMethod { Individual = 0, All = 0, IPF = 0, File = 1, Groups = 2, Custom = 3 };
 
 class DetectorGroupingOptions : public QWidget {
   Q_OBJECT
@@ -42,7 +45,6 @@ private slots:
 
 private:
   int optionIndex(QString const &option) const;
-  bool isOptionHidden(QString const &option) const;
 
   Ui::DetectorGroupingWidget m_uiForm;
 };
