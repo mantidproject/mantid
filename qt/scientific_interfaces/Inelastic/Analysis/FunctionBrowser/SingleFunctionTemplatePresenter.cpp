@@ -17,30 +17,37 @@ using namespace MantidWidgets;
  * Constructor
  * @param parent :: The parent widget.
  */
-SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(
-    SingleFunctionTemplateBrowser *view, std::unique_ptr<SingleFunctionTemplateModel> functionModel)
-    : m_view(view), m_model(std::move(functionModel)) {
+SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
+                                                                 std::unique_ptr<SingleFunctionTemplateModel> model)
+    : FunctionTemplatePresenter(view, std::move(model)) {
   m_view->subscribePresenter(this);
 }
 
+SingleFunctionTemplateBrowser *SingleFunctionTemplatePresenter::view() const {
+  return dynamic_cast<SingleFunctionTemplateBrowser *>(m_view);
+}
+SingleFunctionTemplateModel *SingleFunctionTemplatePresenter::model() const {
+  return dynamic_cast<SingleFunctionTemplateModel *>(m_model.get());
+}
+
 void SingleFunctionTemplatePresenter::init() {
-  m_view->setDataType(m_model->getFunctionList());
-  setFitType(m_model->getFitType());
+  view()->setDataType(model()->getFunctionList());
+  setFitType(model()->getFitType());
 }
 
 void SingleFunctionTemplatePresenter::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
-  m_model->updateAvailableFunctions(functionInitialisationStrings);
-  m_view->setDataType(m_model->getFunctionList());
-  setFitType(m_model->getFitType());
+  model()->updateAvailableFunctions(functionInitialisationStrings);
+  view()->setDataType(model()->getFunctionList());
+  setFitType(model()->getFitType());
 }
 
 void SingleFunctionTemplatePresenter::setFitType(std::string const &name) {
   m_view->clear();
-  m_model->setFitType(name);
+  model()->setFitType(name);
   auto functionParameters = m_model->getParameterNames();
   for (auto const &parameter : functionParameters) {
-    m_view->addParameter(parameter, m_model->getParameterDescription(parameter));
+    view()->addParameter(parameter, m_model->getParameterDescription(parameter));
   }
   setErrorsEnabled(false);
   updateView();
@@ -57,13 +64,13 @@ void SingleFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->clear();
   m_model->setFunctionString(funStr);
 
-  if (m_model->getFitType() == "None")
+  if (model()->getFitType() == "None")
     return;
   auto functionParameters = m_model->getParameterNames();
   for (auto const &parameter : functionParameters) {
-    m_view->addParameter(parameter, m_model->getParameterDescription(parameter));
+    view()->addParameter(parameter, m_model->getParameterDescription(parameter));
   }
-  m_view->setEnumValue(m_model->getEnumIndex());
+  view()->setEnumValue(model()->getEnumIndex());
   setErrorsEnabled(false);
   updateView();
   m_view->emitFunctionStructureChanged();
@@ -83,12 +90,12 @@ std::vector<std::string> SingleFunctionTemplatePresenter::getLocalParameters() c
 
 void SingleFunctionTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
   m_model->setGlobalParameters(globals);
-  m_view->setGlobalParametersQuiet(globals);
+  view()->setGlobalParametersQuiet(globals);
 }
 
 void SingleFunctionTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
-  m_model->setGlobal(parameterName, on);
-  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
+  model()->setGlobal(parameterName, on);
+  view()->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
 void SingleFunctionTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
@@ -113,15 +120,15 @@ void SingleFunctionTemplatePresenter::setDatasets(const QList<FunctionModelDatas
 void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
 EstimationDataSelector SingleFunctionTemplatePresenter::getEstimationDataSelector() const {
-  return m_model->getEstimationDataSelector();
+  return model()->getEstimationDataSelector();
 }
 
 void SingleFunctionTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_model->updateParameterEstimationData(std::move(data));
+  model()->updateParameterEstimationData(std::move(data));
   updateView();
 }
 void SingleFunctionTemplatePresenter::estimateFunctionParameters() {
-  m_model->estimateFunctionParameters();
+  model()->estimateFunctionParameters();
   updateView();
 }
 
@@ -156,10 +163,10 @@ void SingleFunctionTemplatePresenter::setLocalParameterTie(std::string const &pa
 }
 
 void SingleFunctionTemplatePresenter::updateView() {
-  if (m_model->getFitType() == "None")
+  if (model()->getFitType() == "None")
     return;
   for (auto const &parameterName : m_model->getParameterNames()) {
-    m_view->setParameterValueQuietly(parameterName, m_model->getParameter(parameterName),
+    view()->setParameterValueQuietly(parameterName, m_model->getParameter(parameterName),
                                      m_model->getParameterError(parameterName));
   }
 }

@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "ITemplatePresenter.h"
+#include "MantidQtWidgets/Common/IFunctionModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,7 +20,8 @@ class MANTIDQT_INELASTIC_DLL FunctionTemplatePresenter : public ITemplatePresent
 public:
   using ITemplatePresenter::updateMultiDatasetParameters;
 
-  FunctionTemplatePresenter();
+  FunctionTemplatePresenter(FunctionTemplateBrowser *view,
+                            std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> model);
 
   virtual void init() override;
   virtual void
@@ -43,6 +45,10 @@ public:
   virtual void setBackgroundA0(double value) override;
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   virtual void setQValues(const std::vector<double> &qValues) override;
+
+protected:
+  FunctionTemplateBrowser *m_view;
+  std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> m_model;
 };
 
 } // namespace IDA

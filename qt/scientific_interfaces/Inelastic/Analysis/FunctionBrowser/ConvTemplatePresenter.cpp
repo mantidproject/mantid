@@ -31,11 +31,14 @@ using namespace MantidWidgets;
  * Constructor
  * @param parent :: The parent widget.
  */
-ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
-                                             std::unique_ptr<ConvFunctionModel> functionModel)
-    : m_view(view), m_model(std::move(functionModel)) {
+ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> model)
+    : FunctionTemplatePresenter(view, std::move(model)) {
   m_view->subscribePresenter(this);
 }
+
+ConvTemplateBrowser *ConvTemplatePresenter::view() const { return dynamic_cast<ConvTemplateBrowser *>(m_view); }
+
+ConvFunctionModel *ConvTemplatePresenter::model() const { return dynamic_cast<ConvFunctionModel *>(m_model.get()); }
 
 // This function creates a Qt thread to run the model updates
 // This was found to be necessary to allow the processing of the GUI thread to
@@ -43,13 +46,13 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view,
 // itself due to an internal timer occurring within the class
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   if (subTypeIndex == SubTypeIndex::Fit) {
-    m_model->setFitType(static_cast<FitType>(typeIndex));
+    model()->setFitType(static_cast<FitType>(typeIndex));
   } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
-    m_model->setLorentzianType(static_cast<LorentzianType>(typeIndex));
+    model()->setLorentzianType(static_cast<LorentzianType>(typeIndex));
   } else {
-    m_model->setBackground(static_cast<BackgroundType>(typeIndex));
+    model()->setBackground(static_cast<BackgroundType>(typeIndex));
   }
-  m_view->setSubType(subTypeIndex, typeIndex);
+  view()->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -57,13 +60,13 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
 }
 
 void ConvTemplatePresenter::setDeltaFunction(bool on) {
-  if (on == m_model->hasDeltaFunction())
+  if (on == model()->hasDeltaFunction())
     return;
-  m_model->setDeltaFunction(on);
+  model()->setDeltaFunction(on);
   if (on)
-    m_view->addDeltaFunction();
+    view()->addDeltaFunction();
   else
-    m_view->removeDeltaFunction();
+    view()->removeDeltaFunction();
 
   setErrorsEnabled(false);
   updateViewParameterNames();
@@ -72,9 +75,9 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
 }
 
 void ConvTemplatePresenter::setTempCorrection(bool on) {
-  if (on == m_model->hasTempCorrection())
+  if (on == model()->hasTempCorrection())
     return;
-  double temp = m_model->getTempValue();
+  double temp = model()->getTempValue();
   if (on) {
     bool ok;
     temp = QInputDialog::getDouble(m_view, "Temperature", "Set Temperature", temp, 0.0,
@@ -82,11 +85,11 @@ void ConvTemplatePresenter::setTempCorrection(bool on) {
     if (!ok)
       return;
   }
-  m_model->setTempCorrection(on, temp);
+  model()->setTempCorrection(on, temp);
   if (on)
-    m_view->addTempCorrection(temp);
+    view()->addTempCorrection(temp);
   else
-    m_view->removeTempCorrection();
+    view()->removeTempCorrection();
 
   setErrorsEnabled(false);
   updateViewParameterNames();
@@ -101,15 +104,17 @@ int ConvTemplatePresenter::getNumberOfDatasets() const { return m_model->getNumb
 void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
 
-  m_view->updateTemperatureCorrectionAndDelta(m_model->hasTempCorrection(), m_model->hasDeltaFunction());
+  auto convView = view();
+  auto convModel = model();
+  convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection(), convModel->hasDeltaFunction());
 
-  m_view->setSubType(SubTypeIndex::Lorentzian, static_cast<int>(m_model->getLorentzianType()));
-  m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model->getFitType()));
-  m_view->setSubType(SubTypeIndex::Background, static_cast<int>(m_model->getBackgroundType()));
+  convView->setSubType(SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
+  convView->setSubType(SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setSubType(SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
-  m_view->setInt(SubTypeIndex::Lorentzian, static_cast<int>(m_model->getLorentzianType()));
-  m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model->getFitType()));
-  m_view->setEnum(SubTypeIndex::Background, static_cast<int>(m_model->getBackgroundType()));
+  convView->setInt(SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
+  convView->setEnum(SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setEnum(SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);
   updateViewParameterNames();
@@ -150,7 +155,7 @@ void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
 }
 
 void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
-  m_model->updateMultiDatasetParameters(table);
+  model()->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 
@@ -171,19 +176,19 @@ void ConvTemplatePresenter::setBackgroundA0(double value) {
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::setQValues(const std::vector<double> &qValues) { m_model->setQValues(qValues); }
+void ConvTemplatePresenter::setQValues(const std::vector<double> &qValues) { model()->setQValues(qValues); }
 
 void ConvTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
 void ConvTemplatePresenter::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  m_model->setResolution(fitResolutions);
+  model()->setResolution(fitResolutions);
 }
 
 void ConvTemplatePresenter::updateViewParameters() {
-  auto values = m_model->getCurrentValues();
-  auto errors = m_model->getCurrentErrors();
+  auto values = model()->getCurrentValues();
+  auto errors = model()->getCurrentErrors();
   for (auto const id : values.keys()) {
-    m_view->setParameterValueQuiet(id, values[id], errors[id]);
+    view()->setParameterValueQuiet(id, values[id], errors[id]);
   }
 }
 
@@ -215,7 +220,7 @@ void ConvTemplatePresenter::setLocalParameterTie(std::string const &parameterNam
   m_model->setLocalParameterTie(parameterName, i, tie);
 }
 
-void ConvTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(m_model->getParameterNameMap()); }
+void ConvTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(model()->getParameterNameMap()); }
 
 void ConvTemplatePresenter::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
   m_model->setLocalParameterFixed(parameterName, i, fixed);
@@ -280,15 +285,15 @@ void ConvTemplatePresenter::handleParameterValueChanged(std::string const &param
 }
 
 EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const {
-  return m_model->getEstimationDataSelector();
+  return model()->getEstimationDataSelector();
 }
 
 void ConvTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_model->updateParameterEstimationData(std::move(data));
+  model()->updateParameterEstimationData(std::move(data));
 }
 
 void ConvTemplatePresenter::estimateFunctionParameters() {
-  m_model->estimateFunctionParameters();
+  model()->estimateFunctionParameters();
   updateViewParameters();
 }
 

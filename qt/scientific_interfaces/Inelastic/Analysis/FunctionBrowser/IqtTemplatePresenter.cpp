@@ -14,16 +14,16 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
-IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel)
-    : m_view(view), m_model(std::move(functionModel)) {
+IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *browser, std::unique_ptr<IqtFunctionModel> model)
+    : FunctionTemplatePresenter(browser, std::move(model)) {
   m_view->subscribePresenter(this);
   setViewParameterDescriptions();
-  m_view->updateState();
+  view()->updateState();
 }
+
+IqtTemplateBrowser *IqtTemplatePresenter::view() const { return dynamic_cast<IqtTemplateBrowser *>(m_view); }
+
+IqtFunctionModel *IqtTemplatePresenter::model() const { return dynamic_cast<IqtFunctionModel *>(m_model.get()); }
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   if (n < 0) {
@@ -32,50 +32,50 @@ void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   if (n > 2) {
     throw std::logic_error("The number of exponents is limited to 2.");
   }
-  auto nCurrent = m_model->getNumberOfExponentials();
+  auto nCurrent = model()->getNumberOfExponentials();
   if (n == 0) {
     if (nCurrent == 2) {
-      m_view->removeExponentialTwo();
+      view()->removeExponentialTwo();
       --nCurrent;
     }
     if (nCurrent == 1) {
-      m_view->removeExponentialOne();
+      view()->removeExponentialOne();
       --nCurrent;
     }
   } else if (n == 1) {
     if (nCurrent == 0) {
-      m_view->addExponentialOne();
+      view()->addExponentialOne();
       ++nCurrent;
     } else {
-      m_view->removeExponentialTwo();
+      view()->removeExponentialTwo();
       --nCurrent;
     }
   } else /*n == 2*/ {
     if (nCurrent == 0) {
-      m_view->addExponentialOne();
+      view()->addExponentialOne();
       ++nCurrent;
     }
     if (nCurrent == 1) {
-      m_view->addExponentialTwo();
+      view()->addExponentialTwo();
       ++nCurrent;
     }
   }
   assert(nCurrent == n);
-  m_model->setNumberOfExponentials(n);
+  model()->setNumberOfExponentials(n);
   setErrorsEnabled(false);
   updateView();
   m_view->emitFunctionStructureChanged();
 }
 
 void IqtTemplatePresenter::setStretchExponential(bool on) {
-  if (on == m_model->hasStretchExponential())
+  if (on == model()->hasStretchExponential())
     return;
   if (on) {
-    m_view->addStretchExponential();
+    view()->addStretchExponential();
   } else {
-    m_view->removeStretchExponential();
+    view()->removeStretchExponential();
   }
-  m_model->setStretchExponential(on);
+  model()->setStretchExponential(on);
   setErrorsEnabled(false);
   updateView();
   m_view->emitFunctionStructureChanged();
@@ -83,11 +83,11 @@ void IqtTemplatePresenter::setStretchExponential(bool on) {
 
 void IqtTemplatePresenter::setBackground(std::string const &name) {
   if (name == "None") {
-    m_view->removeBackground();
-    m_model->removeBackground();
+    view()->removeBackground();
+    model()->removeBackground();
   } else if (name == "FlatBackground") {
-    m_view->addFlatBackground();
-    m_model->setBackground(name);
+    view()->addFlatBackground();
+    model()->setBackground(name);
   } else {
     throw std::logic_error("Browser doesn't support background " + name);
   }
@@ -104,18 +104,18 @@ void IqtTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
   m_view->clear();
   setErrorsEnabled(false);
-  if (m_model->hasBackground()) {
-    m_view->addFlatBackground();
+  if (model()->hasBackground()) {
+    view()->addFlatBackground();
   }
-  if (m_model->hasStretchExponential()) {
-    m_view->addStretchExponential();
+  if (model()->hasStretchExponential()) {
+    view()->addStretchExponential();
   }
-  auto const nExp = m_model->getNumberOfExponentials();
+  auto const nExp = model()->getNumberOfExponentials();
   if (nExp > 0) {
-    m_view->addExponentialOne();
+    view()->addExponentialOne();
   }
   if (nExp > 1) {
-    m_view->addExponentialTwo();
+    view()->addExponentialTwo();
   }
   updateView();
   m_view->emitFunctionStructureChanged();
@@ -131,12 +131,12 @@ std::vector<std::string> IqtTemplatePresenter::getLocalParameters() const { retu
 
 void IqtTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
   m_model->setGlobalParameters(globals);
-  m_view->setGlobalParametersQuiet(globals);
+  view()->setGlobalParametersQuiet(globals);
 }
 
 void IqtTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
-  m_model->setGlobal(parameterName, on);
-  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
+  model()->setGlobal(parameterName, on);
+  view()->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
 void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
@@ -145,7 +145,7 @@ void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
 }
 
 void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
-  m_model->updateMultiDatasetParameters(table);
+  model()->updateMultiDatasetParameters(table);
   updateViewParameters();
 }
 
@@ -164,7 +164,7 @@ int IqtTemplatePresenter::getCurrentDataset() { return m_model->currentDomainInd
 void IqtTemplatePresenter::setDatasets(const QList<FunctionModelDataset> &datasets) { m_model->setDatasets(datasets); }
 
 void IqtTemplatePresenter::setViewParameterDescriptions() {
-  m_view->updateParameterDescriptions(m_model->getParameterDescriptionMap());
+  view()->updateParameterDescriptions(model()->getParameterDescriptionMap());
 }
 
 void IqtTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
@@ -172,30 +172,30 @@ void IqtTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEna
 void IqtTemplatePresenter::tieIntensities(bool on) {
   if (on && !canTieIntensities())
     return;
-  m_model->tieIntensities(on);
+  model()->tieIntensities(on);
   m_view->emitFunctionStructureChanged();
 }
 
 bool IqtTemplatePresenter::canTieIntensities() const {
-  return (m_model->hasStretchExponential() || m_model->getNumberOfExponentials() > 0) && m_model->hasBackground();
+  return (model()->hasStretchExponential() || model()->getNumberOfExponentials() > 0) && model()->hasBackground();
 }
 
 EstimationDataSelector IqtTemplatePresenter::getEstimationDataSelector() const {
-  return m_model->getEstimationDataSelector();
+  return model()->getEstimationDataSelector();
 }
 
 void IqtTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_model->updateParameterEstimationData(std::move(data));
+  model()->updateParameterEstimationData(std::move(data));
 }
 
 void IqtTemplatePresenter::estimateFunctionParameters() {
-  m_model->estimateFunctionParameters();
+  model()->estimateFunctionParameters();
   updateView();
 }
 
 void IqtTemplatePresenter::setBackgroundA0(double value) {
   m_model->setBackgroundA0(value);
-  m_view->setA0(value, 0.0);
+  view()->setA0(value, 0.0);
 }
 
 void IqtTemplatePresenter::updateViewParameters() {
@@ -208,10 +208,10 @@ void IqtTemplatePresenter::updateViewParameters() {
       {IqtFunctionModel::ParamID::STRETCH_LIFETIME, &IqtTemplateBrowser::setStretchLifetime},
       {IqtFunctionModel::ParamID::STRETCH_STRETCHING, &IqtTemplateBrowser::setStretchStretching},
       {IqtFunctionModel::ParamID::BG_A0, &IqtTemplateBrowser::setA0}};
-  auto values = m_model->getCurrentValues();
-  auto errors = m_model->getCurrentErrors();
+  auto values = model()->getCurrentValues();
+  auto errors = model()->getCurrentErrors();
   for (auto const name : values.keys()) {
-    (m_view->*setters.at(name))(values[name], errors[name]);
+    (view()->*setters.at(name))(values[name], errors[name]);
   }
 }
 
@@ -243,12 +243,12 @@ void IqtTemplatePresenter::setLocalParameterTie(std::string const &parameterName
   m_model->setLocalParameterTie(parameterName, i, tie);
 }
 
-void IqtTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(m_model->getParameterNameMap()); }
+void IqtTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(model()->getParameterNameMap()); }
 
 void IqtTemplatePresenter::updateView() {
   updateViewParameterNames();
   updateViewParameters();
-  m_view->updateState();
+  view()->updateState();
 }
 
 void IqtTemplatePresenter::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {

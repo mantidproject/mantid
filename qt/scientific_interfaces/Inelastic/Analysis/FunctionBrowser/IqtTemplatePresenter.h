@@ -29,8 +29,10 @@ class IqtTemplateBrowser;
  */
 class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
+  explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> model);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
+  IqtTemplateBrowser *view() const;
+  IqtFunctionModel *model() const;
 
   void setNumberOfExponentials(int) override;
   void setStretchExponential(bool) override;
@@ -87,8 +89,6 @@ private:
   void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
   void updateViewParameterNames();
   void updateView();
-  IqtTemplateBrowser *m_view;
-  std::unique_ptr<IqtFunctionModel> m_model;
 };
 
 } // namespace IDA

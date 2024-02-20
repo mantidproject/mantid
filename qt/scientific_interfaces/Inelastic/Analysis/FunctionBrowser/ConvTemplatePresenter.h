@@ -30,8 +30,10 @@ class ConvTemplateBrowser;
  */
 class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> functionModel);
+  explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> model);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
+  ConvTemplateBrowser *view() const;
+  ConvFunctionModel *model() const;
 
   void setSubType(size_t subTypeIndex, int typeIndex) override;
   void setDeltaFunction(bool) override;
@@ -85,8 +87,6 @@ private:
   void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed);
   void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
   void updateViewParameterNames();
-  ConvTemplateBrowser *m_view;
-  std::unique_ptr<ConvFunctionModel> m_model;
 };
 
 } // namespace IDA

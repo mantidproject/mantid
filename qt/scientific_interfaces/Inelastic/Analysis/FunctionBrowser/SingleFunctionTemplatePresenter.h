@@ -34,8 +34,10 @@ public:
   using FunctionTemplatePresenter::updateMultiDatasetParameters;
 
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
-                                           std::unique_ptr<SingleFunctionTemplateModel> functionModel);
+                                           std::unique_ptr<SingleFunctionTemplateModel> model);
   FunctionTemplateBrowser *browser() override { return reinterpret_cast<FunctionTemplateBrowser *>(m_view); }
+  SingleFunctionTemplateBrowser *view() const;
+  SingleFunctionTemplateModel *model() const;
 
   void init() override;
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
@@ -84,8 +86,6 @@ private:
   void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed);
   void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
   void updateView();
-  SingleFunctionTemplateBrowser *m_view;
-  std::unique_ptr<SingleFunctionTemplateModel> m_model;
 };
 
 } // namespace IDA

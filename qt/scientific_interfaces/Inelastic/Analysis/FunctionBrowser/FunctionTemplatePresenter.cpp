@@ -10,7 +10,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FunctionTemplatePresenter::FunctionTemplatePresenter() {}
+FunctionTemplatePresenter::FunctionTemplatePresenter(FunctionTemplateBrowser *view,
+                                                     std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> model)
+    : m_view(view), m_model(std::move(model)) {}
 
 void FunctionTemplatePresenter::init() {}
 
