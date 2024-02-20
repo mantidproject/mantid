@@ -116,8 +116,9 @@ surprised to discover that this is seemingly not the case:
     Signal difference = 0.195
     Errors difference = 0.603
 
-This discrepancy is actually only present for display purposes, and is not part of
-the inner workings of the code. This behaviour was chosen to cover the cases where
+This is actually due to the way data is presented.
+In the case where the *UseFractionalArea* is set to True, the workspace will display
+counts per bin area, rather than the absolute counts. This behaviour was chosen to cover the cases where
 the output grid has a very small overlap with the input grid (for example at the edges of the
 detector coverage), resulting in a small fractional weight :math:`F` of this bin, and
 hence its signal :math:`Y` and error :math:`E` would also be very small compared to its neighbours.
