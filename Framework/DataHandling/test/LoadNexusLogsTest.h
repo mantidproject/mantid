@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -308,9 +309,13 @@ public:
     TS_ASSERT_EQUALS(pclog2->nthValue(1), false);
     TS_ASSERT_EQUALS(pclog2->nthValue(2), false);
 
-    // force the filtering by passing in an empty log
-    auto emptyProperty = new TimeSeriesProperty<bool>("empty");
-    run.filterByLog(*emptyProperty);
+    // force the filtering by passing in a log filter
+    auto timeSeries = new Mantid::Kernel::TimeSeriesProperty<bool>("filter");
+    timeSeries->addValue("2007-11-30T16:16:50", true);
+    timeSeries->addValue("2007-11-30T16:17:25", false);
+    timeSeries->addValue("2007-11-30T16:17:39", true);
+    auto filter = std::make_unique<LogFilter>(*timeSeries);
+    run.filterByLog(filter.get());
 
     auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
     // middle value is invalid and is filtered out

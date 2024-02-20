@@ -101,7 +101,7 @@ class BrowseFileWidgetPresenter(object):
         try:
             self._model.execute()
         except ValueError as error:
-            self._view.warning_popup(error.args[0])
+            self._view.warning_popup(str(error))
             self.filenames = self._model.current_filenames
         self.on_loading_finished()
 
