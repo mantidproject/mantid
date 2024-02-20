@@ -8,7 +8,11 @@
 
 #include "DllConfig.h"
 #include "ITemplatePresenter.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IFunctionModel.h"
+
+#include <QList>
+#include <QStringList>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,12 +24,30 @@ class MANTIDQT_INELASTIC_DLL FunctionTemplatePresenter : public ITemplatePresent
 public:
   using ITemplatePresenter::updateMultiDatasetParameters;
 
-  FunctionTemplatePresenter(FunctionTemplateBrowser *view,
-                            std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> model);
+  FunctionTemplatePresenter(FunctionTemplateBrowser *view, std::unique_ptr<MantidWidgets::IFunctionModel> model);
+
+  FunctionTemplateBrowser *browser() override { return m_view; }
 
   virtual void init() override;
   virtual void
   updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
+
+  void setNumberOfDatasets(int) override;
+  int getNumberOfDatasets() const override;
+  int getCurrentDataset() override;
+
+  Mantid::API::IFunction_sptr getGlobalFunction() const override;
+  Mantid::API::IFunction_sptr getFunction() const override;
+
+  std::vector<std::string> getGlobalParameters() const override;
+  std::vector<std::string> getLocalParameters() const override;
+
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
+
+  void setErrorsEnabled(bool enabled) override;
+
+  void handleEditLocalParameter(std::string const &parameterName) override;
+  void handleParameterValueChanged(std::string const &parameterName, double value) override;
 
   virtual void setFitType(std::string const &name) override;
 
@@ -47,8 +69,19 @@ public:
   virtual void setQValues(const std::vector<double> &qValues) override;
 
 protected:
+  QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
+
+  void setLocalParameterValue(std::string const &parameterName, int i, double value);
+  void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
+  void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed);
+  double getLocalParameterValue(std::string const &parameterName, int i) const;
+  bool isLocalParameterFixed(std::string const &parameterName, int i) const;
+  std::string getLocalParameterTie(std::string const &parameterName, int i) const;
+  std::string getLocalParameterConstraint(std::string const &parameterName, int i) const;
+
   FunctionTemplateBrowser *m_view;
-  std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> m_model;
+  std::unique_ptr<MantidWidgets::IFunctionModel> m_model;
 };
 
 } // namespace IDA

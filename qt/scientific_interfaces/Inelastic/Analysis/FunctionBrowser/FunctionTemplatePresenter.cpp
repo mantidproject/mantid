@@ -5,20 +5,117 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplatePresenter.h"
+#include "Analysis/FunctionTemplateBrowser.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 FunctionTemplatePresenter::FunctionTemplatePresenter(FunctionTemplateBrowser *view,
-                                                     std::unique_ptr<MantidQt::MantidWidgets::IFunctionModel> model)
-    : m_view(view), m_model(std::move(model)) {}
+                                                     std::unique_ptr<MantidWidgets::IFunctionModel> model)
+    : m_view(view), m_model(std::move(model)) {
+  m_view->subscribePresenter(this);
+}
 
 void FunctionTemplatePresenter::init() {}
 
 void FunctionTemplatePresenter::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
   (void)functionInitialisationStrings;
+}
+
+void FunctionTemplatePresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
+
+int FunctionTemplatePresenter::getNumberOfDatasets() const { return m_model->getNumberDomains(); }
+
+int FunctionTemplatePresenter::getCurrentDataset() { return m_model->currentDomainIndex(); }
+
+Mantid::API::IFunction_sptr FunctionTemplatePresenter::getGlobalFunction() const { return m_model->getFitFunction(); }
+
+Mantid::API::IFunction_sptr FunctionTemplatePresenter::getFunction() const { return m_model->getCurrentFunction(); }
+
+std::vector<std::string> FunctionTemplatePresenter::getGlobalParameters() const {
+  return m_model->getGlobalParameters();
+}
+
+std::vector<std::string> FunctionTemplatePresenter::getLocalParameters() const { return m_model->getLocalParameters(); }
+
+void FunctionTemplatePresenter::setLocalParameterValue(std::string const &parameterName, int i, double value) {
+  m_model->setLocalParameterValue(parameterName, i, value);
+}
+
+void FunctionTemplatePresenter::setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) {
+  m_model->setLocalParameterTie(parameterName, i, tie);
+}
+
+void FunctionTemplatePresenter::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
+  m_model->setLocalParameterFixed(parameterName, i, fixed);
+}
+
+double FunctionTemplatePresenter::getLocalParameterValue(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterValue(parameterName, i);
+}
+
+bool FunctionTemplatePresenter::isLocalParameterFixed(std::string const &parameterName, int i) const {
+  return m_model->isLocalParameterFixed(parameterName, i);
+}
+
+std::string FunctionTemplatePresenter::getLocalParameterTie(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterTie(parameterName, i);
+}
+
+std::string FunctionTemplatePresenter::getLocalParameterConstraint(std::string const &parameterName, int i) const {
+  return m_model->getLocalParameterConstraint(parameterName, i);
+}
+
+void FunctionTemplatePresenter::setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) {
+  m_model->setDatasets(datasets);
+}
+
+QStringList FunctionTemplatePresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
+
+QStringList FunctionTemplatePresenter::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
+
+void FunctionTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
+
+void FunctionTemplatePresenter::handleParameterValueChanged(std::string const &parameterName, double value) {
+  if (parameterName.empty())
+    return;
+  if (m_model->isGlobal(parameterName)) {
+    auto const n = getNumberOfDatasets();
+    for (int i = 0; i < n; ++i) {
+      setLocalParameterValue(parameterName, i, value);
+    }
+  } else {
+    auto const i = m_model->currentDomainIndex();
+    auto const oldValue = m_model->getLocalParameterValue(parameterName, i);
+    if (fabs(value - oldValue) > 1e-6) {
+      setErrorsEnabled(false);
+    }
+    setLocalParameterValue(parameterName, i, value);
+  }
+  m_view->emitFunctionStructureChanged();
+}
+
+void FunctionTemplatePresenter::handleEditLocalParameter(std::string const &parameterName) {
+  auto const datasetNames = getDatasetNames();
+  auto const domainNames = getDatasetDomainNames();
+  QList<double> values;
+  QList<bool> fixes;
+  QStringList ties;
+  QStringList constraints;
+  const int n = domainNames.size();
+  for (auto i = 0; i < n; ++i) {
+    const double value = getLocalParameterValue(parameterName, i);
+    values.push_back(value);
+    const bool fixed = isLocalParameterFixed(parameterName, i);
+    fixes.push_back(fixed);
+    const auto tie = getLocalParameterTie(parameterName, i);
+    ties.push_back(QString::fromStdString(tie));
+    const auto constraint = getLocalParameterConstraint(parameterName, i);
+    constraints.push_back(QString::fromStdString(constraint));
+  }
+  m_view->openEditLocalParameterDialog(parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
 }
 
 void FunctionTemplatePresenter::setFitType(std::string const &name) { (void)name; }
