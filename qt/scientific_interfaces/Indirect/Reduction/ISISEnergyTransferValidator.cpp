@@ -108,6 +108,15 @@ std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRun
       return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
                                                defaultSpectraMax);
     }
+  } else if (groupingType == "Groups") {
+    auto const numberOfSpectra = defaultSpectraMax - defaultSpectraMin + 1;
+    auto nGroups = std::stoull(groupingProperties->getPropertyValue("NGroups"));
+    if (nGroups < 1) {
+      return "The number of groups must be a positive number.";
+    } else if (nGroups > numberOfSpectra) {
+      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
+             ").";
+    }
   }
   return "";
 }

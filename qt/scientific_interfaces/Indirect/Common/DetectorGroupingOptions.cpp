@@ -63,6 +63,9 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
   case GroupingMethod::Custom:
     Mantid::API::AlgorithmProperties::update("GroupingString", customGrouping(), *properties);
     break;
+  default:
+    // No properties to update for 'Individual', 'All' or 'IPF'
+    break;
   }
   return properties;
 }
