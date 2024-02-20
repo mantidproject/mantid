@@ -106,6 +106,8 @@ std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingD
     else
       return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSepctraMin,
                                                defaultSpectraMax);
+  } else if (groupingType == "Groups" && groupingData.getNGroups() < 1) {
+    return "The number of groups must be a positive number.";
   }
   return "";
 }

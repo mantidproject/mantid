@@ -22,33 +22,6 @@ class ISISEnergyTransferModelUtilsTest : public CxxTest::TestSuite {
 public:
   ISISEnergyTransferModelUtilsTest() = default;
 
-  void teatCreateRangeString() {
-    TS_ASSERT_EQUALS(createRangeString(1, 10), "1-10");
-    TS_ASSERT_EQUALS(createRangeString(3, 7), "3-7");
-  }
-
-  void testCreateGroupString() {
-    TS_ASSERT_EQUALS(createGroupString(1, 10), "1-10");
-    TS_ASSERT_EQUALS(createGroupString(3, 5), "3-7");
-  }
-
-  void testCreateGroupingString() {
-    TS_ASSERT_EQUALS(createGroupingString(2, 2, 1), "1-2,3-4");
-    TS_ASSERT_EQUALS(createGroupingString(3, 3, 2), "2-4,5-7,8-10");
-    TS_ASSERT_EQUALS(createGroupingString(1, 2, 4), "4-4,5-5");
-    TS_ASSERT_EQUALS(createGroupingString(1, 1, 8), "8-8");
-  }
-
-  void testCreateDetectorGroupingString() {
-    TS_ASSERT_EQUALS(createDetectorGroupingString(2, 2, 4, 1), "1-2,3-4");
-    TS_ASSERT_EQUALS(createDetectorGroupingString(3, 4, 13, 2), "2-4,5-7,8-10,11-13,14-14");
-    TS_ASSERT_EQUALS(createDetectorGroupingString(1, 1, 3, 3), "3-3");
-
-    TS_ASSERT_EQUALS(createDetectorGroupingString(4, 2, 1), "1-2,3-4");
-    TS_ASSERT_EQUALS(createDetectorGroupingString(9, 4, 3), "3-4,5-6,7-8,9-10,11-11");
-    TS_ASSERT_EQUALS(createDetectorGroupingString(11, 3, 2), "2-4,5-7,8-10,11-12");
-  }
-
   void testGetCustomGroupingNumbers() {
     auto result = getCustomGroupingNumbers("1,2,3-5,6");
     std::vector<std::size_t> expected = {1, 2, 3, 5, 6};
