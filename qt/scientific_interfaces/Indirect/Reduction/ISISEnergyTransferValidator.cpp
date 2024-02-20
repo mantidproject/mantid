@@ -95,12 +95,10 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
 std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRuntimeProps *groupingProperties,
                                                        std::size_t const &defaultSpectraMin,
                                                        std::size_t const &defaultSpectraMax) {
-  if (!groupingProperties->existsProperty("GroupingMethod"))
-    return "Please provide a grouping method.";
-
   std::string groupingType = groupingProperties->getProperty("GroupingMethod");
   if (groupingType == "File") {
-    if (!groupingProperties->existsProperty("MapFile"))
+    std::string mapFile = groupingProperties->getProperty("MapFile");
+    if (mapFile.empty())
       return "Mapping file is invalid.";
   } else if (groupingType == "Custom") {
     if (!groupingProperties->existsProperty("GroupingString"))
