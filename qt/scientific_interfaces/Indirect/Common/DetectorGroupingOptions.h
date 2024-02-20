@@ -24,7 +24,7 @@ class DetectorGroupingOptions : public QWidget {
 public:
   DetectorGroupingOptions(QWidget *parent);
 
-  void includeOption(QString const &option, bool include);
+  void setGroupingMethod(QString const &option);
 
   std::string groupingMethod() const;
   std::string mapFile() const;

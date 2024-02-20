@@ -23,16 +23,8 @@ DetectorGroupingOptions::DetectorGroupingOptions(QWidget *parent) : QWidget(pare
   handleGroupingMethodChanged(QString::fromStdString(groupingMethod()));
 }
 
-void DetectorGroupingOptions::includeOption(QString const &option, bool include) {
-  if (include && isOptionHidden(option)) {
-    m_uiForm.cbGroupingOptions->addItem(option);
-    m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
-  } else if (!include && !isOptionHidden(option)) {
-    auto const previousIndex = optionIndex(option);
-    m_uiForm.cbGroupingOptions->removeItem(previousIndex);
-    m_uiForm.cbGroupingOptions->setCurrentIndex(previousIndex < m_uiForm.cbGroupingOptions->count() ? previousIndex
-                                                                                                    : 0);
-  }
+void DetectorGroupingOptions::setGroupingMethod(QString const &option) {
+  m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
 }
 
 void DetectorGroupingOptions::handleGroupingMethodChanged(QString const &method) {
@@ -64,9 +56,6 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
     Mantid::API::AlgorithmProperties::update("MapFile", mapFile(), *properties);
   } else if (method == "Custom") {
     Mantid::API::AlgorithmProperties::update("GroupingString", customGrouping(), *properties);
-  } else if (method == "Default") {
-    // If Default is IPF, why not just default this for the TOSCA instrument?
-    Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("IPF"), *properties);
   } else if (method == "Groups") {
     Mantid::API::AlgorithmProperties::update("NGroups", std::to_string(nGroups()), *properties);
   }

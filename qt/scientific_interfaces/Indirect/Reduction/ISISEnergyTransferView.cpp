@@ -217,7 +217,7 @@ void IETView::setInstrumentDefault(InstrumentData const &instrumentDetails) {
        << "OSIRIS";
   m_uiForm.spEfixed->setEnabled(qens.contains(QString::fromStdString(instrumentName)));
 
-  m_groupingWidget->includeOption("Default", instrumentName == "TOSCA");
+  m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
 
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
