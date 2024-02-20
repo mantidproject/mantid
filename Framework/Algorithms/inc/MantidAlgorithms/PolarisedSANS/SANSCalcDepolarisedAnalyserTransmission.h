@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid::Algorithms {
@@ -31,5 +32,11 @@ private:
 
   /// Execute the algorithm with the provided properties.
   void exec() override;
+
+  /// Divide the depolarised workspace by the empty cell workspace.
+  std::string calcDepolarisedProportion();
+
+  /// Fit using UserFunction1D to find the pxd and transmission values.
+  void calcWavelengthDependentTransmission();
 };
 } // namespace Mantid::Algorithms

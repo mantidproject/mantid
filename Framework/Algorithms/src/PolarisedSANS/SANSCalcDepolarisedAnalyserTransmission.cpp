@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/PolarisedSANS/SANSCalcDepolarisedAnalyserTransmission.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/Divide.h"
 
 namespace {
 /// Property Names
@@ -15,6 +16,7 @@ std::string_view constexpr DEP_WORKSPACE{"DepolarisedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr T_E_START{"T_EStartingValue"};
 std::string_view constexpr PXD_START{"PxDStartingValue"};
+std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 } // namespace Prop
 
 /// Initial fitting function values.
@@ -44,8 +46,22 @@ void SANSCalcDepolarisedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(std::string(Prop::MT_WORKSPACE), "",
                                                                       Kernel::Direction::Input),
                   "The group of empty cell workspaces.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(std::string(Prop::OUTPUT_WORKSPACE), "",
+                                                                      Kernel::Direction::Output),
+                  "The name of the output workspace.");
 }
 
-void SANSCalcDepolarisedAnalyserTransmission::exec() {}
+void SANSCalcDepolarisedAnalyserTransmission::exec() { auto const &dividedWs = calcDepolarisedProportion(); }
+
+std::string SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
+  auto const &depWsName = getPropertyValue(std::string(Prop::DEP_WORKSPACE));
+  auto const &mtWsName = getPropertyValue(std::string(Prop::MT_WORKSPACE));
+  auto const &outWsName = "__" + depWsName + mtWsName + "_div";
+  auto divideAlg = createChildAlgorithm("Divide");
+  divideAlg->setProperty("LHSWorkspace", depWsName);
+  divideAlg->setProperty("RHSWorkspace", mtWsName);
+  divideAlg->setProperty("OutputWorkspace", outWsName);
+  return outWsName;
+}
 
 } // namespace Mantid::Algorithms
