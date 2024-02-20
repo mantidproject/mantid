@@ -8,12 +8,15 @@
 from enum import auto, Enum
 import json
 from pathlib import Path
+from typing import Dict
 
 from euphonic import QpointPhononModes
+import numpy as np
 
 from .abinitioloader import AbInitioLoader
 from .euphonicloader import EuphonicLoader
 from abins.abinsdata import AbinsData
+from abins.constants import COMPLEX_TYPE, FLOAT_TYPE
 from abins.parameters import sampling as sampling_parameters
 from dos.load_euphonic import euphonic_calculate_modes
 
@@ -69,6 +72,28 @@ class JSONLoader(AbInitioLoader):
             case _:
                 return PhononJSON.UNKNOWN
 
+    @staticmethod
+    def array_from_dict(data: Dict[str | int, np.ndarray], complex=False) -> np.ndarray:
+        """Convert from dict of n-d arrays to (n+1-d) array
+
+        AbinsData uses these dicts so that frequency data rows can have
+        different lengths after imaginary modes are removed. e.g.
+
+        {"0": np.array([1, 2, 3, 4]), "1": np.array([11, 12, 13, 14, 15, 16])}
+
+
+        This method is not intended to handle such ragged arrays gracefully: it
+        is for serialising the data before anything is removed.
+
+        """
+        row_shape = data[next(iter(data))].shape
+
+        new_array = np.empty([len(data)] + list(row_shape), dtype=(COMPLEX_TYPE if complex else FLOAT_TYPE))
+        for i in range(len(new_array)):
+            new_array[i] = data[str(i)]
+
+        return new_array
+
     def save_from_abins_data(self, abins_data: AbinsData) -> None:
         """Save data to hdf5 cache from AbinsData format
 
@@ -76,8 +101,12 @@ class JSONLoader(AbInitioLoader):
         construct AbinsData. Sometimes it makes sense to do it the other way
         around, so this method provides the reverse operation.
         """
-        data = abins_data.get_atoms_data().extract()
-        data.update(abins_data.get_kpoints_data().extract())
+        data = abins_data.get_kpoints_data().extract()
+        data["atoms"] = abins_data.get_atoms_data().extract()
+        for key in ("weights", "k_vectors", "frequencies"):
+            data[key] = self.array_from_dict(data[key])
+        data["atomic_displacements"] = self.array_from_dict(data["atomic_displacements"], complex=True)
+
         self.save_ab_initio_data(data=data)
 
     def read_vibrational_or_phonon_data(self) -> AbinsData:
@@ -113,5 +142,4 @@ class JSONLoader(AbInitioLoader):
 
         file_data = EuphonicLoader.data_dict_from_modes(modes)
         self.save_ab_initio_data(data=file_data)
-
         return self._rearrange_data(data=file_data)
