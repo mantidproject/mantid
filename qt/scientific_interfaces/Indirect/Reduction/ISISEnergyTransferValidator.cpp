@@ -110,10 +110,6 @@ std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRun
       return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
                                                defaultSpectraMax);
     }
-  } else if (groupingType == "Groups") {
-    int nGroups = groupingProperties->getProperty("NGroups");
-    if (nGroups < 1)
-      return "The number of groups must be a positive number.";
   }
   return "";
 }

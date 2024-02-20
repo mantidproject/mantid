@@ -100,7 +100,7 @@ Spectra Min/Spectra Max
   Used to specify a range of spectra.
 
 Detector Grouping
-  Used to specify a method for grouping spectra. Possible grouping options include 'Individual', 'All', 'IPF',
+  Used to specify a method for grouping detectors. Possible grouping options include 'Individual', 'All', 'IPF',
   'File', 'Groups' and 'Custom'. The TOSCA instrument will default to grouping using 'IPF', and the other instruments
   will default to 'Individual' grouping.
 

@@ -129,7 +129,6 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
                                       InstrumentData const &instData, IETRunData &runData) {
   auto properties = runData.groupingProperties();
 
-  // Need to sort out these properties
   setInstrumentProperties(*properties, instData);
   setInputProperties(*properties, runData.getInputData());
   setConversionProperties(*properties, runData.getConversionData(), instData.getInstrument());

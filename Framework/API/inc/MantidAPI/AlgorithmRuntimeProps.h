@@ -12,7 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid::API {
-class MANTID_API_DLL AlgorithmRuntimeProps final : public Mantid::Kernel::PropertyManager,
+class MANTID_API_DLL AlgorithmRuntimeProps final : private Mantid::Kernel::PropertyManager,
                                                    public Mantid::API::IAlgorithmRuntimeProps {
 public:
   AlgorithmRuntimeProps() = default;
@@ -21,6 +21,7 @@ public:
   ~AlgorithmRuntimeProps() = default;
 
   bool operator==(const Mantid::Kernel::IPropertyManager &other) override = delete;
+  using Mantid::Kernel::PropertyManager::existsProperty;
   using Mantid::Kernel::PropertyManager::getDeclaredPropertyNames;
   using Mantid::Kernel::PropertyManager::getPropertyValue;
 
