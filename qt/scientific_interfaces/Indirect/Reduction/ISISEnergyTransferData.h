@@ -15,8 +15,6 @@
   ensuring the stability and integrity of the communication process. The classes are as the following
   IETInputData (line 35): contains the parameters values for the input section
   IETConversionData(line 57): contains the parameters values for the conversion section
-  IETGroupingType(line 72): contains the types of the grouping
-  IETGroupingData(line 83): contains the parameters values for the grouping section
   IETBackgroundData(line 102): contains the parameters values for the background section
   IETAnalysisData(line 117): contains the parameters values for the spectra range (this is used by algorithm and plot
   spectra range)
