@@ -83,7 +83,7 @@ public:
   /// Copy properties from another LogManager; filter copied time series properties according to TimeROI
   void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
 
-  /// Filter the run by the given boolean log
+  /// Filter the run by the given log filter
   void filterByLog(Mantid::Kernel::LogFilter *filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
 

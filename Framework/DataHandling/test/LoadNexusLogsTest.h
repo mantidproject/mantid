@@ -309,7 +309,7 @@ public:
     TS_ASSERT_EQUALS(pclog2->nthValue(1), false);
     TS_ASSERT_EQUALS(pclog2->nthValue(2), false);
 
-    // force the filtering by passing in an empty log
+    // force the filtering by passing in a log filter
     auto timeSeries = new Mantid::Kernel::TimeSeriesProperty<bool>("filter");
     timeSeries->addValue("2007-11-30T16:16:50", true);
     timeSeries->addValue("2007-11-30T16:17:25", false);
