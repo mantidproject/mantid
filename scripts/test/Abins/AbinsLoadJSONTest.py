@@ -26,7 +26,7 @@ class AbinsLoadJSONTest(unittest.TestCase, abins.input.Tester):
 
     def test_json_2(self):
         """Load from Euphonic ForceConstants dump"""
-        self.check(name="NH3_euphonic_fc_LoadJSON", loader=abins.input.JSONLoader)
+        self.check(name="NH3_euphonic_fc_LoadJSON", loader=abins.input.JSONLoader, max_displacement_kpt=-1)
 
     def test_json_3(self):
         """Load from AbinsData dump"""
