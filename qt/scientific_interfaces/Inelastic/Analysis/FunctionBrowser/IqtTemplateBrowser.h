@@ -49,7 +49,6 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
-  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
   void clear() override;
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
@@ -84,7 +83,6 @@ private:
   QtProperty *m_A0 = nullptr;
   QtProperty *m_tieIntensities = nullptr;
   QMap<QtProperty *, int> m_parameterMap;
-  QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
   friend class IqtTemplatePresenter;

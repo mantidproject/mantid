@@ -66,15 +66,6 @@ void IqtTemplateBrowser::createProperties() {
   m_parameterMap[m_stretchExpStretching] = 6;
   m_parameterMap[m_A0] = 7;
 
-  m_parameterManager->setDescription(m_exp1Height, m_parameterDescriptions[m_exp1Height]);
-  m_parameterManager->setDescription(m_exp1Lifetime, m_parameterDescriptions[m_exp1Lifetime]);
-  m_parameterManager->setDescription(m_exp2Height, m_parameterDescriptions[m_exp2Height]);
-  m_parameterManager->setDescription(m_exp2Lifetime, m_parameterDescriptions[m_exp2Lifetime]);
-  m_parameterManager->setDescription(m_stretchExpHeight, m_parameterDescriptions[m_stretchExpHeight]);
-  m_parameterManager->setDescription(m_stretchExpLifetime, m_parameterDescriptions[m_stretchExpLifetime]);
-  m_parameterManager->setDescription(m_stretchExpStretching, m_parameterDescriptions[m_stretchExpStretching]);
-  m_parameterManager->setDescription(m_A0, m_parameterDescriptions[m_A0]);
-
   m_numberOfExponentials = m_intManager->addProperty("Exponentials");
   m_intManager->setMinimum(m_numberOfExponentials, 0);
   m_intManager->setMaximum(m_numberOfExponentials, 2);
@@ -222,14 +213,6 @@ void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &para
     if (!name.empty()) {
       prop->setPropertyName(QString::fromStdString(name));
     }
-  }
-}
-
-void IqtTemplateBrowser::updateParameterDescriptions(const QMap<int, std::string> &parameterDescriptions) {
-  m_parameterDescriptions.clear();
-  for (auto const prop : m_parameterMap.keys()) {
-    auto const i = m_parameterMap[prop];
-    m_parameterDescriptions[prop] = parameterDescriptions[i];
   }
 }
 

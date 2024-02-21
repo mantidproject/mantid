@@ -16,7 +16,6 @@ using namespace MantidWidgets;
 
 IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *browser, std::unique_ptr<IqtFunctionModel> model)
     : FunctionTemplatePresenter(browser, std::move(model)) {
-  setViewParameterDescriptions();
   view()->updateState();
 }
 
@@ -144,10 +143,6 @@ void IqtTemplatePresenter::updateParameters(const IFunction &fun) {
 void IqtTemplatePresenter::setCurrentDataset(int i) {
   m_model->setCurrentDomainIndex(i);
   updateViewParameters();
-}
-
-void IqtTemplatePresenter::setViewParameterDescriptions() {
-  view()->updateParameterDescriptions(model()->getParameterDescriptionMap());
 }
 
 void IqtTemplatePresenter::tieIntensities(bool on) {

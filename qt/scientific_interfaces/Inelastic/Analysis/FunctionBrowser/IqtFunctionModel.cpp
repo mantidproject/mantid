@@ -507,22 +507,6 @@ QMap<int, std::string> IqtFunctionModel::getParameterNameMap() const {
   return out;
 }
 
-QMap<int, std::string> IqtFunctionModel::getParameterDescriptionMap() const {
-  QMap<int, std::string> out;
-  auto expDecay = FunctionFactory::Instance().createInitialized(buildExpDecayFunctionString());
-  out[static_cast<int>(ParamID::EXP1_HEIGHT)] = expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP1_LIFETIME)] = expDecay->parameterDescription(1);
-  out[static_cast<int>(ParamID::EXP2_HEIGHT)] = expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP2_LIFETIME)] = expDecay->parameterDescription(1);
-  auto stretchExp = FunctionFactory::Instance().createInitialized(buildStretchExpFunctionString());
-  out[static_cast<int>(ParamID::STRETCH_HEIGHT)] = stretchExp->parameterDescription(0);
-  out[static_cast<int>(ParamID::STRETCH_LIFETIME)] = stretchExp->parameterDescription(1);
-  out[static_cast<int>(ParamID::STRETCH_STRETCHING)] = stretchExp->parameterDescription(2);
-  auto background = FunctionFactory::Instance().createInitialized(buildBackgroundFunctionString());
-  out[static_cast<int>(ParamID::BG_A0)] = background->parameterDescription(0);
-  return out;
-}
-
 void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
   for (auto const name : values.keys()) {
     setParameter(name, values[name]);

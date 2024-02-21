@@ -96,7 +96,6 @@ public:
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
   QMap<int, std::string> getParameterNameMap() const;
-  QMap<int, std::string> getParameterDescriptionMap() const;
 
 private:
   void clearData();

@@ -44,7 +44,6 @@ public:
 
   void setCurrentDataset(int i) override;
 
-  void setViewParameterDescriptions();
   void tieIntensities(bool on) override;
   bool canTieIntensities() const override;
 
