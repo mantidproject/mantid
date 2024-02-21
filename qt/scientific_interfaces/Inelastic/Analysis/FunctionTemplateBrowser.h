@@ -79,7 +79,7 @@ public:
   virtual void updateParameters(const IFunction &fun) = 0;
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
 
-  virtual void clear() = 0;
+  virtual void clear();
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
   virtual void estimateFunctionParameters() = 0;
@@ -100,8 +100,8 @@ protected slots:
   virtual void intChanged(QtProperty *) {}
   virtual void boolChanged(QtProperty *) {}
   virtual void enumChanged(QtProperty *) {}
-  virtual void popupMenu(const QPoint &) = 0;
-  virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
+  virtual void popupMenu(const QPoint &) {}
+  virtual void globalChanged(QtProperty *, const QString &, bool) {}
   virtual void parameterChanged(QtProperty *) = 0;
   void parameterButtonClicked(QtProperty *);
   void editLocalParameterFinished(int result, EditLocalParameterDialog *dialog);

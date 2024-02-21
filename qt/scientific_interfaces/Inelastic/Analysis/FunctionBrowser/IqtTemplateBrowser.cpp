@@ -198,8 +198,6 @@ void IqtTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void IqtTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
-
 void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
   m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
@@ -254,27 +252,16 @@ void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFun
 
 void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
-void IqtTemplateBrowser::popupMenu(const QPoint &) {}
-
 double IqtTemplateBrowser::getParameterPropertyValue(QtProperty *prop) const {
   return prop ? m_parameterManager->value(prop) : 0.0;
 }
 
 void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
-    auto const name = m_parameterNames[prop];
-    auto const findIter = std::find(globals.cbegin(), globals.cend(), name);
-    if (findIter != globals.cend()) {
-      m_parameterManager->setGlobal(prop, true);
-      parameterProperies.removeOne(prop);
-    }
-  }
-  for (auto const prop : parameterProperies) {
-    if (!m_parameterNames[prop].empty()) {
-      m_parameterManager->setGlobal(prop, false);
-    }
+    auto const parameterName = m_parameterNames[prop];
+    auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
+    m_parameterManager->setGlobal(prop, findIter != globals.cend());
   }
 }
 

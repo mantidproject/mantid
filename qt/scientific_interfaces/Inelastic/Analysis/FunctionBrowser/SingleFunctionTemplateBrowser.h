@@ -51,12 +51,10 @@ public:
 
 protected slots:
   void enumChanged(QtProperty *) override;
-  void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals);
 
   QtProperty *m_fitType;

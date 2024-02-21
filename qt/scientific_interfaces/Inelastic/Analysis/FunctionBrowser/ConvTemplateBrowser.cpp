@@ -116,8 +116,6 @@ void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
-
 void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
   m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
@@ -145,24 +143,12 @@ void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &par
   }
 }
 
-void ConvTemplateBrowser::clear() {}
-
-void ConvTemplateBrowser::popupMenu(const QPoint &) {}
-
-void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
+void ConvTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  auto parameterProperies = m_parameterMap.keys();
   for (auto const prop : m_parameterMap.keys()) {
-    auto const name = m_parameterNames[prop];
-    if (globals.contains(QString::fromStdString(name))) {
-      m_parameterManager->setGlobal(prop, true);
-      parameterProperies.removeOne(prop);
-    }
-  }
-  for (auto const prop : parameterProperies) {
-    if (!m_parameterNames[prop].empty()) {
-      m_parameterManager->setGlobal(prop, false);
-    }
+    auto const parameterName = m_parameterNames[prop];
+    auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
+    m_parameterManager->setGlobal(prop, findIter != globals.cend());
   }
 }
 

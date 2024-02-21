@@ -81,8 +81,6 @@ void SingleFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void SingleFunctionTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
-
 void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
   m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
@@ -131,8 +129,6 @@ void SingleFunctionTemplateBrowser::updateParameterEstimationData(DataForParamet
 }
 
 void SingleFunctionTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
-
-void SingleFunctionTemplateBrowser::popupMenu(const QPoint &) {}
 
 void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);

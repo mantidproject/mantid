@@ -62,12 +62,10 @@ protected slots:
   void intChanged(QtProperty *) override;
   void boolChanged(QtProperty *) override;
   void enumChanged(QtProperty *) override;
-  void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &) override;
   double getParameterPropertyValue(QtProperty *prop) const;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void setTieIntensitiesQuiet(bool on);
