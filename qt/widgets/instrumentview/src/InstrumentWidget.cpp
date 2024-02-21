@@ -929,7 +929,7 @@ void InstrumentWidget::setExponent(double nth_power) { emit nthPowerChanged(nth_
  * and then sets it.
  */
 void InstrumentWidget::pickBackgroundColor() {
-  QColor color = QColorDialog::getColor(Qt::green, this);
+  QColor color = QColorDialog::getColor(Qt::black, this);
   setBackgroundColor(color);
 }
 

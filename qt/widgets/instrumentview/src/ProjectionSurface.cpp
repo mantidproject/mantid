@@ -48,7 +48,7 @@ ProjectionSurface::ProjectionSurface(const IInstrumentActor *rootActor)
     : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_viewRect(), m_selectRect(),
       m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
-      m_redrawPicking(true) {
+      m_redrawPicking(true), m_backgroundColor(Qt::black) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(rootActor, SIGNAL(refreshView()), this, SLOT(refreshView()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
