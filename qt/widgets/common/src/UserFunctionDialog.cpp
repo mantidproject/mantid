@@ -79,7 +79,7 @@ void UserFunctionDialog::loadFunctions() {
   setFunction("Base", "log", "log(x)", "Logarithm to the base 10");
   setFunction("Base", "ln", "ln(x)", "Logarithm to the base e = 2.71828...");
   setFunction("Base", "exp", "exp(x)", "e to the power of x");
-  setFunction("Base", "sqrt", "sqrt(x)", "Sqare root of x");
+  setFunction("Base", "sqrt", "sqrt(x)", "Square root of x");
   setFunction("Base", "sign", "sign(x)", "Sign of x");
   setFunction("Base", "rint", "rint(x)", "Round to nearest integer");
   setFunction("Base", "erf", "erf(x)", "error function of x");
