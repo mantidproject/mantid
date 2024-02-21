@@ -69,14 +69,15 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     def test_constructor_settings_are_set(self):
         # Test the paths set in the constructor that are generated.
-        self.assertEqual(self.pr.recovery_directory, os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery"))
+        recovery_folder = "workbench-recovery-6_9-onwards"
+        self.assertEqual(self.pr.recovery_directory, os.path.join(ConfigService.getAppDataDirectory(), recovery_folder))
         self.assertEqual(
             self.pr.recovery_directory_hostname,
-            os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery", socket.gethostname()),
+            os.path.join(ConfigService.getAppDataDirectory(), recovery_folder, socket.gethostname()),
         )
         self.assertEqual(
             self.pr.recovery_directory_pid,
-            os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery", socket.gethostname(), str(os.getpid())),
+            os.path.join(ConfigService.getAppDataDirectory(), recovery_folder, socket.gethostname(), str(os.getpid())),
         )
         self.assertEqual(
             self.pr.recovery_order_workspace_history_file, os.path.join(ConfigService.getAppDataDirectory(), "ordered_recovery.py")
