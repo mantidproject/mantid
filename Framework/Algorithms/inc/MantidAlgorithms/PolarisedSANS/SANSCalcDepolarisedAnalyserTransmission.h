@@ -37,6 +37,6 @@ private:
   std::string calcDepolarisedProportion();
 
   /// Fit using UserFunction1D to find the pxd and transmission values.
-  void calcWavelengthDependentTransmission();
+  void calcWavelengthDependentTransmission(std::string const &inputWsName, std::string const &outputWsName);
 };
 } // namespace Mantid::Algorithms
