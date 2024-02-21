@@ -46,13 +46,8 @@ public:
   void setStretchStretching(double, double);
   void setA0(double, double);
 
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
-  void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void clear() override;
-  EstimationDataSelector getEstimationDataSelector() const override;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
-  void estimateFunctionParameters() override;
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
   void setQValues(const std::vector<double> &) override {}
@@ -65,7 +60,6 @@ protected slots:
 
 private:
   void createProperties() override;
-  double getParameterPropertyValue(QtProperty *prop) const;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void setTieIntensitiesQuiet(bool on);
   void updateState();

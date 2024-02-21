@@ -30,12 +30,7 @@ class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowse
   Q_OBJECT
 public:
   explicit ConvTemplateBrowser(QWidget *parent = nullptr);
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
-  void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
-  EstimationDataSelector getEstimationDataSelector() const override;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
-  void estimateFunctionParameters() override;
 
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
@@ -80,7 +75,6 @@ private:
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
-  QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
   friend class ConvTemplatePresenter;

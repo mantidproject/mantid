@@ -90,10 +90,6 @@ void SingleFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   }
 }
 
-void SingleFunctionTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &) {}
-
-void SingleFunctionTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
-
 void SingleFunctionTemplateBrowser::setParameterValue(std::string const &parameterName, double parameterValue,
                                                       double parameterError) {
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
@@ -107,8 +103,6 @@ void SingleFunctionTemplateBrowser::setParameterValueQuietly(std::string const &
 
 void SingleFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &) {}
 
-void SingleFunctionTemplateBrowser::updateParameterDescriptions(const QMap<int, std::string> &) {}
-
 void SingleFunctionTemplateBrowser::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
   m_presenter->updateAvailableFunctions(functionInitialisationStrings);
@@ -119,16 +113,6 @@ void SingleFunctionTemplateBrowser::clear() {
   m_parameterMap.clear();
   m_parameterNames.clear();
 }
-
-EstimationDataSelector SingleFunctionTemplateBrowser::getEstimationDataSelector() const {
-  return m_presenter->getEstimationDataSelector();
-}
-
-void SingleFunctionTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_presenter->updateParameterEstimationData(std::move(data));
-}
-
-void SingleFunctionTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
 void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);

@@ -124,12 +124,6 @@ void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_presenter->updateMultiDatasetParameters(paramTable);
-}
-
-void ConvTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
-
 void ConvTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
@@ -239,16 +233,6 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value, doubl
   auto prop = m_parameterReverseMap[id];
   setParameterSilent(prop, value, error);
 }
-
-EstimationDataSelector ConvTemplateBrowser::getEstimationDataSelector() const {
-  return m_presenter->getEstimationDataSelector();
-}
-
-void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_presenter->updateParameterEstimationData(std::move(data));
-}
-
-void ConvTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
 void ConvTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 

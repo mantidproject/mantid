@@ -75,14 +75,14 @@ public:
   void setGlobalParameters(std::vector<std::string> const &globals);
 
   void updateMultiDatasetParameters(const IFunction &fun);
-  virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
-  virtual void updateParameters(const IFunction &fun) = 0;
+  void updateMultiDatasetParameters(const ITableWorkspace &table);
+  void updateParameters(const IFunction &fun);
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
 
   virtual void clear();
-  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
-  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
-  virtual void estimateFunctionParameters() = 0;
+  virtual EstimationDataSelector getEstimationDataSelector() const;
+  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  virtual void estimateFunctionParameters();
   virtual void setBackgroundA0(double value) = 0;
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;

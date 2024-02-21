@@ -163,6 +163,12 @@ void FunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun)
   m_presenter->updateMultiDatasetParameters(fun);
 }
 
+void FunctionTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_presenter->updateMultiDatasetParameters(table);
+}
+
+void FunctionTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
+
 void FunctionTemplateBrowser::openEditLocalParameterDialog(std::string const &parameterName,
                                                            QStringList const &datasetNames,
                                                            QStringList const &domainNames, QList<double> const &values,
@@ -186,5 +192,15 @@ void FunctionTemplateBrowser::editLocalParameterFinished(int result, EditLocalPa
   }
   emitFunctionStructureChanged();
 }
+
+EstimationDataSelector FunctionTemplateBrowser::getEstimationDataSelector() const {
+  return m_presenter->getEstimationDataSelector();
+}
+
+void FunctionTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
+  m_presenter->updateParameterEstimationData(std::move(data));
+}
+
+void FunctionTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

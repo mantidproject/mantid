@@ -197,12 +197,6 @@ void IqtTemplateBrowser::parameterChanged(QtProperty *prop) {
   }
 }
 
-void IqtTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
-  m_presenter->updateMultiDatasetParameters(paramTable);
-}
-
-void IqtTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
-
 void IqtTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterNames.clear();
@@ -223,21 +217,7 @@ void IqtTemplateBrowser::clear() {
   removeExponentialOne();
 }
 
-EstimationDataSelector IqtTemplateBrowser::getEstimationDataSelector() const {
-  return m_presenter->getEstimationDataSelector();
-}
-
-void IqtTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_presenter->updateParameterEstimationData(std::move(data));
-}
-
-void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
-
 void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
-
-double IqtTemplateBrowser::getParameterPropertyValue(QtProperty *prop) const {
-  return prop ? m_parameterManager->value(prop) : 0.0;
-}
 
 void IqtTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
