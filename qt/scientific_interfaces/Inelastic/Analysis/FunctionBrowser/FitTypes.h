@@ -93,6 +93,12 @@ enum class ParamID {
 
 namespace ConvTypes {
 
+enum class LorentzianType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+};
+
 enum class FitType {
   None,
   TeixeiraWater,
@@ -111,93 +117,20 @@ enum class FitType {
   InelasticIsoRotDiff,
 };
 
-enum class LorentzianType {
-  None,
-  OneLorentzian,
-  TwoLorentzians,
-};
-
-extern std::map<FitType, bool> FitTypeQDepends;
-extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
-
 enum class BackgroundType { None, Flat, Linear };
 
 enum class TempCorrectionType { None, Exponential };
-
-static std::map<ParamID, std::string> g_paramName{
-    {ParamID::LOR1_AMPLITUDE, "Amplitude"},
-    {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
-    {ParamID::LOR1_FWHM, "FWHM"},
-    {ParamID::LOR2_AMPLITUDE_1, "Amplitude"},
-    {ParamID::LOR2_PEAKCENTRE_1, "PeakCentre"},
-    {ParamID::LOR2_FWHM_1, "FWHM"},
-    {ParamID::LOR2_AMPLITUDE_2, "Amplitude"},
-    {ParamID::LOR2_PEAKCENTRE_2, "PeakCentre"},
-    {ParamID::LOR2_FWHM_2, "FWHM"},
-    {ParamID::TW_HEIGHT, "Height"},
-    {ParamID::TW_DIFFCOEFF, "DiffCoeff"},
-    {ParamID::TW_TAU, "Tau"},
-    {ParamID::TW_CENTRE, "Centre"},
-    {ParamID::FD_HEIGHT, "Height"},
-    {ParamID::FD_DIFFCOEFF, "DiffCoeff"},
-    {ParamID::FD_CENTRE, "Centre"},
-    {ParamID::CE_HEIGHT, "Height"},
-    {ParamID::CE_TAU, "Tau"},
-    {ParamID::CE_L, "L"},
-    {ParamID::CE_CENTRE, "Centre"},
-    {ParamID::HR_HEIGHT, "Height"},
-    {ParamID::HR_TAU, "Tau"},
-    {ParamID::HR_L, "L"},
-    {ParamID::HR_CENTRE, "Centre"},
-    {ParamID::DELTA_HEIGHT, "Height"},
-    {ParamID::DELTA_CENTER, "Centre"},
-    {ParamID::TEMPERATURE, "Temperature"},
-    {ParamID::SE_HEIGHT, "Height"},
-    {ParamID::SE_TAU, "Tau"},
-    {ParamID::SE_BETA, "Beta"},
-    {ParamID::SE_CENTRE, "Centre"},
-    {ParamID::DP_INTENSITY, "f1.Intensity"},
-    {ParamID::DP_RADIUS, "f1.Radius"},
-    {ParamID::DP_DIFFUSION, "f1.Diffusion"},
-    {ParamID::DP_SHIFT, "f1.Shift"},
-    {ParamID::EDP_HEIGHT, "Height"},
-    {ParamID::EDP_CENTRE, "Centre"},
-    {ParamID::EDP_RADIUS, "Radius"},
-    {ParamID::IDP_INTENSITY, "Intensity"},
-    {ParamID::IDP_RADIUS, "Radius"},
-    {ParamID::IDP_DIFFUSION, "Diffusion"},
-    {ParamID::IDP_SHIFT, "Shift"},
-    {ParamID::DRDC_INTENSITY, "f1.Intensity"},
-    {ParamID::DRDC_RADIUS, "f1.Radius"},
-    {ParamID::DRDC_DECAY, "f1.Decay"},
-    {ParamID::DRDC_SHIFT, "f1.Shift"},
-    {ParamID::IDRDC_INTENSITY, "Intensity"},
-    {ParamID::IDRDC_RADIUS, "Radius"},
-    {ParamID::IDRDC_DECAY, "Decay"},
-    {ParamID::IDRDC_SHIFT, "Shift"},
-    {ParamID::EDRDC_HEIGHT, "Height"},
-    {ParamID::EDRDC_CENTRE, "Centre"},
-    {ParamID::EDRDC_RADIUS, "Radius"},
-    {ParamID::IRD_HEIGHT, "f1.Height"},
-    {ParamID::IRD_RADIUS, "f1.Radius"},
-    {ParamID::IRD_TAU, "f1.Tau"},
-    {ParamID::IRD_CENTRE, "f1.Centre"},
-    {ParamID::EIRD_HEIGHT, "Height"},
-    {ParamID::EIRD_RADIUS, "Radius"},
-    {ParamID::IIRD_HEIGHT, "Height"},
-    {ParamID::IIRD_RADIUS, "Radius"},
-    {ParamID::IIRD_TAU, "Tau"},
-    {ParamID::IIRD_CENTRE, "Centre"},
-    {ParamID::FLAT_BG_A0, "A0"},
-    {ParamID::LINEAR_BG_A0, "A0"},
-    {ParamID::LINEAR_BG_A1, "A1"},
-};
 
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
   Background = 2,
 };
+
+extern std::map<ParamID, std::string> g_paramName;
+
+extern std::map<FitType, bool> FitTypeQDepends;
+extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 struct TemplateSubType {
   virtual std::string name() const = 0;
