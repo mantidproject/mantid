@@ -93,7 +93,7 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
 }
 
 std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingData,
-                                                       std::size_t const &defaultSepctraMin,
+                                                       std::size_t const &defaultSpectraMin,
                                                        std::size_t const &defaultSpectraMax) {
   std::string groupingType = groupingData.getGroupingType();
   if (groupingType == "File") {
@@ -104,10 +104,16 @@ std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingD
     if (customString.empty())
       return "Please supply a custom grouping for detectors.";
     else
-      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSepctraMin,
+      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
                                                defaultSpectraMax);
-  } else if (groupingType == "Groups" && groupingData.getNGroups() < 1) {
-    return "The number of groups must be a positive number.";
+  } else if (groupingType == "Groups") {
+    auto const numberOfSpectra = defaultSpectraMax - defaultSpectraMin + 1;
+    if (groupingData.getNGroups() < 1) {
+      return "The number of groups must be a positive number.";
+    } else if (groupingData.getNGroups() > numberOfSpectra) {
+      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
+             ").";
+    }
   }
   return "";
 }

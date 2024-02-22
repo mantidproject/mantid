@@ -27,6 +27,10 @@ class IndirectReductionCommonTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "Number of groups must be greater than zero."):
             _ = create_detector_grouping_string(0, 3, 6)
 
+    def test_create_detector_grouping_gives_assertion_error_when_number_of_groups_is_greater_than_number_of_spectra(self):
+        with self.assertRaisesRegex(AssertionError, "Number of groups must be less or equal to the number of spectra."):
+            _ = create_detector_grouping_string(5, 3, 6)
+
     def test_create_detector_grouping_for_divisible_number_of_groups(self):
         self.assertEqual("3-6,7-10,11-14,15-18,19-22,23-26,27-30,31-34", create_detector_grouping_string(8, 3, 34))
 

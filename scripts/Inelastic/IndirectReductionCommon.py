@@ -787,6 +787,7 @@ def create_grouping_string(group_size: int, number_of_groups: int, spectra_min: 
 def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spectra_max: int) -> str:
     assert number_of_groups > 0, "Number of groups must be greater than zero."
     assert spectra_min <= spectra_max, "Spectra min cannot be larger than spectra max."
+    assert number_of_groups <= spectra_max - spectra_min + 1, "Number of groups must be less or equal to the number of spectra."
     number_of_spectra = 1 + spectra_max - spectra_min
 
     grouping_string = create_grouping_string(int(number_of_spectra / number_of_groups), number_of_groups, spectra_min)

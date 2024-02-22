@@ -19,7 +19,7 @@ public:
   std::vector<std::string> validateBackgroundData(IETBackgroundData backgroundData, IETConversionData conversionData,
                                                   std::string firstFileName, bool isRunFileValid);
   std::string validateAnalysisData(IETAnalysisData analysisData);
-  std::string validateDetectorGrouping(IETGroupingData groupingData, std::size_t const &defaultSepctraMin,
+  std::string validateDetectorGrouping(IETGroupingData groupingData, std::size_t const &defaultSpectraMin,
                                        std::size_t const &defaultSpectraMax);
 
 private:
