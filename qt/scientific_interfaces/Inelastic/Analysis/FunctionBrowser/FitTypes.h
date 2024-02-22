@@ -118,11 +118,7 @@ enum class LorentzianType {
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
-extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
-
-extern std::unordered_map<LorentzianType, std::string> LorentzianTypeEnumToString;
-extern std::unordered_map<std::string, LorentzianType> LorentzianTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 
@@ -196,18 +192,6 @@ static std::map<ParamID, std::string> g_paramName{
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"},
 };
-
-inline ParamID &operator++(ParamID &id) {
-  id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
-  return id;
-}
-
-inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<void(ParamID)> &fun) {
-  if (from == ParamID::NONE || to == ParamID::NONE)
-    return;
-  for (auto i = from; i <= to; ++i)
-    fun(i);
-}
 
 enum SubTypeIndex {
   Lorentzian = 0,
@@ -313,6 +297,18 @@ struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
 };
 
 } // namespace ConvTypes
+
+inline ParamID &operator++(ParamID &id) {
+  id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
+  return id;
+}
+
+inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<void(ParamID)> &fun) {
+  if (from == ParamID::NONE || to == ParamID::NONE)
+    return;
+  for (auto i = from; i <= to; ++i)
+    fun(i);
+}
 
 template <typename TemplateSubType, typename Type>
 void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &paramFun) {

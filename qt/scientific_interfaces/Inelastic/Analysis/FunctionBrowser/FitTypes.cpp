@@ -29,22 +29,6 @@ std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::Non
                                                                    {FitType::ElasticIsoRotDiff, true},
                                                                    {FitType::InelasticIsoRotDiff, true}});
 
-std::unordered_map<FitType, std::string>
-    FitTypeEnumToString({{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
-                         {FitType::FickDiffusion, "FickDiffusionSQE"},
-                         {FitType::ChudleyElliot, "ChudleyElliotSQE"},
-                         {FitType::HallRoss, "HallRossSQE"},
-                         {FitType::StretchedExpFT, "StretchedExpFT"},
-                         {FitType::DiffSphere, "DiffSphere"},
-                         {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
-                         {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
-                         {FitType::DiffRotDiscreteCircle, "DiffRotDiscreteCircle"},
-                         {FitType::InelasticDiffRotDiscreteCircle, "InelasticDiffRotDiscreteCircle"},
-                         {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"},
-                         {FitType::IsoRotDiff, "IsoRotDiff"},
-                         {FitType::ElasticIsoRotDiff, "ElasticIsoRotDiff"},
-                         {FitType::InelasticIsoRotDiff, "InelasticIsoRotDiff"}});
-
 std::unordered_map<std::string, FitType>
     FitTypeStringToEnum({{"TeixeiraWaterSQE", FitType::TeixeiraWater},
                          {"FickDiffusionSQE", FitType::FickDiffusion},
