@@ -91,46 +91,12 @@ enum class ParamID {
   LINEAR_BG_A1,
 };
 
-namespace ConvTypes {
-
-enum class LorentzianType {
-  None,
-  OneLorentzian,
-  TwoLorentzians,
-};
-
-enum class FitType {
-  None,
-  TeixeiraWater,
-  FickDiffusion,
-  ChudleyElliot,
-  HallRoss,
-  StretchedExpFT,
-  DiffSphere,
-  ElasticDiffSphere,
-  InelasticDiffSphere,
-  DiffRotDiscreteCircle,
-  ElasticDiffRotDiscreteCircle,
-  InelasticDiffRotDiscreteCircle,
-  IsoRotDiff,
-  ElasticIsoRotDiff,
-  InelasticIsoRotDiff,
-};
-
-enum class BackgroundType { None, Flat, Linear };
-
-enum class TempCorrectionType { None, Exponential };
-
-enum SubTypeIndex {
-  Lorentzian = 0,
-  Fit = 1,
-  Background = 2,
-};
+inline ParamID &operator++(ParamID &id) {
+  id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
+  return id;
+}
 
 extern std::map<ParamID, std::string> g_paramName;
-
-extern std::map<FitType, bool> FitTypeQDepends;
-extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 struct TemplateSubType {
   virtual std::string name() const = 0;
@@ -167,10 +133,8 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     const auto it = std::find_if(g_typeMap.cbegin(), g_typeMap.cend(),
                                  [&typeName](auto &&it) { return it.second.name == typeName; });
 
-    if (it != g_typeMap.cend())
-      return static_cast<int>((*it).first);
-
-    return static_cast<int>(FitType::None);
+    assert(it != g_typeMap.cend());
+    return static_cast<int>((*it).first);
   }
   int getNTypes() const override { return static_cast<int>(g_typeMap.size()); }
   QList<ParamID> getParameterIDs(int typeIndex) const override {
@@ -181,7 +145,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   }
   std::vector<std::string> getParameterNames(int typeIndex) const override {
     std::vector<std::string> names;
-    auto fillNames = [&names](ParamID id) { names.emplace_back(ConvTypes::g_paramName.at(id)); };
+    auto fillNames = [&names](ParamID id) { names.emplace_back(g_paramName.at(id)); };
     applyToType(static_cast<Type>(typeIndex), fillNames);
     return names;
   }
@@ -192,7 +156,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     if (!function.empty()) {
       IFunction_sptr fun = FunctionFactory::Instance().createFunction(function);
       auto fillDescriptions = [&descriptions, &fun](ParamID id) {
-        descriptions << fun->parameterDescription(fun->parameterIndex(ConvTypes::g_paramName.at(id)));
+        descriptions << fun->parameterDescription(fun->parameterIndex(g_paramName.at(id)));
       };
       applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), fillDescriptions);
     }
@@ -204,10 +168,61 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   void applyToType(Type type, std::function<void(ParamID)> paramFun) const {
     applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), paramFun);
   }
-
   static std::map<Type, TemplateSubTypeDescriptor> g_typeMap;
 };
 GNU_DIAG_ON("undefined-var-template")
+
+inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<void(ParamID)> &fun) {
+  if (from == ParamID::NONE || to == ParamID::NONE)
+    return;
+  for (auto i = from; i <= to; ++i)
+    fun(i);
+}
+
+template <typename TemplateSubType, typename Type>
+void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(TemplateSubType::g_typeMap[functionType].blocks.front(),
+                      TemplateSubType::g_typeMap[functionType].blocks.back(), paramFun);
+}
+
+namespace ConvTypes {
+
+enum class LorentzianType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+};
+
+enum class FitType {
+  None,
+  TeixeiraWater,
+  FickDiffusion,
+  ChudleyElliot,
+  HallRoss,
+  StretchedExpFT,
+  DiffSphere,
+  ElasticDiffSphere,
+  InelasticDiffSphere,
+  DiffRotDiscreteCircle,
+  ElasticDiffRotDiscreteCircle,
+  InelasticDiffRotDiscreteCircle,
+  IsoRotDiff,
+  ElasticIsoRotDiff,
+  InelasticIsoRotDiff,
+};
+
+enum class BackgroundType { None, Flat, Linear };
+
+enum class TempCorrectionType { None, Exponential };
+
+enum SubTypeIndex {
+  Lorentzian = 0,
+  Fit = 1,
+  Background = 2,
+};
+
+extern std::map<FitType, bool> FitTypeQDepends;
+extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
   std::string name() const override { return "Fit Type"; }
@@ -230,24 +245,6 @@ struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
 };
 
 } // namespace ConvTypes
-
-inline ParamID &operator++(ParamID &id) {
-  id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
-  return id;
-}
-
-inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<void(ParamID)> &fun) {
-  if (from == ParamID::NONE || to == ParamID::NONE)
-    return;
-  for (auto i = from; i <= to; ++i)
-    fun(i);
-}
-
-template <typename TemplateSubType, typename Type>
-void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &paramFun) {
-  applyToParamIDRange(TemplateSubType::g_typeMap[functionType].blocks.front(),
-                      TemplateSubType::g_typeMap[functionType].blocks.back(), paramFun);
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces

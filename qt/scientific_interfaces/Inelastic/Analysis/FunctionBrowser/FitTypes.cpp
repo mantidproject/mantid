@@ -11,8 +11,6 @@
 namespace MantidQt::CustomInterfaces::IDA {
 using namespace Mantid::API;
 
-namespace ConvTypes {
-
 std::map<ParamID, std::string> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
@@ -82,6 +80,8 @@ std::map<ParamID, std::string> g_paramName{
     {ParamID::LINEAR_BG_A1, "A1"},
 };
 
+namespace ConvTypes {
+
 std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
                                                                    {FitType::TeixeiraWater, true},
                                                                    {FitType::FickDiffusion, true},
@@ -114,47 +114,58 @@ std::unordered_map<std::string, FitType>
                          {"ElasticIsoRotDiff", FitType::ElasticIsoRotDiff},
                          {"InelasticIsoRotDiff", FitType::InelasticIsoRotDiff}});
 
+} // namespace ConvTypes
+
 template <>
-std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typeMap{
-    {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {FitType::TeixeiraWater, {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
-    {FitType::FickDiffusion, {"Fick Diffusion SQE", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
-    {FitType::ChudleyElliot, {"Chudley-Elliot SQE", "ChudleyElliotSQE", {ParamID::CE_HEIGHT, ParamID::CE_CENTRE}}},
-    {FitType::HallRoss, {"Hall-Ross SQE", "HallRossSQE", {ParamID::HR_HEIGHT, ParamID::HR_CENTRE}}},
-    {FitType::StretchedExpFT, {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
-    {FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
-    {FitType::ElasticDiffSphere,
+std::map<ConvTypes::FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<ConvTypes::FitType>::g_typeMap{
+    {ConvTypes::FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {ConvTypes::FitType::TeixeiraWater,
+     {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {ConvTypes::FitType::FickDiffusion,
+     {"Fick Diffusion SQE", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
+    {ConvTypes::FitType::ChudleyElliot,
+     {"Chudley-Elliot SQE", "ChudleyElliotSQE", {ParamID::CE_HEIGHT, ParamID::CE_CENTRE}}},
+    {ConvTypes::FitType::HallRoss, {"Hall-Ross SQE", "HallRossSQE", {ParamID::HR_HEIGHT, ParamID::HR_CENTRE}}},
+    {ConvTypes::FitType::StretchedExpFT,
+     {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
+    {ConvTypes::FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
+    {ConvTypes::FitType::ElasticDiffSphere,
      {"ElasticDiffSphere", "ElasticDiffSphere", {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
-    {FitType::InelasticDiffSphere,
+    {ConvTypes::FitType::InelasticDiffSphere,
      {"InelasticDiffSphere", "InelasticDiffSphere", {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
-    {FitType::DiffRotDiscreteCircle,
+    {ConvTypes::FitType::DiffRotDiscreteCircle,
      {"DiffRotDiscreteCircle", "DiffRotDiscreteCircle", {ParamID::DRDC_INTENSITY, ParamID::DRDC_SHIFT}}},
-    {FitType::InelasticDiffRotDiscreteCircle,
+    {ConvTypes::FitType::InelasticDiffRotDiscreteCircle,
      {"InelasticDiffRotDiscreteCircle",
       "InelasticDiffRotDiscreteCircle",
       {ParamID::IDRDC_INTENSITY, ParamID::IDRDC_SHIFT}}},
-    {FitType::ElasticDiffRotDiscreteCircle,
+    {ConvTypes::FitType::ElasticDiffRotDiscreteCircle,
      {"ElasticDiffRotDiscreteCircle", "ElasticDiffRotDiscreteCircle", {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
-    {FitType::IsoRotDiff, {"IsoRotDiff", "IsoRotDiff", {ParamID::IRD_HEIGHT, ParamID::IRD_CENTRE}}},
-    {FitType::ElasticIsoRotDiff,
+    {ConvTypes::FitType::IsoRotDiff, {"IsoRotDiff", "IsoRotDiff", {ParamID::IRD_HEIGHT, ParamID::IRD_CENTRE}}},
+    {ConvTypes::FitType::ElasticIsoRotDiff,
      {"ElasticIsoRotDiff", "ElasticIsoRotDiff", {ParamID::EIRD_HEIGHT, ParamID::EIRD_RADIUS}}},
-    {FitType::InelasticIsoRotDiff,
+    {ConvTypes::FitType::InelasticIsoRotDiff,
      {"InelasticIsoRotDiff", "InelasticIsoRotDiff", {ParamID::IIRD_HEIGHT, ParamID::IIRD_CENTRE}}},
 };
 template <>
-std::map<LorentzianType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<LorentzianType>::g_typeMap{
-    {LorentzianType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {LorentzianType::OneLorentzian, {"One Lorentzian", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
-    {LorentzianType::TwoLorentzians,
-     {"Two Lorentzians", "Lorentzian", {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
-};
+std::map<ConvTypes::LorentzianType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<ConvTypes::LorentzianType>::g_typeMap{
+        {ConvTypes::LorentzianType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {ConvTypes::LorentzianType::OneLorentzian,
+         {"One Lorentzian", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
+        {ConvTypes::LorentzianType::TwoLorentzians,
+         {"Two Lorentzians", "Lorentzian", {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
+    };
 
 template <>
-std::map<BackgroundType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<BackgroundType>::g_typeMap{
-    {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {BackgroundType::Flat, {"FlatBackground", "FlatBackground", {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
-    {BackgroundType::Linear, {"LinearBackground", "LinearBackground", {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
-};
+std::map<ConvTypes::BackgroundType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<ConvTypes::BackgroundType>::g_typeMap{
+        {ConvTypes::BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {ConvTypes::BackgroundType::Flat,
+         {"FlatBackground", "FlatBackground", {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
+        {ConvTypes::BackgroundType::Linear,
+         {"LinearBackground", "LinearBackground", {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
+    };
 
 template <>
 std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
@@ -163,11 +174,10 @@ std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
 };
 
 template <>
-std::map<TempCorrectionType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
-    {TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
-    {TempCorrectionType::Exponential,
-     {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
-};
-
-} // namespace ConvTypes
+std::map<ConvTypes::TempCorrectionType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<ConvTypes::TempCorrectionType>::g_typeMap{
+        {ConvTypes::TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
+        {ConvTypes::TempCorrectionType::Exponential,
+         {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
+    };
 } // namespace MantidQt::CustomInterfaces::IDA

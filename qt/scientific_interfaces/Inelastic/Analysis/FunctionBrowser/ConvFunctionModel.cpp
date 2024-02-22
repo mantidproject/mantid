@@ -511,7 +511,7 @@ void ConvFunctionModel::setGlobalParameterValue(std::string const &parameterName
 void ConvFunctionModel::setParameter(ParamID name, double value) {
   auto const prefix = getPrefix(name);
   if (prefix) {
-    m_model.setParameter(*prefix + ConvTypes::g_paramName.at(name), value);
+    m_model.setParameter(*prefix + g_paramName.at(name), value);
   }
 }
 
@@ -527,7 +527,7 @@ boost::optional<double> ConvFunctionModel::getParameterError(ParamID name) const
 
 boost::optional<std::string> ConvFunctionModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
-  return prefix ? *prefix + ConvTypes::g_paramName.at(name) : boost::optional<std::string>();
+  return prefix ? *prefix + g_paramName.at(name) : boost::optional<std::string>();
 }
 
 boost::optional<std::string> ConvFunctionModel::getParameterDescription(ParamID name) const {
