@@ -69,7 +69,6 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty("pxd", 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
   declareProperty("StartLambda", 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
   declareProperty("EndLambda", 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
-  declareProperty("pHe", 0.5, Direction::Output);
 }
 
 /**
