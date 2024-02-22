@@ -355,6 +355,93 @@ public:
     TS_ASSERT_DELTA(duration, 7200.012, 0.01);
   }
 
+  void test_wallclock_filtering() {
+    const std::string wsName("test_wallclock_filtering");
+    const std::string filename("EQSANS_89157.nxs.h5");
+    constexpr double filterStart{200}; // seconds
+    constexpr double filterEnd{5000};  // seconds
+    constexpr size_t NUM_HIST{49152};  // observed value
+
+    // number of events - all are observed
+    constexpr size_t NUM_EVENTS_FULL{14553};
+    constexpr size_t NUM_EVENTS_BEGIN{366};
+    constexpr size_t NUM_EVENTS_END{4353};
+
+    { // first time is unfiltered
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL);
+    }
+
+    { // filter only the beginning
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN);
+    }
+
+    { // filter only the end
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_END);
+    }
+
+    { // filter both
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN - NUM_EVENTS_END);
+    }
+
+    // cleanup assumes the the last one of these worked
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
