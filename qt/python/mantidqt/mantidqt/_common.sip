@@ -1029,6 +1029,7 @@ class ImageInfoWidget : public QTableWidget {
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
     void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
+    void setShowSignal(const bool showSignal);
     void setWorkspace(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
       using boost::python::extract;

@@ -32,9 +32,11 @@ public:
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
   void showInfo(const ImageInfoModel::ImageInfo &info) override;
   void setRowCount(const int count) override;
+  inline void setShowSignal(const bool showSignal) { m_showSignal = showSignal; };
 
 private:
   std::unique_ptr<ImageInfoPresenter> m_presenter;
+  bool m_showSignal;
 };
 
 } // namespace MantidQt::MantidWidgets

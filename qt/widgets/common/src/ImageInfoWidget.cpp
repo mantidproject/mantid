@@ -19,7 +19,7 @@ namespace MantidQt::MantidWidgets {
  * @param parent A QWidget to act as the parent widget
  */
 ImageInfoWidget::ImageInfoWidget(QWidget *parent)
-    : QTableWidget(0, 0, parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
+    : QTableWidget(0, 0, parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)), m_showSignal(true) {
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   horizontalHeader()->hide();
@@ -44,16 +44,28 @@ void ImageInfoWidget::cursorAt(const double x, const double y, const double sign
 void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
   if (info.empty())
     return;
+  int signalIndex = -1;
 
   const auto itemCount(info.size());
   setColumnCount(itemCount);
   for (int i = 0; i < itemCount; ++i) {
-    auto header = new QTableWidgetItem(info.name(i));
+    const auto name = info.name(i);
+    if (name == "Signal") {
+      signalIndex = i;
+    }
+    auto header = new QTableWidgetItem(name);
     header->setFlags(header->flags() & ~Qt::ItemIsEditable);
     setItem(0, i, header);
     auto value = new QTableWidgetItem(info.value(i));
     value->setFlags(header->flags() & ~Qt::ItemIsEditable);
     setItem(1, i, value);
+  }
+  if (signalIndex >= 0) {
+    if (!m_showSignal) {
+      hideColumn(signalIndex);
+    } else {
+      showColumn(signalIndex);
+    }
   }
   horizontalHeader()->setMinimumSectionSize(50);
   resizeColumnsToContents();
