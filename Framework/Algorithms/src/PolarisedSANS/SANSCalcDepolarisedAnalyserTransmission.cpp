@@ -12,29 +12,30 @@
 
 namespace {
 /// Property Names
-namespace Prop {
+namespace PropNames {
 std::string_view constexpr DEP_WORKSPACE{"DepolarisedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
-std::string_view constexpr T_E_START{"T_EStartingValue"};
-std::string_view constexpr PXD_START{"PxDStartingValue"};
+std::string_view constexpr EMPTY_CELL_TRANS_START{"T_EStartingValue"};
+std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
-} // namespace Prop
+} // namespace PropNames
 
 /// Initial fitting function values.
 namespace FitValues {
 double constexpr LAMBDA_CONVERSION_FACTOR = 0.0733;
-double constexpr T_E_START = 0.9;
-double constexpr PXD_START = 12.6;
-std::string_view constexpr T_E_NAME = "t_e";
-std::string_view constexpr PXD_NAME = "pxd";
+double constexpr EMPTY_CELL_TRANS_START = 0.9;
+double constexpr DEPOL_OPACITY_START = 12.6;
+std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_e";
+std::string_view constexpr DEPOL_OPACITY_NAME = "pxd";
 double constexpr START_X = 1.75;
 double constexpr END_X = 14;
 std::string_view constexpr FIT_SUCCESS{"success"};
 
-std::string createFunctionStr() {
+std::ostringstream createFunctionStrStream() {
   std::ostringstream func;
-  func << "name=UserFunction, Formula=" << T_E_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*" << PXD_NAME << "*x)";
-  return func.str();
+  func << "name=UserFunction, Formula=" << EMPTY_CELL_TRANS_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*"
+       << DEPOL_OPACITY_NAME << "*x)";
+  return func;
 }
 } // namespace FitValues
 } // namespace
@@ -51,38 +52,49 @@ std::string const SANSCalcDepolarisedAnalyserTransmission::summary() const {
 }
 
 void SANSCalcDepolarisedAnalyserTransmission::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(Prop::DEP_WORKSPACE), "",
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
                                                                        Kernel::Direction::Input),
                   "The group of fully depolarised workspaces.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(Prop::MT_WORKSPACE), "",
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input),
                   "The group of empty cell workspaces.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(Prop::OUTPUT_WORKSPACE), "",
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the output table workspace containing the fit parameter results.");
+  declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
+                  "Starting value for the empty analyser cell transmission fit property " +
+                      std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
+  declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
+                  "Starting value for the empty analyser cell transmission fit property " +
+                      std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
 }
 
 void SANSCalcDepolarisedAnalyserTransmission::exec() {
   auto const &dividedWs = calcDepolarisedProportion();
   auto const &fitParameterWs =
-      calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(Prop::OUTPUT_WORKSPACE)));
-  setProperty(std::string(Prop::OUTPUT_WORKSPACE), fitParameterWs);
+      calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
+  setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitParameterWs);
 }
 
 MatrixWorkspace_sptr SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
-  auto const &depWsName = getPropertyValue(std::string(Prop::DEP_WORKSPACE));
-  auto const &mtWsName = getPropertyValue(std::string(Prop::MT_WORKSPACE));
+  auto const &depWsName = getPropertyValue(std::string(PropNames::DEP_WORKSPACE));
+  auto const &mtWsName = getPropertyValue(std::string(PropNames::MT_WORKSPACE));
   auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", depWsName);
   divideAlg->setProperty("RHSWorkspace", mtWsName);
   divideAlg->execute();
-  return divideAlg->getProperty(std::string(Prop::OUTPUT_WORKSPACE));
+  return divideAlg->getProperty(std::string(PropNames::OUTPUT_WORKSPACE));
 }
 
 ITableWorkspace_sptr
 SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
                                                                              std::string const &outputWsName) {
-  auto const &func = FunctionFactory::Instance().createInitialized(FitValues::createFunctionStr());
+  auto funcStream = FitValues::createFunctionStrStream();
+  funcStream << "," << FitValues::EMPTY_CELL_TRANS_NAME << "="
+             << getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START));
+  funcStream << "," << FitValues::DEPOL_OPACITY_NAME << "="
+             << getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START));
+  auto const &func = FunctionFactory::Instance().createInitialized(funcStream.str());
   auto fitAlg = createChildAlgorithm("Fit");
   fitAlg->setProperty("Function", func);
   fitAlg->setProperty("InputWorkspace", inputWs);
