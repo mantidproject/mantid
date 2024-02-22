@@ -21,7 +21,7 @@ public:
   std::string const summary() const override;
 
   /// The category of the algorithm. @see Algorithm::category
-  std::string const category() const { return "SANS\\PolarisationCorrections"; }
+  std::string const category() const override { return "SANS\\PolarisationCorrections"; }
 
   /// The version number of the algorithm. @see Algorithm::version
   int version() const override { return 1; }
