@@ -22,7 +22,7 @@ std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 
 /// Initial fitting function values.
 namespace FitValues {
-double constexpr LAMBDA_CONVERSION_FACTOR = 0.0733;
+double constexpr LAMBDA_CONVERSION_FACTOR = -0.0733;
 double constexpr EMPTY_CELL_TRANS_START = 0.9;
 double constexpr DEPOL_OPACITY_START = 12.6;
 std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_e";
