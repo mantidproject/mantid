@@ -27,8 +27,8 @@ double constexpr T_E_START = 0.9;
 double constexpr PXD_START = 12.6;
 std::string_view constexpr T_E_NAME = "t_e";
 std::string_view constexpr PXD_NAME = "pxd";
-double constexpr STARTX = 1.75;
-double constexpr ENDX = 14;
+double constexpr START_X = 1.75;
+double constexpr END_X = 14;
 std::string_view constexpr FIT_SUCCESS{"success"};
 
 std::string createFunctionStr() {
@@ -89,8 +89,8 @@ void SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmissio
   fitAlg->setProperty("Function", func);
   fitAlg->setPropertyValue("InputWorkspace", inputWsName);
   fitAlg->setProperty("IgnoreInvalidData", true);
-  fitAlg->setProperty("StartX", FitValues::STARTX);
-  fitAlg->setProperty("EndX", FitValues::ENDX);
+  fitAlg->setProperty("StartX", FitValues::START_X);
+  fitAlg->setProperty("EndX", FitValues::END_X);
   fitAlg->setProperty("OutputParametersOnly", true);
   fitAlg->setPropertyValue("Output", outputWsName);
   fitAlg->execute();
