@@ -33,7 +33,7 @@ std::string_view constexpr FIT_SUCCESS{"success"};
 
 std::string createFunctionStr() {
   std::ostringstream func;
-  func << "name=UserFunction, Formula=" << T_E_NAME << "exp(" << LAMBDA_CONVERSION_FACTOR << "*" << PXD_NAME << "*x)";
+  func << "name=UserFunction, Formula=" << T_E_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*" << PXD_NAME << "*x)";
   return func.str();
 }
 } // namespace FitValues
@@ -51,43 +51,41 @@ std::string const SANSCalcDepolarisedAnalyserTransmission::summary() const {
 }
 
 void SANSCalcDepolarisedAnalyserTransmission::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(std::string(Prop::DEP_WORKSPACE), "",
-                                                                      Kernel::Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(Prop::DEP_WORKSPACE), "",
+                                                                       Kernel::Direction::Input),
                   "The group of fully depolarised workspaces.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(std::string(Prop::MT_WORKSPACE), "",
-                                                                      Kernel::Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(Prop::MT_WORKSPACE), "",
+                                                                       Kernel::Direction::Input),
                   "The group of empty cell workspaces.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(std::string(Prop::OUTPUT_WORKSPACE), "",
-                                                                      Kernel::Direction::Output),
-                  "The name of the output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(Prop::OUTPUT_WORKSPACE), "",
+                                                                       Kernel::Direction::Output),
+                  "The name of the output table workspace containing the fit parameter results.");
 }
 
 void SANSCalcDepolarisedAnalyserTransmission::exec() {
   auto const &dividedWs = calcDepolarisedProportion();
-  auto const &outputWsName = getPropertyValue(std::string(Prop::OUTPUT_WORKSPACE)) + "_Parameters";
-  calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(Prop::OUTPUT_WORKSPACE)));
-  setProperty(std::string(Prop::OUTPUT_WORKSPACE),
-              AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName));
+  auto const &fitParameterWs =
+      calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(Prop::OUTPUT_WORKSPACE)));
+  setProperty(std::string(Prop::OUTPUT_WORKSPACE), fitParameterWs);
 }
 
-std::string SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
+MatrixWorkspace_sptr SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
   auto const &depWsName = getPropertyValue(std::string(Prop::DEP_WORKSPACE));
   auto const &mtWsName = getPropertyValue(std::string(Prop::MT_WORKSPACE));
-  auto const &outWsName = "__" + depWsName + mtWsName + "_div";
   auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", depWsName);
   divideAlg->setProperty("RHSWorkspace", mtWsName);
-  divideAlg->setProperty("OutputWorkspace", outWsName);
   divideAlg->execute();
-  return outWsName;
+  return divideAlg->getProperty(std::string(Prop::OUTPUT_WORKSPACE));
 }
 
-void SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmission(std::string const &inputWsName,
-                                                                                  std::string const &outputWsName) {
+ITableWorkspace_sptr
+SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
+                                                                             std::string const &outputWsName) {
   auto const &func = FunctionFactory::Instance().createInitialized(FitValues::createFunctionStr());
   auto fitAlg = createChildAlgorithm("Fit");
   fitAlg->setProperty("Function", func);
-  fitAlg->setPropertyValue("InputWorkspace", inputWsName);
+  fitAlg->setProperty("InputWorkspace", inputWs);
   fitAlg->setProperty("IgnoreInvalidData", true);
   fitAlg->setProperty("StartX", FitValues::START_X);
   fitAlg->setProperty("EndX", FitValues::END_X);
@@ -97,9 +95,11 @@ void SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmissio
 
   std::string const &status = fitAlg->getProperty("OutputStatus");
   if (!fitAlg->isExecuted() || status != FitValues::FIT_SUCCESS) {
-    auto const &errMsg{"Failed to fit to divided workspace, " + inputWsName + ": " + status};
+    auto const &errMsg{"Failed to fit to divided workspace, " + inputWs->getName() + ": " + status};
     throw std::runtime_error(errMsg);
   }
+
+  return fitAlg->getProperty("OutputParameters");
 }
 
 } // namespace Mantid::Algorithms
