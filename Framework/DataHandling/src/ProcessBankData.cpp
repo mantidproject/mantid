@@ -115,17 +115,17 @@ void ProcessBankData::run() {
   const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name);
 
   for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(); pulseIndex < NUM_PULSES; pulseIndex++) {
-    // Save the pulse time at this index for creating those events
-    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIndex);
-    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIndex);
-    const int periodIndex = logPeriodNumber - 1;
-
     // determine range of events for the pulse
     const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
     if (eventIndexRange.first > numEvents)
       break;
     else if (eventIndexRange.first == eventIndexRange.second)
       continue;
+
+    // Save the pulse time at this index for creating those events
+    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIndex);
+    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIndex);
+    const int periodIndex = logPeriodNumber - 1;
 
     // loop through events associated with a single pulse
     for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
