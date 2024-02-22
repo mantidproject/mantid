@@ -166,7 +166,9 @@ set(INC_FILES
     Analysis/FunctionBrowser/ITemplatePresenter.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Analysis/FunctionBrowser/ParamID.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
+    Analysis/FunctionBrowser/TemplateSubType.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h
     Common/OutputPlotOptionsModel.h

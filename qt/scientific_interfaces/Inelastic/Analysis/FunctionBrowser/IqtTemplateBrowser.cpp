@@ -66,6 +66,15 @@ void IqtTemplateBrowser::createProperties() {
   m_parameterMap[m_stretchExpStretching] = 6;
   m_parameterMap[m_A0] = 7;
 
+  m_parameterManager->setDescription(m_exp1Height, "First exponential height");
+  m_parameterManager->setDescription(m_exp1Lifetime, "First exponential lifetime");
+  m_parameterManager->setDescription(m_exp2Height, "Second exponential height");
+  m_parameterManager->setDescription(m_exp2Lifetime, "Second exponential lifetime");
+  m_parameterManager->setDescription(m_stretchExpHeight, "Stretched exponential height");
+  m_parameterManager->setDescription(m_stretchExpLifetime, "Stretched exponential lifetime");
+  m_parameterManager->setDescription(m_stretchExpStretching, "Stretched exponential stretching");
+  m_parameterManager->setDescription(m_A0, "Flat background A0 parameter");
+
   m_numberOfExponentials = m_intManager->addProperty("Exponentials");
   m_intManager->setMinimum(m_numberOfExponentials, 0);
   m_intManager->setMaximum(m_numberOfExponentials, 2);
