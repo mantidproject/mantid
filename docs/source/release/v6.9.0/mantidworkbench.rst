@@ -12,7 +12,7 @@ New Features
 - Editing a plot's title will now automatically update its name in the plot selector (and vice versa).
 - Monitor for external changes to script files that are open in Mantid to prevent loss of work.
 - An email is now required to submit an error report.
-- Project recovery performance has been improved by saving one python file for all workspaces, rather than one python file per workspace. Caution: recovering a backup by opening 6.9.0 after a crash in 6.8.0 or earlier will not work.
+- Project recovery performance has been improved by saving one python file for all workspaces, rather than one python file per workspace.
 
 
 Bugfixes
