@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h"
+#include <boost/format.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -86,18 +87,61 @@ public:
     TS_ASSERT_EQUALS(0, AnalysisDataService::Instance().size());
   }
 
-  void testSpinConfigurations() {}
+  void testSpinConfigurations() {
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "bad"), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "10,01"), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "00,00,11,11"),
+                     std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "02,20,22,00"),
+                     std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "00,11,01,10"));
+  }
 
-  void testNonWavelengthInput() {}
+  void testNonWavelengthInput() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName()),
+                     std::invalid_argument &);
+  }
 
-  void testSampleFit() {}
+  void testSampleFit() {
+    // For a p of e.g. p=1, we're going to generate some spin flipped and non-spin flippped
+    // data and fit to it. We should recover the original p.
+    const double p = 0.1;
+    const double pxd = 12;
+    const double mu = pxd * 0.0733;
+    const double te = 1;
 
-  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name) {
+    const boost::format nsfFunc = boost::format("0.5*%1%*exp(-x*%2%*(1-%3%))") % te % mu % p;
+    const boost::format sfFunc = boost::format("0.5*%1%*exp(-x*%2%*(1+%3%))") % te % mu % p;
+
+    auto nsfWs1 = generateFunctionDefinedWorkspace("nsfWs1", nsfFunc.str());
+    auto nsfWs2 = generateFunctionDefinedWorkspace("nsfWs2", nsfFunc.str());
+    auto sfWs1 = generateFunctionDefinedWorkspace("sfWs1", sfFunc.str());
+    auto sfWs2 = generateFunctionDefinedWorkspace("sfWs2", sfFunc.str());
+    auto grpWs = groupWorkspaces("grpWs", {nsfWs1, sfWs1, nsfWs2, sfWs2});
+
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", grpWs->getName());
+    heliumAnalyserEfficiency->setProperty("SpinConfigurations", "11,10,00,01");
+    heliumAnalyserEfficiency->setProperty("T_E", te);
+    heliumAnalyserEfficiency->setProperty("pxd", pxd);
+    heliumAnalyserEfficiency->execute();
+
+    MatrixWorkspace_sptr pHeWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("p_He");
+    auto pFromFit = pHeWs->y(0)[0];
+    TS_ASSERT_DELTA(pFromFit, p, 1e-5);
+  }
+
+  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength") {
     const std::vector<double> x{1, 2, 3};
     const std::vector<double> y{1, 4, 9};
     std::vector<MatrixWorkspace_sptr> wsVec(4);
     for (size_t i = 0; i < 4; ++i) {
-      wsVec[i] = generateWorkspace("ws" + std::to_string(i), x, y);
+      wsVec[i] = generateWorkspace("ws" + std::to_string(i), x, y, xUnit);
     }
     return groupWorkspaces(name, wsVec);
   }
@@ -133,5 +177,22 @@ public:
     groupWorkspace->execute();
     WorkspaceGroup_sptr group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
     return group;
+  }
+
+  MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const std::string &name, const std::string &func) {
+    auto createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
+    createSampleWorkspace->initialize();
+    createSampleWorkspace->setProperty("WorkspaceType", "Histogram");
+    createSampleWorkspace->setProperty("OutputWorkspace", name);
+    createSampleWorkspace->setProperty("Function", "User Defined");
+    createSampleWorkspace->setProperty("UserDefinedFunction", "name=UserFunction,Formula=" + func);
+    createSampleWorkspace->setProperty("XUnit", "Wavelength");
+    createSampleWorkspace->setProperty("XMin", "1");
+    createSampleWorkspace->setProperty("XMax", "8");
+    createSampleWorkspace->setProperty("BinWidth", "1");
+    createSampleWorkspace->execute();
+
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    return result;
   }
 };
