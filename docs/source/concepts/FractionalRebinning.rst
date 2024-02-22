@@ -86,52 +86,52 @@ for each input bin. When :ref:`algm-Rebin2D` is called on RebinnedOutput workspa
 *UseFractionalArea* is always automatically turned on, to ensure the weight fractions are always propagated accross
 several rebins and that the best possible signal and error estimates are achieved.
 
-On the other hand, when :ref:`algm-Rebin2D` is called on a **Workspace2D** workspace,
-by default the argument *UseFractionalArea* is set to False, and no fractional weights
-relative to the original bins are used. If you explicitly set *UseFractionalArea* to True,
-then the algorithm assumes that the Rebin being performed is the very first Rebin on the
-original data, and any fractional weights are set to unity to ensure that the new weights
-calculted on this rebinning are the first fractional weights stored in the output.
-The resulting **RebinnedOutput** workspace will be equal to the **Workspace2D** output of a Rebin
-that does not use fractional weights, with the only difference being that **RebinnedOutput** has
-started tracking the fractional weights to be propagated through any further rebins.
-
-If you try to check this is the case with the following script, however, you will be
-surprised to discover that this is seemingly not the case:
+When :ref:`algm-Rebin2D` is called on a **Workspace2D** workspace, by default the argument
+*UseFractionalArea* is set to ``False``, and no fractional weights relative to the original bins are used.
+This is consistent with the original implementation of the algorithm, but can cause issues when
+used on certain types of workspaces. Take for example a ToF-scattering angle workspace from an
+instrument with two sets of detectors at similar scattering angles:
 
 .. testcode:: ExRebinTwice
 
     import numpy as np
-    # prepare an input workspace
-    theta_tof = CreateSampleWorkspace()
-    theta_tof = ConvertSpectrumAxis(theta_tof, "theta")
+    sample_ws = CreateSampleWorkspace()
+    theta_tof = ConvertSpectrumAxis(sample_ws, "theta")
 
     theta_tof_fa_false = Rebin2D(theta_tof, '100,400,20000', '0, 0.004, 1', UseFractionalArea=False)
     theta_tof_fa_true = Rebin2D(theta_tof,  '100,400,20000', '0, 0.004, 1', UseFractionalArea=True)
-    print(f'Signal difference = {np.median(np.abs(theta_tof_fa_true.readY(0) - theta_tof_fa_false.readY(0))):.3f}')
-    print(f'Errors difference = {np.median(np.abs(theta_tof_fa_true.readE(0) - theta_tof_fa_false.readE(0))):.3f}')
 
-.. testoutput:: ExRebinTwice
 
-    Signal difference = 0.195
-    Errors difference = 0.603
+By default :ref:`algm-CreateSampleWorkspace` uses the "basic_rect" instrument which has two
+detectors around the straight-through beam direction: one at 5m and one at 10m. You can see this
+if you right click on the ``sample_ws`` workspace and select "Instrument View".
+When this workspace is converted to scattering angle (``theta``), the pixels on the 5m and 10m
+detectors will overlap because they have similar ``theta`` values. You can see this by right clicking
+the workspace and select "Show Data" and look along the row labels - you should see several labels
+repeated and others at non-uniform gaps.
 
-This is actually due to the way data is presented.
-In the case where the *UseFractionalArea* is set to True, the workspace will display
-counts per bin area, rather than the absolute counts. This behaviour was chosen to cover the cases where
-the output grid has a very small overlap with the input grid (for example at the edges of the
-detector coverage), resulting in a small fractional weight :math:`F` of this bin, and
-hence its signal :math:`Y` and error :math:`E` would also be very small compared to its neighbours.
-Thus, for display purposes, the actual signal and errors stored internally in a RebinnedOutput are
-displayed in the workspace by renormalising by the fractional weights:
+The ``theta_tof`` workspace thus has non-uniform bins in the ``theta`` axis, and if you use
+:ref:`algm-Rebin2D` with ``UseFractionalArea=False`` these bins will not be correctly normalised.
+To see this, plot the workspaces ``theta_tof``, ``theta_tof_fa_false`` and ``theta_tof_fa_true`` using the
+SliceViewer. You will see that ``theta_tof_fa_false`` looks distinctly different with random intensity spots
+whilst ``theta_tof`` and ``theta_tof_fa_true`` looks similar with only a single ToF peak.
 
-.. math:: Y^{\mathrm{display}} = Y^{\mathrm{new}} / F^{\mathrm{new}}
-.. math:: E^{\mathrm{display}} = E^{\mathrm{new}} / F^{\mathrm{new}}
+We would thus recommend to always use ``UseFractionalArea=True`` with :ref:`algm-Rebin2D`.
 
-at the end of the algorithm. The biggest consequence of this method is
-that in places where there are no counts (:math:`Y=0`) and no acceptance
-(no fractional areas, :math:`F=0`), :math:`Y/F=`\ **nan**\ -s will
-result.
+One final consideration is that **RebinnedOutput** workspaces are always treated as **distributions**.
+That is, the output counts and uncertainties are always renormalised by the fractional weights:
+
+.. math:: Y^{\mathrm{output}} = Y^{\mathrm{new}} / F^{\mathrm{new}}
+.. math:: E^{\mathrm{output}} = E^{\mathrm{new}} / F^{\mathrm{new}}
+
+If this is not done, then the output will look similarly to the case with ``UseFractionalArea=False`` with
+random intensity spots. This means that internally the **RebinnedOutput** workspace stores
+:math:`Y^{\mathrm{new}}` and :math:`F^{\mathrm{new}}` but when you plot the data,
+or use "Show Data", you will get :math:`Y^{\mathrm{output}}`.
+Thus if you view the data of ``theta_tof_fa_true`` you will see that the values generally match that of
+``theta_tof`` whereas the data values of ``theta_tof_fa_false`` will be a factor of approximately 1/3 that of
+``theta_tof`` due to the new bin size being twice as large in the ToF axis and 1.5 times as large in the ``theta``
+axis.
 
 Integration on RebinnedOutput workspaces
 ----------------------------------------
