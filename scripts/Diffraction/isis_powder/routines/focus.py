@@ -180,11 +180,6 @@ def _absorb_and_empty_corrections(
         # Crop to largest acceptable TOF range
         input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
         if absorb:
-            if sample_details is None:
-                raise ValueError(
-                    "Absorption corrections cannot be run without sample details."
-                    " Please set sample details using set_sample before running absorption corrections."
-                )
             input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
         else:
             # Set sample material if specified by the user
