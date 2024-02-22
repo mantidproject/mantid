@@ -11,6 +11,7 @@ import os
 
 from qtpy.QtWidgets import QApplication
 
+from mantid.api import AlgorithmManager
 from mantid.kernel import logger
 from mantidqt.project.projectloader import ProjectLoader
 from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
@@ -98,9 +99,22 @@ class ProjectRecoveryLoader(object):
         :param directory: String; The directory in which the load_workspaces.py files exists
         """
         saved_recovery_script = os.path.join(directory, "load_workspaces.py")
+
         if os.path.exists(saved_recovery_script):
             with open(saved_recovery_script, "r") as reader, open(self.pr.recovery_order_workspace_history_file, "w") as writer:
                 writer.write(reader.read())
+        elif os.path.exists(directory):
+            # This is to ensure compatibility with backups from version 6.8 and earlier.
+            # Prior to 6.9, one python file would be saved for each workspace in the ADS.
+            alg_name = "OrderWorkspaceHistory"
+            alg = AlgorithmManager.createUnmanaged(alg_name, 1)
+            alg.initialize()
+            alg.setChild(True)
+            alg.setLogging(False)
+            alg.setRethrows(False)
+            alg.setProperty("RecoveryCheckpointFolder", directory)
+            alg.setProperty("OutputFilePath", self.pr.recovery_order_workspace_history_file)
+            alg.execute()
 
         self.multi_file_interpreter.mark_file_change_as_ours(self.pr.recovery_order_workspace_history_file)
 
