@@ -30,10 +30,10 @@ set(SRC_FILES
     Analysis/IndirectFitPlotView.cpp
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
-    Analysis/FunctionBrowser/ConvTypes.cpp
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/FitTypes.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
@@ -160,6 +160,7 @@ set(INC_FILES
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/FitTypes.h
     Analysis/FunctionBrowser/FunctionTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/ITemplatePresenter.h

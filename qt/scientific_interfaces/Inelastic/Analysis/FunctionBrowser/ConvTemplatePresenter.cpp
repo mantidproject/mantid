@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvTemplatePresenter.h"
 #include "ConvTemplateBrowser.h"
+#include "FitTypes.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include <QInputDialog>
 #include <QtConcurrentRun>
@@ -28,12 +29,12 @@ ConvFunctionModel *ConvTemplatePresenter::model() const { return dynamic_cast<Co
 // continue which is necessary to stop the int manager from self-incrementing
 // itself due to an internal timer occurring within the class
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
-  if (subTypeIndex == SubTypeIndex::Fit) {
-    model()->setFitType(static_cast<FitType>(typeIndex));
-  } else if (subTypeIndex == SubTypeIndex::Lorentzian) {
-    model()->setLorentzianType(static_cast<LorentzianType>(typeIndex));
+  if (subTypeIndex == ConvTypes::SubTypeIndex::Fit) {
+    model()->setFitType(static_cast<ConvTypes::FitType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
+    model()->setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
   } else {
-    model()->setBackground(static_cast<BackgroundType>(typeIndex));
+    model()->setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
   }
   view()->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);
@@ -87,13 +88,13 @@ void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   auto convModel = model();
   convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection(), convModel->hasDeltaFunction());
 
-  convView->setSubType(SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
-  convView->setSubType(SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
-  convView->setSubType(SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
+  convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
+  convView->setSubType(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
-  convView->setInt(SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
-  convView->setEnum(SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
-  convView->setEnum(SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
+  convView->setInt(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
+  convView->setEnum(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setEnum(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);
   updateViewParameterNames();

@@ -8,8 +8,8 @@
 
 #include "Analysis/FunctionTemplateBrowser.h"
 #include "ConvTemplatePresenter.h"
-#include "ConvTypes.h"
 #include "DllConfig.h"
+#include "FitTypes.h"
 
 #include <QMap>
 #include <QWidget>

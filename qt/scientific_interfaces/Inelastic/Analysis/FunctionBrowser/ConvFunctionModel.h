@@ -8,8 +8,8 @@
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
-#include "ConvTypes.h"
 #include "DllConfig.h"
+#include "FitTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"

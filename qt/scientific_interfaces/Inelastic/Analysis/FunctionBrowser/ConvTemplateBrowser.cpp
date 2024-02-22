@@ -26,9 +26,9 @@
 namespace MantidQt::CustomInterfaces::IDA {
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
-  m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
-  m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
-  m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
+  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::LorentzianSubType>());
+  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::FitSubType>());
+  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::BackgroundSubType>());
   init();
 }
 
@@ -42,11 +42,11 @@ void ConvTemplateBrowser::createProperties() {
   createDeltaFunctionProperties();
   createTempCorrectionProperties();
 
-  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Lorentzian]);
-  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Fit]);
+  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian]);
+  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Fit]);
   m_browser->addProperty(m_deltaFunctionOn);
   m_browser->addProperty(m_tempCorrectionOn);
-  m_browser->addProperty(m_subTypeProperties[SubTypeIndex::Background]);
+  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Background]);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
@@ -168,7 +168,7 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
       }
       parameters[index] = props;
     }
-    if (isub == SubTypeIndex::Lorentzian) {
+    if (isub == ConvTypes::SubTypeIndex::Lorentzian) {
       auto subtypeProp = m_intManager->addProperty(QString::fromStdString(subType->name()));
       m_intManager->setMinimum(subtypeProp, 0);
       m_intManager->setMaximum(subtypeProp, 2);
@@ -241,8 +241,8 @@ void ConvTemplateBrowser::setResolution(const std::vector<std::pair<std::string,
 }
 
 void ConvTemplateBrowser::intChanged(QtProperty *prop) {
-  if (prop == m_subTypeProperties[SubTypeIndex::Lorentzian] && m_emitIntChange) {
-    m_presenter->setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
+  if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian] && m_emitIntChange) {
+    m_presenter->setSubType(ConvTypes::SubTypeIndex::Lorentzian, m_intManager->value(prop));
   }
 }
 } // namespace MantidQt::CustomInterfaces::IDA

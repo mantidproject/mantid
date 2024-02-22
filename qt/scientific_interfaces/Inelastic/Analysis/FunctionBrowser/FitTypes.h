@@ -19,44 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-namespace ConvTypes {
-
 using namespace Mantid::API;
-
-enum class FitType {
-  None,
-  TeixeiraWater,
-  FickDiffusion,
-  ChudleyElliot,
-  HallRoss,
-  StretchedExpFT,
-  DiffSphere,
-  ElasticDiffSphere,
-  InelasticDiffSphere,
-  DiffRotDiscreteCircle,
-  ElasticDiffRotDiscreteCircle,
-  InelasticDiffRotDiscreteCircle,
-  IsoRotDiff,
-  ElasticIsoRotDiff,
-  InelasticIsoRotDiff,
-};
-
-enum class LorentzianType {
-  None,
-  OneLorentzian,
-  TwoLorentzians,
-};
-
-extern std::map<FitType, bool> FitTypeQDepends;
-extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
-extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
-
-extern std::unordered_map<LorentzianType, std::string> LorentzianTypeEnumToString;
-extern std::unordered_map<std::string, LorentzianType> LorentzianTypeStringToEnum;
-
-enum class BackgroundType { None, Flat, Linear };
-
-enum class TempCorrectionType { None, Exponential };
 
 enum class ParamID {
   NONE,
@@ -128,7 +91,111 @@ enum class ParamID {
   LINEAR_BG_A1,
 };
 
-std::string paramName(ParamID id);
+namespace ConvTypes {
+
+enum class FitType {
+  None,
+  TeixeiraWater,
+  FickDiffusion,
+  ChudleyElliot,
+  HallRoss,
+  StretchedExpFT,
+  DiffSphere,
+  ElasticDiffSphere,
+  InelasticDiffSphere,
+  DiffRotDiscreteCircle,
+  ElasticDiffRotDiscreteCircle,
+  InelasticDiffRotDiscreteCircle,
+  IsoRotDiff,
+  ElasticIsoRotDiff,
+  InelasticIsoRotDiff,
+};
+
+enum class LorentzianType {
+  None,
+  OneLorentzian,
+  TwoLorentzians,
+};
+
+extern std::map<FitType, bool> FitTypeQDepends;
+extern std::unordered_map<FitType, std::string> FitTypeEnumToString;
+extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
+
+extern std::unordered_map<LorentzianType, std::string> LorentzianTypeEnumToString;
+extern std::unordered_map<std::string, LorentzianType> LorentzianTypeStringToEnum;
+
+enum class BackgroundType { None, Flat, Linear };
+
+enum class TempCorrectionType { None, Exponential };
+
+static std::map<ParamID, std::string> g_paramName{
+    {ParamID::LOR1_AMPLITUDE, "Amplitude"},
+    {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
+    {ParamID::LOR1_FWHM, "FWHM"},
+    {ParamID::LOR2_AMPLITUDE_1, "Amplitude"},
+    {ParamID::LOR2_PEAKCENTRE_1, "PeakCentre"},
+    {ParamID::LOR2_FWHM_1, "FWHM"},
+    {ParamID::LOR2_AMPLITUDE_2, "Amplitude"},
+    {ParamID::LOR2_PEAKCENTRE_2, "PeakCentre"},
+    {ParamID::LOR2_FWHM_2, "FWHM"},
+    {ParamID::TW_HEIGHT, "Height"},
+    {ParamID::TW_DIFFCOEFF, "DiffCoeff"},
+    {ParamID::TW_TAU, "Tau"},
+    {ParamID::TW_CENTRE, "Centre"},
+    {ParamID::FD_HEIGHT, "Height"},
+    {ParamID::FD_DIFFCOEFF, "DiffCoeff"},
+    {ParamID::FD_CENTRE, "Centre"},
+    {ParamID::CE_HEIGHT, "Height"},
+    {ParamID::CE_TAU, "Tau"},
+    {ParamID::CE_L, "L"},
+    {ParamID::CE_CENTRE, "Centre"},
+    {ParamID::HR_HEIGHT, "Height"},
+    {ParamID::HR_TAU, "Tau"},
+    {ParamID::HR_L, "L"},
+    {ParamID::HR_CENTRE, "Centre"},
+    {ParamID::DELTA_HEIGHT, "Height"},
+    {ParamID::DELTA_CENTER, "Centre"},
+    {ParamID::TEMPERATURE, "Temperature"},
+    {ParamID::SE_HEIGHT, "Height"},
+    {ParamID::SE_TAU, "Tau"},
+    {ParamID::SE_BETA, "Beta"},
+    {ParamID::SE_CENTRE, "Centre"},
+    {ParamID::DP_INTENSITY, "f1.Intensity"},
+    {ParamID::DP_RADIUS, "f1.Radius"},
+    {ParamID::DP_DIFFUSION, "f1.Diffusion"},
+    {ParamID::DP_SHIFT, "f1.Shift"},
+    {ParamID::EDP_HEIGHT, "Height"},
+    {ParamID::EDP_CENTRE, "Centre"},
+    {ParamID::EDP_RADIUS, "Radius"},
+    {ParamID::IDP_INTENSITY, "Intensity"},
+    {ParamID::IDP_RADIUS, "Radius"},
+    {ParamID::IDP_DIFFUSION, "Diffusion"},
+    {ParamID::IDP_SHIFT, "Shift"},
+    {ParamID::DRDC_INTENSITY, "f1.Intensity"},
+    {ParamID::DRDC_RADIUS, "f1.Radius"},
+    {ParamID::DRDC_DECAY, "f1.Decay"},
+    {ParamID::DRDC_SHIFT, "f1.Shift"},
+    {ParamID::IDRDC_INTENSITY, "Intensity"},
+    {ParamID::IDRDC_RADIUS, "Radius"},
+    {ParamID::IDRDC_DECAY, "Decay"},
+    {ParamID::IDRDC_SHIFT, "Shift"},
+    {ParamID::EDRDC_HEIGHT, "Height"},
+    {ParamID::EDRDC_CENTRE, "Centre"},
+    {ParamID::EDRDC_RADIUS, "Radius"},
+    {ParamID::IRD_HEIGHT, "f1.Height"},
+    {ParamID::IRD_RADIUS, "f1.Radius"},
+    {ParamID::IRD_TAU, "f1.Tau"},
+    {ParamID::IRD_CENTRE, "f1.Centre"},
+    {ParamID::EIRD_HEIGHT, "Height"},
+    {ParamID::EIRD_RADIUS, "Radius"},
+    {ParamID::IIRD_HEIGHT, "Height"},
+    {ParamID::IIRD_RADIUS, "Radius"},
+    {ParamID::IIRD_TAU, "Tau"},
+    {ParamID::IIRD_CENTRE, "Centre"},
+    {ParamID::FLAT_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A1, "A1"},
+};
 
 inline ParamID &operator++(ParamID &id) {
   id = ParamID(static_cast<std::underlying_type<ParamID>::type>(id) + 1);
@@ -197,7 +264,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   }
   std::vector<std::string> getParameterNames(int typeIndex) const override {
     std::vector<std::string> names;
-    auto fillNames = [&names](ParamID id) { names.emplace_back(paramName(id)); };
+    auto fillNames = [&names](ParamID id) { names.emplace_back(ConvTypes::g_paramName.at(id)); };
     applyToType(static_cast<Type>(typeIndex), fillNames);
     return names;
   }
@@ -208,7 +275,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     if (!function.empty()) {
       IFunction_sptr fun = FunctionFactory::Instance().createFunction(function);
       auto fillDescriptions = [&descriptions, &fun](ParamID id) {
-        descriptions << fun->parameterDescription(fun->parameterIndex(paramName(id)));
+        descriptions << fun->parameterDescription(fun->parameterIndex(ConvTypes::g_paramName.at(id)));
       };
       applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), fillDescriptions);
     }
@@ -245,16 +312,14 @@ struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
   std::string name() const override { return "ConvTempCorrection"; }
 };
 
-void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun);
-
-void applyToLorentzianType(LorentzianType lorenzianType, const std::function<void(ParamID)> &paramFun);
-
-void applyToBackground(BackgroundType bgType, const std::function<void(ParamID)> &paramFun);
-void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);
-
-void applyToTemp(TempCorrectionType tempCorrectionType, const std::function<void(ParamID)> &paramFun);
-
 } // namespace ConvTypes
+
+template <typename TemplateSubType, typename Type>
+void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(TemplateSubType::g_typeMap[functionType].blocks.front(),
+                      TemplateSubType::g_typeMap[functionType].blocks.back(), paramFun);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

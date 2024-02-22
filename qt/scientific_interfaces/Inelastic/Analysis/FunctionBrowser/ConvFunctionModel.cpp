@@ -511,7 +511,7 @@ void ConvFunctionModel::setGlobalParameterValue(std::string const &parameterName
 void ConvFunctionModel::setParameter(ParamID name, double value) {
   auto const prefix = getPrefix(name);
   if (prefix) {
-    m_model.setParameter(*prefix + paramName(name), value);
+    m_model.setParameter(*prefix + ConvTypes::g_paramName.at(name), value);
   }
 }
 
@@ -527,7 +527,7 @@ boost::optional<double> ConvFunctionModel::getParameterError(ParamID name) const
 
 boost::optional<std::string> ConvFunctionModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
-  return prefix ? *prefix + paramName(name) : boost::optional<std::string>();
+  return prefix ? *prefix + ConvTypes::g_paramName.at(name) : boost::optional<std::string>();
 }
 
 boost::optional<std::string> ConvFunctionModel::getParameterDescription(ParamID name) const {
@@ -581,12 +581,12 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void ConvFunctionModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
-  applyToLorentzianType(m_lorentzianType, paramFun);
-  applyToFitType(m_fitType, paramFun);
-  applyToBackground(m_backgroundType, paramFun);
-  applyToDelta(m_hasDeltaFunction, paramFun);
+  applyToFitFunction<ConvTypes::LorentzianSubType>(m_lorentzianType, paramFun);
+  applyToFitFunction<ConvTypes::FitSubType>(m_fitType, paramFun);
+  applyToFitFunction<ConvTypes::BackgroundSubType>(m_backgroundType, paramFun);
+  applyToFitFunction<ConvTypes::DeltaSubType>(m_hasDeltaFunction, paramFun);
   auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential : TempCorrectionType::None;
-  applyToTemp(tempType, paramFun);
+  applyToFitFunction<ConvTypes::TempSubType>(tempType, paramFun);
 }
 
 boost::optional<ParamID> ConvFunctionModel::getParameterId(std::string const &parameterName) {
