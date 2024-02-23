@@ -107,10 +107,17 @@ SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmission(Mat
 
   std::string const &status = fitAlg->getProperty("OutputStatus");
   if (!fitAlg->isExecuted() || status != FitValues::FIT_SUCCESS) {
-    auto const &errMsg{"Failed to fit to divided workspace, " + inputWs->getName() + ": " + status};
+    auto const &errMsg{"Failed to fit to transmission workspace, " + inputWs->getName() + ": " + status};
     throw std::runtime_error(errMsg);
   }
-
+  // If a non-monitor MT workspace is provided by mistake the workspace to be fitted can contain only NaNs/infs due to
+  // divide-by-0 results. In this case, the fit succeeds but the quality is 0, so we should still throw an error.
+  double const &fitQuality = fitAlg->getProperty("OutputChi2overDoF");
+  if (fitQuality <= 0) {
+    throw std::runtime_error("Failed to fit to transmission workspace, " + inputWs->getName() +
+                             ": Fit quality is too low (" + std::to_string(fitQuality) +
+                             "). You may want to check that the correct monitor spectrum was provided.");
+  }
   return fitAlg->getProperty("OutputParameters");
 }
 
