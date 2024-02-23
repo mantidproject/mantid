@@ -175,7 +175,7 @@ _translations = {
     "Joseph Ramsay": "Ramsay, Joseph F.",
     "=": "Ramsay, Joseph F.",
     "Joe Ramsay": "Ramsay, Joseph F.",
-    "Adam Washington": "Wahington, Adam",
+    "Adam Washington": "Washington, Adam",
     "Edward Brown": "Brown, Edward",
     "Matthew Andrew": "Andrew, Matthew",
     "Mantid-Matthew": "Andrew, Matthew",
