@@ -14,20 +14,34 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
                            const std::size_t numEvents, const std::string &entry_name)
     : m_event_index(std::move(event_index)), m_firstEventIndex(firstEventIndex), m_numEvents(numEvents),
       m_entry_name(entry_name) {
+  // cache the number of pulses
   m_numPulses = m_event_index->size();
+
+  // determine first useful pulse index
+  m_roi.push_back(this->determineFirstPulseIndex(firstEventIndex));
+  // for now, use all pulses up to the end
+  m_roi.push_back(m_event_index->size());
+
+  /*
+  if (firstEventIndex > 0) { // REMOVE
+    std::stringstream msg;
+    msg << "firstEventIndex=" << firstEventIndex;
+    throw std::runtime_error(msg.str());
+  }
+  */
 }
 
 /**
  * This performs a linear search because it is much more likely that the index
  * to look for is at the beginning.
  */
-size_t PulseIndexer::getFirstPulseIndex() const {
+size_t PulseIndexer::determineFirstPulseIndex(const std::size_t firstEventIndex) const {
   // return early if the number of event indices is too small
   if (1 >= m_event_index->size())
     return 1;
 
   // special case to stop from setting up temporary objects because the first event is in the first pulse
-  if (m_firstEventIndex == 0)
+  if (firstEventIndex == 0)
     return 0;
 
   // linear search is used because it is more likely that the pulse index is earlier in the array.
@@ -36,7 +50,7 @@ size_t PulseIndexer::getFirstPulseIndex() const {
   const auto event_index_end = m_event_index->cend();
   auto event_index_iter = m_event_index->cbegin();
 
-  while ((m_firstEventIndex < *event_index_iter) || (m_firstEventIndex >= *(event_index_iter + 1))) {
+  while ((firstEventIndex < *event_index_iter) || (firstEventIndex >= *(event_index_iter + 1))) {
     event_index_iter++;
 
     // make sure not to go past the end
@@ -45,6 +59,13 @@ size_t PulseIndexer::getFirstPulseIndex() const {
   }
   return static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
 }
+
+/**
+ * This performs a linear search because it is much more likely that the index
+ * to look for is at the beginning.
+ */
+size_t PulseIndexer::getFirstPulseIndex() const { return m_roi.front(); }
+size_t PulseIndexer::getLastPulseIndex() const { return m_roi.back(); }
 
 std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseIndex) const {
   const auto start = this->getStartEventIndex(pulseIndex);
@@ -67,20 +88,43 @@ std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseInd
 }
 
 size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
-  const auto firstEventIndex = m_event_index->operator[](pulseIndex);
-  if (firstEventIndex >= m_firstEventIndex)
-    return firstEventIndex - m_firstEventIndex;
-  else
+  // return the start index to signify not using
+  if (pulseIndex >= m_roi.back())
+    return this->getStopEventIndex(pulseIndex);
+
+  // determine the correct start index
+  size_t eventIndex;
+  if (pulseIndex <= m_roi.front()) {
+    eventIndex = m_event_index->operator[](m_roi.front());
+  } else if (pulseIndex >= m_roi.back()) {
+    eventIndex = m_numEvents;
+  } else {
+    eventIndex = m_event_index->operator[](pulseIndex);
+  }
+
+  // return the index with the offset subtracted
+  if (eventIndex >= m_firstEventIndex) {
+    return eventIndex - m_firstEventIndex;
+  } else {
     return 0;
+  }
 }
 
 size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
-  if (pulseIndex + 1 >= m_numPulses)
-    return m_numEvents;
+  // return the start index to signify not using
+  if (pulseIndex < m_roi.front())
+    return this->getStartEventIndex(pulseIndex);
 
-  const size_t lastEventIndex = m_event_index->operator[](pulseIndex + 1) - m_firstEventIndex;
+  const auto pulseIndexEnd = pulseIndex + 1;
+  // check if the requests have gone past the end - order of if/else matters
+  if (pulseIndexEnd >= m_numPulses) // last pulse should read to the last event
+    return m_numEvents - m_firstEventIndex;
+  else if (pulseIndexEnd >= m_roi.back()) // this can be equal to the number of pulses
+    return m_event_index->operator[](m_roi.back()) - m_firstEventIndex;
 
-  return std::min(lastEventIndex, m_numEvents);
+  const size_t lastEventIndex = m_event_index->operator[](pulseIndexEnd) - m_firstEventIndex;
+
+  return std::min(lastEventIndex, m_numEvents - m_firstEventIndex);
 }
 
 } // namespace Mantid::DataHandling

@@ -35,36 +35,52 @@ public:
   PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
                const std::size_t numEvents, const std::string &entry_name);
 
-  /// Which element in the event_index array is the one to use
+  /// Which element in the event_index array is the first one to use
   size_t getFirstPulseIndex() const;
+  /// Which element in the event_index array is the last one to use
+  size_t getLastPulseIndex() const;
   /// The range of event(tof,detid) indices to read for this pulse
   std::pair<size_t, size_t> getEventIndexRange(const size_t pulseIndex) const;
   /**
-   * The first event(tof,detid) index to read for this pulse.
-   * This is only public for testing.
+   * The first event(tof,detid) index to read for this pulse. When this is after the event indices to use, it returns
+   * the value of getStopEventIndex. This is only public for testing.
    */
   size_t getStartEventIndex(const size_t pulseIndex) const;
   /**
-   * The one past the last event(tof,detid) index to read for this pulse
-   * This is only public for testing.
+   * The one past the last event(tof,detid) index to read for this pulse. When this is before the event indices to use,
+   * it returns the value of getStartEventIndex. This is only public for testing.
    */
   size_t getStopEventIndex(const size_t pulseIndex) const;
 
 private:
   PulseIndexer(); // do not allow empty constructor
 
-  /// vector of event index (length of # of pulses)
+  size_t determineFirstPulseIndex(const std::size_t firstEventIndex) const;
+
+  /// vector of indices (length of # of pulses) into the event arrays
   const std::shared_ptr<std::vector<uint64_t>> m_event_index;
 
   /**
-   * How far into the array of events the tof/detid are already.
-   * This is used when data is read in chunks.
+   * How far into the array of events the tof/detid are already. This is used when data is read in chunks.
+   * It is generally taken from the zeroth element of the event_index array, but is also used for chunking by
+   * pulse-time.
    */
   std::size_t m_firstEventIndex;
+
+  /**
+   * Total number of events tof/detid that should be processed. This can be less than the total number of events in the
+   * actual array.
+   */
+  std::size_t m_numEvents;
+
+  /**
+   * Alternating values describe ranges of [use, don't). There will always be a gap between neighboring values.
+   */
+  std::vector<std::size_t> m_roi;
+
   /// Total number of pulsetime/pulseindex
   std::size_t m_numPulses;
-  /// Total number of events tof/detid
-  std::size_t m_numEvents;
+
   /// Name of the NXentry to be used in exceptions
   const std::string m_entry_name;
 };

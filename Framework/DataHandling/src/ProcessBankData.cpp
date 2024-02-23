@@ -97,7 +97,6 @@ void ProcessBankData::run() {
     throw std::runtime_error("Event index is not sorted");
 
   // And there are this many pulses
-  const auto NUM_PULSES = event_index->size();
   prog->report(entry_name + ": filling events");
 
   auto *alg = m_loader.alg;
@@ -113,8 +112,9 @@ void ProcessBankData::run() {
   const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
   const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name);
-
-  for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(); pulseIndex < NUM_PULSES; pulseIndex++) {
+  const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex(); // for whole file reading is 0
+  const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();   // for whole file reading is event_index->size()
+  for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
     // determine range of events for the pulse
     const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
     if (eventIndexRange.first > numEvents)
