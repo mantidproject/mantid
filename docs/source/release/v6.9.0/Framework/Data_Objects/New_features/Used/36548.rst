@@ -1,1 +1,0 @@
-- The ``clear()`` function for the ADS now displays a warning that workspaces might get removed that are still used by one of the interfaces.

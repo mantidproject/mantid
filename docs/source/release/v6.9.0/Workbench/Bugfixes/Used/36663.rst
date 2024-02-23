@@ -1,1 +1,0 @@
-- Fix for crash which could occur when opening file with unicode characters

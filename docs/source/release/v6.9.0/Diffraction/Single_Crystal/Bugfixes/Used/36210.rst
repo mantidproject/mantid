@@ -1,3 +1,0 @@
-- Fixed typo in argument name in :ref:`WISH reduction class <isis-single-crystal-diffraction-wish-ref>` method ``WishSX.find_sx_peaks`` that was causing method to fail
-- Renamed arguments of ``WishSX.remove_peaks_on_edge`` to be consistent with ``SXD.remove_peaks_on_edge`` (renamed ``nedge_pix`` to and ``nedge_tube`` to ``ntubes``)
-- Fix bug requiring string when workspace object passed to ``BaseSX.convert_ws_to_MD`` (now accepts workspace objects) (``BaseSX`` is the bace class for the :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`)

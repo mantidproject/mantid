@@ -1,1 +1,0 @@
-- Add new options to estimate background parameters or manually set them in :ref:`PEARLTransfit <algm-PEARLTransfit>`

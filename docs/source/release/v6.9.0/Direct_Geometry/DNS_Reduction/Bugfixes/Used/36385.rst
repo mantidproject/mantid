@@ -1,1 +1,0 @@
--  The legacy file format is now supported by the :ref:`DNS Reduction GUI<dns_reduction-ref>`.

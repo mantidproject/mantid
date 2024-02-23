@@ -1,1 +1,0 @@
-- Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` where background scale factor was applied multiple times when processing sliced workspaces.

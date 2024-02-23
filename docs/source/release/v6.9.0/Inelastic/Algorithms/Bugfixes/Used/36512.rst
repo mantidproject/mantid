@@ -1,1 +1,0 @@
-- Fixed a bug in the :ref:`VesuvioCalculateGammaBackground <algm-VesuvioCalculateGammaBackground>` algorithm that meant the order of the output spectra was not guarenteed. This largely affected instances of mantid on linux machines.

@@ -1,1 +1,0 @@
-- Workbench will no longer crash if an attempt is made to save a batch to an invalid location.
