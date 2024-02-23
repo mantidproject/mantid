@@ -252,6 +252,7 @@ _translations = {
     "joseph-torsney": "Torsney, Joesph",
     "Joseph Torsney": "Torsney, Joesph",
     "YannickMeinerzhagen": "Meinerzhagen, Yannick",
+    "ymeinerzhagen": "Meinerzhagen, Yannick",
     "Du Rong": "Rong, Du",
     "durong": "Rong, Du",
     "durong24": "Rong, Du",
@@ -316,7 +317,6 @@ _translations = {
     "eric pellegrini": "Pellegrini, Eric",
     "Maria Patrou": "Patrou, Maria",
     "James Clarke": "Clarke, James",
-    "ymeinerzhagen": "YannickMeinerzhagen",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
