@@ -221,9 +221,8 @@ void IETPresenter::notifySaveClicked() {
       m_model->saveWorkspace(workspaceName, saveData);
 }
 
-void IETPresenter::notifySaveCustomGroupingClicked() {
+void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrouping) {
   InstrumentData instrumentData = getInstrumentData();
-  std::string customGrouping = m_view->getCustomGrouping();
 
   if (!customGrouping.empty()) {
     m_model->createGroupingWorkspace(instrumentData.getInstrument(), instrumentData.getAnalyser(), customGrouping,

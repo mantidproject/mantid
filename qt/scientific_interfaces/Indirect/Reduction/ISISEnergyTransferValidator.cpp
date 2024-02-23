@@ -92,25 +92,28 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
   return "";
 }
 
-std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingData,
+std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRuntimeProps *groupingProperties,
                                                        std::size_t const &defaultSpectraMin,
                                                        std::size_t const &defaultSpectraMax) {
-  std::string groupingType = groupingData.getGroupingType();
+  std::string groupingType = groupingProperties->getProperty("GroupingMethod");
   if (groupingType == "File") {
-    if (groupingData.getGroupingMapFile().empty())
+    std::string mapFile = groupingProperties->getProperty("MapFile");
+    if (mapFile.empty())
       return "Mapping file is invalid.";
   } else if (groupingType == "Custom") {
-    const std::string customString = groupingData.getCustomGroups();
-    if (customString.empty())
+    if (!groupingProperties->existsProperty("GroupingString"))
       return "Please supply a custom grouping for detectors.";
-    else
+    else {
+      std::string customString = groupingProperties->getProperty("GroupingString");
       return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
                                                defaultSpectraMax);
+    }
   } else if (groupingType == "Groups") {
     auto const numberOfSpectra = defaultSpectraMax - defaultSpectraMin + 1;
-    if (groupingData.getNGroups() < 1) {
+    auto nGroups = std::stoull(groupingProperties->getPropertyValue("NGroups"));
+    if (nGroups < 1) {
       return "The number of groups must be a positive number.";
-    } else if (groupingData.getNGroups() > numberOfSpectra) {
+    } else if (nGroups > numberOfSpectra) {
       return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
              ").";
     }

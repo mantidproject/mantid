@@ -22,15 +22,14 @@ public:
   IETModel();
   ~IETModel() = default;
 
-  void setInstrumentProperties(IAlgorithm_sptr const &reductionAlg, InstrumentData const &instData);
-  void setInputProperties(IAlgorithm_sptr const &reductionAlg, IETInputData const &inputData);
-  void setConversionProperties(IAlgorithm_sptr const &reductionAlg, IETConversionData const &conversionData,
+  void setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData);
+  void setInputProperties(IAlgorithmRuntimeProps &properties, IETInputData const &inputData);
+  void setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                std::string const &instrument);
-  void setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETBackgroundData const &backgroundData);
-  void setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData);
-  void setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAnalysisData const &analysisData);
-  void setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData);
-  void setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
+  void setBackgroundProperties(IAlgorithmRuntimeProps &properties, IETBackgroundData const &backgroundData);
+  void setRebinProperties(IAlgorithmRuntimeProps &properties, IETRebinData const &rebinData);
+  void setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData);
+  void setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                            std::string const &outputGroupName);
   std::string getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
@@ -39,7 +38,7 @@ public:
   std::vector<std::string> validatePlotData(IETPlotData const &plotData);
 
   std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
-                              IETRunData const &runParams);
+                              IETRunData &runParams);
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> plotRawAlgorithmQueue(InstrumentData const &instData,
                                                                              IETPlotData const &plotData) const;
 
@@ -49,8 +48,6 @@ public:
                    std::string const &xUnits = "DeltaE_inWavenumber");
   void save(std::string const &algorithmName, std::string const &workspaceName, std::string const &outputName,
             int const version = -1, std::string const &separator = "");
-
-  std::pair<std::string, std::string> createGrouping(IETGroupingData const &groupingData);
 
   void createGroupingWorkspace(std::string const &instrumentName, std::string const &analyser,
                                std::string const &customGrouping, std::string const &outputName);

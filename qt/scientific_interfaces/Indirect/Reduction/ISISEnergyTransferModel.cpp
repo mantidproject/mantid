@@ -28,7 +28,7 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, st
   std::string firstFileName = inputFiles.substr(0, inputFiles.find(','));
 
   std::string detectorError =
-      validator.validateDetectorGrouping(runData.getGroupingData(), defaultSpectraMin, defaultSpectraMax);
+      validator.validateDetectorGrouping(runData.groupingPropertiesRaw(), defaultSpectraMin, defaultSpectraMax);
   if (!detectorError.empty()) {
     errors.push_back(detectorError);
   }
@@ -52,43 +52,43 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, st
   return errors;
 }
 
-void IETModel::setInstrumentProperties(IAlgorithm_sptr const &reductionAlg, InstrumentData const &instData) {
-  reductionAlg->setProperty("Instrument", instData.getInstrument());
-  reductionAlg->setProperty("Analyser", instData.getAnalyser());
-  reductionAlg->setProperty("Reflection", instData.getReflection());
+void IETModel::setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData) {
+  Mantid::API::AlgorithmProperties::update("Instrument", instData.getInstrument(), properties);
+  Mantid::API::AlgorithmProperties::update("Analyser", instData.getAnalyser(), properties);
+  Mantid::API::AlgorithmProperties::update("Reflection", instData.getReflection(), properties);
 }
 
-void IETModel::setInputProperties(IAlgorithm_sptr const &reductionAlg, IETInputData const &inputData) {
-  reductionAlg->setProperty("InputFiles", inputData.getInputFiles());
-  reductionAlg->setProperty("SumFiles", inputData.getSumFiles());
-  reductionAlg->setProperty("LoadLogFiles", inputData.getLoadLogFiles());
+void IETModel::setInputProperties(IAlgorithmRuntimeProps &properties, IETInputData const &inputData) {
+  Mantid::API::AlgorithmProperties::update("InputFiles", inputData.getInputFiles(), properties);
+  Mantid::API::AlgorithmProperties::update("SumFiles", inputData.getSumFiles(), properties);
+  Mantid::API::AlgorithmProperties::update("LoadLogFiles", inputData.getLoadLogFiles(), properties);
   if (inputData.getUseCalibration()) {
-    reductionAlg->setProperty("CalibrationWorkspace", inputData.getCalibrationWorkspace());
+    Mantid::API::AlgorithmProperties::update("CalibrationWorkspace", inputData.getCalibrationWorkspace(), properties);
   }
 }
 
-void IETModel::setConversionProperties(IAlgorithm_sptr const &reductionAlg, IETConversionData const &conversionData,
+void IETModel::setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                        std::string const &instrument) {
   std::vector<long> detectorRange;
 
   if (instrument == "IRIS" || instrument == "OSIRIS") {
-    reductionAlg->setProperty("Efixed", conversionData.getEfixed());
+    Mantid::API::AlgorithmProperties::update("Efixed", conversionData.getEfixed(), properties);
   }
   detectorRange.emplace_back(conversionData.getSpectraMin());
   detectorRange.emplace_back(conversionData.getSpectraMax());
-  reductionAlg->setProperty("SpectraRange", detectorRange);
+  Mantid::API::AlgorithmProperties::update("SpectraRange", detectorRange, properties);
 }
 
-void IETModel::setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETBackgroundData const &backgroundData) {
+void IETModel::setBackgroundProperties(IAlgorithmRuntimeProps &properties, IETBackgroundData const &backgroundData) {
   if (backgroundData.getRemoveBackground()) {
     std::vector<double> backgroundRange;
     backgroundRange.emplace_back(backgroundData.getBackgroundStart());
     backgroundRange.emplace_back(backgroundData.getBackgroundEnd());
-    reductionAlg->setProperty("BackgroundRange", backgroundRange);
+    Mantid::API::AlgorithmProperties::update("BackgroundRange", backgroundRange, properties);
   }
 }
 
-void IETModel::setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData) {
+void IETModel::setRebinProperties(IAlgorithmRuntimeProps &properties, IETRebinData const &rebinData) {
   if (rebinData.getShouldRebin()) {
     std::string rebin;
 
@@ -98,38 +98,23 @@ void IETModel::setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinD
     } else {
       rebin = rebinData.getRebinString();
     }
-
-    reductionAlg->setProperty("RebinString", rebin);
+    Mantid::API::AlgorithmProperties::update("RebinString", rebin, properties);
   }
 }
 
-void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAnalysisData const &analysisData) {
+void IETModel::setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData) {
   if (analysisData.getUseDetailedBalance()) {
-    reductionAlg->setProperty("DetailedBalance", analysisData.getDetailedBalance());
+    Mantid::API::AlgorithmProperties::update("DetailedBalance", analysisData.getDetailedBalance(), properties);
   }
 }
 
-void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData) {
-  std::pair<std::string, std::string> grouping = createGrouping(groupingData);
-
-  reductionAlg->setProperty("GroupingMethod", grouping.first);
-
-  if (grouping.first == "File")
-    reductionAlg->setProperty("MapFile", grouping.second);
-  else if (grouping.first == "Custom")
-    reductionAlg->setProperty("GroupingString", grouping.second);
-  else if (grouping.first == "Groups")
-    reductionAlg->setProperty("NGroups", grouping.second);
-}
-
-void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
+void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                                    std::string const &outputGroupName) {
   if (outputData.getUseDeltaEInWavenumber()) {
-    reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
+    Mantid::API::AlgorithmProperties::update("UnitX", std::string("DeltaE_inWavenumber"), properties);
   }
-  reductionAlg->setProperty("FoldMultipleFrames", outputData.getFoldMultipleFrames());
-
-  reductionAlg->setProperty("OutputWorkspace", outputGroupName);
+  Mantid::API::AlgorithmProperties::update("FoldMultipleFrames", outputData.getFoldMultipleFrames(), properties);
+  Mantid::API::AlgorithmProperties::update("OutputWorkspace", outputGroupName, properties);
 }
 
 std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
@@ -141,42 +126,27 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
 }
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                      InstrumentData const &instData, IETRunData const &runData) {
-  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
-  reductionAlg->initialize();
+                                      InstrumentData const &instData, IETRunData &runData) {
+  auto properties = runData.groupingProperties();
 
-  setInstrumentProperties(reductionAlg, instData);
-  setInputProperties(reductionAlg, runData.getInputData());
-  setConversionProperties(reductionAlg, runData.getConversionData(), instData.getInstrument());
-  setBackgroundProperties(reductionAlg, runData.getBackgroundData());
-  setRebinProperties(reductionAlg, runData.getRebinData());
-  setAnalysisProperties(reductionAlg, runData.getAnalysisData());
-  setGroupingProperties(reductionAlg, runData.getGroupingData());
+  setInstrumentProperties(*properties, instData);
+  setInputProperties(*properties, runData.getInputData());
+  setConversionProperties(*properties, runData.getConversionData(), instData.getInstrument());
+  setBackgroundProperties(*properties, runData.getBackgroundData());
+  setRebinProperties(*properties, runData.getRebinData());
+  setAnalysisProperties(*properties, runData.getAnalysisData());
 
   std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
-  setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
+  setOutputProperties(*properties, runData.getOutputData(), outputGroupName);
 
-  batchAlgoRunner->addAlgorithm(reductionAlg);
-  batchAlgoRunner->executeBatchAsync();
+  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  reductionAlg->initialize();
+  API::IConfiguredAlgorithm_sptr configuredAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
+
+  batchAlgoRunner->executeAlgorithmAsync(std::move(configuredAlg));
 
   return outputGroupName;
-}
-
-std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingData &groupingData) {
-  auto groupType = groupingData.getGroupingType();
-
-  if (groupType == IETGroupingType::FILE) {
-    return std::make_pair(IETGroupingType::FILE, groupingData.getGroupingMapFile());
-  } else if (groupType == IETGroupingType::GROUPS) {
-    return std::make_pair(IETGroupingType::GROUPS, std::to_string(groupingData.getNGroups()));
-  } else if (groupType == IETGroupingType::DEFAULT) {
-    return std::make_pair(IETGroupingType::IPF, "");
-  } else if (groupType == IETGroupingType::CUSTOM)
-    return std::make_pair(IETGroupingType::CUSTOM, groupingData.getCustomGroups());
-  else {
-    // Catch All and Individual
-    return std::make_pair(groupType, "");
-  }
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {

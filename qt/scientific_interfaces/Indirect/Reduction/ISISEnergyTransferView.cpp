@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
+#include "Common/DetectorGroupingOptions.h"
 #include "Common/IndirectDataValidationHelper.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
@@ -21,9 +22,6 @@ namespace MantidQt::CustomInterfaces {
 IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(subscriber) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.cbGroupingOptions, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(mappingOptionSelected(const QString &)));
-  connect(m_uiForm.pbSaveCustomGrouping, SIGNAL(clicked()), this, SLOT(saveCustomGroupingClicked()));
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
   connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
@@ -34,10 +32,10 @@ IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(
 
   m_uiForm.dsCalibrationFile->isOptional(true);
 
-  mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
-
-  QRegExp re("([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");
-  m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
+  m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
+  m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+  connect(m_groupingWidget, SIGNAL(saveCustomGrouping(std::string const &)), this,
+          SLOT(saveCustomGroupingClicked(std::string const &)));
 }
 
 IETView::~IETView() {}
@@ -51,10 +49,6 @@ IETRunData IETView::getRunData() const {
   IETConversionData conversionDetails(m_uiForm.spEfixed->value(), m_uiForm.spSpectraMin->value(),
                                       m_uiForm.spSpectraMax->value());
 
-  IETGroupingData groupingDetails(m_uiForm.cbGroupingOptions->currentText().toStdString(),
-                                  m_uiForm.spNumberGroups->value(),
-                                  m_uiForm.dsMapFile->getFirstFilename().toStdString());
-
   IETBackgroundData backgroundDetails(m_uiForm.ckBackgroundRemoval->isChecked(), m_uiForm.spBackgroundStart->value(),
                                       m_uiForm.spBackgroundEnd->value());
 
@@ -66,8 +60,8 @@ IETRunData IETView::getRunData() const {
 
   IETOutputData outputDetails(m_uiForm.ckCm1Units->isChecked(), m_uiForm.ckFold->isChecked());
 
-  IETRunData runParams(inputDetails, conversionDetails, groupingDetails, backgroundDetails, analysisDetails,
-                       rebinDetails, outputDetails);
+  IETRunData runParams(inputDetails, conversionDetails, m_groupingWidget->groupingProperties(), backgroundDetails,
+                       analysisDetails, rebinDetails, outputDetails);
 
   return runParams;
 }
@@ -96,8 +90,6 @@ IETSaveData IETView::getSaveData() const {
 
   return saveTypes;
 }
-
-std::string IETView::getCustomGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
 std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutput->currentText().toStdString(); }
 
@@ -225,10 +217,7 @@ void IETView::setInstrumentDefault(InstrumentData const &instrumentDetails) {
        << "OSIRIS";
   m_uiForm.spEfixed->setEnabled(qens.contains(QString::fromStdString(instrumentName)));
 
-  QStringList allowDefaultGroupingInstruments;
-  allowDefaultGroupingInstruments << "TOSCA";
-  includeExtraGroupingOption(allowDefaultGroupingInstruments.contains(QString::fromStdString(instrumentName)),
-                             "Default");
+  m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
 
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
@@ -303,7 +292,9 @@ void IETView::runClicked() { m_subscriber->notifyRunClicked(); }
 
 void IETView::plotRawClicked() { m_subscriber->notifyPlotRawClicked(); }
 
-void IETView::saveCustomGroupingClicked() { m_subscriber->notifySaveCustomGroupingClicked(); }
+void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
+  m_subscriber->notifySaveCustomGroupingClicked(customGrouping);
+}
 
 void IETView::pbRunFinished() { m_subscriber->notifyRunFinished(); }
 
@@ -316,17 +307,6 @@ void IETView::handleDataReady() {
     emit showMessageBox(errorMessage);
 }
 
-void IETView::mappingOptionSelected(const QString &groupType) {
-  if (groupType == "File")
-    m_uiForm.swGrouping->setCurrentIndex(0);
-  else if (groupType == "Groups")
-    m_uiForm.swGrouping->setCurrentIndex(1);
-  else if (groupType == "Custom")
-    m_uiForm.swGrouping->setCurrentIndex(2);
-  else
-    m_uiForm.swGrouping->setCurrentIndex(3);
-}
-
 void IETView::pbRunEditing() {
   updateRunButton(false, "unchanged", "Editing...", "Run numbers are currently being edited.");
 }
@@ -334,24 +314,6 @@ void IETView::pbRunEditing() {
 void IETView::pbRunFinding() {
   updateRunButton(false, "unchanged", "Finding files...", "Searching for data files for the run numbers entered...");
   m_uiForm.dsRunFiles->setEnabled(false);
-}
-
-int IETView::getGroupingOptionIndex(QString const &option) {
-  auto const index = m_uiForm.cbGroupingOptions->findText(option);
-  return index >= 0 ? index : 0;
-}
-
-bool IETView::isOptionHidden(QString const &option) {
-  auto const index = m_uiForm.cbGroupingOptions->findText(option);
-  return index == -1;
-}
-
-void IETView::includeExtraGroupingOption(bool includeOption, QString const &option) {
-  if (includeOption && isOptionHidden(option)) {
-    m_uiForm.cbGroupingOptions->addItem(option);
-    m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
-  } else if (!includeOption && !isOptionHidden(option))
-    m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
 }
 
 void IETView::setRunEnabled(bool enable) { m_uiForm.pbRun->setEnabled(enable); }
