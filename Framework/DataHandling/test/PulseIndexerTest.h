@@ -25,13 +25,16 @@ public:
   static void destroySuite(PulseIndexerTest *suite) { delete suite; }
 
   void run_test(std::shared_ptr<std::vector<uint64_t>> eventIndices, const size_t start_event_index,
-                const size_t total_events, const size_t firstPulseIndex = 0) {
+                const size_t total_events, const size_t firstPulseIndex = 0, const size_t lastPulseIndex = 0) {
+    // rather than make all the tests supply a value, calculate it when it isn't specified
+    const size_t myLastPulseIndex = (lastPulseIndex == 0) ? eventIndices->size() : lastPulseIndex;
+
     // create the object to test
     PulseIndexer indexer(eventIndices, start_event_index, total_events, entry_name);
 
     // test locating the range of pulse entirely containing the event indices
     TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(), firstPulseIndex);
-    TS_ASSERT_EQUALS(indexer.getLastPulseIndex(), eventIndices->size());
+    TS_ASSERT_EQUALS(indexer.getLastPulseIndex(), myLastPulseIndex);
 
     // things before
     const auto exp_start_event = eventIndices->operator[](firstPulseIndex) - start_event_index;
@@ -42,21 +45,20 @@ public:
 
     // test locating the first event index for the pulse
     // how start_event_index affects values is baked in from how code worked pre 2024
-    for (size_t i = firstPulseIndex; i < eventIndices->size() - 1; ++i) {
-      // std::cout << "==> " << i << "\n";
+    for (size_t i = firstPulseIndex; i < myLastPulseIndex - 1; ++i) {
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), eventIndices->operator[](i) - start_event_index);
       TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), eventIndices->operator[](i + 1) - start_event_index);
     }
 
     // last element is a little different
-    if (false) {
-      const size_t i = eventIndices->size() - 1;
+    {
+      const size_t i = myLastPulseIndex - 1;
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), eventIndices->operator[](i) - start_event_index);
-      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), total_events);
+      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), total_events - start_event_index);
     }
 
     // check past the end
-    for (size_t i = eventIndices->size(); i < eventIndices->size() + 2; ++i) {
+    for (size_t i = myLastPulseIndex; i < eventIndices->size() + 2; ++i) {
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), indexer.getStopEventIndex(i));
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), total_events - start_event_index);
     }
@@ -113,5 +115,16 @@ public:
     constexpr size_t total_events{20};
 
     run_test(eventIndices, start_event_index, total_events, first_pulse_index);
+  }
+
+  void test_nonConstantWithOffsetAndTrimStop() {
+    auto eventIndices = generate_nonConstant();
+
+    constexpr size_t first_pulse_index{1};
+    const size_t last_pulse_index{eventIndices->size() - 1};
+    const auto start_event_index = eventIndices->operator[](1);
+    const size_t total_events{eventIndices->back() - eventIndices->operator[](first_pulse_index) - 1};
+
+    run_test(eventIndices, start_event_index, total_events, first_pulse_index, last_pulse_index);
   }
 };

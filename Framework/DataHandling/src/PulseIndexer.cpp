@@ -18,9 +18,9 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   m_numPulses = m_event_index->size();
 
   // determine first useful pulse index
-  m_roi.push_back(this->determineFirstPulseIndex(firstEventIndex));
+  m_roi.push_back(this->determineFirstPulseIndex());
   // for now, use all pulses up to the end
-  m_roi.push_back(m_event_index->size());
+  m_roi.push_back(this->determineLastPulseIndex());
 
   /*
   if (firstEventIndex > 0) { // REMOVE
@@ -35,13 +35,13 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
  * This performs a linear search because it is much more likely that the index
  * to look for is at the beginning.
  */
-size_t PulseIndexer::determineFirstPulseIndex(const std::size_t firstEventIndex) const {
+size_t PulseIndexer::determineFirstPulseIndex() const {
   // return early if the number of event indices is too small
   if (1 >= m_event_index->size())
     return 1;
 
   // special case to stop from setting up temporary objects because the first event is in the first pulse
-  if (firstEventIndex == 0)
+  if (m_firstEventIndex == 0)
     return 0;
 
   // linear search is used because it is more likely that the pulse index is earlier in the array.
@@ -50,7 +50,7 @@ size_t PulseIndexer::determineFirstPulseIndex(const std::size_t firstEventIndex)
   const auto event_index_end = m_event_index->cend();
   auto event_index_iter = m_event_index->cbegin();
 
-  while ((firstEventIndex < *event_index_iter) || (firstEventIndex >= *(event_index_iter + 1))) {
+  while ((m_firstEventIndex < *event_index_iter) || (m_firstEventIndex >= *(event_index_iter + 1))) {
     event_index_iter++;
 
     // make sure not to go past the end
@@ -58,6 +58,30 @@ size_t PulseIndexer::determineFirstPulseIndex(const std::size_t firstEventIndex)
       break;
   }
   return static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
+}
+
+/**
+ * This looks at the event_indexes and number of events to read then determines what is the maximum pulse to use.
+ */
+size_t PulseIndexer::determineLastPulseIndex() const {
+  if (m_firstEventIndex + m_numEvents > m_event_index->back())
+    return m_event_index->size();
+
+  const auto eventIndexValue = m_firstEventIndex + m_numEvents;
+  // linear search is used because it is more likely that the pulse index is closer to the end of the array.
+  // a bisecting search would win if most of the time the first event_index is much after the first quarter of the
+  // pulse_index array.
+  const auto event_index_end = m_event_index->crend();
+  auto event_index_iter = m_event_index->crbegin();
+  while ((eventIndexValue > *event_index_iter) || (eventIndexValue <= *(event_index_iter + 1))) {
+    event_index_iter++;
+
+    // make sure not to go past the end
+    if (event_index_iter + 1 == event_index_end)
+      break;
+  }
+
+  return static_cast<size_t>(m_event_index->size() - std::distance(m_event_index->crbegin(), event_index_iter));
 }
 
 /**

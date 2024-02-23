@@ -55,7 +55,8 @@ public:
 private:
   PulseIndexer(); // do not allow empty constructor
 
-  size_t determineFirstPulseIndex(const std::size_t firstEventIndex) const;
+  size_t determineFirstPulseIndex() const;
+  size_t determineLastPulseIndex() const;
 
   /// vector of indices (length of # of pulses) into the event arrays
   const std::shared_ptr<std::vector<uint64_t>> m_event_index;
@@ -69,7 +70,8 @@ private:
 
   /**
    * Total number of events tof/detid that should be processed. This can be less than the total number of events in the
-   * actual array.
+   * actual array. This value plus the m_firstEventIndex should be <= the total events in the NXevent_data being
+   * processed.
    */
   std::size_t m_numEvents;
 
