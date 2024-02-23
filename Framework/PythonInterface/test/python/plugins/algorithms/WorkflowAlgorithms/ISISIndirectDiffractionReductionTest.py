@@ -285,6 +285,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
     def test_reduction_with_different_number_of_groups(self):
         # Non-divisible numbers will have an extra group with the remaining detectors
         results = {5: 5, 10: 11, 4: 5, 15: 15}
+        spectra_min, spectra_max = 3, 197
 
         for number_of_groups, expected_size in results.items():
             reduced_workspace = ISISIndirectDiffractionReduction(
@@ -294,10 +295,15 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
                 InstrumentParFile="IP0005.dat",
                 Instrument="VESUVIO",
                 mode="diffspec",
-                SpectraRange=[3, 197],
+                SpectraRange=[spectra_min, spectra_max],
             )
 
-            self.assertEqual(expected_size, reduced_workspace.getItem(0).getNumberHistograms())
+            workspace = reduced_workspace.getItem(0)
+            self.assertEqual(expected_size, workspace.getNumberHistograms())
+
+            n_detectors_per_group = (spectra_max - spectra_min + 1) // number_of_groups
+            for spec_i in range(number_of_groups):
+                self.assertEqual(n_detectors_per_group, len(workspace.getSpectrum(spec_i).getDetectorIDs()))
 
     def test_reduction_with_map_file(self):
         reduced_workspace = ISISIndirectDiffractionReduction(

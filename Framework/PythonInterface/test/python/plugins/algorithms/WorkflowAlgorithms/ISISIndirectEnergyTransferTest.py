@@ -114,6 +114,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
     def test_ISISIndirectEnergyTransfer_with_different_number_of_groups(self):
         # Non-divisible numbers will have an extra group with the remaining detectors
         results = {5: 5, 10: 10, 4: 5, 12: 13}
+        spectra_min, spectra_max = 3, 52
 
         for number_of_groups, expected_size in results.items():
             reduced_workspace = ISISIndirectEnergyTransfer(
@@ -121,12 +122,17 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                 Instrument="IRIS",
                 Analyser="graphite",
                 Reflection="002",
-                SpectraRange=[3, 52],
+                SpectraRange=[spectra_min, spectra_max],
                 GroupingMethod="Groups",
                 NGroups=number_of_groups,
             )
 
-            self.assertEqual(expected_size, reduced_workspace.getItem(0).getNumberHistograms())
+            workspace = reduced_workspace.getItem(0)
+            self.assertEqual(expected_size, workspace.getNumberHistograms())
+
+            n_detectors_per_group = (spectra_max - spectra_min + 1) // number_of_groups
+            for spec_i in range(number_of_groups):
+                self.assertEqual(n_detectors_per_group, len(workspace.getSpectrum(spec_i).getDetectorIDs()))
 
     def test_reduction_with_background_subtraction(self):
         """

@@ -351,6 +351,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                     group_ws=self._grouping_workspace,
                     group_string=self._grouping_string,
                     number_of_groups=self._number_of_groups,
+                    spectra_range=self._spectra_range,
                 )
 
             if is_multi_frame:

@@ -651,7 +651,9 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None):
+def group_spectra(
+    workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None
+):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -663,14 +665,19 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
+    @param spectra_range The min and max spectra numbers
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string, number_of_groups)
+    grouped_ws = group_spectra_of(
+        mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string, number_of_groups, spectra_range
+    )
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
 
 
-def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None):
+def group_spectra_of(
+    workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None
+):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -682,6 +689,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
+    @param spectra_range The min and max spectra numbers
     """
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
@@ -755,7 +763,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         if len(masked_detectors) > 0:
             _mask_detectors(workspace, masked_detectors)
 
-        group_string = create_detector_grouping_string(number_of_groups, 0, workspace.getNumberHistograms() - 1)
+        group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
         return group_on_string(group_detectors, group_string)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
@@ -779,6 +787,7 @@ def create_grouping_string(group_size: int, number_of_groups: int, spectra_min: 
 def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spectra_max: int) -> str:
     assert number_of_groups > 0, "Number of groups must be greater than zero."
     assert spectra_min <= spectra_max, "Spectra min cannot be larger than spectra max."
+    assert number_of_groups <= spectra_max - spectra_min + 1, "Number of groups must be less or equal to the number of spectra."
     number_of_spectra = 1 + spectra_max - spectra_min
 
     grouping_string = create_grouping_string(int(number_of_spectra / number_of_groups), number_of_groups, spectra_min)
