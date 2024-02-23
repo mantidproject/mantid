@@ -46,6 +46,7 @@ _translations = {
     "mdoucet": "Doucet, Mathieu",
     "Mathieu Doucet": "Doucet, Mathieu",
     "Doucet, Mathieu": "Doucet, Mathieu",
+    "Mat Doucet": "Doucet, Mathieu",
     "Nick Draper": "Draper, Nick",
     "NickDraper": "Draper, Nick",
     "Nicholas Draper": "Draper, Nick",
@@ -218,7 +219,8 @@ _translations = {
     "LolloB": "Basso, Lorenzo",
     "Lorenzo Basso": "Basso, Lorenzo",
     "SOKOLOVA": "Sokolova, Anna",
-    "Conor Finn": "Finn, Conor",
+    "Conor Finn": "Finn, Caila",
+    "Caila Finn": "Finn, Caila",
     "StephenSmith25": "Smith, Stephen",
     "Stephen": "Smith, Stephen",
     "Stephen Smith": "Smith, Stephen",
@@ -317,6 +319,12 @@ _translations = {
     "eric pellegrini": "Pellegrini, Eric",
     "Maria Patrou": "Patrou, Maria",
     "James Clarke": "Clarke, James",
+    "Adri Diaz": "Diaz-Alvarez, Adrian",
+    "adriazalvarez": "Diaz-Alvarez, Adrian",
+    "Waruna Wickramasingha": "Jayasundara Abeykoon Wickramasingha, Waruna Priyankara",
+    "Kevin A. Tactac": "TacTac, Kevin",
+    "GuiMacielPereira": "Pereira, Guilherme",
+    "Kort Travis": "Travis, Kort",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
