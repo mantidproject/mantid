@@ -1,1 +1,0 @@
-- A new feature in PyChop which checks that the user input incident energy is within range for a particular instrument and chopper was added.

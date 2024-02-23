@@ -1,1 +1,0 @@
-- Numeric input in <StartX, EndX> columns for the Data tables in tabs of the :ref:`Data Analysis <interface-inelastic-data-analysis>` interface are formatted to a precision of six digits. Additionally, incorrect inputs are not anymore accepted by the table cells.

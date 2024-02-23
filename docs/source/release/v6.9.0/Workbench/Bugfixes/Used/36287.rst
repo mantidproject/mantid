@@ -1,1 +1,0 @@
-- Mantid's package size has been reduced by removing the algorithm dialog screenshots from the documentation.

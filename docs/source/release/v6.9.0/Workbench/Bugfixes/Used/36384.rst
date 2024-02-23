@@ -1,1 +1,0 @@
-- Fixed a bug where double clicking a plot to open the settings dialog would not end a pan/zoom event if either tool was selected.

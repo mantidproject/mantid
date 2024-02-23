@@ -1,3 +1,0 @@
-- Metadata indicating the subtracted workspace and the scale factor is now saved to CanSAS1D and NXCanSAS subtracted
-  output files when a :ref:`ISIS_SANS_scaled_background-ref` has been performed. This information is located in
-  ``SASprocess``.

@@ -1,1 +1,0 @@
-- Fixed problem where spurious peaks can be added when picking single peaks in the Instrument View.

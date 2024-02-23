@@ -1,1 +1,0 @@
-- Avoid crashing the engineering diffraction GUI :ref:`Engineering Diffraction GUI<Engineering_Diffraction-ref>` when errors are raised from GSASIIscriptable module in the GSAS-II tab.

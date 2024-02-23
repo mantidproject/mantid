@@ -1,1 +1,0 @@
-- By utilizing new methods in EventList :ref:`DiffractionFocussing <algm-DiffractionFocussing>` has improved performance when using EventWorkspaces and ``PreverseEvents=False``.

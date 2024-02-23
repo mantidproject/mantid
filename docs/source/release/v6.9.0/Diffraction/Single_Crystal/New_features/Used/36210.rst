@@ -1,2 +1,0 @@
-- Add option to clear instrument calibration from peaks workspace in addition to a Workspace2D in ``SXD.undo_calibration``
-- Add documentation for :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`

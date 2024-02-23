@@ -1,2 +1,0 @@
-- To improve clarity of metadata, :ref:`algm-SaveCanSAS1D` and :ref:`algm-SaveNXcanSAS` will now save the aperture
-  shape as ``Unknown`` if it is not explicitly given in the algorithm parameters.

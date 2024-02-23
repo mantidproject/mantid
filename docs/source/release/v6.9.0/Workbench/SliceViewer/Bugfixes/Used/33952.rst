@@ -1,1 +1,0 @@
-- Fixed spin box showing an incorrect value when a peak was selected that was outside the range of the data.

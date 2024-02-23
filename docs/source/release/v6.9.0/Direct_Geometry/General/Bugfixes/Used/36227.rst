@@ -1,1 +1,0 @@
-- A crash when closing the ALFView interface while it is processing data has been fixed.

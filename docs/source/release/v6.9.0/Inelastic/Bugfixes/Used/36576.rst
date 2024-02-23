@@ -1,1 +1,0 @@
-- The full fit function names are now used on the ConvFit tab of :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` to avoid confusion with similarly named functions.

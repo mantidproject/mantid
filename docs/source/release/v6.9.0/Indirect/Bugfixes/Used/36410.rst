@@ -1,1 +1,0 @@
-- Fixed a bug where ApplyAbsorptionCorrections would not load a *_Corrections* file if it only contained a single correction component.

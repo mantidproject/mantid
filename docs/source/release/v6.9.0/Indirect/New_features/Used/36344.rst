@@ -1,1 +1,0 @@
--  The slice viewer can be opened instead of a contour in the external plot options of the Inelastic/Indirect Interfaces with a plot contour option.
