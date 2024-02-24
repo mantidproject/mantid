@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 #include <utility>
 
-#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
 #include "Analysis/ParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"

@@ -12,8 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
-#include "Analysis/FunctionTemplateBrowser.h"
 #include "Analysis/IIndirectFitDataView.h"
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
 #include "Analysis/IIndirectFitOutputOptionsView.h"

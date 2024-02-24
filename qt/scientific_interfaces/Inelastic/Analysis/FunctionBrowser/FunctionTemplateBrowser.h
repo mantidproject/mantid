@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "ParameterEstimation.h"
 
 #include <QList>
 #include <QMap>
@@ -41,11 +41,6 @@ using namespace MantidWidgets;
 
 class ITemplatePresenter;
 
-/**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
- * and set properties that can be used to generate a fit function.
- *
- */
 class MANTIDQT_INELASTIC_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:

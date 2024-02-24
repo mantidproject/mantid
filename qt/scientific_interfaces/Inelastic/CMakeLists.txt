@@ -14,7 +14,6 @@ set(SRC_FILES
     Analysis/MSDFitModel.cpp
     Analysis/IDAFunctionParameterEstimation.cpp
     Analysis/FitStatusWidget.cpp
-    Analysis/FunctionTemplateBrowser.cpp
     Analysis/IndirectDockWidgetArea.cpp
     Analysis/IndirectEditResultsDialog.cpp
     Analysis/IndirectFitData.cpp
@@ -34,6 +33,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
     Analysis/FunctionBrowser/FitTypes.cpp
+    Analysis/FunctionBrowser/FunctionTemplateBrowser.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
@@ -94,7 +94,6 @@ set(MOC_FILES
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
-    Analysis/FunctionTemplateBrowser.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
     Analysis/IndirectFitDataView.h
@@ -102,6 +101,7 @@ set(MOC_FILES
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
+    Analysis/FunctionBrowser/FunctionTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
     BayesFitting/BayesFitting.h

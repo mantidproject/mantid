@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplateBrowser.h"
 
-#include "FunctionBrowser/ITemplatePresenter.h"
+#include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -32,10 +32,6 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
 FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
     : QWidget(parent), m_parameterNames(), m_decimals(6) {}
 
