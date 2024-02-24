@@ -35,8 +35,6 @@ public:
 
   void setFunction(std::string const &funStr) override;
 
-  void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
-
   void tieIntensities(bool on) override;
   bool canTieIntensities() const override;
 

@@ -102,11 +102,6 @@ void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
-  model()->updateMultiDatasetParameters(table);
-  updateViewParameters();
-}
-
 void ConvTemplatePresenter::setBackgroundA0(double value) {
   m_model->setBackgroundA0(value);
   updateViewParameters();

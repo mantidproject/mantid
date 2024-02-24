@@ -144,7 +144,10 @@ void FunctionTemplatePresenter::updateMultiDatasetParameters(const IFunction &fu
   updateView();
 }
 
-void FunctionTemplatePresenter::updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) { (void)table; }
+void FunctionTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
+  m_model->updateMultiDatasetParameters(table);
+  updateView();
+}
 
 void FunctionTemplatePresenter::updateParameters(const IFunction &fun) {
   m_model->updateParameters(fun);

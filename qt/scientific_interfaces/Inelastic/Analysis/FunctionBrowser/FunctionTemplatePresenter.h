@@ -55,7 +55,7 @@ public:
   virtual void setFitType(std::string const &name) override;
 
   void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
-  virtual void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
+  void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
   void updateParameters(const Mantid::API::IFunction &fun) override;
 
   void setCurrentDataset(int i) override;

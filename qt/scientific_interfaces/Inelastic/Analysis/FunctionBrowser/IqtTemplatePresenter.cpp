@@ -115,11 +115,6 @@ void IqtTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
-  model()->updateMultiDatasetParameters(table);
-  updateViewParameters();
-}
-
 void IqtTemplatePresenter::tieIntensities(bool on) {
   if (on && !canTieIntensities())
     return;
