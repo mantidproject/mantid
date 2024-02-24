@@ -53,12 +53,8 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
 
-  void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
-                                        QList<bool> const &fixes, QStringList const &ties,
-                                        QStringList const &constraints) override;
-
-private:
-  void updateView();
+protected:
+  void updateView() override;
 };
 
 } // namespace IDA

@@ -53,14 +53,12 @@ public:
 
   void setBackgroundA0(double value) override;
 
-  void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
-                                        QList<bool> const &fixes, QStringList const &ties,
-                                        QStringList const &constraints) override;
+protected:
+  void updateView() override;
 
 private:
   void updateViewParameters();
   void updateViewParameterNames();
-  void updateView();
 };
 
 } // namespace IDA

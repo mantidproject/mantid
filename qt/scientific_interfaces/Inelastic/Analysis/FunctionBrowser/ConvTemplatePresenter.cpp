@@ -150,6 +150,11 @@ void ConvTemplatePresenter::setResolution(const std::vector<std::pair<std::strin
   model()->setResolution(fitResolutions);
 }
 
+void ConvTemplatePresenter::updateView() {
+  updateViewParameterNames();
+  updateViewParameters();
+}
+
 void ConvTemplatePresenter::updateViewParameters() {
   auto values = model()->getCurrentValues();
   auto errors = model()->getCurrentErrors();
@@ -159,24 +164,6 @@ void ConvTemplatePresenter::updateViewParameters() {
 }
 
 void ConvTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(model()->getParameterNameMap()); }
-
-void ConvTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
-                                                             QList<double> const &values, QList<bool> const &fixes,
-                                                             QStringList const &ties, QStringList const &constraints) {
-  assert(values.size() == getNumberOfDatasets());
-  for (int i = 0; i < values.size(); ++i) {
-    setLocalParameterValue(parameterName, i, values[i]);
-    if (!ties[i].isEmpty()) {
-      setLocalParameterTie(parameterName, i, ties[i].toStdString());
-    } else if (fixes[i]) {
-      setLocalParameterFixed(parameterName, i, fixes[i]);
-    } else {
-      setLocalParameterTie(parameterName, i, "");
-    }
-    m_model->setLocalParameterConstraint(parameterName, i, constraints[i].toStdString());
-  }
-  updateViewParameters();
-}
 
 EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const {
   return model()->getEstimationDataSelector();

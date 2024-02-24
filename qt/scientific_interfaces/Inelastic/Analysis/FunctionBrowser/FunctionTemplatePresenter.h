@@ -47,6 +47,9 @@ public:
   void setErrorsEnabled(bool enabled) override;
 
   void handleEditLocalParameter(std::string const &parameterName) override;
+  void handleEditLocalParameterFinished(std::string const &parameterName, QList<double> const &values,
+                                        QList<bool> const &fixes, QStringList const &ties,
+                                        QStringList const &constraints) override;
   void handleParameterValueChanged(std::string const &parameterName, double value) override;
 
   virtual void setFitType(std::string const &name) override;
@@ -69,6 +72,8 @@ public:
   virtual void setQValues(const std::vector<double> &qValues) override;
 
 protected:
+  virtual void updateView() = 0;
+
   QStringList getDatasetNames() const;
   QStringList getDatasetDomainNames() const;
 

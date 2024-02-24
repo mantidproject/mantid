@@ -111,24 +111,4 @@ void SingleFunctionTemplatePresenter::updateView() {
   }
 }
 
-void SingleFunctionTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
-                                                                       QList<double> const &values,
-                                                                       QList<bool> const &fixes,
-                                                                       QStringList const &ties,
-                                                                       QStringList const &constraints) {
-  (void)constraints;
-  assert(values.size() == getNumberOfDatasets());
-  for (int i = 0; i < values.size(); ++i) {
-    setLocalParameterValue(parameterName, i, values[i]);
-    if (!ties[i].isEmpty()) {
-      setLocalParameterTie(parameterName, i, ties[i].toStdString());
-    } else if (fixes[i]) {
-      setLocalParameterFixed(parameterName, i, fixes[i]);
-    } else {
-      setLocalParameterTie(parameterName, i, "");
-    }
-  }
-  updateView();
-}
-
 } // namespace MantidQt::CustomInterfaces::IDA

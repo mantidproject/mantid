@@ -97,6 +97,25 @@ void FunctionTemplatePresenter::handleParameterValueChanged(std::string const &p
   m_view->emitFunctionStructureChanged();
 }
 
+void FunctionTemplatePresenter::handleEditLocalParameterFinished(std::string const &parameterName,
+                                                                 QList<double> const &values, QList<bool> const &fixes,
+                                                                 QStringList const &ties,
+                                                                 QStringList const &constraints) {
+  assert(values.size() == getNumberOfDatasets());
+  for (int i = 0; i < values.size(); ++i) {
+    setLocalParameterValue(parameterName, i, values[i]);
+    if (!ties[i].isEmpty()) {
+      setLocalParameterTie(parameterName, i, ties[i].toStdString());
+    } else if (fixes[i]) {
+      setLocalParameterFixed(parameterName, i, fixes[i]);
+    } else {
+      setLocalParameterTie(parameterName, i, "");
+    }
+    m_model->setLocalParameterConstraint(parameterName, i, constraints[i].toStdString());
+  }
+  updateView();
+}
+
 void FunctionTemplatePresenter::handleEditLocalParameter(std::string const &parameterName) {
   auto const datasetNames = getDatasetNames();
   auto const domainNames = getDatasetDomainNames();
