@@ -64,31 +64,6 @@ void SingleFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void SingleFunctionTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
-  m_model->setGlobalParameters(globals);
-  view()->setGlobalParametersQuiet(globals);
-}
-
-void SingleFunctionTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
-  model()->setGlobal(parameterName, on);
-  view()->setGlobalParametersQuiet(m_model->getGlobalParameters());
-}
-
-void SingleFunctionTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
-  m_model->updateMultiDatasetParameters(fun);
-  updateView();
-}
-
-void SingleFunctionTemplatePresenter::updateParameters(const IFunction &fun) {
-  m_model->updateParameters(fun);
-  updateView();
-}
-
-void SingleFunctionTemplatePresenter::setCurrentDataset(int i) {
-  m_model->setCurrentDomainIndex(i);
-  updateView();
-}
-
 EstimationDataSelector SingleFunctionTemplatePresenter::getEstimationDataSelector() const {
   return model()->getEstimationDataSelector();
 }

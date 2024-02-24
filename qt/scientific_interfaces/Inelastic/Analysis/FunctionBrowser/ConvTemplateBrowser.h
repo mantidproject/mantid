@@ -31,6 +31,7 @@ class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowse
 public:
   explicit ConvTemplateBrowser(QWidget *parent = nullptr);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
@@ -52,7 +53,6 @@ protected slots:
 
 private:
   void createProperties() override;
-  void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void createFunctionParameterProperties();
   void createDeltaFunctionProperties();
   void createTempCorrectionProperties();

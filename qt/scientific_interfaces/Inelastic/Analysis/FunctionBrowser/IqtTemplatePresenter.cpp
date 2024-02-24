@@ -115,33 +115,8 @@ void IqtTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void IqtTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
-  m_model->setGlobalParameters(globals);
-  view()->setGlobalParametersQuiet(globals);
-}
-
-void IqtTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
-  model()->setGlobal(parameterName, on);
-  view()->setGlobalParametersQuiet(m_model->getGlobalParameters());
-}
-
-void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
-  m_model->updateMultiDatasetParameters(fun);
-  updateViewParameters();
-}
-
 void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
   model()->updateMultiDatasetParameters(table);
-  updateViewParameters();
-}
-
-void IqtTemplatePresenter::updateParameters(const IFunction &fun) {
-  m_model->updateParameters(fun);
-  updateViewParameters();
-}
-
-void IqtTemplatePresenter::setCurrentDataset(int i) {
-  m_model->setCurrentDomainIndex(i);
   updateViewParameters();
 }
 

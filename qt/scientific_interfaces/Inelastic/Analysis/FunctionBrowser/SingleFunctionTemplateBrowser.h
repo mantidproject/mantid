@@ -32,6 +32,7 @@ public:
   virtual ~SingleFunctionTemplateBrowser() = default;
 
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
   void setBackgroundA0(double) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
@@ -49,7 +50,6 @@ protected slots:
 
 private:
   void createProperties() override;
-  void setGlobalParametersQuiet(std::vector<std::string> const &globals);
 
   QtProperty *m_fitType;
   QMap<std::string, QtProperty *> m_parameterMap;

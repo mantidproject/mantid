@@ -102,40 +102,8 @@ void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void ConvTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
-  m_model->setGlobalParameters(globals);
-}
-
-void ConvTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
-  auto globals = m_model->getGlobalParameters();
-  auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
-  if (on) {
-    if (findIter == globals.cend()) {
-      globals.emplace_back(parameterName);
-    }
-  } else if (findIter != globals.cend()) {
-    globals.erase(findIter);
-  }
-  setGlobalParameters(globals);
-}
-
-void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
-  m_model->updateMultiDatasetParameters(fun);
-  updateViewParameters();
-}
-
 void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &table) {
   model()->updateMultiDatasetParameters(table);
-  updateViewParameters();
-}
-
-void ConvTemplatePresenter::updateParameters(const IFunction &fun) {
-  m_model->updateParameters(fun);
-  updateViewParameters();
-}
-
-void ConvTemplatePresenter::setCurrentDataset(int i) {
-  m_model->setCurrentDomainIndex(i);
   updateViewParameters();
 }
 

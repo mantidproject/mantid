@@ -78,6 +78,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &table);
   void updateParameters(const IFunction &fun);
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
+  virtual void setGlobalParametersQuiet(std::vector<std::string> const &globals) = 0;
 
   virtual void clear();
   virtual EstimationDataSelector getEstimationDataSelector() const;

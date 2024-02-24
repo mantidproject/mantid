@@ -35,14 +35,7 @@ public:
 
   void setFunction(std::string const &funStr) override;
 
-  void setGlobalParameters(std::vector<std::string> const &globals) override;
-  void setGlobal(std::string const &parameterName, bool on) override;
-
-  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
   void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) override;
-  void updateParameters(const IFunction &fun) override;
-
-  void setCurrentDataset(int i) override;
 
   void tieIntensities(bool on) override;
   bool canTieIntensities() const override;

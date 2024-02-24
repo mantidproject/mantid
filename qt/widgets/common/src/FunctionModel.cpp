@@ -469,6 +469,20 @@ void FunctionModel::removeConstraint(std::string const &parameterName) {
 
 std::vector<std::string> FunctionModel::getGlobalParameters() const { return m_globalParameterNames; }
 
+void FunctionModel::setGlobal(std::string const &parameterName, bool on) {
+  if (parameterName.empty())
+    return;
+  if (!on) {
+    auto newEnd = std::remove(m_globalParameterNames.begin(), m_globalParameterNames.end(), parameterName);
+    if (newEnd != m_globalParameterNames.end()) {
+      m_globalParameterNames.erase(newEnd, m_globalParameterNames.end());
+    }
+  } else if (std::find(m_globalParameterNames.cbegin(), m_globalParameterNames.cend(), parameterName) ==
+             m_globalParameterNames.cend()) {
+    m_globalParameterNames.emplace_back(parameterName);
+  }
+}
+
 void FunctionModel::setGlobalParameters(const std::vector<std::string> &globals) { m_globalParameterNames = globals; }
 
 std::vector<std::string> FunctionModel::getLocalParameters() const {

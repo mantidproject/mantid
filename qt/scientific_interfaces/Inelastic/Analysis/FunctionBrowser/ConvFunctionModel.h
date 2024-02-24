@@ -59,7 +59,7 @@ public:
   std::vector<std::string> getGlobalParameters() const override;
   void setGlobalParameters(std::vector<std::string> const &globals) override;
   bool isGlobal(std::string const &parameterName) const override;
-  void setGlobal(std::string const &parameterName, bool on);
+  void setGlobal(std::string const &parameterName, bool on) override;
   std::vector<std::string> getLocalParameters() const override;
   void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateParameters(const IFunction &fun) override;

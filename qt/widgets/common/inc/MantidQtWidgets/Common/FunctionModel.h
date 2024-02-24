@@ -67,6 +67,7 @@ public:
   void addConstraint(std::string const &functionIndex, std::string const &constraint) override;
   void removeConstraint(std::string const &parameterName) override;
   std::vector<std::string> getGlobalParameters() const override;
+  void setGlobal(std::string const &parameterName, bool on) override;
   void setGlobalParameters(const std::vector<std::string> &globals) override;
   bool isGlobal(std::string const &parameterName) const override;
   std::vector<std::string> getLocalParameters() const override;

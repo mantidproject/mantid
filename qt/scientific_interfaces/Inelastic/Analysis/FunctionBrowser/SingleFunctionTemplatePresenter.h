@@ -41,14 +41,6 @@ public:
 
   void setFunction(std::string const &funStr) override;
 
-  void setGlobalParameters(std::vector<std::string> const &globals) override;
-  void setGlobal(std::string const &parameterName, bool on) override;
-
-  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
-  void updateParameters(const IFunction &fun) override;
-
-  void setCurrentDataset(int i) override;
-
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;

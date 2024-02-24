@@ -139,7 +139,32 @@ void FunctionTemplatePresenter::handleEditLocalParameter(std::string const &para
 
 void FunctionTemplatePresenter::setFitType(std::string const &name) { (void)name; }
 
+void FunctionTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
+  m_model->updateMultiDatasetParameters(fun);
+  updateView();
+}
+
 void FunctionTemplatePresenter::updateMultiDatasetParameters(const Mantid::API::ITableWorkspace &table) { (void)table; }
+
+void FunctionTemplatePresenter::updateParameters(const IFunction &fun) {
+  m_model->updateParameters(fun);
+  updateView();
+}
+
+void FunctionTemplatePresenter::setCurrentDataset(int i) {
+  m_model->setCurrentDomainIndex(i);
+  updateView();
+}
+
+void FunctionTemplatePresenter::setGlobalParameters(std::vector<std::string> const &globals) {
+  m_model->setGlobalParameters(globals);
+  m_view->setGlobalParametersQuiet(globals);
+}
+
+void FunctionTemplatePresenter::setGlobal(std::string const &parameterName, bool on) {
+  m_model->setGlobal(parameterName, on);
+  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
+}
 
 void FunctionTemplatePresenter::setNumberOfExponentials(int nExponentials) { (void)nExponentials; }
 
