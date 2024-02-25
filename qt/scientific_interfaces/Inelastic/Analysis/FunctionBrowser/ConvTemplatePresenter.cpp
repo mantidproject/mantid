@@ -84,8 +84,8 @@ void ConvTemplatePresenter::setTempCorrection(bool on) {
 void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
 
-  auto convView = view();
-  auto convModel = model();
+  ConvTemplateBrowser *convView = view();
+  ConvFunctionModel const *convModel = model();
   convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection(), convModel->hasDeltaFunction());
 
   convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
