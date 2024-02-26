@@ -83,7 +83,7 @@ Usage
         print(myFile.readline())
 
 .. testoutput:: SaveISISReflectometryORSO_general_usage
-   :options: +NORMALIZE_WHITESPACE
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    # # ORSO reflectivity data file | ... standard | YAML encoding | https://www.reflectometry.org/
 
