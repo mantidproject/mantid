@@ -107,7 +107,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], GroupingPolicy="Individual"
+            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], GroupingMethod="Individual"
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -217,7 +217,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
             Instrument="OSIRIS",
             Mode="diffspec",
             SpectraRange=[3, 962],
-            GroupingPolicy="Workspace",
+            GroupingMethod="Workspace",
             GroupingWorkspace="__grouping",
         )
 
@@ -252,7 +252,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
         wks = ISISIndirectDiffractionReduction(
             InputFiles=["29244"],
-            GroupingPolicy="Individual",
+            GroupingMethod="Individual",
             InstrumentParFile="IP0005.dat",
             Instrument="VESUVIO",
             mode="diffspec",
@@ -272,7 +272,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         for custom_string, expected_size in custom_grouping_strings.items():
             reduced_workspace = ISISIndirectDiffractionReduction(
                 InputFiles=["29244"],
-                GroupingPolicy="Custom",
+                GroupingMethod="Custom",
                 GroupingString=custom_string,
                 InstrumentParFile="IP0005.dat",
                 Instrument="VESUVIO",
@@ -290,7 +290,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         for number_of_groups, expected_size in results.items():
             reduced_workspace = ISISIndirectDiffractionReduction(
                 InputFiles=["29244"],
-                GroupingPolicy="Groups",
+                GroupingMethod="Groups",
                 NGroups=number_of_groups,
                 InstrumentParFile="IP0005.dat",
                 Instrument="VESUVIO",
@@ -308,7 +308,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
     def test_reduction_with_map_file(self):
         reduced_workspace = ISISIndirectDiffractionReduction(
             InputFiles=["29244"],
-            GroupingPolicy="File",
+            GroupingMethod="File",
             MapFile="vesuvio_4_by_24.map",
             InstrumentParFile="IP0005.dat",
             Instrument="VESUVIO",

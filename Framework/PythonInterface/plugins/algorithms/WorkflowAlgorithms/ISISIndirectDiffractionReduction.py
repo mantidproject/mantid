@@ -133,7 +133,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(name="RebinParam", defaultValue="", doc="Rebin parameters.")
 
         self.declareProperty(
-            name="GroupingPolicy",
+            name="GroupingMethod",
             defaultValue="All",
             validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
             doc="The method used to group detectors.",
@@ -198,7 +198,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 issues["CalFile"] = "Cal Files are currently only available for use in OSIRIS diffspec mode"
 
         # Validate grouping method
-        grouping_method = self.getPropertyValue("GroupingPolicy")
+        grouping_method = self.getPropertyValue("GroupingMethod")
         grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
 
         if grouping_method == "Workspace" and grouping_ws is None:
@@ -392,7 +392,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty("SpectraRange").value
         self._rebin_string = self.getPropertyValue("RebinParam")
 
-        self._grouping_method = self.getPropertyValue("GroupingPolicy")
+        self._grouping_method = self.getPropertyValue("GroupingMethod")
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
