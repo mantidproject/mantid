@@ -31,7 +31,7 @@ Elwin tab
 #. In the main GUI right-click on ``MAR27691-27698_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
 #. This should plot two lines of :math:`ln(Counts(microAmp.hour))^{-1}` vs :math:`Q2`
 
-.. _elwin_indirect_test:
+.. _elwin_inelastic_test:
 
 2. Indirect data
 ################
@@ -68,7 +68,7 @@ I(Q, T) tab
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *MARI27691_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
-.. _iqt_indirect_test:
+.. _iqt_inelastic_test:
 
 2. Indirect data
 ################
