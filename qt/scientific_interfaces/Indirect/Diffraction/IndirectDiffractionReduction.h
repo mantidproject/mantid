@@ -40,7 +40,6 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
-  void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
   void deleteGroupingWorkspace();
   void validateSpectrumMin(int value);

@@ -83,9 +83,6 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
   m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
-  // Update the list of plot options when manual grouping is toggled
-  // connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this, SLOT(manualGroupingToggled(int)));
-
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
 
@@ -801,24 +798,6 @@ void IndirectDiffractionReduction::runFilesFound() {
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
-}
-
-/**
- * Handles the user toggling the manual grouping check box.
- *
- * @param state The selection state of the check box
- */
-void IndirectDiffractionReduction::manualGroupingToggled(int state) {
-  switch (state) {
-  case Qt::Unchecked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
-    break;
-  case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceUnit);
-    break;
-  default:
-    return;
-  }
 }
 
 void IndirectDiffractionReduction::setRunIsRunning(bool running) {
