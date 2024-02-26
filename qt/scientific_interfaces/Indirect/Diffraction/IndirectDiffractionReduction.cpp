@@ -37,7 +37,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
     : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_groupingComponent() {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); }
 
@@ -160,11 +160,6 @@ void IndirectDiffractionReduction::run() {
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
-
-  // Delete grouping workspace, if created.
-  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
-    deleteGroupingWorkspace();
-  }
 
   setRunIsRunning(false);
 
@@ -383,15 +378,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
       msgDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
   }
 
-  auto diffRuntimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  m_groupingWsName = "__Grouping";
-  // Add the property for grouping policy if needed
-  // if (useManualGrouping) {
-  //  msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-  //  createGroupingWorkspace(m_groupingWsName);
-  //  diffRuntimeProps->setPropertyValue("GroupingWorkspace", m_groupingWsName);
-  //}
-  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(diffRuntimeProps));
+  auto groupingProps = m_groupingWidget->groupingProperties();
+  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(groupingProps));
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -475,29 +463,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectDiffractionReduction::createGroupingWorkspace(const std::string &outputWsName) {
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-  // auto const numberOfGroups = m_uiForm.spNumberGroups->value();
-  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
-
-  auto groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-  groupingAlg->initialize();
-  // groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
-  groupingAlg->setProperty("InstrumentName", instrument);
-  groupingAlg->setProperty("ComponentName", m_groupingComponent);
-  groupingAlg->setProperty("OutputWorkspace", outputWsName);
-
-  m_batchAlgoRunner->addAlgorithm(groupingAlg);
-}
-
-void IndirectDiffractionReduction::deleteGroupingWorkspace() {
-  IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", m_groupingWsName);
-  deleteAlg->executeAsync();
-  m_groupingWsName = "";
-}
-
 /**
  * Loads an empty instrument and returns a pointer to the workspace.
  *
@@ -557,9 +522,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-  auto const bankComponent = instrument->getComponentByName("bank");
-  m_groupingComponent = bankComponent ? "bank" : "diffraction";
 
   // Get default spectra range
   double specMin = instrument->getNumberParameter("spectra-min")[0];
