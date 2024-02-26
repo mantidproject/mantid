@@ -94,7 +94,7 @@ Usage
 .. testoutput:: SaveISISReflectometryORSO_general_usage
    :options: +NORMALIZE_WHITESPACE
 
-   # # ORSO reflectivity data file | 1.0 standard | YAML encoding | https://www.reflectometry.org/
+   # # ORSO reflectivity data file | ... standard | YAML encoding | https://www.reflectometry.org/
 
 .. testcleanup:: SaveISISReflectometryORSO_general_usage
 
