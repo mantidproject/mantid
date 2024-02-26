@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
+#include "Common/DetectorGroupingOptions.h"
 #include "Common/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -50,6 +51,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 
+  m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
+  m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
@@ -80,7 +84,7 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Update the list of plot options when manual grouping is toggled
-  connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this, SLOT(manualGroupingToggled(int)));
+  // connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this, SLOT(manualGroupingToggled(int)));
 
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
@@ -325,7 +329,7 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
-  bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
+  // bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -385,11 +389,11 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
   auto diffRuntimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   m_groupingWsName = "__Grouping";
   // Add the property for grouping policy if needed
-  if (useManualGrouping) {
-    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-    createGroupingWorkspace(m_groupingWsName);
-    diffRuntimeProps->setPropertyValue("GroupingWorkspace", m_groupingWsName);
-  }
+  // if (useManualGrouping) {
+  //  msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
+  //  createGroupingWorkspace(m_groupingWsName);
+  //  diffRuntimeProps->setPropertyValue("GroupingWorkspace", m_groupingWsName);
+  //}
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(diffRuntimeProps));
 
   // Handles completion of the diffraction algorithm chain
@@ -476,12 +480,12 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
 void IndirectDiffractionReduction::createGroupingWorkspace(const std::string &outputWsName) {
   auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
+  // auto const numberOfGroups = m_uiForm.spNumberGroups->value();
   auto const instrument = instrumentConfig->getInstrumentName().toStdString();
 
   auto groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
-  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
+  // groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
   groupingAlg->setProperty("InstrumentName", instrument);
   groupingAlg->setProperty("ComponentName", m_groupingComponent);
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
@@ -603,12 +607,12 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     m_uiForm.ckUseCalib->setChecked(true);
   }
 
-  if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
-    // Disable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckManualGrouping->setEnabled(false);
-    m_uiForm.ckManualGrouping->setChecked(false);
+  auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
+  m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
+  m_uiForm.fDetectorGrouping->setToolTip(allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
+                                                               : "");
 
+  if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.ckSumFiles->setEnabled(false);
@@ -619,10 +623,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     m_uiForm.ckSumFiles->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
-
-    // Re-enable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("");
-    m_uiForm.ckManualGrouping->setEnabled(true);
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);

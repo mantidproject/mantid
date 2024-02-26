@@ -17,6 +17,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class DetectorGroupingOptions;
+
 class IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
@@ -88,6 +91,7 @@ private:
   std::string m_groupingComponent;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
+  DetectorGroupingOptions *m_groupingWidget;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
