@@ -40,6 +40,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         }
         abins.parameters.hdf_groups = {"ab_initio_data": "PhononAB", "powder_data": "Powder", "crystal_data": "Crystal", "s_data": "S"}
         abins.parameters.sampling = {
+            "bin_width": None,
             "pkt_per_peak": 50,
             "max_wavenumber": 4100.0,
             "min_wavenumber": 0.0,
