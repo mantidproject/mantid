@@ -95,13 +95,13 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   }
   static std::map<Type, TemplateSubTypeDescriptor> g_typeMap;
 };
-GNU_DIAG_ON("undefined-var-template")
 
 template <typename TemplateSubType, typename Type>
 void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(TemplateSubType::g_typeMap[functionType].blocks.front(),
                       TemplateSubType::g_typeMap[functionType].blocks.back(), paramFun);
 }
+GNU_DIAG_ON("undefined-var-template")
 
 } // namespace IDA
 } // namespace CustomInterfaces
