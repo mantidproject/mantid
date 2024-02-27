@@ -10,6 +10,7 @@
 #include "ui_DetectorGroupingOptions.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include <QObject>
@@ -35,6 +36,8 @@ public:
   std::string customGrouping() const;
   int nGroups() const;
 
+  std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
+                                                        std::size_t const &spectraMax) const;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() const;
 
 signals:

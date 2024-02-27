@@ -116,8 +116,6 @@ void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::AP
 void IndirectDiffractionReduction::run() {
   m_plotOptionsPresenter->clearWorkspaces();
 
-  setRunIsRunning(true);
-
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
   if (!m_uiForm.rfSampleFiles->isValid()) {
@@ -128,6 +126,13 @@ void IndirectDiffractionReduction::run() {
   if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() && m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
     showInformationBox("Use Vanadium File checked but no vanadium files "
                        "have been supplied.");
+    return;
+  }
+
+  auto const spectraMin = static_cast<std::size_t>(m_uiForm.spSpecMin->value());
+  auto const spectraMax = static_cast<std::size_t>(m_uiForm.spSpecMax->value());
+  if (auto const message = m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax)) {
+    showInformationBox(QString::fromStdString(*message));
     return;
   }
 
@@ -319,11 +324,11 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::s
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
 void IndirectDiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
+  setRunIsRunning(true);
 
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
-  // bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -394,6 +399,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
  * OSIRISDiffractionReduction algorithm.
  */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
+  setRunIsRunning(true);
+
   // Get the files names from FileFinderWidget widget, and convert them from Qt
   // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();

@@ -53,6 +53,25 @@ std::string DetectorGroupingOptions::customGrouping() const { return m_uiForm.le
 
 int DetectorGroupingOptions::nGroups() const { return m_uiForm.spNumberGroups->value(); }
 
+std::optional<std::string> DetectorGroupingOptions::validateGroupingProperties(std::size_t const &spectraMin,
+                                                                               std::size_t const &spectraMax) const {
+  auto const properties = groupingProperties();
+  std::string groupingType = properties->getProperty("GroupingMethod");
+  if (groupingType == "File" && !properties->existsProperty("MapFile")) {
+    return "Please supply a map file for grouping detectors.";
+  } else if (groupingType == "Custom" && !properties->existsProperty("GroupingString")) {
+    return "Please supply a custom string for grouping detectors.";
+  } else if (groupingType == "Groups") {
+    auto const numberOfSpectra = spectraMax - spectraMin + 1;
+    auto const nGroups = std::stoull(properties->getPropertyValue("NGroups"));
+    if (nGroups > numberOfSpectra) {
+      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
+             ").";
+    }
+  }
+  return std::nullopt;
+}
+
 std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::groupingProperties() const {
   auto const method = groupingMethod();
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();

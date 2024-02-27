@@ -15,6 +15,8 @@
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
+#include <optional>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
