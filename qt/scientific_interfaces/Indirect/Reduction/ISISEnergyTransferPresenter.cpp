@@ -135,8 +135,11 @@ bool IETPresenter::validate() {
   }
 
   auto instrumentDetails = getInstrumentData();
-  std::vector<std::string> errors = m_model->validateRunData(runData, instrumentDetails.getDefaultSpectraMin(),
-                                                             instrumentDetails.getDefaultSpectraMax());
+  std::vector<std::string> errors = m_model->validateRunData(runData);
+  auto const groupingError = m_view->validateGroupingProperties(instrumentDetails.getDefaultSpectraMin(),
+                                                                instrumentDetails.getDefaultSpectraMax());
+  if (groupingError)
+    errors.emplace_back(*groupingError);
 
   for (auto const &error : errors) {
     if (!error.empty())

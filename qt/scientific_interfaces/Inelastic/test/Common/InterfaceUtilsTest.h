@@ -44,4 +44,8 @@ public:
     TS_ASSERT(!groupingStrInRange("11,6-9,3:5,10", 3, 10));
     TS_ASSERT(!groupingStrInRange("14,9-6,5:3,10, 2", 3, 14));
   }
+
+  void test_groupingStrInRange_returns_false_if_grouping_string_is_empty() {
+    TS_ASSERT(!groupingStrInRange("", 3, 10));
+  }
 };

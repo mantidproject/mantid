@@ -18,20 +18,13 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
 IETModel::IETModel() {}
 
-std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, std::size_t const &defaultSpectraMin,
-                                                   std::size_t const &defaultSpectraMax) {
+std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
   std::vector<std::string> errors;
   IETDataValidator validator;
 
   auto inputFiles = runData.getInputData().getInputFiles();
   bool isRunFileValid = !inputFiles.empty();
   std::string firstFileName = inputFiles.substr(0, inputFiles.find(','));
-
-  std::string detectorError =
-      validator.validateDetectorGrouping(runData.groupingPropertiesRaw(), defaultSpectraMin, defaultSpectraMax);
-  if (!detectorError.empty()) {
-    errors.push_back(detectorError);
-  }
 
   std::string analysisError = validator.validateAnalysisData(runData.getAnalysisData());
   if (!analysisError.empty()) {

@@ -109,6 +109,11 @@ void IETView::validateRebinString(UserInputValidator &uiv) const {
   uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
 }
 
+std::optional<std::string> IETView::validateGroupingProperties(std::size_t const &spectraMin,
+                                                               std::size_t const &spectraMax) const {
+  return m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax);
+}
+
 bool IETView::showRebinWidthPrompt() const {
   const char *text = "The Binning width is currently negative, this suggests "
                      "you wish to use logarithmic binning.\n"

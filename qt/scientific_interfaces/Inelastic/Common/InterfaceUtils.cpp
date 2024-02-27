@@ -149,7 +149,9 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &d
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
 
 bool groupingStrInRange(std::string const &customString, std::size_t const &spectraMin, std::size_t const &spectraMax) {
-  assert(!customString.empty());
+  if (customString.empty()) {
+    return false;
+  }
 
   std::vector<std::string> groupingStrings;
   std::vector<std::size_t> groupingNumbers;

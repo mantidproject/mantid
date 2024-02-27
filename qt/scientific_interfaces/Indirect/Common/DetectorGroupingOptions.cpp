@@ -71,8 +71,8 @@ std::optional<std::string> DetectorGroupingOptions::validateGroupingProperties(s
     }
   } else if (groupingType == "Groups") {
     auto const numberOfSpectra = spectraMax - spectraMin + 1;
-    auto const nGroups = std::stoull(properties->getPropertyValue("NGroups"));
-    if (nGroups > numberOfSpectra) {
+    auto const numberOfGroups = std::stoull(properties->getPropertyValue("NGroups"));
+    if (numberOfGroups > numberOfSpectra) {
       return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
              ").";
     }

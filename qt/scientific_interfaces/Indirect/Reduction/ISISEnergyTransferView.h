@@ -47,6 +47,8 @@ public:
   bool isRunFilesValid() const;
   void validateCalibrationFileType(UserInputValidator &uiv) const;
   void validateRebinString(UserInputValidator &uiv) const;
+  std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
+                                                        std::size_t const &spectraMax) const;
 
   bool showRebinWidthPrompt() const;
   void showSaveCustomGroupingDialog(std::string const &customGroupingOutput, std::string const &defaultGroupingFilename,
