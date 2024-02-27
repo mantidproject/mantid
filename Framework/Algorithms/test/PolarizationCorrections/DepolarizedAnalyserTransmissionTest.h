@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/PolarisedSANS/SANSCalcDepolarisedAnalyserTransmission.h"
+#include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
 
 namespace {
 constexpr double T_E_VALUE = 82593.9;
@@ -22,25 +22,25 @@ constexpr double COST_FUNC_MAX = 5e-15;
 } // namespace
 
 using Mantid::Algorithms::CreateSampleWorkspace;
-using Mantid::Algorithms::SANSCalcDepolarisedAnalyserTransmission;
+using Mantid::Algorithms::DepolarizedAnalyserTransmission;
 using Mantid::API::MatrixWorkspace_sptr;
 
-class SANSCalcDepolarisedAnalyserTransmissionTest : public CxxTest::TestSuite {
+class DepolarizedAnalyserTransmissionTest : public CxxTest::TestSuite {
 public:
   void test_name() {
-    SANSCalcDepolarisedAnalyserTransmission const alg;
-    TS_ASSERT_EQUALS(alg.name(), "SANSCalcDepolarisedAnalyserTransmission");
+    DepolarizedAnalyserTransmission const alg;
+    TS_ASSERT_EQUALS(alg.name(), "DepolarizedAnalyserTransmission");
   }
 
   void test_version() {
-    SANSCalcDepolarisedAnalyserTransmission const alg;
+    DepolarizedAnalyserTransmission const alg;
     TS_ASSERT_EQUALS(alg.version(), 1);
   }
 
   void test_normal_exec() {
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    SANSCalcDepolarisedAnalyserTransmission alg;
+    DepolarizedAnalyserTransmission alg;
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -60,7 +60,7 @@ public:
   void test_failed_fit() {
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    SANSCalcDepolarisedAnalyserTransmission alg;
+    DepolarizedAnalyserTransmission alg;
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -77,7 +77,7 @@ public:
   void test_apparently_successful_fit() {
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "0*x");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    SANSCalcDepolarisedAnalyserTransmission alg;
+    DepolarizedAnalyserTransmission alg;
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());

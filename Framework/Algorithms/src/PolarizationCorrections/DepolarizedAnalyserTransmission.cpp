@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/PolarisedSANS/SANSCalcDepolarisedAnalyserTransmission.h"
+#include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -45,13 +45,13 @@ namespace Mantid::Algorithms {
 using namespace API;
 
 // Register the algorithm in the AlgorithmFactory
-DECLARE_ALGORITHM(SANSCalcDepolarisedAnalyserTransmission)
+DECLARE_ALGORITHM(DepolarizedAnalyserTransmission)
 
-std::string const SANSCalcDepolarisedAnalyserTransmission::summary() const {
+std::string const DepolarizedAnalyserTransmission::summary() const {
   return "Calculate the transmission rate through a depolarised He3 cell.";
 }
 
-void SANSCalcDepolarisedAnalyserTransmission::init() {
+void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
                                                                        Kernel::Direction::Input),
                   "The group of fully depolarised workspaces.");
@@ -69,14 +69,14 @@ void SANSCalcDepolarisedAnalyserTransmission::init() {
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
 }
 
-void SANSCalcDepolarisedAnalyserTransmission::exec() {
+void DepolarizedAnalyserTransmission::exec() {
   auto const &dividedWs = calcDepolarisedProportion();
   ITableWorkspace_sptr const &fitParameterWs =
       calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
   setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitParameterWs);
 }
 
-MatrixWorkspace_sptr SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
+MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarisedProportion() {
   MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
   MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
   auto divideAlg = createChildAlgorithm("Divide");
@@ -87,8 +87,8 @@ MatrixWorkspace_sptr SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedPro
 }
 
 ITableWorkspace_sptr
-SANSCalcDepolarisedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
-                                                                             std::string const &outputWsName) {
+DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
+                                                                     std::string const &outputWsName) {
   auto funcStream = FitValues::createFunctionStrStream();
   funcStream << "," << FitValues::EMPTY_CELL_TRANS_NAME << "="
              << getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START));
