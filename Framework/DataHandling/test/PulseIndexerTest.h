@@ -50,17 +50,18 @@ public:
       TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), eventIndices->operator[](i + 1) - start_event_index);
     }
 
+    const auto exp_stop_event = (total_events >= start_event_index) ? (total_events - start_event_index) : total_events;
     // last element is a little different
     {
       const size_t i = myLastPulseIndex - 1;
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), eventIndices->operator[](i) - start_event_index);
-      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), total_events - start_event_index);
+      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), exp_stop_event);
     }
 
     // check past the end
     for (size_t i = myLastPulseIndex; i < eventIndices->size() + 2; ++i) {
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), indexer.getStopEventIndex(i));
-      TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), total_events - start_event_index);
+      TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), exp_stop_event);
     }
   }
 
@@ -82,7 +83,7 @@ public:
     eventIndices->push_back(10);
     eventIndices->push_back(12);
     eventIndices->push_back(15);
-    eventIndices->push_back(16);
+    eventIndices->push_back(18);
 
     TS_ASSERT_EQUALS(eventIndices->size(), 4);
 
@@ -126,5 +127,19 @@ public:
     const size_t total_events{eventIndices->back() - eventIndices->operator[](first_pulse_index) - 1};
 
     run_test(eventIndices, start_event_index, total_events, first_pulse_index, last_pulse_index);
+  }
+
+  void test_repeatingZeros() {
+    // the values are taken from LoadEventNexusTest::test_load_ILL_no_triggers
+    // in essence, the pulse information isn't supplied
+    auto eventIndices = std::make_shared<std::vector<uint64_t>>();
+    eventIndices->push_back(0);
+    eventIndices->push_back(0);
+
+    constexpr size_t start_event_index{0};
+    constexpr size_t total_events{1000};
+    constexpr size_t first_pulse_index{1};
+
+    run_test(eventIndices, start_event_index, total_events, first_pulse_index);
   }
 };

@@ -40,24 +40,36 @@ size_t PulseIndexer::determineFirstPulseIndex() const {
   if (1 >= m_event_index->size())
     return 1;
 
+  size_t firstPulseIndex = 0;
+
   // special case to stop from setting up temporary objects because the first event is in the first pulse
-  if (m_firstEventIndex == 0)
-    return 0;
+  if (m_firstEventIndex != 0) {
+    // linear search is used because it is more likely that the pulse index is earlier in the array.
+    // a bisecting search would win if most of the time the first event_index is much after the first quarter of the
+    // pulse_index array.
+    const auto event_index_end = m_event_index->cend();
+    auto event_index_iter = m_event_index->cbegin();
 
-  // linear search is used because it is more likely that the pulse index is earlier in the array.
-  // a bisecting search would win if most of the time the first event_index is much after the first quarter of the
-  // pulse_index array.
-  const auto event_index_end = m_event_index->cend();
-  auto event_index_iter = m_event_index->cbegin();
+    while ((m_firstEventIndex < *event_index_iter) || (m_firstEventIndex >= *(event_index_iter + 1))) {
+      event_index_iter++;
 
-  while ((m_firstEventIndex < *event_index_iter) || (m_firstEventIndex >= *(event_index_iter + 1))) {
-    event_index_iter++;
-
-    // make sure not to go past the end
-    if (event_index_iter + 1 == event_index_end)
-      break;
+      // make sure not to go past the end
+      if (event_index_iter + 1 == event_index_end)
+        break;
+    }
+    firstPulseIndex = static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
   }
-  return static_cast<size_t>(std::distance(m_event_index->cbegin(), event_index_iter));
+
+  // verify that there isn't a repeat right after the found value
+  if (firstPulseIndex + 1 != m_event_index->size()) {
+    for (; firstPulseIndex < m_event_index->size() - 1; ++firstPulseIndex) {
+      if (m_event_index->operator[](firstPulseIndex) != m_event_index->operator[](firstPulseIndex + 1)) {
+        break;
+      }
+    }
+  }
+
+  return firstPulseIndex;
 }
 
 /**
@@ -73,7 +85,7 @@ size_t PulseIndexer::determineLastPulseIndex() const {
   // pulse_index array.
   const auto event_index_end = m_event_index->crend();
   auto event_index_iter = m_event_index->crbegin();
-  while ((eventIndexValue > *event_index_iter) || (eventIndexValue <= *(event_index_iter + 1))) {
+  while ((eventIndexValue < *event_index_iter)) {
     event_index_iter++;
 
     // make sure not to go past the end
@@ -140,15 +152,18 @@ size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
     return this->getStartEventIndex(pulseIndex);
 
   const auto pulseIndexEnd = pulseIndex + 1;
+
   // check if the requests have gone past the end - order of if/else matters
+  size_t eventIndex = m_event_index->operator[](pulseIndexEnd);
   if (pulseIndexEnd >= m_numPulses) // last pulse should read to the last event
-    return m_numEvents - m_firstEventIndex;
+    eventIndex = m_numEvents;
   else if (pulseIndexEnd >= m_roi.back()) // this can be equal to the number of pulses
-    return m_event_index->operator[](m_roi.back()) - m_firstEventIndex;
+    eventIndex = m_numEvents;
 
-  const size_t lastEventIndex = m_event_index->operator[](pulseIndexEnd) - m_firstEventIndex;
-
-  return std::min(lastEventIndex, m_numEvents - m_firstEventIndex);
+  if (eventIndex > m_firstEventIndex)
+    return eventIndex - m_firstEventIndex;
+  else
+    return m_numEvents;
 }
 
 } // namespace Mantid::DataHandling
