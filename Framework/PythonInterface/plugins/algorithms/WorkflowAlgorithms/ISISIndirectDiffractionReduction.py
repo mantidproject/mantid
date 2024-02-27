@@ -133,6 +133,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(name="RebinParam", defaultValue="", doc="Rebin parameters.")
 
         self.declareProperty(
+            name="GroupingPolicy",
+            defaultValue="All",
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            doc="This property is deprecated (since v6.10), please use the 'GroupingMethod' property instead.",
+        )
+        self.declareProperty(
             name="GroupingMethod",
             defaultValue="All",
             validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
@@ -203,6 +209,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         if grouping_method == "Workspace" and grouping_ws is None:
             issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
+
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
+        if grouping_policy != "All":
+            logger.warning(
+                "The 'GroupingPolicy' algorithm property has been deprecated (since v6.10). Please use the 'GroupingMethod' "
+                "algorithm property instead."
+            )
 
         return issues
 
@@ -392,7 +405,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty("SpectraRange").value
         self._rebin_string = self.getPropertyValue("RebinParam")
 
-        self._grouping_method = self.getPropertyValue("GroupingMethod")
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
+        grouping_method = self.getPropertyValue("GroupingMethod")
+        # 'GroupingPolicy' is deprecated, but if it is provided instead of 'GroupingMethod' then try to use it anyway
+        self._grouping_method = grouping_policy if grouping_policy != "All" and grouping_method == "All" else grouping_method
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
