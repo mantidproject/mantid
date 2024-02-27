@@ -71,17 +71,17 @@ void SANSCalcDepolarisedAnalyserTransmission::init() {
 
 void SANSCalcDepolarisedAnalyserTransmission::exec() {
   auto const &dividedWs = calcDepolarisedProportion();
-  auto const &fitParameterWs =
+  ITableWorkspace_sptr const &fitParameterWs =
       calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
   setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitParameterWs);
 }
 
 MatrixWorkspace_sptr SANSCalcDepolarisedAnalyserTransmission::calcDepolarisedProportion() {
-  auto const &depWsName = getPropertyValue(std::string(PropNames::DEP_WORKSPACE));
-  auto const &mtWsName = getPropertyValue(std::string(PropNames::MT_WORKSPACE));
+  MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
+  MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
   auto divideAlg = createChildAlgorithm("Divide");
-  divideAlg->setProperty("LHSWorkspace", depWsName);
-  divideAlg->setProperty("RHSWorkspace", mtWsName);
+  divideAlg->setProperty("LHSWorkspace", depWs);
+  divideAlg->setProperty("RHSWorkspace", mtWs);
   divideAlg->execute();
   return divideAlg->getProperty(std::string(PropNames::OUTPUT_WORKSPACE));
 }
