@@ -27,6 +27,9 @@ preprocessorErrorDirective
 // Cppcheck struggles with some inheritance chains, some of these might be true though
 unusedPrivateFunction
 
+// Since 2.13 Cppcheck reports how many checkers are used.
+checkersReport
+
 // ----------------- Upstream libs ---------------
 
 // All ANN files as they are upstream anyway
