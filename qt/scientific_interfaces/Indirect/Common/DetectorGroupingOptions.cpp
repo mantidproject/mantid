@@ -35,6 +35,10 @@ void DetectorGroupingOptions::setGroupingMethod(QString const &option) {
   m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
 }
 
+void DetectorGroupingOptions::setSaveCustomVisible(bool const visible) {
+  m_uiForm.pbSaveCustomGrouping->setVisible(visible);
+}
+
 void DetectorGroupingOptions::handleGroupingMethodChanged(QString const &method) {
   m_uiForm.swGrouping->setCurrentIndex(static_cast<int>(GROUPING_METHODS[method.toStdString()]));
 }

@@ -28,6 +28,7 @@ public:
   DetectorGroupingOptions(QWidget *parent);
 
   void setGroupingMethod(QString const &option);
+  void setSaveCustomVisible(bool const visible);
 
   std::string groupingMethod() const;
   std::string mapFile() const;

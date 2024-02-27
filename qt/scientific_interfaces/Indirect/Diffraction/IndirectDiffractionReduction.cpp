@@ -53,6 +53,7 @@ void IndirectDiffractionReduction::initLayout() {
 
   m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
   m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+  m_groupingWidget->setSaveCustomVisible(false);
   m_groupingWidget->setGroupingMethod("All");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
@@ -569,8 +570,8 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
 
   auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
   m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
-  m_uiForm.fDetectorGrouping->setToolTip(allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
-                                                               : "");
+  m_uiForm.fDetectorGrouping->setToolTip(!allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
+                                                                : "");
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable sum files
