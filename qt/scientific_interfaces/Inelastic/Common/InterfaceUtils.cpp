@@ -15,7 +15,12 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
+
+bool isWithinRange(std::size_t const &spectraNumber, std::size_t const &spectraMin, std::size_t const &spectraMax) {
+  return spectraMax != 0 && spectraNumber >= spectraMin && spectraNumber <= spectraMax;
 }
+
+} // namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {
@@ -142,6 +147,25 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &d
 }
 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
+
+bool groupingStrInRange(std::string const &customString, std::size_t const &spectraMin, std::size_t const &spectraMax) {
+  assert(!customString.empty());
+
+  std::vector<std::string> groupingStrings;
+  std::vector<std::size_t> groupingNumbers;
+  // Split the custom string by its delimiters
+  boost::split(groupingStrings, customString, boost::is_any_of(" ,-+:"));
+  // Remove empty strings
+  groupingStrings.erase(std::remove_if(groupingStrings.begin(), groupingStrings.end(),
+                                       [](std::string const &str) { return str.empty(); }),
+                        groupingStrings.end());
+  // Transform strings to size_t's
+  std::transform(groupingStrings.cbegin(), groupingStrings.cend(), std::back_inserter(groupingNumbers),
+                 [](std::string const &str) { return std::stoull(str); });
+  // Find min and max elements
+  auto const range = std::minmax_element(groupingNumbers.cbegin(), groupingNumbers.cend());
+  return isWithinRange(*range.first, spectraMin, spectraMax) && isWithinRange(*range.second, spectraMin, spectraMax);
+}
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces

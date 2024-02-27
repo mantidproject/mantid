@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorGroupingOptions.h"
+#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AlgorithmProperties.h"
 
 #include <unordered_map>
@@ -59,8 +60,15 @@ std::optional<std::string> DetectorGroupingOptions::validateGroupingProperties(s
   std::string groupingType = properties->getProperty("GroupingMethod");
   if (groupingType == "File" && !properties->existsProperty("MapFile")) {
     return "Please supply a map file for grouping detectors.";
-  } else if (groupingType == "Custom" && !properties->existsProperty("GroupingString")) {
-    return "Please supply a custom string for grouping detectors.";
+  } else if (groupingType == "Custom") {
+    if (!properties->existsProperty("GroupingString")) {
+      return "Please supply a custom string for grouping detectors.";
+    } else {
+      std::string customString = properties->getProperty("GroupingString");
+      return InterfaceUtils::groupingStrInRange(customString, spectraMin, spectraMax)
+                 ? std::nullopt
+                 : std::optional<std::string>("Please supply a custom grouping within the correct range.");
+    }
   } else if (groupingType == "Groups") {
     auto const numberOfSpectra = spectraMax - spectraMin + 1;
     auto const nGroups = std::stoull(properties->getPropertyValue("NGroups"));
