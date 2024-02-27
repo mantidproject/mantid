@@ -44,6 +44,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     # Metadata headings
     _ADDITIONAL_FILES_HEADING = "#     additional_files:\n"
     _REDUCTION_HEADING = "# reduction:\n"
+    _REDUCTION_CALL_HEADING = "#   call:"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -86,9 +87,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         # One of the input runs should be an already loaded workspace as this appears differently in the history
         input_ws_name = "Test_ws"
         LoadNexus("38393", OutputWorkspace=input_ws_name)
-        reduced_ws = self._get_ws_from_reduction(
-            f"0000013460, {input_ws_name}, inter38415.nxs", resolution, f"IvsQ_13460+{input_ws_name}+38415", "13463", "13464, 38415"
-        )
+        input_runs = f"0000013460, {input_ws_name}, inter38415.nxs"
+        reduced_ws = self._get_ws_from_reduction(input_runs, resolution, f"IvsQ_13460+{input_ws_name}+38415", "13463", "13464, 38415")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
         expected_data_files = ["INTER00013460", "INTER00038393", "INTER00038415"]
@@ -100,6 +100,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
         metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
         metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
+        metadata_to_check.append(
+            f"{self._REDUCTION_CALL_HEADING} {self._REDUCTION_WORKFLOW_ALG}(InputRunList='{input_runs.replace(' ', '')}'"
+        )
 
         self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
@@ -119,6 +122,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
         metadata_to_check.append(self._get_expected_data_file_metadata(expected_data_files, self._ADDITIONAL_FILES_HEADING))
         metadata_to_check.append(self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING))
+        metadata_to_check.append(f"{self._REDUCTION_CALL_HEADING} '{self._REDUCTION_WORKFLOW_ALG}(InputRunList=''13460''")
 
         self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
@@ -131,6 +135,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
         metadata_to_check = self._get_basic_metadata_expected_from_reduced_ws(reduced_ws)
+        metadata_to_check.append(f"{self._REDUCTION_CALL_HEADING} '{self._REDUCTION_ALG}(InputWorkspace=''TOF_14966_1''")
 
         self._check_file_contents(metadata_to_check, reduced_ws, resolution)
 
@@ -150,7 +155,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         SaveISISReflectometryORSO(InputWorkspace=input_ws, Filename=self._output_filename)
 
-        self._check_data_in_file(input_ws, None)
+        excluded_values = [self._REDUCTION_CALL_HEADING]
+
+        self._check_file_contents(None, input_ws, None, excluded_values)
 
     def test_create_file_with_write_resolution_set_to_false_omits_resolution_column(self):
         ws = self._create_sample_workspace()

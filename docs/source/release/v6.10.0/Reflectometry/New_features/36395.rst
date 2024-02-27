@@ -1,1 +1,1 @@
-- Algorithm :ref:`algm-SaveISISReflectometryORSO` now outputs the individual angle and transmission files in the ORSO file metadata.
+- Algorithm :ref:`algm-SaveISISReflectometryORSO` now outputs the individual angle and transmission files, and the reduction script in the ORSO file metadata.
