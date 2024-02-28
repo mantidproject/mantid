@@ -227,8 +227,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
                        SLOT(setIntegrationRange(double, double)), Qt::QueuedConnection);
   setAcceptDrops(true);
 
-  setWindowTitle(QString("Instrument - ") + m_workspaceName);
-
   // finish widget init now if not using the background thread
   if (!m_useThread) {
     initWidget(true, true);
@@ -1595,7 +1593,7 @@ void InstrumentWidget::afterReplaceHandle(const std::string &wsName, const std::
 void InstrumentWidget::renameHandle(const std::string &oldName, const std::string &newName) {
   if (hasWorkspace(oldName)) {
     renameWorkspace(newName);
-    setWindowTitle(QString("Instrument - ") + getWorkspaceName());
+    nativeParentWidget()->setWindowTitle(QString("Instrument - ") + getWorkspaceName());
   }
 }
 
