@@ -201,16 +201,16 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return "Theta"
 
     def _s1vg_name(self):
-        return "s1vgap" if self._instrument == "OFFSPEC" else "S1VG"
+        return "S1VG"
 
     def _alternative_s1vg_name(self):
-        return "S1VG" if self._instrument == "OFFSPEC" else "s1vg"
+        return "s1vg"
 
     def _s2vg_name(self):
-        return "s2vgap" if self._instrument == "OFFSPEC" else "S2VG"
+        return "S2VG"
 
     def _alternative_s2vg_name(self):
-        return "S2VG" if self._instrument == "OFFSPEC" else "s2vg"
+        return "s2vg"
 
     def _get_double_or_none(self, propertyName):
         value = self.getProperty(propertyName)
