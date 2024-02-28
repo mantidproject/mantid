@@ -2,7 +2,6 @@ name: mantid-developer
 
 channels:
   - conda-forge
-  - mantid
 
 dependencies:
   - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge

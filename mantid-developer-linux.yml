@@ -2,7 +2,6 @@ name: mantid-developer
 
 channels:
   - conda-forge
-  - mantid
 
 dependencies:
   # Common packages
