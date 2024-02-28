@@ -46,6 +46,10 @@ public slots:
   void validateSpectrumMin(int value);
   void validateSpectrumMax(int value);
 
+private slots:
+  void useVanadiumStateChanged(int state);
+  void useCalibStateChanged(int state);
+
 private:
   std::string documentationPage() const override;
 
@@ -64,8 +68,7 @@ private:
                                                      const std::string &target);
 
   bool validateRebin();
-  bool validateVanCal();
-  bool validateCalOnly();
+  bool validateVanCal(bool const mandatory);
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
                                                    const std::string &reflection = "");

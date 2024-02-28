@@ -72,18 +72,15 @@ void IndirectDiffractionReduction::initLayout() {
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
   connectRunButtonValidation(m_uiForm.rfCanFiles);
   connectRunButtonValidation(m_uiForm.rfCalFile);
-  connectRunButtonValidation(m_uiForm.rfCalFile_only);
-  connectRunButtonValidation(m_uiForm.rfVanadiumFile);
-  connectRunButtonValidation(m_uiForm.rfVanFile_only);
+
+  connect(m_uiForm.ckUseVanadium, SIGNAL(stateChanged(int)), this, SLOT(useVanadiumStateChanged(int)));
+  connect(m_uiForm.ckUseCalib, SIGNAL(stateChanged(int)), this, SLOT(useCalibStateChanged(int)));
 
   m_valDbl = new QDoubleValidator(this);
 
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
-  m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
@@ -92,9 +89,6 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Update invalid rebinning markers
   validateRebin();
-
-  // Update invalid markers
-  validateCalOnly();
 
   // Update instrument dependant widgets
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
@@ -123,9 +117,9 @@ void IndirectDiffractionReduction::run() {
     return;
   }
 
-  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() && m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
-    showInformationBox("Use Vanadium File checked but no vanadium files "
-                       "have been supplied.");
+  auto const vanadiumProblem = validateFileFinder(m_uiForm.rfVanFile, m_uiForm.ckUseVanadium->isChecked());
+  if (!vanadiumProblem.isEmpty()) {
+    showInformationBox("Vanadium: " + vanadiumProblem);
     return;
   }
 
@@ -326,20 +320,9 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::s
 void IndirectDiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
   setRunIsRunning(true);
 
-  QString rebinStart = "";
-  QString rebinWidth = "";
-  QString rebinEnd = "";
-
-  // Get rebin string
-  if (mode == "diffspec") {
-    rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
-    rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
-    rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
-  } else if (mode == "diffonly") {
-    rebinStart = m_uiForm.leRebinStart->text();
-    rebinWidth = m_uiForm.leRebinWidth->text();
-    rebinEnd = m_uiForm.leRebinEnd->text();
-  }
+  QString rebinStart = m_uiForm.leRebinStart->text();
+  QString rebinWidth = m_uiForm.leRebinWidth->text();
+  QString rebinEnd = m_uiForm.leRebinEnd->text();
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
@@ -361,14 +344,13 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
   // Check if Cal file is used
   if (instName == "OSIRIS" && mode == "diffspec") {
     if (m_uiForm.ckUseCalib->isChecked()) {
-      const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
+      const auto calFile = m_uiForm.rfCalFile->getText().toStdString();
       msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
   if (mode == "diffspec") {
-
     if (m_uiForm.ckUseVanadium->isChecked()) {
-      const auto vanFile = m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+      const auto vanFile = m_uiForm.rfVanFile->getFilenames().join(",").toStdString();
       msgDiffReduction->setProperty("VanadiumFiles", vanFile);
     }
   }
@@ -426,7 +408,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
   osirisDiffReduction->initialize();
   osirisDiffReduction->setProperty("Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
-  osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanadiumFile->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
   osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
@@ -525,9 +507,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
-  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
@@ -553,27 +533,21 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     calibNeeded = (correctionVector[0] == "Calibration");
   }
 
-  if (vanadiumNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(0);
-  else if (calibNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(1);
-  else if (reflectionName != "diffspec")
-    m_uiForm.swVanadium->setCurrentIndex(2);
-  else
-    m_uiForm.swVanadium->setCurrentIndex(1);
+  // Require vanadium for OSIRIS diffonly
+  auto vanadiumMandatory = instrumentName == "OSIRIS" && reflectionName == "diffonly";
+  m_uiForm.ckUseVanadium->setChecked(vanadiumMandatory);
+  m_uiForm.ckUseVanadium->setDisabled(vanadiumMandatory);
 
-  // Hide options that the current instrument config cannot process
+  // Hide calibration for non-OSIRIS instruments
+  auto calibrationOptional = instrumentName == "OSIRIS";
+  auto calibrationMandatory = calibrationOptional && reflectionName == "diffonly";
+  m_uiForm.ckUseCalib->setVisible(calibrationOptional);
+  m_uiForm.rfCalFile->setVisible(calibrationOptional);
+  m_uiForm.ckUseCalib->setChecked(calibrationMandatory);
+  m_uiForm.ckUseCalib->setDisabled(calibrationMandatory);
 
-  // Disable calibration for IRIS
-  if (instrumentName == "IRIS") {
-    m_uiForm.ckUseCalib->setEnabled(false);
-    m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
-    m_uiForm.ckUseCalib->setChecked(false);
-  } else {
-    m_uiForm.ckUseCalib->setEnabled(true);
-    m_uiForm.ckUseCalib->setToolTip("");
-    m_uiForm.ckUseCalib->setChecked(true);
-  }
+  // Hide rebin options for OSIRIS diffonly
+  m_uiForm.gbDspaceRebinCalibOnly->setVisible(!(instrumentName == "OSIRIS" && reflectionName == "diffonly"));
 
   auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
   m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
@@ -627,9 +601,8 @@ void IndirectDiffractionReduction::loadSettings() {
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
   m_uiForm.rfSampleFiles->readSettings(settings.group());
-  m_uiForm.rfCalFile->readSettings(settings.group());
   m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.rfVanadiumFile->setUserInput(settings.value("last_van_files").toString());
+  m_uiForm.rfVanFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();
 }
 
@@ -638,7 +611,7 @@ void IndirectDiffractionReduction::saveSettings() {
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_cal_file", m_uiForm.rfCalFile->getText());
-  settings.setValue("last_van_files", m_uiForm.rfVanadiumFile->getText());
+  settings.setValue("last_van_files", m_uiForm.rfVanFile->getText());
   settings.endGroup();
 }
 
@@ -687,53 +660,24 @@ bool IndirectDiffractionReduction::validateRebin() {
  *
  * @returns True fo vanadium and calibration files are valid, false otherwise
  */
-bool IndirectDiffractionReduction::validateVanCal() {
-  if (!m_uiForm.rfCalFile->isValid())
-    return false;
+bool IndirectDiffractionReduction::validateVanCal(bool const mandatory) {
+  if (mandatory) {
+    return m_uiForm.rfCalFile->isValid() && m_uiForm.rfVanFile->isValid();
+  }
 
-  if (!m_uiForm.rfVanadiumFile->isValid())
+  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile->isValid()) {
     return false;
+  }
+  if (m_uiForm.ckUseVanadium->isChecked() && !m_uiForm.rfVanFile->isValid()) {
+    return false;
+  }
 
   return true;
 }
 
-/**
- * Checks to see if the cal file and optional rebin fields are valid.
- *
- * @returns True if calibration file and rebin values are valid, false otherwise
- */
-bool IndirectDiffractionReduction::validateCalOnly() {
-  // Check Calib file valid
-  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
-    return false;
+void IndirectDiffractionReduction::useVanadiumStateChanged(int state) { m_uiForm.rfVanFile->setEnabled(state != 0); }
 
-  // Check rebin values valid
-  QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
-  QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
-  QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
-
-  bool rebinValid = true;
-  // Need all or none
-  if (rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty()) {
-    rebinValid = true;
-    m_uiForm.valRebinStart_CalibOnly->setText("");
-    m_uiForm.valRebinWidth_CalibOnly->setText("");
-    m_uiForm.valRebinEnd_CalibOnly->setText("");
-  } else {
-
-    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
-    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
-    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd_CalibOnly);
-
-    if (rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble()) {
-      rebinValid = false;
-      m_uiForm.valRebinStart_CalibOnly->setText("*");
-      m_uiForm.valRebinEnd_CalibOnly->setText("*");
-    }
-  }
-
-  return rebinValid;
-}
+void IndirectDiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile->setEnabled(state != 0); }
 
 /**
  * Disables and shows message on run button indicating that run files have been
