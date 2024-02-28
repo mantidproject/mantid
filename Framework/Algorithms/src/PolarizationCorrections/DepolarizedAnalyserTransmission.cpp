@@ -25,7 +25,7 @@ namespace FitValues {
 double constexpr LAMBDA_CONVERSION_FACTOR = -0.0733;
 double constexpr EMPTY_CELL_TRANS_START = 0.9;
 double constexpr DEPOL_OPACITY_START = 12.6;
-std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_e";
+std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_E";
 std::string_view constexpr DEPOL_OPACITY_NAME = "pxd";
 double constexpr START_X = 1.75;
 double constexpr END_X = 14;
@@ -52,12 +52,13 @@ std::string const DepolarizedAnalyserTransmission::summary() const {
 }
 
 void DepolarizedAnalyserTransmission::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
-                                                                       Kernel::Direction::Input),
-                  "The group of fully depolarised workspaces.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
+                                                           Kernel::Direction::Input),
+      "The fully depolarised helium cell workspace. Should contain a single spectra. Units must be in wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input),
-                  "The group of empty cell workspaces.");
+                  "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the output table workspace containing the fit parameter results.");
@@ -65,7 +66,7 @@ void DepolarizedAnalyserTransmission::init() {
                   "Starting value for the empty analyser cell transmission fit property " +
                       std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
-                  "Starting value for the empty analyser cell transmission fit property " +
+                  "Starting value for the depolarised cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
 }
 
