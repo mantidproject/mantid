@@ -146,7 +146,7 @@ public:
     crop->setPropertyValue("OutputWorkspace", "out");
     crop->execute();
     m_figaroWS = crop->getProperty("OutputWorkspace");
-    load->setProperty("InstrumentName", "INTER");
+    load->setProperty("Filename", "INTER_Definition_2020.xml");
     load->execute();
     m_interWS = load->getProperty("OutputWorkspace");
   }
