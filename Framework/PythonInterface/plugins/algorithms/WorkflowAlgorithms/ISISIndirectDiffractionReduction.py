@@ -254,11 +254,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts=load_opts,
         )
 
-        # applies the changes in the provided calibration file
-        self._apply_calibration()
-        # Load container if run is given
-        self._load_and_scale_container(self._container_scale_factor, load_opts)
-
         # Load vanadium runs if given
         if self._vanadium_runs:
             self._vanadium_ws, _, _ = load_files(
@@ -272,6 +267,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             if len(self._workspace_names) > len(self._vanadium_runs):
                 raise RuntimeError("There cannot be more sample runs than vanadium runs.")
+
+        # applies the changes in the provided calibration file
+        self._apply_calibration()
+        # Load container if run is given
+        self._load_and_scale_container(self._container_scale_factor, load_opts)
 
         for index, c_ws_name in enumerate(self._workspace_names):
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -449,6 +449,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             for ws_name in self._workspace_names:
                 AlignDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, CalibrationFile=self._cal_file)
                 DiffractionFocussing(InputWorkspace=ws_name, OutputWorkspace=ws_name, GroupingFileName=self._cal_file)
+
+            if self._vanadium_ws:
+                for van_ws_name in self._vanadium_ws:
+                    AlignDetectors(InputWorkspace=van_ws_name, OutputWorkspace=van_ws_name, CalibrationFile=self._cal_file)
+                    DiffractionFocussing(InputWorkspace=van_ws_name, OutputWorkspace=van_ws_name, GroupingFileName=self._cal_file)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """
