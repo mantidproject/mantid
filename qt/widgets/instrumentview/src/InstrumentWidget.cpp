@@ -210,15 +210,12 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   observeRename();
   observeADSClear();
 
-  const int windowWidth = 800;
-  const int tabsSize = windowWidth / 4;
+  const int tabsSize = 200;
   QList<int> sizes;
-  sizes << tabsSize << windowWidth - tabsSize;
+  sizes << tabsSize << 600;
   m_controlPanelLayout->setSizes(sizes);
   m_controlPanelLayout->setStretchFactor(0, 0);
   m_controlPanelLayout->setStretchFactor(1, 1);
-
-  resize(windowWidth, 650);
 
   tabChanged(0);
   updateInfoText("Loading instrument...");
@@ -226,8 +223,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   m_qtConnect->connect(this, SIGNAL(needSetIntegrationRange(double, double)), this,
                        SLOT(setIntegrationRange(double, double)), Qt::QueuedConnection);
   setAcceptDrops(true);
-
-  setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
   // finish widget init now if not using the background thread
   if (!m_useThread) {
@@ -1595,7 +1590,7 @@ void InstrumentWidget::afterReplaceHandle(const std::string &wsName, const std::
 void InstrumentWidget::renameHandle(const std::string &oldName, const std::string &newName) {
   if (hasWorkspace(oldName)) {
     renameWorkspace(newName);
-    setWindowTitle(QString("Instrument - ") + getWorkspaceName());
+    nativeParentWidget()->setWindowTitle(QString("Instrument - ") + getWorkspaceName());
   }
 }
 
