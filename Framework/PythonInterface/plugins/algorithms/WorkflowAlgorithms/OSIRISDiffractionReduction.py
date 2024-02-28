@@ -12,7 +12,8 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (
     AddSampleLog,
-    AlignDetectors,
+    ApplyDiffCal,
+    ConvertUnits,
     CloneWorkspace,
     CropWorkspace,
     DeleteWorkspace,
@@ -401,16 +402,19 @@ def diffraction_calibrator(calibration_file):
             InputWorkspace=workspace, OutputWorkspace="normalised_sample", StoreInADS=False, EnableLogging=False
         )
 
-        aligned = AlignDetectors(
+        ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationFile=calibration_file, StoreInADS=False, EnableLogging=False)
+
+        converted = ConvertUnits(
             InputWorkspace=normalised,
-            CalibrationFile=calibration_file,
-            OutputWorkspace="aligned_sample",
+            Target="dSpacing",
             StoreInADS=False,
             EnableLogging=False,
         )
 
+        ApplyDiffCal(InstrumentWorkspace=converted, ClearCalibration=True, StoreInADS=False, EnableLogging=False)
+
         focussed = DiffractionFocussing(
-            InputWorkspace=aligned,
+            InputWorkspace=converted,
             GroupingFileName=calibration_file,
             OutputWorkspace="focussed_sample",
             StoreInADS=False,
