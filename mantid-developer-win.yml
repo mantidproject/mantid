@@ -52,4 +52,4 @@ dependencies:
   - pre-commit>=2.12.0
   - joblib
   - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
-  - mslice
+  - mslice>=2.9.0
