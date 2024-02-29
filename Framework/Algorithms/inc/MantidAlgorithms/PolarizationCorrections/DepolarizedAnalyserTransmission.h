@@ -33,6 +33,9 @@ private:
   /// Execute the algorithm with the provided properties.
   void exec() override;
 
+  /// Validate the provided properties to the algorithm.
+  std::map<std::string, std::string> validateInputs() override;
+
   /// Divide the depolarised workspace by the empty cell workspace.
   API::MatrixWorkspace_sptr calcDepolarisedProportion();
 

@@ -91,8 +91,26 @@ public:
     Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
   }
 
+  void test_invalid_workspace_lengths() {
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 102);
+    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 2);
+    DepolarizedAnalyserTransmission alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("EmptyCellWorkspace", mtWs);
+    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n DepolarisedWorkspace: The depolarised workspace must "
+                            "contain a single spectrum. Contains 4 spectra.\n EmptyCellWorkspace: The empty cell "
+                            "workspace must contain a single spectrum. Contains 10404 spectra.");
+    TS_ASSERT(!alg.isExecuted());
+  }
+
 private:
-  MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula) {
+  MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula,
+                                              int const numSpectra = 1) {
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
     makeWsAlg.setChild(true);
@@ -101,7 +119,7 @@ private:
     makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=" + formula);
     makeWsAlg.setPropertyValue("XUnit", "wavelength");
     makeWsAlg.setProperty("NumBanks", 1);
-    makeWsAlg.setProperty("BankPixelWidth", 1);
+    makeWsAlg.setProperty("BankPixelWidth", numSpectra);
     makeWsAlg.setProperty("XMin", 3.5);
     makeWsAlg.setProperty("XMax", 16.5);
     makeWsAlg.setProperty("BinWidth", 0.1);

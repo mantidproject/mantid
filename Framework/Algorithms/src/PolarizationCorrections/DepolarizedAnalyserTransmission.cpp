@@ -8,6 +8,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/Divide.h"
 
 namespace {
@@ -43,6 +44,7 @@ std::ostringstream createFunctionStrStream() {
 namespace Mantid::Algorithms {
 
 using namespace API;
+using namespace Kernel;
 
 // Register the algorithm in the AlgorithmFactory
 DECLARE_ALGORITHM(DepolarizedAnalyserTransmission)
@@ -52,12 +54,13 @@ std::string const DepolarizedAnalyserTransmission::summary() const {
 }
 
 void DepolarizedAnalyserTransmission::init() {
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
-                                                           Kernel::Direction::Input),
+                                                           Kernel::Direction::Input, wsValidator),
       "The fully depolarised helium cell workspace. Should contain a single spectra. Units must be in wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
-                                                                       Kernel::Direction::Input),
+                                                                       Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
@@ -68,6 +71,23 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
                   "Starting value for the depolarised cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
+}
+
+std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInputs() {
+  std::map<std::string, std::string> result;
+  MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
+  if (depWs->getNumberHistograms() != 1) {
+    result[std::string(PropNames::DEP_WORKSPACE)] =
+        "The depolarised workspace must contain a single spectrum. Contains " +
+        std::to_string(depWs->getNumberHistograms()) + " spectra.";
+  }
+  MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
+  if (mtWs->getNumberHistograms() != 1) {
+    result[std::string(PropNames::MT_WORKSPACE)] =
+        "The empty cell workspace must contain a single spectrum. Contains " +
+        std::to_string(mtWs->getNumberHistograms()) + " spectra.";
+  }
+  return result;
 }
 
 void DepolarizedAnalyserTransmission::exec() {
