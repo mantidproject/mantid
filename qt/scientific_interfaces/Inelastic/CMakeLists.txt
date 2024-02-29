@@ -43,6 +43,9 @@ set(SRC_FILES
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateView.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplateBrowser.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
     BayesFitting/BayesFitting.cpp
     BayesFitting/BayesFittingTab.cpp
     BayesFitting/Quasi.cpp
@@ -104,6 +107,7 @@ set(MOC_FILES
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
+    Analysis/FunctionBrowser/MultiFunctionTemplateBrowser.h
     BayesFitting/BayesFitting.h
     BayesFitting/BayesFittingTab.h
     BayesFitting/Quasi.h
@@ -168,6 +172,8 @@ set(INC_FILES
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Analysis/FunctionBrowser/ParamID.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
+    Analysis/FunctionBrowser/MultiFunctionTemplateModel.h
+    Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.h
     Analysis/FunctionBrowser/TemplateSubType.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h
