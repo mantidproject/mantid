@@ -10,14 +10,15 @@
 #include "FitTabConstants.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
-#include "FunctionBrowser/ConvFunctionModel.h"
-#include "FunctionBrowser/ConvFunctionTemplateView.h"
-#include "FunctionBrowser/ConvTemplatePresenter.h"
 #include "FunctionBrowser/FqFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionTemplateView.h"
 #include "FunctionBrowser/IqtTemplatePresenter.h"
 #include "FunctionBrowser/MSDFunctionModel.h"
+#include "FunctionBrowser/MultiFunctionTemplateBrowser.h"
+#include "FunctionBrowser/MultiFunctionTemplateModel.h"
+#include "FunctionBrowser/MultiFunctionTemplatePresenter.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "FunctionBrowser/SingleFunctionTemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 #include "IndirectDataAnalysisTab.h"
@@ -55,8 +56,8 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
-  tab->setupFitPropertyBrowser<ConvFunctionTemplateView, ConvTemplatePresenter, ConvFunctionModel>(
-      ConvFit::HIDDEN_PROPS, true);
+  tab->setupFitPropertyBrowser<MultiFunctionTemplateBrowser, MultiFunctionTemplatePresenter,
+                               MultiFunctionTemplateModel>(ConvFit::HIDDEN_PROPS, true);
   tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();
