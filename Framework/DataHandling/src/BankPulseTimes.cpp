@@ -18,12 +18,14 @@ using namespace Mantid::Kernel;
 namespace {
 // these values are simliar to those in EventList::EventSortType
 enum PulseSorting { UNKNOWN, UNSORTED, PULSETIME_SORT };
+
 } // namespace
 
 namespace Mantid::DataHandling {
 
-/// The first period
-const unsigned int BankPulseTimes::FirstPeriod = 1;
+const std::string BankPulseTimes::DEFAULT_START_TIME("1970-01-01T00:00:00Z");
+
+const int BankPulseTimes::FIRST_PERIOD(1);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
@@ -31,13 +33,16 @@ const unsigned int BankPulseTimes::FirstPeriod = 1;
  *  @param times
  */
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times)
-    : pulseTimes(times), have_period_info(false), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), pulseTimes(times), have_period_info(false), m_sorting_info(PulseSorting::UNKNOWN) {
+  this->updateStartTime();
   this->finalizePeriodNumbers();
 }
 
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times,
                                const std::vector<int> &periodNumbers)
-    : periodNumbers(periodNumbers), pulseTimes(times), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), pulseTimes(times), have_period_info(true),
+      m_sorting_info(PulseSorting::UNKNOWN) {
+  this->updateStartTime();
   this->finalizePeriodNumbers();
 }
 
@@ -47,14 +52,15 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
  * @param periodNumbers :: Period numbers to index into. Index via frame/pulse
  */
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
-    : periodNumbers(periodNumbers), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), have_period_info(true),
+      m_sorting_info(PulseSorting::UNKNOWN) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  // If the offset is not present, use Unix epoch
-  if (!file.hasAttr("offset"))
-    startTime = "1970-01-01T00:00:00Z";
-  else
+
+  // Use the offset if it is present
+  if (file.hasAttr("offset"))
     file.getAttr("offset", startTime);
+
   Mantid::Types::Core::DateAndTime start(startTime);
 
   // number of pulse times
@@ -104,6 +110,14 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
   }
 }
 
+void BankPulseTimes::updateStartTime() {
+  if (!pulseTimes.empty()) {
+    const auto minimum = std::min(pulseTimes.cbegin(), pulseTimes.cend());
+    startTime = minimum->toISO8601String();
+  }
+  // otherwise the existing startTime stays
+}
+
 void BankPulseTimes::finalizePeriodNumbers() {
   if (pulseTimes.empty()) {
     // set periods to empty vector
@@ -136,7 +150,7 @@ int BankPulseTimes::periodNumber(const size_t index) const {
   if (have_period_info)
     return this->periodNumbers[index];
   else
-    return FirstPeriod;
+    return FIRST_PERIOD;
 }
 
 const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t index) const {

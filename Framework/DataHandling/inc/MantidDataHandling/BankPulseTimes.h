@@ -23,7 +23,9 @@ namespace Mantid::DataHandling {
 class MANTID_DATAHANDLING_DLL BankPulseTimes {
 public:
   /// Starting number for assigning periods.
-  static const unsigned int FirstPeriod;
+  static const int FIRST_PERIOD;
+  /// Unix epoch used as default epoch when the file does not specify one
+  static const std::string DEFAULT_START_TIME;
 
   /// Constructor with NeXus::File
   BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers);
@@ -54,6 +56,9 @@ public:
 private:
   template <typename ValueType>
   void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+
+  /// This is not needed
+  void updateStartTime();
 
   /// Ensure that we always have a consistency between nPulses and periodNumbers containers
   void finalizePeriodNumbers();
