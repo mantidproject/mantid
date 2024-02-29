@@ -645,10 +645,9 @@ class BaseSX(ABC):
                 ws_cut = None
                 for ipk, pk in enumerate(peaks):
                     peak_shape = pk.getPeakShape()
-                    print(peak_shape.shapeName().lower())
                     if peak_shape.shapeName().lower() == "none":
                         continue
-                    ws_cut, radii, bg_inner_radii, bg_outer_radii = BaseSX._bin_MD_around_peak(
+                    ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths = BaseSX._bin_MD_around_peak(
                         wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr
                     )
 
@@ -657,21 +656,23 @@ class BaseSX(ABC):
                         dims = list(range(3))
                         dims.pop(iax)
                         # plot slice
-                        im = ax.imshow(ws_cut.getSignalArray().sum(axis=iax)[:, ::-1].T)
+                        im = ax.imshow(ws_cut.getSignalArray().sum(axis=iax)[:, ::-1].T)  # reshape to match sliceviewer
                         im.set_extent([-1, 1, -1, 1])  # so that ellipsoid is a circle
                         if log_norm:
                             im.set_norm(LogNorm())
                         # plot peak representation (circle given extents)
-                        patch = Circle((0, 0), 1 / scale, facecolor="none", edgecolor=3 * [0.7])  # outer radius
+                        patch = Circle((0, 0), radii[imax] / box_lengths[imax], facecolor="none", edgecolor="r", ls="--")
                         ax.add_patch(patch)
-                        patch = Circle(
-                            (0, 0), bg_inner_radii[imax] / (bg_outer_radii[imax] * scale), facecolor="none", edgecolor=3 * [0.7], ls="--"
-                        )  # inner radius
-                        ax.add_patch(patch)
-                        patch = Circle(
-                            (0, 0), radii[imax] / (bg_outer_radii[imax] * scale), facecolor="none", edgecolor="r", ls="--"
-                        )  # radius
-                        ax.add_patch(patch)
+                        # add background shell
+                        if np.all(bg_outer_radii > 1e-10):
+                            patch = Circle(
+                                (0, 0), bg_outer_radii[imax] / box_lengths[imax], facecolor="none", edgecolor=3 * [0.7]
+                            )  # outer radius
+                            ax.add_patch(patch)
+                            patch = Circle(
+                                (0, 0), bg_inner_radii[imax] / box_lengths[imax], facecolor="none", edgecolor=3 * [0.7], ls="--"
+                            )  # inner radius
+                            ax.add_patch(patch)
                         # format axes
                         ax.set_aspect("equal")
                         ax.set_xlabel(ws_cut.getDimension(dims[0]).name)
@@ -716,11 +717,13 @@ class BaseSX(ABC):
         cen = getattr(pk, frame_to_peak_centre_attr)()
         cen = np.matmul(evecs.T, np.array(cen) + translation)
         # get extents
-        extents = np.vstack((cen - extent * bg_outer_radii, cen + extent * bg_outer_radii))
+        box_lengths = bg_outer_radii if np.all(bg_outer_radii > 1e-10) else radii
+        box_lengths = box_lengths * extent
+        extents = np.vstack((cen - box_lengths, cen + box_lengths))
         # get nbins along each axis
         nbins = [int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))]
         # call BinMD
-        ws_cut = BinMD(
+        ws_cut = mantid.BinMD(
             InputWorkspace=ws,
             OutputWorkspace="__ws_cut",
             AxisAligned=False,
@@ -731,7 +734,7 @@ class BaseSX(ABC):
             OutputBins=nbins,
             EnableLogging=False,
         )
-        return ws_cut, radii, bg_inner_radii, bg_outer_radii
+        return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths
 
     @staticmethod
     def _convert_spherical_representation_to_ellipsoid(shape_info):
