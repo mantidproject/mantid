@@ -92,7 +92,7 @@ public:
   }
 
   void test_invalid_workspace_lengths() {
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 102);
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 12);
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 2);
     DepolarizedAnalyserTransmission alg;
     alg.setChild(true);
@@ -103,14 +103,30 @@ public:
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarisedWorkspace: The depolarised workspace must "
-                            "contain a single spectrum. Contains 4 spectra.\n EmptyCellWorkspace: The empty cell "
-                            "workspace must contain a single spectrum. Contains 10404 spectra.");
+                            "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: The empty cell "
+                            "workspace must contain a single spectrum. Contains 12 spectra.");
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_non_matching_workspace_bins() {
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, 0.2);
+    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1);
+    DepolarizedAnalyserTransmission alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("EmptyCellWorkspace", mtWs);
+    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n DepolarisedWorkspace: The bins in the "
+                            "DepolarisedWorkspace and EmptyCellWorkspace do not match.");
     TS_ASSERT(!alg.isExecuted());
   }
 
 private:
   MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula,
-                                              int const numSpectra = 1) {
+                                              int const numSpectra = 1, double const binWidth = 0.1) {
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
     makeWsAlg.setChild(true);
@@ -118,11 +134,11 @@ private:
     makeWsAlg.setPropertyValue("Function", "User Defined");
     makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=" + formula);
     makeWsAlg.setPropertyValue("XUnit", "wavelength");
-    makeWsAlg.setProperty("NumBanks", 1);
-    makeWsAlg.setProperty("BankPixelWidth", numSpectra);
+    makeWsAlg.setProperty("NumBanks", numSpectra);
+    makeWsAlg.setProperty("BankPixelWidth", 1);
     makeWsAlg.setProperty("XMin", 3.5);
     makeWsAlg.setProperty("XMax", 16.5);
-    makeWsAlg.setProperty("BinWidth", 0.1);
+    makeWsAlg.setProperty("BinWidth", binWidth);
     makeWsAlg.execute();
     return makeWsAlg.getProperty("OutputWorkspace");
   }

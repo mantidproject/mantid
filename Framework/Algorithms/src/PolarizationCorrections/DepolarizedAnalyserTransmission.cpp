@@ -87,6 +87,11 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
         "The empty cell workspace must contain a single spectrum. Contains " +
         std::to_string(mtWs->getNumberHistograms()) + " spectra.";
   }
+
+  if (!WorkspaceHelpers::matchingBins(*depWs, *mtWs, true)) {
+    result[std::string(PropNames::DEP_WORKSPACE)] =
+        "The bins in the DepolarisedWorkspace and EmptyCellWorkspace do not match.";
+  }
   return result;
 }
 
