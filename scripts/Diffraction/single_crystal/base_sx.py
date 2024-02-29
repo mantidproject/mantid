@@ -9,11 +9,15 @@ import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
 from mantid.api import FunctionFactory, AnalysisDataService as ADS
-from mantid.kernel import logger
+from mantid.kernel import logger, SpecialCoordinateSystem
 from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
-
+from json import loads as json_loads
+from matplotlib.pyplot import subplots, close
+from matplotlib.patches import Circle
+from matplotlib.colors import LogNorm
+from matplotlib.backends.backend_pdf import PdfPages
 from abc import ABC, abstractmethod
 
 
@@ -612,6 +616,144 @@ class BaseSX(ABC):
             FilterValue=0,
             Operator=">",
             EnableLogging=False,
+        )
+
+    @staticmethod
+    def plot_integrated_peaks_MD(wsMD, peaks, filename, nbins_max=21, extent=1.5, log_norm=True):
+        """
+        :param wsMD:  MD workspace to plot
+        :param peaks: integrated peaks using IntegratePeaksMD
+        :param filename: filename to store pdf output
+        :param nbins: number of bins along major radius of ellipsoid
+        :param extent: extent in units of largest outer background radius
+        :param log_norm: use log normalisation in colorscale
+        """
+        wsMD = BaseSX.retrieve(wsMD)
+        peaks = BaseSX.retrieve(peaks)
+
+        # find appropriate getter for peak centre given MD frame
+        frame = wsMD.getSpecialCoordinateSystem()
+        frame_to_peak_centre_attr = "getQLabFrame"
+        if frame == SpecialCoordinateSystem.QSample:
+            frame_to_peak_centre_attr = "getQSampleFrame"
+        elif frame == SpecialCoordinateSystem.HKL:
+            frame_to_peak_centre_attr = "getHKL"
+
+        # loop over peaks and plot
+        try:
+            with PdfPages(filename) as pdf:
+                ws_cut = None
+                for ipk, pk in enumerate(peaks):
+                    peak_shape = pk.getPeakShape()
+                    print(peak_shape.shapeName().lower())
+                    if peak_shape.shapeName().lower() == "none":
+                        continue
+                    ws_cut, radii, bg_inner_radii, bg_outer_radii = BaseSX._bin_MD_around_peak(
+                        wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr
+                    )
+
+                    fig, axes = subplots(1, 3, figsize=(12, 4), subplot_kw={"projection": "mantid"})
+                    for iax, ax in enumerate(axes):
+                        dims = list(range(3))
+                        dims.pop(iax)
+                        # plot slice
+                        im = ax.imshow(ws_cut.getSignalArray().sum(axis=iax)[:, ::-1].T)
+                        im.set_extent([-1, 1, -1, 1])  # so that ellipsoid is a circle
+                        if log_norm:
+                            im.set_norm(LogNorm())
+                        # plot peak representation (circle given extents)
+                        patch = Circle((0, 0), 1 / scale, facecolor="none", edgecolor=3 * [0.7])  # outer radius
+                        ax.add_patch(patch)
+                        patch = Circle(
+                            (0, 0), bg_inner_radii[imax] / (bg_outer_radii[imax] * scale), facecolor="none", edgecolor=3 * [0.7], ls="--"
+                        )  # inner radius
+                        ax.add_patch(patch)
+                        patch = Circle(
+                            (0, 0), radii[imax] / (bg_outer_radii[imax] * scale), facecolor="none", edgecolor="r", ls="--"
+                        )  # radius
+                        ax.add_patch(patch)
+                        # format axes
+                        ax.set_aspect("equal")
+                        ax.set_xlabel(ws_cut.getDimension(dims[0]).name)
+                        ax.set_ylabel(ws_cut.getDimension(dims[1]).name)
+                    fig.suptitle(
+                        f"{ipk} ({','.join(str(np.round(pk.getHKL(), 2))[1:-1].split())})"
+                        f"  $I/\\sigma$={np.round(pk.getIntensityOverSigma(), 2)}\n"
+                        rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$; "
+                        rf"$2\theta={np.round(np.degrees(pk.getScattering()), 1)}^\circ$; "
+                        rf"d={np.round(pk.getDSpacing(), 2)} $\AA$"
+                    )
+                    fig.tight_layout()
+                    pdf.savefig(fig)
+                    close(fig)
+
+                if ws_cut is not None:
+                    mantid.DeleteWorkspace(ws_cut)
+        except OSError:
+            raise RuntimeError(
+                f"OutputFile ({output_file}) could not be opened - please check it is not open by "
+                f"another programme and that the user has permission to write to that directory."
+            )
+
+    @staticmethod
+    def _bin_MD_around_peak(wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr):
+        shape_info = json_loads(peak_shape.toJSON())
+        if peak_shape.shapeName().lower() == "spherical":
+            BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
+        # get radii
+        radii = np.array([shape_info[f"radius{iax}"] for iax in range(3)])
+        bg_inner_radii = np.array([shape_info[f"background_inner_radius{iax}"] for iax in range(3)])
+        bg_outer_radii = np.array([shape_info[f"background_outer_radius{iax}"] for iax in range(3)])
+        isort = np.argsort(radii)
+        imax = isort[-1]
+        # eignevectors of ellipsoid
+        evecs = np.zeros((3, 3))
+        for iax in range(len(radii)):
+            evec = np.array([float(elem) for elem in shape_info[f"direction{iax}"].split()])
+            evecs[:, iax] = evec / np.linalg.norm(evec)
+        # center and translation
+        translation = np.array([shape_info[f"translation{iax}"] for iax in range(3)])
+        cen = getattr(pk, frame_to_peak_centre_attr)()
+        cen = np.matmul(evecs.T, np.array(cen) + translation)
+        # get extents
+        extents = np.vstack((cen - extent * bg_outer_radii, cen + extent * bg_outer_radii))
+        # get nbins along each axis
+        nbins = [int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))]
+        # call BinMD
+        ws_cut = BinMD(
+            InputWorkspace=ws,
+            OutputWorkspace="__ws_cut",
+            AxisAligned=False,
+            BasisVector0=r"Q$_0$,unit," + ",".join(np.array2string(evecs[:, 0], precision=6).strip("[]").split()),
+            BasisVector1=r"Q$_1$,unit," + ",".join(np.array2string(evecs[:, 1], precision=6).strip("[]").split()),
+            BasisVector2=r"Q$_2$,unit," + ",".join(np.array2string(evecs[:, 2], precision=6).strip("[]").split()),
+            OutputExtents=extents.flatten(order="F"),
+            OutputBins=nbins,
+            EnableLogging=False,
+        )
+        return ws_cut, radii, bg_inner_radii, bg_outer_radii
+
+    @staticmethod
+    def _convert_spherical_representation_to_ellipsoid(shape_info):
+        # copied from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid - can't import here though
+        # convert shape_info dict from sphere to ellipsoid for plotting
+        for key in ["radius", "background_inner_radius", "background_outer_radius"]:
+            if key in shape_info:
+                shape_info[f"{key}{0}"] = shape_info.pop(key)
+            else:
+                shape_info[f"{key}{0}"] = 0.0  # null value
+            for idim in [1, 2]:
+                shape_info[f"{key}{idim}"] = shape_info[f"{key}{0}"]
+        # add axes along basis vecs of frame and set 0 translation
+        shape_info.update(
+            {
+                "direction0": "1 0 0",
+                "direction1": "0 1 0",
+                "direction2": "0 0 1",
+                "translation0": 0.0,
+                "translation1": 0.0,
+                "translation2": 0.0,
+            }
         )
 
     @staticmethod
