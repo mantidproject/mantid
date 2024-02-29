@@ -15,7 +15,7 @@ namespace {
 namespace PropNames {
 std::string_view constexpr DEP_WORKSPACE{"DepolarisedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
-std::string_view constexpr EMPTY_CELL_TRANS_START{"T_EStartingValue"};
+std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 } // namespace PropNames

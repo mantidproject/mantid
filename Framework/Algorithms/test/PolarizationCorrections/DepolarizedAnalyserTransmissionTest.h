@@ -66,7 +66,7 @@ public:
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("DepolarisedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setProperty("T_EStartingValue", 1e50);
+    alg.setProperty("TEStartingValue", 1e50);
     alg.setProperty("PxDStartingValue", 1e50);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
