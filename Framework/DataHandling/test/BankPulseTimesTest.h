@@ -12,10 +12,13 @@
 
 using Mantid::DataHandling::BankPulseTimes;
 
+namespace {
+const static Mantid::Types::Core::DateAndTime START_TIME(0., 0.);
+}
+
 class BankPulseTimesTest : public CxxTest::TestSuite {
 private:
   std::vector<Mantid::Types::Core::DateAndTime> createPulseTimes(const size_t length) {
-    const static Mantid::Types::Core::DateAndTime START_TIME(0., 0.);
     constexpr double SECONDS_DELTA{30.};
 
     std::vector<Mantid::Types::Core::DateAndTime> pulse_times;
@@ -45,11 +48,12 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times);
 
+    TS_ASSERT_EQUALS(bank_pulse_times.startTime, pulse_times[0].toISO8601String());
     TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
       TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FirstPeriod);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FIRST_PERIOD);
     }
   }
 
@@ -59,6 +63,7 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times, period_indices);
 
+    TS_ASSERT_EQUALS(bank_pulse_times.startTime, pulse_times[0].toISO8601String());
     TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
@@ -78,6 +83,8 @@ public:
 
     // should be zero length
     TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), NUM_PULSES);
+    // default is unix epoch
+    TS_ASSERT_EQUALS(bank_pulse_times.startTime, BankPulseTimes::DEFAULT_START_TIME);
   }
 
   void test_periods_not_parallel() {
@@ -86,11 +93,12 @@ public:
 
     BankPulseTimes bank_pulse_times(pulse_times, period_indices);
 
+    TS_ASSERT_EQUALS(bank_pulse_times.startTime, pulse_times[0].toISO8601String());
     TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
       TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
-      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FirstPeriod);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FIRST_PERIOD);
     }
   }
 };
