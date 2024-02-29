@@ -112,14 +112,22 @@ void IndirectDiffractionReduction::run() {
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-  if (!m_uiForm.rfSampleFiles->isValid()) {
-    showInformationBox("Sample files input is invalid.");
+
+  auto const sampleProblem = validateFileFinder(m_uiForm.rfSampleFiles);
+  if (!sampleProblem.isEmpty()) {
+    showInformationBox("Sample: " + sampleProblem);
     return;
   }
 
   auto const vanadiumProblem = validateFileFinder(m_uiForm.rfVanFile, m_uiForm.ckUseVanadium->isChecked());
   if (!vanadiumProblem.isEmpty()) {
     showInformationBox("Vanadium: " + vanadiumProblem);
+    return;
+  }
+
+  auto const calibrationProblem = validateFileFinder(m_uiForm.rfCalFile, m_uiForm.ckUseCalib->isChecked());
+  if (!calibrationProblem.isEmpty()) {
+    showInformationBox("Calibration: " + calibrationProblem);
     return;
   }
 
@@ -130,20 +138,8 @@ void IndirectDiffractionReduction::run() {
     return;
   }
 
-  if (instName == "OSIRIS") {
-    if (mode == "diffonly") {
-      if (!validateVanCal()) {
-        showInformationBox("Vanadium and Calibration input is invalid.");
-        return;
-      }
-      runOSIRISdiffonlyReduction();
-    } else {
-      if (!validateCalOnly()) {
-        showInformationBox("Calibration and rebinning parameters are incorrect.");
-        return;
-      }
-      runGenericReduction(instName, mode);
-    }
+  if (instName == "OSIRIS" && mode == "diffonly") {
+    runOSIRISdiffonlyReduction();
   } else {
     if (!validateRebin()) {
       showInformationBox("Rebinning parameters are incorrect.");
@@ -535,6 +531,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
 
   // Require vanadium for OSIRIS diffonly
   auto vanadiumMandatory = instrumentName == "OSIRIS" && reflectionName == "diffonly";
+  m_uiForm.rfVanFile->isOptional(!vanadiumMandatory);
   m_uiForm.ckUseVanadium->setChecked(vanadiumMandatory);
   m_uiForm.ckUseVanadium->setDisabled(vanadiumMandatory);
 
@@ -543,6 +540,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   auto calibrationMandatory = calibrationOptional && reflectionName == "diffonly";
   m_uiForm.ckUseCalib->setVisible(calibrationOptional);
   m_uiForm.rfCalFile->setVisible(calibrationOptional);
+  m_uiForm.rfCalFile->isOptional(!calibrationMandatory);
   m_uiForm.ckUseCalib->setChecked(calibrationMandatory);
   m_uiForm.ckUseCalib->setDisabled(calibrationMandatory);
 
