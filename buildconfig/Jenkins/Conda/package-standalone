@@ -66,7 +66,7 @@ mamba install --yes mamba conda-build
 # Setup a local conda channel to find our locally built packages package. It is
 # assumed the raw .bz2 artefacts have been copied into the directory below
 LOCAL_CHANNEL_PATH=$WORKSPACE/conda-bld
-conda index $LOCAL_CHANNEL_PATH
+python -m conda_index $LOCAL_CHANNEL_PATH
 
 # Jenkins Pipeline expects packages in the root workspace directory
 cd $WORKSPACE
