@@ -68,7 +68,7 @@ private:
                                                      const std::string &target);
 
   bool validateRebin();
-  bool validateVanCal(bool const mandatory);
+  QString validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder, bool const isChecked = true) const;
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
                                                    const std::string &reflection = "");

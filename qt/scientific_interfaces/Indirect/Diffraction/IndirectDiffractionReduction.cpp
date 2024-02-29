@@ -654,23 +654,16 @@ bool IndirectDiffractionReduction::validateRebin() {
 }
 
 /**
- * Checks to see if the vanadium and cal file fields are valid.
+ * Checks to see if the file finder fields are valid.
  *
- * @returns True fo vanadium and calibration files are valid, false otherwise
+ * @returns A message if the file finder has a problem.
  */
-bool IndirectDiffractionReduction::validateVanCal(bool const mandatory) {
-  if (mandatory) {
-    return m_uiForm.rfCalFile->isValid() && m_uiForm.rfVanFile->isValid();
+QString IndirectDiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
+                                                         bool const isChecked) const {
+  if (!fileFinder->isOptional() || isChecked) {
+    return fileFinder->getFileProblem();
   }
-
-  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile->isValid()) {
-    return false;
-  }
-  if (m_uiForm.ckUseVanadium->isChecked() && !m_uiForm.rfVanFile->isValid()) {
-    return false;
-  }
-
-  return true;
+  return "";
 }
 
 void IndirectDiffractionReduction::useVanadiumStateChanged(int state) { m_uiForm.rfVanFile->setEnabled(state != 0); }
