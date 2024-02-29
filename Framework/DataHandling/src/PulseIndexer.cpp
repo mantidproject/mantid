@@ -132,8 +132,6 @@ size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
   size_t eventIndex;
   if (pulseIndex <= m_roi.front()) {
     eventIndex = m_event_index->operator[](m_roi.front());
-  } else if (pulseIndex >= m_roi.back()) {
-    eventIndex = m_numEvents;
   } else {
     eventIndex = m_event_index->operator[](pulseIndex);
   }
