@@ -691,7 +691,7 @@ class BaseSX(ABC):
                     mantid.DeleteWorkspace(ws_cut)
         except OSError:
             raise RuntimeError(
-                f"OutputFile ({output_file}) could not be opened - please check it is not open by "
+                f"OutputFile ({filename}) could not be opened - please check it is not open by "
                 f"another programme and that the user has permission to write to that directory."
             )
 
