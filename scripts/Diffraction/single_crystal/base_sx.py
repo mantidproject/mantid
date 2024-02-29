@@ -722,6 +722,10 @@ class BaseSX(ABC):
         extents = np.vstack((cen - box_lengths, cen + box_lengths))
         # get nbins along each axis
         nbins = [int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))]
+        # ensure minimum of 3 bins inside radius along each dim
+        min_nbins_in_radius = np.min(nbins * radii / box_lengths)
+        if min_nbins_in_radius < 3:
+            nbins = nbins * 3 / min_nbins_in_radius
         # call BinMD
         ws_cut = mantid.BinMD(
             InputWorkspace=ws,
@@ -731,7 +735,7 @@ class BaseSX(ABC):
             BasisVector1=r"Q$_1$,unit," + ",".join(np.array2string(evecs[:, 1], precision=6).strip("[]").split()),
             BasisVector2=r"Q$_2$,unit," + ",".join(np.array2string(evecs[:, 2], precision=6).strip("[]").split()),
             OutputExtents=extents.flatten(order="F"),
-            OutputBins=nbins,
+            OutputBins=nbins.astype(int),
             EnableLogging=False,
         )
         return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths
