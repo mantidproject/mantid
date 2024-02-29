@@ -41,11 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>526</width>
-<<<<<<< HEAD
-         <height>593</height>
-=======
          <height>647</height>
->>>>>>> 762fa00a966 (Simplify vanadium, calibration and rebin widgets in diffraction interface)
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">

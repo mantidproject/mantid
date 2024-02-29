@@ -520,15 +520,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
-  // Determine whether we need vanadium input
-  std::vector<std::string> correctionVector = instrument->getStringParameter("Workflow.Diffraction.Correction");
-  bool vanadiumNeeded = false;
-  bool calibNeeded = false;
-  if (correctionVector.size() > 0) {
-    vanadiumNeeded = (correctionVector[0] == "Vanadium");
-    calibNeeded = (correctionVector[0] == "Calibration");
-  }
-
   // Require vanadium for OSIRIS diffonly
   auto vanadiumMandatory = instrumentName == "OSIRIS" && reflectionName == "diffonly";
   m_uiForm.rfVanFile->isOptional(!vanadiumMandatory);
