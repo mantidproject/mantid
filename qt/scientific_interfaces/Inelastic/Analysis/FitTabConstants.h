@@ -78,7 +78,7 @@ static const auto HIDDEN_PROPS = std::vector<std::string>(
 
 static auto TEMPLATE_SUB_TYPES =
     packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(), std::make_unique<ConvTypes::FitSubType>(),
-                         std::make_unique<ConvTypes::BackgroundSubType>());
+                         std::make_unique<ConvTypes::DeltaSubType>(), std::make_unique<ConvTypes::BackgroundSubType>());
 
 } // namespace ConvFit
 

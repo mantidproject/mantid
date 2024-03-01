@@ -41,6 +41,8 @@ enum class FitType {
   InelasticIsoRotDiff,
 };
 
+enum class DeltaType { None, Delta };
+
 enum class BackgroundType { None, Flat, Linear };
 
 enum class TempCorrectionType { None, Exponential };
@@ -48,7 +50,8 @@ enum class TempCorrectionType { None, Exponential };
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
-  Background = 2,
+  Delta = 2,
+  Background = 3,
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
@@ -67,7 +70,7 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
 };
 
 struct DeltaSubType : public TemplateSubTypeImpl<bool> {
-  std::string name() const override { return "Delta"; }
+  std::string name() const override { return "Delta Function"; }
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {

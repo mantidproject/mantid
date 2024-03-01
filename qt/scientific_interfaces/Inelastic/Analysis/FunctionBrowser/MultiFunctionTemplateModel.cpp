@@ -40,8 +40,9 @@ MultiFunctionTemplateModel::MultiFunctionTemplateModel()
     : m_parameterEstimation(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
 void MultiFunctionTemplateModel::clearData() {
+  m_lorentzianType = LorentzianType::None;
   m_fitType = FitType::None;
-  m_hasDeltaFunction = false;
+  m_deltaType = DeltaType::None;
   m_hasTempCorrection = false;
   m_backgroundType = BackgroundType::None;
   m_model.clear();
@@ -49,7 +50,7 @@ void MultiFunctionTemplateModel::clearData() {
 
 void MultiFunctionTemplateModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions, buildLorentzianPeaksString(),
-                   buildFitTypeString(), m_hasDeltaFunction, m_qValues, m_isQDependentFunction, m_hasTempCorrection,
+                   buildFitTypeString(), hasDeltaFunction(), m_qValues, m_isQDependentFunction, m_hasTempCorrection,
                    m_tempValue);
   if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
     m_globals.push_back(ParamID::TEMPERATURE);
@@ -143,8 +144,6 @@ void MultiFunctionTemplateModel::checkSingleFunction(const IFunction_sptr &fun, 
     m_fitType = FitTypeStringToEnum[name];
     m_isQDependentFunction = FitTypeQDepends[m_fitType];
     isFitTypeSet = true;
-  } else if (name == "DeltaFunction") {
-    m_hasDeltaFunction = true;
   } else if (!isFitTypeSet && !isLorentzianTypeSet) {
     clear();
     throw std::runtime_error("Function has wrong structure. Function not recognized");
@@ -161,6 +160,8 @@ FitType MultiFunctionTemplateModel::getFitType() const { return m_fitType; }
 BackgroundType MultiFunctionTemplateModel::getBackgroundType() const { return m_backgroundType; }
 
 LorentzianType MultiFunctionTemplateModel::getLorentzianType() const { return m_lorentzianType; }
+
+DeltaType MultiFunctionTemplateModel::getDeltaType() const { return m_deltaType; }
 
 bool MultiFunctionTemplateModel::hasFunction() const { return m_model.hasFunction(); }
 
@@ -183,9 +184,9 @@ void MultiFunctionTemplateModel::addFunction(std::string const &prefix, std::str
       throw std::runtime_error("Cannot add more Lorentzians.");
     }
   } else if (name == "DeltaFunction") {
-    if (m_hasDeltaFunction)
+    if (hasDeltaFunction())
       throw std::runtime_error("Cannot add a DeltaFunction.");
-    setDeltaFunction(true);
+    setDeltaType(DeltaType::Delta);
     newPrefix = *getDeltaPrefix();
   } else if (name == "FlatBackground" || name == "LinearBackground") {
     if (hasBackground())
@@ -223,7 +224,7 @@ void MultiFunctionTemplateModel::removeFunction(std::string const &prefix) {
   }
   prefix1 = getDeltaPrefix();
   if (prefix1 && *prefix1 == prefix) {
-    setDeltaFunction(false);
+    setDeltaType(DeltaType::None);
     return;
   }
   prefix1 = getBackgroundPrefix();
@@ -232,13 +233,6 @@ void MultiFunctionTemplateModel::removeFunction(std::string const &prefix) {
     return;
   }
   throw std::runtime_error("Function doesn't have member function with prefix " + prefix);
-}
-
-void MultiFunctionTemplateModel::setDeltaFunction(bool on) {
-  auto oldValues = getCurrentValues();
-  m_hasDeltaFunction = on;
-  setModel();
-  setCurrentValues(oldValues);
 }
 
 void MultiFunctionTemplateModel::setTempCorrection(bool on, double value) {
@@ -253,7 +247,7 @@ bool MultiFunctionTemplateModel::hasTempCorrection() const { return m_hasTempCor
 
 double MultiFunctionTemplateModel::getTempValue() const { return m_tempValue; }
 
-bool MultiFunctionTemplateModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
+bool MultiFunctionTemplateModel::hasDeltaFunction() const { return m_deltaType != DeltaType::None; }
 
 void MultiFunctionTemplateModel::setBackground(BackgroundType bgType) {
   auto oldValues = getCurrentValues();
@@ -409,6 +403,11 @@ void MultiFunctionTemplateModel::setFitType(FitType fitType) {
 
 void MultiFunctionTemplateModel::setLorentzianType(LorentzianType lorentzianType) {
   m_lorentzianType = lorentzianType;
+  setModel();
+}
+
+void MultiFunctionTemplateModel::setDeltaType(DeltaType deltaType) {
+  m_deltaType = deltaType;
   setModel();
 }
 
@@ -596,7 +595,7 @@ void MultiFunctionTemplateModel::applyParameterFunction(const std::function<void
   applyToFitFunction<ConvTypes::LorentzianSubType>(m_lorentzianType, paramFun);
   applyToFitFunction<ConvTypes::FitSubType>(m_fitType, paramFun);
   applyToFitFunction<ConvTypes::BackgroundSubType>(m_backgroundType, paramFun);
-  applyToFitFunction<ConvTypes::DeltaSubType>(m_hasDeltaFunction, paramFun);
+  applyToFitFunction<ConvTypes::DeltaSubType>(hasDeltaFunction(), paramFun);
   auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential : TempCorrectionType::None;
   applyToFitFunction<ConvTypes::TempSubType>(tempType, paramFun);
 }

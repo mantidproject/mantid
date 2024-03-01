@@ -38,25 +38,12 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
     model()->setFitType(static_cast<ConvTypes::FitType>(typeIndex));
   } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
     model()->setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
+    model()->setDeltaType(static_cast<ConvTypes::DeltaType>(typeIndex));
   } else {
     model()->setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
   }
   view()->setSubType(subTypeIndex, typeIndex);
-  setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
-  m_view->emitFunctionStructureChanged();
-}
-
-void MultiFunctionTemplatePresenter::setDeltaFunction(bool on) {
-  if (on == model()->hasDeltaFunction())
-    return;
-  model()->setDeltaFunction(on);
-  if (on)
-    view()->addDeltaFunction();
-  else
-    view()->removeDeltaFunction();
-
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -91,14 +78,16 @@ void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
 
   MultiFunctionTemplateBrowser *convView = view();
   MultiFunctionTemplateModel const *convModel = model();
-  convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection(), convModel->hasDeltaFunction());
+  convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection());
 
   convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(convModel->getDeltaType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   convView->setInt(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
   convView->setEnum(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setBool(ConvTypes::SubTypeIndex::Delta, static_cast<bool>(convModel->getDeltaType()));
   convView->setEnum(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);

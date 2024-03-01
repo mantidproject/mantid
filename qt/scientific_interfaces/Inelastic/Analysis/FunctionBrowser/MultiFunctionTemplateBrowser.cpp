@@ -37,12 +37,11 @@ void MultiFunctionTemplateBrowser::createProperties() {
   m_intManager->blockSignals(true);
 
   createFunctionParameterProperties();
-  createDeltaFunctionProperties();
   createTempCorrectionProperties();
 
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian]);
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Fit]);
-  m_browser->addProperty(m_deltaFunctionOn);
+  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]);
   m_browser->addProperty(m_tempCorrectionOn);
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Background]);
 
@@ -55,26 +54,14 @@ void MultiFunctionTemplateBrowser::createProperties() {
 void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
-  if (prop == m_deltaFunctionOn) {
-    m_presenter->setDeltaFunction(m_boolManager->value(prop));
+  if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]) {
+    m_presenter->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(m_boolManager->value(prop)));
   } else if (prop == m_tempCorrectionOn) {
     m_presenter->setTempCorrection(m_boolManager->value(prop));
   }
 }
 
 void MultiFunctionTemplateBrowser::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
-
-void MultiFunctionTemplateBrowser::addDeltaFunction() {
-  m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
-  m_deltaFunctionOn->addSubProperty(m_deltaFunctionCenter);
-  setBoolSilent(m_deltaFunctionOn, true);
-}
-
-void MultiFunctionTemplateBrowser::removeDeltaFunction() {
-  m_deltaFunctionOn->removeSubProperty(m_deltaFunctionHeight);
-  m_deltaFunctionOn->removeSubProperty(m_deltaFunctionCenter);
-  setBoolSilent(m_deltaFunctionOn, false);
-}
 
 void MultiFunctionTemplateBrowser::addTempCorrection(double value) {
   m_tempCorrectionOn->addSubProperty(m_temperature);
@@ -83,7 +70,7 @@ void MultiFunctionTemplateBrowser::addTempCorrection(double value) {
   m_parameterManager->setGlobal(m_temperature, true);
 }
 
-void MultiFunctionTemplateBrowser::updateTemperatureCorrectionAndDelta(bool tempCorrection, bool deltaFunction) {
+void MultiFunctionTemplateBrowser::updateTemperatureCorrectionAndDelta(bool tempCorrection) {
   MantidQt::MantidWidgets::ScopedFalse _boolBlock(m_emitBoolChange);
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
 
@@ -91,11 +78,6 @@ void MultiFunctionTemplateBrowser::updateTemperatureCorrectionAndDelta(bool temp
     addTempCorrection(100.0);
   else
     removeTempCorrection();
-
-  if (deltaFunction)
-    addDeltaFunction();
-  else
-    removeDeltaFunction();
 }
 
 void MultiFunctionTemplateBrowser::removeTempCorrection() {
@@ -172,6 +154,9 @@ void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
       m_intManager->setMaximum(subtypeProp, 2);
       m_subTypeProperties.push_back(subtypeProp);
 
+    } else if (isub == ConvTypes::SubTypeIndex::Delta) {
+      auto subtypeProp = m_boolManager->addProperty(QString::fromStdString(subType->name()));
+      m_subTypeProperties.push_back(subtypeProp);
     } else {
       auto subTypeProp = m_enumManager->addProperty(QString::fromStdString(subType->name()));
       m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
@@ -185,24 +170,12 @@ void MultiFunctionTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
   setEnumSilent(m_subTypeProperties[subTypeIndex], enumIndex);
 }
 
-void MultiFunctionTemplateBrowser::setInt(size_t subTypeIndex, int value) {
-  setIntSilent(m_subTypeProperties[subTypeIndex], value);
+void MultiFunctionTemplateBrowser::setBool(size_t subTypeIndex, int enumIndex) {
+  setBoolSilent(m_subTypeProperties[subTypeIndex], enumIndex);
 }
 
-void MultiFunctionTemplateBrowser::createDeltaFunctionProperties() {
-  m_deltaFunctionOn = m_boolManager->addProperty("Delta Function");
-  m_deltaFunctionHeight = m_parameterManager->addProperty("DeltaFunctionHeight");
-  m_parameterManager->setDecimals(m_deltaFunctionHeight, 6);
-  m_parameterManager->setMinimum(m_deltaFunctionHeight, 0.0);
-  m_parameterManager->setDescription(m_deltaFunctionHeight, "Delta Function Height");
-  m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
-  m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
-
-  m_deltaFunctionCenter = m_parameterManager->addProperty("DeltaFunctionCenter");
-  m_parameterManager->setDecimals(m_deltaFunctionCenter, 6);
-  m_parameterManager->setDescription(m_deltaFunctionCenter, "Delta Function Height");
-  m_parameterMap[m_deltaFunctionCenter] = ParamID::DELTA_CENTER;
-  m_parameterReverseMap[ParamID::DELTA_CENTER] = m_deltaFunctionCenter;
+void MultiFunctionTemplateBrowser::setInt(size_t subTypeIndex, int value) {
+  setIntSilent(m_subTypeProperties[subTypeIndex], value);
 }
 
 void MultiFunctionTemplateBrowser::createTempCorrectionProperties() {

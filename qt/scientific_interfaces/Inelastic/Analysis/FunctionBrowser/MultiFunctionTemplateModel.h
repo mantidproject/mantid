@@ -39,6 +39,7 @@ public:
   void setParameterError(std::string const &parameterName, double value) override;
   FitType getFitType() const;
   LorentzianType getLorentzianType() const;
+  DeltaType getDeltaType() const;
   BackgroundType getBackgroundType() const;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
@@ -78,7 +79,7 @@ public:
   std::string setBackgroundA0(double value) override;
   void setFitType(FitType fitType);
   void setLorentzianType(LorentzianType lorentzianType);
-  void setDeltaFunction(bool);
+  void setDeltaType(DeltaType deltaType);
   bool hasDeltaFunction() const;
   void setTempCorrection(bool, double value);
   bool hasTempCorrection() const;
@@ -142,8 +143,8 @@ private:
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
   LorentzianType m_lorentzianType = LorentzianType::None;
+  DeltaType m_deltaType = DeltaType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  bool m_hasDeltaFunction = false;
   bool m_hasTempCorrection = false;
   double m_tempValue = 100.0;
   DataForParameterEstimationCollection m_estimationData;
