@@ -647,7 +647,7 @@ class BaseSX(ABC):
                     peak_shape = pk.getPeakShape()
                     if peak_shape.shapeName().lower() == "none":
                         continue
-                    ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths = BaseSX._bin_MD_around_peak(
+                    ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax = BaseSX._bin_MD_around_peak(
                         wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr
                     )
 
@@ -660,6 +660,8 @@ class BaseSX(ABC):
                         im.set_extent([-1, 1, -1, 1])  # so that ellipsoid is a circle
                         if log_norm:
                             im.set_norm(LogNorm())
+                        # plot peak position
+                        ax.plot(0, 0, "xr")
                         # plot peak representation (circle given extents)
                         patch = Circle((0, 0), radii[imax] / box_lengths[imax], facecolor="none", edgecolor="r", ls="--")
                         ax.add_patch(patch)
@@ -674,6 +676,8 @@ class BaseSX(ABC):
                             )  # inner radius
                             ax.add_patch(patch)
                         # format axes
+                        ax.set_xlim(-1, 1)
+                        ax.set_ylim(-1, 1)
                         ax.set_aspect("equal")
                         ax.set_xlabel(ws_cut.getDimension(dims[0]).name)
                         ax.set_ylabel(ws_cut.getDimension(dims[1]).name)
@@ -721,14 +725,14 @@ class BaseSX(ABC):
         box_lengths = box_lengths * extent
         extents = np.vstack((cen - box_lengths, cen + box_lengths))
         # get nbins along each axis
-        nbins = [int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))]
+        nbins = np.array([int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))])
         # ensure minimum of 3 bins inside radius along each dim
         min_nbins_in_radius = np.min(nbins * radii / box_lengths)
         if min_nbins_in_radius < 3:
             nbins = nbins * 3 / min_nbins_in_radius
         # call BinMD
         ws_cut = mantid.BinMD(
-            InputWorkspace=ws,
+            InputWorkspace=wsMD,
             OutputWorkspace="__ws_cut",
             AxisAligned=False,
             BasisVector0=r"Q$_0$,unit," + ",".join(np.array2string(evecs[:, 0], precision=6).strip("[]").split()),
@@ -738,7 +742,7 @@ class BaseSX(ABC):
             OutputBins=nbins.astype(int),
             EnableLogging=False,
         )
-        return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths
+        return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax
 
     @staticmethod
     def _convert_spherical_representation_to_ellipsoid(shape_info):
