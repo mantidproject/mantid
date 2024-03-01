@@ -41,7 +41,7 @@ public:
 
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
   virtual void newInputFiles() = 0;
-  virtual void newInputFilesFromDialog(IDA::IAddWorkspaceDialog const *dialog) = 0;
+  virtual void newInputFilesFromDialog(std::vector<std::string> const &names) = 0;
   virtual void clearPreviewFile() = 0;
   virtual void clearInputFiles() = 0;
   virtual void setRunIsRunning(const bool running) = 0;
