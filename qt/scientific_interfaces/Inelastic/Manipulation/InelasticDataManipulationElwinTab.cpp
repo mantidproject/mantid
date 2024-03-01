@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -282,12 +282,12 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTab::newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::newInputFilesFromDialog() {
   // Clear the existing list of files
   if (m_dataModel->getNumberOfWorkspaces().value < 2)
     m_view->clearPreviewFile();
 
-  m_view->newInputFilesFromDialog(dialog);
+  m_view->newInputFilesFromDialog(m_dataModel->getWorkspaceNames());
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
   auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
@@ -399,10 +399,11 @@ std::string InelasticDataManipulationElwinTab::getOutputBasename() {
 
 void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
+    std::cout << "You reach here" << std::endl;
     addDataToModel(dialog);
     updateTableFromModel();
-
-    newInputFilesFromDialog(dialog);
+    std::cout << "You also reach here" << std::endl;
+    newInputFilesFromDialog();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -412,7 +413,7 @@ void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspa
 void InelasticDataManipulationElwinTab::handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
-    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     QList<QString> allFiles;
     allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
     auto const suffixes = getFilteredSuffixes(allFiles);
@@ -433,8 +434,12 @@ void InelasticDataManipulationElwinTab::handleAddDataFromFile(MantidWidgets::IAd
 }
 
 void InelasticDataManipulationElwinTab::addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog))
-    m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog)) {
+    auto const nameIndexPairs = indirectDialog->selectedNameIndexPairs();
+    for (auto const &pair : nameIndexPairs) {
+      m_dataModel->addWorkspace(pair.first, FunctionModelSpectra(pair.second));
+    }
+  }
 }
 
 void InelasticDataManipulationElwinTab::updateTableFromModel() {

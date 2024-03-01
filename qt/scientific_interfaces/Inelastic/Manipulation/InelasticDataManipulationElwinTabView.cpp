@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -186,14 +186,14 @@ void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presen
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
+  auto dialog = new MantidWidgets::AddWorkspaceMultiDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
   auto const tabName("Elwin");
+  dialog->setup();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
-  dialog->updateSelectedSpectra();
   dialog->show();
 }
 
@@ -207,7 +207,7 @@ void InelasticDataManipulationElwinTabView::notifyAddData(MantidWidgets::IAddWor
  */
 void InelasticDataManipulationElwinTabView::addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
-    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     if (indirectDialog) {
       // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
       if (indirectDialog->getFileName().empty()) {
@@ -316,15 +316,11 @@ void InelasticDataManipulationElwinTabView::newInputFiles() {
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(std::vector<std::string> const &names) {
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
-  if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
-    workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
-    filename = QString::fromStdString(indirectDialog->getFileName());
-  }
-  m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
+  m_uiForm.cbPreviewFile->addItems(MantidWidgets::stdVectorToQStringList(names));
 
   // Default to the first file
   setPreviewToDefault();

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
-
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"
@@ -16,6 +15,7 @@
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
@@ -46,7 +46,7 @@ public:
 
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void newInputFiles() override;
-  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
+  void newInputFilesFromDialog(std::vector<std::string> const &names) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
   void setRunIsRunning(const bool running) override;

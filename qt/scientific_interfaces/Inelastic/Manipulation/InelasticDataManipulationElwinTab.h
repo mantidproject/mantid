@@ -67,7 +67,7 @@ public:
 
 protected:
   void runComplete(bool error) override;
-  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
+  void newInputFilesFromDialog();
   virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
