@@ -20,11 +20,93 @@
 
 #include <QCompleter>
 #include <QDebug>
-#include <QDropEvent>
+#include <QHeaderView>
 #include <QLineEdit>
-#include <QMimeData>
-#include <QUrl>
-using namespace MantidQt::MantidWidgets;
+#include <QStyledItemDelegate>
+
+constexpr short namesCol = 0;
+constexpr short indexCol = 1;
+
+namespace {
+using namespace Mantid::API;
+
+QStringList headerLabels = {"Workspace Name", "Ws Index"};
+
+MatrixWorkspace_sptr getWorkspace(const std::string &name) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
+
+boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
+  if (workspace) {
+    const auto numberOfHistograms = workspace->getNumberHistograms();
+    if (numberOfHistograms > 0)
+      return numberOfHistograms - 1;
+  }
+  return boost::none;
+}
+
+QString getIndexString(const MatrixWorkspace_sptr &workspace) {
+  const auto maximum = maximumIndex(workspace);
+  if (maximum) {
+    if (*maximum > 0)
+      return QString("0-%1").arg(*maximum);
+    return "0";
+  }
+  return "";
+}
+
+QString getIndexString(const std::string &workspaceName) { return getIndexString(getWorkspace(workspaceName)); }
+
+std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
+  return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
+}
+
+QString OR(const QString &lhs, const QString &rhs) { return "(" + lhs + "|" + rhs + ")"; }
+
+QString NATURAL_NUMBER(std::size_t digits) { return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}"); }
+
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString MINUS = "\\-";
+
+const QString NUMBER = NATURAL_NUMBER(4);
+const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
+const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
+const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
+
+class SpectraListDelegate : public QStyledItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                        const QModelIndex & /*index*/) const override {
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = createValidator(SPECTRA_LIST, parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toString();
+    static_cast<QLineEdit *>(editor)->setText(value);
+  }
+
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
+    model->setData(index, lineEdit->text(), Qt::EditRole);
+  }
+
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex & /*index*/) const override {
+    editor->setGeometry(option.rect);
+  }
+};
+} // namespace
 
 /**
  * Default constructor
@@ -32,20 +114,20 @@ using namespace MantidQt::MantidWidgets;
  * @param init :: If true then the widget will make calls to the framework
  * (default = true)
  */
+namespace MantidQt {
+namespace MantidWidgets {
+
 WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
-    : QListWidget(parent), m_addObserver(*this, &WorkspaceMultiSelector::handleAddEvent),
+    : QTableWidget(parent), m_addObserver(*this, &WorkspaceMultiSelector::handleAddEvent),
       m_remObserver(*this, &WorkspaceMultiSelector::handleRemEvent),
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
-      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
-      m_showHidden(false), m_showGroups(true), m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
-      m_algName(), m_algPropName(), m_algorithm() {
+      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_connected(false),
+      m_workspaceTypes(), m_showHidden(false), m_showGroups(true), m_binLimits(std::make_pair(0, -1)), m_suffix() {
+
   if (init) {
     connectObservers();
   }
-  this->setAcceptDrops(true);
-  this->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  this->setSortingEnabled(true);
 }
 
 /**
@@ -54,6 +136,20 @@ WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
  */
 WorkspaceMultiSelector::~WorkspaceMultiSelector() { disconnectObservers(); }
 
+/**
+ * Setup table dimensions and headers from the parent class.
+ */
+void WorkspaceMultiSelector::setupTable() {
+  this->setRowCount(0);
+  this->setColumnCount(headerLabels.size());
+  this->verticalHeader()->setVisible(false);
+  this->horizontalHeader()->setVisible(true);
+  this->setHorizontalHeaderLabels(headerLabels);
+  this->setItemDelegateForColumn(1, new SpectraListDelegate);
+  this->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  this->setSortingEnabled(true);
+  this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
 /**
  * De-subscribes this object from the Poco NotificationCentre
  */
@@ -118,18 +214,8 @@ void WorkspaceMultiSelector::showWorkspaceGroups(bool show) {
 }
 
 bool WorkspaceMultiSelector::isValid() const {
-  QListWidgetItem *item = currentItem();
+  QTableWidgetItem *item = currentItem();
   return (item->text() != "");
-}
-
-bool WorkspaceMultiSelector::isOptional() const { return m_optional; }
-
-void WorkspaceMultiSelector::setOptional(bool optional) {
-  if (optional != m_optional) {
-    m_optional = optional;
-    if (m_init)
-      refresh();
-  }
 }
 
 bool WorkspaceMultiSelector::isConnected() const { return m_connected; }
@@ -149,15 +235,79 @@ void WorkspaceMultiSelector::setLowerBinLimit(int numberOfBins) { m_binLimits.fi
 
 void WorkspaceMultiSelector::setUpperBinLimit(int numberOfBins) { m_binLimits.second = numberOfBins; }
 
+void WorkspaceMultiSelector::addItem(const std::string &name) {
+  insertRow(rowCount());
+  auto nameItem = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto indexItem = std::make_unique<QTableWidgetItem>(getIndexString(name));
+
+  nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+
+  setItem(rowCount() - 1, namesCol, nameItem.release());
+  setItem(rowCount() - 1, indexCol, indexItem.release());
+  return;
+}
+
+void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
+  // here is assuming item has already been deemed eligible
+  this->item(row, namesCol)->setText(QString::fromStdString(newName));
+  this->item(row, indexCol)->setText(getIndexString(newName));
+}
+
+void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
+  auto nItems = names.size();
+  for (auto &name : names) {
+    if (checkEligibility(name)) {
+      addItem(name);
+    }
+  }
+  return;
+}
+
+stringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
+
+  auto selIndexes = selectedIndexes();
+  stringPairVec nameIndexPairVec;
+  nameIndexPairVec.reserve(static_cast<std::size_t>(selIndexes.size()));
+
+  for (auto const &index : selIndexes) {
+    std::string txt = item(index.row(), namesCol)->text().toStdString();
+    if (txt != "") {
+      std::string idx = item(index.row(), indexCol)->text().toStdString();
+      nameIndexPairVec.push_back(std::make_pair(txt, idx));
+    }
+  }
+  nameIndexPairVec.shrink_to_fit();
+  return nameIndexPairVec;
+}
+
+void WorkspaceMultiSelector::resetIndexRangeToDefault() {
+  auto selIndex = this->selectedIndexes();
+  if (!selIndex.isEmpty()) {
+    for (auto &index : selIndex) {
+      std::string selName = this->item(index.row(), namesCol)->text().toStdString();
+      this->item(index.row(), indexCol)->setText(getIndexString(selName));
+    }
+  }
+}
+
+void WorkspaceMultiSelector::unifyRange() {
+  auto selIndex = this->selectedIndexes();
+  if (!selIndex.isEmpty()) {
+    auto rangeFirst = this->item(selIndex.takeFirst().row(), indexCol)->text();
+    for (auto &index : selIndex) {
+      this->item(index.row(), indexCol)->setText(rangeFirst);
+    }
+  }
+}
+
 void WorkspaceMultiSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   if (!showHiddenWorkspaces() &&
       Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->objectName())) {
     return;
   }
-  QString name = QString::fromStdString(pNf->objectName());
-  if (checkEligibility(name, pNf->object())) {
-    addItem(name);
+  if (checkEligibility(pNf->objectName())) {
+    addItem(pNf->objectName());
   }
 }
 
@@ -166,38 +316,39 @@ void WorkspaceMultiSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNoti
   QString name = QString::fromStdString(pNf->objectName());
   auto items = findItems(name, Qt::MatchExactly);
   if (!items.isEmpty()) {
-    for (auto item : items)
-      delete item;
+    for (auto &item : items)
+      removeRow(item->row());
   }
-  if (count() <= 0) {
+  if (rowCount() == 0) {
     emit emptied();
   }
 }
 
 void WorkspaceMultiSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
-  this->clear();
-  if (m_optional)
-    addItem("");
+  this->clearContents();
+  while (rowCount() > 0) {
+    removeRow(0);
+  }
   emit emptied();
 }
 
 void WorkspaceMultiSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
-  QString name = QString::fromStdString(pNf->objectName());
-  QString newName = QString::fromStdString(pNf->newObjectName());
+
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  // 1 rename per notification?
-  bool eligible = checkEligibility(newName, ads.retrieve(pNf->newObjectName()));
+  bool eligible = checkEligibility(pNf->newObjectName());
+  QString name = QString::fromStdString(pNf->objectName());
+
   auto items = findItems(name, Qt::MatchExactly);
   std::cout << "I'm a rename event" << std::endl;
-  if (eligible) {
-    addItem(newName);
-  }
-  if (!items.isEmpty()) {
-    for (auto item : items) {
-      delete item;
-    }
+
+  if (eligible && !items.isEmpty()) {
+    renameItem(pNf->newObjectName(), items.first()->row());
+  } else if (eligible && items.isEmpty()) {
+    addItem(pNf->newObjectName());
+  } else if (!eligible && !items.isEmpty()) {
+    removeRow(items.first()->row());
   }
 }
 
@@ -206,45 +357,33 @@ void WorkspaceMultiSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterRepla
   QString name = QString::fromStdString(pNf->objectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
 
-  bool eligible = checkEligibility(name, ads.retrieve(pNf->objectName()));
+  bool eligible = checkEligibility(pNf->objectName());
   auto items = findItems(name, Qt::MatchExactly);
   std::cout << "I'm a replace event " << std::endl;
   std::cout << name.toStdString() << std::endl;
   if (!items.isEmpty()) {
     std::cout << items[0]->text().toStdString() << std::endl;
   }
-
-  // if it is inside and it is eligible do nothing
-  // if it is not inside and it is eligible insert
-  // if it is inside and it is not eligible remove
-  // if it is not inside and it is not eligible do nothing
-
-  if ((!items.isEmpty() && eligible) || (items.isEmpty() && !eligible))
+  if ((eligible && !items.isEmpty()) || (!eligible && items.isEmpty()))
     return;
   else if (items.isEmpty() && eligible) {
-    addItem(name);
+    addItem(pNf->objectName());
   } else { // (inside && !eligible)
-    for (auto item : items) {
-      delete item;
-    }
+    removeRow(items.first()->row());
   }
 }
 
-bool WorkspaceMultiSelector::checkEligibility(const QString &name, const Mantid::API::Workspace_sptr &object) const {
-  if (m_algorithm && !m_algPropName.isEmpty()) {
-    try {
-      m_algorithm->setPropertyValue(m_algPropName.toStdString(), name.toStdString());
-    } catch (std::invalid_argument &) {
-      return false;
-    }
-  } else if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(object->id())) == -1) {
+bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  auto workspace = ads.retrieve(name);
+  if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(workspace->id())) == -1) {
     return false;
-  } else if (!hasValidSuffix(name)) {
+  } else if (!hasValidSuffix(QString::fromStdString(name))) {
     return false;
-  } else if (!hasValidNumberOfBins(object)) {
+  } else if (!hasValidNumberOfBins(workspace)) {
     return false;
   } else if (!m_showGroups) {
-    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
+    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace);
     if (group != nullptr)
       return false;
   }
@@ -280,9 +419,7 @@ bool WorkspaceMultiSelector::hasValidNumberOfBins(const Mantid::API::Workspace_s
 
 void WorkspaceMultiSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
-  clear();
-  if (m_optional)
-    addItem("");
+  this->clearContents();
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   std::vector<std::string> items;
   if (showHiddenWorkspaces()) {
@@ -290,53 +427,13 @@ void WorkspaceMultiSelector::refresh() {
   } else {
     items = ads.getObjectNames();
   }
-
-  QStringList namesToAdd;
-  for (auto &item : items) {
-    QString name = QString::fromStdString(item);
-    if (checkEligibility(name, ads.retrieve(item))) {
-      namesToAdd << name;
-    }
-  }
-  addItems(namesToAdd);
-}
-
-/**
- * Called when an item is dropped
- * @param de :: the drop event data package
- */
-void WorkspaceMultiSelector::dropEvent(QDropEvent *de) {
-  const std::lock_guard<std::mutex> lock(m_adsMutex);
-  const QMimeData *mimeData = de->mimeData();
-  QString text = mimeData->text();
-  int equal_pos = text.indexOf("=");
-  QString ws_name = text.left(equal_pos - 1);
-  QString ws_name_test = text.mid(equal_pos + 7, equal_pos - 1);
-  /* FOR THE MOMENT DONT FIDDLE WITH THIS UNTILS IS CLEARER HOW TO RUN IT
-  if (ws_name == ws_name_test) {
-    int index = findText(ws_name);
-    if (index >= 0) {
-      setCurrentIndex(index);
-      de->acceptProposedAction();
-    }
-  } */
-}
-
-/**
- * Called when an item is dragged onto a control
- * @param de :: the drag event data package
- */
-void WorkspaceMultiSelector::dragEnterEvent(QDragEnterEvent *de) {
-  const std::lock_guard<std::mutex> lock(m_adsMutex);
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasText()) {
-    QString text = mimeData->text();
-    if (text.contains(" = mtd[\""))
-      de->acceptProposedAction();
-  }
+  addItems(items);
 }
 
 /**
  * Called when there is an interaction with the widget.
  */
 void WorkspaceMultiSelector::focusInEvent(QFocusEvent *) { emit focussed(); }
+
+} // namespace MantidWidgets
+} // namespace MantidQt

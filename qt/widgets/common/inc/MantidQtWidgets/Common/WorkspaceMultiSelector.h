@@ -8,25 +8,19 @@
 
 #include "DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <QListWidget>
 #include <QStringList>
+#include <QTableWidget>
 #include <mutex>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
 
-// Forward declarations
-namespace Mantid {
-namespace API {
-class Algorithm;
-}
-} // namespace Mantid
-
+typedef std::vector<std::pair<std::string, std::string>> stringPairVec;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-This class defines a widget for selecting a workspace present in the
-AnalysisDataService
+This class defines a widget for selecting multiple workspace present in the
+AnalysisDataService and adding to a QTableWidget.
 
 Subscribes to the WorkspaceAddNotification and WorkspaceDeleteNotification from
 the ADS.
@@ -38,47 +32,47 @@ Types of workspace to show can be restricted in several ways:
 double underscore at the start of the
           workspace name
  * By providing a suffix that the workspace name must have
- * By giving the name of an algorithm, each workspace will be validated as an
-input to the workspaces first input WorkspaceProperty
-
-@author Michael Whitty
-@date 23/02/2011
 */
-class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector : public QListWidget {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector : public QTableWidget {
   Q_OBJECT
 
   Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
   Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
-  Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
   Q_PROPERTY(QStringList Suffix READ getWSSuffixes WRITE setWSSuffixes)
-  friend class DataSelector;
+  friend class AddWorkspaceMultiDialog;
 
 public:
-  // using QComboBox::currentIndexChanged;
-
   /// Default Constructor
-  WorkspaceMultiSelector(QWidget *parent = nullptr, bool init = true);
+  explicit WorkspaceMultiSelector(QWidget *parent = 0, bool init = true);
+
   /// Destructor
   ~WorkspaceMultiSelector() override;
 
-  QStringList getWorkspaceTypes() const;
-  void setWorkspaceTypes(const QStringList &types);
+  void setupTable();
+
+  void refresh();
+  void resetIndexRangeToDefault();
+  void unifyRange();
+
   bool showHiddenWorkspaces() const;
   void showHiddenWorkspaces(bool show);
   bool showWorkspaceGroups() const;
   void showWorkspaceGroups(bool show);
-  bool isOptional() const;
-  void setOptional(bool optional);
+  stringPairVec retrieveSelectedNameIndexPairs();
+
+  QStringList getWorkspaceTypes() const;
   QStringList getWSSuffixes() const;
+  void setWorkspaceTypes(const QStringList &types);
   void setWSSuffixes(const QStringList &suffix);
   void setLowerBinLimit(int numberOfBins);
   void setUpperBinLimit(int numberOfBins);
+
   bool isValid() const;
-  void refresh();
-  void disconnectObservers();
-  void connectObservers();
   bool isConnected() const;
+
+  void connectObservers();
+  void disconnectObservers();
 
 signals:
   void emptied();
@@ -91,15 +85,15 @@ private:
   void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
   void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-  bool checkEligibility(const QString &name, const Mantid::API::Workspace_sptr &object) const;
+  bool checkEligibility(const std::string &name) const;
   bool hasValidSuffix(const QString &name) const;
   bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
+  void addItem(const std::string &name);
+  void addItems(const std::vector<std::string> &names);
+  void renameItem(const std::string &newName, int row);
+
 protected:
-  // Method for handling drop events
-  void dropEvent(QDropEvent * /*unused*/) override;
-  // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
   // Method for handling focus in events
   void focusInEvent(QFocusEvent * /*unused*/) override;
 
@@ -114,22 +108,15 @@ private:
   bool m_init;
   bool m_connected;
 
-  /// A list of workspace types that should be shown in the ComboBox
+  /// A list of workspace types that should be shown in the QtableWidget
   QStringList m_workspaceTypes;
   /// Whether to show "hidden" workspaces
   bool m_showHidden;
   // show/hide workspace groups
   bool m_showGroups;
-  /// Whether to add an extra empty entry to the combobox
-  bool m_optional;
   /// Allows you to put limits on the size of the workspace i.e. number of bins
   std::pair<int, int> m_binLimits;
   QStringList m_suffix;
-  QString m_algName;
-  QString m_algPropName;
-
-  // Algorithm to validate against
-  std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
 
   // Mutex for synchronized event handling
   std::mutex m_adsMutex;
