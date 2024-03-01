@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_AddWorkspaceMultiDialog.h"
@@ -23,28 +24,24 @@ class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceMultiDialog : public QDialog, publi
 public:
   explicit AddWorkspaceMultiDialog(QWidget *parent);
 
-  std::vector<std::string> workspaceNames() const;
-  FunctionModelSpectra workspaceIndices() const;
+  std::string workspaceName() const override;
+  stringPairVec selectedNameIndexPairs() const;
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
-
-  void updateSelectedSpectra() override;
-
-  std::string getFileName() const;
+  void setup();
 
 signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
-private slots:
-  void selectAllSpectra(int state);
-  void workspaceChanged(const QString &workspaceName);
+public slots:
+  void selectAllSpectra();
+  void unifyRange();
+  void updateSelectedSpectra() override;
+  void handleFilesFound();
   void emitAddData();
 
 private:
-  void setWorkspace(const std::string &workspace);
-  void setAllSpectraSelectionEnabled(bool doEnable);
-
   Ui::AddWorkspaceMultiDialog m_uiForm;
 };
 
