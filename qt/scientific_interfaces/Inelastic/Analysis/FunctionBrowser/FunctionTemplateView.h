@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Analysis/FunctionBrowser/TemplateSubType.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
@@ -44,8 +45,9 @@ class ITemplatePresenter;
 class MANTIDQT_INELASTIC_DLL FunctionTemplateView : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateView(QWidget *parent = nullptr);
+  FunctionTemplateView();
   virtual ~FunctionTemplateView();
+
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 

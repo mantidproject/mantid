@@ -27,7 +27,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit IqtFunctionTemplateView(QWidget *parent = nullptr);
+  explicit IqtFunctionTemplateView(TemplateBrowserCustomizations customizations);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();

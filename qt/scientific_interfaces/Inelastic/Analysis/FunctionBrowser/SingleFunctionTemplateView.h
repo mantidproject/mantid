@@ -28,7 +28,7 @@ class IDAFunctionParameterEstimation;
 class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplateView(QWidget *parent = nullptr);
+  explicit SingleFunctionTemplateView(TemplateBrowserCustomizations customizations);
   virtual ~SingleFunctionTemplateView() = default;
 
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;

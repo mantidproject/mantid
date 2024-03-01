@@ -29,7 +29,7 @@ using namespace ConvTypes;
 class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit ConvFunctionTemplateView(QWidget *parent = nullptr);
+  explicit ConvFunctionTemplateView(TemplateBrowserCustomizations customizations);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 

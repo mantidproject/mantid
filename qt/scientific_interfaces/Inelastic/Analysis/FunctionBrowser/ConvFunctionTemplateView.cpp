@@ -25,7 +25,9 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-ConvFunctionTemplateView::ConvFunctionTemplateView(QWidget *parent) : FunctionTemplateView(parent) {
+ConvFunctionTemplateView::ConvFunctionTemplateView(TemplateBrowserCustomizations customizations)
+      : FunctionTemplateView() {
+  (void)customizations;
   m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::LorentzianSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::BackgroundSubType>());

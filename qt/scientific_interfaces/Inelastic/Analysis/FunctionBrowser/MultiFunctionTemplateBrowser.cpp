@@ -25,10 +25,8 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-MultiFunctionTemplateBrowser::MultiFunctionTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent) {
-  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::LorentzianSubType>());
-  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::FitSubType>());
-  m_templateSubTypes.emplace_back(std::make_unique<ConvTypes::BackgroundSubType>());
+MultiFunctionTemplateBrowser::MultiFunctionTemplateBrowser(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateBrowser(), m_templateSubTypes(std::move(*customizations.templateSubTypes)) {
   init();
 }
 

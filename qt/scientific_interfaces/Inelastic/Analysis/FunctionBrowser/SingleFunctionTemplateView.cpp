@@ -32,11 +32,11 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
-SingleFunctionTemplateView::SingleFunctionTemplateView(QWidget *parent) : FunctionTemplateView(parent) { init(); }
+SingleFunctionTemplateView::SingleFunctionTemplateView(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateView() {
+  (void)customizations;
+  init();
+}
 
 void SingleFunctionTemplateView::createProperties() {
   m_parameterManager->blockSignals(true);

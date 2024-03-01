@@ -25,7 +25,7 @@ using namespace ConvTypes;
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit MultiFunctionTemplateBrowser(QWidget *parent = nullptr);
+  explicit MultiFunctionTemplateBrowser(TemplateBrowserCustomizations customizations);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 

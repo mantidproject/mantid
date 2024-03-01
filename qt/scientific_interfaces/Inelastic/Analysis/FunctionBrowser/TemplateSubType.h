@@ -103,6 +103,24 @@ void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &p
 }
 GNU_DIAG_ON("undefined-var-template")
 
+using TemplateSubTypes = std::vector<std::unique_ptr<TemplateSubType>>;
+
+template <typename... Args> std::unique_ptr<TemplateSubTypes> packTemplateSubTypes(Args &&...others) {
+  std::unique_ptr<TemplateSubTypes> subTypes = std::make_unique<TemplateSubTypes>();
+  (subTypes->emplace_back(std::forward<Args>(others)), ...);
+  return subTypes;
+}
+
+struct TemplateBrowserCustomizations {
+  std::unique_ptr<TemplateSubTypes> templateSubTypes = nullptr;
+};
+
+static TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<TemplateSubTypes> subTypes) {
+  auto browserCustomizations = TemplateBrowserCustomizations();
+  browserCustomizations.templateSubTypes = std::move(subTypes);
+  return browserCustomizations;
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

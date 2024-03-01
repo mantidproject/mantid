@@ -56,8 +56,10 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
+  auto browserCustomizations = packBrowserCustomizations(std::move(ConvFit::TEMPLATE_SUB_TYPES));
   tab->setupFitPropertyBrowser<MultiFunctionTemplateBrowser, MultiFunctionTemplatePresenter,
-                               MultiFunctionTemplateModel>(ConvFit::HIDDEN_PROPS, true);
+                               MultiFunctionTemplateModel>(ConvFit::HIDDEN_PROPS, true,
+                                                           std::move(browserCustomizations));
   tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();
