@@ -70,7 +70,6 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
  * @param exptRun :: The run for this period
  */
 void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
-  const TimeSeriesProperty<bool> *maskProp{nullptr};
   std::unique_ptr<LogFilter> logFilter{nullptr};
   try {
     auto runningLog = exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
@@ -102,16 +101,14 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   if (multiperiod) {
     if (logFilter) {
       logFilter->addFilter(*currentPeriodLog);
-      maskProp = logFilter->filter();
-    } else
-      maskProp = currentPeriodLog;
-  } else if (logFilter) {
-    maskProp = logFilter->filter();
+    } else if (currentPeriodLog) {
+      logFilter = std::make_unique<LogFilter>(*currentPeriodLog);
+    }
   }
 
   // Filter logs if we have anything to filter on
-  if (maskProp) {
-    exptRun.filterByLog(*maskProp, ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
+  if (logFilter) {
+    exptRun.filterByLog(logFilter.get(), ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
   }
 }
 

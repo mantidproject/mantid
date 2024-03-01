@@ -178,9 +178,9 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(get_value(all_logs[21]), "{} (2 entries)".format(model.get_statistics("C9_SLAVE_PHASE").mean))
         self.assertEqual(get_value(all_logs[21]), "{} (2 entries)".format(model.get_statistics("C9_SLAVE_PHASE").maximum))
 
-        # Valid log with 4 identical value entries
-        self.assertEqual(get_value(all_logs[38]), "{} (4 entries)".format(model.get_statistics("x").mean))
-        self.assertEqual(get_value(all_logs[38]), "{} (4 entries)".format(model.get_statistics("x").maximum))
+        # Valid log with 6 identical value entries
+        self.assertEqual(get_value(all_logs[38]), "{} (6 entries)".format(model.get_statistics("x").mean))
+        self.assertEqual(get_value(all_logs[38]), "{} (6 entries)".format(model.get_statistics("x").maximum))
 
         # Valid log with multiple different value entries
         self.assertEqual(get_value(all_logs[29]), "({} entries)".format(all_logs[29].size()))  # cryo_Sample

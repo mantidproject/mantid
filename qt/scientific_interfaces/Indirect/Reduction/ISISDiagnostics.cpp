@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
@@ -293,7 +294,7 @@ void ISISDiagnostics::handleNewFile() {
   m_uiForm.ppRawPlot->clear();
   m_uiForm.ppRawPlot->addSpectrum("Raw", inputWorkspace->clone(), previewSpec);
 
-  auto const xLimits = getXRangeFromWorkspace(inputWorkspace);
+  auto const xLimits = WorkspaceUtils::getXRangeFromWorkspace(inputWorkspace);
   setPeakRangeLimits(xLimits.first, xLimits.second);
   setBackgroundRangeLimits(xLimits.first, xLimits.second);
 
@@ -446,8 +447,9 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 void ISISDiagnostics::setFileExtensionsByName(bool filter) {
   QStringList const noSuffices{""};
   auto const tabName("ISISDiagnostics");
-  m_uiForm.dsCalibration->setFBSuffixes(filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName));
-  m_uiForm.dsCalibration->setWSSuffixes(filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
+  m_uiForm.dsCalibration->setFBSuffixes(filter ? InterfaceUtils::getCalibrationFBSuffixes(tabName)
+                                               : InterfaceUtils::getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibration->setWSSuffixes(filter ? InterfaceUtils::getCalibrationWSSuffixes(tabName) : noSuffices);
 }
 
 /**

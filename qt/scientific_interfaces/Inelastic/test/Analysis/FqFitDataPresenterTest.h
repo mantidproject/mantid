@@ -13,7 +13,7 @@
 #include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
-#include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/SingleFunctionTemplateView.h"
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"

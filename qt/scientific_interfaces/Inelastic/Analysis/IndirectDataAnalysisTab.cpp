@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
-
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "Common/WorkspaceUtils.h"
+
 #include "FitTabConstants.h"
 #include "IndirectFitPlotView.h"
 
@@ -31,15 +33,6 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("IndirectDataAnalysisTab");
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -123,14 +116,14 @@ void IndirectDataAnalysisTab::setFileExtensionsByName(bool filter) {
 
 void IndirectDataAnalysisTab::setSampleSuffixes(std::string const &tab, bool filter) {
   QStringList const noSuffixes{""};
-  setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
-  setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
+  setSampleWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tab) : noSuffixes);
+  setSampleFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
 }
 
 void IndirectDataAnalysisTab::setResolutionSuffixes(std::string const &tab, bool filter) {
   QStringList const noSuffixes{""};
-  setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
-  setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab) : getExtensions(tab));
+  setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tab) : noSuffixes);
+  setResolutionFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
 }
 
 void IndirectDataAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
@@ -489,10 +482,10 @@ void IndirectDataAnalysisTab::enableOutputOptions(bool enable) {
  */
 void IndirectDataAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
   auto const fabMinimizer = m_fitPropertyBrowser->minimizer() == "FABADA";
-  auto const enablePDFOptions = doesExistInADS(workspaceName) && fabMinimizer;
+  auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && fabMinimizer;
 
   if (enablePDFOptions) {
-    m_outOptionsPresenter->setPDFWorkspace(getADSGroupWorkspace(workspaceName));
+    m_outOptionsPresenter->setPDFWorkspace(WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(workspaceName));
     m_outOptionsPresenter->setPlotWorkspaces();
   } else
     m_outOptionsPresenter->removePDFWorkspace();

@@ -59,7 +59,6 @@ public:
   void loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser = "",
                                 const std::string &reflection = "");
 
-  std::vector<std::pair<std::string, std::vector<std::string>>> getInstrumentModes();
   QMap<QString, QString> getInstrumentDetails();
 
   void showAnalyserAndReflectionOptions(bool visible);

@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSqwTabModel.h"
 #include "Common/IndirectDataValidationHelper.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,15 +23,6 @@ using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace {
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &tuple) {
-  return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
-}
-
 void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
   auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   converter->initialize();
@@ -126,7 +118,7 @@ std::string InelasticDataManipulationSqwTabModel::getOutputWorkspace() { return 
 MatrixWorkspace_sptr InelasticDataManipulationSqwTabModel::getRqwWorkspace() {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
-  return getADSMatrixWorkspace(outputName);
+  return WorkspaceUtils::getADSWorkspace(outputName);
 }
 
 UserInputValidator InelasticDataManipulationSqwTabModel::validate(std::tuple<double, double> const qRange,
@@ -138,15 +130,15 @@ UserInputValidator InelasticDataManipulationSqwTabModel::validate(std::tuple<dou
 
   // Validate Q binning
   uiv.checkBins(m_qLow, m_qWidth, m_qHigh, tolerance);
-  uiv.checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
-                           std::make_pair(m_qLow, m_qHigh));
+  uiv.checkRangeIsEnclosed("The contour plots Q axis", InterfaceUtils::convertTupleToPair(qRange),
+                           "the Q range provided", std::make_pair(m_qLow, m_qHigh));
 
   // If selected, validate energy binning
   if (m_rebinInEnergy) {
 
     uiv.checkBins(m_eLow, m_eWidth, m_eHigh, tolerance);
-    uiv.checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
-                             std::make_pair(m_eLow, m_eHigh));
+    uiv.checkRangeIsEnclosed("The contour plots Energy axis", InterfaceUtils::convertTupleToPair(eRange),
+                             "the E range provided", std::make_pair(m_eLow, m_eHigh));
   }
   return uiv;
 }

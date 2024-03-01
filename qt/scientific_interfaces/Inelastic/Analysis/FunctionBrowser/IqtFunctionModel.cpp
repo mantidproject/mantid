@@ -16,6 +16,7 @@
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+namespace IqtTypes {
 std::map<IqtFunctionModel::ParamID, std::string> g_paramName{
     {IqtFunctionModel::ParamID::EXP1_HEIGHT, "Height"},
     {IqtFunctionModel::ParamID::EXP1_LIFETIME, "Lifetime"},
@@ -25,6 +26,7 @@ std::map<IqtFunctionModel::ParamID, std::string> g_paramName{
     {IqtFunctionModel::ParamID::STRETCH_LIFETIME, "Lifetime"},
     {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
     {IqtFunctionModel::ParamID::BG_A0, "A0"}};
+}
 
 std::tuple<double, double> calculateLifetimeAndHeight(Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
@@ -450,7 +452,7 @@ void IqtFunctionModel::setGlobalParameterValue(std::string const &parameterName,
 void IqtFunctionModel::setParameter(ParamID name, double value) {
   auto const prefix = getPrefix(name);
   if (prefix) {
-    m_model.setParameter(*prefix + g_paramName.at(name), value);
+    m_model.setParameter(*prefix + IqtTypes::g_paramName.at(name), value);
   }
 }
 
@@ -466,7 +468,7 @@ boost::optional<double> IqtFunctionModel::getParameterError(ParamID name) const 
 
 boost::optional<std::string> IqtFunctionModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
-  return prefix ? *prefix + g_paramName.at(name) : boost::optional<std::string>();
+  return prefix ? *prefix + IqtTypes::g_paramName.at(name) : boost::optional<std::string>();
 }
 
 boost::optional<std::string> IqtFunctionModel::getParameterDescription(ParamID name) const {
@@ -504,22 +506,6 @@ QMap<int, std::string> IqtFunctionModel::getParameterNameMap() const {
   QMap<int, std::string> out;
   auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
-  return out;
-}
-
-QMap<int, std::string> IqtFunctionModel::getParameterDescriptionMap() const {
-  QMap<int, std::string> out;
-  auto expDecay = FunctionFactory::Instance().createInitialized(buildExpDecayFunctionString());
-  out[static_cast<int>(ParamID::EXP1_HEIGHT)] = expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP1_LIFETIME)] = expDecay->parameterDescription(1);
-  out[static_cast<int>(ParamID::EXP2_HEIGHT)] = expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP2_LIFETIME)] = expDecay->parameterDescription(1);
-  auto stretchExp = FunctionFactory::Instance().createInitialized(buildStretchExpFunctionString());
-  out[static_cast<int>(ParamID::STRETCH_HEIGHT)] = stretchExp->parameterDescription(0);
-  out[static_cast<int>(ParamID::STRETCH_LIFETIME)] = stretchExp->parameterDescription(1);
-  out[static_cast<int>(ParamID::STRETCH_STRETCHING)] = stretchExp->parameterDescription(2);
-  auto background = FunctionFactory::Instance().createInitialized(buildBackgroundFunctionString());
-  out[static_cast<int>(ParamID::BG_A0)] = background->parameterDescription(0);
   return out;
 }
 

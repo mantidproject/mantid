@@ -9,6 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
@@ -469,6 +470,20 @@ void FunctionModel::removeConstraint(std::string const &parameterName) {
 
 std::vector<std::string> FunctionModel::getGlobalParameters() const { return m_globalParameterNames; }
 
+void FunctionModel::setGlobal(std::string const &parameterName, bool on) {
+  if (parameterName.empty())
+    return;
+  if (!on) {
+    auto newEnd = std::remove(m_globalParameterNames.begin(), m_globalParameterNames.end(), parameterName);
+    if (newEnd != m_globalParameterNames.end()) {
+      m_globalParameterNames.erase(newEnd, m_globalParameterNames.end());
+    }
+  } else if (std::find(m_globalParameterNames.cbegin(), m_globalParameterNames.cend(), parameterName) ==
+             m_globalParameterNames.cend()) {
+    m_globalParameterNames.emplace_back(parameterName);
+  }
+}
+
 void FunctionModel::setGlobalParameters(const std::vector<std::string> &globals) { m_globalParameterNames = globals; }
 
 std::vector<std::string> FunctionModel::getLocalParameters() const {
@@ -515,6 +530,34 @@ void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
     return;
   copyParametersAndErrors(fun, *m_function);
   updateMultiDatasetAttributes(fun);
+}
+
+void FunctionModel::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
+  auto const nRows = paramTable.rowCount();
+  if (nRows == 0)
+    return;
+
+  auto const globalParameterNames = getGlobalParameters();
+  for (auto &&name : globalParameterNames) {
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
+    setParameter(name, valueColumn->toDouble(0));
+    setParameterError(name, errorColumn->toDouble(0));
+  }
+
+  auto const localParameterNames = getLocalParameters();
+  for (auto &&name : localParameterNames) {
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
+    if (nRows > 1) {
+      for (size_t i = 0; i < nRows; ++i) {
+        setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
+      }
+    } else {
+      auto const i = currentDomainIndex();
+      setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
+    }
+  }
 }
 
 void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
