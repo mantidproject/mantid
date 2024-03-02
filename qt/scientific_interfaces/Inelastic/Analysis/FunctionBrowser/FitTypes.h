@@ -58,24 +58,27 @@ enum SubTypeIndex {
 extern std::map<FitType, bool> FitTypeQDepends;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
+struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
+  std::string name() const override { return "Lorentzians"; }
+  bool isType(const std::type_info &type) const { return type == typeid(int); }
+};
+
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
   std::string name() const override { return "Fit Type"; }
 };
 
-struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
-  std::string name() const override { return "Lorentzians"; }
-};
-
-struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
-  std::string name() const override { return "Background"; }
-};
-
 struct DeltaSubType : public TemplateSubTypeImpl<bool> {
   std::string name() const override { return "Delta Function"; }
+  bool isType(const std::type_info &type) const { return type == typeid(bool); }
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
   std::string name() const override { return "ConvTempCorrection"; }
+  bool isType(const std::type_info &type) const { return type == typeid(bool); }
+};
+
+struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
+  std::string name() const override { return "Background"; }
 };
 
 } // namespace ConvTypes

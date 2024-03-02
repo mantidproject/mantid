@@ -118,18 +118,18 @@ void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
       }
       parameters[index] = props;
     }
-    if (isub == ConvTypes::SubTypeIndex::Lorentzian) {
+
+    if (m_templateSubTypes[isub]->isType(typeid(int))) {
       auto subtypeProp = m_intManager->addProperty(QString::fromStdString(subType->name()));
       m_intManager->setMinimum(subtypeProp, 0);
-      m_intManager->setMaximum(subtypeProp, 2);
+      m_intManager->setMaximum(subtypeProp, m_templateSubTypes[isub]->getNTypes() - 1);
       m_subTypeProperties.push_back(subtypeProp);
 
-    } else if (isub == ConvTypes::SubTypeIndex::Delta || isub == ConvTypes::SubTypeIndex::TempCorrection) {
+    } else if (m_templateSubTypes[isub]->isType(typeid(bool))) {
       auto subtypeProp = m_boolManager->addProperty(QString::fromStdString(subType->name()));
       m_subTypeProperties.push_back(subtypeProp);
     } else {
       auto subTypeProp = m_enumManager->addProperty(QString::fromStdString(subType->name()));
-      m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
       m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
       m_subTypeProperties.push_back(subTypeProp);
     }
