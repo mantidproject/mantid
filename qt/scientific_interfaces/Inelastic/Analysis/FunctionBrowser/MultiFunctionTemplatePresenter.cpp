@@ -64,11 +64,11 @@ void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   convView->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(convModel->getTempCorrectionType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
-  convView->setInt(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
-  convView->setEnum(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
-  convView->setBool(ConvTypes::SubTypeIndex::Delta, static_cast<bool>(convModel->getDeltaType()));
-  convView->setBool(ConvTypes::SubTypeIndex::TempCorrection, static_cast<bool>(convModel->getTempCorrectionType()));
-  convView->setEnum(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
+  convView->setProperty(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
+  convView->setProperty(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
+  convView->setProperty(ConvTypes::SubTypeIndex::Delta, static_cast<bool>(convModel->getDeltaType()));
+  convView->setProperty(ConvTypes::SubTypeIndex::TempCorrection, static_cast<bool>(convModel->getTempCorrectionType()));
+  convView->setProperty(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);
   updateViewParameterNames();

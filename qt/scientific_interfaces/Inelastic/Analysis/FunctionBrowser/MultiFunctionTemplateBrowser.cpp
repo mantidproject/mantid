@@ -1,27 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiFunctionTemplateBrowser.h"
+#include "MultiFunctionTemplatePresenter.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-
-#include <QMessageBox>
-#include <QSettings>
-#include <QVBoxLayout>
-
-#include <limits>
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -47,39 +38,11 @@ void MultiFunctionTemplateBrowser::createProperties() {
   m_intManager->blockSignals(false);
 }
 
-void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
-  if (!m_emitBoolChange)
-    return;
-
-  if (auto const index = propertySubTypeIndex(prop)) {
-    m_presenter->setSubType(*index, m_boolManager->value(prop));
-  }
-}
-
-void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
-  if (!m_emitEnumChange)
-    return;
-
-  if (auto const index = propertySubTypeIndex(prop)) {
-    m_presenter->setSubType(*index, m_enumManager->value(prop));
-  }
-}
-
-void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
-  if (!m_emitParameterValueChange) {
-    return;
-  }
-
-  m_presenter->setGlobal(m_parameterNames[prop], m_parameterManager->isGlobal(prop));
-  m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
-}
-
 void MultiFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
-    auto const i = m_parameterMap[prop];
-    auto const name = parameterNames[static_cast<int>(i)];
+    auto const name = parameterNames[static_cast<int>(m_parameterMap[prop])];
     m_parameterNames[prop] = name;
     if (!name.empty()) {
       prop->setPropertyName(QString::fromStdString(name));
@@ -118,37 +81,33 @@ void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
       }
       parameters[index] = props;
     }
-
-    if (m_templateSubTypes[isub]->isType(typeid(int))) {
-      auto subtypeProp = m_intManager->addProperty(QString::fromStdString(subType->name()));
-      m_intManager->setMinimum(subtypeProp, 0);
-      m_intManager->setMaximum(subtypeProp, m_templateSubTypes[isub]->getNTypes() - 1);
-      m_subTypeProperties.push_back(subtypeProp);
-
-    } else if (m_templateSubTypes[isub]->isType(typeid(bool))) {
-      auto subtypeProp = m_boolManager->addProperty(QString::fromStdString(subType->name()));
-      m_subTypeProperties.push_back(subtypeProp);
+    QtProperty *subTypeProp;
+    if (subType->isType(typeid(int))) {
+      subTypeProp = m_intManager->addProperty(QString::fromStdString(subType->name()));
+      m_intManager->setMinimum(subTypeProp, 0);
+      m_intManager->setMaximum(subTypeProp, subType->getNTypes() - 1);
+    } else if (subType->isType(typeid(bool))) {
+      subTypeProp = m_boolManager->addProperty(QString::fromStdString(subType->name()));
     } else {
-      auto subTypeProp = m_enumManager->addProperty(QString::fromStdString(subType->name()));
-      m_enumManager->setEnumNames(subTypeProp, m_templateSubTypes[isub]->getTypeNames());
-      m_subTypeProperties.push_back(subTypeProp);
+      subTypeProp = m_enumManager->addProperty(QString::fromStdString(subType->name()));
+      m_enumManager->setEnumNames(subTypeProp, subType->getTypeNames());
     }
+    m_subTypeProperties.push_back(subTypeProp);
   }
 }
 
-void MultiFunctionTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
-  setEnumSilent(m_subTypeProperties[subTypeIndex], enumIndex);
+void MultiFunctionTemplateBrowser::setProperty(std::size_t subTypeIndex, int value) {
+  auto const &subType = m_templateSubTypes[subTypeIndex];
+  if (subType->isType(typeid(int))) {
+    setIntSilent(m_subTypeProperties[subTypeIndex], value);
+  } else if (subType->isType(typeid(bool))) {
+    setBoolSilent(m_subTypeProperties[subTypeIndex], value);
+  } else {
+    setEnumSilent(m_subTypeProperties[subTypeIndex], value);
+  }
 }
 
-void MultiFunctionTemplateBrowser::setBool(size_t subTypeIndex, int enumIndex) {
-  setBoolSilent(m_subTypeProperties[subTypeIndex], enumIndex);
-}
-
-void MultiFunctionTemplateBrowser::setInt(size_t subTypeIndex, int value) {
-  setIntSilent(m_subTypeProperties[subTypeIndex], value);
-}
-
-void MultiFunctionTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {
+void MultiFunctionTemplateBrowser::setSubType(std::size_t subTypeIndex, int typeIndex) {
   auto subTypeProp = m_subTypeProperties[subTypeIndex];
   auto &currentParameters = m_currentSubTypeParameters[subTypeIndex];
   for (auto &&prop : currentParameters) {
@@ -174,6 +133,33 @@ void MultiFunctionTemplateBrowser::intChanged(QtProperty *prop) {
   if (auto const index = propertySubTypeIndex(prop)) {
     m_presenter->setSubType(*index, m_intManager->value(prop));
   }
+}
+
+void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
+  if (!m_emitBoolChange)
+    return;
+
+  if (auto const index = propertySubTypeIndex(prop)) {
+    m_presenter->setSubType(*index, m_boolManager->value(prop));
+  }
+}
+
+void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
+  if (!m_emitEnumChange)
+    return;
+
+  if (auto const index = propertySubTypeIndex(prop)) {
+    m_presenter->setSubType(*index, m_enumManager->value(prop));
+  }
+}
+
+void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
+  if (!m_emitParameterValueChange) {
+    return;
+  }
+
+  m_presenter->setGlobal(m_parameterNames[prop], m_parameterManager->isGlobal(prop));
+  m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
 }
 
 std::optional<std::size_t> MultiFunctionTemplateBrowser::propertySubTypeIndex(QtProperty *prop) {
