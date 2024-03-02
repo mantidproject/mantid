@@ -31,14 +31,10 @@ public:
 
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void addTempCorrection(double value);
-  void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
   void setBool(size_t subTypeIndex, int enumIndex);
   void setInt(size_t subTypeIndex, int val);
-
-  void updateTemperatureCorrectionAndDelta(bool tempCorrection);
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -49,7 +45,6 @@ protected slots:
 private:
   void createProperties() override;
   void createFunctionParameterProperties();
-  void createTempCorrectionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setParameterValueQuiet(ParamID id, double value, double error);
 
@@ -59,9 +54,6 @@ private:
   std::vector<QMap<int, QList<QtProperty *>>> m_subTypeParameters;
   std::vector<QList<QtProperty *>> m_currentSubTypeParameters;
   std::vector<QtProperty *> m_subTypeProperties;
-
-  QtProperty *m_tempCorrectionOn;
-  QtProperty *m_temperature;
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;

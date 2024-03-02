@@ -32,7 +32,6 @@ public:
   MultiFunctionTemplateModel *model() const;
 
   void setSubType(size_t subTypeIndex, int typeIndex) override;
-  void setTempCorrection(bool) override;
 
   void setFunction(std::string const &funStr) override;
 

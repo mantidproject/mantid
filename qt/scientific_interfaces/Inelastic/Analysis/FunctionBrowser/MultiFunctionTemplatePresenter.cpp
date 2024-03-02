@@ -8,7 +8,6 @@
 #include "FitTypes.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MultiFunctionTemplateBrowser.h"
-#include <QInputDialog>
 #include <QtConcurrentRun>
 #include <cmath>
 #include <float.h>
@@ -40,33 +39,12 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
     model()->setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
   } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
     model()->setDeltaType(static_cast<ConvTypes::DeltaType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::TempCorrection) {
+    model()->setTempCorrectionType(static_cast<ConvTypes::TempCorrectionType>(typeIndex));
   } else {
     model()->setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
   }
   view()->setSubType(subTypeIndex, typeIndex);
-  setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
-  m_view->emitFunctionStructureChanged();
-}
-
-void MultiFunctionTemplatePresenter::setTempCorrection(bool on) {
-  if (on == model()->hasTempCorrection())
-    return;
-  double temp = model()->getTempValue();
-  if (on) {
-    bool ok;
-    temp = QInputDialog::getDouble(m_view, "Temperature", "Set Temperature", temp, 0.0,
-                                   std::numeric_limits<double>::max(), 3, &ok);
-    if (!ok)
-      return;
-  }
-  model()->setTempCorrection(on, temp);
-  if (on)
-    view()->addTempCorrection(temp);
-  else
-    view()->removeTempCorrection();
-
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -78,16 +56,17 @@ void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
 
   MultiFunctionTemplateBrowser *convView = view();
   MultiFunctionTemplateModel const *convModel = model();
-  convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection());
 
   convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(convModel->getDeltaType()));
+  convView->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(convModel->getTempCorrectionType()));
   convView->setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   convView->setInt(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
   convView->setEnum(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
   convView->setBool(ConvTypes::SubTypeIndex::Delta, static_cast<bool>(convModel->getDeltaType()));
+  convView->setBool(ConvTypes::SubTypeIndex::TempCorrection, static_cast<bool>(convModel->getTempCorrectionType()));
   convView->setEnum(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);

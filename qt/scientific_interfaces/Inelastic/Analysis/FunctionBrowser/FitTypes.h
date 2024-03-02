@@ -43,15 +43,16 @@ enum class FitType {
 
 enum class DeltaType { None, Delta };
 
-enum class BackgroundType { None, Flat, Linear };
-
 enum class TempCorrectionType { None, Exponential };
+
+enum class BackgroundType { None, Flat, Linear };
 
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
   Delta = 2,
-  Background = 3,
+  TempCorrection = 3,
+  Background = 4,
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;

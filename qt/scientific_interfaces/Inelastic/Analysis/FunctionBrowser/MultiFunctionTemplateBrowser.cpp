@@ -37,12 +37,11 @@ void MultiFunctionTemplateBrowser::createProperties() {
   m_intManager->blockSignals(true);
 
   createFunctionParameterProperties();
-  createTempCorrectionProperties();
 
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian]);
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Fit]);
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]);
-  m_browser->addProperty(m_tempCorrectionOn);
+  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::TempCorrection]);
   m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Background]);
 
   m_parameterManager->blockSignals(false);
@@ -56,34 +55,12 @@ void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
     return;
   if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]) {
     m_presenter->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(m_boolManager->value(prop)));
-  } else if (prop == m_tempCorrectionOn) {
-    m_presenter->setTempCorrection(m_boolManager->value(prop));
+  } else if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::TempCorrection]) {
+    m_presenter->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(m_boolManager->value(prop)));
   }
 }
 
 void MultiFunctionTemplateBrowser::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
-
-void MultiFunctionTemplateBrowser::addTempCorrection(double value) {
-  m_tempCorrectionOn->addSubProperty(m_temperature);
-  setBoolSilent(m_tempCorrectionOn, true);
-  m_parameterManager->setValue(m_temperature, value);
-  m_parameterManager->setGlobal(m_temperature, true);
-}
-
-void MultiFunctionTemplateBrowser::updateTemperatureCorrectionAndDelta(bool tempCorrection) {
-  MantidQt::MantidWidgets::ScopedFalse _boolBlock(m_emitBoolChange);
-  MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-
-  if (tempCorrection)
-    addTempCorrection(100.0);
-  else
-    removeTempCorrection();
-}
-
-void MultiFunctionTemplateBrowser::removeTempCorrection() {
-  m_tempCorrectionOn->removeSubProperty(m_temperature);
-  setBoolSilent(m_tempCorrectionOn, false);
-}
 
 void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
@@ -154,7 +131,7 @@ void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
       m_intManager->setMaximum(subtypeProp, 2);
       m_subTypeProperties.push_back(subtypeProp);
 
-    } else if (isub == ConvTypes::SubTypeIndex::Delta) {
+    } else if (isub == ConvTypes::SubTypeIndex::Delta || isub == ConvTypes::SubTypeIndex::TempCorrection) {
       auto subtypeProp = m_boolManager->addProperty(QString::fromStdString(subType->name()));
       m_subTypeProperties.push_back(subtypeProp);
     } else {
@@ -176,14 +153,6 @@ void MultiFunctionTemplateBrowser::setBool(size_t subTypeIndex, int enumIndex) {
 
 void MultiFunctionTemplateBrowser::setInt(size_t subTypeIndex, int value) {
   setIntSilent(m_subTypeProperties[subTypeIndex], value);
-}
-
-void MultiFunctionTemplateBrowser::createTempCorrectionProperties() {
-  m_tempCorrectionOn = m_boolManager->addProperty("Temp Correction");
-  m_temperature = m_parameterManager->addProperty("Temperature");
-  m_parameterManager->setDescription(m_temperature, "Temperature");
-  m_parameterMap[m_temperature] = ParamID::TEMPERATURE;
-  m_parameterReverseMap[ParamID::TEMPERATURE] = m_temperature;
 }
 
 void MultiFunctionTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {

@@ -40,6 +40,7 @@ public:
   FitType getFitType() const;
   LorentzianType getLorentzianType() const;
   DeltaType getDeltaType() const;
+  TempCorrectionType getTempCorrectionType() const;
   BackgroundType getBackgroundType() const;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
@@ -80,10 +81,9 @@ public:
   void setFitType(FitType fitType);
   void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaType(DeltaType deltaType);
+  void setTempCorrectionType(TempCorrectionType tempCorrectionType);
   bool hasDeltaFunction() const;
-  void setTempCorrection(bool, double value);
   bool hasTempCorrection() const;
-  double getTempValue() const;
   void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
@@ -144,9 +144,8 @@ private:
   FitType m_fitType = FitType::None;
   LorentzianType m_lorentzianType = LorentzianType::None;
   DeltaType m_deltaType = DeltaType::None;
+  TempCorrectionType m_tempCorrectionType = TempCorrectionType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  bool m_hasTempCorrection = false;
-  double m_tempValue = 100.0;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;

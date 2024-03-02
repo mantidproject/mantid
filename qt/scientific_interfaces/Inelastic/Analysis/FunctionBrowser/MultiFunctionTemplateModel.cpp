@@ -43,16 +43,16 @@ void MultiFunctionTemplateModel::clearData() {
   m_lorentzianType = LorentzianType::None;
   m_fitType = FitType::None;
   m_deltaType = DeltaType::None;
-  m_hasTempCorrection = false;
+  m_tempCorrectionType = TempCorrectionType::None;
   m_backgroundType = BackgroundType::None;
   m_model.clear();
 }
 
 void MultiFunctionTemplateModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions, buildLorentzianPeaksString(),
-                   buildFitTypeString(), hasDeltaFunction(), m_qValues, m_isQDependentFunction, m_hasTempCorrection,
-                   m_tempValue);
-  if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
+                   buildFitTypeString(), hasDeltaFunction(), m_qValues, m_isQDependentFunction, hasTempCorrection(),
+                   100.0);
+  if (hasTempCorrection() && !m_globals.contains(ParamID::TEMPERATURE)) {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model.setGlobalParameters(makeGlobalList());
@@ -108,7 +108,6 @@ void MultiFunctionTemplateModel::checkConvolution(const IFunction_sptr &fun) {
           !innerFunction->getFunction(0)->hasParameter("Temperature")) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_hasTempCorrection = true;
       if (std::dynamic_pointer_cast<CompositeFunction>(innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
@@ -162,6 +161,8 @@ BackgroundType MultiFunctionTemplateModel::getBackgroundType() const { return m_
 LorentzianType MultiFunctionTemplateModel::getLorentzianType() const { return m_lorentzianType; }
 
 DeltaType MultiFunctionTemplateModel::getDeltaType() const { return m_deltaType; }
+
+TempCorrectionType MultiFunctionTemplateModel::getTempCorrectionType() const { return m_tempCorrectionType; }
 
 bool MultiFunctionTemplateModel::hasFunction() const { return m_model.hasFunction(); }
 
@@ -235,17 +236,7 @@ void MultiFunctionTemplateModel::removeFunction(std::string const &prefix) {
   throw std::runtime_error("Function doesn't have member function with prefix " + prefix);
 }
 
-void MultiFunctionTemplateModel::setTempCorrection(bool on, double value) {
-  auto oldValues = getCurrentValues();
-  m_hasTempCorrection = on;
-  m_tempValue = value;
-  setModel();
-  setCurrentValues(oldValues);
-}
-
-bool MultiFunctionTemplateModel::hasTempCorrection() const { return m_hasTempCorrection; }
-
-double MultiFunctionTemplateModel::getTempValue() const { return m_tempValue; }
+bool MultiFunctionTemplateModel::hasTempCorrection() const { return m_tempCorrectionType != TempCorrectionType::None; }
 
 bool MultiFunctionTemplateModel::hasDeltaFunction() const { return m_deltaType != DeltaType::None; }
 
@@ -408,6 +399,11 @@ void MultiFunctionTemplateModel::setLorentzianType(LorentzianType lorentzianType
 
 void MultiFunctionTemplateModel::setDeltaType(DeltaType deltaType) {
   m_deltaType = deltaType;
+  setModel();
+}
+
+void MultiFunctionTemplateModel::setTempCorrectionType(TempCorrectionType tempCorrectionType) {
+  m_tempCorrectionType = tempCorrectionType;
   setModel();
 }
 
@@ -594,10 +590,9 @@ void MultiFunctionTemplateModel::setCurrentValues(const QMap<ParamID, double> &v
 void MultiFunctionTemplateModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
   applyToFitFunction<ConvTypes::LorentzianSubType>(m_lorentzianType, paramFun);
   applyToFitFunction<ConvTypes::FitSubType>(m_fitType, paramFun);
-  applyToFitFunction<ConvTypes::BackgroundSubType>(m_backgroundType, paramFun);
   applyToFitFunction<ConvTypes::DeltaSubType>(hasDeltaFunction(), paramFun);
-  auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential : TempCorrectionType::None;
-  applyToFitFunction<ConvTypes::TempSubType>(tempType, paramFun);
+  applyToFitFunction<ConvTypes::TempSubType>(m_tempCorrectionType, paramFun);
+  applyToFitFunction<ConvTypes::BackgroundSubType>(m_backgroundType, paramFun);
 }
 
 boost::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string const &parameterName) {
