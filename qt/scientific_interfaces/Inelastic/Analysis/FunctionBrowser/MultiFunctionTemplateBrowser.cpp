@@ -74,9 +74,9 @@ void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
 }
 
 void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
-  auto isGlobal = m_parameterManager->isGlobal(prop);
-  m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
   if (m_emitParameterValueChange) {
+    auto isGlobal = m_parameterManager->isGlobal(prop);
+    m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
     m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
   }
 }

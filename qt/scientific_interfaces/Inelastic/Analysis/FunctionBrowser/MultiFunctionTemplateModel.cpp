@@ -16,6 +16,8 @@
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+double constexpr DEFAULT_TEMPERATURE_CORRECTION = 100.0;
+
 auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   return std::unordered_map<std::string, double>{{"Amplitude", y[1]}, {"FWHM", 2.0 * std::abs(x[1] - x[0])}};
 };
@@ -51,7 +53,7 @@ void MultiFunctionTemplateModel::clearData() {
 void MultiFunctionTemplateModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions, buildLorentzianPeaksString(),
                    buildFitTypeString(), hasDeltaFunction(), m_qValues, m_isQDependentFunction, hasTempCorrection(),
-                   100.0);
+                   DEFAULT_TEMPERATURE_CORRECTION);
   if (hasTempCorrection() && !m_globals.contains(ParamID::TEMPERATURE)) {
     m_globals.push_back(ParamID::TEMPERATURE);
   }

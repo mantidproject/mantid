@@ -48,6 +48,7 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
+  view()->setGlobalParametersQuiet(model()->getGlobalParameters());
   m_view->emitFunctionStructureChanged();
 }
 
