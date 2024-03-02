@@ -120,8 +120,4 @@ void SingleFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::strin
   }
 }
 
-void SingleFunctionTemplateView::setBackgroundA0(double) {}
-void SingleFunctionTemplateView::setResolution(const std::vector<std::pair<std::string, size_t>> &) {}
-void SingleFunctionTemplateView::setQValues(const std::vector<double> &) {}
-
 } // namespace MantidQt::CustomInterfaces::IDA

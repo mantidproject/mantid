@@ -66,8 +66,6 @@ void ConvFunctionTemplateView::boolChanged(QtProperty *prop) {
   }
 }
 
-void ConvFunctionTemplateView::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
-
 void ConvFunctionTemplateView::addDeltaFunction() {
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionCenter);
@@ -236,13 +234,7 @@ void ConvFunctionTemplateView::setParameterValueQuiet(ParamID id, double value, 
   setParameterSilent(prop, value, error);
 }
 
-void ConvFunctionTemplateView::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
-
-void ConvFunctionTemplateView::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  m_presenter->setResolution(fitResolutions);
-}
-
-void ConvFunctionTemplateView::intChanged(QtProperty *prop) {
+void ConvFunctionTemplateView::intChanged(QtProperty * prop) {
   if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian] && m_emitIntChange) {
     m_presenter->setSubType(ConvTypes::SubTypeIndex::Lorentzian, m_intManager->value(prop));
   }

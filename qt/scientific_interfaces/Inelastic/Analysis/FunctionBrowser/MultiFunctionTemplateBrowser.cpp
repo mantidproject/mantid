@@ -56,8 +56,6 @@ void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
   }
 }
 
-void MultiFunctionTemplateBrowser::setQValues(const std::vector<double> &qValues) { m_presenter->setQValues(qValues); }
-
 void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
     return;
@@ -167,12 +165,6 @@ void MultiFunctionTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex
 void MultiFunctionTemplateBrowser::setParameterValueQuiet(ParamID id, double value, double error) {
   auto prop = m_parameterReverseMap[id];
   setParameterSilent(prop, value, error);
-}
-
-void MultiFunctionTemplateBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
-
-void MultiFunctionTemplateBrowser::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  m_presenter->setResolution(fitResolutions);
 }
 
 void MultiFunctionTemplateBrowser::intChanged(QtProperty *prop) {

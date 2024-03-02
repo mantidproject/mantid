@@ -81,9 +81,6 @@ public:
   virtual EstimationDataSelector getEstimationDataSelector() const;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   virtual void estimateFunctionParameters();
-  virtual void setBackgroundA0(double value) = 0;
-  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
-  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
   void emitFunctionStructureChanged() { emit functionStructureChanged(); }
 

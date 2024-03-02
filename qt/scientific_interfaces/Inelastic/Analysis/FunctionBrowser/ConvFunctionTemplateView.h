@@ -33,13 +33,10 @@ public:
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 
-  void setBackgroundA0(double value) override;
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
   void removeTempCorrection();
-  void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
   void setInt(size_t subTypeIndex, int val);
 

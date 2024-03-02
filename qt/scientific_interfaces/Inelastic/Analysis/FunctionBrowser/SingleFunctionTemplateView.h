@@ -34,9 +34,6 @@ public:
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
-  void setBackgroundA0(double) override;
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
-  void setQValues(const std::vector<double> &) override;
   void addParameter(std::string const &parameterName, std::string const &parameterDescription);
   void setParameterValue(std::string const &parameterName, double parameterValue, double parameterError);
   void setParameterValueQuietly(std::string const &parameterName, double parameterValue, double parameterError);

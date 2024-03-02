@@ -230,8 +230,6 @@ void IqtFunctionTemplateView::clear() {
   removeExponentialOne();
 }
 
-void IqtFunctionTemplateView::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
-
 void IqtFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
