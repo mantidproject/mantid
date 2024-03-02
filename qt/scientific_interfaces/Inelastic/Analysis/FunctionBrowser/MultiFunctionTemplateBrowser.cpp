@@ -38,11 +38,8 @@ void MultiFunctionTemplateBrowser::createProperties() {
 
   createFunctionParameterProperties();
 
-  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian]);
-  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Fit]);
-  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]);
-  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::TempCorrection]);
-  m_browser->addProperty(m_subTypeProperties[ConvTypes::SubTypeIndex::Background]);
+  for (auto &prop : m_subTypeProperties)
+    m_browser->addProperty(prop);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
@@ -53,10 +50,9 @@ void MultiFunctionTemplateBrowser::createProperties() {
 void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
-  if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Delta]) {
-    m_presenter->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(m_boolManager->value(prop)));
-  } else if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::TempCorrection]) {
-    m_presenter->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(m_boolManager->value(prop)));
+
+  if (auto const index = propertySubTypeIndex(prop)) {
+    m_presenter->setSubType(*index, m_boolManager->value(prop));
   }
 }
 
@@ -65,20 +61,19 @@ void MultiFunctionTemplateBrowser::setQValues(const std::vector<double> &qValues
 void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
     return;
-  auto const index = m_enumManager->value(prop);
-  auto propIt = std::find(m_subTypeProperties.begin(), m_subTypeProperties.end(), prop);
-  if (propIt != m_subTypeProperties.end()) {
-    auto const subTypeIndex = std::distance(m_subTypeProperties.begin(), propIt);
-    m_presenter->setSubType(subTypeIndex, index);
+
+  if (auto const index = propertySubTypeIndex(prop)) {
+    m_presenter->setSubType(*index, m_enumManager->value(prop));
   }
 }
 
 void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
-  if (m_emitParameterValueChange) {
-    auto isGlobal = m_parameterManager->isGlobal(prop);
-    m_presenter->setGlobal(m_parameterNames[prop], isGlobal);
-    m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
+  if (!m_emitParameterValueChange) {
+    return;
   }
+
+  m_presenter->setGlobal(m_parameterNames[prop], m_parameterManager->isGlobal(prop));
+  m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
 }
 
 void MultiFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
@@ -181,8 +176,21 @@ void MultiFunctionTemplateBrowser::setResolution(const std::vector<std::pair<std
 }
 
 void MultiFunctionTemplateBrowser::intChanged(QtProperty *prop) {
-  if (prop == m_subTypeProperties[ConvTypes::SubTypeIndex::Lorentzian] && m_emitIntChange) {
-    m_presenter->setSubType(ConvTypes::SubTypeIndex::Lorentzian, m_intManager->value(prop));
+  if (!m_emitIntChange)
+    return;
+
+  if (auto const index = propertySubTypeIndex(prop)) {
+    m_presenter->setSubType(*index, m_intManager->value(prop));
   }
 }
+
+std::optional<std::size_t> MultiFunctionTemplateBrowser::propertySubTypeIndex(QtProperty *prop) {
+  auto const it = std::find(m_subTypeProperties.cbegin(), m_subTypeProperties.cend(), prop);
+  if (it != m_subTypeProperties.cend()) {
+    std::size_t index = std::distance(m_subTypeProperties.cbegin(), it);
+    return index;
+  }
+  return std::nullopt;
+}
+
 } // namespace MantidQt::CustomInterfaces::IDA

@@ -47,6 +47,7 @@ private:
   void createFunctionParameterProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setParameterValueQuiet(ParamID id, double value, double error);
+  std::optional<std::size_t> propertySubTypeIndex(QtProperty *prop);
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
   // Map fit type to a list of function parameters (QtProperties for those
