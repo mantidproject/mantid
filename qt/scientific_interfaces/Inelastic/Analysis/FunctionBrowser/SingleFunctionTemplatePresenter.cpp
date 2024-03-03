@@ -6,19 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SingleFunctionTemplatePresenter.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-#include "SingleFunctionTemplateBrowser.h"
+#include "SingleFunctionTemplateView.h"
 #include <math.h>
 
 namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
+SingleFunctionTemplatePresenter::SingleFunctionTemplatePresenter(SingleFunctionTemplateView *view,
                                                                  std::unique_ptr<SingleFunctionTemplateModel> model)
     : FunctionTemplatePresenter(view, std::move(model)) {}
 
-SingleFunctionTemplateBrowser *SingleFunctionTemplatePresenter::view() const {
-  return dynamic_cast<SingleFunctionTemplateBrowser *>(m_view);
+SingleFunctionTemplateView *SingleFunctionTemplatePresenter::view() const {
+  return dynamic_cast<SingleFunctionTemplateView *>(m_view);
 }
 SingleFunctionTemplateModel *SingleFunctionTemplatePresenter::model() const {
   return dynamic_cast<SingleFunctionTemplateModel *>(m_model.get());

@@ -20,13 +20,13 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class IqtTemplateBrowser;
+class IqtFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> model);
+  explicit IqtTemplatePresenter(IqtFunctionTemplateView *view, std::unique_ptr<IqtFunctionModel> model);
 
-  IqtTemplateBrowser *view() const;
+  IqtFunctionTemplateView *view() const;
   IqtFunctionModel *model() const;
 
   void setNumberOfExponentials(int) override;

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FunctionTemplateBrowser.h"
+#include "FunctionTemplateView.h"
 
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 
@@ -32,10 +32,9 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
-    : QWidget(parent), m_parameterNames(), m_decimals(6) {}
+FunctionTemplateView::FunctionTemplateView(QWidget *parent) : QWidget(parent), m_parameterNames(), m_decimals(6) {}
 
-FunctionTemplateBrowser::~FunctionTemplateBrowser() {
+FunctionTemplateView::~FunctionTemplateView() {
   m_browser->unsetFactoryForManager(m_stringManager);
   m_browser->unsetFactoryForManager(m_doubleManager);
   m_browser->unsetFactoryForManager(m_intManager);
@@ -44,7 +43,7 @@ FunctionTemplateBrowser::~FunctionTemplateBrowser() {
   m_browser->unsetFactoryForManager(m_parameterManager);
 }
 
-void FunctionTemplateBrowser::createBrowser() {
+void FunctionTemplateView::createBrowser() {
   m_stringManager = new QtStringPropertyManager(this);
   m_doubleManager = new QtDoublePropertyManager(this);
   m_intManager = new QtIntPropertyManager(this);
@@ -87,7 +86,7 @@ void FunctionTemplateBrowser::createBrowser() {
           SLOT(globalChanged(QtProperty *, const QString &, bool)));
 }
 
-void FunctionTemplateBrowser::init() {
+void FunctionTemplateView::init() {
   createBrowser();
   createProperties();
   auto *layout = new QVBoxLayout(this);
@@ -95,81 +94,78 @@ void FunctionTemplateBrowser::init() {
   layout->setContentsMargins(0, 0, 0, 0);
 }
 
-void FunctionTemplateBrowser::subscribePresenter(ITemplatePresenter *presenter) { m_presenter = presenter; }
+void FunctionTemplateView::subscribePresenter(ITemplatePresenter *presenter) { m_presenter = presenter; }
 
-void FunctionTemplateBrowser::clear() { m_browser->clear(); }
+void FunctionTemplateView::clear() { m_browser->clear(); }
 
-void FunctionTemplateBrowser::setEnumSilent(QtProperty *prop, int enumIndex) {
+void FunctionTemplateView::setEnumSilent(QtProperty *prop, int enumIndex) {
   MantidQt::MantidWidgets::ScopedFalse _enumBlock(m_emitEnumChange);
   m_enumManager->setValue(prop, enumIndex);
 }
 
-void FunctionTemplateBrowser::setIntSilent(QtProperty *prop, int value) {
+void FunctionTemplateView::setIntSilent(QtProperty *prop, int value) {
   MantidQt::MantidWidgets::ScopedFalse _intBlock(m_emitIntChange);
   m_intManager->setValue(prop, value);
 }
 
-void FunctionTemplateBrowser::setBoolSilent(QtProperty *prop, bool value) {
+void FunctionTemplateView::setBoolSilent(QtProperty *prop, bool value) {
   MantidQt::MantidWidgets::ScopedFalse _boolBlock(m_emitBoolChange);
   m_boolManager->setValue(prop, value);
 }
 
-void FunctionTemplateBrowser::setParameterSilent(QtProperty *prop, double value, double error) {
+void FunctionTemplateView::setParameterSilent(QtProperty *prop, double value, double error) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterManager->setValue(prop, value);
   m_parameterManager->setError(prop, error);
 }
 
-void FunctionTemplateBrowser::setErrorsEnabled(bool enabled) {
+void FunctionTemplateView::setErrorsEnabled(bool enabled) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterManager->setErrorsEnabled(enabled);
 }
 
-void FunctionTemplateBrowser::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
+void FunctionTemplateView::setFunction(std::string const &funStr) { m_presenter->setFunction(funStr); }
 
-IFunction_sptr FunctionTemplateBrowser::getGlobalFunction() const { return m_presenter->getGlobalFunction(); }
+IFunction_sptr FunctionTemplateView::getGlobalFunction() const { return m_presenter->getGlobalFunction(); }
 
-IFunction_sptr FunctionTemplateBrowser::getFunction() const { return m_presenter->getFunction(); }
+IFunction_sptr FunctionTemplateView::getFunction() const { return m_presenter->getFunction(); }
 
-void FunctionTemplateBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(i); }
+void FunctionTemplateView::setCurrentDataset(int i) { m_presenter->setCurrentDataset(i); }
 
-int FunctionTemplateBrowser::getCurrentDataset() { return m_presenter->getCurrentDataset(); }
+int FunctionTemplateView::getCurrentDataset() { return m_presenter->getCurrentDataset(); }
 
-void FunctionTemplateBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatasets(n); }
+void FunctionTemplateView::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatasets(n); }
 
-int FunctionTemplateBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
+int FunctionTemplateView::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
 
-void FunctionTemplateBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
+void FunctionTemplateView::setDatasets(const QList<FunctionModelDataset> &datasets) {
   m_presenter->setDatasets(datasets);
 }
 
-std::vector<std::string> FunctionTemplateBrowser::getGlobalParameters() const {
+std::vector<std::string> FunctionTemplateView::getGlobalParameters() const {
   return m_presenter->getGlobalParameters();
 }
 
-std::vector<std::string> FunctionTemplateBrowser::getLocalParameters() const {
-  return m_presenter->getLocalParameters();
-}
+std::vector<std::string> FunctionTemplateView::getLocalParameters() const { return m_presenter->getLocalParameters(); }
 
-void FunctionTemplateBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
+void FunctionTemplateView::setGlobalParameters(std::vector<std::string> const &globals) {
   m_presenter->setGlobalParameters(globals);
 }
 
-void FunctionTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
+void FunctionTemplateView::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter->updateMultiDatasetParameters(fun);
 }
 
-void FunctionTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &table) {
+void FunctionTemplateView::updateMultiDatasetParameters(const ITableWorkspace &table) {
   m_presenter->updateMultiDatasetParameters(table);
 }
 
-void FunctionTemplateBrowser::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
+void FunctionTemplateView::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
 
-void FunctionTemplateBrowser::openEditLocalParameterDialog(std::string const &parameterName,
-                                                           QStringList const &datasetNames,
-                                                           QStringList const &domainNames, QList<double> const &values,
-                                                           QList<bool> const &fixes, QStringList const &ties,
-                                                           QStringList const &constraints) {
+void FunctionTemplateView::openEditLocalParameterDialog(std::string const &parameterName,
+                                                        QStringList const &datasetNames, QStringList const &domainNames,
+                                                        QList<double> const &values, QList<bool> const &fixes,
+                                                        QStringList const &ties, QStringList const &constraints) {
   auto dialog =
       new EditLocalParameterDialog(this, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
   connect(dialog, SIGNAL(dialogFinished(int, EditLocalParameterDialog *)), this,
@@ -177,11 +173,11 @@ void FunctionTemplateBrowser::openEditLocalParameterDialog(std::string const &pa
   dialog->open();
 }
 
-void FunctionTemplateBrowser::parameterButtonClicked(QtProperty *prop) {
+void FunctionTemplateView::parameterButtonClicked(QtProperty *prop) {
   m_presenter->handleEditLocalParameter(m_parameterNames[prop]);
 }
 
-void FunctionTemplateBrowser::editLocalParameterFinished(int result, EditLocalParameterDialog *dialog) {
+void FunctionTemplateView::editLocalParameterFinished(int result, EditLocalParameterDialog *dialog) {
   if (result == QDialog::Accepted) {
     m_presenter->handleEditLocalParameterFinished(dialog->getParameterName(), dialog->getValues(), dialog->getFixes(),
                                                   dialog->getTies(), dialog->getConstraints());
@@ -189,14 +185,14 @@ void FunctionTemplateBrowser::editLocalParameterFinished(int result, EditLocalPa
   emitFunctionStructureChanged();
 }
 
-EstimationDataSelector FunctionTemplateBrowser::getEstimationDataSelector() const {
+EstimationDataSelector FunctionTemplateView::getEstimationDataSelector() const {
   return m_presenter->getEstimationDataSelector();
 }
 
-void FunctionTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
+void FunctionTemplateView::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_presenter->updateParameterEstimationData(std::move(data));
 }
 
-void FunctionTemplateBrowser::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
+void FunctionTemplateView::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

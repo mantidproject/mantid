@@ -11,15 +11,15 @@
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
 #include "FunctionBrowser/ConvFunctionModel.h"
-#include "FunctionBrowser/ConvTemplateBrowser.h"
+#include "FunctionBrowser/ConvFunctionTemplateView.h"
 #include "FunctionBrowser/ConvTemplatePresenter.h"
 #include "FunctionBrowser/FqFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionModel.h"
-#include "FunctionBrowser/IqtTemplateBrowser.h"
+#include "FunctionBrowser/IqtFunctionTemplateView.h"
 #include "FunctionBrowser/IqtTemplatePresenter.h"
 #include "FunctionBrowser/MSDFunctionModel.h"
-#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "FunctionBrowser/SingleFunctionTemplatePresenter.h"
+#include "FunctionBrowser/SingleFunctionTemplateView.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IqtFitModel.h"
@@ -32,7 +32,7 @@ DataAnalysisTabFactory::DataAnalysisTabFactory(QTabWidget *tabWidget) : m_tabWid
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<MSDFitModel>();
-  tab->setupFitPropertyBrowser<SingleFunctionTemplateBrowser, SingleFunctionTemplatePresenter, MSDFunctionModel>(
+  tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
       MSDFit::HIDDEN_PROPS);
   tab->setupFitDataView<IndirectFitDataView>();
   tab->setupOutputOptionsPresenter();
@@ -44,7 +44,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<IqtFitModel>();
-  tab->setupFitPropertyBrowser<IqtTemplateBrowser, IqtTemplatePresenter, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
+  tab->setupFitPropertyBrowser<IqtFunctionTemplateView, IqtTemplatePresenter, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
   tab->setupFitDataView<IndirectFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
@@ -55,8 +55,8 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
-  tab->setupFitPropertyBrowser<ConvTemplateBrowser, ConvTemplatePresenter, ConvFunctionModel>(ConvFit::HIDDEN_PROPS,
-                                                                                              true);
+  tab->setupFitPropertyBrowser<ConvFunctionTemplateView, ConvTemplatePresenter, ConvFunctionModel>(
+      ConvFit::HIDDEN_PROPS, true);
   tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();
@@ -67,7 +67,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index)
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<FqFitModel>();
-  tab->setupFitPropertyBrowser<SingleFunctionTemplateBrowser, SingleFunctionTemplatePresenter, FqFunctionModel>(
+  tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(
       FqFit::HIDDEN_PROPS);
   tab->setupFitDataView<FqFitDataView>();
   tab->setupOutputOptionsPresenter();

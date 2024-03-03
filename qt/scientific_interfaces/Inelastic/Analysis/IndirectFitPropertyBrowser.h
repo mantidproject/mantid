@@ -39,7 +39,7 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class FunctionTemplateBrowser;
+class FunctionTemplateView;
 class FitStatusWidget;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {

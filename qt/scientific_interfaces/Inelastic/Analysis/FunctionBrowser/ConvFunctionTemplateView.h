@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "ConvTemplatePresenter.h"
 #include "DllConfig.h"
 #include "FitTypes.h"
@@ -22,14 +22,14 @@ namespace IDA {
 
 using namespace ConvTypes;
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit ConvTemplateBrowser(QWidget *parent = nullptr);
+  explicit ConvFunctionTemplateView(QWidget *parent = nullptr);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 

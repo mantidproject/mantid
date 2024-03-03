@@ -41,11 +41,11 @@ using namespace MantidWidgets;
 
 class ITemplatePresenter;
 
-class MANTIDQT_INELASTIC_DLL FunctionTemplateBrowser : public QWidget {
+class MANTIDQT_INELASTIC_DLL FunctionTemplateView : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateBrowser(QWidget *parent = nullptr);
-  virtual ~FunctionTemplateBrowser();
+  FunctionTemplateView(QWidget *parent = nullptr);
+  virtual ~FunctionTemplateView();
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 

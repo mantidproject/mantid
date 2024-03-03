@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplatePresenter.h"
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FunctionTemplatePresenter::FunctionTemplatePresenter(FunctionTemplateBrowser *view,
+FunctionTemplatePresenter::FunctionTemplatePresenter(FunctionTemplateView *view,
                                                      std::unique_ptr<MantidWidgets::IFunctionModel> model)
     : m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);

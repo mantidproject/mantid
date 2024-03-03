@@ -12,7 +12,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 #include "Analysis/IIndirectFitDataView.h"
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
@@ -258,9 +258,9 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
-class MockFunctionTemplateBrowser : public FunctionTemplateBrowser {
+class MockFunctionTemplateView : public FunctionTemplateView {
 public:
-  virtual ~MockFunctionTemplateBrowser() = default;
+  virtual ~MockFunctionTemplateView() = default;
 
   MOCK_METHOD1(setFunction, void(std::string const &funStr));
   MOCK_CONST_METHOD0(getGlobalFunction, IFunction_sptr());
@@ -290,10 +290,10 @@ public:
 
 class MockFunctionTemplatePresenter : public ITemplatePresenter {
 public:
-  MockFunctionTemplatePresenter(MockFunctionTemplateBrowser *view) : m_view(view) {}
+  MockFunctionTemplatePresenter(MockFunctionTemplateView *view) : m_view(view) {}
   virtual ~MockFunctionTemplatePresenter() = default;
 
-  FunctionTemplateBrowser *browser() override { return m_view; }
+  FunctionTemplateView *browser() override { return m_view; }
 
   MOCK_METHOD0(init, void());
   MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
@@ -346,7 +346,7 @@ public:
                     QStringList const &ties, QStringList const &constraints));
 
 private:
-  FunctionTemplateBrowser *m_view;
+  FunctionTemplateView *m_view;
 };
 
 class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "SingleFunctionTemplatePresenter.h"
 
@@ -21,15 +21,15 @@ namespace IDA {
 
 class IDAFunctionParameterEstimation;
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplateBrowser(QWidget *parent = nullptr);
-  virtual ~SingleFunctionTemplateBrowser() = default;
+  explicit SingleFunctionTemplateView(QWidget *parent = nullptr);
+  virtual ~SingleFunctionTemplateView() = default;
 
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;

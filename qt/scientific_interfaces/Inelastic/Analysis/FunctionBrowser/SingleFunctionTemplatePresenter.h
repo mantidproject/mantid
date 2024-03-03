@@ -22,16 +22,16 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class SingleFunctionTemplateBrowser;
+class SingleFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
   using FunctionTemplatePresenter::updateMultiDatasetParameters;
 
-  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
+  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateView *view,
                                            std::unique_ptr<SingleFunctionTemplateModel> model);
 
-  SingleFunctionTemplateBrowser *view() const;
+  SingleFunctionTemplateView *view() const;
   SingleFunctionTemplateModel *model() const;
 
   void init() override;

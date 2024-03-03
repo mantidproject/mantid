@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "IqtTemplatePresenter.h"
 
@@ -20,14 +20,14 @@ namespace CustomInterfaces {
 namespace IDA {
 
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
+  explicit IqtFunctionTemplateView(QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();

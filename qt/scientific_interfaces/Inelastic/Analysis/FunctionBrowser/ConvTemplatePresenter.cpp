@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvTemplatePresenter.h"
-#include "ConvTemplateBrowser.h"
+#include "ConvFunctionTemplateView.h"
 #include "FitTypes.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include <QInputDialog>
@@ -17,10 +17,12 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> model)
+ConvTemplatePresenter::ConvTemplatePresenter(ConvFunctionTemplateView *view, std::unique_ptr<ConvFunctionModel> model)
     : FunctionTemplatePresenter(view, std::move(model)) {}
 
-ConvTemplateBrowser *ConvTemplatePresenter::view() const { return dynamic_cast<ConvTemplateBrowser *>(m_view); }
+ConvFunctionTemplateView *ConvTemplatePresenter::view() const {
+  return dynamic_cast<ConvFunctionTemplateView *>(m_view);
+}
 
 ConvFunctionModel *ConvTemplatePresenter::model() const { return dynamic_cast<ConvFunctionModel *>(m_model.get()); }
 
@@ -84,7 +86,7 @@ void ConvTemplatePresenter::setTempCorrection(bool on) {
 void ConvTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
 
-  ConvTemplateBrowser *convView = view();
+  ConvFunctionTemplateView *convView = view();
   ConvFunctionModel const *convModel = model();
   convView->updateTemperatureCorrectionAndDelta(convModel->hasTempCorrection(), convModel->hasDeltaFunction());
 

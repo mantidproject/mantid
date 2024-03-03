@@ -18,15 +18,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class FunctionTemplateBrowser;
+class FunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL FunctionTemplatePresenter : public ITemplatePresenter {
 public:
   using ITemplatePresenter::updateMultiDatasetParameters;
 
-  FunctionTemplatePresenter(FunctionTemplateBrowser *view, std::unique_ptr<MantidWidgets::IFunctionModel> model);
+  FunctionTemplatePresenter(FunctionTemplateView *view, std::unique_ptr<MantidWidgets::IFunctionModel> model);
 
-  FunctionTemplateBrowser *browser() override { return m_view; }
+  FunctionTemplateView *browser() override { return m_view; }
 
   virtual void init() override;
   virtual void
@@ -92,7 +92,7 @@ protected:
   std::string getLocalParameterTie(std::string const &parameterName, int i) const;
   std::string getLocalParameterConstraint(std::string const &parameterName, int i) const;
 
-  FunctionTemplateBrowser *m_view;
+  FunctionTemplateView *m_view;
   std::unique_ptr<MantidWidgets::IFunctionModel> m_model;
 };
 
