@@ -149,9 +149,9 @@ private:
 
   /// User has requested to cancel processing
   bool m_cancelRequested;
-  std::recursive_mutex m_mutex;
+  std::recursive_mutex m_executeMutex;
   std::recursive_mutex m_cancelMutex;
-  std::recursive_mutex m_notificationCentreMutex;
+  std::recursive_mutex m_notificationMutex;
   void resetState();
   bool cancelRequested();
 
