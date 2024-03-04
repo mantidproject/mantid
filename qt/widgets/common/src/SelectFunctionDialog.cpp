@@ -28,6 +28,9 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
+#include <QTreeWidgetItemIterator>
+#include <algorithm>
+#include <iostream>
 namespace MantidQt::MantidWidgets {
 
 /**
@@ -68,12 +71,36 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
   m_form->searchBox->completer()->setCompletionMode(QCompleter::PopupCompletion);
   m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
 
+  // Function to uncoment once debugging is complete
+  // completeSearchBox(registeredFunctions);
+
   connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
   setMinimumHeightOfFunctionTree();
+
+  // Check that number of registered functions should match number in box
+  QTreeWidgetItemIterator it(m_form->fitTree);
+  std::vector<std::string> unique_functions{};
+  while (*it) {
+    std::string fun = (*it)->text(0).toStdString();
+    if (std::find(unique_functions.begin(), unique_functions.end(), fun) == unique_functions.end()) {
+      unique_functions.push_back(fun);
+    }
+    ++it;
+  }
+  std::sort(unique_functions.begin(), unique_functions.end());
+  for (auto f : unique_functions)
+    std::cout << f << std::endl;
+  std::cout << "Number of items in tree: " << unique_functions.size() << std::endl;
+  std::cout << "Number of items in search box: " << m_form->searchBox->count() << std::endl;
+  std::cout << "Numner of items in registered functions: " << registeredFunctions.size() << std::endl;
+  // Output:
+  // Number of items in tree: 150
+  // Number of items in search box: 136
+  // Numner of items in registered functions: 136
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
           SLOT(functionDoubleClicked(QTreeWidgetItem *)));
@@ -85,6 +112,17 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
   m_form->searchBox->setCurrentIndex(-1);
 
   connect(m_form->helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));
+}
+
+/**
+ * Complete the QComboBox with the available functions for fitting
+ * @param registeredFunctions :: [input] Vector of avaiblable functions
+ */
+void SelectFunctionDialog::completeSearchBox(const std::vector<std::string> &registeredFunctions) {
+
+  for (const auto &function : registeredFunctions) {
+    m_form->searchBox->addItem(QString::fromStdString(function));
+  }
 }
 
 /**
@@ -122,7 +160,8 @@ void SelectFunctionDialog::constructFunctionTree(
           for (const auto &function : entry.second) {
             QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
             fit->setText(0, QString::fromStdString(function));
-            m_form->searchBox->addItem(QString::fromStdString(function));
+            if (m_form->searchBox->findText(QString::fromStdString(function)) == -1)
+              m_form->searchBox->addItem(QString::fromStdString(function));
           }
         }
       } else {
@@ -157,7 +196,8 @@ void SelectFunctionDialog::constructFunctionTree(
               for (const auto &function : entry.second) {
                 QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
                 fit->setText(0, QString::fromStdString(function));
-                m_form->searchBox->addItem(QString::fromStdString(function));
+                if (m_form->searchBox->findText(QString::fromStdString(function)) == -1)
+                  m_form->searchBox->addItem(QString::fromStdString(function));
               }
             }
           }
