@@ -209,14 +209,11 @@ void InelasticDataManipulationElwinTabView::addDataWksOrFile(MantidWidgets::IAdd
   try {
     const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     if (indirectDialog) {
-      // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
-      if (indirectDialog->getFileName().empty()) {
+      if (!indirectDialog->isEmpty())
         m_presenter->handleAddData(dialog);
-      } else
-        m_presenter->handleAddDataFromFile(dialog);
-    } else
-      (throw std::invalid_argument("Unable to access AddWorkspaceDialog"));
-
+      else
+        (throw std::runtime_error("Unable to access data: No available workspaces or not selected"));
+    }
   } catch (const std::runtime_error &ex) {
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
   }

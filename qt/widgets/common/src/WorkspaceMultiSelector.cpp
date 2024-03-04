@@ -255,7 +255,7 @@ void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
 
 void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
   auto nItems = names.size();
-  for (auto &name : names) {
+  for (auto const &name : names) {
     if (checkEligibility(name)) {
       addItem(name);
     }
@@ -336,19 +336,26 @@ void WorkspaceMultiSelector::handleClearEvent(Mantid::API::ClearADSNotification_
 void WorkspaceMultiSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
 
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  QString newName = QString::fromStdString(pNf->newObjectName());
+  QString currName = QString::fromStdString(pNf->objectName());
+
   bool eligible = checkEligibility(pNf->newObjectName());
-  QString name = QString::fromStdString(pNf->objectName());
+  auto currItems = findItems(currName, Qt::MatchExactly);
+  auto newItems = findItems(newName, Qt::MatchExactly);
 
-  auto items = findItems(name, Qt::MatchExactly);
-  std::cout << "I'm a rename event" << std::endl;
-
-  if (eligible && !items.isEmpty()) {
-    renameItem(pNf->newObjectName(), items.first()->row());
-  } else if (eligible && items.isEmpty()) {
-    addItem(pNf->newObjectName());
-  } else if (!eligible && !items.isEmpty()) {
-    removeRow(items.first()->row());
+  if (eligible) {
+    if (!currItems.isEmpty() && newItems.isEmpty())
+      renameItem(pNf->newObjectName(), currItems.first()->row());
+    else if (currItems.isEmpty() && newItems.isEmpty())
+      addItem(pNf->newObjectName());
+    else if (!currItems.isEmpty() && !newItems.isEmpty()) {
+      // list reduction w. redundancies
+      removeRow(currItems.first()->row());
+      renameItem(pNf->newObjectName(), newItems.first()->row());
+    }
+  } else {
+    if (!currItems.isEmpty())
+      removeRow(currItems.first()->row());
   }
 }
 
@@ -356,14 +363,9 @@ void WorkspaceMultiSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterRepla
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   QString name = QString::fromStdString(pNf->objectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-
   bool eligible = checkEligibility(pNf->objectName());
   auto items = findItems(name, Qt::MatchExactly);
-  std::cout << "I'm a replace event " << std::endl;
-  std::cout << name.toStdString() << std::endl;
-  if (!items.isEmpty()) {
-    std::cout << items[0]->text().toStdString() << std::endl;
-  }
+
   if ((eligible && !items.isEmpty()) || (!eligible && items.isEmpty()))
     return;
   else if (items.isEmpty() && eligible) {

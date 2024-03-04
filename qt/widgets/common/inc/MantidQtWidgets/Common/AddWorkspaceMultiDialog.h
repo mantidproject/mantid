@@ -27,6 +27,7 @@ public:
   std::string workspaceName() const override;
   stringPairVec selectedNameIndexPairs() const;
 
+  bool isEmpty() const;
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
   void setup();

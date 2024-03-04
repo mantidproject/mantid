@@ -18,16 +18,6 @@
 namespace {
 using namespace Mantid::API;
 
-MatrixWorkspace_sptr getWorkspace(const std::string &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
-
 void loadFile(const QString &filename) {
   QFileInfo fileinfo(filename);
 
@@ -63,6 +53,10 @@ void AddWorkspaceMultiDialog::setup() {
 stringPairVec AddWorkspaceMultiDialog::selectedNameIndexPairs() const {
 
   return m_uiForm.tbWorkspace->retrieveSelectedNameIndexPairs();
+}
+
+bool AddWorkspaceMultiDialog::isEmpty() const {
+  return ((m_uiForm.tbWorkspace->rowCount() == 0) || (m_uiForm.tbWorkspace->selectedItems().isEmpty()));
 }
 
 void AddWorkspaceMultiDialog::setWSSuffices(const QStringList &suffices) {

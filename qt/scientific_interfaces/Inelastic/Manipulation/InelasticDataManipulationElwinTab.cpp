@@ -399,10 +399,8 @@ std::string InelasticDataManipulationElwinTab::getOutputBasename() {
 
 void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
-    std::cout << "You reach here" << std::endl;
     addDataToModel(dialog);
     updateTableFromModel();
-    std::cout << "You also reach here" << std::endl;
     newInputFilesFromDialog();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
@@ -415,7 +413,7 @@ void InelasticDataManipulationElwinTab::handleAddDataFromFile(MantidWidgets::IAd
     UserInputValidator uiv;
     const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     QList<QString> allFiles;
-    allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
+    // allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
     auto const suffixes = getFilteredSuffixes(allFiles);
     if (suffixes.size() < 1) {
       uiv.addErrorMessage("The input files must be all _red or all _sqw.");
