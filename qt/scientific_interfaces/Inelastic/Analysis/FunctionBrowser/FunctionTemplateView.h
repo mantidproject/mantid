@@ -47,7 +47,6 @@ class MANTIDQT_INELASTIC_DLL FunctionTemplateView : public QWidget {
 public:
   FunctionTemplateView();
   virtual ~FunctionTemplateView();
-
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 

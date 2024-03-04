@@ -32,9 +32,7 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FunctionTemplateView::FunctionTemplateView()
-    : QWidget(),
-                                                                 m_parameterNames(), m_decimals(6) {}
+FunctionTemplateView::FunctionTemplateView() : QWidget(), m_parameterNames(), m_decimals(6) {}
 
 FunctionTemplateView::~FunctionTemplateView() {
   m_browser->unsetFactoryForManager(m_stringManager);

@@ -8,19 +8,19 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/FunctionBrowser/ConvFunctionModel.h"
+#include "Analysis/FunctionBrowser/ConvFunctionTemplateModel.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::IDA;
 
-class ConvFunctionModelTest : public CxxTest::TestSuite {
+class ConvFunctionTemplateModelTest : public CxxTest::TestSuite {
 public:
-  static ConvFunctionModelTest *createSuite() { return new ConvFunctionModelTest(); }
+  static ConvFunctionTemplateModelTest *createSuite() { return new ConvFunctionTemplateModelTest(); }
 
-  static void destroySuite(ConvFunctionModelTest *suite) { delete suite; }
+  static void destroySuite(ConvFunctionTemplateModelTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionModel>(); }
+  void setUp() override { m_model = std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionTemplateModel>(); }
 
   void tearDown() override { m_model.reset(); }
 
@@ -113,55 +113,63 @@ public:
   }
 
   void test_setFunction_does_not_throw_for_valid_temperature_function() {
-    m_model->setLorentzianType(LorentzianType::OneLorentzian);
-    m_model->setTempCorrection(true, 100.0);
+    m_model->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::OneLorentzian));
+    m_model->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(TempCorrectionType::Exponential));
+
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 
-    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
-    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::OneLorentzian);
+    auto const subTypes = m_model->getSubTypes();
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString());
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Background), static_cast<int>(BackgroundType::None));
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian), static_cast<int>(LorentzianType::OneLorentzian));
   }
 
   void test_setFunction_does_not_throw_for_valid_temperature_function_with_delta() {
-    m_model->setLorentzianType(LorentzianType::OneLorentzian);
-    m_model->setTempCorrection(true, 100.0);
-    m_model->setDeltaFunction(true);
+    m_model->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::OneLorentzian));
+    m_model->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(TempCorrectionType::Exponential));
+    m_model->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(DeltaType::Delta));
+
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 
+    auto const subTypes = m_model->getSubTypes();
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
-    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::OneLorentzian);
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Background), static_cast<int>(BackgroundType::None));
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian), static_cast<int>(LorentzianType::OneLorentzian));
   }
 
   void test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function() {
-    m_model->setLorentzianType(LorentzianType::TwoLorentzians);
-    m_model->setTempCorrection(true, 100.0);
+    m_model->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::TwoLorentzians));
+    m_model->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(TempCorrectionType::Exponential));
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 
+    auto const subTypes = m_model->getSubTypes();
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
-    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::TwoLorentzians);
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Background), static_cast<int>(BackgroundType::None));
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian),
+                     static_cast<int>(LorentzianType::TwoLorentzians));
   }
 
   void test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function_with_delta() {
-    m_model->setLorentzianType(LorentzianType::TwoLorentzians);
-    m_model->setTempCorrection(true, 100.0);
-    m_model->setDeltaFunction(true);
+    m_model->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::TwoLorentzians));
+    m_model->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(TempCorrectionType::Exponential));
+    m_model->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(DeltaType::Delta));
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 
+    auto const subTypes = m_model->getSubTypes();
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString());
-    TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::TwoLorentzians);
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Background), static_cast<int>(BackgroundType::None));
+    TS_ASSERT_EQUALS(subTypes.at(ConvTypes::SubTypeIndex::Lorentzian),
+                     static_cast<int>(LorentzianType::TwoLorentzians));
   }
 
 private:
-  std::unique_ptr<MantidQt::CustomInterfaces::IDA::ConvFunctionModel> m_model;
+  std::unique_ptr<MantidQt::CustomInterfaces::IDA::ConvFunctionTemplateModel> m_model;
 };

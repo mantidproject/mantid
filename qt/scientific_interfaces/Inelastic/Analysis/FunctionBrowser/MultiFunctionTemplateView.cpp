@@ -172,8 +172,7 @@ void MultiFunctionTemplateView::parameterChanged(QtProperty *prop) {
 std::optional<std::size_t> MultiFunctionTemplateView::propertySubTypeIndex(QtProperty *prop) {
   auto const it = std::find(m_subTypeProperties.cbegin(), m_subTypeProperties.cend(), prop);
   if (it != m_subTypeProperties.cend()) {
-    std::size_t index = std::distance(m_subTypeProperties.cbegin(), it);
-    return index;
+    return std::distance(m_subTypeProperties.cbegin(), it);
   }
   return std::nullopt;
 }

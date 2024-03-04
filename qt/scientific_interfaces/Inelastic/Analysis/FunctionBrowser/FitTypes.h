@@ -67,7 +67,7 @@ struct FitSubType : public TemplateSubTypeImpl<FitType> {
   std::string name() const override { return "Fit Type"; }
 };
 
-struct DeltaSubType : public TemplateSubTypeImpl<bool> {
+struct DeltaSubType : public TemplateSubTypeImpl<DeltaType> {
   std::string name() const override { return "Delta Function"; }
   bool isType(const std::type_info &type) const { return type == typeid(bool); }
 };

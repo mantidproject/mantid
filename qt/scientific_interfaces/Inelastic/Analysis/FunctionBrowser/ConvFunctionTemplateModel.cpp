@@ -110,6 +110,7 @@ void ConvFunctionTemplateModel::checkConvolution(const IFunction_sptr &fun) {
           !innerFunction->getFunction(0)->hasParameter("Temperature")) {
         throw std::runtime_error("Function has wrong structure.");
       }
+      m_tempCorrectionType = ConvTypes::TempCorrectionType::Exponential;
       if (std::dynamic_pointer_cast<CompositeFunction>(innerFunction->getFunction(1)))
         checkConvolution(innerFunction->getFunction(1));
       else
@@ -145,6 +146,8 @@ void ConvFunctionTemplateModel::checkSingleFunction(const IFunction_sptr &fun, b
     m_fitType = FitTypeStringToEnum[name];
     m_isQDependentFunction = FitTypeQDepends[m_fitType];
     isFitTypeSet = true;
+  } else if (name == "DeltaFunction") {
+    m_deltaType = ConvTypes::DeltaType::Delta;
   } else if (!isFitTypeSet && !isLorentzianTypeSet) {
     clear();
     throw std::runtime_error("Function has wrong structure. Function not recognized");
@@ -538,7 +541,7 @@ boost::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) 
     return m_model.deltaFunctionPrefix();
   } else if (name == ParamID::TEMPERATURE) {
     return m_model.tempFunctionPrefix();
-  } else if (name >= ParamID::TW_HEIGHT && name < ParamID::FLAT_BG_A0) {
+  } else if (name >= ParamID::TW_HEIGHT) {
     return m_model.fitTypePrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
@@ -579,7 +582,7 @@ void ConvFunctionTemplateModel::setCurrentValues(const QMap<ParamID, double> &va
 void ConvFunctionTemplateModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
   applyToFitFunction<ConvTypes::LorentzianSubType>(m_lorentzianType, paramFun);
   applyToFitFunction<ConvTypes::FitSubType>(m_fitType, paramFun);
-  applyToFitFunction<ConvTypes::DeltaSubType>(hasDeltaFunction(), paramFun);
+  applyToFitFunction<ConvTypes::DeltaSubType>(m_deltaType, paramFun);
   applyToFitFunction<ConvTypes::TempSubType>(m_tempCorrectionType, paramFun);
   applyToFitFunction<ConvTypes::BackgroundSubType>(m_backgroundType, paramFun);
 }

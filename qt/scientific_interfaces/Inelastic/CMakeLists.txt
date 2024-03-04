@@ -29,10 +29,7 @@ set(SRC_FILES
     Analysis/IndirectFitPlotView.cpp
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
-    Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvFunctionTemplateModel.cpp
-    Analysis/FunctionBrowser/ConvFunctionTemplateView.cpp
-    Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
     Analysis/FunctionBrowser/FitTypes.cpp
     Analysis/FunctionBrowser/FunctionTemplateView.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
@@ -103,7 +100,6 @@ set(MOC_FILES
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPropertyBrowser.h
-    Analysis/FunctionBrowser/ConvFunctionTemplateView.h
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
@@ -162,9 +158,7 @@ set(INC_FILES
     Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
-    Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/ConvFunctionTemplateModel.h
-    Analysis/FunctionBrowser/ConvTemplatePresenter.h
     Analysis/FunctionBrowser/FitTypes.h
     Analysis/FunctionBrowser/FunctionTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
