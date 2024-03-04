@@ -185,9 +185,11 @@ void OutputPlotOptionsPresenter::handlePlotBinsClicked() {
 }
 
 void OutputPlotOptionsPresenter::handleShowSliceViewerClicked() {
-  setPlotting(true);
-  m_model->showSliceViewer();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::SpectrumSlice)) {
+    setPlotting(true);
+    m_model->showSliceViewer();
+    setPlotting(false);
+  }
 }
 
 void OutputPlotOptionsPresenter::handlePlotTiledClicked() {

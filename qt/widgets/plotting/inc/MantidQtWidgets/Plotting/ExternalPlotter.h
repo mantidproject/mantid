@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-enum MantidAxis { Spectrum, Bin };
+enum MantidAxis { Spectrum, Bin, SpectrumSlice };
 
 /**
  @class ExternalPlotter

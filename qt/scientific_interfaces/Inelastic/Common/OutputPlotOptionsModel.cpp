@@ -87,9 +87,13 @@ boost::optional<std::string> checkWorkspaceSpectrumSize(const MatrixWorkspace_co
   return boost::none;
 }
 
-boost::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
+boost::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace,
+                                                   const std::string &caller = "") {
   if (workspace->getNumberHistograms() < 2)
-    return "Plot Bins failed: There is only one data point to plot in " + workspace->getName() + ".";
+    if (caller != "")
+      return caller + ": Can't plot with less than two histograms in  " + workspace->getName() + ".";
+    else
+      return "Plot Bins failed: There is only one data point to plot in " + workspace->getName() + ".";
   return boost::none;
 }
 
@@ -253,6 +257,8 @@ boost::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::str
     if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
       if (axisType == MantidAxis::Spectrum)
         return checkWorkspaceSpectrumSize(matrixWs);
+      else if (axisType == MantidAxis::SpectrumSlice)
+        return checkWorkspaceBinSize(matrixWs, "Open Slice Viewer");
       return checkWorkspaceBinSize(matrixWs);
     }
   }
