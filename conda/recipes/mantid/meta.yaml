@@ -76,7 +76,7 @@ requirements:
     - toml
     - libglu  # [linux]
     - joblib
-    - orsopy
+    - orsopy {{ orsopy }}
 
 about:
   home: https://github.com/mantidproject/mantid
