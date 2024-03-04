@@ -70,7 +70,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
 
   // Complete suggestions in search box,
   // number of suggestions same as number of registeredFunctions
-  completeSearchBox(registeredFunctions);
+  addSearchBoxFunctionNames(registeredFunctions);
 
   connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
@@ -95,7 +95,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
  * Complete the QComboBox with the available functions for fitting
  * @param registeredFunctions :: [input] Vector of avaiblable functions
  */
-void SelectFunctionDialog::completeSearchBox(const std::vector<std::string> &registeredFunctions) {
+void SelectFunctionDialog::addSearchBoxFunctionNames(const std::vector<std::string> &registeredFunctions) {
   for (const auto &function : registeredFunctions) {
     m_form->searchBox->addItem(QString::fromStdString(function));
   }

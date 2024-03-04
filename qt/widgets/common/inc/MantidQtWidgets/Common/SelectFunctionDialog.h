@@ -46,7 +46,7 @@ protected:
 
 private:
   /// Complete QComboBox for searching functions with available functions
-  void completeSearchBox(const std::vector<std::string> &registeredFunctions);
+  void addSearchBoxFunctionNames(const std::vector<std::string> &registeredFunctions);
   /// Construct QTreeWidget with categories and functions
   void constructFunctionTree(const std::map<std::string, std::vector<std::string>> &categoryFunctionsMap,
                              const std::vector<std::string> &restrictions);
