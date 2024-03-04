@@ -254,7 +254,6 @@ void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
 }
 
 void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
-  auto nItems = names.size();
   for (auto const &name : names) {
     if (checkEligibility(name)) {
       addItem(name);
@@ -362,7 +361,6 @@ void WorkspaceMultiSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotif
 void WorkspaceMultiSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   QString name = QString::fromStdString(pNf->objectName());
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
   bool eligible = checkEligibility(pNf->objectName());
   auto items = findItems(name, Qt::MatchExactly);
 

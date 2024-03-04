@@ -77,7 +77,7 @@ void AddWorkspaceMultiDialog::unifyRange() { return m_uiForm.tbWorkspace->unifyR
 
 void AddWorkspaceMultiDialog::handleFilesFound() {
   auto fileNames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto &fileName : fileNames) {
+  for (auto const &fileName : fileNames) {
     loadFile(fileName);
   }
   return;
