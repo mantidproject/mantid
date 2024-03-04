@@ -30,6 +30,7 @@ set(SRC_FILES
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
+    Analysis/FunctionBrowser/ConvFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/ConvFunctionTemplateView.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
     Analysis/FunctionBrowser/FitTypes.cpp
@@ -44,7 +45,6 @@ set(SRC_FILES
     Analysis/FunctionBrowser/SingleFunctionTemplateView.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
-    Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
     BayesFitting/BayesFitting.cpp
     BayesFitting/BayesFittingTab.cpp
@@ -163,6 +163,7 @@ set(INC_FILES
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
+    Analysis/FunctionBrowser/ConvFunctionTemplateModel.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
     Analysis/FunctionBrowser/FitTypes.h
     Analysis/FunctionBrowser/FunctionTemplatePresenter.h
@@ -172,7 +173,6 @@ set(INC_FILES
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Analysis/FunctionBrowser/ParamID.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
-    Analysis/FunctionBrowser/MultiFunctionTemplateModel.h
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.h
     Analysis/FunctionBrowser/TemplateSubType.h
     Common/IndirectDataValidationHelper.h

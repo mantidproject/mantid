@@ -26,9 +26,9 @@ using namespace ConvTypes;
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateModel : public IFunctionModel {
+class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateModel : public IFunctionModel {
 public:
-  MultiFunctionTemplateModel();
+  ConvFunctionTemplateModel();
   void setFunction(IFunction_sptr fun) override;
   IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;

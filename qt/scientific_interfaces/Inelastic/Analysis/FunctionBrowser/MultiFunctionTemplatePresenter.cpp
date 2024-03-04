@@ -5,21 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiFunctionTemplatePresenter.h"
-#include "MultiFunctionTemplateModel.h"
+#include "ConvFunctionTemplateModel.h"
 #include "MultiFunctionTemplateView.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 
 MultiFunctionTemplatePresenter::MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
-                                                               std::unique_ptr<MultiFunctionTemplateModel> model)
+                                                               std::unique_ptr<ConvFunctionTemplateModel> model)
     : FunctionTemplatePresenter(view, std::move(model)) {}
 
 MultiFunctionTemplateView *MultiFunctionTemplatePresenter::view() const {
   return dynamic_cast<MultiFunctionTemplateView *>(m_view);
 }
 
-MultiFunctionTemplateModel *MultiFunctionTemplatePresenter::model() const {
-  return dynamic_cast<MultiFunctionTemplateModel *>(m_model.get());
+ConvFunctionTemplateModel *MultiFunctionTemplatePresenter::model() const {
+  return dynamic_cast<ConvFunctionTemplateModel *>(m_model.get());
 }
 
 void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
