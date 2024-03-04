@@ -30,7 +30,7 @@ public:
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 
-  void setProperty(std::size_t subTypeIndex, int value);
+  void setSubTypes(std::map<std::size_t, int> const &subTypes);
   void setSubType(std::size_t subTypeIndex, int typeIndex);
   void setParameterValueQuiet(ParamID id, double value, double error);
 
@@ -43,6 +43,7 @@ protected slots:
 private:
   void createProperties() override;
   void createFunctionParameterProperties();
+  void setProperty(std::size_t subTypeIndex, int value);
   std::optional<std::size_t> propertySubTypeIndex(QtProperty *prop);
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;

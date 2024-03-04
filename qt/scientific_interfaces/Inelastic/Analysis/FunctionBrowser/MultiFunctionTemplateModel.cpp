@@ -157,15 +157,6 @@ IFunction_sptr MultiFunctionTemplateModel::getFitFunction() const { return m_mod
 
 void MultiFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
 
-FitType MultiFunctionTemplateModel::getFitType() const { return m_fitType; }
-BackgroundType MultiFunctionTemplateModel::getBackgroundType() const { return m_backgroundType; }
-
-LorentzianType MultiFunctionTemplateModel::getLorentzianType() const { return m_lorentzianType; }
-
-DeltaType MultiFunctionTemplateModel::getDeltaType() const { return m_deltaType; }
-
-TempCorrectionType MultiFunctionTemplateModel::getTempCorrectionType() const { return m_tempCorrectionType; }
-
 bool MultiFunctionTemplateModel::hasFunction() const { return m_model.hasFunction(); }
 
 void MultiFunctionTemplateModel::addFunction(std::string const &prefix, std::string const &funStr) {
@@ -396,6 +387,16 @@ void MultiFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeIn
   } else {
     setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
   }
+}
+
+std::map<std::size_t, int> MultiFunctionTemplateModel::getSubTypes() const {
+  std::map<std::size_t, int> subTypes;
+  subTypes[ConvTypes::SubTypeIndex::Lorentzian] = static_cast<int>(m_lorentzianType);
+  subTypes[ConvTypes::SubTypeIndex::Fit] = static_cast<int>(m_fitType);
+  subTypes[ConvTypes::SubTypeIndex::Delta] = static_cast<int>(m_deltaType);
+  subTypes[ConvTypes::SubTypeIndex::TempCorrection] = static_cast<int>(m_tempCorrectionType);
+  subTypes[ConvTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
+  return subTypes;
 }
 
 void MultiFunctionTemplateModel::setFitType(FitType fitType) {

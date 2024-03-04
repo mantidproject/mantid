@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -8,19 +8,12 @@
 
 #include "DllConfig.h"
 #include "FunctionTemplatePresenter.h"
-#include "MultiFunctionTemplateModel.h"
-
-#include <QMap>
-
-class QtProperty;
 
 namespace MantidQt {
-namespace MantidWidgets {
-class EditLocalParameterDialog;
-}
 namespace CustomInterfaces {
 namespace IDA {
 
+class MultiFunctionTemplateModel;
 class MultiFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplatePresenter : public FunctionTemplatePresenter {

@@ -107,6 +107,12 @@ void MultiFunctionTemplateView::setProperty(std::size_t subTypeIndex, int value)
   }
 }
 
+void MultiFunctionTemplateView::setSubTypes(std::map<std::size_t, int> const &subTypes) {
+  for (auto it = subTypes.cbegin(); it != subTypes.cend(); ++it) {
+    setSubType(it->first, it->second);
+  }
+}
+
 void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeIndex) {
   auto subTypeProp = m_subTypeProperties[subTypeIndex];
   auto &currentParameters = m_currentSubTypeParameters[subTypeIndex];
@@ -119,6 +125,7 @@ void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeInd
     subTypeProp->addSubProperty(prop);
     currentParameters.append(prop);
   }
+  setProperty(subTypeIndex, typeIndex);
 }
 
 void MultiFunctionTemplateView::setParameterValueQuiet(ParamID id, double value, double error) {

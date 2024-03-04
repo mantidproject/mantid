@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiFunctionTemplatePresenter.h"
-#include "FitTypes.h"
+#include "MultiFunctionTemplateModel.h"
 #include "MultiFunctionTemplateView.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -25,6 +25,7 @@ MultiFunctionTemplateModel *MultiFunctionTemplatePresenter::model() const {
 void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   model()->setSubType(subTypeIndex, typeIndex);
   view()->setSubType(subTypeIndex, typeIndex);
+
   setErrorsEnabled(false);
   updateView();
   m_view->emitFunctionStructureChanged();
@@ -33,20 +34,7 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
 void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
 
-  MultiFunctionTemplateView *convView = view();
-  MultiFunctionTemplateModel const *convModel = model();
-
-  convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
-  convView->setSubType(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
-  convView->setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(convModel->getDeltaType()));
-  convView->setSubType(ConvTypes::SubTypeIndex::TempCorrection, static_cast<int>(convModel->getTempCorrectionType()));
-  convView->setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
-
-  convView->setProperty(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));
-  convView->setProperty(ConvTypes::SubTypeIndex::Fit, static_cast<int>(convModel->getFitType()));
-  convView->setProperty(ConvTypes::SubTypeIndex::Delta, static_cast<bool>(convModel->getDeltaType()));
-  convView->setProperty(ConvTypes::SubTypeIndex::TempCorrection, static_cast<bool>(convModel->getTempCorrectionType()));
-  convView->setProperty(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
+  view()->setSubTypes(model()->getSubTypes());
 
   setErrorsEnabled(false);
   updateView();
@@ -67,7 +55,6 @@ void MultiFunctionTemplatePresenter::setResolution(const std::vector<std::pair<s
 void MultiFunctionTemplatePresenter::updateView() {
   updateViewParameterNames();
   updateViewParameters();
-  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
 void MultiFunctionTemplatePresenter::updateViewParameters() {
@@ -79,6 +66,7 @@ void MultiFunctionTemplatePresenter::updateViewParameters() {
   for (auto const &id : values.keys()) {
     templateView->setParameterValueQuiet(id, values[id], errors[id]);
   }
+  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
 void MultiFunctionTemplatePresenter::updateViewParameterNames() {

@@ -37,11 +37,6 @@ public:
   void removeFunction(std::string const &prefix) override;
   void setParameter(std::string const &parameterName, double value) override;
   void setParameterError(std::string const &parameterName, double value) override;
-  FitType getFitType() const;
-  LorentzianType getLorentzianType() const;
-  DeltaType getDeltaType() const;
-  TempCorrectionType getTempCorrectionType() const;
-  BackgroundType getBackgroundType() const;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
   std::string getParameterDescription(std::string const &parameterName) const override;
@@ -79,6 +74,7 @@ public:
   void setGlobalParameterValue(std::string const &parameterName, double value) override;
   std::string setBackgroundA0(double value) override;
   void setSubType(std::size_t subTypeIndex, int typeIndex);
+  std::map<std::size_t, int> getSubTypes() const;
   void setFitType(FitType fitType);
   void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaType(DeltaType deltaType);
