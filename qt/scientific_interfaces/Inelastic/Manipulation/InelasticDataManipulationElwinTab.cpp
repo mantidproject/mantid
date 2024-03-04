@@ -284,9 +284,7 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
  */
 void InelasticDataManipulationElwinTab::newInputFilesFromDialog() {
   // Clear the existing list of files
-  if (m_dataModel->getNumberOfWorkspaces().value < 2)
-    m_view->clearPreviewFile();
-
+  m_view->clearPreviewFile();
   m_view->newInputFilesFromDialog(m_dataModel->getWorkspaceNames());
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
@@ -403,29 +401,6 @@ void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspa
     updateTableFromModel();
     newInputFilesFromDialog();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  } catch (const std::runtime_error &ex) {
-    displayWarning(ex.what());
-  }
-}
-
-void InelasticDataManipulationElwinTab::handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
-  try {
-    UserInputValidator uiv;
-    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
-    QList<QString> allFiles;
-    // allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
-    auto const suffixes = getFilteredSuffixes(allFiles);
-    if (suffixes.size() < 1) {
-      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-      m_view->clearInputFiles();
-    }
-    std::string error = uiv.generateErrorMessage().toStdString();
-
-    if (error.empty()) {
-      handleAddData(dialog);
-    } else {
-      m_view->showMessageBox(error);
-    }
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }

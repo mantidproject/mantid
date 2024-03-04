@@ -35,7 +35,6 @@ public:
   virtual void handlePreviewSpectrumChanged(int spectrum) = 0;
   virtual void handlePreviewIndexChanged(int index) = 0;
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
-  virtual void handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveSelectedData() = 0;
   virtual void updateAvailableSpectra() = 0;
 };
@@ -61,7 +60,6 @@ public:
   void handlePreviewSpectrumChanged(int spectrum) override;
   void handlePreviewIndexChanged(int index) override;
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
-  void handleAddDataFromFile(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveSelectedData() override;
   void updateAvailableSpectra() override;
 

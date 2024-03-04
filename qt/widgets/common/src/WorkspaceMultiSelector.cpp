@@ -40,8 +40,6 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
-
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     const auto numberOfHistograms = workspace->getNumberHistograms();
