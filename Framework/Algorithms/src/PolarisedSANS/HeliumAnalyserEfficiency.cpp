@@ -234,9 +234,18 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   plus->initialize();
   plus->setProperty("LHSWorkspace", tParaWorkspace);
   plus->setProperty("RHSWorkspace", tAntiWorkspace);
-  plus->setProperty("OutputWorkspace", "T");
+  plus->setProperty("OutputWorkspace", "Tsum");
   plus->executeAsChildAlg();
   MatrixWorkspace_sptr transmissionWorkspace = plus->getProperty("OutputWorkspace");
+
+  auto scale = createChildAlgorithm("Scale");
+  scale->initialize();
+  scale->setProperty("InputWorkspace", transmissionWorkspace);
+  scale->setProperty("OutputWorkspace", transmissionWorkspace);
+  scale->setProperty("Factor", 0.5);
+  scale->setProperty("Operation", "Multiply");
+  scale->executeAsChildAlg();
+
   setProperty("OutputTransmissionWorkspace", transmissionWorkspace);
 
   // Errors?
