@@ -542,7 +542,7 @@ boost::optional<std::string> ConvFunctionModel::getPrefix(ParamID name) const {
     return m_model.deltaFunctionPrefix();
   } else if (name == ParamID::TEMPERATURE) {
     return m_model.tempFunctionPrefix();
-  } else if (name >= ParamID::TW_HEIGHT && name < ParamID::FLAT_BG_A0) {
+  } else if (name >= ParamID::TW_HEIGHT) {
     return m_model.fitTypePrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
