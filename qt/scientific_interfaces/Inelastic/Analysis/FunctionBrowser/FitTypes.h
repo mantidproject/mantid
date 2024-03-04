@@ -60,7 +60,7 @@ extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
   std::string name() const override { return "Lorentzians"; }
-  bool isType(const std::type_info &type) const { return type == typeid(int); }
+  bool isType(const std::type_info &type) const override { return type == typeid(int); }
 };
 
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
@@ -69,12 +69,12 @@ struct FitSubType : public TemplateSubTypeImpl<FitType> {
 
 struct DeltaSubType : public TemplateSubTypeImpl<DeltaType> {
   std::string name() const override { return "Delta Function"; }
-  bool isType(const std::type_info &type) const { return type == typeid(bool); }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
   std::string name() const override { return "ConvTempCorrection"; }
-  bool isType(const std::type_info &type) const { return type == typeid(bool); }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
 };
 
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {

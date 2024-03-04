@@ -48,7 +48,7 @@ void MultiFunctionTemplatePresenter::updateView() {
 
 void MultiFunctionTemplatePresenter::updateViewParameters() {
   auto templateView = view();
-  auto templateModel = model();
+  ConvFunctionTemplateModel const *templateModel = model();
 
   auto values = templateModel->getCurrentValues();
   auto errors = templateModel->getCurrentErrors();
