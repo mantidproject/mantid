@@ -112,7 +112,7 @@ void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo, std::unique
  */
 void BatchAlgorithmRunner::setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   g_log.debug() << "Set batch queue to algorithm list:\n";
-  for (auto &algorithm : algorithms)
+  for (auto const &algorithm : algorithms)
     g_log.debug() << algorithm->algorithm()->name() << "\n";
 
   std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
@@ -206,7 +206,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) 
   std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
 
   bool errorFlag = false;
-  for (auto &it : m_algorithms) {
+  for (auto const &it : m_algorithms) {
     if (cancelRequested()) {
       g_log.information("Stopping batch algorithm execution: cancelled");
       break;
