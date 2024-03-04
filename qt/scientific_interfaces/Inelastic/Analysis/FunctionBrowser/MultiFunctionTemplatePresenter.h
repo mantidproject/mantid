@@ -28,9 +28,6 @@ public:
 
   void setFunction(std::string const &funStr) override;
 
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void setQValues(const std::vector<double> &qValues) override;
-
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;

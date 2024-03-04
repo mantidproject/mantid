@@ -35,7 +35,6 @@ public:
 
   void setFitType(const std::string &name);
   std::string getFitType();
-  void removeFitType();
   std::vector<std::string> getFunctionList();
   int getEnumIndex();
   void setGlobal(std::string const &parameterName, bool isGlobal) override;

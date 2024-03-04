@@ -41,12 +41,6 @@ void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_view->emitFunctionStructureChanged();
 }
 
-void MultiFunctionTemplatePresenter::setQValues(const std::vector<double> &qValues) { model()->setQValues(qValues); }
-
-void MultiFunctionTemplatePresenter::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  model()->setResolution(fitResolutions);
-}
-
 void MultiFunctionTemplatePresenter::updateView() {
   updateViewParameterNames();
   updateViewParameters();

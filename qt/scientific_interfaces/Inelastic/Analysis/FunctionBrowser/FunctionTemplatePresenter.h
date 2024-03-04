@@ -75,8 +75,8 @@ public:
   virtual void setDeltaFunction(bool on) override;
   virtual void setTempCorrection(bool on) override;
   void setBackgroundA0(double value) override;
-  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  virtual void setQValues(const std::vector<double> &qValues) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
+  void setQValues(const std::vector<double> &qValues) override;
 
 protected:
   virtual void updateView() = 0;

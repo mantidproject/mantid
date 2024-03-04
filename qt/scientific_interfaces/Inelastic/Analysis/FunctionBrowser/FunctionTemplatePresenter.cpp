@@ -194,10 +194,10 @@ void FunctionTemplatePresenter::setBackgroundA0(double value) {
 }
 
 void FunctionTemplatePresenter::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  (void)fitResolutions;
+  m_model->setResolution(fitResolutions);
 }
 
-void FunctionTemplatePresenter::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+void FunctionTemplatePresenter::setQValues(const std::vector<double> &qValues) { m_model->setQValues(qValues); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
