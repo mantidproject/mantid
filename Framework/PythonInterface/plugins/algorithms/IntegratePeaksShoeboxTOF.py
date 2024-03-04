@@ -299,9 +299,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         if self.getProperty("GetNBinsFromBackToBackParams").value:
             # check at least first peak in workspace has back to back params
             if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
-                issues[
-                    "GetNBinsFromBackToBackParams"
-                ] = "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                issues["GetNBinsFromBackToBackParams"] = (
+                    "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                )
         return issues
 
     def PyExec(self):
@@ -366,7 +366,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
 
-                intens, sigma, status, ispecs, ipos, nrows, ncols, nbins = integrate_peak(
+                intens, sigma, status, ipos, nrows, ncols, nbins = integrate_peak(
                     ws,
                     peaks,
                     ipk,
@@ -506,6 +506,8 @@ def integrate_peak(
     ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, *ipos_predicted)
 
     # perform final integration if required
+    intens, sigma = 0.0, 0.0
+    status = PEAK_STATUS.NO_PEAK
     if ipos is not None:
         # integrate at that position (without smoothing I/sigma)
         intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
@@ -514,7 +516,7 @@ def integrate_peak(
             kernel = make_kernel(nrows, ncols, nbins)
             # re-integrate but this time check for overlap with edge
             intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
-    return intens, sigma, status, ispecs, ipos, nrows, ncols, nbins
+    return intens, sigma, status, ipos, nrows, ncols, nbins
 
 
 def round_up_to_odd_number(number):
