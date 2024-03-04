@@ -50,4 +50,4 @@ dependencies:
   - cppcheck==2.13.1
   - pre-commit>=2.12.0
   - joblib
-  - orsopy
+  - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
