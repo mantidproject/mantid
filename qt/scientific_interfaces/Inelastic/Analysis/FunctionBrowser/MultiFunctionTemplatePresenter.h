@@ -21,14 +21,14 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class MultiFunctionTemplateBrowser;
+class MultiFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit MultiFunctionTemplatePresenter(MultiFunctionTemplateBrowser *view,
+  explicit MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
                                           std::unique_ptr<MultiFunctionTemplateModel> model);
 
-  MultiFunctionTemplateBrowser *view() const;
+  MultiFunctionTemplateView *view() const;
   MultiFunctionTemplateModel *model() const;
 
   void setSubType(size_t subTypeIndex, int typeIndex) override;

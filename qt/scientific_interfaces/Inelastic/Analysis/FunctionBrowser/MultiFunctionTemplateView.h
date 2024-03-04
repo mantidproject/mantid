@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "FitTypes.h"
 
@@ -23,10 +23,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit MultiFunctionTemplateBrowser(TemplateBrowserCustomizations customizations);
+  explicit MultiFunctionTemplateView(TemplateBrowserCustomizations customizations);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 

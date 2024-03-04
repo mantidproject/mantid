@@ -7,7 +7,7 @@
 #include "MultiFunctionTemplatePresenter.h"
 #include "FitTypes.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-#include "MultiFunctionTemplateBrowser.h"
+#include "MultiFunctionTemplateView.h"
 #include <QtConcurrentRun>
 #include <cmath>
 #include <float.h>
@@ -16,12 +16,12 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-MultiFunctionTemplatePresenter::MultiFunctionTemplatePresenter(MultiFunctionTemplateBrowser *view,
+MultiFunctionTemplatePresenter::MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
                                                                std::unique_ptr<MultiFunctionTemplateModel> model)
     : FunctionTemplatePresenter(view, std::move(model)) {}
 
-MultiFunctionTemplateBrowser *MultiFunctionTemplatePresenter::view() const {
-  return dynamic_cast<MultiFunctionTemplateBrowser *>(m_view);
+MultiFunctionTemplateView *MultiFunctionTemplatePresenter::view() const {
+  return dynamic_cast<MultiFunctionTemplateView *>(m_view);
 }
 
 MultiFunctionTemplateModel *MultiFunctionTemplatePresenter::model() const {
@@ -55,7 +55,7 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
 void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   m_model->setFunctionString(funStr);
 
-  MultiFunctionTemplateBrowser *convView = view();
+  MultiFunctionTemplateView *convView = view();
   MultiFunctionTemplateModel const *convModel = model();
 
   convView->setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(convModel->getLorentzianType()));

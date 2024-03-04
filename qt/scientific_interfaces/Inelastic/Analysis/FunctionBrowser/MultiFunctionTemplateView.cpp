@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MultiFunctionTemplateBrowser.h"
+#include "MultiFunctionTemplateView.h"
 #include "MultiFunctionTemplatePresenter.h"
 
 #include "MantidAPI/IFunction.h"
@@ -16,12 +16,12 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-MultiFunctionTemplateBrowser::MultiFunctionTemplateBrowser(TemplateBrowserCustomizations customizations)
-    : FunctionTemplateBrowser(), m_templateSubTypes(std::move(*customizations.templateSubTypes)) {
+MultiFunctionTemplateView::MultiFunctionTemplateView(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateView(), m_templateSubTypes(std::move(*customizations.templateSubTypes)) {
   init();
 }
 
-void MultiFunctionTemplateBrowser::createProperties() {
+void MultiFunctionTemplateView::createProperties() {
   m_parameterManager->blockSignals(true);
   m_boolManager->blockSignals(true);
   m_enumManager->blockSignals(true);
@@ -38,7 +38,7 @@ void MultiFunctionTemplateBrowser::createProperties() {
   m_intManager->blockSignals(false);
 }
 
-void MultiFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::string> &parameterNames) {
+void MultiFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
@@ -50,7 +50,7 @@ void MultiFunctionTemplateBrowser::updateParameterNames(const QMap<int, std::str
   }
 }
 
-void MultiFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
+void MultiFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const parameterName = m_parameterNames[prop];
@@ -59,7 +59,7 @@ void MultiFunctionTemplateBrowser::setGlobalParametersQuiet(std::vector<std::str
   }
 }
 
-void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
+void MultiFunctionTemplateView::createFunctionParameterProperties() {
   m_subTypeParameters.resize(m_templateSubTypes.size());
   m_currentSubTypeParameters.resize(m_templateSubTypes.size());
   for (size_t isub = 0; isub < m_templateSubTypes.size(); ++isub) {
@@ -96,7 +96,7 @@ void MultiFunctionTemplateBrowser::createFunctionParameterProperties() {
   }
 }
 
-void MultiFunctionTemplateBrowser::setProperty(std::size_t subTypeIndex, int value) {
+void MultiFunctionTemplateView::setProperty(std::size_t subTypeIndex, int value) {
   auto const &subType = m_templateSubTypes[subTypeIndex];
   if (subType->isType(typeid(int))) {
     setIntSilent(m_subTypeProperties[subTypeIndex], value);
@@ -107,7 +107,7 @@ void MultiFunctionTemplateBrowser::setProperty(std::size_t subTypeIndex, int val
   }
 }
 
-void MultiFunctionTemplateBrowser::setSubType(std::size_t subTypeIndex, int typeIndex) {
+void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeIndex) {
   auto subTypeProp = m_subTypeProperties[subTypeIndex];
   auto &currentParameters = m_currentSubTypeParameters[subTypeIndex];
   for (auto &&prop : currentParameters) {
@@ -121,12 +121,12 @@ void MultiFunctionTemplateBrowser::setSubType(std::size_t subTypeIndex, int type
   }
 }
 
-void MultiFunctionTemplateBrowser::setParameterValueQuiet(ParamID id, double value, double error) {
+void MultiFunctionTemplateView::setParameterValueQuiet(ParamID id, double value, double error) {
   auto prop = m_parameterReverseMap[id];
   setParameterSilent(prop, value, error);
 }
 
-void MultiFunctionTemplateBrowser::intChanged(QtProperty *prop) {
+void MultiFunctionTemplateView::intChanged(QtProperty *prop) {
   if (!m_emitIntChange)
     return;
 
@@ -135,7 +135,7 @@ void MultiFunctionTemplateBrowser::intChanged(QtProperty *prop) {
   }
 }
 
-void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
+void MultiFunctionTemplateView::boolChanged(QtProperty *prop) {
   if (!m_emitBoolChange)
     return;
 
@@ -144,7 +144,7 @@ void MultiFunctionTemplateBrowser::boolChanged(QtProperty *prop) {
   }
 }
 
-void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
+void MultiFunctionTemplateView::enumChanged(QtProperty *prop) {
   if (!m_emitEnumChange)
     return;
 
@@ -153,7 +153,7 @@ void MultiFunctionTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
+void MultiFunctionTemplateView::parameterChanged(QtProperty *prop) {
   if (!m_emitParameterValueChange) {
     return;
   }
@@ -162,7 +162,7 @@ void MultiFunctionTemplateBrowser::parameterChanged(QtProperty *prop) {
   m_presenter->handleParameterValueChanged(m_parameterNames[prop], m_parameterManager->value(prop));
 }
 
-std::optional<std::size_t> MultiFunctionTemplateBrowser::propertySubTypeIndex(QtProperty *prop) {
+std::optional<std::size_t> MultiFunctionTemplateView::propertySubTypeIndex(QtProperty *prop) {
   auto const it = std::find(m_subTypeProperties.cbegin(), m_subTypeProperties.cend(), prop);
   if (it != m_subTypeProperties.cend()) {
     std::size_t index = std::distance(m_subTypeProperties.cbegin(), it);

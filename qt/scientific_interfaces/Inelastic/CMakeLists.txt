@@ -43,7 +43,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateView.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
-    Analysis/FunctionBrowser/MultiFunctionTemplateBrowser.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
     BayesFitting/BayesFitting.cpp
@@ -107,7 +107,7 @@ set(MOC_FILES
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
-    Analysis/FunctionBrowser/MultiFunctionTemplateBrowser.h
+    Analysis/FunctionBrowser/MultiFunctionTemplateView.h
     BayesFitting/BayesFitting.h
     BayesFitting/BayesFittingTab.h
     BayesFitting/Quasi.h
