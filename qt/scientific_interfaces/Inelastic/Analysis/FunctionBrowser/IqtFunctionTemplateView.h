@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "IqtTemplatePresenter.h"
 
@@ -20,14 +20,14 @@ namespace CustomInterfaces {
 namespace IDA {
 
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
+  explicit IqtFunctionTemplateView(QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();
@@ -46,14 +46,9 @@ public:
   void setStretchStretching(double, double);
   void setA0(double, double);
 
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
-  void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
-  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
-  EstimationDataSelector getEstimationDataSelector() const override;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
-  void estimateFunctionParameters() override;
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
   void setQValues(const std::vector<double> &) override {}
@@ -62,14 +57,10 @@ protected slots:
   void intChanged(QtProperty *) override;
   void boolChanged(QtProperty *) override;
   void enumChanged(QtProperty *) override;
-  void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &) override;
-  double getParameterPropertyValue(QtProperty *prop) const;
-  void setGlobalParametersQuiet(std::vector<std::string> const &globals);
   void setTieIntensitiesQuiet(bool on);
   void updateState();
 
@@ -86,7 +77,6 @@ private:
   QtProperty *m_A0 = nullptr;
   QtProperty *m_tieIntensities = nullptr;
   QMap<QtProperty *, int> m_parameterMap;
-  QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
   friend class IqtTemplatePresenter;

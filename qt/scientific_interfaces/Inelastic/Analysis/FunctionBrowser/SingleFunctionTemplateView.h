@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "SingleFunctionTemplatePresenter.h"
 
@@ -21,24 +21,19 @@ namespace IDA {
 
 class IDAFunctionParameterEstimation;
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplateBrowser(QWidget *parent = nullptr);
-  virtual ~SingleFunctionTemplateBrowser() = default;
+  explicit SingleFunctionTemplateView(QWidget *parent = nullptr);
+  virtual ~SingleFunctionTemplateView() = default;
 
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
-  void updateParameters(const IFunction &fun) override;
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
-  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
-  EstimationDataSelector getEstimationDataSelector() const override;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
-  void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
   void setQValues(const std::vector<double> &) override;
@@ -51,13 +46,10 @@ public:
 
 protected slots:
   void enumChanged(QtProperty *) override;
-  void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &) override;
-  void setGlobalParametersQuiet(std::vector<std::string> const &globals);
 
   QtProperty *m_fitType;
   QMap<std::string, QtProperty *> m_parameterMap;

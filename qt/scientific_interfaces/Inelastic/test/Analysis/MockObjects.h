@@ -12,8 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
-#include "Analysis/FunctionTemplateBrowser.h"
 #include "Analysis/IIndirectFitDataView.h"
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
 #include "Analysis/IIndirectFitOutputOptionsView.h"
@@ -258,9 +258,9 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
-class MockFunctionTemplateBrowser : public FunctionTemplateBrowser {
+class MockFunctionTemplateView : public FunctionTemplateView {
 public:
-  virtual ~MockFunctionTemplateBrowser() = default;
+  virtual ~MockFunctionTemplateView() = default;
 
   MOCK_METHOD1(setFunction, void(std::string const &funStr));
   MOCK_CONST_METHOD0(getGlobalFunction, IFunction_sptr());
@@ -272,23 +272,16 @@ public:
   MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
   MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
   MOCK_METHOD1(updateMultiDatasetParameters, void(const IFunction &fun));
-  MOCK_METHOD1(updateMultiDatasetParameters, void(const ITableWorkspace &paramTable));
-  MOCK_METHOD1(updateParameters, void(const IFunction &fun));
   MOCK_METHOD1(setCurrentDataset, void(int i));
   MOCK_METHOD0(getCurrentDataset, int());
   MOCK_METHOD1(updateParameterNames, void(const QMap<int, std::string> &parameterNames));
+  MOCK_METHOD1(setGlobalParametersQuiet, void(std::vector<std::string> const &globals));
   MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
-  MOCK_METHOD0(clear, void());
-  MOCK_CONST_METHOD0(getEstimationDataSelector, EstimationDataSelector());
-  MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
-  MOCK_METHOD0(estimateFunctionParameters, void());
   MOCK_METHOD1(setBackgroundA0, void(double value));
   MOCK_METHOD2(setResolution, void(std::string const &name, WorkspaceID const &index));
   MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
   MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
   // protected Slots
-  MOCK_METHOD1(popupMenu, void(const QPoint &));
-  MOCK_METHOD3(globalChanged, void(QtProperty *, const QString &, bool));
   MOCK_METHOD1(parameterChanged, void(QtProperty *));
   MOCK_METHOD1(parameterButtonClicked, void(QtProperty *));
   // Private methods
@@ -297,10 +290,10 @@ public:
 
 class MockFunctionTemplatePresenter : public ITemplatePresenter {
 public:
-  MockFunctionTemplatePresenter(MockFunctionTemplateBrowser *view) : m_view(view) {}
+  MockFunctionTemplatePresenter(MockFunctionTemplateView *view) : m_view(view) {}
   virtual ~MockFunctionTemplatePresenter() = default;
 
-  FunctionTemplateBrowser *browser() override { return m_view; }
+  FunctionTemplateView *browser() override { return m_view; }
 
   MOCK_METHOD0(init, void());
   MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
@@ -353,7 +346,7 @@ public:
                     QStringList const &ties, QStringList const &constraints));
 
 private:
-  FunctionTemplateBrowser *m_view;
+  FunctionTemplateView *m_view;
 };
 
 class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {

@@ -23,13 +23,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class FunctionTemplateBrowser;
+class FunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL ITemplatePresenter {
 public:
   virtual ~ITemplatePresenter() = default;
 
-  virtual FunctionTemplateBrowser *browser() = 0;
+  virtual FunctionTemplateView *browser() = 0;
 
   virtual void init() = 0;
   virtual void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) = 0;

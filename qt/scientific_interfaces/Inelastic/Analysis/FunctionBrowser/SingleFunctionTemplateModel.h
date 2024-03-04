@@ -38,7 +38,7 @@ public:
   void removeFitType();
   std::vector<std::string> getFunctionList();
   int getEnumIndex();
-  void setGlobal(std::string const &parameterName, bool isGlobal);
+  void setGlobal(std::string const &parameterName, bool isGlobal) override;
 
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);

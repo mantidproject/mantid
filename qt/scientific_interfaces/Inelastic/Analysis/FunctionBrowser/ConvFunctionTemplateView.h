@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "ConvTemplatePresenter.h"
-#include "ConvTypes.h"
 #include "DllConfig.h"
+#include "FitTypes.h"
 
 #include <QMap>
 #include <QWidget>
@@ -22,21 +22,16 @@ namespace IDA {
 
 using namespace ConvTypes;
 /**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
+ * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit ConvTemplateBrowser(QWidget *parent = nullptr);
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
-  void updateParameters(const IFunction &fun) override;
+  explicit ConvFunctionTemplateView(QWidget *parent = nullptr);
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
-  void clear() override;
-  EstimationDataSelector getEstimationDataSelector() const override;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
-  void estimateFunctionParameters() override;
+  void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 
   void setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
@@ -54,13 +49,10 @@ protected slots:
   void intChanged(QtProperty *) override;
   void boolChanged(QtProperty *) override;
   void enumChanged(QtProperty *) override;
-  void globalChanged(QtProperty *, const QString &, bool) override;
   void parameterChanged(QtProperty *) override;
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &) override;
-  void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
   void createDeltaFunctionProperties();
   void createTempCorrectionProperties();
@@ -83,7 +75,6 @@ private:
 
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
-  QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
   friend class ConvTemplatePresenter;

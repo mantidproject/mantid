@@ -10,6 +10,7 @@
 
 #include "FunctionModelDataset.h"
 #include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QList>
 #include <QPair>
@@ -54,10 +55,12 @@ public:
   virtual void addConstraint(std::string const &functionIndex, std::string const &constraint) = 0;
   virtual void removeConstraint(std::string const &parameterName) = 0;
   virtual std::vector<std::string> getGlobalParameters() const = 0;
+  virtual void setGlobal(std::string const &parameterName, bool on) = 0;
   virtual void setGlobalParameters(const std::vector<std::string> &globals) = 0;
   virtual bool isGlobal(std::string const &parameterName) const = 0;
   virtual std::vector<std::string> getLocalParameters() const = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
   virtual double getLocalParameterValue(std::string const &parameterName, int i) const = 0;
   virtual bool isLocalParameterFixed(std::string const &parameterName, int i) const = 0;

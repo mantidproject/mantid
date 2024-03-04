@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 #include <utility>
 
-#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
 #include "Analysis/ParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -47,7 +47,7 @@ public:
     m_browser = std::make_unique<IndirectFitPropertyBrowser>();
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
-    m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
+    m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateView>>();
     auto templatePresenter = std::make_unique<NiceMock<MockFunctionTemplatePresenter>>(m_templateBrowser.get());
     m_templatePresenter = templatePresenter.get();
     m_browser->setFunctionTemplatePresenter(std::move(templatePresenter));
@@ -188,7 +188,7 @@ public:
   void test_updateFitStatusData_does_not_throw() {
 
     auto browser = std::make_unique<IndirectFitPropertyBrowser>();
-    auto templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
+    auto templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateView>>();
     auto templatePresenter = std::make_unique<NiceMock<MockFunctionTemplatePresenter>>(templateBrowser.get());
     browser->setFunctionTemplatePresenter(std::move(templatePresenter));
     browser->init();
@@ -254,7 +254,7 @@ public:
 
 private:
   std::unique_ptr<IndirectFitPropertyBrowser> m_browser;
-  std::unique_ptr<NiceMock<MockFunctionTemplateBrowser>> m_templateBrowser;
+  std::unique_ptr<NiceMock<MockFunctionTemplateView>> m_templateBrowser;
   NiceMock<MockFunctionTemplatePresenter> *m_templatePresenter;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
 };

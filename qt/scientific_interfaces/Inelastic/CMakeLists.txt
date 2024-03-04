@@ -14,7 +14,6 @@ set(SRC_FILES
     Analysis/MSDFitModel.cpp
     Analysis/IDAFunctionParameterEstimation.cpp
     Analysis/FitStatusWidget.cpp
-    Analysis/FunctionTemplateBrowser.cpp
     Analysis/IndirectDockWidgetArea.cpp
     Analysis/IndirectEditResultsDialog.cpp
     Analysis/IndirectFitData.cpp
@@ -30,18 +29,19 @@ set(SRC_FILES
     Analysis/IndirectFitPlotView.cpp
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
-    Analysis/FunctionBrowser/ConvTypes.cpp
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
-    Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
+    Analysis/FunctionBrowser/ConvFunctionTemplateView.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/FitTypes.cpp
+    Analysis/FunctionBrowser/FunctionTemplateView.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
-    Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
+    Analysis/FunctionBrowser/IqtFunctionTemplateView.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
     Analysis/FunctionBrowser/MSDFunctionModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
-    Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
+    Analysis/FunctionBrowser/SingleFunctionTemplateView.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
     BayesFitting/BayesFitting.cpp
     BayesFitting/BayesFittingTab.cpp
@@ -94,16 +94,16 @@ set(MOC_FILES
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
-    Analysis/FunctionTemplateBrowser.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
     Analysis/IndirectFitDataView.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPropertyBrowser.h
-    Analysis/FunctionBrowser/ConvTemplateBrowser.h
-    Analysis/FunctionBrowser/IqtTemplateBrowser.h
-    Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
+    Analysis/FunctionBrowser/ConvFunctionTemplateView.h
+    Analysis/FunctionBrowser/FunctionTemplateView.h
+    Analysis/FunctionBrowser/IqtFunctionTemplateView.h
+    Analysis/FunctionBrowser/SingleFunctionTemplateView.h
     BayesFitting/BayesFitting.h
     BayesFitting/BayesFittingTab.h
     BayesFitting/Quasi.h
@@ -160,12 +160,15 @@ set(INC_FILES
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/FitTypes.h
     Analysis/FunctionBrowser/FunctionTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
     Analysis/FunctionBrowser/ITemplatePresenter.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/MSDFunctionModel.h
+    Analysis/FunctionBrowser/ParamID.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
+    Analysis/FunctionBrowser/TemplateSubType.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h
     Common/OutputPlotOptionsModel.h

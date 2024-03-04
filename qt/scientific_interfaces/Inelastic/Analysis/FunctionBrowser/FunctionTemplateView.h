@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "ParameterEstimation.h"
 
 #include <QList>
 #include <QMap>
@@ -41,16 +41,11 @@ using namespace MantidWidgets;
 
 class ITemplatePresenter;
 
-/**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
- * and set properties that can be used to generate a fit function.
- *
- */
-class MANTIDQT_INELASTIC_DLL FunctionTemplateBrowser : public QWidget {
+class MANTIDQT_INELASTIC_DLL FunctionTemplateView : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateBrowser(QWidget *parent = nullptr);
-  virtual ~FunctionTemplateBrowser();
+  FunctionTemplateView(QWidget *parent = nullptr);
+  virtual ~FunctionTemplateView();
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
 
@@ -75,14 +70,15 @@ public:
   void setGlobalParameters(std::vector<std::string> const &globals);
 
   void updateMultiDatasetParameters(const IFunction &fun);
-  virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
-  virtual void updateParameters(const IFunction &fun) = 0;
+  void updateMultiDatasetParameters(const ITableWorkspace &table);
+  void updateParameters(const IFunction &fun);
   virtual void updateParameterNames(const QMap<int, std::string> &parameterNames) = 0;
+  virtual void setGlobalParametersQuiet(std::vector<std::string> const &globals) = 0;
 
-  virtual void clear() = 0;
-  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
-  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
-  virtual void estimateFunctionParameters() = 0;
+  virtual void clear();
+  virtual EstimationDataSelector getEstimationDataSelector() const;
+  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  virtual void estimateFunctionParameters();
   virtual void setBackgroundA0(double value) = 0;
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
@@ -100,8 +96,8 @@ protected slots:
   virtual void intChanged(QtProperty *) {}
   virtual void boolChanged(QtProperty *) {}
   virtual void enumChanged(QtProperty *) {}
-  virtual void popupMenu(const QPoint &) = 0;
-  virtual void globalChanged(QtProperty *, const QString &, bool) = 0;
+  virtual void popupMenu(const QPoint &) {}
+  virtual void globalChanged(QtProperty *, const QString &, bool) {}
   virtual void parameterChanged(QtProperty *) = 0;
   void parameterButtonClicked(QtProperty *);
   void editLocalParameterFinished(int result, EditLocalParameterDialog *dialog);
