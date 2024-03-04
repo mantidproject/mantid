@@ -28,9 +28,6 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-#include <QTreeWidgetItemIterator>
-#include <algorithm>
-#include <iostream>
 namespace MantidQt::MantidWidgets {
 
 /**
