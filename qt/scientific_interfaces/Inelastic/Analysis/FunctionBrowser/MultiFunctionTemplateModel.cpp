@@ -384,6 +384,20 @@ std::vector<std::string> MultiFunctionTemplateModel::makeGlobalList() const {
   return globals;
 }
 
+void MultiFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeIndex) {
+  if (subTypeIndex == ConvTypes::SubTypeIndex::Fit) {
+    setFitType(static_cast<ConvTypes::FitType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
+    setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
+    setDeltaType(static_cast<ConvTypes::DeltaType>(typeIndex));
+  } else if (subTypeIndex == ConvTypes::SubTypeIndex::TempCorrection) {
+    setTempCorrectionType(static_cast<ConvTypes::TempCorrectionType>(typeIndex));
+  } else {
+    setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
+  }
+}
+
 void MultiFunctionTemplateModel::setFitType(FitType fitType) {
   m_fitType = fitType;
   if (FitTypeQDepends[m_fitType]) {

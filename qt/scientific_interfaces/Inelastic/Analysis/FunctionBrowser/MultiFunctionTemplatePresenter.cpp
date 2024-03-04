@@ -6,15 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiFunctionTemplatePresenter.h"
 #include "FitTypes.h"
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MultiFunctionTemplateView.h"
-#include <QtConcurrentRun>
-#include <cmath>
-#include <float.h>
 
 namespace MantidQt::CustomInterfaces::IDA {
-
-using namespace MantidWidgets;
 
 MultiFunctionTemplatePresenter::MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
                                                                std::unique_ptr<MultiFunctionTemplateModel> model)
@@ -28,22 +22,8 @@ MultiFunctionTemplateModel *MultiFunctionTemplatePresenter::model() const {
   return dynamic_cast<MultiFunctionTemplateModel *>(m_model.get());
 }
 
-// This function creates a Qt thread to run the model updates
-// This was found to be necessary to allow the processing of the GUI thread to
-// continue which is necessary to stop the int manager from self-incrementing
-// itself due to an internal timer occurring within the class
 void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
-  if (subTypeIndex == ConvTypes::SubTypeIndex::Fit) {
-    model()->setFitType(static_cast<ConvTypes::FitType>(typeIndex));
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
-    model()->setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
-    model()->setDeltaType(static_cast<ConvTypes::DeltaType>(typeIndex));
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::TempCorrection) {
-    model()->setTempCorrectionType(static_cast<ConvTypes::TempCorrectionType>(typeIndex));
-  } else {
-    model()->setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
-  }
+  model()->setSubType(subTypeIndex, typeIndex);
   view()->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);
   updateViewParameterNames();
@@ -95,8 +75,9 @@ void MultiFunctionTemplatePresenter::updateView() {
 void MultiFunctionTemplatePresenter::updateViewParameters() {
   auto values = model()->getCurrentValues();
   auto errors = model()->getCurrentErrors();
-  for (auto const id : values.keys()) {
-    view()->setParameterValueQuiet(id, values[id], errors[id]);
+  auto templateView = view();
+  for (auto const &id : values.keys()) {
+    templateView->setParameterValueQuiet(id, values[id], errors[id]);
   }
 }
 

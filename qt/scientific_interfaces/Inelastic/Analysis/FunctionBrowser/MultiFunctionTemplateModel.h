@@ -78,6 +78,7 @@ public:
   void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) override;
   void setGlobalParameterValue(std::string const &parameterName, double value) override;
   std::string setBackgroundA0(double value) override;
+  void setSubType(std::size_t subTypeIndex, int typeIndex);
   void setFitType(FitType fitType);
   void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaType(DeltaType deltaType);
