@@ -74,7 +74,7 @@ public:
   virtual void setSubType(std::size_t subTypeIndex, int typeIndex) override;
   virtual void setDeltaFunction(bool on) override;
   virtual void setTempCorrection(bool on) override;
-  virtual void setBackgroundA0(double value) override;
+  void setBackgroundA0(double value) override;
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   virtual void setQValues(const std::vector<double> &qValues) override;
 

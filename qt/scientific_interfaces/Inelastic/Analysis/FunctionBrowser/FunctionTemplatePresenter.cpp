@@ -188,7 +188,10 @@ void FunctionTemplatePresenter::setDeltaFunction(bool on) { (void)on; }
 
 void FunctionTemplatePresenter::setTempCorrection(bool on) { (void)on; }
 
-void FunctionTemplatePresenter::setBackgroundA0(double value) { (void)value; }
+void FunctionTemplatePresenter::setBackgroundA0(double value) {
+  m_model->setBackgroundA0(value);
+  updateView();
+}
 
 void FunctionTemplatePresenter::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   (void)fitResolutions;
