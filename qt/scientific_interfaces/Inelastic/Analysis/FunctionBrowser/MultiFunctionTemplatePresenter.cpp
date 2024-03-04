@@ -26,9 +26,7 @@ void MultiFunctionTemplatePresenter::setSubType(size_t subTypeIndex, int typeInd
   model()->setSubType(subTypeIndex, typeIndex);
   view()->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
-  view()->setGlobalParametersQuiet(model()->getGlobalParameters());
+  updateView();
   m_view->emitFunctionStructureChanged();
 }
 
@@ -51,8 +49,7 @@ void MultiFunctionTemplatePresenter::setFunction(std::string const &funStr) {
   convView->setProperty(ConvTypes::SubTypeIndex::Background, static_cast<int>(convModel->getBackgroundType()));
 
   setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
+  updateView();
   m_view->emitFunctionStructureChanged();
 }
 
@@ -70,12 +67,15 @@ void MultiFunctionTemplatePresenter::setResolution(const std::vector<std::pair<s
 void MultiFunctionTemplatePresenter::updateView() {
   updateViewParameterNames();
   updateViewParameters();
+  m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }
 
 void MultiFunctionTemplatePresenter::updateViewParameters() {
-  auto values = model()->getCurrentValues();
-  auto errors = model()->getCurrentErrors();
   auto templateView = view();
+  auto templateModel = model();
+
+  auto values = templateModel->getCurrentValues();
+  auto errors = templateModel->getCurrentErrors();
   for (auto const &id : values.keys()) {
     templateView->setParameterValueQuiet(id, values[id], errors[id]);
   }
