@@ -180,15 +180,15 @@ void MultiFunctionTemplateModel::addFunction(std::string const &prefix, std::str
   } else if (name == "DeltaFunction") {
     if (hasDeltaFunction())
       throw std::runtime_error("Cannot add a DeltaFunction.");
-    setDeltaType(DeltaType::Delta);
+    setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(DeltaType::Delta));
     newPrefix = *getDeltaPrefix();
   } else if (name == "FlatBackground" || name == "LinearBackground") {
     if (hasBackground())
       throw std::runtime_error("Cannot add more backgrounds.");
     if (name == "FlatBackground") {
-      setBackground(BackgroundType::Flat);
+      setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(BackgroundType::Flat));
     } else if (name == "LinearBackground") {
-      setBackground(BackgroundType::Linear);
+      setSubType(ConvTypes::SubTypeIndex::Background, static_cast<int>(BackgroundType::Linear));
     }
     newPrefix = *getBackgroundPrefix();
   } else {
@@ -208,17 +208,17 @@ void MultiFunctionTemplateModel::removeFunction(std::string const &prefix) {
   }
   auto prefix1 = getLor1Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setLorentzianType(LorentzianType::None);
+    setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::None));
     return;
   }
   prefix1 = getLor2Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setLorentzianType(LorentzianType::OneLorentzian);
+    setSubType(ConvTypes::SubTypeIndex::Lorentzian, static_cast<int>(LorentzianType::OneLorentzian));
     return;
   }
   prefix1 = getDeltaPrefix();
   if (prefix1 && *prefix1 == prefix) {
-    setDeltaType(DeltaType::None);
+    setSubType(ConvTypes::SubTypeIndex::Delta, static_cast<int>(DeltaType::None));
     return;
   }
   prefix1 = getBackgroundPrefix();
@@ -232,13 +232,6 @@ void MultiFunctionTemplateModel::removeFunction(std::string const &prefix) {
 bool MultiFunctionTemplateModel::hasTempCorrection() const { return m_tempCorrectionType != TempCorrectionType::None; }
 
 bool MultiFunctionTemplateModel::hasDeltaFunction() const { return m_deltaType != DeltaType::None; }
-
-void MultiFunctionTemplateModel::setBackground(BackgroundType bgType) {
-  auto oldValues = getCurrentValues();
-  m_backgroundType = bgType;
-  setModel();
-  setCurrentValues(oldValues);
-}
 
 void MultiFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();
@@ -376,17 +369,21 @@ std::vector<std::string> MultiFunctionTemplateModel::makeGlobalList() const {
 }
 
 void MultiFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeIndex) {
+  auto oldValues = getCurrentValues();
   if (subTypeIndex == ConvTypes::SubTypeIndex::Fit) {
-    setFitType(static_cast<ConvTypes::FitType>(typeIndex));
+    m_fitType = static_cast<ConvTypes::FitType>(typeIndex);
+    m_isQDependentFunction = FitTypeQDepends[m_fitType];
   } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
-    setLorentzianType(static_cast<ConvTypes::LorentzianType>(typeIndex));
+    m_lorentzianType = static_cast<ConvTypes::LorentzianType>(typeIndex);
   } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
-    setDeltaType(static_cast<ConvTypes::DeltaType>(typeIndex));
+    m_deltaType = static_cast<ConvTypes::DeltaType>(typeIndex);
   } else if (subTypeIndex == ConvTypes::SubTypeIndex::TempCorrection) {
-    setTempCorrectionType(static_cast<ConvTypes::TempCorrectionType>(typeIndex));
+    m_tempCorrectionType = static_cast<ConvTypes::TempCorrectionType>(typeIndex);
   } else {
-    setBackground(static_cast<ConvTypes::BackgroundType>(typeIndex));
+    m_backgroundType = static_cast<ConvTypes::BackgroundType>(typeIndex);
   }
+  setModel();
+  setCurrentValues(oldValues);
 }
 
 std::map<std::size_t, int> MultiFunctionTemplateModel::getSubTypes() const {
@@ -397,31 +394,6 @@ std::map<std::size_t, int> MultiFunctionTemplateModel::getSubTypes() const {
   subTypes[ConvTypes::SubTypeIndex::TempCorrection] = static_cast<int>(m_tempCorrectionType);
   subTypes[ConvTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
   return subTypes;
-}
-
-void MultiFunctionTemplateModel::setFitType(FitType fitType) {
-  m_fitType = fitType;
-  if (FitTypeQDepends[m_fitType]) {
-    m_isQDependentFunction = true;
-  } else {
-    m_isQDependentFunction = false;
-  }
-  setModel();
-}
-
-void MultiFunctionTemplateModel::setLorentzianType(LorentzianType lorentzianType) {
-  m_lorentzianType = lorentzianType;
-  setModel();
-}
-
-void MultiFunctionTemplateModel::setDeltaType(DeltaType deltaType) {
-  m_deltaType = deltaType;
-  setModel();
-}
-
-void MultiFunctionTemplateModel::setTempCorrectionType(TempCorrectionType tempCorrectionType) {
-  m_tempCorrectionType = tempCorrectionType;
-  setModel();
 }
 
 int MultiFunctionTemplateModel::getNumberOfPeaks() const {

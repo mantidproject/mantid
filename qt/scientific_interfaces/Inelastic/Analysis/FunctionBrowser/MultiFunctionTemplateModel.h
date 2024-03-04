@@ -75,13 +75,8 @@ public:
   std::string setBackgroundA0(double value) override;
   void setSubType(std::size_t subTypeIndex, int typeIndex);
   std::map<std::size_t, int> getSubTypes() const;
-  void setFitType(FitType fitType);
-  void setLorentzianType(LorentzianType lorentzianType);
-  void setDeltaType(DeltaType deltaType);
-  void setTempCorrectionType(TempCorrectionType tempCorrectionType);
   bool hasDeltaFunction() const;
   bool hasTempCorrection() const;
-  void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
   EstimationDataSelector getEstimationDataSelector() const;
