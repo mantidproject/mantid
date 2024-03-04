@@ -182,4 +182,4 @@ The timing output of these jobs are typically monitored manually on a
 weekly basis to pick up any notable performance degradation. Although
 automatic checking is available within the python scripts, the level of
 instability in the timings meant that it always produced way too many
-false positives to be useful.
+false positives to be useful..
