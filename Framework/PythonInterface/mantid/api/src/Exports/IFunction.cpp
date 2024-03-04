@@ -51,7 +51,7 @@ template <typename T> inline T extractValueAndClone(const boost::python::object 
   return boost::python::extract<T>(value)()->clone();
 }
 
-struct DLLExport FunctionPropertyValueHandler : public PropertyValueHandler {
+struct FunctionPropertyValueHandler : public PropertyValueHandler {
 
   /// Type required by TypeRegistry framework
   using HeldType = std::shared_ptr<IFunction>;
