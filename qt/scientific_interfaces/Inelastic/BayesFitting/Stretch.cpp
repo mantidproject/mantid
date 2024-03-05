@@ -107,6 +107,12 @@ bool Stretch::validate() {
     return false;
   }
 
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
+    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
+    return false;
+  }
+
   return true;
 }
 
@@ -141,20 +147,28 @@ void Stretch::run() {
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto stretch = AlgorithmManager::Instance().create("BayesStretch");
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  std::string const algorithmName = useQuickBayes ? "BayesStretch2" : "BayesStretch";
+  auto stretch = AlgorithmManager::Instance().create(algorithmName);
   stretch->initialize();
   stretch->setProperty("SampleWorkspace", sampleName);
   stretch->setProperty("ResolutionWorkspace", resName);
   stretch->setProperty("EMin", eMin);
   stretch->setProperty("EMax", eMax);
-  stretch->setProperty("SampleBins", nBins);
-  stretch->setProperty("Elastic", elasticPeak);
-  stretch->setProperty("Background", background);
-  stretch->setProperty("NumberSigma", sigma);
   stretch->setProperty("NumberBeta", beta);
-  stretch->setProperty("Loop", sequence);
+  stretch->setProperty("Elastic", elasticPeak);
   stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
   stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
+  if (useQuickBayes) {
+    stretch->setProperty("Background", background == "Flat" ? background : "None");
+  } else {
+    stretch->setProperty("Background", background);
+    stretch->setProperty("SampleBins", nBins);
+    stretch->setProperty("NumberSigma", sigma);
+    stretch->setProperty("Loop", sequence);
+  }
 
   m_batchAlgoRunner->addAlgorithm(stretch);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
