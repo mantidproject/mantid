@@ -152,6 +152,12 @@ bool Quasi::validate() {
     }
   }
 
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
+    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
+    return false;
+  }
+
   return true;
 }
 
@@ -208,25 +214,39 @@ void Quasi::run() {
   long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long const resBins = m_properties["ResBinning"]->valueText().toLong();
 
-  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  std::string const algorithmName = useQuickBayes ? "BayesQuasi2" : "BayesQuasi";
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create(algorithmName);
   runAlg->initialize();
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);
   runAlg->setProperty("ResolutionWorkspace", resName);
-  runAlg->setProperty("ResNormWorkspace", resNormFile);
   runAlg->setProperty("OutputWorkspaceFit", "fit");
   runAlg->setProperty("OutputWorkspaceProb", "prob");
   runAlg->setProperty("OutputWorkspaceResult", "result");
-  runAlg->setProperty("MinRange", eMin);
-  runAlg->setProperty("MaxRange", eMax);
-  runAlg->setProperty("SampleBins", sampleBins);
-  runAlg->setProperty("ResolutionBins", resBins);
   runAlg->setProperty("Elastic", elasticPeak);
-  runAlg->setProperty("Background", background);
-  runAlg->setProperty("FixedWidth", fixedWidth);
-  runAlg->setProperty("UseResNorm", useResNorm);
-  runAlg->setProperty("WidthFile", fixedWidthFile);
-  runAlg->setProperty("Loop", sequence);
+  if (useQuickBayes) {
+    // Use quickBayes package in BayesQuasi2 algorithm
+    runAlg->setProperty("Background", background == "Flat" ? background : "None");
+    runAlg->setProperty("EMin", eMin);
+    runAlg->setProperty("EMax", eMax);
+  } else {
+    // Use quasielasticbayes package in BayesQuasi algorithm
+    runAlg->setProperty("ResNormWorkspace", resNormFile);
+    runAlg->setProperty("Background", background);
+    runAlg->setProperty("MinRange", eMin);
+    runAlg->setProperty("MaxRange", eMax);
+    runAlg->setProperty("SampleBins", sampleBins);
+    runAlg->setProperty("ResolutionBins", resBins);
+    runAlg->setProperty("Elastic", elasticPeak);
+    runAlg->setProperty("Background", background);
+    runAlg->setProperty("FixedWidth", fixedWidth);
+    runAlg->setProperty("UseResNorm", useResNorm);
+    runAlg->setProperty("WidthFile", fixedWidthFile);
+    runAlg->setProperty("Loop", sequence);
+  }
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
