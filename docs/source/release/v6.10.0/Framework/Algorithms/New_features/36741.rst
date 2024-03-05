@@ -1,0 +1,5 @@
+- Abins and Abins2D algorithms now support frozen atoms in data from GAUSSIAN
+
+  - Similarly to the frozen-atoms ("selective dynamics") support for
+    VASP outputs, frozen atoms will be disregarded in the calculation
+    of inelastic scattering structure factor.
