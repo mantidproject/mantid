@@ -54,7 +54,7 @@ dependencies:
   - libcxx
   - joblib
   - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
-  - mslice>=2.9.0
+  - mslice
 
   # Use conda version of clang to get matching CXXFLAGS.
   # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml

@@ -50,7 +50,7 @@ dependencies:
   - versioningit>=2.1
   - joblib
   - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
-  - mslice>=2.9.0
+  - mslice
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0
