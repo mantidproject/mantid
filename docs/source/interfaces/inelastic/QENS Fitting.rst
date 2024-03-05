@@ -166,6 +166,8 @@ equal to zero.
   :width: 450
   :widget: tabMSD
 
+.. _msdfit-example-workflow:
+
 MSD Fit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The MSD Fit tab operates on ``_eq`` files. The files used in this workflow are produced on the Elwin
@@ -199,8 +201,6 @@ tab as seen in the :ref:`elwin-example-workflow`.
 
 8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
    Msd parameter which can be found within the _Results group workspace.
-
-.. _msdfit-example-workflow:
 
 I(Q, t) Fit
 -----------
@@ -482,6 +482,6 @@ then it is possible to plot this PDF data using the output options at the bottom
 1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
 2. Yi et al, J Phys Chem B 116, 5028 (2012)
 
-:ref:`Indirect Data Analysis <interface-inelastic-data-analysis>`
+:ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>`
 
-.. categories:: Interfaces Indirect Direct
+.. categories:: Interfaces Inelastic
