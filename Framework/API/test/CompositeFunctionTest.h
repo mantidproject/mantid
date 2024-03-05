@@ -139,6 +139,28 @@ public:
   void setFwhm(const double w) override { setParameter(2, w); }
 };
 
+// Create class with configurable number of domains for ease of testing.
+class FunctionWithNDomains : public IPeakFunction {
+public:
+  FunctionWithNDomains(int nDomains) : m_nDomains(nDomains) {}
+
+  size_t getNumberDomains() const override { return m_nDomains; }
+
+  // Override pure virtual functions.
+  std::string name() const override { return "FunctionWithNDomains"; }
+
+  double fwhm() const override { return 1; }
+  void setFwhm(const double w) override {}
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {}
+  double centre() const override { return 1; }
+  double height() const override { return 1; }
+  void setCentre(const double c) override {}
+  void setHeight(const double h) override {}
+
+private:
+  size_t m_nDomains;
+};
+
 template <bool withAttributes = false> class Linear : public ParamFunction, public IFunction1D {
 public:
   Linear() {
@@ -1515,6 +1537,19 @@ public:
     TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
     TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
     TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
+  }
+
+  void test_getNumberDomains_throws_with_inconsistent_domain_numbers() {
+    IFunction_sptr f1 = IFunction_sptr(new FunctionWithNDomains(7));
+    IFunction_sptr f2 = IFunction_sptr(new FunctionWithNDomains(13));
+
+    CompositeFunction fun;
+
+    fun.addFunction(f1);
+    fun.addFunction(f2);
+
+    TS_ASSERT_THROWS_EQUALS(fun.getNumberDomains(), const std::runtime_error &e, std::string(e.what()),
+                            "CompositeFunction has members with inconsistent domain numbers.");
   }
 
 private:
