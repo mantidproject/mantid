@@ -11,8 +11,8 @@ Description
 
 Takes a pair of normalised, single-spectra workspaces representing a depolarised helium cell and the empty cell. It will
 then determine the empty cell transmission value, ``T_E``, and the cell path length multiplied by the gas pressure
-``pxd``.
-The result of this is then stored in a table workspace for use in future corrections.
+``pxd`` by using an exponential fit. The calculated fit curve and parameters table are then output for use in later
+calculations. See :ref:`algm-Fit` for more details.
 
 A polarised He\ :sub:`3`\  cell decays over time. At the end of its life, it will be fully depolarised and a run is
 created to find the depolarised transmission rate through the helium. This allows for more effective efficiency
@@ -35,10 +35,10 @@ Usage
    CreateSampleWorkspace(OutputWorkspace='mt', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=1.465e-07*exp(0.0733*4.76*x)', XUnit='wavelength', NumBanks=1, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
    CreateSampleWorkspace(OutputWorkspace='dep', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=0.0121*exp(-0.0733*10.226*x)', XUnit='wavelength', NumBanks=1, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
 
-   output = DepolarizedAnalyserTransmission("dep", "mt")
+   output = DepolarizedAnalyserTransmission("dep", "mt", OutputParameters="output_params")
 
-   print("PXD Value = " + str(output.column("Value")[0]) + ".")
-   print("T_E Value = " + str(output.column("Value")[1]) + ".")
+   print("PXD Value = " + str(mtd[output_params].column("Value")[0]) + ".")
+   print("T_E Value = " + str(mtd[output_params].column("Value")[1]) + ".")
 
 Output:
 
