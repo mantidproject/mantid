@@ -47,9 +47,10 @@ public:
     alg.setProperty("DepolarisedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputParameters", "__unused_for_child_2");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
+    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputParameters");
     TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_DELTA);
     TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_DELTA);
     TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_DELTA);
@@ -69,6 +70,7 @@ public:
     alg.setProperty("TEStartingValue", 1e50);
     alg.setProperty("PxDStartingValue", 1e50);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputParameters", "__unused_for_child_2");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
                             "Failed to fit to transmission workspace, : Changes in function value are too small");
     TS_ASSERT(!alg.isExecuted());
@@ -84,11 +86,11 @@ public:
     alg.setProperty("DepolarisedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputParameters", "__unused_for_child_2");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
                             "Failed to fit to transmission workspace, : Fit quality is too low (0.000000). You may "
                             "want to check that the correct monitor spectrum was provided.");
-    alg.isExecuted();
-    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(!alg.isExecuted());
   }
 
   void test_invalid_workspace_lengths() {
@@ -101,6 +103,7 @@ public:
     alg.setProperty("DepolarisedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputParameters", "__unused_for_child_2");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarisedWorkspace: The depolarised workspace must "
                             "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: The empty cell "
@@ -118,6 +121,7 @@ public:
     alg.setProperty("DepolarisedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputParameters", "__unused_for_child_2");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarisedWorkspace: The bins in the "
                             "DepolarisedWorkspace and EmptyCellWorkspace do not match.");

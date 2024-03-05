@@ -40,7 +40,6 @@ private:
   API::MatrixWorkspace_sptr calcDepolarisedProportion();
 
   /// Fit using UserFunction1D to find the pxd and transmission values.
-  API::ITableWorkspace_sptr calcWavelengthDependentTransmission(API::MatrixWorkspace_sptr const &inputWs,
-                                                                std::string const &outputWsName);
+  void calcWavelengthDependentTransmission(API::MatrixWorkspace_sptr const &inputWs, std::string const &outputWsName);
 };
 } // namespace Mantid::Algorithms

@@ -19,6 +19,7 @@ std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
+std::string_view constexpr OUTPUT_PARAMS{"OutputParameters"};
 } // namespace PropNames
 
 /// Initial fitting function values.
@@ -62,9 +63,12 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
-                  "The name of the output table workspace containing the fit parameter results.");
+                  "The name of the output workspace containing the calculated fit curves.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_PARAMS), "",
+                                                                       Kernel::Direction::Output),
+                  "The name of the table workspace containing the fit parameter results.");
   declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
                   "Starting value for the empty analyser cell transmission fit property " +
                       std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
@@ -97,9 +101,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
 
 void DepolarizedAnalyserTransmission::exec() {
   auto const &dividedWs = calcDepolarisedProportion();
-  ITableWorkspace_sptr const &fitParameterWs =
-      calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
-  setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitParameterWs);
+  calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
 }
 
 MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarisedProportion() {
@@ -112,9 +114,8 @@ MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarisedProportion(
   return divideAlg->getProperty(std::string(PropNames::OUTPUT_WORKSPACE));
 }
 
-ITableWorkspace_sptr
-DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
-                                                                     std::string const &outputWsName) {
+void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
+                                                                          std::string const &outputWsName) {
   auto funcStream = FitValues::createFunctionStrStream();
   funcStream << "," << FitValues::EMPTY_CELL_TRANS_NAME << "="
              << getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START));
@@ -127,7 +128,6 @@ DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorks
   fitAlg->setProperty("IgnoreInvalidData", true);
   fitAlg->setProperty("StartX", FitValues::START_X);
   fitAlg->setProperty("EndX", FitValues::END_X);
-  fitAlg->setProperty("OutputParametersOnly", true);
   fitAlg->setPropertyValue("Output", outputWsName);
   fitAlg->execute();
 
@@ -144,7 +144,10 @@ DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorks
                              ": Fit quality is too low (" + std::to_string(fitQuality) +
                              "). You may want to check that the correct monitor spectrum was provided.");
   }
-  return fitAlg->getProperty("OutputParameters");
+  ITableWorkspace_sptr const &paramWs = fitAlg->getProperty("OutputParameters");
+  MatrixWorkspace_sptr const &fitWs = fitAlg->getProperty("OutputWorkspace");
+  setProperty(std::string(PropNames::OUTPUT_PARAMS), paramWs);
+  setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitWs);
 }
 
 } // namespace Mantid::Algorithms
