@@ -68,9 +68,6 @@ qscintilla2:
 tbb:
   - 2021
 
-hdf5:
-  - 1.12.*
-
 gsl:
   - 2.7
 
