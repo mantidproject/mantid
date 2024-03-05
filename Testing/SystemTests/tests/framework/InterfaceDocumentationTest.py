@@ -21,6 +21,7 @@ INTERFACES_WITH_NO_DOCS = [
     "Powder Diffraction Reduction.rst",  # reduction application
     "DGS Reduction.rst",  # reduction application
     "HFIR 4Circle Reduction.rst",
+    "Garnet.rst",  # externally imported
 ]
 
 
