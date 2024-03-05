@@ -34,7 +34,7 @@ dependencies:
   - python=3.10.*
   - pyyaml>=5.4.1
   - qscintilla2
-  - qt=5.15.8 # Avoid unexpected qt upgrades
+  - qt==5.15.8 # Avoid unexpected qt upgrades
   - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
