@@ -11,19 +11,19 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 
 using Mantid::DataHandling::BankPulseTimes;
+typedef std::vector<Mantid::Types::Core::DateAndTime> PulseTimeVec;
 
 namespace {
+constexpr double SECONDS_DELTA{30.};
 const static Mantid::Types::Core::DateAndTime START_TIME(0., 0.);
-}
+} // namespace
 
 class BankPulseTimesTest : public CxxTest::TestSuite {
 private:
-  std::vector<Mantid::Types::Core::DateAndTime> createPulseTimes(const size_t length) {
-    constexpr double SECONDS_DELTA{30.};
-
-    std::vector<Mantid::Types::Core::DateAndTime> pulse_times;
+  PulseTimeVec createPulseTimes(const size_t length) {
+    PulseTimeVec pulse_times;
     for (size_t i = 0; i < length; ++i)
-      pulse_times.emplace_back(START_TIME + static_cast<double>(i) + SECONDS_DELTA);
+      pulse_times.emplace_back(START_TIME + (static_cast<double>(i) * SECONDS_DELTA));
 
     return pulse_times;
   }
@@ -49,6 +49,27 @@ public:
     BankPulseTimes bank_pulse_times(pulse_times);
 
     TS_ASSERT_EQUALS(bank_pulse_times.startTime, pulse_times[0].toISO8601String());
+    TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
+
+    for (std::size_t i = 0; i < pulse_times.size(); ++i) {
+      TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
+      TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FIRST_PERIOD);
+    }
+  }
+
+  void test_noPeriods_unsorted() {
+    // generate a sawtooth function for pulse times - smallest value is not at the beginning
+    PulseTimeVec pulse_times;
+    for (int offset = 20; offset >= 0; offset -= 10)
+      for (size_t i = 0; i < 33; ++i)
+        pulse_times.emplace_back(START_TIME + static_cast<double>(offset) + (static_cast<double>(i) * SECONDS_DELTA));
+
+    // cache the minimum value
+    const auto startTimeObj = std::min(pulse_times.cbegin(), pulse_times.cend());
+
+    BankPulseTimes bank_pulse_times(pulse_times);
+
+    TS_ASSERT_EQUALS(bank_pulse_times.startTime, startTimeObj->toISO8601String());
     TS_ASSERT_EQUALS(bank_pulse_times.numberOfPulses(), pulse_times.size());
 
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
