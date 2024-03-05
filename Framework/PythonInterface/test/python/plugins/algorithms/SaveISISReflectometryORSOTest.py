@@ -41,6 +41,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _SECOND_TRANS_COMMENT = "Second transmission run"
     _FLOOD_WS_COMMENT = "Flood correction workspace or file"
     _FLOOD_RUN_COMMENT = "Flood correction run file"
+    _CALIB_FILE_COMMENT = "Calibration file"
 
     # Algorithm names
     _SAVE_ALG = "SaveISISReflectometryORSO"
@@ -390,6 +391,31 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
         self._check_file_header(None, [filename])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_calibration_file_included_in_additional_files(self, mock_alg_histories):
+        filename = "calib_file.nxs"
+        test_path = Path(f"path/to/{filename}")
+        histories_to_create = [(self._REDUCTION_WORKFLOW_ALG, {"CalibrationFile": str(test_path)})]
+        ws = self._create_sample_workspace()
+
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header(
+            [self._get_expected_additional_file_metadata({filename: self._CALIB_FILE_COMMENT}, self._REDUCTION_HEADING)]
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_calibration_file_excluded_if_not_in_history(self, mock_alg_histories):
+        histories_to_create = [(self._REDUCTION_WORKFLOW_ALG, {"CalibrationFile": ""})]
+        ws = self._create_sample_workspace()
+        self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header(None, [self._CALIB_FILE_COMMENT])
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name=""):
         ws = CreateSampleWorkspace(InstrumentName=instrument_name)
