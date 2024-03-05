@@ -21,7 +21,7 @@ Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are separated from their respective categories by a "/".
 
-mantidqt.python_interfaces = ILL/DrILL.py ILL/Simple_Scan_Viewer.py Direct/DGS_Reduction.py Direct/DGS_Planner.py Direct/PyChop.py Direct/MSlice.py Direct/Shiver.py SANS/ORNL_SANS.py Utility/TOF_Converter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Diffraction/SNAPRed.py Utility/Filter_Events.py Diffraction/HFIR_4Circle_Reduction.py Utility/QE_Coverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Muon_Analysis.py General/Sample_Transmission_Calculator.py Direct/DNS_Reduction.py
+mantidqt.python_interfaces = ILL/DrILL.py ILL/Simple_Scan_Viewer.py Direct/DGS_Reduction.py Direct/DGS_Planner.py Direct/PyChop.py Direct/MSlice.py Direct/Shiver.py SANS/ORNL_SANS.py Utility/TOF_Converter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Diffraction/SNAPRed.py Utility/Filter_Events.py Diffraction/HFIR_4Circle_Reduction.py Utility/QE_Coverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Muon_Analysis.py General/Sample_Transmission_Calculator.py Direct/DNS_Reduction.py Diffraction/Garnet.py
 
 mantidqt.python_interfaces_io_registry = Engineering_Diffraction_register.py
 
