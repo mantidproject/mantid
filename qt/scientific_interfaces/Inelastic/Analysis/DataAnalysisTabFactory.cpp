@@ -25,6 +25,17 @@
 #include "IqtFitModel.h"
 #include "MSDFitModel.h"
 
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
+TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<TemplateSubTypes> subTypes) {
+  auto browserCustomizations = TemplateBrowserCustomizations();
+  browserCustomizations.templateSubTypes = std::move(subTypes);
+  return browserCustomizations;
+}
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces::IDA {
 
 DataAnalysisTabFactory::DataAnalysisTabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}

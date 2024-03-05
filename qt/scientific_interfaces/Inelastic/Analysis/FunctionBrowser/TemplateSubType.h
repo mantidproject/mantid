@@ -121,12 +121,6 @@ struct TemplateBrowserCustomizations {
   std::unique_ptr<TemplateSubTypes> templateSubTypes = nullptr;
 };
 
-static TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<TemplateSubTypes> subTypes) {
-  auto browserCustomizations = TemplateBrowserCustomizations();
-  browserCustomizations.templateSubTypes = std::move(subTypes);
-  return browserCustomizations;
-}
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
