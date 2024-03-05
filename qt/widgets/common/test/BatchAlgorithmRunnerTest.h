@@ -328,7 +328,7 @@ public:
     TS_ASSERT_EQUALS(args.at(0).toBool(), false);
   }
 
-  void test_cancelBatchWithQueue() {
+  void test_cancelBatch_before_executing_queue() {
     BatchAlgorithmRunner runner(nullptr);
 
     QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
@@ -344,11 +344,11 @@ public:
     runner.cancelBatch();
     runner.executeBatch();
 
-    // No algorithms are run if they were in the queue before we cancelled
-    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 0);
+    // All algorithms are run if cancelBatch() is called before execution has started
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(batchCancelledSpy.count(), 1);
-    TS_ASSERT_EQUALS(algStartSpy.count(), 0);
-    TS_ASSERT_EQUALS(algCompleteSpy.count(), 0);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 3);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 3);
     TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
   }
 
