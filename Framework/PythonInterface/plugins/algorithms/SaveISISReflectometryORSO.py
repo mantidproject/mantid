@@ -181,6 +181,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if flood_entry:
             dataset.add_measurement_additional_file(flood_entry[0], comment=flood_entry[1])
 
+        calib_file_entry = self._get_calibration_file_entry(reduction_workflow_histories)
+        if calib_file_entry:
+            dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
+
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
         Check if the experiment RB number can be found in the workspace logs.
@@ -343,6 +347,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
 
         return None
+
+    @staticmethod
+    def _get_calibration_file_entry(reduction_workflow_histories) -> Optional[str]:
+        """
+        Get the calibration file name from the reduction history.
+        """
+        calibration_file = reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
+        return Path(calibration_file).name if calibration_file else None
 
     def _get_reduction_script(self, ws) -> Optional[str]:
         """
