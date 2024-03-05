@@ -89,11 +89,12 @@ boost::optional<std::string> checkWorkspaceSpectrumSize(const MatrixWorkspace_co
 
 boost::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace,
                                                    const std::string &caller = "") {
-  if (workspace->getNumberHistograms() < 2)
+  if (workspace->getNumberHistograms() < 2) {
     if (caller != "")
       return caller + ": Can't plot with less than two histograms in  " + workspace->getName() + ".";
     else
       return "Plot Bins failed: There is only one data point to plot in " + workspace->getName() + ".";
+  }
   return boost::none;
 }
 
