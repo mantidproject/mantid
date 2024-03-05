@@ -65,6 +65,9 @@ private:
    * How far into the array of events the tof/detid are already. This is used when data is read in chunks.
    * It is generally taken from the zeroth element of the event_index array, but is also used for chunking by
    * pulse-time.
+   *
+   * Another way to think of this value is the offset into the tof/detid arrays from disk that are actually in memory.
+   * Because of this, all indices into the event arrays (tof/detid) have this value subtracted off.
    */
   std::size_t m_firstEventIndex;
 
@@ -76,7 +79,8 @@ private:
   std::size_t m_numEvents;
 
   /**
-   * Alternating values describe ranges of [use, don't). There will always be a gap between neighboring values.
+   * Alternating values describe ranges of [use, don't) of pulse index ranges. There will always be a gap between
+   * neighboring values.
    */
   std::vector<std::size_t> m_roi;
 

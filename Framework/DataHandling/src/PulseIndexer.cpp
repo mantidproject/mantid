@@ -21,14 +21,6 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   m_roi.push_back(this->determineFirstPulseIndex());
   // for now, use all pulses up to the end
   m_roi.push_back(this->determineLastPulseIndex());
-
-  /*
-  if (firstEventIndex > 0) { // REMOVE
-    std::stringstream msg;
-    msg << "firstEventIndex=" << firstEventIndex;
-    throw std::runtime_error(msg.str());
-  }
-  */
 }
 
 /**
@@ -96,10 +88,6 @@ size_t PulseIndexer::determineLastPulseIndex() const {
   return static_cast<size_t>(m_event_index->size() - std::distance(m_event_index->crbegin(), event_index_iter));
 }
 
-/**
- * This performs a linear search because it is much more likely that the index
- * to look for is at the beginning.
- */
 size_t PulseIndexer::getFirstPulseIndex() const { return m_roi.front(); }
 size_t PulseIndexer::getLastPulseIndex() const { return m_roi.back(); }
 
