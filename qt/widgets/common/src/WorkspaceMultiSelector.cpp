@@ -36,10 +36,6 @@ MatrixWorkspace_sptr getWorkspace(const std::string &name) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     const auto numberOfHistograms = workspace->getNumberHistograms();
