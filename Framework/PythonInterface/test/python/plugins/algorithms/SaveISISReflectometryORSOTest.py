@@ -9,6 +9,7 @@ import unittest
 import tempfile
 import numpy as np
 from unittest.mock import Mock, patch
+from pathlib import Path
 
 from mantid import config
 from mantid.simpleapi import (
@@ -33,14 +34,20 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _LOG_RB_NUMBER = "rb_proposal"
     _LOG_EXP_IDENTIFIER = "experiment_identifier"
     _LOG_RUN_NUM = "run_number"
+
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
+    _Q_UNIT = "MomentumTransfer"
+    _FIRST_TRANS_COMMENT = "First transmission run"
+    _SECOND_TRANS_COMMENT = "Second transmission run"
+    _FLOOD_WS_COMMENT = "Flood correction workspace or file"
+    _FLOOD_RUN_COMMENT = "Flood correction run file"
+
+    # Algorithm names
     _SAVE_ALG = "SaveISISReflectometryORSO"
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     _STITCH_ALG = "Stitch1DMany"
-    _Q_UNIT = "MomentumTransfer"
-    _FIRST_TRANS_COMMENT = "First transmission run"
-    _SECOND_TRANS_COMMENT = "Second transmission run"
+    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
 
     # Metadata headings
     _DATA_FILES_HEADING = "#     data_files:"
@@ -82,8 +89,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_file_populates_software_version_and_reduction_timestamp(self, mock_alg_histories):
         input_ws = self._create_sample_workspace()
-        history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"})
-        history.getChildHistories = Mock(return_value=[Mock()])
+        history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"}, [Mock()])
         history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
         mock_alg_histories.return_value = [history]
 
@@ -324,6 +330,67 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             ]
         )
 
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_flood_correction_ws_included_in_additional_files(self, mock_alg_histories):
+        test_cases = [
+            (Path("test/path_to/flood_file.nxs"), "flood_file.nxs"),
+            ("ws_name", "ws_name"),
+        ]
+        for flood_ws_param, expected_entry in test_cases:
+            with self.subTest(flood_ws_param=flood_ws_param, expected_entry=expected_entry):
+                ws = self._create_sample_workspace()
+                property_values = {
+                    "FloodCorrection": "Workspace",
+                    "FloodWorkspace": str(flood_ws_param),
+                }
+                self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
+
+                SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+                self._check_file_header(
+                    [self._get_expected_additional_file_metadata({expected_entry: self._FLOOD_WS_COMMENT}, self._REDUCTION_HEADING)]
+                )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_flood_correction_from_parameter_file_included_in_additional_files(self, mock_alg_histories):
+        flood_run_file = "flood_run.nxs"
+        test_path = Path(f"path/to/{flood_run_file}")
+        flood_history = self._create_mock_alg_history(self._CREATE_FLOOD_ALG, {"Filename": str(test_path)})
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [flood_history])
+        property_values = {
+            "FloodCorrection": "ParameterFile",
+            "FloodWorkspace": "",
+        }
+        history = self._create_mock_alg_history(self._REDUCTION_WORKFLOW_ALG, property_values, [red_history])
+        mock_alg_histories.return_value = [history]
+
+        ws = self._create_sample_workspace()
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header(
+            [self._get_expected_additional_file_metadata({flood_run_file: self._FLOOD_RUN_COMMENT}, self._REDUCTION_HEADING)]
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_flood_correction_excluded_if_not_in_history(self, mock_alg_histories):
+        filename = "test_file.nxs"
+        test_path = Path(f"path/to/{filename}")
+        child_history = self._create_mock_alg_history("test_alg", {"Filename": str(test_path)})
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [child_history])
+        property_values = {
+            "FloodCorrection": "ParameterFile",
+            "FloodWorkspace": "",
+        }
+        history = self._create_mock_alg_history(self._REDUCTION_WORKFLOW_ALG, property_values, [red_history])
+        mock_alg_histories.return_value = [history]
+
+        ws = self._create_sample_workspace()
+
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
+
+        self._check_file_header(None, [filename])
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name=""):
         ws = CreateSampleWorkspace(InstrumentName=instrument_name)
         self._set_units_as_momentum_transfer(ws)
@@ -361,11 +428,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         mock_alg_histories.return_value = histories
 
-    @staticmethod
-    def _create_mock_alg_history(alg_name, property_values):
+    def _create_mock_alg_history(self, alg_name, property_values, child_histories=None):
         history = Mock()
         history.name = Mock(return_value=alg_name)
-        history.getChildHistories = Mock(return_value=[])
+        history.getChildHistories = Mock(return_value=[]) if child_histories is None else Mock(return_value=child_histories)
+        if alg_name == self._REDUCTION_ALG:
+            history.executionDate = Mock(return_value=DateAndTime("2024-03-05T12:30:30.000000000"))
 
         def mock_get_property_value(key):
             try:

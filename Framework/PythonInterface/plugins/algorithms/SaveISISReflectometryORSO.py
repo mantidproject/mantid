@@ -337,9 +337,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             return Path(flood_name).name, "Flood correction workspace or file"
 
         # It's possible that a flood workspace was created as the first step in the reduction
-        flood_history = reduction_history.getChildHistories()[0]
-        if flood_history.name() == self._CREATE_FLOOD_ALG:
-            return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
+        if reduction_history:
+            flood_history = reduction_history.getChildHistories()[0]
+            if flood_history.name() == self._CREATE_FLOOD_ALG:
+                return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
 
         return None
 
