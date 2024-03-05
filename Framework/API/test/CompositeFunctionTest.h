@@ -148,14 +148,17 @@ public:
 
   // Override pure virtual functions.
   std::string name() const override { return "FunctionWithNDomains"; }
-
   double fwhm() const override { return 1; }
-  void setFwhm(const double w) override {}
-  void functionLocal(double *out, const double *xValues, const size_t nData) const override {}
+  void setFwhm(const double w) override { UNUSED_ARG(w); }
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+  }
   double centre() const override { return 1; }
   double height() const override { return 1; }
-  void setCentre(const double c) override {}
-  void setHeight(const double h) override {}
+  void setCentre(const double c) override { UNUSED_ARG(c); }
+  void setHeight(const double h) override { UNUSED_ARG(h); }
 
 private:
   size_t m_nDomains;
