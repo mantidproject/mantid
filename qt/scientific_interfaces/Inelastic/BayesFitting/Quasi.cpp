@@ -214,6 +214,11 @@ void Quasi::run() {
   long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long const resBins = m_properties["ResBinning"]->valueText().toLong();
 
+  // Construct an output name for the Fit group workspace
+  auto const resType = resName.substr(0, resName.size() - 3);
+  auto const programName = program == "Lorentzians" ? resType == "res" ? "QLr" : "QLd" : program;
+  m_outputFitGroup = sampleName.substr(0, sampleName.size() - 3) + programName + "_Fit";
+
   // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
   auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
 
@@ -223,7 +228,7 @@ void Quasi::run() {
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);
   runAlg->setProperty("ResolutionWorkspace", resName);
-  runAlg->setProperty("OutputWorkspaceFit", "fit");
+  runAlg->setProperty("OutputWorkspaceFit", m_outputFitGroup);
   runAlg->setProperty("OutputWorkspaceProb", "prob");
   runAlg->setProperty("OutputWorkspaceResult", "result");
   runAlg->setProperty("Elastic", elasticPeak);
@@ -282,32 +287,15 @@ void Quasi::updateMiniPlot() {
     g_log.warning(ex.what());
   }
 
-  // Update fit plot
-  QString program = m_uiForm.cbProgram->currentText();
-  if (program == "Lorentzians")
-    program = "QL";
-  else
-    program = "QSe";
-
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-
-  // Should be either "red", "sqw" or "res"
-  QString resType = resName.right(3);
-
-  // Get the correct workspace name based on the type of resolution file
-  if (program == "QL") {
-    if (resType == "res")
-      program += "r";
-    else
-      program += "d";
-  }
-
-  QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
-  if (!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
+  if (!AnalysisDataService::Instance().doesExist(m_outputFitGroup))
     return;
 
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+  auto const fitGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_outputFitGroup);
+  if (!fitGroup || fitGroup->getNumberOfEntries() == 0) {
+    return;
+  }
+
+  auto const outputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(fitGroup->getItem(0));
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
@@ -315,14 +303,14 @@ void Quasi::updateMiniPlot() {
     QString specName = QString::fromStdString(axis->label(histIndex));
     QColor curveColour;
 
-    if (specName.contains("fit.1"))
+    if (specName.contains("fit 1"))
       curveColour = Qt::red;
-    else if (specName.contains("fit.2"))
+    else if (specName.contains("fit 2"))
       curveColour = Qt::magenta;
 
-    else if (specName.contains("diff.1"))
+    else if (specName.contains("diff 1"))
       curveColour = Qt::blue;
-    else if (specName.contains("diff.2"))
+    else if (specName.contains("diff 2"))
       curveColour = Qt::cyan;
 
     else
