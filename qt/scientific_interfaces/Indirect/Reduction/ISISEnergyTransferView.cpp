@@ -205,71 +205,69 @@ void IETView::setOutputWorkspaces(std::vector<std::string> const &outputWorkspac
   m_outputWorkspaces = outputWorkspaces;
 }
 
-void IETView::setInstrumentDefault(InstrumentData const &instrumentDetails) {
-  auto const instrumentName = instrumentDetails.getInstrument();
-  auto const specMin = instrumentDetails.getDefaultSpectraMin();
-  auto const specMax = instrumentDetails.getDefaultSpectraMax();
-
-  m_uiForm.dsRunFiles->setInstrumentOverride(QString::fromStdString(instrumentName));
-
-  QStringList qens;
-  qens << "IRIS"
-       << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(QString::fromStdString(instrumentName)));
-
-  m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
-
-  m_uiForm.spSpectraMin->setMinimum(specMin);
-  m_uiForm.spSpectraMin->setMaximum(specMax);
+void IETView::setInstrumentSpectraRange(int specMin, int specMax) {
+  m_uiForm.spSpectraMin->setRange(specMin, specMax);
   m_uiForm.spSpectraMin->setValue(specMin);
 
-  m_uiForm.spSpectraMax->setMinimum(specMin);
-  m_uiForm.spSpectraMax->setMaximum(specMax);
+  m_uiForm.spSpectraMax->setRange(specMin, specMax);
   m_uiForm.spSpectraMax->setValue(specMax);
 
-  m_uiForm.spPlotTimeSpecMin->setMinimum(1);
-  m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMin->setRange(1, specMax);
   m_uiForm.spPlotTimeSpecMin->setValue(1);
 
-  m_uiForm.spPlotTimeSpecMax->setMinimum(1);
-  m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMax->setRange(1, specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
+}
 
-  m_uiForm.spEfixed->setValue(instrumentDetails.getDefaultEfixed());
+void IETView::setInstrumentRebinning(QStringList const &rebinParams, QString const &rebinText, bool checked,
+                                     int tabIndex) {
+  m_uiForm.ckDoNotRebin->setChecked(checked);
+  m_uiForm.cbRebinType->setCurrentIndex(tabIndex);
+  m_uiForm.spRebinLow->setValue(rebinParams[0].toDouble());
+  m_uiForm.spRebinWidth->setValue(rebinParams[1].toDouble());
+  m_uiForm.spRebinHigh->setValue(rebinParams[2].toDouble());
+  m_uiForm.leRebinString->setText(rebinText);
+}
 
-  auto const rebinDefault = QString::fromStdString(instrumentDetails.getDefaultRebin());
-  if (!rebinDefault.isEmpty()) {
-    m_uiForm.leRebinString->setText(rebinDefault);
-    m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = rebinDefault.split(",", Qt::SkipEmptyParts);
-    if (rbp.size() == 3) {
-      m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
-      m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
-      m_uiForm.spRebinHigh->setValue(rbp[2].toDouble());
-      m_uiForm.cbRebinType->setCurrentIndex(0);
-    } else {
-      m_uiForm.cbRebinType->setCurrentIndex(1);
-    }
-  } else {
-    m_uiForm.ckDoNotRebin->setChecked(true);
-    m_uiForm.spRebinLow->setValue(0.0);
-    m_uiForm.spRebinWidth->setValue(0.0);
-    m_uiForm.spRebinHigh->setValue(0.0);
-    m_uiForm.leRebinString->setText("");
-  }
+void IETView::setInstrumentGrouping(QString const &instrumentName) {
 
+  setGroupOutputCheckBoxVisible(instrumentName == "OSIRIS");
+  setGroupOutputDropdownVisible(instrumentName == "IRIS");
+
+  m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
   m_uiForm.cbGroupOutput->clear();
-
   m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::UNGROUPED));
   m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::GROUP));
   if (instrumentName == "IRIS") {
     m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::SAMPLECHANGERGROUPED));
   }
+}
 
-  m_uiForm.ckCm1Units->setChecked(instrumentDetails.getDefaultUseDeltaEInWavenumber());
-  m_uiForm.ckSaveNexus->setChecked(instrumentDetails.getDefaultSaveNexus());
-  m_uiForm.ckSaveASCII->setChecked(instrumentDetails.getDefaultSaveASCII());
-  m_uiForm.ckFold->setChecked(instrumentDetails.getDefaultFoldMultipleFrames());
+void IETView::setInstrumentEFixed(QString const &instrumentName, double eFixed) {
+  QStringList qens;
+  qens << "IRIS"
+       << "OSIRIS";
+  m_uiForm.spEfixed->setEnabled(qens.contains(instrumentName));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
+  m_uiForm.spEfixed->setValue(eFixed);
+}
+
+void IETView::setInstrumentSpecDefault(std::map<std::string, bool> &specMap) {
+  setBackgroundSectionVisible(specMap["irsORosiris"]);
+  setPlotTimeSectionVisible(specMap["irsORosiris"]);
+  setAclimaxSaveVisible(specMap["irsORosiris"]);
+  setFoldMultipleFramesVisible(specMap["irsORosiris"]);
+  setOutputInCm1Visible(specMap["irsORosiris"]);
+
+  setSPEVisible(specMap["toscaORtfxa"]);
+  setAnalysisSectionVisible(specMap["toscaORtfxa"]);
+  setCalibVisible(specMap["toscaORtfxa"]);
+  setEfixedVisible(specMap["toscaORtfxa"]);
+
+  m_uiForm.ckCm1Units->setChecked(specMap["defaultEUnits"]);
+  m_uiForm.ckSaveNexus->setChecked(specMap["defaultSaveNexus"]);
+  m_uiForm.ckSaveASCII->setChecked(specMap["defaultSaveASCII"]);
+  m_uiForm.ckFold->setChecked(specMap["defaultFoldMultiple"]);
 }
 
 void IETView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,

@@ -77,28 +77,38 @@ InstrumentData IETPresenter::getInstrumentData() {
 void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
-    m_view->setInstrumentDefault(instrumentDetails);
-    bool const iris = instrumentDetails.getInstrument() == "IRIS";
-    bool const osiris = instrumentDetails.getInstrument() == "OSIRIS";
-    bool const irisOrOsiris =
-        instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
-    bool const toscaOrTfxa =
-        instrumentDetails.getInstrument() == "TOSCA" || instrumentDetails.getInstrument() == "TFXA";
+    auto const instrumentName = QString::fromStdString(instrumentDetails.getInstrument());
 
-    m_view->setGroupOutputCheckBoxVisible(osiris);
-    m_view->setGroupOutputDropdownVisible(iris);
+    // spectraRange & Efixed
+    auto const specMin = instrumentDetails.getDefaultSpectraMin();
+    auto const specMax = instrumentDetails.getDefaultSpectraMax();
+    m_view->setInstrumentSpectraRange(specMin, specMax);
+    m_view->setInstrumentEFixed(instrumentName, instrumentDetails.getDefaultEfixed());
 
-    m_view->setBackgroundSectionVisible(!irisOrOsiris);
-    m_view->setPlotTimeSectionVisible(!irisOrOsiris);
-    m_view->setAclimaxSaveVisible(!irisOrOsiris);
-    m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
-    m_view->setOutputInCm1Visible(!irisOrOsiris);
+    // Rebinning
+    auto const rebinDefault = QString::fromStdString(instrumentDetails.getDefaultRebin());
+    QStringList rebinParams =
+        !rebinDefault.isEmpty() ? rebinDefault.split(",", Qt::SkipEmptyParts) : QStringList({"0", "0", "0"});
 
-    m_idrUI->showAnalyserAndReflectionOptions(!toscaOrTfxa);
-    m_view->setSPEVisible(!toscaOrTfxa);
-    m_view->setAnalysisSectionVisible(!toscaOrTfxa);
-    m_view->setCalibVisible(!toscaOrTfxa);
-    m_view->setEfixedVisible(!toscaOrTfxa);
+    int rebinTab = (int)(rebinParams.size() != 3);
+    std::cout << rebinDefault.toStdString() << "  rebin tab  " << rebinTab << std::endl;
+    QString rebinString = !rebinDefault.isEmpty() ? rebinDefault : QString("");
+    m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.isEmpty(), rebinTab);
+
+    // Grouping
+    m_view->setInstrumentGrouping(instrumentName);
+
+    // Instrument spec defaults
+    bool irsORosiris = instrumentName.contains(QRegularExpression("(^OSIRIS$)|(^IRIS$)"));
+    bool toscaORtfxa = instrumentName.contains(QRegularExpression("(^TOSCA$)|(^TFXA$)"));
+    m_idrUI->showAnalyserAndReflectionOptions(!toscaORtfxa);
+    std::map<std::string, bool> specMap{{"irsORosiris", !irsORosiris},
+                                        {"toscaORtfxa", !toscaORtfxa},
+                                        {"defaultEUnits", instrumentDetails.getDefaultUseDeltaEInWavenumber()},
+                                        {"defaultSaveNexus", instrumentDetails.getDefaultSaveNexus()},
+                                        {"defaultSaveASCII", instrumentDetails.getDefaultSaveASCII()},
+                                        {"defaultFoldMultiple", instrumentDetails.getDefaultFoldMultipleFrames()}};
+    m_view->setInstrumentSpecDefault(specMap);
   }
 }
 
