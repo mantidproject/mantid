@@ -188,7 +188,7 @@ pipeline {
             // conda packages unless 'none' is specified.
             expression { env.BUILD_PACKAGE != 'none' }
           }
-          agent { label 'linux-64' }
+          agent { label 'core-test-mantid-builder' }
           options {
               timestamps ()
               retry(3)
@@ -296,7 +296,7 @@ pipeline {
                   expression { env.BUILD_PACKAGE == 'all' }
               }
             }
-            agent { label "${PLATFORM}" }
+            agent { label 'core-test-mantidworkbench-builder' }
             options {
                 timestamps()
                 retry(3)
