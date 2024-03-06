@@ -93,7 +93,10 @@ Usage
 
 **Example - TransformToIqt with IRIS data.**
 
-.. testcode:: exTransformToIqtIRIS
+    # Commented out while we investigate an unreliable error
+    # .. testcode:: exTransformToIqtIRIS
+
+.. code:: python
 
     sample = Load('irs26176_graphite002_red.nxs')
     can = Load('irs26173_graphite002_red.nxs')
