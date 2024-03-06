@@ -34,7 +34,7 @@ class MANTIDQT_INELASTIC_DLL OutputPlotOptionsPresenter final : public IOutputPl
 public:
   OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
                              std::string const &fixedIndices = "",
-                             boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+                             std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   /// Used by the unit tests so that the view and model can be mocked
   OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
                              PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");

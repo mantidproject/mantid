@@ -81,23 +81,23 @@ void insertWorkspaceNames(std::vector<std::string> &allNames, std::string const 
   }
 }
 
-boost::optional<std::string> checkWorkspaceSpectrumSize(const MatrixWorkspace_const_sptr &workspace) {
+std::optional<std::string> checkWorkspaceSpectrumSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->y(0).size() < 2)
-    return "Plot Spectra failed: There is only one data point to plot in " + workspace->getName() + ".";
-  return boost::none;
+    return "There is only one data point to plot in " + workspace->getName() + ".";
+  return std::nullopt;
 }
 
-boost::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
+std::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->getNumberHistograms() < 2)
-    return "Plot Bins failed: There is only one data point to plot in " + workspace->getName() + ".";
-  return boost::none;
+    return "There is only one histogram in " + workspace->getName() + ".";
+  return std::nullopt;
 }
 
 std::map<std::string, std::string>
-constructActions(boost::optional<std::map<std::string, std::string>> const &availableActions) {
+constructActions(std::optional<std::map<std::string, std::string>> const &availableActions) {
   std::map<std::string, std::string> actions;
   if (availableActions)
-    actions = availableActions.get();
+    actions = availableActions.value();
   actions.insert({"Plot Spectra", "Plot Spectra"});
   actions.insert({"Plot Bins", "Plot Bins"});
   actions.insert({"Open Slice Viewer", "Open Slice Viewer"});
@@ -110,15 +110,15 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 namespace MantidQt::CustomInterfaces {
 
 OutputPlotOptionsModel::OutputPlotOptionsModel(
-    boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::make_unique<ExternalPlotter>()) {}
+    std::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(std::nullopt),
+      m_workspaceName(std::nullopt), m_plotter(std::make_unique<ExternalPlotter>()) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 OutputPlotOptionsModel::OutputPlotOptionsModel(
-    ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(plotter) {}
+    ExternalPlotter *plotter, std::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(std::nullopt),
+      m_workspaceName(std::nullopt), m_plotter(plotter) {}
 
 OutputPlotOptionsModel::~OutputPlotOptionsModel() = default;
 
@@ -131,9 +131,9 @@ bool OutputPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   return false;
 }
 
-boost::optional<std::string> OutputPlotOptionsModel::workspace() const { return m_workspaceName; }
+std::optional<std::string> OutputPlotOptionsModel::workspace() const { return m_workspaceName; }
 
-void OutputPlotOptionsModel::removeWorkspace() { m_workspaceName = boost::none; }
+void OutputPlotOptionsModel::removeWorkspace() { m_workspaceName = std::nullopt; }
 
 std::vector<std::string>
 OutputPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const {
@@ -145,7 +145,7 @@ OutputPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &wor
 
 void OutputPlotOptionsModel::setUnit(std::string const &unit) { m_unit = unit; }
 
-boost::optional<std::string> OutputPlotOptionsModel::unit() { return m_unit; }
+std::optional<std::string> OutputPlotOptionsModel::unit() { return m_unit; }
 
 std::string OutputPlotOptionsModel::formatIndices(std::string const &indices) const {
   return formatIndicesString(indices);
@@ -164,16 +164,16 @@ bool OutputPlotOptionsModel::setIndices(std::string const &indices) {
   if (valid)
     m_workspaceIndices = indices;
   else
-    m_workspaceIndices = boost::none;
+    m_workspaceIndices = std::nullopt;
   return valid;
 }
 
-boost::optional<std::string> OutputPlotOptionsModel::indices() const { return m_workspaceIndices; }
+std::optional<std::string> OutputPlotOptionsModel::indices() const { return m_workspaceIndices; }
 
 bool OutputPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
-  if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.get())) {
-    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
+  if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.value())) {
+    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.value())) {
       if (axisType == MantidAxis::Spectrum)
         return validateSpectra(matrixWs, indices);
       return validateBins(matrixWs, indices);
@@ -213,14 +213,15 @@ void OutputPlotOptionsModel::plotSpectra() {
   auto const unitName = unit();
 
   if (workspaceName && indicesString) {
-    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
-    m_plotter->plotSpectra(plotWorkspaceName, indicesString.get(), SettingsHelper::externalPlotErrorBars());
+    std::string plotWorkspaceName =
+        unitName ? convertUnit(workspaceName.value(), unitName.value()) : workspaceName.value();
+    m_plotter->plotSpectra(plotWorkspaceName, indicesString.value(), SettingsHelper::externalPlotErrorBars());
   }
 }
 
 void OutputPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
-    m_plotter->plotBins(workspaceName.get(), binIndices, SettingsHelper::externalPlotErrorBars());
+    m_plotter->plotBins(workspaceName.value(), binIndices, SettingsHelper::externalPlotErrorBars());
 }
 
 void OutputPlotOptionsModel::showSliceViewer() {
@@ -228,7 +229,8 @@ void OutputPlotOptionsModel::showSliceViewer() {
   auto const unitName = unit();
 
   if (workspaceName) {
-    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
+    std::string plotWorkspaceName =
+        unitName ? convertUnit(workspaceName.value(), unitName.value()) : workspaceName.value();
     m_plotter->showSliceViewer(plotWorkspaceName);
   }
 }
@@ -237,26 +239,37 @@ void OutputPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), SettingsHelper::externalPlotErrorBars());
+    m_plotter->plotTiled(workspaceName.value(), indicesString.value(), SettingsHelper::externalPlotErrorBars());
 }
 
-boost::optional<std::string> OutputPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
+std::optional<std::string> OutputPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
   if (auto const workspaceName = workspace())
-    return checkWorkspaceSize(workspaceName.get(), axisType);
-  return boost::none;
+    return checkWorkspaceSize(workspaceName.value(), axisType);
+  return std::nullopt;
 }
 
-boost::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
-                                                                        MantidAxis const &axisType) const {
+std::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
+                                                                      MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
-      if (axisType == MantidAxis::Spectrum)
-        return checkWorkspaceSpectrumSize(matrixWs);
-      return checkWorkspaceBinSize(matrixWs);
+      if (axisType == MantidAxis::Spectrum) {
+        auto msg = checkWorkspaceSpectrumSize(matrixWs);
+        return msg.has_value() ? "Plot Spectra Failed: " + msg.value() : msg;
+      } else if (axisType == MantidAxis::Bin) {
+        auto msg = checkWorkspaceBinSize(matrixWs);
+        return msg.has_value() ? "Plot Bins Failed: " + msg.value() : msg;
+      } else {
+        auto msg1 = checkWorkspaceBinSize(matrixWs).value_or("");
+        auto msg2 = checkWorkspaceSpectrumSize(matrixWs).value_or("");
+        if (!msg1.empty() || !msg2.empty())
+          return "Open Slice viewer failed: " + msg1 + " " + msg2;
+        else
+          return std::nullopt;
+      }
     }
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 std::map<std::string, std::string> OutputPlotOptionsModel::availableActions() const { return m_actions; }

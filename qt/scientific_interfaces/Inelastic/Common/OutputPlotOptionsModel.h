@@ -11,8 +11,7 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <boost/none_t.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 using namespace MantidQt::Widgets::MplCpp;
 
@@ -21,10 +20,10 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INELASTIC_DLL OutputPlotOptionsModel {
 public:
-  OutputPlotOptionsModel(boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+  OutputPlotOptionsModel(std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   /// Used by the unit tests so that m_plotter can be mocked
   OutputPlotOptionsModel(ExternalPlotter *plotter,
-                         boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+                         std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   virtual ~OutputPlotOptionsModel();
 
   virtual bool setWorkspace(std::string const &workspaceName);
@@ -32,26 +31,26 @@ public:
 
   virtual std::vector<std::string> getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const;
 
-  boost::optional<std::string> workspace() const;
+  std::optional<std::string> workspace() const;
 
   virtual void setFixedIndices(std::string const &indices);
   virtual bool indicesFixed() const;
 
   virtual void setUnit(std::string const &unit);
-  boost::optional<std::string> unit();
+  std::optional<std::string> unit();
 
   virtual std::string formatIndices(std::string const &indices) const;
   virtual bool validateIndices(std::string const &indices, MantidAxis const &axisType = MantidAxis::Spectrum) const;
   virtual bool setIndices(std::string const &indices);
 
-  boost::optional<std::string> indices() const;
+  std::optional<std::string> indices() const;
 
   virtual void plotSpectra();
   virtual void plotBins(std::string const &binIndices);
   virtual void plotTiled();
   virtual void showSliceViewer();
 
-  boost::optional<std::string> singleDataPoint(MantidAxis const &axisType) const;
+  std::optional<std::string> singleDataPoint(MantidAxis const &axisType) const;
 
   std::map<std::string, std::string> availableActions() const;
 
@@ -60,13 +59,13 @@ private:
   bool validateBins(const Mantid::API::MatrixWorkspace_sptr &workspace, std::string const &bins) const;
   std::string convertUnit(const std::string &workspaceName, const std::string &unit);
 
-  boost::optional<std::string> checkWorkspaceSize(std::string const &workspaceName, MantidAxis const &axisType) const;
+  std::optional<std::string> checkWorkspaceSize(std::string const &workspaceName, MantidAxis const &axisType) const;
 
   std::map<std::string, std::string> m_actions;
   bool m_fixedIndices;
-  boost::optional<std::string> m_workspaceIndices;
-  boost::optional<std::string> m_workspaceName;
-  boost::optional<std::string> m_unit;
+  std::optional<std::string> m_workspaceIndices;
+  std::optional<std::string> m_workspaceName;
+  std::optional<std::string> m_unit;
   std::unique_ptr<ExternalPlotter> m_plotter;
 };
 

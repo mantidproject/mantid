@@ -57,10 +57,10 @@ void createWorkspaceGroup(std::vector<std::string> const &workspaceNames, std::s
 }
 
 std::map<std::string, std::string>
-constructActions(boost::optional<std::map<std::string, std::string>> const &availableActions) {
+constructActions(std::optional<std::map<std::string, std::string>> const &availableActions) {
   std::map<std::string, std::string> actions;
   if (availableActions)
-    actions = availableActions.get();
+    actions = availableActions.value();
   if (actions.find("Plot Spectra") == actions.end())
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
@@ -131,7 +131,7 @@ public:
 
     TS_ASSERT(m_model->setWorkspace(WORKSPACE_NAME));
     TS_ASSERT(m_model->workspace());
-    TS_ASSERT_EQUALS(m_model->workspace().get(), WORKSPACE_NAME);
+    TS_ASSERT_EQUALS(m_model->workspace().value(), WORKSPACE_NAME);
   }
 
   void test_that_setWorkspace_will_not_set_the_workspace_if_the_workspace_provided_does_not_exist_in_the_ADS() {
@@ -161,7 +161,7 @@ public:
 
     TS_ASSERT(m_model->indicesFixed());
     TS_ASSERT(m_model->indices());
-    TS_ASSERT_EQUALS(m_model->indices().get(), WORKSPACE_INDICES);
+    TS_ASSERT_EQUALS(m_model->indices().value(), WORKSPACE_INDICES);
   }
 
   void test_that_setFixedIndices_will_not_set_the_indices_as_being_fixed_if_the_indices_are_empty() {
@@ -242,7 +242,7 @@ public:
 
     TS_ASSERT(m_model->setIndices(WORKSPACE_INDICES));
     TS_ASSERT(m_model->indices());
-    TS_ASSERT_EQUALS(m_model->indices().get(), WORKSPACE_INDICES);
+    TS_ASSERT_EQUALS(m_model->indices().value(), WORKSPACE_INDICES);
   }
 
   void test_that_setIndices_will_not_set_the_indices_if_they_are_invalid() {
@@ -320,6 +320,14 @@ public:
   }
 
   void
+  test_that_singleDataPoint_will_return_a_no_error_message_if_the_workspace_has_more_than_one_data_points_to_open_slice_viewer() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(!m_model->singleDataPoint(MantidAxis::Both));
+  }
+
+  void
   test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_a_single_data_point_to_plot_for_spectrum() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 1));
     m_model->setWorkspace(WORKSPACE_NAME);
@@ -335,8 +343,31 @@ public:
     TS_ASSERT(m_model->singleDataPoint(MantidAxis::Bin));
   }
 
+  void
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_histogram_to_open_slice_viewer() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(1, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(m_model->singleDataPoint(MantidAxis::Both));
+  }
+
+  void test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_to_open_slice_viewer() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 1));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(m_model->singleDataPoint(MantidAxis::Both));
+  }
+
+  void
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_and_one_histogram_to_open_slice_viewer() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(1, 1));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(m_model->singleDataPoint(MantidAxis::Both));
+  }
+
   void test_that_availableActions_will_return_the_default_actions_when_none_are_set() {
-    TS_ASSERT_EQUALS(m_model->availableActions(), constructActions(boost::none));
+    TS_ASSERT_EQUALS(m_model->availableActions(), constructActions(std::nullopt));
   }
 
   void test_that_availableActions_will_return_the_correct_actions_when_they_have_been_set() {
