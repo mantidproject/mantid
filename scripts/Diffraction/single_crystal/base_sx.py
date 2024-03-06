@@ -665,7 +665,7 @@ class BaseSX(ABC):
                         patch = Circle((0, 0), radii[imax] / box_lengths[imax], facecolor="none", edgecolor="r", ls="--")
                         ax.add_patch(patch)
                         # add background shell
-                        if np.all(bg_outer_radii > 1e-10):
+                        if not np.allclose(bg_outer_radii, 0.0):
                             patch = Circle(
                                 (0, 0), bg_outer_radii[imax] / box_lengths[imax], facecolor="none", edgecolor=3 * [0.7]
                             )  # outer radius
@@ -720,7 +720,7 @@ class BaseSX(ABC):
         cen = getattr(pk, frame_to_peak_centre_attr)()
         cen = np.matmul(evecs.T, np.array(cen) + translation)
         # get extents
-        box_lengths = bg_outer_radii if np.all(bg_outer_radii > 1e-10) else radii
+        box_lengths = bg_outer_radii if not np.allclose(bg_outer_radii, 0.0) else radii
         box_lengths = box_lengths * extent
         extents = np.vstack((cen - box_lengths, cen + box_lengths))
         # get nbins along each axis
@@ -768,10 +768,7 @@ class BaseSX(ABC):
         # copied from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid - can't import here though
         # convert shape_info dict from sphere to ellipsoid for plotting
         for key in ["radius", "background_inner_radius", "background_outer_radius"]:
-            if key in shape_info:
-                shape_info[f"{key}{0}"] = shape_info.pop(key)
-            else:
-                shape_info[f"{key}{0}"] = 0.0  # null value
+            shape_info[f"{key}{0}"] = shape_info.pop(key) if key in shape_info else 0.0
             for idim in [1, 2]:
                 shape_info[f"{key}{idim}"] = shape_info[f"{key}{0}"]
         # add axes along basis vecs of frame and set 0 translation
