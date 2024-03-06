@@ -575,6 +575,51 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.update_ws_fit_function_parameters(self.model.dataset_names[1:], [1.0, 2.0])
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), ([1.0, 2.0], [0.0, 0.0]))
 
+    def test_remove_non_existing_global_parameters_will_remove_non_existing_ties(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        # Add a non-existing parameter as a global parameter
+        self.model.fitting_context.global_parameters = ["f0.A0"]
+
+        self.model._remove_non_existing_global_parameters()
+
+        self.assertEqual([], self.model.fitting_context.global_parameters)
+
+    def test_remove_non_existing_global_parameters_will_not_remove_existing_ties(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        # Add an existing parameter as a global parameter
+        self.model.fitting_context.global_parameters = ["A0"]
+
+        self.model._remove_non_existing_global_parameters()
+
+        self.assertEqual(["A0"], self.model.fitting_context.global_parameters)
+
+    def test_add_global_ties_to_simultaneous_function_will_remove_non_existing_ties_before_adding_ties(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        # Add a non-existing parameter as a global parameter
+        self.model.fitting_context.global_parameters = ["f0.A0"]
+
+        # There should be no error on this line
+        self.model._add_global_ties_to_simultaneous_function()
+
+        self.assertEqual([], self.model.fitting_context.global_parameters)
+
+    def test_add_global_ties_to_simultaneous_function_will_raise_assertion_if_the_simultaneous_function_is_none(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = None
+        self.model.simultaneous_fitting_mode = True
+
+        with self.assertRaisesRegex(AssertionError, "This method assumes the simultaneous fit function is not None."):
+            self.model._add_global_ties_to_simultaneous_function()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,7 +32,7 @@ repos:
         # Exclude sphinx / template file
         exclude: test_doctest.py|python_export_maker.py
       - id: mantid-release-note-check
-        files: docs\/source\/release\/v\d\.\d\.\d\/.*\/.*\.rst
+        files: docs\/source\/release\/v\d+\.\d+\.\d+\/.*\/.*\.rst
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13

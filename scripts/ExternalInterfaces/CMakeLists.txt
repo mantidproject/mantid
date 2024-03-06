@@ -1,7 +1,7 @@
 # # Fetch any externally-managed interfaces include(ExternalProject)
 
 # # mslice set(_mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/src/mslice) externalproject_add( mslice PREFIX
-# ${_mslice_external_root} GIT_REPOSITORY "https://github.com/mantidproject/mslice.git" GIT_TAG
+# ${_mslice_external_root} UPDATE_DISCONNECTED "false" GIT_REPOSITORY "https://github.com/mantidproject/mslice.git" GIT_TAG
 # be452d09a15b120282eac7691e116b2e87e50e8d EXCLUDE_FROM_ALL 1 CONFIGURE_COMMAND "" BUILD_COMMAND "" TEST_COMMAND ""
 # INSTALL_COMMAND "" ) message(STATUS "Fetching/updating mslice") execute_process( COMMAND ${CMAKE_COMMAND} ARGS -P
 # ${_mslice_external_root}/tmp/mslice-gitclone.cmake RESULT_VARIABLE _exit_code ) if(_exit_code EQUAL 0)

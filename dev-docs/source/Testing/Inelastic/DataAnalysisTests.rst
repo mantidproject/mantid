@@ -16,13 +16,13 @@ MSD Fit tab
 
 *Preparation*
 
--  The ``_eq.nxs`` file from the :ref:`Elwin Indirect Inelastic <elwin_indirect_test>` test
+-  The ``_eq.nxs`` file from the :ref:`Elwin Indirect Inelastic <elwin_inelastic_test>` test
 
 **Time required 3 - 5 minutes**
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Analysis``
 #. Go to the ``MSD fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``File`` click browse and select the file that you saved in the previous test
@@ -41,13 +41,13 @@ I(Q, T) Fit tab
 
 *Preparation*
 
--  The ``_iqt`` workspace from the :ref:`I(Q, T) Indirect Inelastic <iqt_indirect_test>` test
+-  The ``_iqt`` workspace from the :ref:`I(Q, T) Indirect Inelastic <iqt_inelastic_test>` test
 
 **Time required 3 - 5 minutes**
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Analysis``
 #. Go to the ``I(Q, T) Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``Workspace`` select the ``_iqt`` workspace from the previous test
@@ -75,7 +75,7 @@ Conv Fit tab
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Analysis``
 #. Go to the ``Conv Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box's set to ``File``
@@ -110,7 +110,7 @@ F(Q) Fit tab
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Analysis``
 #. Go to the ``F(Q) Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``Workspace`` select the ``0-5__Result`` workspace from the previous test

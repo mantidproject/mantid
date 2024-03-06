@@ -85,8 +85,8 @@ class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
   void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
     const std::string wsName = "test_filtering";
-    const double filterStart = 1;
-    const double filterEnd = 1000;
+    constexpr double filterStart = 1;
+    constexpr double filterEnd = 1000;
 
     LoadEventNexus ld;
     ld.initialize();
@@ -95,6 +95,7 @@ private:
     ld.setProperty("FilterByTimeStart", filterStart);
     ld.setProperty("FilterByTimeStop", filterEnd);
     ld.setProperty("MetaDataOnly", metadataonly);
+    ld.setProperty("NumberOfBins", 1); // only one bin to make validation easier
 
     TS_ASSERT(ld.execute());
 
@@ -110,6 +111,48 @@ private:
     auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size() - 1);
     TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000", filteredLogStartTime.toSimpleString());
     TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540", filteredLogEndTime.toSimpleString());
+
+    // check the events themselves
+    const auto NUM_HIST = outWs->getNumberHistograms();
+    TS_ASSERT_EQUALS(NUM_HIST, 51200); // observed value
+    if (metadataonly) {
+      // check that no events were created
+      TS_ASSERT_EQUALS(outWs->getNumberEvents(), 0);
+    } else {
+      // total number of events
+      TS_ASSERT_EQUALS(outWs->getNumberEvents(), 110969); // observed value
+
+      // check some particular spectra - observed values
+      TS_ASSERT_EQUALS(outWs->getSpectrum(0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(2).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(5).getNumberEvents(), 4);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(7).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(11).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(13).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(17).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(29).getNumberEvents(), 1);
+      constexpr size_t bank2offset = 128 * 12; // half way into bank2
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 2).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 5).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 7).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 11).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 13).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 17).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 29).getNumberEvents(), 1);
+      constexpr size_t bank4offset = 128 * 8 * 4 + 128 * 4; // half way into bank4
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 2).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 5).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 7).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 11).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 13).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 17).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 29).getNumberEvents(), 3);
+    }
   }
 
   void validate_pulse_time_sorting(EventWorkspace_sptr eventWS) {
@@ -310,6 +353,93 @@ public:
     TS_ASSERT(eventWS);
     const double duration = eventWS->mutableRun().getPropertyValueAsType<double>("duration");
     TS_ASSERT_DELTA(duration, 7200.012, 0.01);
+  }
+
+  void test_wallclock_filtering() {
+    const std::string wsName("test_wallclock_filtering");
+    const std::string filename("EQSANS_89157.nxs.h5");
+    constexpr double filterStart{200}; // seconds
+    constexpr double filterEnd{5000};  // seconds
+    constexpr size_t NUM_HIST{49152};  // observed value
+
+    // number of events - all are observed
+    constexpr size_t NUM_EVENTS_FULL{14553};
+    constexpr size_t NUM_EVENTS_BEGIN{366};
+    constexpr size_t NUM_EVENTS_END{4353};
+
+    { // first time is unfiltered
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL);
+    }
+
+    { // filter only the beginning
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN);
+    }
+
+    { // filter only the end
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_END);
+    }
+
+    { // filter both
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN - NUM_EVENTS_END);
+    }
+
+    // cleanup assumes the the last one of these worked
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void test_Normal_vs_Precount() {

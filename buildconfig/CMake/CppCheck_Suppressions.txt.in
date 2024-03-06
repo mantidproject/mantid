@@ -1207,8 +1207,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProperti
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:404
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:294
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmHistoryWindow.cpp:716
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/BatchAlgorithmRunner.cpp:116
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/BatchAlgorithmRunner.cpp:208
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SlicingAlgorithm.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.cpp:83

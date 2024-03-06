@@ -126,6 +126,10 @@ private:
   bool executeBatchAsyncImpl(const Poco::Void & /*unused*/);
   /// Sets up and executes an algorithm
   bool executeAlgo(const IConfiguredAlgorithm_sptr &algorithm);
+  /// Post a poco notification
+  void postNotification(Poco::Notification *notification);
+  // Sets cancel requested flag
+  void setCancelRequested(bool const cancel);
 
   /// Handlers for notifications
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
@@ -145,7 +149,9 @@ private:
 
   /// User has requested to cancel processing
   bool m_cancelRequested;
-  std::recursive_mutex m_mutex;
+  std::recursive_mutex m_executeMutex;
+  std::recursive_mutex m_cancelMutex;
+  std::recursive_mutex m_notificationMutex;
   void resetState();
   bool cancelRequested();
 
