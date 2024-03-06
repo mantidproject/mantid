@@ -54,7 +54,7 @@ Usage
 
 .. testoutput:: exampleFindSXPeaksConvolve
 
-    Found 307 peaks
+    Found 261 peaks
 
 
 .. categories::

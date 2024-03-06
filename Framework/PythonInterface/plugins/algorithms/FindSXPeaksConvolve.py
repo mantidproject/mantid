@@ -21,7 +21,7 @@ from mantid.kernel import (
     logger,
 )
 import numpy as np
-from scipy.ndimage import label, maximum_position, binary_closing, sum_labels
+from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d
 from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 
@@ -157,6 +157,8 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
 
             with np.errstate(divide="ignore", invalid="ignore"):
                 intens_over_sig = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
+                intens_over_sig[~np.isfinite(intens_over_sig)] = 0
+                intens_over_sig = uniform_filter1d(intens_over_sig, size=3, axis=2, mode="nearest")
 
             # find peaks above threshold I/sigma
             pk_mask = intens_over_sig > threshold_i_over_sig

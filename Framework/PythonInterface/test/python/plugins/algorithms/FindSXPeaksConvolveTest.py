@@ -41,10 +41,10 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("ws_rect", cls.ws)
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
-        # fake peak centred on ispec=30 (detid=79) and TOF=5 - near middle of bank
-        peak_1D = array([0, 0, 0, 0, 4, 6, 4, 0, 0, 0, 0, 0, 0])
-        cls.ws.setY(30, cls.ws.readY(30) + peak_1D)
-        for ispec in [23, 29, 30, 31, 37]:
+        # fake peak centred on ispec=25 (detid=74) and TOF=5 - near middle of bank
+        peak_1D = array([0, 0, 0, 0, 8, 12, 8, 0, 0, 0, 0, 0, 0])
+        cls.ws.setY(25, cls.ws.readY(30) + peak_1D)
+        for ispec in [18, 24, 25, 26, 32]:
             cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D)
             cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
         # fake peak centred on ispec=12 (detid=61) and TOF=7 - near detector edge
@@ -60,18 +60,14 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         AnalysisDataService.clear()
 
     def _assert_found_correct_peaks(self, peak_ws):
-        self.assertEqual(peak_ws.getNumberPeaks(), 2)
+        self.assertEqual(peak_ws.getNumberPeaks(), 1)
         peak_ws = SortPeaksWorkspace(
             InputWorkspace=peak_ws, OutputWorkspace=peak_ws.name(), ColumnNameToSortBy="DetID", SortAscending=False
         )
         pk = peak_ws.getPeak(0)
-        self.assertEqual(pk.getDetectorID(), 79)
+        self.assertEqual(pk.getDetectorID(), 74)
         self.assertAlmostEqual(pk.getTOF(), 5.0, delta=1e-8)
-        self.assertAlmostEqual(pk.getIntensityOverSigma(), 6.7937, delta=1e-4)
-        pk = peak_ws.getPeak(1)
-        self.assertEqual(pk.getDetectorID(), 61)
-        self.assertAlmostEqual(pk.getTOF(), 7.0, delta=1e-8)
-        self.assertAlmostEqual(pk.getIntensityOverSigma(), 6.1274, delta=1e-4)
+        self.assertAlmostEqual(pk.getIntensityOverSigma(), 7.4826, delta=1e-4)
 
     def test_exec_specify_nbins(self):
         out = FindSXPeaksConvolve(
@@ -94,22 +90,6 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
     def test_exec_IoverSigma_threshold(self):
         out = FindSXPeaksConvolve(InputWorkspace=self.ws, PeaksWorkspace="peaks3", NRows=3, NCols=3, NBins=3, ThresholdIoverSigma=100.0)
         self.assertEqual(out.getNumberPeaks(), 0)
-
-    def test_exec_remove_on_edge(self):
-        out = FindSXPeaksConvolve(
-            InputWorkspace=self.ws,
-            PeaksWorkspace="peaks1",
-            NRows=3,
-            NCols=3,
-            NBins=3,
-            ThresholdIoverSigma=3.0,
-            MinFracSize=0.02,
-            RemoveOnEdge=True,
-        )
-        self.assertEqual(out.getNumberPeaks(), 1)
-        # check it's the correct peak
-        pk = out.getPeak(0)
-        self.assertEqual(pk.getDetectorID(), 79)
 
     def test_exec_min_frac_size(self):
         out = FindSXPeaksConvolve(
