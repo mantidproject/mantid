@@ -4,14 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence
+from typing import Sequence, Optional
 import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
-from mantid.api import FunctionFactory, AnalysisDataService as ADS
+from mantid.api import FunctionFactory, AnalysisDataService as ADS, IMDEventWorkspace, IPeaksWorkspace, IPeak
 from mantid.kernel import logger, SpecialCoordinateSystem
 from FindGoniometerFromUB import getSignMaxAbsValInCol
-from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
+from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter, PeakShape
 from os import path
 from json import loads as json_loads
 from matplotlib.pyplot import subplots, close
@@ -619,7 +619,14 @@ class BaseSX(ABC):
         )
 
     @staticmethod
-    def plot_integrated_peaks_MD(wsMD, peaks, filename, nbins_max=21, extent=1.5, log_norm=True):
+    def plot_integrated_peaks_MD(
+        wsMD: IMDEventWorkspace,
+        peaks: IPeaksWorkspace,
+        filename: str,
+        nbins_max: Optional[int] = 21,
+        extent: Optional[float] = 1.5,
+        log_norm: Optional[bool] = True,
+    ):
         """
         :param wsMD:  MD workspace to plot
         :param peaks: integrated peaks using IntegratePeaksMD
@@ -697,7 +704,9 @@ class BaseSX(ABC):
             )
 
     @staticmethod
-    def _bin_MD_around_peak(wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr):
+    def _bin_MD_around_peak(
+        wsMD: IMDEventWorkspace, pk: IPeak, peak_shape: PeakShape, nbins_max: int, extent: float, frame_to_peak_centre_attr: str
+    ):
         """
         Bin MD workspace in peak region with projection axes given by the axes of the ellipsoid shape
         :param wsMD: MD workspace (with 3 dims)
@@ -746,7 +755,7 @@ class BaseSX(ABC):
         return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax
 
     @staticmethod
-    def _get_ellipsoid_params_from_peak(peak_shape, ndims):
+    def _get_ellipsoid_params_from_peak(peak_shape: PeakShape, ndims: int):
         shape_info = json_loads(peak_shape.toJSON())
         if peak_shape.shapeName().lower() == "spherical":
             BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
@@ -764,7 +773,7 @@ class BaseSX(ABC):
         return radii, bg_inner_radii, bg_outer_radii, evecs, translation
 
     @staticmethod
-    def _convert_spherical_representation_to_ellipsoid(shape_info):
+    def _convert_spherical_representation_to_ellipsoid(shape_info: dict):
         # copied from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid - can't import here though
         # convert shape_info dict from sphere to ellipsoid for plotting
         for key in ["radius", "background_inner_radius", "background_outer_radius"]:
