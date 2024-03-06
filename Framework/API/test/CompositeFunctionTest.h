@@ -1359,7 +1359,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getAttribute("NumDeriv").asBool(), true);
   }
 
-  void test_set_attribute_thorws_if_attribute_not_recongized() {
+  void test_set_attribute_throws_if_attribute_not_recongized() {
     auto mfun = std::make_unique<CompositeFunction>();
     auto gauss = std::make_shared<Gauss<true>>();
     auto background = std::make_shared<Linear<true>>();
