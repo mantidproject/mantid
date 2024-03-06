@@ -7,6 +7,8 @@
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/Divide.h"
@@ -20,6 +22,7 @@ std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
+std::string_view constexpr OUTPUT_COV_MATRIX{"OutputCovarianceMatrix"};
 } // namespace PropNames
 
 /// Initial fitting function values.
@@ -69,6 +72,9 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       std::string(PropNames::OUTPUT_FIT), "", Kernel::Direction::Output, PropertyMode::Optional),
                   "The name of the workspace containing the calculated fit curve.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      std::string(PropNames::OUTPUT_COV_MATRIX), "", Kernel::Direction::Output, PropertyMode::Optional),
+                  "The name of the table workspace containing the normalised covariance matrix from the fit.");
   declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
                   "Starting value for the empty analyser cell transmission fit property " +
                       std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
@@ -151,6 +157,38 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
     MatrixWorkspace_sptr const &fitWs = fitAlg->getProperty("OutputWorkspace");
     setProperty(std::string(PropNames::OUTPUT_FIT), fitWs);
   }
+
+  if (!getPropertyValue(std::string(PropNames::OUTPUT_COV_MATRIX)).empty()) {
+    ITableWorkspace_sptr const &normCovMatrix = fitAlg->getProperty("OutputNormalisedCovarianceMatrix");
+    calcNonNormCovarianceMatrix(normCovMatrix, paramWs);
+  }
+}
+
+void DepolarizedAnalyserTransmission::calcNonNormCovarianceMatrix(ITableWorkspace_sptr const &normCovMatrix,
+                                                                  ITableWorkspace_sptr const &paramsWs) {
+  auto const &T_EError = paramsWs->getColumn("Error")->toDouble(0);
+  auto const &pxdError = paramsWs->getColumn("Error")->toDouble(1);
+
+  // Diagonal terms given by s_ii = (err_i)^2 where s_ii is the non-normalised matrix.
+  auto const &covMatrix_00 = std::pow(T_EError, 2);
+  auto const &covMatrix_11 = std::pow(pxdError, 2);
+
+  // Off-diagonal terms given by s_ij = n_ij * sqrt(s_ii * s_jj)/100
+  auto const &scaleFactor = std::sqrt(covMatrix_00 * covMatrix_11) / 100.0;
+  // Column indexes are increased by 1 to account for the "Name" column.
+  auto const &covMatrix_01 = normCovMatrix->getColumn(2)->toDouble(0) * scaleFactor;
+  auto const &covMatrix_10 = normCovMatrix->getColumn(1)->toDouble(1) * scaleFactor;
+
+  // Make a TableWorkspace, which matches the original normalised one's format.
+  auto covMatrix = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  covMatrix->addColumn("str", "Name");
+  covMatrix->addColumn("double", std::string(FitValues::EMPTY_CELL_TRANS_NAME));
+  covMatrix->addColumn("double", std::string(FitValues::DEPOL_OPACITY_NAME));
+  TableRow row = covMatrix->appendRow();
+  row << std::string(FitValues::EMPTY_CELL_TRANS_NAME) << covMatrix_00 << covMatrix_01;
+  row = covMatrix->appendRow();
+  row << std::string(FitValues::DEPOL_OPACITY_NAME) << covMatrix_10 << covMatrix_11;
+  setProperty(std::string(PropNames::OUTPUT_COV_MATRIX), covMatrix);
 }
 
 } // namespace Mantid::Algorithms

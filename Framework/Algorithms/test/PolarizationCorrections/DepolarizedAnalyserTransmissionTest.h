@@ -19,6 +19,13 @@ constexpr double PXD_ERROR = 467.994241;
 constexpr double T_E_DELTA = 1e-1;
 constexpr double PXD_DELTA = 1e-5;
 constexpr double COST_FUNC_MAX = 5e-15;
+
+constexpr double T_E_COV = 680586304785150.26;
+constexpr double PXD_COV = 219018.61;
+constexpr double PXD_COV_DELTA = 1e-5;
+constexpr double OFF_DIAG_COV = 11828693410.21;
+constexpr double COV_DELTA = 1;
+
 } // namespace
 
 using Mantid::Algorithms::CreateSampleWorkspace;
@@ -90,6 +97,37 @@ public:
     TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_DELTA);
     TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
     TS_ASSERT_EQUALS(fitWs->getNumberHistograms(), 3);
+  }
+
+  void test_covariance_matrix_is_output_when_optional_prop_set() {
+    // GIVEN
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
+    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+    DepolarizedAnalyserTransmission alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+
+    // WHEN
+    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("EmptyCellWorkspace", mtWs);
+    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    alg.setPropertyValue("OutputCovarianceMatrix", "__unused_for_child");
+    alg.execute();
+
+    // THEN
+    TS_ASSERT(alg.isExecuted());
+    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
+    Mantid::API::ITableWorkspace_sptr const &covWs = alg.getProperty("OutputCovarianceMatrix");
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_DELTA);
+    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(0), T_E_COV, COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(1), OFF_DIAG_COV, COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(0), OFF_DIAG_COV, COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(1), PXD_COV, PXD_COV_DELTA);
   }
 
   void test_failed_fit() {
