@@ -642,7 +642,6 @@ class BaseSX(ABC):
         # loop over peaks and plot
         try:
             with PdfPages(filename) as pdf:
-                ws_cut = None
                 for ipk, pk in enumerate(peaks):
                     peak_shape = pk.getPeakShape()
                     if peak_shape.shapeName().lower() == "none":
@@ -691,9 +690,6 @@ class BaseSX(ABC):
                     fig.tight_layout()
                     pdf.savefig(fig)
                     close(fig)
-
-                if ws_cut is not None:
-                    mantid.DeleteWorkspace(ws_cut)
         except OSError:
             raise RuntimeError(
                 f"OutputFile ({filename}) could not be opened - please check it is not open by "
@@ -745,6 +741,7 @@ class BaseSX(ABC):
             OutputExtents=extents.flatten(order="F"),
             OutputBins=nbins.astype(int),
             EnableLogging=False,
+            StoreInADS=False,
         )
         return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax
 
