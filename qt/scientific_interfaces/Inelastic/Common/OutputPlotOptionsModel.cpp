@@ -254,7 +254,7 @@ std::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::strin
   if (ads.doesExist(workspaceName)) {
     if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
       if (axisType == MantidAxis::Spectrum) {
-        auto msg = checkWorkspaceBinSize(matrixWs);
+        auto msg = checkWorkspaceSpectrumSize(matrixWs);
         return msg.has_value() ? "Plot Spectra Failed: " + msg.value() : msg;
       } else if (axisType == MantidAxis::Bin) {
         auto msg = checkWorkspaceBinSize(matrixWs);
