@@ -702,22 +702,25 @@ class BaseSX(ABC):
 
     @staticmethod
     def _bin_MD_around_peak(wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr):
-        shape_info = json_loads(peak_shape.toJSON())
-        if peak_shape.shapeName().lower() == "spherical":
-            BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
-        # get radii
-        radii = np.array([shape_info[f"radius{iax}"] for iax in range(3)])
-        bg_inner_radii = np.array([shape_info[f"background_inner_radius{iax}"] for iax in range(3)])
-        bg_outer_radii = np.array([shape_info[f"background_outer_radius{iax}"] for iax in range(3)])
-        isort = np.argsort(radii)
-        imax = isort[-1]
-        # eignevectors of ellipsoid
-        evecs = np.zeros((3, 3))
-        for iax in range(len(radii)):
-            evec = np.array([float(elem) for elem in shape_info[f"direction{iax}"].split()])
-            evecs[:, iax] = evec / np.linalg.norm(evec)
-        # center and translation
-        translation = np.array([shape_info[f"translation{iax}"] for iax in range(3)])
+        """
+        Bin MD workspace in peak region with projection axes given by the axes of the ellipsoid shape
+        :param wsMD: MD workspace (with 3 dims)
+        :param pk: Peak object that has been integrated
+        :param peak_shape: shape of integrated peak (spherical, ellipsoid or none)
+        :param nbins_max: number of bins along the major axis of the ellipsoid
+        :param extent: extent of output MD workspace along each dimension in units of the outer background radius
+        :param frame_to_peak_centre_attr: name of attribute to return peak centre in appropriate frame
+        :return ws_cut: MD workspace in peak region
+        :return radii: radii of the ellipsoid peak region
+        :return bg_inner_radii: inner background radii of the ellipsoid peak region
+        :return bg_outer_radii: outer background radii of the ellipsoid peak region
+        :return box_lengths: length of each dimension in the MD workspace
+        :return: imax: index of dimension with largest radius
+        """
+        ndims = wsMD.getNumDims()
+        radii, bg_inner_radii, bg_outer_radii, evecs, translation = BaseSX._get_ellipsoid_params_from_peak(peak_shape, ndims)
+        imax = np.argmax(radii)
+        # calc center in frame of ellipsoid axes
         cen = getattr(pk, frame_to_peak_centre_attr)()
         cen = np.matmul(evecs.T, np.array(cen) + translation)
         # get extents
@@ -725,11 +728,12 @@ class BaseSX(ABC):
         box_lengths = box_lengths * extent
         extents = np.vstack((cen - box_lengths, cen + box_lengths))
         # get nbins along each axis
-        nbins = np.array([int(nbins_max * radii[iax] / radii[imax]) for iax in range(len(radii))])
+        nbins = np.array([int(nbins_max * radii[iax] / radii[imax]) for iax in range(ndims)])
         # ensure minimum of 3 bins inside radius along each dim
-        min_nbins_in_radius = np.min(nbins * radii / box_lengths)
-        if min_nbins_in_radius < 3:
-            nbins = nbins * 3 / min_nbins_in_radius
+        min_nbins_in_radius = 3
+        nbins_in_radius = np.min(nbins * radii / box_lengths)  # along most coarsely binned dimension
+        if nbins_in_radius < min_nbins_in_radius:
+            nbins = nbins * min_nbins_in_radius / nbins_in_radius
         # call BinMD
         ws_cut = mantid.BinMD(
             InputWorkspace=wsMD,
@@ -743,6 +747,24 @@ class BaseSX(ABC):
             EnableLogging=False,
         )
         return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax
+
+    @staticmethod
+    def _get_ellipsoid_params_from_peak(peak_shape, ndims):
+        shape_info = json_loads(peak_shape.toJSON())
+        if peak_shape.shapeName().lower() == "spherical":
+            BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
+        # get radii
+        radii = np.array([shape_info[f"radius{iax}"] for iax in range(ndims)])
+        bg_inner_radii = np.array([shape_info[f"background_inner_radius{iax}"] for iax in range(ndims)])
+        bg_outer_radii = np.array([shape_info[f"background_outer_radius{iax}"] for iax in range(ndims)])
+        # eignevectors of ellipsoid
+        evecs = np.zeros((ndims, ndims))
+        for iax in range(ndims):
+            evec = np.array([float(elem) for elem in shape_info[f"direction{iax}"].split()])
+            evecs[:, iax] = evec / np.linalg.norm(evec)
+        # get translation in frame of wsMD
+        translation = np.array([shape_info[f"translation{iax}"] for iax in range(ndims)])
+        return radii, bg_inner_radii, bg_outer_radii, evecs, translation
 
     @staticmethod
     def _convert_spherical_representation_to_ellipsoid(shape_info):
