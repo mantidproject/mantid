@@ -159,6 +159,54 @@ const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t i
 
 //----------------------------------------------------------------------------------------------
 
+std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
+                                                    const Mantid::Types::Core::DateAndTime &stop) const {
+  std::vector<size_t> roi;
+  if (this->arePulseTimesIncreasing()) {
+    const bool includeStart = start <= this->pulseTimes.front();
+    const bool includeStop = stop >= this->pulseTimes.back();
+    if (!(includeStart && includeStop)) {
+      // get start index
+      if (includeStart) {
+        roi.push_back(0);
+      } else {
+        // do a linear search with the assumption that the index will be near the beginning
+        for (size_t index = 0; index < this->pulseTimes.size(); ++index) {
+          if (this->pulseTime(index) >= start) {
+            roi.push_back(index);
+            break;
+          }
+        }
+      }
+      // get stop index
+      if (includeStop) {
+        roi.push_back(this->pulseTimes.size());
+      } else {
+        const auto start_index = roi.front();
+        // do a linear search with the assumption that the index will be near the beginning
+        for (size_t index = this->pulseTimes.size() - 1; index > start_index; --index) {
+          if (this->pulseTime(index) <= stop) {
+            roi.push_back(index);
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    throw std::runtime_error("BankPulseTimes::getPulseIndicies() is not implemented for unsorted pulse times");
+  }
+
+  if ((!roi.empty()) && (roi.size() % 2 != 0)) {
+    std::stringstream msg;
+    msg << "Invalid state for ROI. Has odd number of values: " << roi.size();
+    throw std::runtime_error(msg.str());
+  }
+
+  return roi;
+}
+
+//----------------------------------------------------------------------------------------------
+
 /** Comparison. Is this bank's pulse times array the same as another one.
  *
  * @param otherNumPulse :: number of pulses in the OTHER bank event_time_zero.

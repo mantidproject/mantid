@@ -44,7 +44,8 @@ public:
   static void destroySuite(BankPulseTimesTest *suite) { delete suite; }
 
   void test_noPeriods() {
-    const auto pulse_times = createPulseTimes(100);
+    constexpr size_t NUM_TIMES{100};
+    const auto pulse_times = createPulseTimes(NUM_TIMES);
 
     BankPulseTimes bank_pulse_times(pulse_times);
 
@@ -54,6 +55,72 @@ public:
     for (std::size_t i = 0; i < pulse_times.size(); ++i) {
       TS_ASSERT_EQUALS(bank_pulse_times.pulseTime(i), pulse_times[i]);
       TS_ASSERT_EQUALS(bank_pulse_times.periodNumber(i), BankPulseTimes::FIRST_PERIOD);
+    }
+
+    // roi - include everything
+    {
+      const auto start = pulse_times.front() - SECONDS_DELTA;
+      const auto stop = pulse_times.back() + SECONDS_DELTA;
+
+      // past both ends
+      auto roi = bank_pulse_times.getPulseIndices(start, stop);
+      TS_ASSERT(roi.empty());
+
+      // at the front and past the end
+      roi = bank_pulse_times.getPulseIndices(pulse_times.front(), stop);
+      TS_ASSERT(roi.empty());
+
+      // before the front and at the end
+      roi = bank_pulse_times.getPulseIndices(start, pulse_times.back());
+      TS_ASSERT(roi.empty());
+    }
+
+    // roi - trim from the front
+    {
+      const auto start = pulse_times.front() + 2. * SECONDS_DELTA;
+      const auto stop = pulse_times.back() + SECONDS_DELTA;
+
+      // parameterize values to check - all have the same roi result
+      std::vector<Mantid::Types::Core::DateAndTime> starting({start, start - .5 * SECONDS_DELTA});
+      std::vector<Mantid::Types::Core::DateAndTime> stopping({stop, pulse_times.back()});
+
+      const size_t start_index_exp = 2;
+      const size_t stop_index_exp = pulse_times.size();
+
+      for (const auto &startVal : starting) {
+        for (const auto &stopVal : stopping) {
+          auto roi = bank_pulse_times.getPulseIndices(startVal, stopVal);
+          TS_ASSERT_EQUALS(roi.size(), 2);
+          if (!roi.empty()) {
+            TS_ASSERT_EQUALS(roi.front(), start_index_exp);
+            TS_ASSERT_EQUALS(roi.back(), stop_index_exp);
+          }
+        }
+      }
+    }
+
+    // roi - trim from the back
+    {
+      const auto start = pulse_times.front() - SECONDS_DELTA;
+      const auto stop = pulse_times.back() - 2. * SECONDS_DELTA;
+
+      // parameterize values to check - all have the same roi result
+      std::vector<Mantid::Types::Core::DateAndTime> starting({start, pulse_times.front()});
+      std::vector<Mantid::Types::Core::DateAndTime> stopping({stop, stop + .5 * SECONDS_DELTA});
+
+      const size_t start_index_exp = 0;
+      const size_t stop_index_exp = pulse_times.size() - 3;
+
+      for (const auto &startVal : starting) {
+        for (const auto &stopVal : stopping) {
+          auto roi = bank_pulse_times.getPulseIndices(startVal, stopVal);
+          TS_ASSERT_EQUALS(roi.size(), 2);
+          if (!roi.empty()) {
+            TS_ASSERT_EQUALS(roi.front(), start_index_exp);
+            TS_ASSERT_EQUALS(roi.back(), stop_index_exp);
+          }
+        }
+      }
     }
   }
 

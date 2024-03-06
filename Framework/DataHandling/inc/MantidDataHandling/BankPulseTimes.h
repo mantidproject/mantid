@@ -47,6 +47,15 @@ public:
   /// The wall clock time of the pulse
   const Mantid::Types::Core::DateAndTime &pulseTime(const size_t index) const;
 
+  /**
+   * Return a vector of [include,exclude) indices into the pulse vectors that are between the start and stop times. This
+   * is very similar to the behavior of Mantid::Kernel::TimeROI.
+   *
+   * This will return an empty vector if all pulse indices are between the start and stop.
+   */
+  std::vector<size_t> getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
+                                      const Mantid::Types::Core::DateAndTime &stop) const;
+
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 
