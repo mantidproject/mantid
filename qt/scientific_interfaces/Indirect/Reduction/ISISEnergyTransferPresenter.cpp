@@ -91,7 +91,6 @@ void IETPresenter::setInstrumentDefault() {
         !rebinDefault.isEmpty() ? rebinDefault.split(",", Qt::SkipEmptyParts) : QStringList({"0", "0", "0"});
 
     int rebinTab = (int)(rebinParams.size() != 3);
-    std::cout << rebinDefault.toStdString() << "  rebin tab  " << rebinTab << std::endl;
     QString rebinString = !rebinDefault.isEmpty() ? rebinDefault : QString("");
     m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.isEmpty(), rebinTab);
 
