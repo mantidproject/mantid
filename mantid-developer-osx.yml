@@ -6,7 +6,7 @@ channels:
 dependencies:
   - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
-  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
+  - cmake>=3.21.0
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
   - euphonic>=1.2.1,<2.0
@@ -16,13 +16,13 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
-  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.26 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed, v0.3.25/26 causing a system test failure.
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed, v0.3.25 causing a system test failure.
   - librdkafka>=1.6.0
   - muparser>=2.3.2
   - matplotlib=3.7.*
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.22,<1.25
+  - numpy>=1.23,<1.26
   - occt
   - pip>=21.0.1
   - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
@@ -38,7 +38,7 @@ dependencies:
   - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
-  - scipy>=1.10.0,!=1.12.0 # 1.12.0 causing unit test failures due to tanh not being found.
+  - scipy>=1.10.0
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme=>0.8.1
@@ -48,11 +48,11 @@ dependencies:
   - versioningit>=2.1
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.12.1
+  - cppcheck==2.13.1
   - pre-commit>=2.12.0
   - libcxx
   - joblib
-  - orsopy
+  - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 
   # Use conda version of clang to get matching CXXFLAGS.
   # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml

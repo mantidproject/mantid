@@ -6,7 +6,7 @@ channels:
 dependencies:
   - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
-  - cmake>=3.21.0,<3.27.0 # Avoid bug in 3.20.* and 3.27.* with updating external projects
+  - cmake>=3.21.0
   - conda-wrappers
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
@@ -22,7 +22,7 @@ dependencies:
   - matplotlib=3.7.*
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.22,<1.25
+  - numpy>=1.23,<1.26
   - occt
   - conda-wrappers
   - pip>=21.0.1
@@ -38,7 +38,7 @@ dependencies:
   - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
-  - scipy>=1.10.0,!=1.12.0 # 1.12.0 causing unit test failures due to tanh not being found.
+  - scipy>=1.10.0
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme=>0.8.1
@@ -47,7 +47,7 @@ dependencies:
   - versioningit>=2.1
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.12.1
+  - cppcheck==2.13.1
   - pre-commit>=2.12.0
   - joblib
-  - orsopy
+  - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.

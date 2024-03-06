@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -538,7 +538,7 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
     if (!params.empty()) {
       double res = params[0];
 
-      const auto energyRange = getXRangeFromWorkspace(ws);
+      const auto energyRange = WorkspaceUtils::getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
       double minScaleFactor = 10.0;
       double maxScaleFactor = 10.0;

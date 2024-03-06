@@ -12,6 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
+#include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 #include "Analysis/IIndirectFitDataView.h"
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
 #include "Analysis/IIndirectFitOutputOptionsView.h"
@@ -254,6 +256,97 @@ public:
   MOCK_METHOD1(setResolutionFBSuffices, void(const QStringList &suffices));
 
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+};
+
+class MockFunctionTemplateView : public FunctionTemplateView {
+public:
+  virtual ~MockFunctionTemplateView() = default;
+
+  MOCK_METHOD1(setFunction, void(std::string const &funStr));
+  MOCK_CONST_METHOD0(getGlobalFunction, IFunction_sptr());
+  MOCK_CONST_METHOD0(getFunction, IFunction_sptr());
+  MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_METHOD1(setDatasets, void(const QList<FunctionModelDataset> &datasets));
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
+  MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const IFunction &fun));
+  MOCK_METHOD1(setCurrentDataset, void(int i));
+  MOCK_METHOD0(getCurrentDataset, int());
+  MOCK_METHOD1(updateParameterNames, void(const QMap<int, std::string> &parameterNames));
+  MOCK_METHOD1(setGlobalParametersQuiet, void(std::vector<std::string> const &globals));
+  MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
+  MOCK_METHOD1(setBackgroundA0, void(double value));
+  MOCK_METHOD2(setResolution, void(std::string const &name, WorkspaceID const &index));
+  MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
+  MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
+  // protected Slots
+  MOCK_METHOD1(parameterChanged, void(QtProperty *));
+  MOCK_METHOD1(parameterButtonClicked, void(QtProperty *));
+  // Private methods
+  MOCK_METHOD0(createProperties, void());
+};
+
+class MockFunctionTemplatePresenter : public ITemplatePresenter {
+public:
+  MockFunctionTemplatePresenter(MockFunctionTemplateView *view) : m_view(view) {}
+  virtual ~MockFunctionTemplatePresenter() = default;
+
+  FunctionTemplateView *browser() override { return m_view; }
+
+  MOCK_METHOD0(init, void());
+  MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
+
+  MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_METHOD0(getCurrentDataset, int());
+
+  MOCK_METHOD1(setFitType, void(std::string const &name));
+
+  MOCK_METHOD1(setFunction, void(std::string const &funStr));
+  MOCK_CONST_METHOD0(getGlobalFunction, Mantid::API::IFunction_sptr());
+  MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
+
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
+  MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
+  MOCK_METHOD2(setGlobal, void(std::string const &parameterName, bool on));
+
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::IFunction &fun));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::ITableWorkspace &table));
+  MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &fun));
+
+  MOCK_METHOD1(setCurrentDataset, void(int i));
+  MOCK_METHOD1(setDatasets, void(const QList<MantidQt::MantidWidgets::FunctionModelDataset> &datasets));
+
+  MOCK_CONST_METHOD0(getEstimationDataSelector, EstimationDataSelector());
+  MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
+  MOCK_METHOD0(estimateFunctionParameters, void());
+
+  MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
+
+  MOCK_METHOD1(setNumberOfExponentials, void(int nExponentials));
+  MOCK_METHOD1(setStretchExponential, void(bool on));
+  MOCK_METHOD1(setBackground, void(std::string const &name));
+  MOCK_METHOD1(tieIntensities, void(bool on));
+  MOCK_CONST_METHOD0(canTieIntensities, bool());
+
+  MOCK_METHOD2(setSubType, void(std::size_t subTypeIndex, int typeIndex));
+  MOCK_METHOD1(setDeltaFunction, void(bool on));
+  MOCK_METHOD1(setTempCorrection, void(bool on));
+  MOCK_METHOD1(setBackgroundA0, void(double value));
+  MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
+  MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
+
+  MOCK_METHOD1(handleEditLocalParameter, void(std::string const &parameterName));
+  MOCK_METHOD2(handleParameterValueChanged, void(std::string const &parameterName, double value));
+  MOCK_METHOD5(handleEditLocalParameterFinished,
+               void(std::string const &parameterName, QList<double> const &values, QList<bool> const &fixes,
+                    QStringList const &ties, QStringList const &constraints));
+
+private:
+  FunctionTemplateView *m_view;
 };
 
 class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {

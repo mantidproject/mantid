@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
@@ -20,12 +22,6 @@
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
-
-namespace {
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
@@ -221,13 +217,12 @@ void IETPresenter::plotRawComplete(bool error) {
 void IETPresenter::notifySaveClicked() {
   IETSaveData saveData = m_view->getSaveData();
   for (auto const &workspaceName : m_outputWorkspaces)
-    if (doesExistInADS(workspaceName))
+    if (WorkspaceUtils::doesExistInADS(workspaceName))
       m_model->saveWorkspace(workspaceName, saveData);
 }
 
-void IETPresenter::notifySaveCustomGroupingClicked() {
+void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrouping) {
   InstrumentData instrumentData = getInstrumentData();
-  std::string customGrouping = m_view->getCustomGrouping();
 
   if (!customGrouping.empty()) {
     m_model->createGroupingWorkspace(instrumentData.getInstrument(), instrumentData.getAnalyser(), customGrouping,
@@ -236,7 +231,7 @@ void IETPresenter::notifySaveCustomGroupingClicked() {
     m_view->displayWarning("The custom grouping is empty.");
   }
 
-  if (doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
+  if (WorkspaceUtils::doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
     auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     m_view->showSaveCustomGroupingDialog(IETGroupingConstants::GROUPING_WS_NAME,
                                          IETGroupingConstants::DEFAULT_GROUPING_FILENAME, saveDirectory);
@@ -258,8 +253,9 @@ void IETPresenter::notifyRunFinished() {
 void IETPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ISISEnergyTransfer");
-  auto fbSuffixes = filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName);
-  auto wsSuffixes = filter ? getCalibrationWSSuffixes(tabName) : noSuffixes;
+  auto fbSuffixes =
+      filter ? InterfaceUtils::getCalibrationFBSuffixes(tabName) : InterfaceUtils::getCalibrationExtensions(tabName);
+  auto wsSuffixes = filter ? InterfaceUtils::getCalibrationWSSuffixes(tabName) : noSuffixes;
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }

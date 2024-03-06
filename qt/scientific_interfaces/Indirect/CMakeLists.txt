@@ -1,4 +1,5 @@
 set(SRC_FILES
+    Common/DetectorGroupingOptions.cpp
     Common/IndirectInstrumentConfig.cpp
     Diffraction/IndirectDiffractionReduction.cpp
     Reduction/IndirectDataReduction.cpp
@@ -23,6 +24,7 @@ set(SRC_FILES
 )
 
 set(MOC_FILES
+    Common/DetectorGroupingOptions.h
     Common/IndirectInstrumentConfig.h
     Diffraction/IndirectDiffractionReduction.h
     Reduction/IndirectDataReduction.h
@@ -49,6 +51,7 @@ set(INC_FILES
 )
 
 set(UI_FILES
+    Common/DetectorGroupingOptions.ui
     Common/IndirectInstrumentConfig.ui
     Diffraction/IndirectDiffractionReduction.ui
     Reduction/IndirectDataReduction.ui

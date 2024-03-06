@@ -6,24 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitAddWorkspaceDialog.h"
 
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
 #include <boost/optional.hpp>
 #include <utility>
 
 namespace {
 using namespace Mantid::API;
-
-MatrixWorkspace_sptr getWorkspace(const std::string &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
+using namespace MantidQt::CustomInterfaces;
 
 boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
@@ -41,7 +32,9 @@ QString getIndexString(const MatrixWorkspace_sptr &workspace) {
   return "";
 }
 
-QString getIndexString(const std::string &workspaceName) { return getIndexString(getWorkspace(workspaceName)); }
+QString getIndexString(const std::string &workspaceName) {
+  return getIndexString(WorkspaceUtils::getADSWorkspace(workspaceName));
+}
 
 std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
   return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
@@ -112,7 +105,7 @@ void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
 
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
-  if (validWorkspace(name) && state == Qt::Checked) {
+  if (WorkspaceUtils::doesExistInADS(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   } else
@@ -121,7 +114,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
 
 void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
-  const auto workspace = getWorkspace(name);
+  const auto workspace = WorkspaceUtils::getADSWorkspace(name);
   if (workspace)
     setWorkspace(name);
   else

@@ -9,9 +9,9 @@
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
+#include "FunctionTemplatePresenter.h"
 #include "SingleFunctionTemplateModel.h"
 #include <QMap>
-#include <QWidget>
 
 class QtProperty;
 
@@ -22,64 +22,31 @@ class EditLocalParameterDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class SingleFunctionTemplateBrowser;
+class SingleFunctionTemplateView;
 
-/**
- * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
- * and set properties that can be used to generate a fit function.
- *
- */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
-                                           std::unique_ptr<SingleFunctionTemplateModel> functionModel);
-  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
-  void setFitType(std::string const &name);
+  using FunctionTemplatePresenter::updateMultiDatasetParameters;
 
-  void init();
+  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateView *view,
+                                           std::unique_ptr<SingleFunctionTemplateModel> model);
 
-  void setNumberOfDatasets(int);
-  int getNumberOfDatasets() const;
-  int getCurrentDataset();
-  void setFunction(std::string const &funStr);
-  IFunction_sptr getGlobalFunction() const;
-  IFunction_sptr getFunction() const;
-  std::vector<std::string> getGlobalParameters() const;
-  std::vector<std::string> getLocalParameters() const;
-  void setGlobalParameters(std::vector<std::string> const &globals);
-  void setGlobal(std::string const &parameterName, bool on);
-  void updateMultiDatasetParameters(const IFunction &fun);
-  void updateParameters(const IFunction &fun);
-  void setCurrentDataset(int i);
-  void setDatasets(const QList<FunctionModelDataset> &datasets);
-  void setErrorsEnabled(bool enabled);
-  EstimationDataSelector getEstimationDataSelector() const;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void estimateFunctionParameters();
+  SingleFunctionTemplateView *view() const;
+  SingleFunctionTemplateModel *model() const;
 
-signals:
-  void functionStructureChanged();
+  void init() override;
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
 
-private slots:
-  void editLocalParameter(std::string const &parameterName);
-  void editLocalParameterFinish(int result);
-  void viewChangedParameterValue(std::string const &parameterName, double value);
+  void setFitType(std::string const &name) override;
 
-private:
-  QStringList getDatasetNames() const;
-  QStringList getDatasetDomainNames() const;
-  double getLocalParameterValue(std::string const &parameterName, int i) const;
-  bool isLocalParameterFixed(std::string const &parameterName, int i) const;
-  std::string getLocalParameterTie(std::string const &parameterName, int i) const;
-  std::string getLocalParameterConstraint(std::string const &parameterName, int i) const;
-  void setLocalParameterValue(std::string const &parameterName, int i, double value);
-  void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed);
-  void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);
-  void updateView();
-  SingleFunctionTemplateBrowser *m_view;
-  std::unique_ptr<SingleFunctionTemplateModel> m_model;
-  EditLocalParameterDialog *m_editLocalParameterDialog;
+  void setFunction(std::string const &funStr) override;
+
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
+
+protected:
+  void updateView() override;
 };
 
 } // namespace IDA

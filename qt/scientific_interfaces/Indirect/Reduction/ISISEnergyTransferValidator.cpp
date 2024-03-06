@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferValidator.h"
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -21,11 +21,6 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &ou
   loader->setProperty("OutputWorkspace", outputName);
   return loader;
 }
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -70,7 +65,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
         errors.push_back("Background Start must be less than Background End");
       }
 
-      auto tempWs = getADSMatrixWorkspace(name);
+      auto tempWs = WorkspaceUtils::getADSWorkspace(name);
 
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();
@@ -97,20 +92,31 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
   return "";
 }
 
-std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingData,
-                                                       std::size_t const &defaultSepctraMin,
+std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRuntimeProps *groupingProperties,
+                                                       std::size_t const &defaultSpectraMin,
                                                        std::size_t const &defaultSpectraMax) {
-  std::string groupingType = groupingData.getGroupingType();
+  std::string groupingType = groupingProperties->getProperty("GroupingMethod");
   if (groupingType == "File") {
-    if (groupingData.getGroupingMapFile().empty())
+    std::string mapFile = groupingProperties->getProperty("MapFile");
+    if (mapFile.empty())
       return "Mapping file is invalid.";
   } else if (groupingType == "Custom") {
-    const std::string customString = groupingData.getCustomGroups();
-    if (customString.empty())
+    if (!groupingProperties->existsProperty("GroupingString"))
       return "Please supply a custom grouping for detectors.";
-    else
-      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSepctraMin,
+    else {
+      std::string customString = groupingProperties->getProperty("GroupingString");
+      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
                                                defaultSpectraMax);
+    }
+  } else if (groupingType == "Groups") {
+    auto const numberOfSpectra = defaultSpectraMax - defaultSpectraMin + 1;
+    auto nGroups = std::stoull(groupingProperties->getPropertyValue("NGroups"));
+    if (nGroups < 1) {
+      return "The number of groups must be a positive number.";
+    } else if (nGroups > numberOfSpectra) {
+      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
+             ").";
+    }
   }
   return "";
 }

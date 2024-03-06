@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSqwTab.h"
 #include "Common/IndirectDataValidationHelper.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -48,7 +49,7 @@ void InelasticDataManipulationSqwTab::handleDataReady(std::string const &dataNam
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName);
     try {
-      double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName));
+      double eFixed = WorkspaceUtils::getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName));
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
       m_view->showMessageBox(ex.what());
@@ -111,8 +112,8 @@ void InelasticDataManipulationSqwTab::plotRqwContour() {
 void InelasticDataManipulationSqwTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Sqw");
-  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void InelasticDataManipulationSqwTab::handleRunClicked() { runTab(); }

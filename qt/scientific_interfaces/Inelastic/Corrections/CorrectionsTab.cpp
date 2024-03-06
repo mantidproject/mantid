@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CorrectionsTab.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -106,13 +107,13 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
   convertAlg->setProperty("Target", unitID);
 
   if (eMode.empty())
-    eMode = getEMode(ws);
+    eMode = WorkspaceUtils::getEMode(ws);
 
   convertAlg->setProperty("EMode", eMode);
 
   if (eMode == "Indirect" && eFixed == 0.0) {
     try {
-      eFixed = getEFixed(ws);
+      eFixed = WorkspaceUtils::getEFixed(ws);
     } catch (std::exception const &) {
       showMessageBox("Please enter an Efixed value.");
       return boost::none;

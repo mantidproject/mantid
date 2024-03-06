@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSymmetriseTab.h"
 #include "Common/IndirectDataValidationHelper.h"
-
+#include "Common/InterfaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -117,8 +117,8 @@ void InelasticDataManipulationSymmetriseTab::runComplete(bool error) {
 void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Symmetrise");
-  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void InelasticDataManipulationSymmetriseTab::handleReflectTypeChanged(int value) {

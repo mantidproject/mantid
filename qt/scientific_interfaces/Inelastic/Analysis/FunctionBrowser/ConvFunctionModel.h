@@ -8,8 +8,8 @@
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
-#include "ConvTypes.h"
 #include "DllConfig.h"
+#include "FitTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
@@ -59,9 +59,10 @@ public:
   std::vector<std::string> getGlobalParameters() const override;
   void setGlobalParameters(std::vector<std::string> const &globals) override;
   bool isGlobal(std::string const &parameterName) const override;
-  void setGlobal(std::string const &parameterName, bool on);
+  void setGlobal(std::string const &parameterName, bool on) override;
   std::vector<std::string> getLocalParameters() const override;
   void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
 
   double getLocalParameterValue(std::string const &parameterName, int i) const override;
@@ -75,9 +76,6 @@ public:
   void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) override;
   void setGlobalParameterValue(std::string const &parameterName, double value) override;
   std::string setBackgroundA0(double value) override;
-
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
-
   void setFitType(FitType fitType);
   void setLorentzianType(LorentzianType lorentzianType);
   void setDeltaFunction(bool);
