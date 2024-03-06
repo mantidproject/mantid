@@ -12,7 +12,8 @@ Description
 Takes a pair of normalised, single-spectra workspaces representing a depolarised helium cell and the empty cell. It will
 then determine the empty cell transmission value, ``T_E``, and the cell path length multiplied by the gas pressure
 ``pxd`` by using an exponential fit. The parameters table is then output for use in later calculations. Optionally, the
-calculated fit curve can also be output to check the quality of the fit. See :ref:`algm-Fit` for more details.
+calculated fit curve and a non-normalised version of the covariance matrix can also be output to check the quality of
+the fit. See :ref:`algm-Fit` for more details.
 
 A polarised He\ :sub:`3`\  cell decays over time. At the end of its life, it will be fully depolarised and a run is
 created to find the depolarised transmission rate through the helium. This allows for more effective efficiency
