@@ -435,8 +435,8 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// The total number of events across all of the spectra.
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
-  return std::accumulate(data.begin(), data.end(), size_t{0},
-                         [](size_t total, auto &list) { return total + list->getNumberEvents(); });
+  return std::accumulate(data.cbegin(), data.cend(), size_t{0},
+                         [](const auto total, const auto &list) { return total + list->getNumberEvents(); });
 }
 
 /** Get the EventType of the most-specialized EventList in the workspace
