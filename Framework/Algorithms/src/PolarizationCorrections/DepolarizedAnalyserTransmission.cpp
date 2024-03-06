@@ -19,7 +19,7 @@ std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
-std::string_view constexpr OUTPUT_PARAMS{"OutputParameters"};
+std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
 } // namespace PropNames
 
 /// Initial fitting function values.
@@ -63,12 +63,12 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
-                                                                       Kernel::Direction::Output),
-                  "The name of the output workspace containing the calculated fit curves.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_PARAMS), "",
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the table workspace containing the fit parameter results.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      std::string(PropNames::OUTPUT_FIT), "", Kernel::Direction::Output, PropertyMode::Optional),
+                  "The name of the workspace containing the calculated fit curve.");
   declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
                   "Starting value for the empty analyser cell transmission fit property " +
                       std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
@@ -145,9 +145,12 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
                              "). You may want to check that the correct monitor spectrum was provided.");
   }
   ITableWorkspace_sptr const &paramWs = fitAlg->getProperty("OutputParameters");
-  MatrixWorkspace_sptr const &fitWs = fitAlg->getProperty("OutputWorkspace");
-  setProperty(std::string(PropNames::OUTPUT_PARAMS), paramWs);
-  setProperty(std::string(PropNames::OUTPUT_WORKSPACE), fitWs);
+  setProperty(std::string(PropNames::OUTPUT_WORKSPACE), paramWs);
+
+  if (!getPropertyValue(std::string(PropNames::OUTPUT_FIT)).empty()) {
+    MatrixWorkspace_sptr const &fitWs = fitAlg->getProperty("OutputWorkspace");
+    setProperty(std::string(PropNames::OUTPUT_FIT), fitWs);
+  }
 }
 
 } // namespace Mantid::Algorithms
