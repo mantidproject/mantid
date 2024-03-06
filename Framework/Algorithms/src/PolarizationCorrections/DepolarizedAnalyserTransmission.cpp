@@ -23,6 +23,9 @@ std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
 std::string_view constexpr OUTPUT_COV_MATRIX{"OutputCovarianceMatrix"};
+std::string_view constexpr GROUP_INPUT{"Input Workspaces"};
+std::string_view constexpr GROUP_OUTPUT{"Output Workspaces"};
+std::string_view constexpr GROUP_FIT{"Fit Starting Values"};
 } // namespace PropNames
 
 /// Initial fitting function values.
@@ -66,6 +69,12 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
+  declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
+                  "Starting value for the empty analyser cell transmission fit property " +
+                      std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
+  declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
+                  "Starting value for the depolarised cell transmission fit property " +
+                      std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the table workspace containing the fit parameter results.");
@@ -75,12 +84,17 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       std::string(PropNames::OUTPUT_COV_MATRIX), "", Kernel::Direction::Output, PropertyMode::Optional),
                   "The name of the table workspace containing the normalised covariance matrix from the fit.");
-  declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
-                  "Starting value for the empty analyser cell transmission fit property " +
-                      std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
-  declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
-                  "Starting value for the depolarised cell transmission fit property " +
-                      std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
+
+  auto const &inputGroup = std::string(PropNames::GROUP_INPUT);
+  setPropertyGroup(std::string(PropNames::DEP_WORKSPACE), inputGroup);
+  setPropertyGroup(std::string(PropNames::MT_WORKSPACE), inputGroup);
+  auto const &fitGroup = std::string(PropNames::GROUP_FIT);
+  setPropertyGroup(std::string(PropNames::EMPTY_CELL_TRANS_START), fitGroup);
+  setPropertyGroup(std::string(PropNames::DEPOL_OPACITY_START), fitGroup);
+  auto const &outputGroup = std::string(PropNames::GROUP_OUTPUT);
+  setPropertyGroup(std::string(PropNames::OUTPUT_WORKSPACE), outputGroup);
+  setPropertyGroup(std::string(PropNames::OUTPUT_FIT), outputGroup);
+  setPropertyGroup(std::string(PropNames::OUTPUT_COV_MATRIX), outputGroup);
 }
 
 std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInputs() {
