@@ -291,11 +291,12 @@ void Quasi::updateMiniPlot() {
     return;
 
   auto const fitGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_outputFitGroup);
-  if (!fitGroup || fitGroup->getNumberOfEntries() == 0) {
+  if (!fitGroup || fitGroup->getNumberOfEntries() <= m_previewSpec) {
     return;
   }
 
-  auto const outputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(fitGroup->getItem(0));
+  auto const outputWorkspace =
+      std::dynamic_pointer_cast<MatrixWorkspace>(fitGroup->getItem(static_cast<std::size_t>(m_previewSpec)));
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
@@ -352,7 +353,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 void Quasi::plotCurrentPreview() {
   auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
-  if (m_uiForm.ppPlot->hasCurve("fit.1")) {
+  if (m_uiForm.ppPlot->hasCurve("fit 1")) {
     QString program = m_uiForm.cbProgram->currentText();
     auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
     checkADSForPlotSaveWorkspace(fitName, false);
