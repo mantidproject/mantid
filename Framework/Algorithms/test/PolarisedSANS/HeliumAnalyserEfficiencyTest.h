@@ -8,6 +8,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h"
 #include <boost/format.hpp>
 #include <cxxtest/TestSuite.h>
@@ -32,8 +33,8 @@ public:
   }
 
   void testInputWorkspaceFormat() {
-    std::vector<double> x{1, 2, 3};
-    std::vector<double> y{1, 4, 9};
+    std::vector<double> x{1, 2, 3, 4, 5};
+    std::vector<double> y{1, 4, 9, 16, 25};
 
     MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
 
@@ -136,9 +137,66 @@ public:
     TS_ASSERT_DELTA(pFromFit, p, 1e-5);
   }
 
-  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength") {
-    const std::vector<double> x{1, 2, 3};
-    const std::vector<double> y{1, 4, 9};
+  void testCovarianceMatrix() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+
+    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
+
+    covariance->addColumn("str", "Name");
+    covariance->addColumn("double", "a");
+    covariance->addColumn("double", "b");
+    covariance->appendRow();
+
+    // Test covariance matrix with incorrect size
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error);
+
+    // Test with correctly sized covariance matrix
+    covariance->appendRow();
+    for (size_t i = 0; i < 2; ++i)
+      for (size_t j = 1; j < 3; ++j) {
+        covariance->cell<double>(i, j) = 5;
+      }
+
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    heliumAnalyserEfficiency->execute();
+    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+  }
+
+  void testSmallNumberOfBins() {
+    // With less than 4 bins it's not possible to perform the error calculation correctly, because the
+    // number of parameters exceeds the number of data points.
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", "Wavelength", 3);
+
+    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
+
+    covariance->addColumn("str", "Name");
+    covariance->addColumn("double", "a");
+    covariance->addColumn("double", "b");
+    covariance->appendRow();
+    covariance->appendRow();
+
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    heliumAnalyserEfficiency->execute();
+    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+  }
+
+  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
+                                                  const size_t numBins = 5) {
+    std::vector<double> x(numBins);
+    std::vector<double> y(numBins);
+    for (size_t i = 0; i < numBins; ++i) {
+      x[i] = i + 1.0;
+      y[i] = x[i] * x[i];
+    }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
     for (size_t i = 0; i < 4; ++i) {
       wsVec[i] = generateWorkspace("ws" + std::to_string(i), x, y, xUnit);

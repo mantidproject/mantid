@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/math/distributions/students_t.hpp>
 #include <vector>
 
 namespace Mantid::Algorithms {
@@ -65,8 +66,10 @@ void HeliumAnalyserEfficiency::init() {
       std::make_shared<ListValidator<std::string>>(allowedSpinConfigs));
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty("T_E", 0.9, mustBePositive);
+  declareProperty("T_E", 0.9, mustBePositive, "Transmission of the empty cell");
   declareProperty("pxd", 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("T_E_pxd_Covariance", "", Direction::Input,
+                                                                       PropertyMode::Optional));
   declareProperty("StartLambda", 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
   declareProperty("EndLambda", 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
 }
@@ -86,6 +89,18 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
     if (wsGroup->size() != 4) {
       errorList["InputWorkspace"] =
           "The input group workspace must have four periods corresponding to the four spin configurations.";
+    }
+  }
+
+  ITableWorkspace_sptr covarianceMatrix = getProperty("T_E_pxd_Covariance");
+  if (covarianceMatrix != nullptr) {
+    // Should be a 2x2 matrix with a Name column
+    const auto numRows = covarianceMatrix->rowCount();
+    const auto numCols = covarianceMatrix->columnCount();
+    // One extra column for Name
+    if (numCols != 3 || numRows != 2) {
+      errorList["T_E_pxd_Covariance"] = "The covariance matrix is the wrong size, it should be a 2x2 matrix containing "
+                                        "the T_E and pxd covariance matrix, with an extra column for Name.";
     }
   }
   return errorList;
@@ -183,38 +198,81 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
   MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
 
-  double pHe = fitParameters->getRef<double>("Value", 0);
+  const double pHe = fitParameters->getRef<double>("Value", 0);
+  const double pHeError = fitParameters->getRef<double>("Error", 0);
 
   auto createSingleValuedWorkspace = createChildAlgorithm("CreateSingleValuedWorkspace");
   createSingleValuedWorkspace->initialize();
   createSingleValuedWorkspace->setProperty("DataValue", pHe);
-  createSingleValuedWorkspace->setProperty("ErrorValue", fitParameters->getRef<double>("Error", 0));
+  createSingleValuedWorkspace->setProperty("ErrorValue", pHeError);
   createSingleValuedWorkspace->setProperty("OutputWorkspace", "phe");
   createSingleValuedWorkspace->executeAsChildAlg();
   MatrixWorkspace_sptr pheWs = createSingleValuedWorkspace->getProperty("OutputWorkspace");
 
   setProperty("p_He", pheWs);
-  const double t_E = getProperty("T_E");
 
   // Now we have all the parameters to calculate T(lambda), the transmission of the helium
   // analyser for an incident unpolarised beam. T_para and T_anti are also calculated, the
-  // transmission of the wanted and unwanted spin state. T = T_para + T_anti
+  // transmission of the wanted and unwanted spin state. T = (T_para + T_anti) / 2
 
   const auto wavelengthValuesHist = fitWorkspace->x(0);
   std::vector<double> wavelengthValues(wavelengthValuesHist.cbegin(), wavelengthValuesHist.cend());
   std::vector<double> tPara(wavelengthValues.size());
   std::vector<double> tAnti(wavelengthValues.size());
+  std::vector<double> tParaErrors(wavelengthValues.size());
+  std::vector<double> tAntiErrors(wavelengthValues.size());
 
-  std::transform(wavelengthValues.cbegin(), wavelengthValues.cend(), tPara.begin(),
-                 [pHe, t_E, mu](double w) { return 0.5 * t_E * std::exp(-mu * w * (1 - pHe)); });
-  std::transform(wavelengthValues.cbegin(), wavelengthValues.cend(), tAnti.begin(),
-                 [pHe, t_E, mu](double w) { return 0.5 * t_E * std::exp(-mu * w * (1 + pHe)); });
+  double s00, s01, s10, s11;
+  s00 = s01 = s10 = s11 = 0;
+  ITableWorkspace_sptr covarianceMatrix = getProperty("T_E_pxd_Covariance");
+  if (covarianceMatrix != nullptr) {
+    s00 = covarianceMatrix->cell<double>(0, 1);
+    s01 = covarianceMatrix->cell<double>(0, 2);
+    s10 = covarianceMatrix->cell<double>(1, 1);
+    s11 = covarianceMatrix->cell<double>(1, 2);
+  }
+
+  const double pHe_variance = pHeError * pHeError;
+  const double t_E = getProperty("T_E");
+
+  // Create a t distribution with dof given by the number of data points minus
+  // the number of params (3)
+  double tPpf = 1;
+  if (wavelengthValues.size() > 3) {
+    const boost::math::students_t dist(wavelengthValues.size() - 3.0);
+    // Critical value corresponding to 1-sigma
+    const double alpha = (1 + std::erf(1.0 / sqrt(2))) / 2;
+    // Scale factor for the error calculations
+    tPpf = boost::math::quantile(dist, alpha);
+  } else {
+    g_log.warning(
+        "The number of histogram bins must be greater than 3 in order to provide an accurate error calculation");
+  }
+
+  for (size_t i = 0; i < wavelengthValues.size(); ++i) {
+    const double w = wavelengthValues[i];
+    tPara[i] = 0.5 * t_E * std::exp(-mu * w * (1 - pHe));
+    const double dTp_dpHe = mu * w * tPara[i];
+    const double dTp_dT_E = tPara[i] / t_E;
+    const double dTp_dpxd = -ABSORPTION_CROSS_SECTION_CONSTANT * w * (1 - pHe) * tPara[i];
+    tParaErrors[i] =
+        tPpf * std::sqrt(dTp_dpHe * dTp_dpHe * pHe_variance + dTp_dT_E * dTp_dT_E * s00 + dTp_dT_E * dTp_dpxd * s01 +
+                         dTp_dpxd * dTp_dT_E * s10 + dTp_dpxd * dTp_dpxd * s11);
+    tAnti[i] = 0.5 * t_E * std::exp(-mu * w * (1 + pHe));
+    const double dTa_dpHe = mu * w * tAnti[i];
+    const double dTa_dT_E = tAnti[i] / t_E;
+    const double dTa_dpxd = -ABSORPTION_CROSS_SECTION_CONSTANT * w * (1 + pHe) * tAnti[i];
+    tAntiErrors[i] =
+        tPpf * std::sqrt(dTa_dpHe * dTa_dpHe * pHe_variance + dTa_dT_E * dTa_dT_E * s00 + dTa_dT_E * dTa_dpxd * s01 +
+                         dTa_dpxd * dTa_dT_E * s10 + dTa_dpxd * dTa_dpxd * s11);
+  }
 
   auto createWorkspace = createChildAlgorithm("CreateWorkspace");
   createWorkspace->initialize();
   createWorkspace->setProperty("OutputWorkspace", "tPara");
   createWorkspace->setProperty("DataX", wavelengthValues);
   createWorkspace->setProperty("DataY", tPara);
+  createWorkspace->setProperty("DataE", tParaErrors);
   createWorkspace->setProperty("UnitX", "Wavelength");
   createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_para");
   createWorkspace->executeAsChildAlg();
@@ -225,6 +283,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   createWorkspace->setProperty("OutputWorkspace", "tAnti");
   createWorkspace->setProperty("DataX", wavelengthValues);
   createWorkspace->setProperty("DataY", tAnti);
+  createWorkspace->setProperty("DataE", tAntiErrors);
   createWorkspace->setProperty("UnitX", "Wavelength");
   createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_anti");
   createWorkspace->executeAsChildAlg();
@@ -247,8 +306,6 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   scale->executeAsChildAlg();
 
   setProperty("OutputTransmissionWorkspace", transmissionWorkspace);
-
-  // Errors?
 }
 
 Workspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
