@@ -628,6 +628,7 @@ class BaseSX(ABC):
         log_norm: Optional[bool] = True,
     ):
         """
+        Function to plot summary of IntegratePeaksMD integration comprising 3 colorfill plots per peak saved in a pdf.
         :param wsMD:  MD workspace to plot
         :param peaks: integrated peaks using IntegratePeaksMD
         :param filename: filename to store pdf output
@@ -742,7 +743,6 @@ class BaseSX(ABC):
         # call BinMD
         ws_cut = mantid.BinMD(
             InputWorkspace=wsMD,
-            OutputWorkspace="__ws_cut",
             AxisAligned=False,
             BasisVector0=r"Q$_0$,unit," + ",".join(np.array2string(evecs[:, 0], precision=6).strip("[]").split()),
             BasisVector1=r"Q$_1$,unit," + ",".join(np.array2string(evecs[:, 1], precision=6).strip("[]").split()),
@@ -756,6 +756,16 @@ class BaseSX(ABC):
 
     @staticmethod
     def _get_ellipsoid_params_from_peak(peak_shape: PeakShape, ndims: int):
+        """
+        Extract ellipsoid parameters (eigenvectors, radii etc.) from PeakShape object
+        :param peak_shape: PeakShape object of a integrated peak
+        :param ndims: number of dimensions in the MD workspace
+        :return radii: array of ellipsoid radii (3 sigma) defining peak region
+        :return bg_inner_radii: array of inner radii for ellipsoid background shell
+        :return bg_outer_radii: array of outer radii for ellipsoid background shell
+        :return evecs: ndims x ndims array of eignevectors - each column corresponds to an ellipsoid axis
+        :return translation: translation of the ellipsoid center in the coordinates/frame of the MD workspace integrated
+        """
         shape_info = json_loads(peak_shape.toJSON())
         if peak_shape.shapeName().lower() == "spherical":
             BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
@@ -774,6 +784,10 @@ class BaseSX(ABC):
 
     @staticmethod
     def _convert_spherical_representation_to_ellipsoid(shape_info: dict):
+        """
+        Update shape_info dict of a spherical peak shape to have same keys/fields as an ellipsoid
+        :param shape_info: dictionary of JSON shape representation
+        """
         # copied from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid - can't import here though
         # convert shape_info dict from sphere to ellipsoid for plotting
         for key in ["radius", "background_inner_radius", "background_outer_radius"]:
