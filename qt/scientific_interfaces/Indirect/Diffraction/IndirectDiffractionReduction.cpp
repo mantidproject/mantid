@@ -771,6 +771,24 @@ void IndirectDiffractionReduction::runFilesFound() {
     m_uiForm.ckSumFiles->setChecked(false);
 }
 
+/**
+ * Handles the user toggling the manual grouping check box.
+ *
+ * @param state The selection state of the check box
+ */
+void IndirectDiffractionReduction::manualGroupingToggled(int state) {
+  switch (state) {
+  case Qt::Unchecked:
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
+    break;
+  case Qt::Checked:
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceSurfaceUnit);
+    break;
+  default:
+    return;
+  }
+}
+
 void IndirectDiffractionReduction::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);

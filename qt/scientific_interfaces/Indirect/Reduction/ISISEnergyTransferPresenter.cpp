@@ -30,7 +30,7 @@ IETPresenter::IETPresenter(IndirectDataReduction *idrUI, QWidget *parent)
       m_view(std::make_unique<IETView>(this, parent)) {
 
   setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 
