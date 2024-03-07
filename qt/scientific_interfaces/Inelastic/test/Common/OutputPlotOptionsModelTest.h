@@ -69,6 +69,8 @@ constructActions(std::optional<std::map<std::string, std::string>> const &availa
     actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
+  if (actions.find("Plot 3D Surface") == actions.end())
+    actions["Plot 3D Surface"] = "Plot 3D Surface";
   return actions;
 }
 
@@ -93,6 +95,7 @@ public:
                void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
   MOCK_METHOD3(plotBins, void(std::string const &workspaceName, std::string const &binIndices, bool errorBars));
   MOCK_METHOD1(showSliceViewer, void(std::string const &workspaceName));
+  MOCK_METHOD1(plot3DSurface, void(std::string const &workspaceName));
   MOCK_METHOD3(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
 };
 
@@ -320,7 +323,7 @@ public:
   }
 
   void
-  test_that_singleDataPoint_will_return_a_no_error_message_if_the_workspace_has_more_than_one_data_points_to_open_slice_viewer() {
+  test_that_singleDataPoint_will_return_a_no_error_message_if_the_workspace_has_more_than_one_data_points_to_open_slice_viewer_or_3DSurface() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
@@ -344,14 +347,15 @@ public:
   }
 
   void
-  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_histogram_to_open_slice_viewer() {
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_histogram_to_open_slice_viewer_or_3DSurface() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(1, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
     TS_ASSERT(m_model->singleDataPoint(MantidAxis::Both));
   }
 
-  void test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_to_open_slice_viewer() {
+  void
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_to_open_slice_viewer_or_3DSurface() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 1));
     m_model->setWorkspace(WORKSPACE_NAME);
 
@@ -359,7 +363,7 @@ public:
   }
 
   void
-  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_and_one_histogram_to_open_slice_viewer() {
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_one_bin_and_one_histogram_to_open_slice_viewer_or_3DSurface() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(1, 1));
     m_model->setWorkspace(WORKSPACE_NAME);
 
@@ -378,6 +382,7 @@ public:
     m_model = std::make_unique<OutputPlotOptionsModel>(m_plotter, actions);
 
     actions["Open Slice Viewer"] = "Open Slice Viewer";
+    actions["Plot 3D Surface"] = "Plot 3D Surface";
     actions["Plot Tiled"] = "Plot Tiled";
     TS_ASSERT_EQUALS(m_model->availableActions(), actions);
   }
