@@ -8,6 +8,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # where for these commands.
 cd ${SCRIPT_DIR}
 
+# Remove any local tags that are not published
+git fetch -p -P
+
 # Find the latest version tag. Anything that starts with v is considered
 # The '-' prefixing version:refname sorts in descending order
 LATEST_VERSION_TAG=$(git tag --list  --sort -version:refname 'v*' | head -n 1)
