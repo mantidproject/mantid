@@ -200,6 +200,17 @@ void ExternalPlotter::plotContour(std::string const &workspaceName) {
 }
 
 /**
+ * Produces an external call to 3D Surface Plot on the target workspace
+ *
+ * @param workspaceName The name of the workspace to use in slice viewer
+ */
+void ExternalPlotter::plot3DSurface(std::string const &workspaceName) {
+  if (validate(workspaceName)) {
+    surface(QStringList(QString::fromStdString(workspaceName)));
+  }
+}
+
+/**
  * Produces an external call to slice viewer on the target workspace
  *
  * @param workspaceName The name of the workspace to use in slice viewer
