@@ -611,15 +611,15 @@ void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const
                                  bool appendToFile, bool writeHeader, int prec, bool scientific,
                                  const std::string &comment) {
   int count = 0;
-  int dimIndex = -1;
-  for (auto i = 0; i < mdws->getNumDims(); i++) {
+  size_t dimIndex = -1;
+  for (size_t i = 0; i < mdws->getNumDims(); i++) {
     if (mdws->getDimension(i)->getNBins() > 1) {
       ++count;
       dimIndex = i;
     }
   }
 
-  if (count != 1 || dimIndex == -1) {
+  if (count != 1) {
     throw std::runtime_error("SaveAscii does not support saving multidimentional MDHistoWorkspace, and only supports "
                              "1D MDHistoWorkspaces cuts");
   }
@@ -660,16 +660,17 @@ void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const
 
   auto start = binMin + binWidth;
   auto end = binMax - binWidth;
-  auto step = (end - start) / (nbins - 1);
+  auto step = (end - start) / float(nbins - 1);
 
   auto nPoints = mdws->getNPoints();
   auto signal = mdws->getSignalArray();
   auto error = mdws->getErrorSquaredArray();
 
-  Progress progress(this, 0.0, 1.0, nPoints);
+  Progress progress(this, 0.0, 1.0, nbins);
 
-  for (size_t i = 0; i < nbins; ++i) {
-    file << start + step * i << m_sep << signal[i] << m_sep << error[i] << "\n";
+  for (size_t i = 0; i < nPoints; ++i) {
+    file << start + step * float(i) << m_sep << signal[i] << m_sep << error[i] << "\n";
+    progress.report();
   }
 
   file.unsetf(std::ios_base::floatfield);
