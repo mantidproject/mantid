@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -128,6 +130,7 @@ void SaveAscii2::exec() {
   Workspace_const_sptr ws = getProperty("InputWorkspace");
   m_ws = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   ITableWorkspace_const_sptr tws = std::dynamic_pointer_cast<const ITableWorkspace>(ws);
+  IMDHistoWorkspace_const_sptr mdws = std::dynamic_pointer_cast<const IMDHistoWorkspace>(ws);
 
   // Get the properties valid for all workspaces
   const bool writeHeader = getProperty("ColumnHeader");
@@ -158,10 +161,11 @@ void SaveAscii2::exec() {
     m_sep = ",";
   }
 
+  // handle table and 1 histo cuts workspaces
   if (tws) {
-    writeTableWorkspace(tws, filename, appendToFile, writeHeader, prec, scientific, comment);
-    // return here as the rest of the class is all about matrix workspace saving
-    return;
+    return writeTableWorkspace(tws, filename, appendToFile, writeHeader, prec, scientific, comment);
+  } else if (mdws) {
+    return write1DHistoCut(mdws, filename, appendToFile, writeHeader, prec, scientific, comment);
   }
 
   if (!m_ws) {
@@ -603,4 +607,74 @@ void SaveAscii2::writeFileHeader(const std::vector<std::string> &logList, std::o
   outputFile << '\n';
 }
 
+void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const std::string &filename,
+                                 bool appendToFile, bool writeHeader, int prec, bool scientific,
+                                 const std::string &comment) {
+  int count = 0;
+  int dimIndex = -1;
+  for (auto i = 0; i < mdws->getNumDims(); i++) {
+    if (mdws->getDimension(i)->getNBins() > 1) {
+      ++count;
+      dimIndex = i;
+    }
+  }
+
+  if (count != 1 || dimIndex == -1) {
+    throw std::runtime_error("SaveAscii does not support saving multidimentional MDHistoWorkspace, and only supports "
+                             "1D MDHistoWorkspaces cuts");
+  }
+
+  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
+
+  if (file.bad()) {
+    throw Exception::FileError("Unable to create file: ", filename);
+  }
+
+  if (prec != EMPTY_INT()) {
+    file.precision(prec);
+  }
+
+  if (scientific) {
+    file << std::scientific;
+  }
+
+  auto lastAlg = mdws->getHistory().lastAlgorithm();
+  auto propsVec = lastAlg->getProperties();
+
+  if (writeHeader) {
+    file << comment << " {";
+    for (size_t i = 0; i < propsVec.size(); i++) {
+      file << propsVec[i]->name() << ": " << propsVec[i]->valueAsPrettyStr();
+      if (i < propsVec.size() - 1)
+        file << ", ";
+    }
+    file << " }\n";
+  }
+
+  auto dim = mdws->getDimension(dimIndex);
+  auto nbins = dim->getNBins();
+
+  auto binWidth = dim->getBinWidth() / 2;
+  auto binMax = dim->getMaximum();
+  auto binMin = dim->getMinimum();
+
+  auto start = binMin + binWidth;
+  auto end = binMax - binWidth;
+  auto step = (end - start) / (nbins - 1);
+
+  auto nPoints = mdws->getNPoints();
+  auto signal = mdws->getSignalArray();
+  auto error = mdws->getErrorSquaredArray();
+
+  Progress progress(this, 0.0, 1.0, nPoints);
+
+  for (size_t i = 0; i < nbins; ++i) {
+    file << start + step * i << m_sep << signal[i] << m_sep << error[i] << "\n";
+  }
+
+  file.unsetf(std::ios_base::floatfield);
+  file.close();
+
+  return;
+}
 } // namespace Mantid::DataHandling
