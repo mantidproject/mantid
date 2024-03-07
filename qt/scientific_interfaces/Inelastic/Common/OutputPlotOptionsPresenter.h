@@ -27,6 +27,7 @@ public:
   virtual void handlePlotBinsClicked() = 0;
   virtual void handleShowSliceViewerClicked() = 0;
   virtual void handlePlotTiledClicked() = 0;
+  virtual void handlePlot3DClicked() = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL OutputPlotOptionsPresenter final : public IOutputPlotOptionsPresenter {
@@ -46,6 +47,7 @@ public:
   void handlePlotSpectraClicked() override;
   void handlePlotBinsClicked() override;
   void handleShowSliceViewerClicked() override;
+  void handlePlot3DClicked() override;
   void handlePlotTiledClicked() override;
 
   void setPlotType(PlotWidget const &plotType);

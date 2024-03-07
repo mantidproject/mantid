@@ -102,6 +102,7 @@ constructActions(std::optional<std::map<std::string, std::string>> const &availa
   actions.insert({"Plot Bins", "Plot Bins"});
   actions.insert({"Open Slice Viewer", "Open Slice Viewer"});
   actions.insert({"Plot Tiled", "Plot Tiled"});
+  actions.insert({"Plot 3D Surface", "Plot 3D Surface"});
   return actions;
 }
 
@@ -235,6 +236,17 @@ void OutputPlotOptionsModel::showSliceViewer() {
   }
 }
 
+void OutputPlotOptionsModel::plot3DSurface() {
+  auto const workspaceName = workspace();
+  auto const unitName = unit();
+
+  if (workspaceName) {
+    std::string plotWorkspaceName =
+        unitName ? convertUnit(workspaceName.value(), unitName.value()) : workspaceName.value();
+    m_plotter->plot3DSurface(plotWorkspaceName);
+  }
+}
+
 void OutputPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
@@ -263,7 +275,7 @@ std::optional<std::string> OutputPlotOptionsModel::checkWorkspaceSize(std::strin
         auto msg1 = checkWorkspaceBinSize(matrixWs).value_or("");
         auto msg2 = checkWorkspaceSpectrumSize(matrixWs).value_or("");
         if (!msg1.empty() || !msg2.empty())
-          return "Open Slice viewer failed: " + msg1 + " " + msg2;
+          return "Plotting data failed: " + msg1 + " " + msg2;
         else
           return std::nullopt;
       }

@@ -133,7 +133,7 @@ void OutputPlotOptionsPresenter::clearWorkspaces() {
 }
 
 void OutputPlotOptionsPresenter::setUnit(std::string const &unit) {
-  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceUnit) {
+  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceSurfaceUnit) {
     m_model->setUnit(unit);
   }
 }
@@ -188,6 +188,14 @@ void OutputPlotOptionsPresenter::handleShowSliceViewerClicked() {
   if (validateWorkspaceSize(MantidAxis::Both)) {
     setPlotting(true);
     m_model->showSliceViewer();
+    setPlotting(false);
+  }
+}
+
+void OutputPlotOptionsPresenter::handlePlot3DClicked() {
+  if (validateWorkspaceSize(MantidAxis::Both)) {
+    setPlotting(true);
+    m_model->plot3DSurface();
     setPlotting(false);
   }
 }

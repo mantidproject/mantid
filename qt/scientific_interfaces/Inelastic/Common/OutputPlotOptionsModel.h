@@ -48,6 +48,7 @@ public:
   virtual void plotSpectra();
   virtual void plotBins(std::string const &binIndices);
   virtual void plotTiled();
+  virtual void plot3DSurface();
   virtual void showSliceViewer();
 
   std::optional<std::string> singleDataPoint(MantidAxis const &axisType) const;
