@@ -117,6 +117,7 @@ pipeline {
         script {
           env.GIT_TAG = generate_git_tag()
         }
+        echo "${env.GIT_TAG}"
       }
     }
 
