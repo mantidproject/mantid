@@ -76,10 +76,12 @@ static const auto HAS_RESOLUTION = true;
 static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
-static auto TEMPLATE_SUB_TYPES =
-    packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(), std::make_unique<ConvTypes::FitSubType>(),
-                         std::make_unique<ConvTypes::DeltaSubType>(), std::make_unique<ConvTypes::TempSubType>(),
-                         std::make_unique<ConvTypes::BackgroundSubType>());
+inline auto templateSubTypes() {
+  return packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(),
+                              std::make_unique<ConvTypes::FitSubType>(), std::make_unique<ConvTypes::DeltaSubType>(),
+                              std::make_unique<ConvTypes::TempSubType>(),
+                              std::make_unique<ConvTypes::BackgroundSubType>());
+}
 
 } // namespace ConvFit
 
