@@ -16,16 +16,13 @@ constexpr double T_E_VALUE = 82593.9;
 constexpr double PXD_VALUE = 14.9860;
 constexpr double T_E_ERROR = 26088049.0;
 constexpr double PXD_ERROR = 467.994241;
-constexpr double T_E_DELTA = 1e-1;
-constexpr double PXD_DELTA = 1e-5;
-constexpr double COST_FUNC_MAX = 5e-15;
-
 constexpr double T_E_COV = 680586304785150.26;
 constexpr double PXD_COV = 219018.61;
-constexpr double PXD_COV_DELTA = 1e-5;
 constexpr double OFF_DIAG_COV = 11828693410.21;
-constexpr double COV_DELTA = 1;
+constexpr double COST_FUNC_MAX = 5e-15;
 
+constexpr double FIT_DELTA = 1e-6;
+constexpr double COV_DELTA = 1e-10;
 } // namespace
 
 using Mantid::Algorithms::CreateSampleWorkspace;
@@ -63,10 +60,10 @@ public:
     TS_ASSERT(alg.isExecuted());
     Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
     Mantid::API::MatrixWorkspace_sptr const &fitWs = alg.getProperty("OutputFitCurves");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_ERROR * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_ERROR * FIT_DELTA);
     TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
     TS_ASSERT_EQUALS(fitWs, nullptr)
   }
@@ -91,10 +88,10 @@ public:
     TS_ASSERT(alg.isExecuted());
     Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
     Mantid::API::MatrixWorkspace_sptr const &fitWs = alg.getProperty("OutputFitCurves");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
     TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
     TS_ASSERT_EQUALS(fitWs->getNumberHistograms(), 3);
   }
@@ -119,15 +116,15 @@ public:
     TS_ASSERT(alg.isExecuted());
     Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
     Mantid::API::ITableWorkspace_sptr const &covWs = alg.getProperty("OutputCovarianceMatrix");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
     TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
-    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(0), T_E_COV, COV_DELTA);
-    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(1), OFF_DIAG_COV, COV_DELTA);
-    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(0), OFF_DIAG_COV, COV_DELTA);
-    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(1), PXD_COV, PXD_COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(0), T_E_COV, T_E_COV * COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(1), OFF_DIAG_COV, OFF_DIAG_COV * COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(0), OFF_DIAG_COV, OFF_DIAG_COV * COV_DELTA);
+    TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(1), PXD_COV, PXD_COV * COV_DELTA);
   }
 
   void test_failed_fit() {
