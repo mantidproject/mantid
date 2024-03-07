@@ -14,7 +14,6 @@ import numpy as np
 from .abinitioloader import AbInitioLoader
 from .textparser import TextParser
 from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, ROTATIONS_AND_TRANSLATIONS
-from abins.abinsdata import AbinsData
 from mantid.kernel import Atom
 
 
