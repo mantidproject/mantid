@@ -7,8 +7,6 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/FileFinderWidget.h"
-#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_AddWorkspaceMultiDialog.h"
 
@@ -35,10 +33,10 @@ public:
 signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
-public slots:
+private slots:
+  void updateSelectedSpectra() override;
   void selectAllSpectra();
   void unifyRange();
-  void updateSelectedSpectra() override;
   void handleFilesFound();
   void emitAddData();
 

@@ -15,7 +15,6 @@
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {

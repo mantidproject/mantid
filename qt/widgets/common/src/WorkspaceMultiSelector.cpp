@@ -117,7 +117,7 @@ WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_connected(false),
-      m_workspaceTypes(), m_showHidden(false), m_showGroups(true), m_binLimits(std::make_pair(0, -1)), m_suffix() {
+      m_workspaceTypes(), m_showHidden(false), m_showGroups(false), m_binLimits(std::make_pair(0, -1)), m_suffix() {
 
   if (init) {
     connectObservers();

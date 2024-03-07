@@ -5,14 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
-
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <QFileInfo>
-
-#include <boost/optional.hpp>
 #include <utility>
 
 namespace {
@@ -45,10 +39,7 @@ AddWorkspaceMultiDialog::AddWorkspaceMultiDialog(QWidget *parent) : QDialog(pare
 }
 std::string AddWorkspaceMultiDialog::workspaceName() const { return std::string(""); }
 
-void AddWorkspaceMultiDialog::setup() {
-  m_uiForm.tbWorkspace->setupTable();
-  return;
-}
+void AddWorkspaceMultiDialog::setup() { m_uiForm.tbWorkspace->setupTable(); }
 
 stringPairVec AddWorkspaceMultiDialog::selectedNameIndexPairs() const {
 
@@ -80,7 +71,6 @@ void AddWorkspaceMultiDialog::handleFilesFound() {
   for (auto const &fileName : fileNames) {
     loadFile(fileName);
   }
-  return;
 }
 
 } // namespace MantidQt::MantidWidgets
