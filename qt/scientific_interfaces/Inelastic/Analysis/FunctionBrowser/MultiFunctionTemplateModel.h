@@ -9,11 +9,11 @@
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
-#include "FitTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
+#include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "ParamID.h"
 
 #include <QMap>
 #include <boost/optional.hpp>
@@ -22,13 +22,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-using namespace ConvTypes;
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateModel : public IFunctionModel {
 public:
-  MultiFunctionTemplateModel(std::unique_ptr<IDAFunctionParameterEstimation> estimators);
+  MultiFunctionTemplateModel(std::unique_ptr<FunctionModel> model,
+                             std::unique_ptr<IDAFunctionParameterEstimation> estimators);
   IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
   bool hasFunction() const override;
@@ -90,7 +90,7 @@ private:
   boost::optional<double> getParameterError(ParamID name) const;
   boost::optional<std::string> getParameterName(ParamID name) const;
   boost::optional<std::string> getParameterDescription(ParamID name) const;
-  boost::optional<std::string> getPrefix(ParamID name) const;
+  virtual boost::optional<std::string> getPrefix(ParamID name) const = 0;
   void setCurrentValues(const QMap<ParamID, double> &);
   virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
   boost::optional<ParamID> getParameterId(std::string const &parameterName);
@@ -99,7 +99,7 @@ private:
   void removeGlobal(std::string const &parameterName);
   std::vector<std::string> makeGlobalList() const;
 
-  ConvolutionFunctionModel m_model;
+  std::unique_ptr<FunctionModel> m_model;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
