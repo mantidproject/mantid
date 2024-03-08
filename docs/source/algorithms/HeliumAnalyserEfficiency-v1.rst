@@ -36,21 +36,21 @@ We can then calculate the theoretical transmission curves :math:`T_{para}` and :
     T_{anti} = \frac{T_E}{2}\exp(-0.0733 p d \lambda (1 + p_{He}))
 
 To calculate the errors :math:`\Delta T_{para}` and :math:`\Delta T_{anti}` we need the error on :math:`p_{He}`, :math:`\Delta p_{He}`, and
-the covariance matrix from the calculation of :math:`T_E` and :math:`pd`, given by :math:`S = [\sigma_{ij}]`, where
-:math:`\sigma_{00} = \left( \Delta T_E \right)^2` and :math:`\sigma_{11} = \left( \Delta pd \right)^2`, with the diagonal terms given by the
-covariances. Then :math:`\Delta T_{para}` (and similarly for :math:`\Delta T_{anti}`) is given by
+the covariance matrix from the calculation of :math:`T_E` and :math:`pd`. If :math:`\mathbf{\partial T}` is the 3x1 vector of partial
+derivatives of :math:`T_{para}` with respect to each parameter, and :math:`S` is the 3x3 parameter covariance matrix, then
+:math:`\Delta T_{para}` (and similarly for :math:`\Delta T_{anti}`) is given by
 
 .. math::
-    \frac{\Delta T_{para}}{\Delta t} = \sqrt{\frac{\partial T_{para}}{\partial p_{He}}^2 \left(\Delta p_{He} \right)^2 + \frac{\partial T_{para}}{\partial T_E}^2 \sigma_{00} + \frac{\partial T_{para}}{\partial T_E}\frac{\partial T_{para}}{\partial pd}\left(\sigma_{01} + \sigma_{10}\right) +  \frac{\partial T_{para}}{\partial pd}^2 \sigma_{11}}
+    \frac{\Delta T_{para}}{t_{crit}} = \sqrt{\mathbf{\partial T}^T S \mathbf{\partial T}}
 
 If :math:`n_b` is the number of histogram bins used in the fit, then define :math:`n := n_b-3`, since we are fitting three parameters. Then the
-factor :math:`\Delta t` follows a :math:`t` distribution with :math:`n` degrees of freedom, and probability density function :math:`f_t(x,n)`.
-For a standard 68.3% (1-sigma) error the factor :math:`\Delta t` is given by the solution to
+factor :math:`t_{crit}` follows a :math:`t` distribution with :math:`n` degrees of freedom, and probability density function :math:`f_t(x,n)`.
+For a standard 68.3% (1-sigma) error the factor :math:`t_{crit}` is given by the solution to
 
 .. math::
-	\frac{1}{2}\left(1 + \mathrm{erf}\left(\frac{1}{\sqrt{2}}\right)\right) = P(X < \Delta t ) = \int_0^{\Delta t} f_t(x; n) dx
+	\frac{1}{2}\left(1 + \mathrm{erf}\left(\frac{1}{\sqrt{2}}\right)\right) = P(X < t_{crit} ) = \int_0^{t_{crit}} f_t(x; n) dx
 
-As the number of histogram bins used in the fit increases, :math:`\Delta t \rightarrow 1`.
+As the number of histogram bins used in the fit increases, :math:`t_{crit} \rightarrow 1`.
 
 Usage
 -----
