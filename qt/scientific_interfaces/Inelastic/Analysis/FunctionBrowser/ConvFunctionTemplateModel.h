@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IDAFunctionParameterEstimation.h"
-#include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
-#include "FitTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+
+#include "Analysis/IDAFunctionParameterEstimation.h"
+#include "Analysis/ParameterEstimation.h"
+#include "FitTypes.h"
 #include "MultiFunctionTemplateModel.h"
 
 #include <optional>
@@ -26,7 +27,6 @@ namespace IDA {
 
 using namespace ConvTypes;
 using namespace Mantid::API;
-using namespace MantidWidgets;
 
 class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateModel : public MultiFunctionTemplateModel {
 public:
@@ -35,8 +35,8 @@ public:
   ConvolutionFunctionModel *model() const;
 
   void setFunction(IFunction_sptr fun) override;
-  void addFunction(std::string const &prefix, std::string const &funStr) override;
   void removeFunction(std::string const &prefix) override;
+  void addFunction(std::string const &prefix, std::string const &funStr) override;
 
   void setSubType(std::size_t subTypeIndex, int typeIndex) override;
   std::map<std::size_t, int> getSubTypes() const override;
@@ -52,15 +52,18 @@ public:
   EstimationDataSelector getEstimationDataSelector() const override;
 
 private:
+  std::optional<std::string> getPrefix(ParamID name) const override;
+  void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
+
   void clearData();
   void setModel();
+
   std::optional<std::string> getLor1Prefix() const;
   std::optional<std::string> getLor2Prefix() const;
   std::optional<std::string> getFitTypePrefix() const;
   std::optional<std::string> getDeltaPrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;
-  std::optional<std::string> getPrefix(ParamID name) const override;
-  void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
+
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
   std::string buildFickFunctionString() const;
@@ -80,6 +83,7 @@ private:
   std::string buildIsoRotDiffFunctionString() const;
   std::string buildElasticIsoRotDiffFunctionString() const;
   std::string buildInelasticIsoRotDiffFunctionString() const;
+
   int getNumberOfPeaks() const;
   void checkConvolution(const IFunction_sptr &fun);
   void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet, bool &isFiTypeSet);
@@ -89,7 +93,9 @@ private:
   DeltaType m_deltaType = DeltaType::None;
   TempCorrectionType m_tempCorrectionType = TempCorrectionType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
+
   BackgroundSubType m_backgroundSubtype;
+
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;

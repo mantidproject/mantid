@@ -8,10 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include "MantidQtWidgets/Common/FunctionModel.h"
 
 #include <map>
 
@@ -37,7 +35,6 @@ auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEsti
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-using namespace MantidWidgets;
 using namespace Mantid::API;
 
 ConvFunctionTemplateModel::ConvFunctionTemplateModel()
@@ -54,6 +51,7 @@ void ConvFunctionTemplateModel::clearData() {
   m_deltaType = DeltaType::None;
   m_tempCorrectionType = TempCorrectionType::None;
   m_backgroundType = BackgroundType::None;
+
   m_model->clear();
 }
 
@@ -196,7 +194,7 @@ void ConvFunctionTemplateModel::addFunction(std::string const &prefix, std::stri
     }
     newPrefix = *getBackgroundPrefix();
   } else {
-    throw std::runtime_error("Cannot add funtion " + name);
+    throw std::runtime_error("Cannot add function " + name);
   }
   auto newFun = getFunctionWithPrefix(newPrefix, getSingleFunction(0));
   copyParametersAndErrors(*fun, *newFun);
