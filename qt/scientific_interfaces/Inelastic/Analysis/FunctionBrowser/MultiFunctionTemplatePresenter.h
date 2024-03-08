@@ -13,16 +13,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class ConvFunctionTemplateModel;
+class MultiFunctionTemplateModel;
 class MultiFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplatePresenter : public FunctionTemplatePresenter {
 public:
   explicit MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
-                                          std::unique_ptr<ConvFunctionTemplateModel> model);
+                                          std::unique_ptr<MultiFunctionTemplateModel> model);
 
   MultiFunctionTemplateView *view() const;
-  ConvFunctionTemplateModel *model() const;
+  MultiFunctionTemplateModel *model() const;
 
   void setSubType(size_t subTypeIndex, int typeIndex) override;
 

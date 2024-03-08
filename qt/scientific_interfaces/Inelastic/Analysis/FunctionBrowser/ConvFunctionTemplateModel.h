@@ -90,7 +90,6 @@ private:
   DeltaType m_deltaType = DeltaType::None;
   TempCorrectionType m_tempCorrectionType = TempCorrectionType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  FitSubType m_fitSubType;
   BackgroundSubType m_backgroundSubtype;
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
