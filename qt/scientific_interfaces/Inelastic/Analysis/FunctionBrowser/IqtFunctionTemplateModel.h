@@ -22,9 +22,9 @@ namespace IDA {
 
 using namespace Mantid::API;
 
-class MANTIDQT_INELASTIC_DLL IqtFunctionModel : public MultiFunctionTemplateModel {
+class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateModel : public MultiFunctionTemplateModel {
 public:
-  IqtFunctionModel();
+  IqtFunctionTemplateModel();
 
   void setFunction(IFunction_sptr fun) override;
   void removeFunction(std::string const &prefix) override;

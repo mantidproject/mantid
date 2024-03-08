@@ -14,14 +14,17 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-IqtTemplatePresenter::IqtTemplatePresenter(IqtFunctionTemplateView *browser, std::unique_ptr<IqtFunctionModel> model)
+IqtTemplatePresenter::IqtTemplatePresenter(IqtFunctionTemplateView *browser,
+                                           std::unique_ptr<IqtFunctionTemplateModel> model)
     : FunctionTemplatePresenter(browser, std::move(model)) {
   view()->updateState();
 }
 
 IqtFunctionTemplateView *IqtTemplatePresenter::view() const { return dynamic_cast<IqtFunctionTemplateView *>(m_view); }
 
-IqtFunctionModel *IqtTemplatePresenter::model() const { return dynamic_cast<IqtFunctionModel *>(m_model.get()); }
+IqtFunctionTemplateModel *IqtTemplatePresenter::model() const {
+  return dynamic_cast<IqtFunctionTemplateModel *>(m_model.get());
+}
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   if (n < 0) {

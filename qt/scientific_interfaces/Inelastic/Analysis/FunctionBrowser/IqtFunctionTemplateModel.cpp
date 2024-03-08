@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IqtFunctionModel.h"
+#include "IqtFunctionTemplateModel.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -47,18 +47,18 @@ namespace MantidQt::CustomInterfaces::IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-IqtFunctionModel::IqtFunctionModel()
+IqtFunctionTemplateModel::IqtFunctionTemplateModel()
     : MultiFunctionTemplateModel(std::make_unique<FunctionModel>(),
                                  std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
-void IqtFunctionModel::clearData() {
+void IqtFunctionTemplateModel::clearData() {
   m_numberOfExponentials = 0;
   m_hasStretchExponential = false;
   m_background.clear();
   m_model->clear();
 }
 
-void IqtFunctionModel::setFunction(IFunction_sptr fun) {
+void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
@@ -115,7 +115,7 @@ void IqtFunctionModel::setFunction(IFunction_sptr fun) {
   m_model->setFunction(fun);
 }
 
-void IqtFunctionModel::addFunction(std::string const &prefix, std::string const &funStr) {
+void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::string const &funStr) {
   if (!prefix.empty())
     throw std::runtime_error("Function doesn't have member function with prefix " + prefix);
   auto fun = FunctionFactory::Instance().createInitialized(funStr);
@@ -151,7 +151,7 @@ void IqtFunctionModel::addFunction(std::string const &prefix, std::string const 
   }
 }
 
-void IqtFunctionModel::removeFunction(std::string const &prefix) {
+void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
   if (prefix.empty()) {
     clear();
     return;
@@ -179,7 +179,7 @@ void IqtFunctionModel::removeFunction(std::string const &prefix) {
   throw std::runtime_error("Function doesn't have member function with prefix " + prefix);
 }
 
-void IqtFunctionModel::setNumberOfExponentials(int n) {
+void IqtFunctionTemplateModel::setNumberOfExponentials(int n) {
   auto oldValues = getCurrentValues();
   m_numberOfExponentials = n;
   m_model->setFunctionString(buildFunctionString());
@@ -188,9 +188,9 @@ void IqtFunctionModel::setNumberOfExponentials(int n) {
   estimateFunctionParameters();
 }
 
-int IqtFunctionModel::getNumberOfExponentials() const { return m_numberOfExponentials; }
+int IqtFunctionTemplateModel::getNumberOfExponentials() const { return m_numberOfExponentials; }
 
-void IqtFunctionModel::setStretchExponential(bool on) {
+void IqtFunctionTemplateModel::setStretchExponential(bool on) {
   auto oldValues = getCurrentValues();
   m_hasStretchExponential = on;
   m_model->setFunctionString(buildFunctionString());
@@ -199,9 +199,9 @@ void IqtFunctionModel::setStretchExponential(bool on) {
   estimateFunctionParameters();
 }
 
-bool IqtFunctionModel::hasStretchExponential() const { return m_hasStretchExponential; }
+bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_hasStretchExponential; }
 
-void IqtFunctionModel::setBackground(std::string const &name) {
+void IqtFunctionTemplateModel::setBackground(std::string const &name) {
   auto oldValues = getCurrentValues();
   m_background = name;
   m_model->setFunctionString(buildFunctionString());
@@ -209,7 +209,7 @@ void IqtFunctionModel::setBackground(std::string const &name) {
   setCurrentValues(oldValues);
 }
 
-void IqtFunctionModel::removeBackground() {
+void IqtFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();
   m_background.clear();
   m_model->setFunctionString(buildFunctionString());
@@ -217,9 +217,9 @@ void IqtFunctionModel::removeBackground() {
   setCurrentValues(oldValues);
 }
 
-bool IqtFunctionModel::hasBackground() const { return !m_background.empty(); }
+bool IqtFunctionTemplateModel::hasBackground() const { return !m_background.empty(); }
 
-void IqtFunctionModel::tieIntensities(bool on) {
+void IqtFunctionTemplateModel::tieIntensities(bool on) {
   auto heightName = getParameterName(ParamID::STRETCH_HEIGHT);
   if (!heightName)
     heightName = getParameterName(ParamID::EXP1_HEIGHT);
@@ -232,7 +232,7 @@ void IqtFunctionModel::tieIntensities(bool on) {
   }
 }
 
-EstimationDataSelector IqtFunctionModel::getEstimationDataSelector() const {
+EstimationDataSelector IqtFunctionTemplateModel::getEstimationDataSelector() const {
   return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
             const std::pair<double, double> range) -> DataForParameterEstimation {
     (void)range;
@@ -243,7 +243,7 @@ EstimationDataSelector IqtFunctionModel::getEstimationDataSelector() const {
   };
 }
 
-std::string IqtFunctionModel::setBackgroundA0(double value) {
+std::string IqtFunctionTemplateModel::setBackgroundA0(double value) {
   if (hasBackground()) {
     setParameter(ParamID::FLAT_BG_A0, value);
     return *getParameterName(ParamID::FLAT_BG_A0);
@@ -251,13 +251,13 @@ std::string IqtFunctionModel::setBackgroundA0(double value) {
   return "";
 }
 
-void IqtFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+void IqtFunctionTemplateModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   (void)fitResolutions;
 }
 
-void IqtFunctionModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+void IqtFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
 
-std::optional<std::string> IqtFunctionModel::getPrefix(ParamID name) const {
+std::optional<std::string> IqtFunctionTemplateModel::getPrefix(ParamID name) const {
   if (name <= ParamID::EXP1_LIFETIME) {
     return getExp1Prefix();
   } else if (name <= ParamID::EXP2_LIFETIME) {
@@ -269,7 +269,7 @@ std::optional<std::string> IqtFunctionModel::getPrefix(ParamID name) const {
   }
 }
 
-void IqtFunctionModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
+void IqtFunctionTemplateModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
   if (m_numberOfExponentials > 0) {
     paramFun(ParamID::EXP1_HEIGHT);
     paramFun(ParamID::EXP1_LIFETIME);
@@ -288,20 +288,20 @@ void IqtFunctionModel::applyParameterFunction(const std::function<void(ParamID)>
   }
 }
 
-std::string IqtFunctionModel::buildExpDecayFunctionString() const {
+std::string IqtFunctionTemplateModel::buildExpDecayFunctionString() const {
   return "name=ExpDecay,Height=1,Lifetime=1,constraints=(Height>0,Lifetime>0)";
 }
 
-std::string IqtFunctionModel::buildStretchExpFunctionString() const {
+std::string IqtFunctionTemplateModel::buildStretchExpFunctionString() const {
   return "name=StretchExp,Height=1,Lifetime=1,Stretching=1,constraints=(Height>"
          "0,Lifetime>0,0<Stretching<1.001)";
 }
 
-std::string IqtFunctionModel::buildBackgroundFunctionString() const {
+std::string IqtFunctionTemplateModel::buildBackgroundFunctionString() const {
   return "name=FlatBackground,A0=0,constraints=(A0>0)";
 }
 
-std::string IqtFunctionModel::buildFunctionString() const {
+std::string IqtFunctionTemplateModel::buildFunctionString() const {
   QStringList functions;
   if (m_numberOfExponentials > 0) {
     functions << QString::fromStdString(buildExpDecayFunctionString());
@@ -318,7 +318,7 @@ std::string IqtFunctionModel::buildFunctionString() const {
   return functions.join(";").toStdString();
 }
 
-std::optional<std::string> IqtFunctionModel::getExp1Prefix() const {
+std::optional<std::string> IqtFunctionTemplateModel::getExp1Prefix() const {
   if (m_numberOfExponentials == 0)
     return std::optional<std::string>();
   if (m_numberOfExponentials == 1 && !m_hasStretchExponential && m_background.empty())
@@ -326,13 +326,13 @@ std::optional<std::string> IqtFunctionModel::getExp1Prefix() const {
   return std::string("f0.");
 }
 
-std::optional<std::string> IqtFunctionModel::getExp2Prefix() const {
+std::optional<std::string> IqtFunctionTemplateModel::getExp2Prefix() const {
   if (m_numberOfExponentials < 2)
     return std::optional<std::string>();
   return std::string("f1.");
 }
 
-std::optional<std::string> IqtFunctionModel::getStretchPrefix() const {
+std::optional<std::string> IqtFunctionTemplateModel::getStretchPrefix() const {
   if (!m_hasStretchExponential)
     return std::optional<std::string>();
   if (m_numberOfExponentials == 0 && m_background.empty())
@@ -340,7 +340,7 @@ std::optional<std::string> IqtFunctionModel::getStretchPrefix() const {
   return "f" + std::to_string(m_numberOfExponentials) + ".";
 }
 
-std::optional<std::string> IqtFunctionModel::getBackgroundPrefix() const {
+std::optional<std::string> IqtFunctionTemplateModel::getBackgroundPrefix() const {
   if (m_background.empty())
     return std::optional<std::string>();
   if (m_numberOfExponentials == 0 && !m_hasStretchExponential)

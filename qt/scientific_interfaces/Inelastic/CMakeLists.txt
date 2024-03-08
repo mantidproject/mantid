@@ -34,7 +34,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/FunctionTemplateView.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
     Analysis/FunctionBrowser/FqFunctionModel.cpp
-    Analysis/FunctionBrowser/IqtFunctionModel.cpp
+    Analysis/FunctionBrowser/IqtFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/IqtFunctionTemplateView.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
     Analysis/FunctionBrowser/MSDFunctionModel.cpp
