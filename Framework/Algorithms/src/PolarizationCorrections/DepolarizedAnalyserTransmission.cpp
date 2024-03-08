@@ -20,6 +20,7 @@ std::string_view constexpr DEP_WORKSPACE{"DepolarisedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
+std::string_view constexpr FIT_QUALITY_OVERRIDE{"OverrideFitQualityError"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
 std::string_view constexpr OUTPUT_COV_MATRIX{"OutputCovarianceMatrix"};
@@ -75,6 +76,9 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
                   "Starting value for the depolarised cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
+  declareProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE), false,
+                  "Whether the algorithm should ignore a chi-squared (fit cost value) greater than 1 and therefore not "
+                  "throw an error.");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the table workspace containing the fit parameter results.");
@@ -159,10 +163,13 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
   // If a non-monitor MT workspace is provided by mistake the workspace to be fitted can contain only NaNs/infs due to
   // divide-by-0 results. In this case, the fit succeeds but the quality is 0, so we should still throw an error.
   double const &fitQuality = fitAlg->getProperty("OutputChi2overDoF");
-  if (fitQuality <= 0) {
-    throw std::runtime_error("Failed to fit to transmission workspace, " + inputWs->getName() +
-                             ": Fit quality is too low (" + std::to_string(fitQuality) +
-                             "). You may want to check that the correct monitor spectrum was provided.");
+  bool const &qualityOverride = getProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE));
+  if (fitQuality == 0 || (fitQuality > 1 && !qualityOverride)) {
+    throw std::runtime_error(
+        "Failed to fit to transmission workspace, " + inputWs->getName() + ": Fit quality (chi-squared) is too poor (" +
+        std::to_string(fitQuality) +
+        ". Should be 0 < x < 1). You may want to check that the correct monitor spectrum and starting "
+        "fitting values were provided.");
   }
   ITableWorkspace_sptr const &paramWs = fitAlg->getProperty("OutputParameters");
   setProperty(std::string(PropNames::OUTPUT_WORKSPACE), paramWs);
