@@ -33,6 +33,7 @@ public:
   }
 
   void testInputWorkspaceFormat() {
+    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
     std::vector<double> x{1, 2, 3, 4, 5};
     std::vector<double> y{1, 4, 9, 16, 25};
 
@@ -100,6 +101,7 @@ public:
   }
 
   void testNonWavelengthInput() {
+    // The units of the input workspace should be wavelength
     auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
@@ -138,6 +140,7 @@ public:
   }
 
   void testCovarianceMatrix() {
+    // Should accept a 2x2 covariance matrix for the two input parameters
     auto wsGrp = createExampleGroupWorkspace("wsGrp");
 
     ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
