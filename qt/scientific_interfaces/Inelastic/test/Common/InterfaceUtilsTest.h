@@ -21,7 +21,9 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 
 class InterfaceUtilsTest : public CxxTest::TestSuite {
 public:
-  InterfaceUtilsTest() = default;
+  static InterfaceUtilsTest *createSuite() { return new InterfaceUtilsTest(); }
+
+  static void destroySuite(InterfaceUtilsTest *suite) { delete suite; }
 
   void test_interface_property_empty_if_no_interface_found() {
     TS_ASSERT_EQUALS(getInterfaceProperty("Empty", "EXTENSIONS", "all"), "");

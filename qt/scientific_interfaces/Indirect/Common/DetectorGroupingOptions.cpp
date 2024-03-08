@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorGroupingOptions.h"
-#include "Common/InterfaceUtils.h"
+#include "Common/ValidationUtils.h"
 #include "MantidAPI/AlgorithmProperties.h"
 
 #include <unordered_map>
@@ -56,28 +56,7 @@ int DetectorGroupingOptions::nGroups() const { return m_uiForm.spNumberGroups->v
 
 std::optional<std::string> DetectorGroupingOptions::validateGroupingProperties(std::size_t const &spectraMin,
                                                                                std::size_t const &spectraMax) const {
-  auto const properties = groupingProperties();
-  std::string groupingType = properties->getProperty("GroupingMethod");
-  if (groupingType == "File" && !properties->existsProperty("MapFile")) {
-    return "Please supply a map file for grouping detectors.";
-  } else if (groupingType == "Custom") {
-    if (!properties->existsProperty("GroupingString")) {
-      return "Please supply a custom string for grouping detectors.";
-    } else {
-      std::string customString = properties->getProperty("GroupingString");
-      return InterfaceUtils::groupingStrInRange(customString, spectraMin, spectraMax)
-                 ? std::nullopt
-                 : std::optional<std::string>("Please supply a custom grouping within the correct range.");
-    }
-  } else if (groupingType == "Groups") {
-    auto const numberOfSpectra = spectraMax - spectraMin + 1;
-    auto const numberOfGroups = std::stoull(properties->getPropertyValue("NGroups"));
-    if (numberOfGroups > numberOfSpectra) {
-      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
-             ").";
-    }
-  }
-  return std::nullopt;
+  return ValidationUtils::validateGroupingProperties(groupingProperties(), spectraMin, spectraMax);
 }
 
 std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::groupingProperties() const {

@@ -61,6 +61,7 @@ set(SRC_FILES
     Common/IndirectTab.cpp
     Common/InterfaceUtils.cpp
     Common/WorkspaceUtils.cpp
+    Common/ValidationUtils.cpp
     Corrections/AbsorptionCorrections.cpp
     Corrections/ApplyAbsorptionCorrections.cpp
     Corrections/CalculatePaalmanPings.cpp
@@ -174,6 +175,7 @@ set(INC_FILES
     Common/SettingsPresenter.h
     Common/InterfaceUtils.h
     Common/WorkspaceUtils.h
+    Common/ValidationUtils.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
