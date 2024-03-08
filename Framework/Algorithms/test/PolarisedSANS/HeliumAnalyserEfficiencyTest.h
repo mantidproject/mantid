@@ -8,6 +8,8 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h"
 #include <boost/format.hpp>
