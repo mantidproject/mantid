@@ -24,6 +24,6 @@ class ISISIndirectEnergyTransferTest(MantidSystemTest):
             OutputWorkspace="TOSCA20000_graphite_002_Reduced",
         )
 
-    # def validate(self):
-    #    self.tolerance = 1e-10
-    #    return "__ElWinMulti_OutputWS", "II.AnalysisElwinMulti.nxs"
+    def validate(self):
+        self.tolerance = 1e-10
+        return "tosca5224-glucose", "tosca5224-glucose-ref.nxs"
