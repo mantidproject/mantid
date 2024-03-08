@@ -515,10 +515,10 @@ void Quasi::plotClicked() {
   auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Output options
-  std::string const plot = m_uiForm.cbPlot->currentText().toStdString();
+  std::string const plot = m_uiForm.cbPlot->currentText().toLower().toStdString();
   QString const program = m_uiForm.cbProgram->currentText();
   auto const resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-  if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
+  if ((plot == "prob" || plot == "all") && (program == "Lorentzians")) {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
@@ -528,13 +528,16 @@ void Quasi::plotClicked() {
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
-  auto const paramNames = {"Amplitude", "FWHM", "Beta"};
+  auto const paramNames = {"amplitude", "fwhm", "beta"};
   for (std::string const &paramName : paramNames) {
 
-    if (plot == paramName || plot == "All") {
+    if (plot == paramName || plot == "all") {
       std::vector<std::size_t> spectraIndices = {};
       for (auto i = 0u; i < static_cast<std::size_t>(numSpectra); i++) {
         auto axisLabel = resultWS->getAxis(1)->label(i);
+        // Convert to lower case
+        std::transform(axisLabel.begin(), axisLabel.end(), axisLabel.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
 
         auto const found = axisLabel.find(paramName);
         if (found != std::string::npos) {
