@@ -63,7 +63,7 @@ private:
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
-  std::string m_outputFitGroup;
+  std::string m_outputBaseName;
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

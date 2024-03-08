@@ -214,10 +214,10 @@ void Quasi::run() {
   long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long const resBins = m_properties["ResBinning"]->valueText().toLong();
 
-  // Construct an output name for the Fit group workspace
-  auto const resType = resName.substr(0, resName.size() - 3);
-  auto const programName = program == "Lorentzians" ? resType == "res" ? "QLr" : "QLd" : program;
-  m_outputFitGroup = sampleName.substr(0, sampleName.size() - 3) + programName + "_Fit";
+  // Construct an output base name for the output workspaces
+  auto const resType = resName.substr(resName.length() - 3);
+  auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
+  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName;
 
   // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
   auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
@@ -228,9 +228,9 @@ void Quasi::run() {
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);
   runAlg->setProperty("ResolutionWorkspace", resName);
-  runAlg->setProperty("OutputWorkspaceFit", m_outputFitGroup);
-  runAlg->setProperty("OutputWorkspaceProb", "prob");
-  runAlg->setProperty("OutputWorkspaceResult", "result");
+  runAlg->setProperty("OutputWorkspaceFit", m_outputBaseName + "_Fit");
+  runAlg->setProperty("OutputWorkspaceProb", m_outputBaseName + "_Prob");
+  runAlg->setProperty("OutputWorkspaceResult", m_outputBaseName + "_Result");
   runAlg->setProperty("Elastic", elasticPeak);
   if (useQuickBayes) {
     // Use quickBayes package in BayesQuasi2 algorithm
@@ -287,10 +287,11 @@ void Quasi::updateMiniPlot() {
     g_log.warning(ex.what());
   }
 
-  if (!AnalysisDataService::Instance().doesExist(m_outputFitGroup))
+  auto const fitGroupName = m_outputBaseName + "_Fit";
+  if (!AnalysisDataService::Instance().doesExist(fitGroupName))
     return;
 
-  auto const fitGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_outputFitGroup);
+  auto const fitGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(fitGroupName);
   if (!fitGroup || fitGroup->getNumberOfEntries() <= m_previewSpec) {
     return;
   }
