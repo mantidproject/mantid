@@ -140,15 +140,15 @@ void IqtTemplatePresenter::estimateFunctionParameters() {
 }
 
 void IqtTemplatePresenter::updateViewParameters() {
-  static std::map<IqtFunctionModel::ParamID, void (IqtFunctionTemplateView::*)(double, double)> setters{
-      {IqtFunctionModel::ParamID::EXP1_HEIGHT, &IqtFunctionTemplateView::setExp1Height},
-      {IqtFunctionModel::ParamID::EXP1_LIFETIME, &IqtFunctionTemplateView::setExp1Lifetime},
-      {IqtFunctionModel::ParamID::EXP2_HEIGHT, &IqtFunctionTemplateView::setExp2Height},
-      {IqtFunctionModel::ParamID::EXP2_LIFETIME, &IqtFunctionTemplateView::setExp2Lifetime},
-      {IqtFunctionModel::ParamID::STRETCH_HEIGHT, &IqtFunctionTemplateView::setStretchHeight},
-      {IqtFunctionModel::ParamID::STRETCH_LIFETIME, &IqtFunctionTemplateView::setStretchLifetime},
-      {IqtFunctionModel::ParamID::STRETCH_STRETCHING, &IqtFunctionTemplateView::setStretchStretching},
-      {IqtFunctionModel::ParamID::BG_A0, &IqtFunctionTemplateView::setA0}};
+  static std::map<ParamID, void (IqtFunctionTemplateView::*)(double, double)> setters{
+      {ParamID::EXP1_HEIGHT, &IqtFunctionTemplateView::setExp1Height},
+      {ParamID::EXP1_LIFETIME, &IqtFunctionTemplateView::setExp1Lifetime},
+      {ParamID::EXP2_HEIGHT, &IqtFunctionTemplateView::setExp2Height},
+      {ParamID::EXP2_LIFETIME, &IqtFunctionTemplateView::setExp2Lifetime},
+      {ParamID::STRETCH_HEIGHT, &IqtFunctionTemplateView::setStretchHeight},
+      {ParamID::STRETCH_LIFETIME, &IqtFunctionTemplateView::setStretchLifetime},
+      {ParamID::STRETCH_STRETCHING, &IqtFunctionTemplateView::setStretchStretching},
+      {ParamID::FLAT_BG_A0, &IqtFunctionTemplateView::setA0}};
   auto values = model()->getCurrentValues();
   auto errors = model()->getCurrentErrors();
   for (auto const &value : values) {
