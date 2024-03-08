@@ -182,6 +182,8 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   divide->executeAsChildAlg();
   MatrixWorkspace_sptr p = divide->getProperty("OutputWorkspace");
 
+  // Now we fit tanh(mu*pHe*x) to P to give us pHe
+
   const double pxd = getProperty("pxd");
   const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pxd;
 
@@ -248,6 +250,9 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
     g_log.warning(
         "The number of histogram bins must be greater than 3 in order to provide an accurate error calculation");
   }
+
+  // This is the error calculation for T_para and T_anti using the error on pHe and
+  // the supplied covariance matrix (if there is one).
 
   for (size_t i = 0; i < wavelengthValues.size(); ++i) {
     const double w = wavelengthValues[i];
