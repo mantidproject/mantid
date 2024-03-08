@@ -134,8 +134,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             name="GroupingPolicy",
-            defaultValue="All",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            defaultValue="",
+            validator=StringListValidator(["", "Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
             doc="This property is deprecated (since v6.10), please use the 'GroupingMethod' property instead.",
         )
         self.declareProperty(
@@ -205,17 +205,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Validate grouping method
         grouping_method = self.getPropertyValue("GroupingMethod")
-        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
-
-        if grouping_method == "Workspace" and grouping_ws is None:
-            issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
-
         grouping_policy = self.getPropertyValue("GroupingPolicy")
-        if grouping_policy != "All":
+
+        if grouping_policy != "":
             logger.warning(
                 "The 'GroupingPolicy' algorithm property has been deprecated (since v6.10). Please use the 'GroupingMethod' "
                 "algorithm property instead."
             )
+
+        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        if (grouping_method == "Workspace" or grouping_policy == "Workspace") and grouping_ws is None:
+            issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
 
         return issues
 
@@ -408,7 +408,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         grouping_policy = self.getPropertyValue("GroupingPolicy")
         grouping_method = self.getPropertyValue("GroupingMethod")
         # 'GroupingPolicy' is deprecated, but if it is provided instead of 'GroupingMethod' then try to use it anyway
-        self._grouping_method = grouping_policy if grouping_policy != "All" and grouping_method == "All" else grouping_method
+        self._grouping_method = grouping_policy if grouping_policy != "" and grouping_method == "All" else grouping_method
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
