@@ -1,0 +1,1 @@
+- Fixed an out-of-range error when running a :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` on old TOSCA data.
