@@ -34,20 +34,4 @@ public:
     TS_ASSERT_EQUALS(getResolutionWSSuffixes("Iqt"), QStringList({"_res", "_red", "_sqw"}));
     TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({"_res.nxs", "_red.nxs", "_sqw.nxs"}));
   }
-
-  void test_groupingStrInRange_returns_true_if_the_string_is_in_range() {
-    TS_ASSERT(groupingStrInRange("3,4,5-8,9+10", 3, 10));
-    TS_ASSERT(groupingStrInRange("11,6-9,3:5,10", 3, 11));
-    TS_ASSERT(groupingStrInRange("14,9-6,5:3,10, 2", 2, 14));
-  }
-
-  void test_groupingStrInRange_returns_false_if_the_min_or_max_is_out_of_range() {
-    TS_ASSERT(!groupingStrInRange("3,4,5-8,9+10, 22", 3, 10));
-    TS_ASSERT(!groupingStrInRange("11,6-9,3:5,10", 3, 10));
-    TS_ASSERT(!groupingStrInRange("14,9-6,5:3,10, 2", 3, 14));
-  }
-
-  void test_groupingStrInRange_returns_false_if_grouping_string_is_empty() {
-    TS_ASSERT(!groupingStrInRange("", 3, 10));
-  }
 };

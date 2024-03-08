@@ -5,11 +5,41 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ValidationUtils.h"
-#include "InterfaceUtils.h"
+
+#include <boost/algorithm/string.hpp>
+
+namespace {
+
+bool isWithinRange(std::size_t const &spectraNumber, std::size_t const &spectraMin, std::size_t const &spectraMax) {
+  return spectraMax != 0 && spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ValidationUtils {
+
+bool groupingStrInRange(std::string const &customString, std::size_t const &spectraMin, std::size_t const &spectraMax) {
+  if (customString.empty()) {
+    return false;
+  }
+
+  std::vector<std::string> groupingStrings;
+  std::vector<std::size_t> groupingNumbers;
+  // Split the custom string by its delimiters
+  boost::split(groupingStrings, customString, boost::is_any_of(" ,-+:"));
+  // Remove empty strings
+  groupingStrings.erase(std::remove_if(groupingStrings.begin(), groupingStrings.end(),
+                                       [](std::string const &str) { return str.empty(); }),
+                        groupingStrings.end());
+  // Transform strings to size_t's
+  std::transform(groupingStrings.cbegin(), groupingStrings.cend(), std::back_inserter(groupingNumbers),
+                 [](std::string const &str) { return std::stoull(str); });
+  // Find min and max elements
+  auto const range = std::minmax_element(groupingNumbers.cbegin(), groupingNumbers.cend());
+  return isWithinRange(*range.first, spectraMin, spectraMax) && isWithinRange(*range.second, spectraMin, spectraMax);
+}
 
 std::optional<std::string> validateGroupingProperties(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties,
                                                       std::size_t const &spectraMin, std::size_t const &spectraMax) {
@@ -21,7 +51,7 @@ std::optional<std::string> validateGroupingProperties(std::unique_ptr<Mantid::AP
       return "Please supply a custom string for grouping detectors.";
     }
     std::string customString = properties->getProperty("GroupingString");
-    return InterfaceUtils::groupingStrInRange(customString, spectraMin, spectraMax)
+    return groupingStrInRange(customString, spectraMin, spectraMax)
                ? std::nullopt
                : std::optional<std::string>("Please supply a custom grouping within the correct range.");
   } else if (groupingType == "Groups") {

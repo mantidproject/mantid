@@ -15,6 +15,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ValidationUtils {
 
+MANTIDQT_INELASTIC_DLL bool groupingStrInRange(std::string const &customString, std::size_t const &spectraMin,
+                                               std::size_t const &spectraMax);
+
 MANTIDQT_INELASTIC_DLL std::optional<std::string>
 validateGroupingProperties(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties,
                            std::size_t const &spectraMin, std::size_t const &spectraMax);

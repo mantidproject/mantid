@@ -24,6 +24,22 @@ public:
     m_spectraMax = 50u;
   }
 
+  void test_groupingStrInRange_returns_true_if_the_string_is_in_range() {
+    TS_ASSERT(ValidationUtils::groupingStrInRange("3,4,5-8,9+10", 3, 10));
+    TS_ASSERT(ValidationUtils::groupingStrInRange("11,6-9,3:5,10", 3, 11));
+    TS_ASSERT(ValidationUtils::groupingStrInRange("14,9-6,5:3,10, 2", 2, 14));
+  }
+
+  void test_groupingStrInRange_returns_false_if_the_min_or_max_is_out_of_range() {
+    TS_ASSERT(!ValidationUtils::groupingStrInRange("3,4,5-8,9+10, 22", 3, 10));
+    TS_ASSERT(!ValidationUtils::groupingStrInRange("11,6-9,3:5,10", 3, 10));
+    TS_ASSERT(!ValidationUtils::groupingStrInRange("14,9-6,5:3,10, 2", 3, 14));
+  }
+
+  void test_groupingStrInRange_returns_false_if_grouping_string_is_empty() {
+    TS_ASSERT(!ValidationUtils::groupingStrInRange("", 3, 10));
+  }
+
   void test_when_grouping_method_is_file_and_a_file_is_provided() {
     m_properties->setProperty("GroupingMethod", "File");
     m_properties->setProperty("MapFile", "/path/to/a/grouping/file.map");
