@@ -445,7 +445,7 @@ def identify_bad_detectors(workspace_name):
     @param workspace_name Name of workspace to use to get masking detectors
     @return List of masked spectra
     """
-    from mantid.simpleapi import IdentifyNoisyDetectors, DeleteWorkspace
+    from mantid.simpleapi import IdentifyNoisyDetectors
 
     instrument = mtd[workspace_name].getInstrument()
 
@@ -459,15 +459,11 @@ def identify_bad_detectors(workspace_name):
     masked_spec = list()
 
     if masking_type == "IdentifyNoisyDetectors":
-        ws_mask = "__workspace_mask"
-        IdentifyNoisyDetectors(InputWorkspace=workspace_name, OutputWorkspace=ws_mask)
+        workspace_mask = IdentifyNoisyDetectors(InputWorkspace=workspace_name, StoreInADS=False)
 
         # Convert workspace to a list of spectra
-        num_spec = mtd[ws_mask].getNumberHistograms()
-        masked_spec = [spec for spec in range(0, num_spec) if mtd[ws_mask].readY(spec)[0] == 0.0]
-
-        # Remove the temporary masking workspace
-        DeleteWorkspace(ws_mask)
+        num_spec = workspace_mask.getNumberHistograms()
+        masked_spec = [spec for spec in range(0, num_spec) if workspace_mask.readY(spec)[0] == 0.0]
 
     logger.debug("Masked spectra for workspace %s: %s" % (workspace_name, str(masked_spec)))
 
