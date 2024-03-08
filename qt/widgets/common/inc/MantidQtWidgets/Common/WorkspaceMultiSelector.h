@@ -11,6 +11,7 @@
 #include <QStringList>
 #include <QTableWidget>
 #include <mutex>
+#include <optional>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -40,7 +41,6 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector : public QTableWidget {
   Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(QStringList Suffix READ getWSSuffixes WRITE setWSSuffixes)
-  friend class AddWorkspaceMultiDialog;
 
 public:
   /// Default Constructor
@@ -86,7 +86,7 @@ private:
   void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
   bool checkEligibility(const std::string &name) const;
-  bool hasValidSuffix(const QString &name) const;
+  bool hasValidSuffix(const std::string &name) const;
   bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
   void addItem(const std::string &name);
@@ -106,7 +106,6 @@ private:
   Poco::NObserver<WorkspaceMultiSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   bool m_init;
-  bool m_connected;
 
   /// A list of workspace types that should be shown in the QtableWidget
   QStringList m_workspaceTypes;
@@ -115,7 +114,7 @@ private:
   // show/hide workspace groups
   bool m_showGroups;
   /// Allows you to put limits on the size of the workspace i.e. number of bins
-  std::pair<int, int> m_binLimits;
+  std::optional<std::pair<int, int>> m_binLimits;
   QStringList m_suffix;
 
   // Mutex for synchronized event handling

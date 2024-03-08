@@ -37,7 +37,9 @@ AddWorkspaceMultiDialog::AddWorkspaceMultiDialog(QWidget *parent) : QDialog(pare
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
-std::string AddWorkspaceMultiDialog::workspaceName() const { return std::string(""); }
+std::string AddWorkspaceMultiDialog::workspaceName() const {
+  throw std::logic_error("This method is not implemented in AddWorkspaceMultiDialog class and shouldn't be called");
+}
 
 void AddWorkspaceMultiDialog::setup() { m_uiForm.tbWorkspace->setupTable(); }
 

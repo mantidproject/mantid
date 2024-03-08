@@ -36,13 +36,13 @@ MatrixWorkspace_sptr getWorkspace(const std::string &name) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 }
 
-boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
+std::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     const auto numberOfHistograms = workspace->getNumberHistograms();
     if (numberOfHistograms > 0)
       return numberOfHistograms - 1;
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 QString getIndexString(const MatrixWorkspace_sptr &workspace) {
@@ -116,8 +116,8 @@ WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
       m_remObserver(*this, &WorkspaceMultiSelector::handleRemEvent),
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
-      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_connected(false),
-      m_workspaceTypes(), m_showHidden(false), m_showGroups(false), m_binLimits(std::make_pair(0, -1)), m_suffix() {
+      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
+      m_showHidden(false), m_showGroups(false), m_binLimits(std::nullopt), m_suffix() {
 
   if (init) {
     connectObservers();
@@ -155,7 +155,6 @@ void WorkspaceMultiSelector::disconnectObservers() {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
     m_init = false;
-    m_connected = false;
   }
 }
 
@@ -171,7 +170,6 @@ void WorkspaceMultiSelector::connectObservers() {
   ads.notificationCenter.addObserver(m_replaceObserver);
   refresh();
   m_init = true;
-  m_connected = true;
 }
 
 QStringList WorkspaceMultiSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
@@ -209,10 +207,8 @@ void WorkspaceMultiSelector::showWorkspaceGroups(bool show) {
 
 bool WorkspaceMultiSelector::isValid() const {
   QTableWidgetItem *item = currentItem();
-  return (item->text() != "");
+  return (item != nullptr);
 }
-
-bool WorkspaceMultiSelector::isConnected() const { return m_connected; }
 
 QStringList WorkspaceMultiSelector::getWSSuffixes() const { return m_suffix; }
 
@@ -225,9 +221,15 @@ void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
   }
 }
 
-void WorkspaceMultiSelector::setLowerBinLimit(int numberOfBins) { m_binLimits.first = numberOfBins; }
+void WorkspaceMultiSelector::setLowerBinLimit(int numberOfBins) {
+  m_binLimits = m_binLimits.has_value() ? std::make_pair(numberOfBins, m_binLimits.value().second)
+                                        : std::make_pair(numberOfBins, -1);
+}
 
-void WorkspaceMultiSelector::setUpperBinLimit(int numberOfBins) { m_binLimits.second = numberOfBins; }
+void WorkspaceMultiSelector::setUpperBinLimit(int numberOfBins) {
+  m_binLimits = m_binLimits.has_value() ? std::make_pair(m_binLimits.value().first, numberOfBins)
+                                        : std::make_pair(0, numberOfBins);
+}
 
 void WorkspaceMultiSelector::addItem(const std::string &name) {
   insertRow(rowCount());
@@ -238,7 +240,6 @@ void WorkspaceMultiSelector::addItem(const std::string &name) {
 
   setItem(rowCount() - 1, namesCol, nameItem.release());
   setItem(rowCount() - 1, indexCol, indexItem.release());
-  return;
 }
 
 void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
@@ -249,11 +250,9 @@ void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
 
 void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
   for (auto const &name : names) {
-    if (checkEligibility(name)) {
+    if (checkEligibility(name))
       addItem(name);
-    }
   }
-  return;
 }
 
 stringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
@@ -372,7 +371,7 @@ bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
   auto workspace = ads.retrieve(name);
   if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(workspace->id())) == -1) {
     return false;
-  } else if (!hasValidSuffix(QString::fromStdString(name))) {
+  } else if (!hasValidSuffix(name)) {
     return false;
   } else if (!hasValidNumberOfBins(workspace)) {
     return false;
@@ -385,27 +384,24 @@ bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
   return true;
 }
 
-bool WorkspaceMultiSelector::hasValidSuffix(const QString &name) const {
-  if (m_suffix.isEmpty()) {
+bool WorkspaceMultiSelector::hasValidSuffix(const std::string &name) const {
+  if (m_suffix.isEmpty())
     return true;
-  } else {
-    for (int i = 0; i < m_suffix.size(); ++i) {
-      if (name.endsWith(m_suffix[i])) {
-        return true;
-      }
-    }
+  else {
+    if (name.find_last_of("_") < name.size())
+      return m_suffix.contains(QString::fromStdString(name.substr(name.find_last_of("_"))));
+    else
+      return false;
   }
-
-  return false;
 }
 
 bool WorkspaceMultiSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const {
-  if (m_binLimits.first != 0 || m_binLimits.second != -1) {
+  if (m_binLimits.has_value()) {
     if (auto const workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
       auto const numberOfBins = static_cast<int>(workspace->y(0).size());
-      if (m_binLimits.second != -1)
-        return numberOfBins >= m_binLimits.first && numberOfBins <= m_binLimits.second;
-      return numberOfBins >= m_binLimits.first;
+      if (m_binLimits.value().second != -1)
+        return numberOfBins >= m_binLimits.value().first && numberOfBins <= m_binLimits.value().second;
+      return numberOfBins >= m_binLimits.value().first;
     }
   }
   return true;
@@ -415,12 +411,7 @@ void WorkspaceMultiSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   this->clearContents();
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  std::vector<std::string> items;
-  if (showHiddenWorkspaces()) {
-    items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted, Mantid::Kernel::DataServiceHidden::Include);
-  } else {
-    items = ads.getObjectNames();
-  }
+  auto items = ads.getObjectNames();
   addItems(items);
 }
 
