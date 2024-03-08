@@ -72,6 +72,7 @@ void HeliumAnalyserEfficiency::init() {
                                                                        PropertyMode::Optional));
   declareProperty("StartLambda", 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
   declareProperty("EndLambda", 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
+  declareProperty("StopOnFitError", true, "If the fit fails, then stop the algorithm", Direction::Input);
 }
 
 /**
@@ -197,6 +198,16 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   fit->setProperty("EndX", endLambda);
   fit->setProperty("CreateOutput", true);
   fit->executeAsChildAlg();
+
+  const bool stopOnFitError = getProperty("StopOnFitError");
+  const std::string &status = fit->getProperty("OutputStatus");
+  if (stopOnFitError && (!fit->isExecuted() || status != "success")) {
+    auto const &errMsg{"Failed to fit to workspace, " + groupWorkspace->getName() +
+                       " + in the calculation of p_He: " + status};
+    g_log.error(errMsg);
+    throw std::runtime_error(errMsg);
+  }
+
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
   MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
 
