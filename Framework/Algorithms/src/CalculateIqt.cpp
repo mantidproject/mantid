@@ -272,7 +272,6 @@ MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sp
   auto workspace_int = integration(workspace);
   workspace = convertToPointData(workspace);
   workspace = extractFFTSpectrum(workspace);
-  std::cout << "enforceNormalization" << enforceNormalization << std::endl;
   if (enforceNormalization) {
     return divide(workspace, workspace_int);
   }

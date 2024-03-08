@@ -206,8 +206,6 @@ void InelasticDataManipulationIqtTabView::notifyValueChanged(QtProperty *prop, d
 }
 
 void InelasticDataManipulationIqtTabView::notifyEnableNormalizationClicked(int state) {
-  // TODO THIS IS WRONG!!
-  m_uiForm.spIterations->setEnabled(state);
   m_presenter->handleNormalizationClicked(state);
 }
 
