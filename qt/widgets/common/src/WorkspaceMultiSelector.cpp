@@ -206,7 +206,7 @@ void WorkspaceMultiSelector::showWorkspaceGroups(bool show) {
 }
 
 bool WorkspaceMultiSelector::isValid() const {
-  QTableWidgetItem *item = currentItem();
+  const QTableWidgetItem *item = currentItem();
   return (item != nullptr);
 }
 
