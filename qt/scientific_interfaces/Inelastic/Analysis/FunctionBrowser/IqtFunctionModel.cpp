@@ -494,30 +494,30 @@ boost::optional<std::string> IqtFunctionModel::getPrefix(ParamID name) const {
   }
 }
 
-QMap<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentValues() const {
-  QMap<ParamID, double> values;
+std::map<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentValues() const {
+  std::map<ParamID, double> values;
   auto store = [&values, this](ParamID name) { values[name] = *getParameter(name); };
   applyParameterFunction(store);
   return values;
 }
 
-QMap<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentErrors() const {
-  QMap<ParamID, double> errors;
+std::map<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentErrors() const {
+  std::map<ParamID, double> errors;
   auto store = [&errors, this](ParamID name) { errors[name] = *getParameterError(name); };
   applyParameterFunction(store);
   return errors;
 }
 
-QMap<int, std::string> IqtFunctionModel::getParameterNameMap() const {
-  QMap<int, std::string> out;
+std::map<int, std::string> IqtFunctionModel::getParameterNameMap() const {
+  std::map<int, std::string> out;
   auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
   return out;
 }
 
-void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
-  for (auto const name : values.keys()) {
-    setParameter(name, values[name]);
+void IqtFunctionModel::setCurrentValues(const std::map<ParamID, double> &values) {
+  for (auto const &value : values) {
+    setParameter(value.first, value.second);
   }
 }
 

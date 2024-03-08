@@ -16,8 +16,8 @@
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
 #include <QList>
-#include <QMap>
 
+#include <map>
 #include <optional>
 
 namespace MantidQt {
@@ -84,14 +84,14 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 
-  QMap<ParamID, double> getCurrentValues() const;
-  QMap<ParamID, double> getCurrentErrors() const;
-  QMap<int, std::string> getParameterNameMap() const;
+  std::map<ParamID, double> getCurrentValues() const;
+  std::map<ParamID, double> getCurrentErrors() const;
+  std::map<int, std::string> getParameterNameMap() const;
 
 protected:
   void setParameter(ParamID name, double value);
   std::optional<std::string> getParameterName(ParamID name) const;
-  void setCurrentValues(const QMap<ParamID, double> &);
+  void setCurrentValues(const std::map<ParamID, double> &);
   std::vector<std::string> makeGlobalList() const;
 
   std::unique_ptr<FunctionModel> m_model;

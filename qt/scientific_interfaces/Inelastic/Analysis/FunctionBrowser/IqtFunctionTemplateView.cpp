@@ -210,15 +210,18 @@ void IqtFunctionTemplateView::parameterChanged(QtProperty *prop) {
   }
 }
 
-void IqtFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &parameterNames) {
+void IqtFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &parameterNames) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterNames.clear();
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
-    auto const name = parameterNames[i];
-    m_parameterNames[prop] = name;
-    if (!name.empty()) {
-      prop->setPropertyName(QString::fromStdString(name));
+    auto const it = parameterNames.find(i);
+    if (it != parameterNames.cend()) {
+      auto const name = it->second;
+      m_parameterNames[prop] = name;
+      if (!name.empty()) {
+        prop->setPropertyName(QString::fromStdString(name));
+      }
     }
   }
 }

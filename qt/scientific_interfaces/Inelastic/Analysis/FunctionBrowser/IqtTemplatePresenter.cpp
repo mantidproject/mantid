@@ -151,8 +151,8 @@ void IqtTemplatePresenter::updateViewParameters() {
       {IqtFunctionModel::ParamID::BG_A0, &IqtFunctionTemplateView::setA0}};
   auto values = model()->getCurrentValues();
   auto errors = model()->getCurrentErrors();
-  for (auto const name : values.keys()) {
-    (view()->*setters.at(name))(values[name], errors[name]);
+  for (auto const &value : values) {
+    (view()->*setters.at(value.first))(value.second, errors[value.first]);
   }
 }
 

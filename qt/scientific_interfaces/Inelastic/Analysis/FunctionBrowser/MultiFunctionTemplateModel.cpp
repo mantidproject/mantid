@@ -183,22 +183,22 @@ void MultiFunctionTemplateModel::estimateFunctionParameters() {
   m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
-QMap<ParamID, double> MultiFunctionTemplateModel::getCurrentValues() const {
-  QMap<ParamID, double> values;
+std::map<ParamID, double> MultiFunctionTemplateModel::getCurrentValues() const {
+  std::map<ParamID, double> values;
   auto store = [&values, this](ParamID name) { values[name] = *getParameter(name); };
   applyParameterFunction(store);
   return values;
 }
 
-QMap<ParamID, double> MultiFunctionTemplateModel::getCurrentErrors() const {
-  QMap<ParamID, double> errors;
+std::map<ParamID, double> MultiFunctionTemplateModel::getCurrentErrors() const {
+  std::map<ParamID, double> errors;
   auto store = [&errors, this](ParamID name) { errors[name] = *getParameterError(name); };
   applyParameterFunction(store);
   return errors;
 }
 
-QMap<int, std::string> MultiFunctionTemplateModel::getParameterNameMap() const {
-  QMap<int, std::string> out;
+std::map<int, std::string> MultiFunctionTemplateModel::getParameterNameMap() const {
+  std::map<int, std::string> out;
   auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
   return out;
@@ -221,9 +221,9 @@ void MultiFunctionTemplateModel::setParameter(ParamID name, double value) {
   }
 }
 
-void MultiFunctionTemplateModel::setCurrentValues(const QMap<ParamID, double> &values) {
-  for (auto const name : values.keys()) {
-    setParameter(name, values[name]);
+void MultiFunctionTemplateModel::setCurrentValues(const std::map<ParamID, double> &values) {
+  for (auto const &value : values) {
+    setParameter(value.first, value.second);
   }
 }
 

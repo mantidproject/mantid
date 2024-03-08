@@ -13,7 +13,8 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
-#include <QMap>
+#include <map>
+
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -94,9 +95,9 @@ public:
     STRETCH_STRETCHING,
     BG_A0
   };
-  QMap<ParamID, double> getCurrentValues() const;
-  QMap<ParamID, double> getCurrentErrors() const;
-  QMap<int, std::string> getParameterNameMap() const;
+  std::map<ParamID, double> getCurrentValues() const;
+  std::map<ParamID, double> getCurrentErrors() const;
+  std::map<int, std::string> getParameterNameMap() const;
 
 private:
   void clearData();
@@ -111,7 +112,7 @@ private:
   boost::optional<std::string> getParameterName(ParamID name) const;
   boost::optional<std::string> getParameterDescription(ParamID name) const;
   boost::optional<std::string> getPrefix(ParamID name) const;
-  void setCurrentValues(const QMap<ParamID, double> &);
+  void setCurrentValues(const std::map<ParamID, double> &);
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(std::string const &parameterName);
   std::string buildExpDecayFunctionString() const;

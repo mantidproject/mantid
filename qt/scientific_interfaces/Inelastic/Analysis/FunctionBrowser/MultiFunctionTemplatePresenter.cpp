@@ -52,8 +52,8 @@ void MultiFunctionTemplatePresenter::updateViewParameters() {
 
   auto values = templateModel->getCurrentValues();
   auto errors = templateModel->getCurrentErrors();
-  for (auto const &id : values.keys()) {
-    templateView->setParameterValueQuiet(id, values[id], errors[id]);
+  for (auto const &value : values) {
+    templateView->setParameterValueQuiet(value.first, value.second, errors[value.first]);
   }
   m_view->setGlobalParametersQuiet(m_model->getGlobalParameters());
 }

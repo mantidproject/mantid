@@ -38,14 +38,17 @@ void MultiFunctionTemplateView::createProperties() {
   m_intManager->blockSignals(false);
 }
 
-void MultiFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &parameterNames) {
+void MultiFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
-    auto const name = parameterNames[static_cast<int>(m_parameterMap[prop])];
-    m_parameterNames[prop] = name;
-    if (!name.empty()) {
-      prop->setPropertyName(QString::fromStdString(name));
+    auto const it = parameterNames.find(static_cast<int>(m_parameterMap[prop]));
+    if (it != parameterNames.cend()) {
+      auto const name = it->second;
+      m_parameterNames[prop] = name;
+      if (!name.empty()) {
+        prop->setPropertyName(QString::fromStdString(name));
+      }
     }
   }
 }
