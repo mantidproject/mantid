@@ -147,6 +147,8 @@ void InelasticDataManipulationIqtTabView::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(notifyErrorsClicked(int)));
+  connect(m_uiForm.enEnforceNormalization, SIGNAL(stateChanged(int)), this,
+          SLOT(notifyEnableNormalizationClicked(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(notifyPreviewSpectrumChanged(int)));
   connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyUpdateEnergyRange(int)));
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
@@ -159,6 +161,7 @@ void InelasticDataManipulationIqtTabView::setup() {
   m_uiForm.dsResolution->isOptional(true);
   notifyIterationsChanged(m_uiForm.spIterations->value());
   notifyErrorsClicked(1);
+  notifyEnableNormalizationClicked(1);
   m_dblManager->setValue(m_properties["SampleBinning"], 10);
 }
 
@@ -200,6 +203,12 @@ void InelasticDataManipulationIqtTabView::notifyUpdateEnergyRange(int state) {
 
 void InelasticDataManipulationIqtTabView::notifyValueChanged(QtProperty *prop, double value) {
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), value);
+}
+
+void InelasticDataManipulationIqtTabView::notifyEnableNormalizationClicked(int state) {
+  // TODO THIS IS WRONG!!
+  m_uiForm.spIterations->setEnabled(state);
+  m_presenter->handleNormalizationClicked(state);
 }
 
 /**

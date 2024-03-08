@@ -61,6 +61,7 @@ private slots:
   void notifySaveClicked();
   void notifyPlotCurrentPreview();
   void notifyErrorsClicked(int state);
+  void notifyEnableNormalizationClicked(int state);
   void notifyPreviewSpectrumChanged(int spectra);
   void notifyUpdateEnergyRange(int state);
   void notifyValueChanged(QtProperty *prop, double value);

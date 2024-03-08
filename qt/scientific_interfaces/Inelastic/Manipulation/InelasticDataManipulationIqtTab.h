@@ -24,6 +24,7 @@ public:
   virtual void handleSaveClicked() = 0;
   virtual void handlePlotCurrentPreview() = 0;
   virtual void handleErrorsClicked(int state) = 0;
+  virtual void handleNormalizationClicked(int state) = 0;
   virtual void handleValueChanged(std::string const &propName, double value) = 0;
   virtual void handlePreviewSpectrumChanged(int spectra) = 0;
 };
@@ -47,6 +48,7 @@ public:
   void handleSaveClicked() override;
   void handlePlotCurrentPreview() override;
   void handleErrorsClicked(int state) override;
+  void handleNormalizationClicked(int state) override;
   void handleValueChanged(std::string const &propName, double value) override;
   void handlePreviewSpectrumChanged(int spectra) override;
 

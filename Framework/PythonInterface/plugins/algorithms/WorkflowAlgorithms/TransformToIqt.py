@@ -24,6 +24,7 @@ class TransformToIqt(PythonAlgorithm):
     _output_workspace = None
     _dry_run = None
     _calculate_errors = None
+    _enforce_normalization = None
     _number_of_iterations = None
     _seed = None
 
@@ -78,6 +79,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self.declareProperty(name="DryRun", defaultValue=False, doc="Only calculate and output the parameters")
         self.declareProperty("CalculateErrors", defaultValue=True, doc="Calculate monte-carlo errors.")
+        self.declareProperty("EnforceNormalization", defaultValue=True, doc="Normalization to enforce I(t=0)")
 
     def PyExec(self):
         self._setup()
@@ -119,6 +121,7 @@ class TransformToIqt(PythonAlgorithm):
             self._parameter_table = getWSprefix(self._sample) + "TransformToIqtParameters"
 
         self._calculate_errors = self.getProperty("CalculateErrors").value
+        self._enforce_normalization = self.getProperty("EnforceNormalization").value
         self._number_of_iterations = self.getProperty("NumberOfIterations").value
         self._seed = self.getProperty("SeedValue").value
 
@@ -259,6 +262,7 @@ class TransformToIqt(PythonAlgorithm):
             "EnergyMax": self._e_max,
             "EnergyWidth": self._e_width,
             "CalculateErrors": self._calculate_errors,
+            "EnforceNormalization": self._enforce_normalization,
             "NumberOfIterations": self._number_of_iterations,
             "SeedValue": self._seed,
         }

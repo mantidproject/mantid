@@ -30,7 +30,8 @@ private:
   API::MatrixWorkspace_sptr monteCarloErrorCalculation(const API::MatrixWorkspace_sptr &sample,
                                                        const API::MatrixWorkspace_sptr &resolution,
                                                        const std::string &rebinParams, const int seed,
-                                                       const bool calculateErrors, const int nIterations);
+                                                       const bool calculateErrors, const int nIterations,
+                                                       const bool enforceNormalization);
 
   API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace, const std::string &params);
   API::MatrixWorkspace_sptr integration(const API::MatrixWorkspace_sptr &workspace);
@@ -43,12 +44,13 @@ private:
 
   API::MatrixWorkspace_sptr removeInvalidData(API::MatrixWorkspace_sptr workspace);
   API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace,
-                                                       const std::string &rebinParams);
+                                                       const std::string &rebinParams, const bool enforceNormalization);
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace,
                                          const API::MatrixWorkspace_sptr &resolutionWorkspace,
-                                         const std::string &rebinParams);
+                                         const std::string &rebinParams, const bool enforceNormalization);
   API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample, const API::MatrixWorkspace_sptr &resolution,
-                                         const std::string &rebinParams, Kernel::MersenneTwister &mTwister);
+                                         const std::string &rebinParams, Kernel::MersenneTwister &mTwister,
+                                         const bool enforceNormalization);
   API::MatrixWorkspace_sptr
   setErrorsToStandardDeviation(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
   API::MatrixWorkspace_sptr setErrorsToZero(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
