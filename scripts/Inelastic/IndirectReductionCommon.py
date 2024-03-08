@@ -647,15 +647,12 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(
-    workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None
-):
+def group_spectra(workspace_name, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
 
     @param workspace_name Name of workspace to group spectra of
-    @param masked_detectors List of spectra numbers to mask
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
@@ -663,23 +660,18 @@ def group_spectra(
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
-    grouped_ws = group_spectra_of(
-        mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string, number_of_groups, spectra_range
-    )
+    grouped_ws = group_spectra_of(mtd[workspace_name], method, group_file, group_ws, group_string, number_of_groups, spectra_range)
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
 
 
-def group_spectra_of(
-    workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None
-):
+def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
 
     @param workspace Workspace to group spectra of
-    @param masked_detectors List of spectra numbers to mask
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
@@ -714,7 +706,7 @@ def group_spectra_of(
     elif grouping_method == "All":
         # Get a list of all spectra minus those which are masked
         num_spec = workspace.getNumberHistograms()
-        spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
+        spectra_list = [spec for spec in range(0, num_spec)]
 
         # Apply the grouping
         group_detectors.setProperty("WorkspaceIndexList", spectra_list)
@@ -738,10 +730,6 @@ def group_spectra_of(
         if not os.path.isfile(grouping_file):
             raise RuntimeError("Cannot find grouping file: %s" % grouping_file)
 
-        # Mask detectors if required
-        if len(masked_detectors) > 0:
-            _mask_detectors(workspace, masked_detectors)
-
         # Apply the grouping
         group_detectors.setProperty("MapFile", grouping_file)
 
@@ -750,15 +738,8 @@ def group_spectra_of(
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     elif grouping_method == "Custom":
-        # Mask detectors if required
-        if len(masked_detectors) > 0:
-            _mask_detectors(workspace, masked_detectors)
         return group_on_string(group_detectors, group_string)
     elif grouping_method == "Groups":
-        # Mask detectors if required
-        if len(masked_detectors) > 0:
-            _mask_detectors(workspace, masked_detectors)
-
         group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
         return group_on_string(group_detectors, group_string)
     else:
@@ -1073,7 +1054,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
 # ========== Child Algorithms ==========
 
 
-def _mask_detectors(workspace, masked_indices):
+def mask_detectors(workspace, masked_indices):
     """
     Masks the detectors at the specified indices in the specified
     workspace.
@@ -1081,12 +1062,12 @@ def _mask_detectors(workspace, masked_indices):
     :param workspace:       The workspace whose detectors to mask.
     :param masked_indices:  The spectra indices to mask.
     """
-    mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
-    mask_detectors.setChild(True)
-    mask_detectors.initialize()
-    mask_detectors.setProperty("Workspace", workspace)
-    mask_detectors.setProperty("SpectraList", masked_indices)
-    mask_detectors.execute()
+    mask_detectors_alg = AlgorithmManager.createUnmanaged("MaskDetectors")
+    mask_detectors_alg.setChild(True)
+    mask_detectors_alg.initialize()
+    mask_detectors_alg.setProperty("Workspace", workspace)
+    mask_detectors_alg.setProperty("SpectraList", masked_indices)
+    mask_detectors_alg.execute()
 
 
 def _save_ascii(workspace, file_name):
