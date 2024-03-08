@@ -443,7 +443,7 @@ def identify_bad_detectors(workspace_name):
     Identify detectors which should be masked
 
     @param workspace_name Name of workspace to use to get masking detectors
-    @return List of masked spectra
+    @return List of spectra numbers to mask
     """
     from mantid.simpleapi import IdentifyNoisyDetectors
 
@@ -463,7 +463,7 @@ def identify_bad_detectors(workspace_name):
 
         # Convert workspace to a list of spectra
         num_spec = workspace_mask.getNumberHistograms()
-        masked_spec = [spec for spec in range(0, num_spec) if workspace_mask.readY(spec)[0] == 0.0]
+        masked_spec = [workspace_mask.getSpectrum(i).getSpectrumNo() for i in range(0, num_spec) if workspace_mask.readY(i)[0] == 0.0]
 
     logger.debug("Masked spectra for workspace %s: %s" % (workspace_name, str(masked_spec)))
 
@@ -1079,13 +1079,13 @@ def _mask_detectors(workspace, masked_indices):
     workspace.
 
     :param workspace:       The workspace whose detectors to mask.
-    :param masked_indices:  The indices of the detectors to mask.
+    :param masked_indices:  The spectra indices to mask.
     """
     mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
     mask_detectors.setChild(True)
     mask_detectors.initialize()
     mask_detectors.setProperty("Workspace", workspace)
-    mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
+    mask_detectors.setProperty("SpectraList", masked_indices)
     mask_detectors.execute()
 
 
