@@ -34,6 +34,21 @@ static const std::string DownUp = "01";
 static const std::string DownDown = "00";
 } // namespace SpinConfigurations
 
+namespace PropertyNames {
+static const std::string INPUT_WORKSPACE = "InputWorkspace";
+static const std::string OUTPUT_T_WORKSPACE = "OutputTransmissionWorkspace";
+static const std::string P_HE = "p_He";
+static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
+static const std::string OUTPUT_T_ANTI_WORKSPACE = "OutputTransmissionAntiWorkspace";
+static const std::string SPIN_CONFIGURATIONS = "SpinConfigurations";
+static const std::string T_E = "T_E";
+static const std::string PXD = "pxd";
+static const std::string COVARIANCE = "T_E_pxd_Covariance";
+static const std::string START_LAMBDA = "StartLambda";
+static const std::string END_LAMBDA = "EndLambda";
+static const std::string STOP_ON_FIT_ERROR = "StopOnFitError";
+} // namespace PropertyNames
+
 /// Empty default constructor algorithm() calls the constructor in the base class
 HeliumAnalyserEfficiency::HeliumAnalyserEfficiency() : Algorithm() {}
 
@@ -42,13 +57,13 @@ void HeliumAnalyserEfficiency::init() {
   auto val = std::make_shared<CompositeValidator>();
   val->add<WorkspaceUnitValidator>("Wavelength");
   val->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, val));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputTransmissionWorkspace", "T", Direction::Output));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("p_He", "p_He", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, val));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_WORKSPACE, "T", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "p_He", Direction::Output));
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputTransmissionParaWorkspace", "T_para", Direction::Output));
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_PARA_WORKSPACE, "T_para", Direction::Output));
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputTransmissionAntiWorkspace", "T_anti", Direction::Output));
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, "T_anti", Direction::Output));
 
   std::vector<std::string> initialSpinConfig{
       {SpinConfigurations::UpUp, SpinConfigurations::UpDown, SpinConfigurations::DownUp, SpinConfigurations::DownDown}};
@@ -59,20 +74,23 @@ void HeliumAnalyserEfficiency::init() {
     allowedSpinConfigs.push_back(boost::algorithm::join(initialSpinConfig, ","));
   }
   declareProperty(
-      "SpinConfigurations",
+      PropertyNames::SPIN_CONFIGURATIONS,
       boost::algorithm::join(std::vector<std::string>{{SpinConfigurations::UpUp, SpinConfigurations::DownUp,
                                                        SpinConfigurations::DownDown, SpinConfigurations::UpDown}},
                              ","),
       std::make_shared<ListValidator<std::string>>(allowedSpinConfigs));
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty("T_E", 0.9, mustBePositive, "Transmission of the empty cell");
-  declareProperty("pxd", 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("T_E_pxd_Covariance", "", Direction::Input,
+  declareProperty(PropertyNames::T_E, 0.9, mustBePositive, "Transmission of the empty cell");
+  declareProperty(PropertyNames::PXD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::COVARIANCE, "", Direction::Input,
                                                                        PropertyMode::Optional));
-  declareProperty("StartLambda", 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
-  declareProperty("EndLambda", 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
-  declareProperty("StopOnFitError", true, "If the fit fails, then stop the algorithm", Direction::Input);
+  declareProperty(PropertyNames::START_LAMBDA, 1.75, mustBePositive,
+                  "Lower boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::END_LAMBDA, 8.0, mustBePositive,
+                  "Upper boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::STOP_ON_FIT_ERROR, true, "If the fit fails, then stop the algorithm",
+                  Direction::Input);
 }
 
 /**
@@ -82,26 +100,27 @@ void HeliumAnalyserEfficiency::init() {
  */
 std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
-  const auto ws = AnalysisDataService::Instance().retrieve(getProperty("InputWorkspace"));
+  const auto ws = AnalysisDataService::Instance().retrieve(getProperty(PropertyNames::INPUT_WORKSPACE));
   if (!ws->isGroup()) {
-    errorList["InputWorkspace"] = "The input workspace is not a group workspace";
+    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
   } else {
     const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (wsGroup->size() != 4) {
-      errorList["InputWorkspace"] =
+      errorList[PropertyNames::INPUT_WORKSPACE] =
           "The input group workspace must have four periods corresponding to the four spin configurations.";
     }
   }
 
-  ITableWorkspace_sptr covarianceMatrix = getProperty("T_E_pxd_Covariance");
+  ITableWorkspace_sptr covarianceMatrix = getProperty(PropertyNames::COVARIANCE);
   if (covarianceMatrix != nullptr) {
     // Should be a 2x2 matrix with a Name column
     const auto numRows = covarianceMatrix->rowCount();
     const auto numCols = covarianceMatrix->columnCount();
     // One extra column for Name
     if (numCols != 3 || numRows != 2) {
-      errorList["T_E_pxd_Covariance"] = "The covariance matrix is the wrong size, it should be a 2x2 matrix containing "
-                                        "the T_E and pxd covariance matrix, with an extra column for Name.";
+      errorList[PropertyNames::COVARIANCE] =
+          "The covariance matrix is the wrong size, it should be a 2x2 matrix containing "
+          "the T_E and pxd covariance matrix, with an extra column for Name.";
     }
   }
   return errorList;
@@ -128,8 +147,9 @@ void HeliumAnalyserEfficiency::exec() { calculateAnalyserEfficiency(); }
 
 void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  const auto groupWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty("InputWorkspace"));
-  std::string spinConfigurationInput = getProperty("SpinConfigurations");
+  const auto groupWorkspace =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
+  std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_CONFIGURATIONS);
   std::vector<std::string> spinConfigurations;
   boost::split(spinConfigurations, spinConfigurationInput, boost::is_any_of(","));
 
@@ -185,7 +205,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
 
   // Now we fit tanh(mu*pHe*x) to P to give us pHe
 
-  const double pxd = getProperty("pxd");
+  const double pxd = getProperty(PropertyNames::PXD);
   const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pxd;
 
   auto fit = createChildAlgorithm("Fit");
@@ -199,7 +219,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   fit->setProperty("CreateOutput", true);
   fit->executeAsChildAlg();
 
-  const bool stopOnFitError = getProperty("StopOnFitError");
+  const bool stopOnFitError = getProperty(PropertyNames::STOP_ON_FIT_ERROR);
   const std::string &status = fit->getProperty("OutputStatus");
   if (stopOnFitError && (!fit->isExecuted() || status != "success")) {
     auto const &errMsg{"Failed to fit to workspace, " + groupWorkspace->getName() +
@@ -222,7 +242,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   createSingleValuedWorkspace->executeAsChildAlg();
   MatrixWorkspace_sptr pheWs = createSingleValuedWorkspace->getProperty("OutputWorkspace");
 
-  setProperty("p_He", pheWs);
+  setProperty(PropertyNames::P_HE, pheWs);
 
   // Now we have all the parameters to calculate T(lambda), the transmission of the helium
   // analyser for an incident unpolarised beam. T_para and T_anti are also calculated, the
@@ -237,7 +257,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
 
   double s00, s01, s10, s11;
   s00 = s01 = s10 = s11 = 0;
-  ITableWorkspace_sptr covarianceMatrix = getProperty("T_E_pxd_Covariance");
+  ITableWorkspace_sptr covarianceMatrix = getProperty(PropertyNames::COVARIANCE);
   if (covarianceMatrix != nullptr) {
     s00 = covarianceMatrix->cell<double>(0, 1);
     s01 = covarianceMatrix->cell<double>(0, 2);
@@ -246,7 +266,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   }
 
   const double pHe_variance = pHeError * pHeError;
-  const double t_E = getProperty("T_E");
+  const double t_E = getProperty(PropertyNames::T_E);
 
   // Create a t distribution with dof given by the number of data points minus
   // the number of params (3)
@@ -293,7 +313,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_para");
   createWorkspace->executeAsChildAlg();
   MatrixWorkspace_sptr tParaWorkspace = createWorkspace->getProperty("OutputWorkspace");
-  setProperty("OutputTransmissionParaWorkspace", tParaWorkspace);
+  setProperty(PropertyNames::OUTPUT_T_PARA_WORKSPACE, tParaWorkspace);
 
   createWorkspace->initialize();
   createWorkspace->setProperty("OutputWorkspace", "tAnti");
@@ -304,7 +324,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_anti");
   createWorkspace->executeAsChildAlg();
   MatrixWorkspace_sptr tAntiWorkspace = createWorkspace->getProperty("OutputWorkspace");
-  setProperty("OutputTransmissionAntiWorkspace", tAntiWorkspace);
+  setProperty(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, tAntiWorkspace);
 
   plus->initialize();
   plus->setProperty("LHSWorkspace", tParaWorkspace);
@@ -321,7 +341,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   scale->setProperty("Operation", "Multiply");
   scale->executeAsChildAlg();
 
-  setProperty("OutputTransmissionWorkspace", transmissionWorkspace);
+  setProperty(PropertyNames::OUTPUT_T_WORKSPACE, transmissionWorkspace);
 }
 
 Workspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
