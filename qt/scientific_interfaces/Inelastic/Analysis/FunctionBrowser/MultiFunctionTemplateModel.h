@@ -16,7 +16,7 @@
 #include "ParamID.h"
 
 #include <QMap>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -86,7 +86,7 @@ public:
 
 protected:
   void setParameter(ParamID name, double value);
-  boost::optional<std::string> getParameterName(ParamID name) const;
+  std::optional<std::string> getParameterName(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
   std::vector<std::string> makeGlobalList() const;
 
@@ -94,12 +94,12 @@ protected:
   QList<ParamID> m_globals;
 
 private:
-  boost::optional<double> getParameter(ParamID name) const;
-  boost::optional<double> getParameterError(ParamID name) const;
-  boost::optional<std::string> getParameterDescription(ParamID name) const;
-  virtual boost::optional<std::string> getPrefix(ParamID name) const = 0;
+  std::optional<double> getParameter(ParamID name) const;
+  std::optional<double> getParameterError(ParamID name) const;
+  std::optional<std::string> getParameterDescription(ParamID name) const;
+  virtual std::optional<std::string> getPrefix(ParamID name) const = 0;
   virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
-  boost::optional<ParamID> getParameterId(std::string const &parameterName);
+  std::optional<ParamID> getParameterId(std::string const &parameterName);
 
   void addGlobal(std::string const &parameterName);
   void removeGlobal(std::string const &parameterName);

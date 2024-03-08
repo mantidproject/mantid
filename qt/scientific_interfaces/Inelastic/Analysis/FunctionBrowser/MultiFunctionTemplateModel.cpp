@@ -226,24 +226,24 @@ void MultiFunctionTemplateModel::setParameter(ParamID name, double value) {
   }
 }
 
-boost::optional<double> MultiFunctionTemplateModel::getParameter(ParamID name) const {
+std::optional<double> MultiFunctionTemplateModel::getParameter(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameter(*paramName) : boost::optional<double>();
+  return paramName ? m_model->getParameter(*paramName) : std::optional<double>();
 }
 
-boost::optional<double> MultiFunctionTemplateModel::getParameterError(ParamID name) const {
+std::optional<double> MultiFunctionTemplateModel::getParameterError(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterError(*paramName) : boost::optional<double>();
+  return paramName ? m_model->getParameterError(*paramName) : std::optional<double>();
 }
 
-boost::optional<std::string> MultiFunctionTemplateModel::getParameterName(ParamID name) const {
+std::optional<std::string> MultiFunctionTemplateModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
-  return prefix ? *prefix + g_paramName.at(name) : boost::optional<std::string>();
+  return prefix ? *prefix + g_paramName.at(name) : std::optional<std::string>();
 }
 
-boost::optional<std::string> MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
+std::optional<std::string> MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterDescription(*paramName) : boost::optional<std::string>();
+  return paramName ? m_model->getParameterDescription(*paramName) : std::optional<std::string>();
 }
 
 QMap<ParamID, double> MultiFunctionTemplateModel::getCurrentValues() const {
@@ -273,8 +273,8 @@ void MultiFunctionTemplateModel::setCurrentValues(const QMap<ParamID, double> &v
   }
 }
 
-boost::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string const &parameterName) {
-  boost::optional<ParamID> result;
+std::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string const &parameterName) {
+  std::optional<ParamID> result;
   auto getter = [&result, parameterName, this](ParamID pid) {
     if (parameterName == *getParameterName(pid))
       result = pid;

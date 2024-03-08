@@ -15,8 +15,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MultiFunctionTemplateModel.h"
 
-#include <QMap>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -55,12 +54,12 @@ public:
 private:
   void clearData();
   void setModel();
-  boost::optional<std::string> getLor1Prefix() const;
-  boost::optional<std::string> getLor2Prefix() const;
-  boost::optional<std::string> getFitTypePrefix() const;
-  boost::optional<std::string> getDeltaPrefix() const;
-  boost::optional<std::string> getBackgroundPrefix() const;
-  boost::optional<std::string> getPrefix(ParamID name) const override;
+  std::optional<std::string> getLor1Prefix() const;
+  std::optional<std::string> getLor2Prefix() const;
+  std::optional<std::string> getFitTypePrefix() const;
+  std::optional<std::string> getDeltaPrefix() const;
+  std::optional<std::string> getBackgroundPrefix() const;
+  std::optional<std::string> getPrefix(ParamID name) const override;
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;

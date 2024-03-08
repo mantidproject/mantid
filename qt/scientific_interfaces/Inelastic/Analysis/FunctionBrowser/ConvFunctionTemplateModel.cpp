@@ -324,7 +324,7 @@ int ConvFunctionTemplateModel::getNumberOfPeaks() const {
   return 1;
 }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) const {
+std::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) const {
   if (name >= ParamID::FLAT_BG_A0) {
     return model()->backgroundPrefix();
   } else if (name == ParamID::DELTA_HEIGHT || name == ParamID::DELTA_CENTER) {
@@ -336,7 +336,7 @@ boost::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) 
   } else {
     auto const prefixes = model()->peakPrefixes();
     if (!prefixes)
-      return boost::optional<std::string>();
+      return std::optional<std::string>();
     auto const index = name > ParamID::LOR2_FWHM_1 && name <= ParamID::LOR2_FWHM_2 ? 1 : 0;
     return prefixes->at(index).toStdString();
   }
@@ -519,21 +519,19 @@ std::string ConvFunctionTemplateModel::buildBackgroundFunctionString() const {
   return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) + ",A0=0,constraints=(A0>0)";
 }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getLor1Prefix() const {
+std::optional<std::string> ConvFunctionTemplateModel::getLor1Prefix() const {
   return model()->peakPrefixes()->at(0).toStdString();
 }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getLor2Prefix() const {
+std::optional<std::string> ConvFunctionTemplateModel::getLor2Prefix() const {
   return model()->peakPrefixes()->at(1).toStdString();
 }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getFitTypePrefix() const { return model()->fitTypePrefix(); }
+std::optional<std::string> ConvFunctionTemplateModel::getFitTypePrefix() const { return model()->fitTypePrefix(); }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getDeltaPrefix() const {
-  return model()->deltaFunctionPrefix();
-}
+std::optional<std::string> ConvFunctionTemplateModel::getDeltaPrefix() const { return model()->deltaFunctionPrefix(); }
 
-boost::optional<std::string> ConvFunctionTemplateModel::getBackgroundPrefix() const {
+std::optional<std::string> ConvFunctionTemplateModel::getBackgroundPrefix() const {
   return model()->backgroundPrefix();
 }
 
