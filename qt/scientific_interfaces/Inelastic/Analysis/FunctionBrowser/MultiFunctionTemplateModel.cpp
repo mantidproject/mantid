@@ -23,24 +23,6 @@ IFunction_sptr MultiFunctionTemplateModel::getFitFunction() const { return m_mod
 
 bool MultiFunctionTemplateModel::hasFunction() const { return m_model->hasFunction(); }
 
-EstimationDataSelector MultiFunctionTemplateModel::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
-            const std::pair<double, double> &range) -> DataForParameterEstimation {
-    (void)range;
-
-    auto const maxElement = std::max_element(y.cbegin(), y.cend());
-    auto const halfMaxElement =
-        std::find_if(y.cbegin(), y.cend(), [&maxElement](double const val) { return val > *maxElement / 2.0; });
-    if (maxElement == y.cend() || halfMaxElement == y.cend())
-      return DataForParameterEstimation{{}, {}};
-
-    auto const maxElementIndex = std::distance(y.cbegin(), maxElement);
-    auto const halfMaxElementIndex = std::distance(y.cbegin(), halfMaxElement);
-
-    return DataForParameterEstimation{{x[halfMaxElementIndex], x[maxElementIndex]}, {*halfMaxElement, *maxElement}};
-  };
-}
-
 void MultiFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }

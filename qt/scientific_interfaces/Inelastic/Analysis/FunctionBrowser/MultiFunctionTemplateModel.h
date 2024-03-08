@@ -76,7 +76,7 @@ public:
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 
-  EstimationDataSelector getEstimationDataSelector() const;
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 
@@ -84,24 +84,27 @@ public:
   QMap<ParamID, double> getCurrentErrors() const;
   QMap<int, std::string> getParameterNameMap() const;
 
-private:
+protected:
   void setParameter(ParamID name, double value);
+  boost::optional<std::string> getParameterName(ParamID name) const;
+  void setCurrentValues(const QMap<ParamID, double> &);
+  std::vector<std::string> makeGlobalList() const;
+
+  std::unique_ptr<FunctionModel> m_model;
+  QList<ParamID> m_globals;
+
+private:
   boost::optional<double> getParameter(ParamID name) const;
   boost::optional<double> getParameterError(ParamID name) const;
-  boost::optional<std::string> getParameterName(ParamID name) const;
   boost::optional<std::string> getParameterDescription(ParamID name) const;
   virtual boost::optional<std::string> getPrefix(ParamID name) const = 0;
-  void setCurrentValues(const QMap<ParamID, double> &);
   virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
   boost::optional<ParamID> getParameterId(std::string const &parameterName);
 
   void addGlobal(std::string const &parameterName);
   void removeGlobal(std::string const &parameterName);
-  std::vector<std::string> makeGlobalList() const;
 
-  std::unique_ptr<FunctionModel> m_model;
   DataForParameterEstimationCollection m_estimationData;
-  QList<ParamID> m_globals;
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };
 
