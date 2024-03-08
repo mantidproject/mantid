@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -8,14 +8,16 @@
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
+#include "ParamID.h"
+
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
-#include "ParamID.h"
 
+#include <QList>
 #include <QMap>
+
 #include <optional>
 
 namespace MantidQt {
@@ -29,32 +31,34 @@ class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateModel : public IFunctionModel 
 public:
   MultiFunctionTemplateModel(std::unique_ptr<FunctionModel> model,
                              std::unique_ptr<IDAFunctionParameterEstimation> estimators);
+
+  bool hasFunction() const override;
   IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
-  bool hasFunction() const override;
+  IFunction_sptr getSingleFunction(int index) const override;
+  IFunction_sptr getCurrentFunction() const override;
+
   void setParameter(std::string const &parameterName, double value) override;
   void setParameterError(std::string const &parameterName, double value) override;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
   std::string getParameterDescription(std::string const &parameterName) const override;
   std::vector<std::string> getParameterNames() const override;
-  IFunction_sptr getSingleFunction(int index) const override;
-  IFunction_sptr getCurrentFunction() const override;
+
   void setNumberDomains(int) override;
+  int getNumberDomains() const override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   QStringList getDatasetNames() const override;
   QStringList getDatasetDomainNames() const override;
-  int getNumberDomains() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
-  void changeTie(std::string const &parameterName, std::string const &tie) override;
-  void addConstraint(std::string const &functionIndex, std::string const &constraint) override;
-  void removeConstraint(std::string const &parameterName) override;
-  std::vector<std::string> getGlobalParameters() const override;
+
   void setGlobalParameters(std::vector<std::string> const &globals) override;
+  std::vector<std::string> getGlobalParameters() const override;
   bool isGlobal(std::string const &parameterName) const override;
   void setGlobal(std::string const &parameterName, bool on) override;
   std::vector<std::string> getLocalParameters() const override;
+
   void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
@@ -97,12 +101,17 @@ private:
   std::optional<double> getParameter(ParamID name) const;
   std::optional<double> getParameterError(ParamID name) const;
   std::optional<std::string> getParameterDescription(ParamID name) const;
-  virtual std::optional<std::string> getPrefix(ParamID name) const = 0;
-  virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
   std::optional<ParamID> getParameterId(std::string const &parameterName);
 
-  void addGlobal(std::string const &parameterName);
+  virtual std::optional<std::string> getPrefix(ParamID name) const = 0;
+  virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
+
+  void changeTie(std::string const &parameterName, std::string const &tie) override;
+  void removeConstraint(std::string const &parameterName) override;
+  void addConstraint(std::string const &functionIndex, std::string const &constraint) override;
+
   void removeGlobal(std::string const &parameterName);
+  void addGlobal(std::string const &parameterName);
 
   DataForParameterEstimationCollection m_estimationData;
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;

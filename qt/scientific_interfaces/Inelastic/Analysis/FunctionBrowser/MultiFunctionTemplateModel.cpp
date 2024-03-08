@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -17,23 +17,17 @@ MultiFunctionTemplateModel::MultiFunctionTemplateModel(std::unique_ptr<FunctionM
                                                        std::unique_ptr<IDAFunctionParameterEstimation> estimators)
     : m_model(std::move(model)), m_parameterEstimation(std::move(estimators)) {}
 
+bool MultiFunctionTemplateModel::hasFunction() const { return m_model->hasFunction(); }
+
 IFunction_sptr MultiFunctionTemplateModel::getFullFunction() const { return m_model->getFullFunction(); }
 
 IFunction_sptr MultiFunctionTemplateModel::getFitFunction() const { return m_model->getFitFunction(); }
 
-bool MultiFunctionTemplateModel::hasFunction() const { return m_model->hasFunction(); }
-
-void MultiFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
-  m_estimationData = std::move(data);
+IFunction_sptr MultiFunctionTemplateModel::getSingleFunction(int index) const {
+  return m_model->getSingleFunction(index);
 }
 
-void MultiFunctionTemplateModel::estimateFunctionParameters() {
-  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
-}
-
-void MultiFunctionTemplateModel::setNumberDomains(int n) { m_model->setNumberDomains(n); }
-
-int MultiFunctionTemplateModel::getNumberDomains() const { return m_model->getNumberDomains(); }
+IFunction_sptr MultiFunctionTemplateModel::getCurrentFunction() const { return m_model->getCurrentFunction(); }
 
 void MultiFunctionTemplateModel::setParameter(std::string const &parameterName, double value) {
   m_model->setParameter(parameterName, value);
@@ -57,19 +51,21 @@ std::string MultiFunctionTemplateModel::getParameterDescription(std::string cons
 
 std::vector<std::string> MultiFunctionTemplateModel::getParameterNames() const { return m_model->getParameterNames(); }
 
-IFunction_sptr MultiFunctionTemplateModel::getSingleFunction(int index) const {
-  return m_model->getSingleFunction(index);
+void MultiFunctionTemplateModel::setNumberDomains(int n) { m_model->setNumberDomains(n); }
+
+int MultiFunctionTemplateModel::getNumberDomains() const { return m_model->getNumberDomains(); }
+
+void MultiFunctionTemplateModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  m_model->setDatasets(datasets);
 }
 
-IFunction_sptr MultiFunctionTemplateModel::getCurrentFunction() const { return m_model->getCurrentFunction(); }
+QStringList MultiFunctionTemplateModel::getDatasetNames() const { return m_model->getDatasetNames(); }
 
-std::vector<std::string> MultiFunctionTemplateModel::getGlobalParameters() const {
-  return m_model->getGlobalParameters();
-}
+QStringList MultiFunctionTemplateModel::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
 
-std::vector<std::string> MultiFunctionTemplateModel::getLocalParameters() const {
-  return m_model->getLocalParameters();
-}
+void MultiFunctionTemplateModel::setCurrentDomainIndex(int i) { m_model->setCurrentDomainIndex(i); }
+
+int MultiFunctionTemplateModel::currentDomainIndex() const { return m_model->currentDomainIndex(); }
 
 void MultiFunctionTemplateModel::setGlobalParameters(std::vector<std::string> const &globals) {
   m_globals.clear();
@@ -78,6 +74,10 @@ void MultiFunctionTemplateModel::setGlobalParameters(std::vector<std::string> co
   }
   auto newGlobals = makeGlobalList();
   m_model->setGlobalParameters(newGlobals);
+}
+
+std::vector<std::string> MultiFunctionTemplateModel::getGlobalParameters() const {
+  return m_model->getGlobalParameters();
 }
 
 bool MultiFunctionTemplateModel::isGlobal(std::string const &parameterName) const {
@@ -95,28 +95,8 @@ void MultiFunctionTemplateModel::setGlobal(std::string const &parameterName, boo
   m_model->setGlobalParameters(globals);
 }
 
-void MultiFunctionTemplateModel::addGlobal(std::string const &parameterName) {
-  auto const pid = getParameterId(parameterName);
-  if (pid && !m_globals.contains(*pid)) {
-    m_globals.push_back(*pid);
-  }
-}
-
-void MultiFunctionTemplateModel::removeGlobal(std::string const &parameterName) {
-  auto const pid = getParameterId(parameterName);
-  if (pid && m_globals.contains(*pid)) {
-    m_globals.removeOne(*pid);
-  }
-}
-
-std::vector<std::string> MultiFunctionTemplateModel::makeGlobalList() const {
-  std::vector<std::string> globals;
-  for (auto const id : m_globals) {
-    auto const name = getParameterName(id);
-    if (name)
-      globals.emplace_back(*name);
-  }
-  return globals;
+std::vector<std::string> MultiFunctionTemplateModel::getLocalParameters() const {
+  return m_model->getLocalParameters();
 }
 
 void MultiFunctionTemplateModel::updateMultiDatasetParameters(const IFunction &fun) {
@@ -152,30 +132,6 @@ void MultiFunctionTemplateModel::updateMultiDatasetParameters(const ITableWorksp
 }
 
 void MultiFunctionTemplateModel::updateParameters(const IFunction &fun) { m_model->updateParameters(fun); }
-
-void MultiFunctionTemplateModel::setCurrentDomainIndex(int i) { m_model->setCurrentDomainIndex(i); }
-
-int MultiFunctionTemplateModel::currentDomainIndex() const { return m_model->currentDomainIndex(); }
-
-void MultiFunctionTemplateModel::changeTie(std::string const &parameterName, std::string const &tie) {
-  m_model->changeTie(parameterName, tie);
-}
-
-void MultiFunctionTemplateModel::addConstraint(std::string const &functionIndex, std::string const &constraint) {
-  m_model->addConstraint(functionIndex, constraint);
-}
-
-void MultiFunctionTemplateModel::removeConstraint(std::string const &parameterName) {
-  m_model->removeConstraint(parameterName);
-}
-
-void MultiFunctionTemplateModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
-  m_model->setDatasets(datasets);
-}
-
-QStringList MultiFunctionTemplateModel::getDatasetNames() const { return m_model->getDatasetNames(); }
-
-QStringList MultiFunctionTemplateModel::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
 
 double MultiFunctionTemplateModel::getLocalParameterValue(std::string const &parameterName, int i) const {
   return m_model->getLocalParameterValue(parameterName, i);
@@ -219,31 +175,12 @@ void MultiFunctionTemplateModel::setGlobalParameterValue(std::string const &para
   m_model->setGlobalParameterValue(parameterName, value);
 }
 
-void MultiFunctionTemplateModel::setParameter(ParamID name, double value) {
-  auto const prefix = getPrefix(name);
-  if (prefix) {
-    m_model->setParameter(*prefix + g_paramName.at(name), value);
-  }
+void MultiFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
+  m_estimationData = std::move(data);
 }
 
-std::optional<double> MultiFunctionTemplateModel::getParameter(ParamID name) const {
-  auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameter(*paramName) : std::optional<double>();
-}
-
-std::optional<double> MultiFunctionTemplateModel::getParameterError(ParamID name) const {
-  auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterError(*paramName) : std::optional<double>();
-}
-
-std::optional<std::string> MultiFunctionTemplateModel::getParameterName(ParamID name) const {
-  auto const prefix = getPrefix(name);
-  return prefix ? *prefix + g_paramName.at(name) : std::optional<std::string>();
-}
-
-std::optional<std::string> MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
-  auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterDescription(*paramName) : std::optional<std::string>();
+void MultiFunctionTemplateModel::estimateFunctionParameters() {
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
 QMap<ParamID, double> MultiFunctionTemplateModel::getCurrentValues() const {
@@ -267,10 +204,47 @@ QMap<int, std::string> MultiFunctionTemplateModel::getParameterNameMap() const {
   return out;
 }
 
+std::vector<std::string> MultiFunctionTemplateModel::makeGlobalList() const {
+  std::vector<std::string> globals;
+  for (auto const id : m_globals) {
+    auto const name = getParameterName(id);
+    if (name)
+      globals.emplace_back(*name);
+  }
+  return globals;
+}
+
+void MultiFunctionTemplateModel::setParameter(ParamID name, double value) {
+  auto const prefix = getPrefix(name);
+  if (prefix) {
+    m_model->setParameter(*prefix + g_paramName.at(name), value);
+  }
+}
+
 void MultiFunctionTemplateModel::setCurrentValues(const QMap<ParamID, double> &values) {
   for (auto const name : values.keys()) {
     setParameter(name, values[name]);
   }
+}
+
+std::optional<double> MultiFunctionTemplateModel::getParameter(ParamID name) const {
+  auto const paramName = getParameterName(name);
+  return paramName ? m_model->getParameter(*paramName) : std::optional<double>();
+}
+
+std::optional<double> MultiFunctionTemplateModel::getParameterError(ParamID name) const {
+  auto const paramName = getParameterName(name);
+  return paramName ? m_model->getParameterError(*paramName) : std::optional<double>();
+}
+
+std::optional<std::string> MultiFunctionTemplateModel::getParameterName(ParamID name) const {
+  auto const prefix = getPrefix(name);
+  return prefix ? *prefix + g_paramName.at(name) : std::optional<std::string>();
+}
+
+std::optional<std::string> MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
+  auto const paramName = getParameterName(name);
+  return paramName ? m_model->getParameterDescription(*paramName) : std::optional<std::string>();
 }
 
 std::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string const &parameterName) {
@@ -281,6 +255,32 @@ std::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string co
   };
   applyParameterFunction(getter);
   return result;
+}
+
+void MultiFunctionTemplateModel::changeTie(std::string const &parameterName, std::string const &tie) {
+  m_model->changeTie(parameterName, tie);
+}
+
+void MultiFunctionTemplateModel::addConstraint(std::string const &functionIndex, std::string const &constraint) {
+  m_model->addConstraint(functionIndex, constraint);
+}
+
+void MultiFunctionTemplateModel::removeConstraint(std::string const &parameterName) {
+  m_model->removeConstraint(parameterName);
+}
+
+void MultiFunctionTemplateModel::removeGlobal(std::string const &parameterName) {
+  auto const pid = getParameterId(parameterName);
+  if (pid && m_globals.contains(*pid)) {
+    m_globals.removeOne(*pid);
+  }
+}
+
+void MultiFunctionTemplateModel::addGlobal(std::string const &parameterName) {
+  auto const pid = getParameterId(parameterName);
+  if (pid && !m_globals.contains(*pid)) {
+    m_globals.push_back(*pid);
+  }
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
