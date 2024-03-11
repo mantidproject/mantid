@@ -372,12 +372,9 @@ bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
 bool WorkspaceMultiSelector::hasValidSuffix(const std::string &name) const {
   if (m_suffix.isEmpty())
     return true;
-  else {
-    if (name.find_last_of("_") < name.size())
-      return m_suffix.contains(QString::fromStdString(name.substr(name.find_last_of("_"))));
-    else
-      return false;
-  }
+  if (name.find_last_of("_") < name.size())
+    return m_suffix.contains(QString::fromStdString(name.substr(name.find_last_of("_"))));
+  return false;
 }
 
 bool WorkspaceMultiSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const {
