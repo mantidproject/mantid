@@ -272,7 +272,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // the number of params (3)
   double tPpf = 1;
   if (wavelengthValues.size() > 3) {
-    const boost::math::students_t dist(wavelengthValues.size() - 3.0);
+    const boost::math::students_t dist(static_cast<double>(wavelengthValues.size()) - 3.0);
     // Critical value corresponding to 1-sigma
     const double alpha = (1 + std::erf(1.0 / sqrt(2))) / 2;
     // Scale factor for the error calculations
