@@ -37,13 +37,13 @@ static const std::string DownDown = "00";
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string OUTPUT_T_WORKSPACE = "OutputTransmissionWorkspace";
-static const std::string P_HE = "p_He";
+static const std::string P_HE = "HeliumPolarisation";
 static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
 static const std::string OUTPUT_T_ANTI_WORKSPACE = "OutputTransmissionAntiWorkspace";
 static const std::string SPIN_CONFIGURATIONS = "SpinConfigurations";
-static const std::string T_E = "T_E";
-static const std::string PXD = "pxd";
-static const std::string COVARIANCE = "T_E_pxd_Covariance";
+static const std::string T_E = "TransmissionEmptyCell";
+static const std::string PXD = "GasPressureTimesCellLength";
+static const std::string COVARIANCE = "Covariance";
 static const std::string START_LAMBDA = "StartLambda";
 static const std::string END_LAMBDA = "EndLambda";
 static const std::string STOP_ON_FIT_ERROR = "StopOnFitError";
