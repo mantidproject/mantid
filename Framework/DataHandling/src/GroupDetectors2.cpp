@@ -548,7 +548,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname, const API::Matrix
         wsindexes.emplace_back(wsid);
         unUsedSpec[wsid] = (USED);
       } else {
-        g_log.error() << "Detector with ID " << detid << " is not found in instrument \n";
+        g_log.warning() << "Detector with ID " << detid << " is not found in instrument \n";
       }
     } // for index
   }   // for group
@@ -571,7 +571,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname, const API::Matrix
         wsindexes.emplace_back(wsid);
         unUsedSpec[wsid] = (USED);
       } else {
-        g_log.error() << "Spectrum with ID " << specNum << " is not found in instrument \n";
+        g_log.warning() << "Spectrum with ID " << specNum << " is not found in instrument \n";
       }
     } // for index
   }   // for group
