@@ -76,9 +76,10 @@ public:
   void setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
   void setInstrumentSpectraRange(int specMin, int specMax);
-  void setInstrumentRebinning(QStringList const &rebinParams, QString const &rebinText, bool checked, int tabIndex);
-  void setInstrumentEFixed(QString const &instrumentName, double eFixed);
-  void setInstrumentGrouping(QString const &instrumentName);
+  void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
+                              int tabIndex);
+  void setInstrumentEFixed(std::string const &instrumentName, double eFixed);
+  void setInstrumentGrouping(std::string const &instrumentName);
   void setInstrumentSpecDefault(std::map<std::string, bool> &specMap);
 
 public slots:

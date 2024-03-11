@@ -219,17 +219,17 @@ void IETView::setInstrumentSpectraRange(int specMin, int specMax) {
   m_uiForm.spPlotTimeSpecMax->setValue(1);
 }
 
-void IETView::setInstrumentRebinning(QStringList const &rebinParams, QString const &rebinText, bool checked,
+void IETView::setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
                                      int tabIndex) {
   m_uiForm.ckDoNotRebin->setChecked(checked);
   m_uiForm.cbRebinType->setCurrentIndex(tabIndex);
-  m_uiForm.spRebinLow->setValue(rebinParams[0].toDouble());
-  m_uiForm.spRebinWidth->setValue(rebinParams[1].toDouble());
-  m_uiForm.spRebinHigh->setValue(rebinParams[2].toDouble());
-  m_uiForm.leRebinString->setText(rebinText);
+  m_uiForm.spRebinLow->setValue(rebinParams[0]);
+  m_uiForm.spRebinWidth->setValue(rebinParams[1]);
+  m_uiForm.spRebinHigh->setValue(rebinParams[2]);
+  m_uiForm.leRebinString->setText(QString::fromStdString(rebinText));
 }
 
-void IETView::setInstrumentGrouping(QString const &instrumentName) {
+void IETView::setInstrumentGrouping(std::string const &instrumentName) {
 
   setGroupOutputCheckBoxVisible(instrumentName == "OSIRIS");
   setGroupOutputDropdownVisible(instrumentName == "IRIS");
@@ -243,12 +243,13 @@ void IETView::setInstrumentGrouping(QString const &instrumentName) {
   }
 }
 
-void IETView::setInstrumentEFixed(QString const &instrumentName, double eFixed) {
+void IETView::setInstrumentEFixed(std::string const &instrumentName, double eFixed) {
   QStringList qens;
   qens << "IRIS"
        << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(instrumentName));
-  m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
+  auto instName = QString::fromStdString(instrumentName);
+  m_uiForm.spEfixed->setEnabled(qens.contains(instName));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instName);
   m_uiForm.spEfixed->setValue(eFixed);
 }
 

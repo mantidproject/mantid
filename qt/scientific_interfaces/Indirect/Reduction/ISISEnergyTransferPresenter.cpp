@@ -18,7 +18,10 @@
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <filesystem>
+#include <regex>
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -77,7 +80,7 @@ InstrumentData IETPresenter::getInstrumentData() {
 void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
-    auto const instrumentName = QString::fromStdString(instrumentDetails.getInstrument());
+    auto const instrumentName = instrumentDetails.getInstrument();
 
     // spectraRange & Efixed
     auto const specMin = instrumentDetails.getDefaultSpectraMin();
@@ -86,20 +89,26 @@ void IETPresenter::setInstrumentDefault() {
     m_view->setInstrumentEFixed(instrumentName, instrumentDetails.getDefaultEfixed());
 
     // Rebinning
-    auto const rebinDefault = QString::fromStdString(instrumentDetails.getDefaultRebin());
-    QStringList rebinParams =
-        !rebinDefault.isEmpty() ? rebinDefault.split(",", Qt::SkipEmptyParts) : QStringList({"0", "0", "0"});
+    auto const rebinDefault = instrumentDetails.getDefaultRebin();
+    std::vector<double> rebinParams;
+    if (!rebinDefault.empty()) {
+      std::vector<std::string> rebinParamsStr;
+      boost::split(rebinParamsStr, rebinDefault, boost::is_any_of(","));
+      std::for_each(rebinParamsStr.begin(), rebinParamsStr.end(),
+                    [&rebinParams](auto &param) { rebinParams.push_back(std::stod(param)); });
+    } else
+      rebinParams = {0, 0, 0};
 
     int rebinTab = (int)(rebinParams.size() != 3);
-    QString rebinString = !rebinDefault.isEmpty() ? rebinDefault : QString("");
-    m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.isEmpty(), rebinTab);
+    std::string rebinString = !rebinDefault.empty() ? rebinDefault : "";
+    m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.empty(), rebinTab);
 
     // Grouping
     m_view->setInstrumentGrouping(instrumentName);
 
     // Instrument spec defaults
-    bool irsORosiris = instrumentName.contains(QRegularExpression("(^OSIRIS$)|(^IRIS$)"));
-    bool toscaORtfxa = instrumentName.contains(QRegularExpression("(^TOSCA$)|(^TFXA$)"));
+    bool irsORosiris = std::regex_search(instrumentName, std::regex("(^OSIRIS$)|(^IRIS$)"));
+    bool toscaORtfxa = std::regex_search(instrumentName, std::regex("(^TOSCA$)|(^TFXA$)"));
     m_idrUI->showAnalyserAndReflectionOptions(!toscaORtfxa);
     std::map<std::string, bool> specMap{{"irsORosiris", !irsORosiris},
                                         {"toscaORtfxa", !toscaORtfxa},
