@@ -373,18 +373,28 @@ std::vector<std::string> ConvFunctionTemplateModel::makeGlobalList() const {
 
 void ConvFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeIndex) {
   auto oldValues = getCurrentValues();
-  if (subTypeIndex == ConvTypes::SubTypeIndex::Fit) {
+
+  switch (ConvTypes::SubTypeIndex(subTypeIndex)) {
+  case ConvTypes::SubTypeIndex::Fit:
     m_fitType = static_cast<ConvTypes::FitType>(typeIndex);
     m_isQDependentFunction = FitTypeQDepends[m_fitType];
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Lorentzian) {
+    break;
+  case ConvTypes::SubTypeIndex::Lorentzian:
     m_lorentzianType = static_cast<ConvTypes::LorentzianType>(typeIndex);
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::Delta) {
+    break;
+  case ConvTypes::SubTypeIndex::Delta:
     m_deltaType = static_cast<ConvTypes::DeltaType>(typeIndex);
-  } else if (subTypeIndex == ConvTypes::SubTypeIndex::TempCorrection) {
+    break;
+  case ConvTypes::SubTypeIndex::TempCorrection:
     m_tempCorrectionType = static_cast<ConvTypes::TempCorrectionType>(typeIndex);
-  } else {
+    break;
+  case ConvTypes::SubTypeIndex::Background:
     m_backgroundType = static_cast<ConvTypes::BackgroundType>(typeIndex);
+    break;
+  default:
+    throw std::logic_error("A matching ConvTypes::SubTypeIndex could not be found.");
   }
+
   setModel();
   setCurrentValues(oldValues);
 }

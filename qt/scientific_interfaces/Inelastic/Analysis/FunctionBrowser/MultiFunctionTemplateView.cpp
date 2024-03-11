@@ -108,9 +108,8 @@ void MultiFunctionTemplateView::setProperty(std::size_t subTypeIndex, int value)
 }
 
 void MultiFunctionTemplateView::setSubTypes(std::map<std::size_t, int> const &subTypes) {
-  for (auto it = subTypes.cbegin(); it != subTypes.cend(); ++it) {
-    setSubType(it->first, it->second);
-  }
+  std::for_each(subTypes.cbegin(), subTypes.cend(),
+                [&](auto const &subType) { setSubType(subType.first, subType.second); });
 }
 
 void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeIndex) {
