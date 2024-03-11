@@ -149,7 +149,11 @@ class FitPropertyBrowserTest(unittest.TestCase):
         workspaceList = property_browser.getWorkspaceList()
         self.assertEqual(3, workspaceList.count())
 
-        AnalysisDataService.clear()
+        # Removing the specific workspaces created during the test
+        AnalysisDataService.remove(name_1)
+        AnalysisDataService.remove(name_1 + "_Workspace")
+        AnalysisDataService.remove(name_1 + "_Parameters")
+        AnalysisDataService.remove(name_1 + "_NormalisedCovarianceMatrix")
 
         name_2 = "ws_2"
         ws = CreateWorkspace(OutputWorkspace=name_2, DataX=np.arange(10), DataY=2 + np.arange(10), NSpec=5)
