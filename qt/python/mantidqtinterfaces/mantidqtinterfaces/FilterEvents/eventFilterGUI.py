@@ -57,9 +57,9 @@ class MainWindow(QMainWindow):
         self.ui = load_ui(__file__, "MainWindow.ui", baseinstance=self)
         mpl_layout = QVBoxLayout()
         self.ui.graphicsView.setLayout(mpl_layout)
-        self.fig = Figure()
+        self.fig = Figure(figsize=(4, 3), layout="constrained")
         self.canvas = FigureCanvas(self.fig)
-        self.ui.mainplot = self.fig.add_subplot(111, projection="mantid")
+        self.ui.mainplot = self.fig.add_subplot(111, projection="mantid", xlabel="x-units", ylabel="y-units")
         mpl_layout.addWidget(self.canvas)
 
         # Do initialize plotting
@@ -111,14 +111,14 @@ class MainWindow(QMainWindow):
         locale.setNumberOptions(QLocale.RejectGroupSeparator)
         self.dvalidator.setLocale(locale)
         self.doubleLineEdits = {
-            "leStartTime": [self.ui.leStartTime, self.set_startTime],
-            "leStopTime": [self.ui.leStopTime, self.set_stopTime],
-            "leMinimumValue": [self.ui.leMinimumValue, self.set_minLogValue],
-            "leMaximumValue": [self.ui.leMaximumValue, self.set_maxLogValue],
-            "leStepSize": [self.ui.leStepSize, None],
-            "leValueTolerance": [self.ui.leValueTolerance, None],
-            "leTimeTolerance": [self.ui.leTimeTolerance, None],
-            "leIncidentEnergy": [self.ui.leIncidentEnergy, None],
+            "leStartTime": (self.ui.leStartTime, self.set_startTime),
+            "leStopTime": (self.ui.leStopTime, self.set_stopTime),
+            "leMinimumValue": (self.ui.leMinimumValue, self.set_minLogValue),
+            "leMaximumValue": (self.ui.leMaximumValue, self.set_maxLogValue),
+            "leStepSize": (self.ui.leStepSize, None),
+            "leValueTolerance": (self.ui.leValueTolerance, None),
+            "leTimeTolerance": (self.ui.leTimeTolerance, None),
+            "leIncidentEnergy": (self.ui.leIncidentEnergy, None),
         }
         for edit in self.doubleLineEdits.values():
             edit[0].setValidator(self.dvalidator)
@@ -205,9 +205,9 @@ class MainWindow(QMainWindow):
 
     def reformat(self):
         self.sender().setText(f"{float(self.sender().text()):.6f}")
-        func = self.doubleLineEdits[self.sender().objectName()][1]
-        if func is not None:
-            func()
+        callback = self.doubleLineEdits[self.sender().objectName()][1]
+        if callback is not None:
+            callback()
 
     def computeMock(self):
         """Compute vecx and vecy as mocking"""
@@ -878,8 +878,8 @@ class MainWindow(QMainWindow):
         self.ui.mainplot.set_xlim(xmin, xmax)
         self.ui.mainplot.set_ylim(ymin, ymax)
 
-        self.ui.mainplot.set_xlabel("Time (seconds)", fontsize=13)
-        self.ui.mainplot.set_ylabel("Counts", fontsize=13)
+        self.ui.mainplot.set_xlabel("Time (seconds)")
+        self.ui.mainplot.set_ylabel("Counts")
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy)
@@ -928,11 +928,10 @@ class MainWindow(QMainWindow):
                 InformationWorkspace=splitinfowsname,
                 **kwargs,
             )
+            self.splitWksp(splitws, infows)
         except (RuntimeError, ValueError) as e:
             Logger("Filter_Events").error("Splitting failed ! \n {0}".format(e))
             return
-
-        self.splitWksp(splitws, infows)
 
     def filterByLogValue(self):
         """Filter by log value"""
@@ -972,8 +971,8 @@ class MainWindow(QMainWindow):
         logboundtype = str(self.ui.comboBox_5.currentText())
         kwargs["LogBoundary"] = logboundtype
 
-        if self.ui.leValuetolerance.text() != "":
-            logvaluetol = float(self.ui.leValuetolerance.text())
+        if self.ui.leValueTolerance.text() != "":
+            logvaluetol = float(self.ui.leValueTolerance.text())
             kwargs["LogValueTolerance"] = logvaluetol
 
         splitwsname = str(self._dataWS) + "_splitters"
@@ -1008,6 +1007,8 @@ class MainWindow(QMainWindow):
 
         kwargs = {}
         if corr2sample == "Direct":
+            if not self.ui.leIncidentEnergy.text():
+                raise RuntimeError("To use direct corrections, incident energy field must have a valid value")
             ei = float(self.ui.leIncidentEnergy.text())
             kwargs["IncidentEnergy"] = ei
         elif corr2sample == "Customized":
@@ -1125,7 +1126,7 @@ class MainWindow(QMainWindow):
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
 
         self.ui.leStepSize.clear()
-        self.ui.leValuetolerance.clear()
+        self.ui.leValueTolerance.clear()
         self.ui.leTimeTolerance.clear()
 
         # Filter by time
