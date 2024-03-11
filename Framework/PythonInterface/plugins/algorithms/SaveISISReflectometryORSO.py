@@ -6,16 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
 
-from mantid.kernel import Direction, config
-from mantid.api import (
-    AlgorithmFactory,
-    MatrixWorkspaceProperty,
-    FileProperty,
-    FileAction,
-    PythonAlgorithm,
-    PropertyMode,
-    AnalysisDataService,
+from mantid.kernel import (
+    Direction,
+    config,
+    StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
+    CompositeValidator,
 )
+from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
 
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
@@ -24,7 +23,7 @@ from collections import OrderedDict
 
 
 class Prop:
-    INPUT_WS = "InputWorkspace"
+    WORKSPACE_LIST = "WorkspaceList"
     WRITE_RESOLUTION = "WriteResolution"
     FILENAME = "Filename"
 
@@ -58,9 +57,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         return "Saves ISIS processed reflectometry workspaces into the ASCII implementation of the ORSO data standard."
 
     def PyInit(self):
+        mandatory_ws_list = CompositeValidator()
+        mandatory_ws_list.add(StringArrayMandatoryValidator())
+        len_validator = StringArrayLengthValidator()
+        len_validator.setLengthMin(1)
+        mandatory_ws_list.add(len_validator)
         self.declareProperty(
-            MatrixWorkspaceProperty(name=Prop.INPUT_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc="The workspace containing the reduced reflectivity data to save.",
+            StringArrayProperty(Prop.WORKSPACE_LIST, values=[], validator=mandatory_ws_list),
+            doc="A list of workspace names containing the reduced reflectivity data to be saved.",
         )
 
         self.declareProperty(
@@ -78,24 +82,28 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
 
-        ws = self.getProperty(Prop.INPUT_WS).value
-        if ws and not self._is_momentum_transfer_ws(ws):
-            issues[Prop.INPUT_WS] = f"{Prop.INPUT_WS} must have units of {self._Q_UNIT}"
+        ws_list = self.getProperty(Prop.WORKSPACE_LIST).value
+        for ws_name in ws_list:
+            if not AnalysisDataService.doesExist(ws_name):
+                issues[Prop.WORKSPACE_LIST] = f"Cannot find workspace with name {ws_name} in the ADS."
+            else:
+                ws = AnalysisDataService.retrieve(ws_name)
+                if not self._is_momentum_transfer_ws(ws):
+                    issues[Prop.WORKSPACE_LIST] = f"Workspace {ws_name} must have units of {self._Q_UNIT}"
         return issues
 
     def _is_momentum_transfer_ws(self, ws) -> bool:
         return ws.getAxis(0).getUnit().unitID() == self._Q_UNIT
 
     def PyExec(self):
-        ws = self.getProperty(Prop.INPUT_WS).value
-
         # We cannot include all the mandatory information required by the standard, so we include a comment to highlight
         # this at the top of the file. In future this comment will not be needed, or we may need to add validation to
         # determine if it should be included (although ideally validation would be implemented in the orsopy library).
         orso_saver = MantidORSOSaver(self.getProperty(Prop.FILENAME).value, self._INVALID_HEADER_COMMENT)
 
         # Create the file contents
-        orso_saver.add_dataset(self._create_dataset(ws, ws.name()))
+        for ws in self._get_ordered_ws_list():
+            orso_saver.add_dataset(self._create_dataset(ws, ws.name()))
 
         # Write the file to disk in the ORSO ASCII format
         if Path(orso_saver.filename).is_file():
@@ -107,6 +115,34 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             raise RuntimeError(
                 f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
             )
+
+    def _get_ordered_ws_list(self) -> list:
+        """Retrieve the workspaces from the input list and sort them into the order that the datasets should appear in
+        the ORSO file"""
+        ordered_list = []
+        stitched_workspaces = []
+
+        for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
+            workspace = AnalysisDataService.retrieve(ws_name)
+            group = workspace if isinstance(workspace, WorkspaceGroup) else [workspace]
+            for ws in group:
+                if self._is_stitched_data(ws):
+                    stitched_workspaces.append(ws)
+                else:
+                    ordered_list.append(ws)
+
+        ordered_list.extend(stitched_workspaces)
+        return ordered_list
+
+    def _is_stitched_data(self, ws) -> bool:
+        history = ws.getHistory()
+        if history.empty():
+            return False
+
+        for history in reversed(history.getAlgorithmHistories()):
+            if history.name() == self._STITCH_ALG:
+                return True
+        return False
 
     def _create_dataset(self, ws, dataset_name: str = None) -> MantidORSODataset:
         reduction_history = self._get_reduction_alg_history(ws)

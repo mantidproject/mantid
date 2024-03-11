@@ -31,7 +31,7 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(const Mantid::API::Workspace_sptr
                                                std::string const &savePath, const bool &includeQResolution) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
   alg->setRethrows(true);
-  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty("WorkspaceList", workspace->getName());
   alg->setProperty("Filename", savePath);
   alg->setProperty("WriteResolution", includeQResolution);
   alg->execute();

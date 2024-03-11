@@ -91,7 +91,7 @@ class SaveISISReflectometryORSOTest(systemtesting.MantidSystemTest):
         return AnalysisDataService.retrieve(stitched_ws_name)
 
     def _call_save_algorithm(self, reduced_ws):
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, WriteResolution=True, Filename=self._output_filename)
+        SaveISISReflectometryORSO(WorkspaceList=reduced_ws, WriteResolution=True, Filename=self._output_filename)
 
     @staticmethod
     def _read_lines_from_file(filepath):
