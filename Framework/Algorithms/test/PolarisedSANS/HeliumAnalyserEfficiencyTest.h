@@ -199,7 +199,7 @@ public:
     std::vector<double> x(numBins);
     std::vector<double> y(numBins);
     for (size_t i = 0; i < numBins; ++i) {
-      x[i] = i + 1.0;
+      x[i] = static_cast<double>(i) + 1.0;
       y[i] = x[i] * x[i];
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
