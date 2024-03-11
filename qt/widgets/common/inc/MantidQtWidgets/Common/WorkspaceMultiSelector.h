@@ -38,7 +38,6 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector : public QTableWidget {
   Q_OBJECT
 
   Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
-  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(QStringList Suffix READ getWSSuffixes WRITE setWSSuffixes)
 
@@ -55,8 +54,6 @@ public:
   void resetIndexRangeToDefault();
   void unifyRange();
 
-  bool showHiddenWorkspaces() const;
-  void showHiddenWorkspaces(bool show);
   bool showWorkspaceGroups() const;
   void showWorkspaceGroups(bool show);
   stringPairVec retrieveSelectedNameIndexPairs();
@@ -69,7 +66,6 @@ public:
   void setUpperBinLimit(int numberOfBins);
 
   bool isValid() const;
-  bool isConnected() const;
 
   void connectObservers();
   void disconnectObservers();
@@ -109,8 +105,6 @@ private:
 
   /// A list of workspace types that should be shown in the QtableWidget
   QStringList m_workspaceTypes;
-  /// Whether to show "hidden" workspaces
-  bool m_showHidden;
   // show/hide workspace groups
   bool m_showGroups;
   /// Allows you to put limits on the size of the workspace i.e. number of bins

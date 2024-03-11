@@ -117,7 +117,7 @@ WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
-      m_showHidden(false), m_showGroups(false), m_binLimits(std::nullopt), m_suffix() {
+      m_showGroups(false), m_binLimits(std::nullopt), m_suffix() {
 
   if (init) {
     connectObservers();
@@ -177,17 +177,6 @@ QStringList WorkspaceMultiSelector::getWorkspaceTypes() const { return m_workspa
 void WorkspaceMultiSelector::setWorkspaceTypes(const QStringList &types) {
   if (types != m_workspaceTypes) {
     m_workspaceTypes = types;
-    if (m_init) {
-      refresh();
-    }
-  }
-}
-
-bool WorkspaceMultiSelector::showHiddenWorkspaces() const { return m_showHidden; }
-
-void WorkspaceMultiSelector::showHiddenWorkspaces(bool show) {
-  if (show != m_showHidden) {
-    m_showHidden = show;
     if (m_init) {
       refresh();
     }
@@ -294,10 +283,6 @@ void WorkspaceMultiSelector::unifyRange() {
 
 void WorkspaceMultiSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
-  if (!showHiddenWorkspaces() &&
-      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->objectName())) {
-    return;
-  }
   if (checkEligibility(pNf->objectName())) {
     addItem(pNf->objectName());
   }
