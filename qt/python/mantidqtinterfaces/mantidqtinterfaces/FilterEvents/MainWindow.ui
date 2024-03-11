@@ -261,19 +261,6 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QSlider" name="horizontalSlider_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -283,8 +270,12 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <spacer name="horizontalSpacer_11">
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -296,10 +287,6 @@
           </property>
          </spacer>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -308,17 +295,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_3"/>
+         <widget class="QLineEdit" name="leStartTime"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_setT0">
-          <property name="text">
-           <string>Set</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_12">
+         <spacer name="horizontalSpacer_9">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -338,14 +318,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_4"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_setTf">
-          <property name="text">
-           <string>Set</string>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="leStopTime"/>
         </item>
        </layout>
       </item>
@@ -416,7 +389,7 @@
                <x>0</x>
                <y>0</y>
                <width>674</width>
-               <height>283</height>
+               <height>285</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_5">
@@ -619,7 +592,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_5"/>
+                   <widget class="QLineEdit" name="leMinimumValue"/>
                   </item>
                   <item>
                    <spacer name="horizontalSpacer_15">
@@ -645,7 +618,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_6"/>
+                   <widget class="QLineEdit" name="leMaximumValue"/>
                   </item>
                  </layout>
                 </item>
@@ -665,7 +638,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_7">
+                   <widget class="QLineEdit" name="leStepSize">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -724,7 +697,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_8">
+                   <widget class="QLineEdit" name="leValueTolerance">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -783,7 +756,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_9">
+                   <widget class="QLineEdit" name="leTimeTolerance">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -952,7 +925,7 @@
                <x>0</x>
                <y>0</y>
                <width>674</width>
-               <height>283</height>
+               <height>285</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_6">
@@ -1036,7 +1009,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_Ei">
+                   <widget class="QLineEdit" name="leIncidentEnergy">
                     <property name="maximumSize">
                      <size>
                       <width>400</width>
@@ -1330,27 +1303,25 @@
   <tabstop>verticalSlider_2</tabstop>
   <tabstop>horizontalSlider</tabstop>
   <tabstop>horizontalSlider_2</tabstop>
-  <tabstop>lineEdit_3</tabstop>
-  <tabstop>pushButton_setT0</tabstop>
-  <tabstop>lineEdit_4</tabstop>
-  <tabstop>pushButton_setTf</tabstop>
+  <tabstop>leStartTime</tabstop>
+  <tabstop>leStopTime</tabstop>
   <tabstop>lineEdit_outwsname</tabstop>
   <tabstop>lineEdit_title</tabstop>
   <tabstop>filterTab</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>comboBox_2</tabstop>
   <tabstop>pushButton_4</tabstop>
-  <tabstop>lineEdit_5</tabstop>
-  <tabstop>lineEdit_6</tabstop>
-  <tabstop>lineEdit_7</tabstop>
+  <tabstop>leMinimumValue</tabstop>
+  <tabstop>leMaximumValue</tabstop>
+  <tabstop>leStepSize</tabstop>
   <tabstop>comboBox_4</tabstop>
-  <tabstop>lineEdit_8</tabstop>
+  <tabstop>leValueTolerance</tabstop>
   <tabstop>comboBox_5</tabstop>
-  <tabstop>lineEdit_9</tabstop>
+  <tabstop>leTimeTolerance</tabstop>
   <tabstop>pushButton_filterLog</tabstop>
   <tabstop>scrollArea_2</tabstop>
   <tabstop>comboBox_tofCorr</tabstop>
-  <tabstop>lineEdit_Ei</tabstop>
+  <tabstop>leIncidentEnergy</tabstop>
   <tabstop>comboBox_corrWS</tabstop>
   <tabstop>pushButton_refreshCorrWSList</tabstop>
   <tabstop>checkBox_fastLog</tabstop>
