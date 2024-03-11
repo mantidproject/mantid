@@ -108,7 +108,8 @@ private:
   // show/hide workspace groups
   bool m_showGroups;
   /// Allows you to put limits on the size of the workspace i.e. number of bins
-  std::optional<std::pair<int, int>> m_binLimits;
+  std::optional<int> m_lowerBin;
+  std::optional<int> m_upperBin;
   QStringList m_suffix;
 
   // Mutex for synchronized event handling
