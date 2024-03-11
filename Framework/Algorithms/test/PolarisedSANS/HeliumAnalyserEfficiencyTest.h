@@ -132,8 +132,8 @@ public:
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", grpWs->getName());
     heliumAnalyserEfficiency->setProperty("SpinConfigurations", "11,10,00,01");
-    heliumAnalyserEfficiency->setProperty("T_E", te);
-    heliumAnalyserEfficiency->setProperty("pxd", pxd);
+    heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
+    heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
     heliumAnalyserEfficiency->execute();
 
     MatrixWorkspace_sptr pHeWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("p_He");
@@ -156,7 +156,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
-    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error);
 
     // Test with correctly sized covariance matrix
@@ -168,7 +168,7 @@ public:
 
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
-    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
   }
@@ -189,7 +189,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
-    heliumAnalyserEfficiency->setProperty("T_E_pxd_Covariance", covariance);
+    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
   }

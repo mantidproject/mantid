@@ -10,11 +10,11 @@ Description
 -----------
 
 Takes a normalised group workspace with four periods representing a run, combines this with the transmission of the empty
-cell (``T_E``) and the cell path length multiplied by the gas pressure (``pxd``) to calculate the efficiency of the analyser.
+cell (``TransmissionEmptyCell``) and the cell path length multiplied by the gas pressure (``GasPressureTimesCellLength``) to calculate the efficiency of the analyser.
 It will output the calculated efficiency in ``p_He``, as well as the transmission curves for the parallel (``T_para``), and
 anti-parallel (``T_anti``) cases.
 
-The parameters ``T_E`` and ``pxd`` are going to be calculated by fitting to data, and the covariance matrix of these
+The parameters ``TransmissionEmptyCell`` and ``GasPressureTimesCellLength`` are going to be calculated by fitting to data, and the covariance matrix of these
 two parameters can be provided in order to calculate the errors on the transmission curves.
 
 If the transmission of the wanted spin state is :math:`T_{para}`, and the transmission of the unwanted spin state is :math:`T_{anti}`,
