@@ -37,6 +37,18 @@ private:
     return period_indices;
   }
 
+  void doROITest(BankPulseTimes &bank_pulse_times, const std::vector<Mantid::Types::Core::DateAndTime> &starting,
+                 const std::vector<Mantid::Types::Core::DateAndTime> &stopping, const std::vector<size_t> &roi_exp) {
+
+    for (const auto &startVal : starting) {
+      for (const auto &stopVal : stopping) {
+        auto roi = bank_pulse_times.getPulseIndices(startVal, stopVal);
+        TS_ASSERT_EQUALS(roi.size(), 2);
+        TS_ASSERT_EQUALS(roi, roi_exp);
+      }
+    }
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -84,19 +96,9 @@ public:
       std::vector<Mantid::Types::Core::DateAndTime> starting({start, start - .5 * SECONDS_DELTA});
       std::vector<Mantid::Types::Core::DateAndTime> stopping({stop, pulse_times.back()});
 
-      const size_t start_index_exp = 2;
-      const size_t stop_index_exp = pulse_times.size();
+      const std::vector<size_t> roi_exp({2, pulse_times.size()});
 
-      for (const auto &startVal : starting) {
-        for (const auto &stopVal : stopping) {
-          auto roi = bank_pulse_times.getPulseIndices(startVal, stopVal);
-          TS_ASSERT_EQUALS(roi.size(), 2);
-          if (!roi.empty()) {
-            TS_ASSERT_EQUALS(roi.front(), start_index_exp);
-            TS_ASSERT_EQUALS(roi.back(), stop_index_exp);
-          }
-        }
-      }
+      doROITest(bank_pulse_times, starting, stopping, roi_exp);
     }
 
     // roi - trim from the back
@@ -108,19 +110,9 @@ public:
       std::vector<Mantid::Types::Core::DateAndTime> starting({start, pulse_times.front()});
       std::vector<Mantid::Types::Core::DateAndTime> stopping({stop, stop + .5 * SECONDS_DELTA});
 
-      const size_t start_index_exp = 0;
-      const size_t stop_index_exp = pulse_times.size() - 3;
+      const std::vector<size_t> roi_exp({0, pulse_times.size() - 3});
 
-      for (const auto &startVal : starting) {
-        for (const auto &stopVal : stopping) {
-          auto roi = bank_pulse_times.getPulseIndices(startVal, stopVal);
-          TS_ASSERT_EQUALS(roi.size(), 2);
-          if (!roi.empty()) {
-            TS_ASSERT_EQUALS(roi.front(), start_index_exp);
-            TS_ASSERT_EQUALS(roi.back(), stop_index_exp);
-          }
-        }
-      }
+      doROITest(bank_pulse_times, starting, stopping, roi_exp);
     }
   }
 
