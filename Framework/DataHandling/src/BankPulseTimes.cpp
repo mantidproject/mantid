@@ -112,7 +112,7 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
 
 void BankPulseTimes::updateStartTime() {
   if (!pulseTimes.empty()) {
-    const auto minimum = std::min(pulseTimes.cbegin(), pulseTimes.cend());
+    const auto minimum = std::min_element(pulseTimes.cbegin(), pulseTimes.cend());
     startTime = minimum->toISO8601String();
   }
   // otherwise the existing startTime stays
@@ -159,10 +159,43 @@ const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t i
 
 //----------------------------------------------------------------------------------------------
 
+namespace {
+std::size_t getFirstIncludedIndex(const std::vector<Mantid::Types::Core::DateAndTime> &pulseTimes,
+                                  const std::size_t startIndex, const Mantid::Types::Core::DateAndTime &start,
+                                  const Mantid::Types::Core::DateAndTime &stop) {
+  const auto NUM_PULSES{pulseTimes.size()};
+  if (startIndex >= NUM_PULSES)
+    return NUM_PULSES;
+
+  for (size_t i = startIndex; i < NUM_PULSES; ++i) {
+    const auto pulseTime = pulseTimes[i];
+    if (pulseTime >= start && pulseTime < stop)
+      return i;
+  }
+  return NUM_PULSES; // default is the number of pulses
+}
+
+std::size_t getFirstExcludedIndex(const std::vector<Mantid::Types::Core::DateAndTime> &pulseTimes,
+                                  const std::size_t startIndex, const Mantid::Types::Core::DateAndTime &start,
+                                  const Mantid::Types::Core::DateAndTime &stop) {
+  const auto NUM_PULSES{pulseTimes.size()};
+  if (startIndex >= NUM_PULSES)
+    return NUM_PULSES;
+
+  for (size_t i = startIndex; i < NUM_PULSES; ++i) {
+    const auto pulseTime = pulseTimes[i];
+    if (pulseTime < start || pulseTime > stop)
+      return i;
+  }
+  return NUM_PULSES; // default is the number of pulses
+}
+} // namespace
+
 std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
                                                     const Mantid::Types::Core::DateAndTime &stop) const {
   std::vector<size_t> roi;
   if (this->arePulseTimesIncreasing()) {
+    // sorted pulse times don't have to go through the whole vector, just look at the ends
     const bool includeStart = start <= this->pulseTimes.front();
     const bool includeStop = stop >= this->pulseTimes.back();
     if (!(includeStart && includeStop)) {
@@ -171,12 +204,7 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
         roi.push_back(0);
       } else {
         // do a linear search with the assumption that the index will be near the beginning
-        for (size_t index = 0; index < this->pulseTimes.size(); ++index) {
-          if (this->pulseTime(index) >= start) {
-            roi.push_back(index);
-            break;
-          }
-        }
+        roi.push_back(getFirstIncludedIndex(this->pulseTimes, 0, start, stop));
       }
       // get stop index
       if (includeStop) {
@@ -193,7 +221,24 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
       }
     }
   } else {
-    throw std::runtime_error("BankPulseTimes::getPulseIndicies() is not implemented for unsorted pulse times");
+    // loop through the entire vector of pulse times
+    const auto [min_ele, max_ele] = std::minmax_element(this->pulseTimes.cbegin(), this->pulseTimes.cend());
+    const bool includeStart = (start <= *min_ele);
+    const bool includeStop = (stop >= *max_ele);
+
+    // only put together range if one is needed
+    if (!(includeStart && includeStop)) {
+      const auto NUM_PULSES = this->pulseTimes.size();
+      std::size_t firstInclude = getFirstIncludedIndex(this->pulseTimes, 0, start, stop);
+      while (firstInclude < NUM_PULSES) {
+        auto firstExclude = getFirstExcludedIndex(this->pulseTimes, firstInclude + 1, start, stop);
+        if (firstInclude != firstExclude) {
+          roi.push_back(firstInclude);
+          roi.push_back(firstExclude);
+          firstInclude = getFirstIncludedIndex(this->pulseTimes, firstExclude + 1, start, stop);
+        }
+      }
+    }
   }
 
   if ((!roi.empty()) && (roi.size() % 2 != 0)) {
