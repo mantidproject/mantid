@@ -62,8 +62,6 @@ public:
   QStringList getWSSuffixes() const;
   void setWorkspaceTypes(const QStringList &types);
   void setWSSuffixes(const QStringList &suffix);
-  void setLowerBinLimit(int numberOfBins);
-  void setUpperBinLimit(int numberOfBins);
 
   bool isValid() const;
 
@@ -83,7 +81,6 @@ private:
 
   bool checkEligibility(const std::string &name) const;
   bool hasValidSuffix(const std::string &name) const;
-  bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
   void addItem(const std::string &name);
   void addItems(const std::vector<std::string> &names);
@@ -107,9 +104,6 @@ private:
   QStringList m_workspaceTypes;
   // show/hide workspace groups
   bool m_showGroups;
-  /// Allows you to put limits on the size of the workspace i.e. number of bins
-  std::optional<int> m_lowerBin;
-  std::optional<int> m_upperBin;
   QStringList m_suffix;
 
   // Mutex for synchronized event handling

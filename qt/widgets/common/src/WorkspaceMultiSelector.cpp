@@ -117,7 +117,7 @@ WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
-      m_showGroups(false), m_lowerBin(std::nullopt), m_upperBin(std::nullopt), m_suffix() {
+      m_showGroups(false), m_suffix() {
 
   if (init) {
     connectObservers();
@@ -209,10 +209,6 @@ void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
     }
   }
 }
-
-void WorkspaceMultiSelector::setLowerBinLimit(int numberOfBins) { m_lowerBin = numberOfBins; }
-
-void WorkspaceMultiSelector::setUpperBinLimit(int numberOfBins) { m_upperBin = numberOfBins; }
 
 void WorkspaceMultiSelector::addItem(const std::string &name) {
   insertRow(rowCount());
@@ -350,7 +346,7 @@ bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
   auto workspace = ads.retrieve(name);
   if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(workspace->id())) == -1)
     return false;
-  else if (!hasValidSuffix(name) || !hasValidNumberOfBins(workspace))
+  else if (!hasValidSuffix(name))
     return false;
   else if (!m_showGroups)
     return std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace) == nullptr;
@@ -363,18 +359,6 @@ bool WorkspaceMultiSelector::hasValidSuffix(const std::string &name) const {
   if (name.find_last_of("_") < name.size())
     return m_suffix.contains(QString::fromStdString(name.substr(name.find_last_of("_"))));
   return false;
-}
-
-bool WorkspaceMultiSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const {
-  if (m_lowerBin.has_value()) {
-    if (auto const workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
-      auto const numberOfBins = static_cast<int>(workspace->y(0).size());
-      if (m_upperBin.has_value())
-        return numberOfBins >= m_lowerBin && numberOfBins <= m_upperBin;
-      return numberOfBins >= m_lowerBin;
-    }
-  }
-  return true;
 }
 
 void WorkspaceMultiSelector::refresh() {
