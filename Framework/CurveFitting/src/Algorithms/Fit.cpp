@@ -169,6 +169,8 @@ size_t Fit::runMinimizer() {
   auto prog = std::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
   m_function->setProgressReporter(prog);
 
+  m_costFunction->normPenalties();
+
   // do the fitting until success or iteration limit is reached
   size_t iter = 0;
   bool isFinished = false;

@@ -56,6 +56,9 @@ public:
   /// get the penalty factor for the constraint
   virtual double getPenaltyFactor() const = 0;
 
+  /// Why even is there an inheritance layer here
+  virtual double getSpacing() const = 0;
+
   /// Return the string that can be used in this->initialize() to recreate this
   /// constraint
   virtual std::string asString() const = 0;

@@ -171,22 +171,28 @@ double BoundaryConstraint::check() {
     return 0.0;
   }
 
-  double paramValue = getParameter();
-
   double penalty = 0.0;
 
+  double dp = getSpacing();
+
+  penalty = m_penaltyFactor * dp;
+  g_log.notice() << parameterName() << " penalty: " << penalty << "\n";
+
+  return penalty;
+}
+
+double BoundaryConstraint::getSpacing() const {
+  double dp = 0;
+  double paramValue = getParameter();
   if (m_hasLowerBound)
     if (paramValue < m_lowerBound) {
-      double dp = m_lowerBound - paramValue;
-      penalty = m_penaltyFactor * dp * dp;
+      dp = m_lowerBound - paramValue;
     }
   if (m_hasUpperBound)
     if (paramValue > m_upperBound) {
-      double dp = paramValue - m_upperBound;
-      penalty = m_penaltyFactor * dp * dp;
+      dp = paramValue - m_upperBound;
     }
-
-  return penalty;
+  return dp;
 }
 
 double BoundaryConstraint::checkDeriv() {

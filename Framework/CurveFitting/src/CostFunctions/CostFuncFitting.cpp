@@ -13,6 +13,7 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Exception.h"
+#include <iostream>
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
@@ -326,6 +327,26 @@ double CostFuncFitting::val() const {
 
   m_dirtyVal = false;
   return m_value;
+}
+
+void CostFuncFitting::normPenalties() {
+  if (m_includePenalty) {
+    for (size_t i = 0; i < m_function->nParams(); ++i) {
+      if (!m_function->isActive(i))
+        continue;
+      API::IConstraint *c = m_function->getConstraint(i);
+      if (c) {
+        // std::cout << "Setting penalty from " << c->check();
+        // double dp = c->getSpacing();
+        // if (dp > 0) c->setPenaltyFactor(m_value / (2 * dp * dp));
+        // std::cout << " to " << c->check() << std::endl;
+        double par_val = c->getParameter();
+        double new_factor = 10e3 * std::log(1 / par_val * 10);
+        std::cout << "Setting penalty from " << c->getPenaltyFactor() << " to " << new_factor << std::endl;
+        c->setPenaltyFactor(new_factor);
+      }
+    }
+  }
 }
 
 /** Calculate the derivatives of the cost function

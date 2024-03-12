@@ -80,6 +80,8 @@ public:
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
   void reset() const;
 
+  void normPenalties();
+
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
   virtual void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);

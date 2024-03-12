@@ -54,7 +54,8 @@ void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function,
 
 /// Do one iteration.
 bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
-  const bool verbose = getProperty("Verbose");
+  // const bool verbose = getProperty("Verbose");
+  const bool verbose = true; // getProperty("Verbose");
   const double muMax = getProperty("MuMax");
   const double absError = getProperty("AbsError");
 
@@ -277,7 +278,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
       g_log.warning() << "Bad iteration, increase mu and revert changes to parameters.\n";
     }
   }
-
+  // m_costFunction->normPenalties();
   return true;
 }
 

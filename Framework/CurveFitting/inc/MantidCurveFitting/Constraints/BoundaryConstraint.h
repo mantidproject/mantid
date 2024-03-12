@@ -49,6 +49,8 @@ public:
   void setPenaltyFactor(const double &c) override;
   double getPenaltyFactor() const override { return m_penaltyFactor; }
 
+  double getSpacing() const override;
+
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }
   /// Return if it has a lower bound
