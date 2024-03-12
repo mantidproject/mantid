@@ -51,7 +51,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
     alg.execute();
@@ -78,7 +78,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
     alg.setPropertyValue("OutputFitCurves", "__unused_for_child");
@@ -106,7 +106,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
     alg.setPropertyValue("OutputCovarianceMatrix", "__unused_for_child");
@@ -137,7 +137,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setProperty("TEStartingValue", 1e50);
     alg.setProperty("PxDStartingValue", 1e50);
@@ -159,7 +159,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
 
@@ -181,13 +181,13 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
 
     // THEN
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
-                            "Some invalid Properties found: \n DepolarisedWorkspace: The depolarised workspace must "
+                            "Some invalid Properties found: \n DepolarizedWorkspace: The depolarized workspace must "
                             "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: The empty cell "
                             "workspace must contain a single spectrum. Contains 12 spectra.");
     TS_ASSERT(!alg.isExecuted());
@@ -203,14 +203,14 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // WHEN
-    alg.setProperty("DepolarisedWorkspace", depWs);
+    alg.setProperty("DepolarizedWorkspace", depWs);
     alg.setProperty("EmptyCellWorkspace", mtWs);
     alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
 
     // THEN
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
-                            "Some invalid Properties found: \n DepolarisedWorkspace: The bins in the "
-                            "DepolarisedWorkspace and EmptyCellWorkspace do not match.");
+                            "Some invalid Properties found: \n DepolarizedWorkspace: The bins in the "
+                            "DepolarizedWorkspace and EmptyCellWorkspace do not match.");
     TS_ASSERT(!alg.isExecuted());
   }
 

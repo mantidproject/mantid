@@ -21,7 +21,7 @@ public:
   std::string const summary() const override;
 
   /// The category of the algorithm. @see Algorithm::category
-  std::string const category() const override { return "SANS\\PolarisationCorrections"; }
+  std::string const category() const override { return "SANS\\PolarizationCorrections"; }
 
   /// The version number of the algorithm. @see Algorithm::version
   int version() const override { return 1; }
@@ -36,8 +36,8 @@ private:
   /// Validate the provided properties to the algorithm.
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Divide the depolarised workspace by the empty cell workspace.
-  API::MatrixWorkspace_sptr calcDepolarisedProportion();
+  /// Divide the depolarized workspace by the empty cell workspace.
+  API::MatrixWorkspace_sptr calcDepolarizedProportion();
 
   /// Fit using UserFunction1D to find the pxd and transmission values.
   void calcWavelengthDependentTransmission(API::MatrixWorkspace_sptr const &inputWs, std::string const &outputWsName);

@@ -16,7 +16,7 @@
 namespace {
 /// Property Names
 namespace PropNames {
-std::string_view constexpr DEP_WORKSPACE{"DepolarisedWorkspace"};
+std::string_view constexpr DEP_WORKSPACE{"DepolarizedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
@@ -62,7 +62,7 @@ using namespace Kernel;
 DECLARE_ALGORITHM(DepolarizedAnalyserTransmission)
 
 std::string const DepolarizedAnalyserTransmission::summary() const {
-  return "Calculate the transmission rate through a depolarised He3 cell.";
+  return "Calculate the transmission rate through a depolarized He3 cell.";
 }
 
 void DepolarizedAnalyserTransmission::init() {
@@ -70,7 +70,7 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
                                                            Kernel::Direction::Input, wsValidator),
-      "The fully depolarised helium cell workspace. Should contain a single spectra. Units must be in wavelength.");
+      "The fully depolarized helium cell workspace. Should contain a single spectra. Units must be in wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
@@ -78,7 +78,7 @@ void DepolarizedAnalyserTransmission::init() {
                   "Starting value for the empty analyser cell transmission fit property " +
                       std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
-                  "Starting value for the depolarised cell transmission fit property " +
+                  "Starting value for the depolarized cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
   declareProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE), false,
                   "Whether the algorithm should ignore a chi-squared (fit cost value) greater than 1 and therefore not "
@@ -110,7 +110,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
   MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
   if (depWs->getNumberHistograms() != 1) {
     result[std::string(PropNames::DEP_WORKSPACE)] =
-        "The depolarised workspace must contain a single spectrum. Contains " +
+        "The depolarized workspace must contain a single spectrum. Contains " +
         std::to_string(depWs->getNumberHistograms()) + " spectra.";
   }
   MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
@@ -122,17 +122,17 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
 
   if (!WorkspaceHelpers::matchingBins(*depWs, *mtWs, true)) {
     result[std::string(PropNames::DEP_WORKSPACE)] =
-        "The bins in the DepolarisedWorkspace and EmptyCellWorkspace do not match.";
+        "The bins in the DepolarizedWorkspace and EmptyCellWorkspace do not match.";
   }
   return result;
 }
 
 void DepolarizedAnalyserTransmission::exec() {
-  auto const &dividedWs = calcDepolarisedProportion();
+  auto const &dividedWs = calcDepolarizedProportion();
   calcWavelengthDependentTransmission(dividedWs, getPropertyValue(std::string(PropNames::OUTPUT_WORKSPACE)));
 }
 
-MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarisedProportion() {
+MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarizedProportion() {
   MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
   MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
   auto divideAlg = createChildAlgorithm("Divide");

@@ -9,19 +9,19 @@
 Description
 -----------
 
-Takes a pair of normalised, single-spectra workspaces representing a depolarised helium cell and the empty cell. It will
+Takes a pair of normalised, single-spectra workspaces representing a depolarized helium cell and the empty cell. It will
 then determine the empty cell transmission value, ``T_E``, and the cell path length multiplied by the gas pressure
 ``pxd`` by using an exponential fit. The parameters table is then output for use in later calculations. Optionally, the
 calculated fit curve and a non-normalised version of the covariance matrix can also be output to check the quality of
 the fit. See :ref:`algm-Fit` for more details.
 
-A polarised He\ :sub:`3`\  cell decays over time. At the end of its life, it will be fully depolarised and a run is
-created to find the depolarised transmission rate through the helium. This allows for more effective efficiency
+A polarised He\ :sub:`3`\  cell decays over time. At the end of its life, it will be fully depolarized and a run is
+created to find the depolarized transmission rate through the helium. This allows for more effective efficiency
 corrections.
 
-When depolarised, :math:`P_{He} = 0`, therefore the transmission can be determined using
+When depolarized, :math:`P_{He} = 0`, therefore the transmission can be determined using
 :math:`T(\lambda) = T_E(\lambda) * exp(-\mu) = T_E(\lambda) * exp(-0.0733 * p * d * \lambda)`. We can then use this
-equation, after normalising the ``DepolarisedWorkspace`` by the ``EmptyCellWorkspace``, to perform a fit to determine
+equation, after normalising the ``DepolarizedWorkspace`` by the ``EmptyCellWorkspace``, to perform a fit to determine
 our :math:`T_E` (``T_E``) and :math:`p * d` (``pxd``) values.
 
 
