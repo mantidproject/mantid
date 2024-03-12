@@ -35,6 +35,7 @@ private:
     declareProperty("EnergyMin", 0.0);
     declareProperty("EnergyMax", 1.0);
     declareProperty("BinReductionFactor", 2.0);
+    declareProperty("EnforceNormalization", true);
   };
   void exec() override {
     ITableWorkspace_sptr outputWS = WorkspaceFactory::Instance().createTable();
@@ -47,6 +48,7 @@ private:
     outputWS->addColumn("double", "EnergyMin");
     outputWS->addColumn("double", "EnergyMax");
     outputWS->addColumn("double", "BinReductionFactor");
+    outputWS->addColumn("str", "EnforceNormalization");
 
     TableRow newRow = outputWS->appendRow();
     auto inWS = getPropertyValue("SampleWorkspace");
@@ -58,8 +60,9 @@ private:
     double eMin = getProperty("EnergyMin");
     double eMax = getProperty("EnergyMax");
     double bRF = getProperty("BinReductionFactor");
+    auto enfNorm = getPropertyValue("EnforceNormalization");
 
-    newRow << inWS << resWS << outWS << nIt << calcErr << dryRun << eMin << eMax << bRF;
+    newRow << inWS << resWS << outWS << nIt << calcErr << dryRun << eMin << eMax << bRF << enfNorm;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("outputWS", outputWS);
   };
@@ -90,6 +93,7 @@ public:
     m_model->setEnergyMax(0.1);
     m_model->setNumBins(10);
     m_model->setCalculateErrors(true);
+    m_model->setEnforceNormalization(true);
     m_model->setNIterations("50");
 
     m_model->setupTransformToIqt(&batch, "outputWS");
@@ -106,6 +110,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->cell<double>(0, 6), -0.1);
     TS_ASSERT_EQUALS(outputWS->cell<double>(0, 7), 0.1);
     TS_ASSERT_EQUALS(outputWS->cell<double>(0, 8), 10);
+    TS_ASSERT_EQUALS(outputWS->cell<std::string>(0, 9), "1");
   }
 
 private:
