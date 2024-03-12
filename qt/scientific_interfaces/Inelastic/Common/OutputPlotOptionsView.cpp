@@ -199,7 +199,7 @@ void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
     break;
   default:
     throw std::runtime_error("Plot option not found. Plot types are Spectra, "
-                             "SpectraSliceSurfaced or SpectraTiled.");
+                             "SpectraBin, SpectraSliceSurface or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
