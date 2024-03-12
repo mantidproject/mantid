@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/IndirectFitDataModel.h"
-
 #include "IElwinView.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationTab.h"
@@ -46,7 +45,7 @@ public:
 
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void newInputFiles() override;
-  void newInputFilesFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
+  void newInputFilesFromDialog(std::vector<std::string> const &names) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
   void setRunIsRunning(const bool running) override;
