@@ -220,6 +220,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             group_spectra,
             fold_chopped,
             rename_reduction,
+            mask_detectors,
         )
 
         self._setup()
@@ -339,13 +340,16 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Convert to dSpacing
                 ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target="dSpacing", EMode="Elastic")
 
+                # Mask noisy detectors
+                if len(masked_detectors) > 0:
+                    mask_detectors(ws_name, masked_detectors)
+
                 # Handle rebinning
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
                 group_spectra(
                     ws_name,
-                    masked_detectors=masked_detectors,
                     method=self._grouping_method,
                     group_file=self._grouping_map_file,
                     group_ws=self._grouping_workspace,
