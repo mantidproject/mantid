@@ -76,9 +76,6 @@ public:
 
   virtual void setSubType(std::size_t subTypeIndex, int typeIndex) = 0;
   virtual std::map<std::size_t, int> getSubTypes() const = 0;
-  virtual std::string setBackgroundA0(double value) = 0;
-  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
-  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
