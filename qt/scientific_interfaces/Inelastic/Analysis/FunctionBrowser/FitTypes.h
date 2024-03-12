@@ -41,37 +41,44 @@ enum class FitType {
   InelasticIsoRotDiff,
 };
 
-enum class BackgroundType { None, Flat, Linear };
+enum class DeltaType { None, Delta };
 
 enum class TempCorrectionType { None, Exponential };
+
+enum class BackgroundType { None, Flat, Linear };
 
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
-  Background = 2,
+  Delta = 2,
+  TempCorrection = 3,
+  Background = 4,
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
 extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
+struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
+  std::string name() const override { return "Lorentzians"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(int); }
+};
+
 struct FitSubType : public TemplateSubTypeImpl<FitType> {
   std::string name() const override { return "Fit Type"; }
 };
 
-struct LorentzianSubType : public TemplateSubTypeImpl<LorentzianType> {
-  std::string name() const override { return "Lorentzians"; }
-};
-
-struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
-  std::string name() const override { return "Background"; }
-};
-
-struct DeltaSubType : public TemplateSubTypeImpl<bool> {
-  std::string name() const override { return "Delta"; }
+struct DeltaSubType : public TemplateSubTypeImpl<DeltaType> {
+  std::string name() const override { return "Delta Function"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
 };
 
 struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
   std::string name() const override { return "ConvTempCorrection"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
+};
+
+struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
+  std::string name() const override { return "Background"; }
 };
 
 } // namespace ConvTypes

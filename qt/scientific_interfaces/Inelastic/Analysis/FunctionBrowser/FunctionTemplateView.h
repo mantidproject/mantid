@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Analysis/FunctionBrowser/TemplateSubType.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
@@ -44,7 +45,7 @@ class ITemplatePresenter;
 class MANTIDQT_INELASTIC_DLL FunctionTemplateView : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateView(QWidget *parent = nullptr);
+  FunctionTemplateView();
   virtual ~FunctionTemplateView();
   void init();
   void subscribePresenter(ITemplatePresenter *presenter);
@@ -79,9 +80,6 @@ public:
   virtual EstimationDataSelector getEstimationDataSelector() const;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   virtual void estimateFunctionParameters();
-  virtual void setBackgroundA0(double value) = 0;
-  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
-  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
   void emitFunctionStructureChanged() { emit functionStructureChanged(); }
 

@@ -42,8 +42,6 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
 
-  void setBackgroundA0(double value) override;
-
 protected:
   void updateView() override;
 

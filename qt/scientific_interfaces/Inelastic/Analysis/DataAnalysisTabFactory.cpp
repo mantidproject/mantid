@@ -10,20 +10,31 @@
 #include "FitTabConstants.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
-#include "FunctionBrowser/ConvFunctionModel.h"
-#include "FunctionBrowser/ConvFunctionTemplateView.h"
-#include "FunctionBrowser/ConvTemplatePresenter.h"
+#include "FunctionBrowser/ConvFunctionTemplateModel.h"
 #include "FunctionBrowser/FqFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionTemplateView.h"
 #include "FunctionBrowser/IqtTemplatePresenter.h"
 #include "FunctionBrowser/MSDFunctionModel.h"
+#include "FunctionBrowser/MultiFunctionTemplatePresenter.h"
+#include "FunctionBrowser/MultiFunctionTemplateView.h"
 #include "FunctionBrowser/SingleFunctionTemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IqtFitModel.h"
 #include "MSDFitModel.h"
+
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
+TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<TemplateSubTypes> subTypes) {
+  auto browserCustomizations = TemplateBrowserCustomizations();
+  browserCustomizations.templateSubTypes = std::move(subTypes);
+  return browserCustomizations;
+}
+
+} // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -55,8 +66,9 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
   auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
-  tab->setupFitPropertyBrowser<ConvFunctionTemplateView, ConvTemplatePresenter, ConvFunctionModel>(
-      ConvFit::HIDDEN_PROPS, true);
+  auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
+  tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, ConvFunctionTemplateModel>(
+      ConvFit::HIDDEN_PROPS, true, std::move(browserCustomizations));
   tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();

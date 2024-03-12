@@ -25,6 +25,7 @@ namespace IDA {
 
 struct TemplateSubType {
   virtual std::string name() const = 0;
+  virtual bool isType(const std::type_info &type) const = 0;
   virtual QStringList getTypeNames() const = 0;
   virtual int getTypeIndex(const QString &typeName) const = 0;
   virtual int getNTypes() const = 0;
@@ -47,6 +48,11 @@ struct TemplateSubTypeDescriptor {
 // ok to disable this warning.
 GNU_DIAG_OFF("undefined-var-template")
 template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
+  virtual bool isType(const std::type_info &type) const override {
+    (void)type;
+    return false;
+  };
+
   QStringList getTypeNames() const override {
     QStringList out;
     for (auto &&it : g_typeMap) {
@@ -102,6 +108,18 @@ void applyToFitFunction(Type functionType, const std::function<void(ParamID)> &p
                       TemplateSubType::g_typeMap[functionType].blocks.back(), paramFun);
 }
 GNU_DIAG_ON("undefined-var-template")
+
+using TemplateSubTypes = std::vector<std::unique_ptr<TemplateSubType>>;
+
+template <typename... Args> std::unique_ptr<TemplateSubTypes> packTemplateSubTypes(Args &&...others) {
+  std::unique_ptr<TemplateSubTypes> subTypes = std::make_unique<TemplateSubTypes>();
+  (subTypes->emplace_back(std::forward<Args>(others)), ...);
+  return subTypes;
+}
+
+struct TemplateBrowserCustomizations {
+  std::unique_ptr<TemplateSubTypes> templateSubTypes = nullptr;
+};
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -276,6 +276,12 @@ std::string IqtFunctionModel::setBackgroundA0(double value) {
   return "";
 }
 
+void IqtFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  (void)fitResolutions;
+}
+
+void IqtFunctionModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+
 void IqtFunctionModel::setNumberDomains(int n) { m_model.setNumberDomains(n); }
 
 int IqtFunctionModel::getNumberDomains() const { return m_model.getNumberDomains(); }

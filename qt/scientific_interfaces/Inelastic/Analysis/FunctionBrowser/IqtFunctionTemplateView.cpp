@@ -30,11 +30,11 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
-IqtFunctionTemplateView::IqtFunctionTemplateView(QWidget *parent) : FunctionTemplateView(parent) { init(); }
+IqtFunctionTemplateView::IqtFunctionTemplateView(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateView() {
+  (void)customizations;
+  init();
+}
 
 void IqtFunctionTemplateView::createProperties() {
   m_parameterManager->blockSignals(true);
@@ -229,8 +229,6 @@ void IqtFunctionTemplateView::clear() {
   removeExponentialTwo();
   removeExponentialOne();
 }
-
-void IqtFunctionTemplateView::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
 void IqtFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);

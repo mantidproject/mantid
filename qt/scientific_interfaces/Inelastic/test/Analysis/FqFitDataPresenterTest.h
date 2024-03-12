@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/FitTabConstants.h"
 #include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"

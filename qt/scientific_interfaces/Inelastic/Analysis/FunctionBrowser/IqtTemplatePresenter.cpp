@@ -139,11 +139,6 @@ void IqtTemplatePresenter::estimateFunctionParameters() {
   updateView();
 }
 
-void IqtTemplatePresenter::setBackgroundA0(double value) {
-  m_model->setBackgroundA0(value);
-  view()->setA0(value, 0.0);
-}
-
 void IqtTemplatePresenter::updateViewParameters() {
   static std::map<IqtFunctionModel::ParamID, void (IqtFunctionTemplateView::*)(double, double)> setters{
       {IqtFunctionModel::ParamID::EXP1_HEIGHT, &IqtFunctionTemplateView::setExp1Height},

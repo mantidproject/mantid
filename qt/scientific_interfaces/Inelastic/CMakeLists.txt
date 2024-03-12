@@ -29,9 +29,7 @@ set(SRC_FILES
     Analysis/IndirectFitPlotView.cpp
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
-    Analysis/FunctionBrowser/ConvFunctionModel.cpp
-    Analysis/FunctionBrowser/ConvFunctionTemplateView.cpp
-    Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/ConvFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/FitTypes.cpp
     Analysis/FunctionBrowser/FunctionTemplateView.cpp
     Analysis/FunctionBrowser/FunctionTemplatePresenter.cpp
@@ -43,6 +41,8 @@ set(SRC_FILES
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateView.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
+    Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
     BayesFitting/BayesFitting.cpp
     BayesFitting/BayesFittingTab.cpp
     BayesFitting/Quasi.cpp
@@ -101,10 +101,10 @@ set(MOC_FILES
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPropertyBrowser.h
-    Analysis/FunctionBrowser/ConvFunctionTemplateView.h
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
+    Analysis/FunctionBrowser/MultiFunctionTemplateView.h
     BayesFitting/BayesFitting.h
     BayesFitting/BayesFittingTab.h
     BayesFitting/Quasi.h
@@ -159,8 +159,7 @@ set(INC_FILES
     Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
-    Analysis/FunctionBrowser/ConvFunctionModel.h
-    Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/ConvFunctionTemplateModel.h
     Analysis/FunctionBrowser/FitTypes.h
     Analysis/FunctionBrowser/FunctionTemplatePresenter.h
     Analysis/FunctionBrowser/FqFunctionModel.h
@@ -169,6 +168,7 @@ set(INC_FILES
     Analysis/FunctionBrowser/MSDFunctionModel.h
     Analysis/FunctionBrowser/ParamID.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
+    Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.h
     Analysis/FunctionBrowser/TemplateSubType.h
     Common/IndirectDataValidationHelper.h
     Common/ISettingsView.h

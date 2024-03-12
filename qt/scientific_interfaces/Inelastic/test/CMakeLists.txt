@@ -2,7 +2,7 @@
 set(TEST_FILES
     Analysis/ConvFitModelTest.h
     Analysis/ConvFitDataPresenterTest.h
-    Analysis/ConvFunctionModelTest.h
+    Analysis/ConvFunctionTemplateModelTest.h
     Analysis/FqFitDataPresenterTest.h
     Analysis/FqFitModelTest.h
     Analysis/IDAFunctionParameterEstimationTest.h

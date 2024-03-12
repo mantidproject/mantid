@@ -81,6 +81,8 @@ public:
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
+  void setQValues(const std::vector<double> &qValues) override;
 
   enum class ParamID {
     EXP1_HEIGHT,

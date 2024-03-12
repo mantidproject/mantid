@@ -27,7 +27,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
 public:
-  explicit IqtFunctionTemplateView(QWidget *parent = nullptr);
+  explicit IqtFunctionTemplateView(TemplateBrowserCustomizations customizations);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();
@@ -49,9 +49,6 @@ public:
   void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
-  void setBackgroundA0(double value) override;
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
-  void setQValues(const std::vector<double> &) override {}
 
 protected slots:
   void intChanged(QtProperty *) override;

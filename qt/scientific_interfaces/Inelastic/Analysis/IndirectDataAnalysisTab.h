@@ -8,6 +8,7 @@
 
 #include "Common/IndirectTab.h"
 #include "DllConfig.h"
+#include "FunctionBrowser/TemplateSubType.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitPlotPresenter.h"
@@ -64,8 +65,9 @@ public:
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
 
   template <typename TemplateBrowser, typename TemplatePresenter, typename FunctionModel>
-  void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false) {
-    auto templateBrowser = new TemplateBrowser();
+  void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false,
+                               TemplateBrowserCustomizations customizations = TemplateBrowserCustomizations()) {
+    auto templateBrowser = new TemplateBrowser(std::move(customizations));
     auto functionModel = std::make_unique<FunctionModel>();
     auto templatePresenter = std::make_unique<TemplatePresenter>(templateBrowser, std::move(functionModel));
     m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplatePresenter(std::move(templatePresenter));

@@ -26,9 +26,9 @@ using namespace ConvTypes;
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL ConvFunctionModel : public IFunctionModel {
+class MANTIDQT_INELASTIC_DLL ConvFunctionTemplateModel : public IFunctionModel {
 public:
-  ConvFunctionModel();
+  ConvFunctionTemplateModel();
   void setFunction(IFunction_sptr fun) override;
   IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
@@ -37,9 +37,6 @@ public:
   void removeFunction(std::string const &prefix) override;
   void setParameter(std::string const &parameterName, double value) override;
   void setParameterError(std::string const &parameterName, double value) override;
-  FitType getFitType() const;
-  LorentzianType getLorentzianType() const;
-  BackgroundType getBackgroundType() const;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
   std::string getParameterDescription(std::string const &parameterName) const override;
@@ -76,21 +73,17 @@ public:
   void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) override;
   void setGlobalParameterValue(std::string const &parameterName, double value) override;
   std::string setBackgroundA0(double value) override;
-  void setFitType(FitType fitType);
-  void setLorentzianType(LorentzianType lorentzianType);
-  void setDeltaFunction(bool);
+  void setSubType(std::size_t subTypeIndex, int typeIndex);
+  std::map<std::size_t, int> getSubTypes() const;
   bool hasDeltaFunction() const;
-  void setTempCorrection(bool, double value);
   bool hasTempCorrection() const;
-  double getTempValue() const;
-  void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
-  void setQValues(const std::vector<double> &qValues);
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
+  void setQValues(const std::vector<double> &qValues) override;
 
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
@@ -142,10 +135,9 @@ private:
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
   LorentzianType m_lorentzianType = LorentzianType::None;
+  DeltaType m_deltaType = DeltaType::None;
+  TempCorrectionType m_tempCorrectionType = TempCorrectionType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  bool m_hasDeltaFunction = false;
-  bool m_hasTempCorrection = false;
-  double m_tempValue = 100.0;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
