@@ -375,25 +375,6 @@ public:
     }
   }
 
-  void testValidateRunDataGroupingInvalid() {
-    IETInputData inputData("iris26184_multi_graphite002_red");
-    IETConversionData conversionData(0.5, 1, 2);
-    auto groupingProperties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-    Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("Custom"), *groupingProperties);
-    IETBackgroundData backgroundData(false);
-    IETAnalysisData analysisData;
-    IETRebinData rebinData;
-    IETOutputData outputData;
-
-    IETRunData runData(inputData, conversionData, std::move(groupingProperties), backgroundData, analysisData,
-                       rebinData, outputData);
-
-    std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
-    TS_ASSERT_EQUALS(errors.size(), 1);
-    if (errors.size() == 1)
-      TS_ASSERT_EQUALS(errors[0], "Please supply a custom grouping for detectors.");
-  }
-
   void testValidateRunDataAnalysisInvalid() {
     IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
@@ -405,7 +386,7 @@ public:
     IETRunData runData(inputData, conversionData, defaultGroupingProps(), backgroundData, analysisData, rebinData,
                        outputData);
 
-    std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
+    std::vector<std::string> errors = m_model->validateRunData(runData);
     TS_ASSERT_EQUALS(errors.size(), 1);
     if (errors.size() == 1)
       TS_ASSERT_EQUALS(errors[0], "Detailed Balance must be more than 0 K");
@@ -422,7 +403,7 @@ public:
     IETRunData runData(inputData, conversionData, defaultGroupingProps(), backgroundData, analysisData, rebinData,
                        outputData);
 
-    std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
+    std::vector<std::string> errors = m_model->validateRunData(runData);
     TS_ASSERT_EQUALS(errors.size(), 1);
     if (errors.size() == 1)
       TS_ASSERT_EQUALS(errors[0], "Minimum spectra must be less than maximum spectra.");
@@ -439,7 +420,7 @@ public:
     IETRunData runData(inputData, conversionData, defaultGroupingProps(), backgroundData, analysisData, rebinData,
                        outputData);
 
-    std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
+    std::vector<std::string> errors = m_model->validateRunData(runData);
     TS_ASSERT_EQUALS(errors.size(), 2);
     if (errors.size() == 2) {
       TS_ASSERT_EQUALS(errors[0], "The Start of Background Removal is less than the minimum of the data range");
@@ -458,7 +439,7 @@ public:
     IETRunData runData(inputData, conversionData, defaultGroupingProps(), backgroundData, analysisData, rebinData,
                        outputData);
 
-    std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
+    std::vector<std::string> errors = m_model->validateRunData(runData);
     TS_ASSERT_EQUALS(errors.size(), 0);
   }
 

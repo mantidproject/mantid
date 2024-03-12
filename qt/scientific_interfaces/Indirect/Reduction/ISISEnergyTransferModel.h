@@ -33,8 +33,7 @@ public:
                            std::string const &outputGroupName);
   std::string getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
-  std::vector<std::string> validateRunData(IETRunData const &runData, std::size_t const &defaultSpectraMin,
-                                           std::size_t const &defaultSpectraMax);
+  std::vector<std::string> validateRunData(IETRunData const &runData);
   std::vector<std::string> validatePlotData(IETPlotData const &plotData);
 
   std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,

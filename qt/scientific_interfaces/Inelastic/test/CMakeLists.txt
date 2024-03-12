@@ -25,6 +25,7 @@ set(TEST_FILES
     Common/SettingsPresenterTest.h
     Common/WorkspaceUtilsTest.h
     Common/InterfaceUtilsTest.h
+    Common/ValidationUtilsTest.h
     Manipulation/InelasticDataManipulationElwinTabModelTest.h
     Manipulation/InelasticDataManipulationIqtTabModelTest.h
     Manipulation/InelasticDataManipulationMomentsTabModelTest.h

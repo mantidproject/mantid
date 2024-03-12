@@ -134,6 +134,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             name="GroupingPolicy",
+            defaultValue="",
+            validator=StringListValidator(["", "Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            doc="This property is deprecated (since v6.10), please use the 'GroupingMethod' property instead.",
+        )
+        self.declareProperty(
+            name="GroupingMethod",
             defaultValue="All",
             validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
             doc="The method used to group detectors.",
@@ -198,10 +204,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 issues["CalFile"] = "Cal Files are currently only available for use in OSIRIS diffspec mode"
 
         # Validate grouping method
-        grouping_method = self.getPropertyValue("GroupingPolicy")
-        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        grouping_method = self.getPropertyValue("GroupingMethod")
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
 
-        if grouping_method == "Workspace" and grouping_ws is None:
+        if grouping_policy != "":
+            logger.warning(
+                "The 'GroupingPolicy' algorithm property has been deprecated (since v6.10). Please use the 'GroupingMethod' "
+                "algorithm property instead."
+            )
+
+        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        if (grouping_method == "Workspace" or grouping_policy == "Workspace") and grouping_ws is None:
             issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
 
         return issues
@@ -396,7 +409,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty("SpectraRange").value
         self._rebin_string = self.getPropertyValue("RebinParam")
 
-        self._grouping_method = self.getPropertyValue("GroupingPolicy")
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
+        grouping_method = self.getPropertyValue("GroupingMethod")
+        # 'GroupingPolicy' is deprecated, but if it is provided instead of 'GroupingMethod' then try to use it anyway
+        self._grouping_method = grouping_policy if grouping_policy != "" and grouping_method == "All" else grouping_method
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))

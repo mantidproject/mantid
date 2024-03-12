@@ -15,8 +15,13 @@
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
+#include <optional>
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class DetectorGroupingOptions;
+
 class IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
@@ -37,9 +42,7 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
-  void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
-  void deleteGroupingWorkspace();
   void validateSpectrumMin(int value);
   void validateSpectrumMax(int value);
 
@@ -70,7 +73,6 @@ private:
   void runGenericReduction(const QString &instName, const QString &mode);
   void connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field);
   void runOSIRISdiffonlyReduction();
-  void createGroupingWorkspace(const std::string &outputWsName);
 
   void setRunIsRunning(bool running);
   void setButtonsEnabled(bool enabled);
@@ -84,10 +86,9 @@ private:
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
-  std::string m_groupingWsName;
-  std::string m_groupingComponent;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
+  DetectorGroupingOptions *m_groupingWidget;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

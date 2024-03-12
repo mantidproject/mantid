@@ -649,8 +649,7 @@ def group_on_string(group_detectors, grouping_string):
 
 def group_spectra(workspace_name, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
     """
-    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GroupingPolicy property.
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
     @param workspace_name Name of workspace to group spectra of
     @param method Grouping method (IPF, All, Individual, File, Workspace)
@@ -668,8 +667,7 @@ def group_spectra(workspace_name, method, group_file=None, group_ws=None, group_
 
 def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
     """
-    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GroupingPolicy property.
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
     @param workspace Workspace to group spectra of
     @param method Grouping method (IPF, All, Individual, File, Workspace)
@@ -694,7 +692,7 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
             grouping_method = "Individual"
 
     else:
-        # Otherwise use the value of GroupingPolicy
+        # Otherwise use the value of GroupingMethod
         grouping_method = method
 
     logger.information("Grouping method for workspace %s is %s" % (workspace.name(), grouping_method))

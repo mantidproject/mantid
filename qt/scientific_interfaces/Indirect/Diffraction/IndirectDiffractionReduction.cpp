@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
+#include "Common/DetectorGroupingOptions.h"
 #include "Common/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -36,7 +37,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
     : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_groupingComponent() {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); }
 
@@ -49,6 +50,11 @@ void IndirectDiffractionReduction::initLayout() {
 
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
+
+  m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
+  m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+  m_groupingWidget->setSaveCustomVisible(false);
+  m_groupingWidget->setGroupingMethod("All");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -78,9 +84,6 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
   m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
   m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
-
-  // Update the list of plot options when manual grouping is toggled
-  connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this, SLOT(manualGroupingToggled(int)));
 
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
@@ -113,8 +116,6 @@ void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::AP
 void IndirectDiffractionReduction::run() {
   m_plotOptionsPresenter->clearWorkspaces();
 
-  setRunIsRunning(true);
-
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
   if (!m_uiForm.rfSampleFiles->isValid()) {
@@ -125,6 +126,13 @@ void IndirectDiffractionReduction::run() {
   if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() && m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
     showInformationBox("Use Vanadium File checked but no vanadium files "
                        "have been supplied.");
+    return;
+  }
+
+  auto const spectraMin = static_cast<std::size_t>(m_uiForm.spSpecMin->value());
+  auto const spectraMax = static_cast<std::size_t>(m_uiForm.spSpecMax->value());
+  if (auto const message = m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax)) {
+    showInformationBox(QString::fromStdString(*message));
     return;
   }
 
@@ -159,11 +167,6 @@ void IndirectDiffractionReduction::run() {
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
-
-  // Delete grouping workspace, if created.
-  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
-    deleteGroupingWorkspace();
-  }
 
   setRunIsRunning(false);
 
@@ -321,11 +324,11 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::s
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
 void IndirectDiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
+  setRunIsRunning(true);
 
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
-  bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -382,15 +385,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
       msgDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
   }
 
-  auto diffRuntimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  m_groupingWsName = "__Grouping";
-  // Add the property for grouping policy if needed
-  if (useManualGrouping) {
-    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-    createGroupingWorkspace(m_groupingWsName);
-    diffRuntimeProps->setPropertyValue("GroupingWorkspace", m_groupingWsName);
-  }
-  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(diffRuntimeProps));
+  auto groupingProps = m_groupingWidget->groupingProperties();
+  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(groupingProps));
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -403,6 +399,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
  * OSIRISDiffractionReduction algorithm.
  */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
+  setRunIsRunning(true);
+
   // Get the files names from FileFinderWidget widget, and convert them from Qt
   // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
@@ -474,29 +472,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectDiffractionReduction::createGroupingWorkspace(const std::string &outputWsName) {
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
-  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
-
-  auto groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-  groupingAlg->initialize();
-  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
-  groupingAlg->setProperty("InstrumentName", instrument);
-  groupingAlg->setProperty("ComponentName", m_groupingComponent);
-  groupingAlg->setProperty("OutputWorkspace", outputWsName);
-
-  m_batchAlgoRunner->addAlgorithm(groupingAlg);
-}
-
-void IndirectDiffractionReduction::deleteGroupingWorkspace() {
-  IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", m_groupingWsName);
-  deleteAlg->executeAsync();
-  m_groupingWsName = "";
-}
-
 /**
  * Loads an empty instrument and returns a pointer to the workspace.
  *
@@ -557,9 +532,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
-  auto const bankComponent = instrument->getComponentByName("bank");
-  m_groupingComponent = bankComponent ? "bank" : "diffraction";
-
   // Get default spectra range
   double specMin = instrument->getNumberParameter("spectra-min")[0];
   double specMax = instrument->getNumberParameter("spectra-max")[0];
@@ -603,12 +575,12 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     m_uiForm.ckUseCalib->setChecked(true);
   }
 
-  if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
-    // Disable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckManualGrouping->setEnabled(false);
-    m_uiForm.ckManualGrouping->setChecked(false);
+  auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
+  m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
+  m_uiForm.fDetectorGrouping->setToolTip(!allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
+                                                                : "");
 
+  if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.ckSumFiles->setEnabled(false);
@@ -619,10 +591,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     m_uiForm.ckSumFiles->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
-
-    // Re-enable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("");
-    m_uiForm.ckManualGrouping->setEnabled(true);
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);
@@ -801,24 +769,6 @@ void IndirectDiffractionReduction::runFilesFound() {
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
-}
-
-/**
- * Handles the user toggling the manual grouping check box.
- *
- * @param state The selection state of the check box
- */
-void IndirectDiffractionReduction::manualGroupingToggled(int state) {
-  switch (state) {
-  case Qt::Unchecked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
-    break;
-  case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceUnit);
-    break;
-  default:
-    return;
-  }
 }
 
 void IndirectDiffractionReduction::setRunIsRunning(bool running) {
