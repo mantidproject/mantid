@@ -51,6 +51,18 @@ std::shared_ptr<IFunction> createFunction(std::string const &mtTransStart, std::
   return FunctionFactory::Instance().createInitialized(funcSS.str());
 }
 } // namespace FitValues
+
+inline void validateWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace, std::string const &prop,
+                              std::map<std::string, std::string> &result) {
+  if (workspace->getNumberHistograms() != 1) {
+    result[prop] = prop + " must contain a single spectrum. Contains " +
+                   std::to_string(workspace->getNumberHistograms()) + " spectra.";
+  }
+  if (!workspace->spectrumInfo().isMonitor(0)) {
+    result[prop] = prop + " must be a monitor workspace.";
+  }
+}
+
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -108,21 +120,14 @@ void DepolarizedAnalyserTransmission::init() {
 std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInputs() {
   std::map<std::string, std::string> result;
   MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
-  if (depWs->getNumberHistograms() != 1) {
-    result[std::string(PropNames::DEP_WORKSPACE)] =
-        "The depolarized workspace must contain a single spectrum. Contains " +
-        std::to_string(depWs->getNumberHistograms()) + " spectra.";
-  }
+  validateWorkspace(depWs, std::string(PropNames::DEP_WORKSPACE), result);
+
   MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
-  if (mtWs->getNumberHistograms() != 1) {
-    result[std::string(PropNames::MT_WORKSPACE)] =
-        "The empty cell workspace must contain a single spectrum. Contains " +
-        std::to_string(mtWs->getNumberHistograms()) + " spectra.";
-  }
+  validateWorkspace(mtWs, std::string(PropNames::MT_WORKSPACE), result);
 
   if (!WorkspaceHelpers::matchingBins(*depWs, *mtWs, true)) {
-    result[std::string(PropNames::DEP_WORKSPACE)] =
-        "The bins in the DepolarizedWorkspace and EmptyCellWorkspace do not match.";
+    result[std::string(PropNames::DEP_WORKSPACE)] = "The bins in the " + std::string(PropNames::DEP_WORKSPACE) +
+                                                    " and " + std::string(PropNames::MT_WORKSPACE) + " do not match.";
   }
   return result;
 }
@@ -160,8 +165,6 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
     auto const &errMsg{"Failed to fit to transmission workspace, " + inputWs->getName() + ": " + status};
     throw std::runtime_error(errMsg);
   }
-  // If a non-monitor MT workspace is provided by mistake the workspace to be fitted can contain only NaNs/infs due to
-  // divide-by-0 results. In this case, the fit succeeds but the quality is 0, so we should still throw an error.
   double const &fitQuality = fitAlg->getProperty("OutputChi2overDoF");
   bool const &qualityOverride = getProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE));
   if (fitQuality == 0 || (fitQuality > 1 && !qualityOverride)) {

@@ -187,15 +187,15 @@ public:
 
     // THEN
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
-                            "Some invalid Properties found: \n DepolarizedWorkspace: The depolarized workspace must "
-                            "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: The empty cell "
-                            "workspace must contain a single spectrum. Contains 12 spectra.");
+                            "Some invalid Properties found: \n DepolarizedWorkspace: DepolarizedWorkspace must "
+                            "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: EmptyCellWorkspace "
+                            "must contain a single spectrum. Contains 12 spectra.");
     TS_ASSERT(!alg.isExecuted());
   }
 
   void test_non_matching_workspace_bins() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, 0.2);
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, true, 0.2);
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1);
     DepolarizedAnalyserTransmission alg;
     alg.setChild(true);
@@ -214,9 +214,31 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
+  void test_non_monitor_spectra() {
+    // GIVEN
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, false);
+    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1, false);
+    DepolarizedAnalyserTransmission alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+
+    // WHEN
+    alg.setProperty("DepolarizedWorkspace", depWs);
+    alg.setProperty("EmptyCellWorkspace", mtWs);
+    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+
+    // THEN
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n DepolarizedWorkspace: DepolarizedWorkspace must be a "
+                            "monitor workspace.\n EmptyCellWorkspace: EmptyCellWorkspace must be a monitor workspace.");
+    TS_ASSERT(!alg.isExecuted());
+  }
+
 private:
   MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula,
-                                              int const numSpectra = 1, double const binWidth = 0.1) {
+                                              int const numSpectra = 1, bool const isMonitor = true,
+                                              double const binWidth = 0.1) {
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
     makeWsAlg.setChild(true);
@@ -224,7 +246,12 @@ private:
     makeWsAlg.setPropertyValue("Function", "User Defined");
     makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=" + formula);
     makeWsAlg.setPropertyValue("XUnit", "wavelength");
-    makeWsAlg.setProperty("NumBanks", numSpectra);
+    if (isMonitor) {
+      makeWsAlg.setProperty("NumBanks", 0);
+      makeWsAlg.setProperty("NumMonitors", numSpectra);
+    } else {
+      makeWsAlg.setProperty("NumBanks", numSpectra);
+    }
     makeWsAlg.setProperty("BankPixelWidth", 1);
     makeWsAlg.setProperty("XMin", 3.5);
     makeWsAlg.setProperty("XMax", 16.5);

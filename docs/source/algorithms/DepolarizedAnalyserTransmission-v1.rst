@@ -33,8 +33,8 @@ Usage
 .. testcode:: ExDepolTransmissionCalc
 
    # Create example workspaces.
-   CreateSampleWorkspace(OutputWorkspace='mt', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=1.465e-07*exp(0.0733*4.76*x)', XUnit='wavelength', NumBanks=1, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
-   CreateSampleWorkspace(OutputWorkspace='dep', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=0.0121*exp(-0.0733*10.226*x)', XUnit='wavelength', NumBanks=1, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
+   CreateSampleWorkspace(OutputWorkspace='mt', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=1.465e-07*exp(0.0733*4.76*x)', XUnit='wavelength', NumMonitors=1, NumBanks=0, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
+   CreateSampleWorkspace(OutputWorkspace='dep', Function='User Defined', UserDefinedFunction='name=UserFunction, Formula=0.0121*exp(-0.0733*10.226*x)', XUnit='wavelength', NumMonitors=1, NumBanks=0, BankPixelWidth=1, XMin=3.5, XMax=16.5, BinWidth=0.1)
 
    output = DepolarizedAnalyserTransmission("dep", "mt")
 
