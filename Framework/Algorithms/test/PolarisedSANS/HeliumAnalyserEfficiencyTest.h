@@ -112,7 +112,7 @@ public:
   }
 
   void testSampleFit() {
-    // For a p of e.g. p=1, we're going to generate some spin flipped and non-spin flippped
+    // For a p of e.g. p=0.1, we're going to generate some spin flipped and non-spin flippped
     // data and fit to it. We should recover the original p.
     const double p = 0.1;
     const double pxd = 12;
@@ -157,7 +157,7 @@ public:
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error &);
 
     // Test with correctly sized covariance matrix
     covariance->appendRow();
