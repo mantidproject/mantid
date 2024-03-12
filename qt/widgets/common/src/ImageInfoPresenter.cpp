@@ -9,6 +9,8 @@
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 
+#include <QTableWidget>
+
 using Mantid::API::MatrixWorkspace;
 
 namespace MantidQt::MantidWidgets {
@@ -17,7 +19,9 @@ namespace MantidQt::MantidWidgets {
  * Constructor
  * @param view A pointer to a view object that displays the information
  */
-ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_view(view) { m_view->setRowCount(2); }
+ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_view(view), m_showSignal(true) {
+  m_view->setRowCount(2);
+}
 
 /**
  * @param x X position on an image of the workspace
@@ -40,6 +44,38 @@ void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &workspa
     m_model = std::make_unique<ImageInfoModelMatrixWS>(matrixWS);
   else {
     m_model = std::make_unique<ImageInfoModelMD>();
+  }
+}
+
+/**
+ * Fill the view table cells using the model
+ * @param info A reference to a collection of header/value pairs
+ */
+void ImageInfoPresenter::fillTableCells(const ImageInfoModel::ImageInfo &info) {
+  if (info.empty())
+    return;
+  int signalIndex = -1;
+
+  const auto itemCount(info.size());
+  m_view->setColumnCount(itemCount);
+  for (int i = 0; i < itemCount; ++i) {
+    const auto name = info.name(i);
+    if (name == "Signal") {
+      signalIndex = i;
+    }
+    auto header = new QTableWidgetItem(name);
+    header->setFlags(header->flags() & ~Qt::ItemIsEditable);
+    m_view->setItem(0, i, header);
+    auto value = new QTableWidgetItem(info.value(i));
+    value->setFlags(header->flags() & ~Qt::ItemIsEditable);
+    m_view->setItem(1, i, value);
+  }
+  if (signalIndex >= 0) {
+    if (!m_showSignal) {
+      m_view->hideColumn(signalIndex);
+    } else {
+      m_view->showColumn(signalIndex);
+    }
   }
 }
 
