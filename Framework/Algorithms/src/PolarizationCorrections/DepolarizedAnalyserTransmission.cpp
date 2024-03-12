@@ -31,6 +31,8 @@ std::string_view constexpr GROUP_FIT{"Fit Starting Values"};
 
 /// Initial fitting function values.
 namespace FitValues {
+using namespace Mantid::API;
+
 double constexpr LAMBDA_CONVERSION_FACTOR = -0.0733;
 double constexpr EMPTY_CELL_TRANS_START = 0.9;
 double constexpr DEPOL_OPACITY_START = 12.6;
@@ -40,11 +42,13 @@ double constexpr START_X = 1.75;
 double constexpr END_X = 14;
 std::string_view constexpr FIT_SUCCESS{"success"};
 
-std::ostringstream createFunctionStrStream() {
-  std::ostringstream func;
-  func << "name=UserFunction, Formula=" << EMPTY_CELL_TRANS_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*"
-       << DEPOL_OPACITY_NAME << "*x)";
-  return func;
+std::shared_ptr<IFunction> createFunction(std::string const &mtTransStart, std::string const &depolOpacStart) {
+  std::ostringstream funcSS;
+  funcSS << "name=UserFunction, Formula=" << EMPTY_CELL_TRANS_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*"
+         << DEPOL_OPACITY_NAME << "*x)";
+  funcSS << "," << FitValues::EMPTY_CELL_TRANS_NAME << "=" << mtTransStart;
+  funcSS << "," << FitValues::DEPOL_OPACITY_NAME << "=" << depolOpacStart;
+  return FunctionFactory::Instance().createInitialized(funcSS.str());
 }
 } // namespace FitValues
 } // namespace
@@ -140,12 +144,8 @@ MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarisedProportion(
 
 void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
                                                                           std::string const &outputWsName) {
-  auto funcStream = FitValues::createFunctionStrStream();
-  funcStream << "," << FitValues::EMPTY_CELL_TRANS_NAME << "="
-             << getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START));
-  funcStream << "," << FitValues::DEPOL_OPACITY_NAME << "="
-             << getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START));
-  auto const &func = FunctionFactory::Instance().createInitialized(funcStream.str());
+  auto func = FitValues::createFunction(getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START)),
+                                        getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START)));
   auto fitAlg = createChildAlgorithm("Fit");
   fitAlg->setProperty("Function", func);
   fitAlg->setProperty("InputWorkspace", inputWs);
