@@ -18,7 +18,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 std::tuple<double, double> calculateLifetimeAndHeight(Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-  if (lifeTime <= 0)
+  if (lifeTime <= 0 || std::isinf(lifeTime))
     lifeTime = 1.0;
   auto const height = y[0] * exp(x[0] / lifeTime);
   return {lifeTime, height};
