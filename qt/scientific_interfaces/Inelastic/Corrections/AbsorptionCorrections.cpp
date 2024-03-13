@@ -66,10 +66,9 @@ MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace, std::st
   convertAlg->setChild(true);
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
-  auto eMode = workspace->getEMode();
-  convertAlg->setProperty("EMode", DeltaEMode::asString(eMode));
-  if ((eMode == DeltaEMode::Type::Direct) || (eMode == DeltaEMode::Type::Indirect)) {
-    convertAlg->setProperty("EFixed", workspace->getEFixed(workspace->getDetector(0)));
+  convertAlg->setProperty("EMode", DeltaEMode::asString(workspace->getEMode()));
+  if (auto const eFixed = MantidQt::CustomInterfaces::WorkspaceUtils::getEFixed(workspace)) {
+    convertAlg->setProperty("EFixed", *eFixed);
   }
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
