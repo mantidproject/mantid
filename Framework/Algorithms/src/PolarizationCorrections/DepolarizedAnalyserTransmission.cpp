@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
-#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/Divide.h"
+#include "MantidKernel/CompositeValidator.h"
 
 namespace {
 /// Property Names
@@ -78,7 +79,9 @@ std::string const DepolarizedAnalyserTransmission::summary() const {
 }
 
 void DepolarizedAnalyserTransmission::init() {
-  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<HistogramValidator>();
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::DEP_WORKSPACE), "",
                                                            Kernel::Direction::Input, wsValidator),
@@ -121,9 +124,18 @@ void DepolarizedAnalyserTransmission::init() {
 std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInputs() {
   std::map<std::string, std::string> result;
   MatrixWorkspace_sptr const &depWs = getProperty(std::string(PropNames::DEP_WORKSPACE));
+  if (depWs == nullptr) {
+    result[std::string(PropNames::DEP_WORKSPACE)] =
+        std::string(PropNames::DEP_WORKSPACE) + " must be a MatrixWorkspace.";
+    return result;
+  }
   validateWorkspace(depWs, std::string(PropNames::DEP_WORKSPACE), result);
 
   MatrixWorkspace_sptr const &mtWs = getProperty(std::string(PropNames::MT_WORKSPACE));
+  if (mtWs == nullptr) {
+    result[std::string(PropNames::MT_WORKSPACE)] = std::string(PropNames::MT_WORKSPACE) + " must be a MatrixWorkspace.";
+    return result;
+  }
   validateWorkspace(mtWs, std::string(PropNames::MT_WORKSPACE), result);
 
   if (!WorkspaceHelpers::matchingBins(*depWs, *mtWs, true)) {
