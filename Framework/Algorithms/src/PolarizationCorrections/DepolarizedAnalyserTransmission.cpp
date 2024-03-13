@@ -101,9 +101,10 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       std::string(PropNames::OUTPUT_FIT), "", Kernel::Direction::Output, PropertyMode::Optional),
                   "The name of the workspace containing the calculated fit curve.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      std::string(PropNames::OUTPUT_COV_MATRIX), "", Kernel::Direction::Output, PropertyMode::Optional),
-                  "The name of the table workspace containing the normalised covariance matrix from the fit.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_COV_MATRIX), "",
+                                                           Kernel::Direction::Output, PropertyMode::Optional),
+      "The name of the table workspace containing the calculated non-normalised covariance matrix from the fit.");
 
   auto const &inputGroup = std::string(PropNames::GROUP_INPUT);
   setPropertyGroup(std::string(PropNames::DEP_WORKSPACE), inputGroup);
@@ -188,6 +189,14 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
   }
 }
 
+/**
+ * Takes a normalised covariance matrix from the result of the exponential fit and uses the fit parameter's error's to
+ * reverse the normalisation process, producing the non-normalised version. This can then be used to accurately
+ * calculate errors in subsequent parts of the efficiency corrections.
+ *
+ * @param normCovMatrix Normalised Covariance matrix TableWorkspace from the fit result.
+ * @param paramsWs Parameter TableWorkspace from the fit results.
+ */
 void DepolarizedAnalyserTransmission::calcNonNormCovarianceMatrix(ITableWorkspace_sptr const &normCovMatrix,
                                                                   ITableWorkspace_sptr const &paramsWs) {
   auto const &T_EError = paramsWs->getColumn("Error")->toDouble(0);
