@@ -28,6 +28,65 @@ class Prop:
     FILENAME = "Filename"
 
 
+class ReflectometryDataset:
+    REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+
+    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _STITCH_ALG = "Stitch1DMany"
+
+    def __init__(self, ws):
+        self._ws = ws
+        self._reduction_history = None
+        self._reduction_workflow_histories = []
+        self._stitch_history = None
+
+        self._populate_histories()
+
+    @property
+    def ws(self):
+        return self._ws
+
+    @property
+    def reduction_history(self):
+        return self._reduction_history
+
+    @property
+    def reduction_workflow_histories(self):
+        return self._reduction_workflow_histories
+
+    @property
+    def stitch_history(self):
+        return self._stitch_history
+
+    @property
+    def is_stitched(self) -> bool:
+        return self._stitch_history is not None
+
+    def _populate_histories(self):
+        ws_history = self._ws.getHistory()
+        if ws_history.empty():
+            return
+
+        for history in ws_history.getAlgorithmHistories():
+            if history.name() == self.REDUCTION_WORKFLOW_ALG:
+                self._reduction_workflow_histories.append(history)
+            elif history.name() == self._STITCH_ALG:
+                # We want the last call to the stitch algorithm in the history
+                # (we would normally expect there to be only one)
+                self._stitch_history = history
+
+        # Get the last occurrence of the reduction algorithm in the workspace history
+        for history in reversed(ws_history.getAlgorithmHistories()):
+            if history.name() == self._REDUCTION_ALG:
+                self._reduction_history = history
+                return
+            elif history.name() == self.REDUCTION_WORKFLOW_ALG:
+                for child_history in reversed(history.getChildHistories()):
+                    if child_history.name() == self._REDUCTION_ALG:
+                        self._reduction_history = child_history
+                        return
+
+
 class SaveISISReflectometryORSO(PythonAlgorithm):
     """
     See https://www.reflectometry.org/ for more information about the ORSO .ort format
@@ -38,9 +97,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
     _RUN_NUM_LOG = "run_number"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
-    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
-    _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
-    _STITCH_ALG = "Stitch1DMany"
     _REBIN_ALG = "Rebin"
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _Q_UNIT = "MomentumTransfer"
@@ -102,8 +158,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         orso_saver = MantidORSOSaver(self.getProperty(Prop.FILENAME).value, self._INVALID_HEADER_COMMENT)
 
         # Create the file contents
-        for ws in self._get_ordered_ws_list():
-            orso_saver.add_dataset(self._create_dataset(ws, ws.name()))
+        for refl_dataset in self._create_and_sort_refl_datasets():
+            orso_saver.add_dataset(self._create_orso_dataset(refl_dataset))
 
         # Write the file to disk in the ORSO ASCII format
         if Path(orso_saver.filename).is_file():
@@ -116,48 +172,38 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
             )
 
-    def _get_ordered_ws_list(self) -> list:
-        """Retrieve the workspaces from the input list and sort them into the order that the datasets should appear in
-        the ORSO file"""
-        ordered_list = []
+    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDataset]:
+        """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
+        into the order that the datasets should appear in the ORSO file"""
+        final_list = []
         stitched_workspaces = []
 
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             workspace = AnalysisDataService.retrieve(ws_name)
             group = workspace if isinstance(workspace, WorkspaceGroup) else [workspace]
             for ws in group:
-                if self._is_stitched_data(ws):
-                    stitched_workspaces.append(ws)
+                refl_dataset = ReflectometryDataset(ws)
+                if refl_dataset.is_stitched:
+                    stitched_workspaces.append(refl_dataset)
                 else:
-                    ordered_list.append(ws)
+                    final_list.append(refl_dataset)
 
-        ordered_list.extend(stitched_workspaces)
-        return ordered_list
+        final_list.extend(stitched_workspaces)
+        return final_list
 
-    def _is_stitched_data(self, ws) -> bool:
-        history = ws.getHistory()
-        if history.empty():
-            return False
-
-        for history in reversed(history.getAlgorithmHistories()):
-            if history.name() == self._STITCH_ALG:
-                return True
-        return False
-
-    def _create_dataset(self, ws, dataset_name: str = None) -> MantidORSODataset:
-        reduction_history = self._get_reduction_alg_history(ws)
-        data_columns = self._create_data_columns(ws, reduction_history)
-        dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_history, data_columns)
-        self._add_optional_header_info(dataset, ws, reduction_history)
+    def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
+        data_columns = self._create_data_columns(refl_dataset)
+        dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
+        self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 
-    def _create_data_columns(self, ws, reduction_history) -> MantidORSODataColumns:
+    def _create_data_columns(self, refl_dataset: ReflectometryDataset) -> MantidORSODataColumns:
         """
         Set up the column headers and data values
         """
-        resolution = self._get_resolution(ws, reduction_history)
+        resolution = self._get_resolution(refl_dataset)
 
-        alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace="pointData")
+        alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=refl_dataset.ws, OutputWorkspace="pointData")
         alg.execute()
         point_data = alg.getProperty("OutputWorkspace").value
 
@@ -171,37 +217,41 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         return data_columns
 
     def _create_dataset_with_mandatory_header(
-        self, ws, dataset_name: str, reduction_history, data_columns: MantidORSODataColumns
+        self,
+        data_columns: MantidORSODataColumns,
+        refl_dataset: ReflectometryDataset,
     ) -> MantidORSODataset:
         """
         Create a dataset with the data columns and the mandatory information populated in the header
         """
         return MantidORSODataset(
-            dataset_name,
+            refl_dataset.ws.name(),
             data_columns,
-            ws,
-            reduction_timestamp=self._get_reduction_timestamp(reduction_history),
+            refl_dataset.ws,
+            reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, ws, reduction_history) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:
         """
         Populate the non_mandatory information in the header
         """
-        run = ws.getRun()
+        run = refl_dataset.ws.getRun()
         rb_number, doi = self._get_rb_number_and_doi(run)
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
-        dataset.set_reduction_call(self._get_reduction_script(ws))
+        dataset.set_reduction_call(self._get_reduction_script(refl_dataset.ws))
 
-        reduction_workflow_histories = self._get_reduction_workflow_alg_histories(ws)
-        if not reduction_workflow_histories:
-            self.log().warning(f"Unable to find history for {self._REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file.")
+        reduction_workflow_histories = refl_dataset.reduction_workflow_histories
+        if not refl_dataset.reduction_workflow_histories:
+            self.log().warning(
+                f"Unable to find history for {ReflectometryDataset.REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file."
+            )
             return
 
-        instrument_name = ws.getInstrument().getName()
+        instrument_name = refl_dataset.ws.getInstrument().getName()
 
         for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
             dataset.add_measurement_data_file(file, comment=f"Incident angle {theta}")
@@ -213,7 +263,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         for file in second_trans_files:
             dataset.add_measurement_additional_file(file, comment="Second transmission run")
 
-        flood_entry = self._get_flood_correction_entry(reduction_workflow_histories, reduction_history)
+        flood_entry = self._get_flood_correction_entry(reduction_workflow_histories, refl_dataset.reduction_history)
         if flood_entry:
             dataset.add_measurement_additional_file(flood_entry[0], comment=flood_entry[1])
 
@@ -233,25 +283,22 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, ws, reduction_history) -> Optional[float]:
+    def _get_resolution(self, refl_dataset: ReflectometryDataset) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value:
             return None
 
         # Attempt to get the resolution from the workspace history
-        history = ws.getHistory()
-        if not history.empty():
-            for history in reversed(history.getAlgorithmHistories()):
-                if history.name() == self._STITCH_ALG:
-                    # The absolute value of the stitch parameter is the resolution
-                    return abs(float(history.getPropertyValue("Params")))
+        if refl_dataset.is_stitched:
+            # The absolute value of the stitch parameter of the stitch algorithm is the resolution
+            return abs(float(refl_dataset.stitch_history.getPropertyValue("Params")))
 
-            if reduction_history:
-                rebin_alg = reduction_history.getChildHistories()[-1]
-                if rebin_alg.name() == self._REBIN_ALG:
-                    rebin_params = rebin_alg.getPropertyValue("Params").split(",")
-                    if len(rebin_params) == 3:
-                        # The absolute value of the middle rebin parameter is the resolution
-                        return abs(float(rebin_params[1]))
+        if refl_dataset.reduction_history:
+            rebin_alg = refl_dataset.reduction_history.getChildHistories()[-1]
+            if rebin_alg.name() == self._REBIN_ALG:
+                rebin_params = rebin_alg.getPropertyValue("Params").split(",")
+                if len(rebin_params) == 3:
+                    # The absolute value of the middle rebin parameter is the resolution
+                    return abs(float(rebin_params[1]))
 
         self.log().warning("Unable to find resolution from workspace history.")
         return None
@@ -403,35 +450,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         alg.execute()
         script = alg.getPropertyValue("ScriptText")
         return "\n".join(script.split("\n")[2:])  # trim the import statement
-
-    def _get_reduction_alg_history(self, ws):
-        """
-        Find the first occurrence of the reduction algorithm in the workspace history, otherwise return None
-        """
-        ws_history = ws.getHistory()
-        if ws_history.empty():
-            return None
-
-        for history in reversed(ws_history.getAlgorithmHistories()):
-            if history.name() == self._REDUCTION_ALG:
-                return history
-
-            if history.name() == self._REDUCTION_WORKFLOW_ALG:
-                for child_history in reversed(history.getChildHistories()):
-                    if child_history.name() == self._REDUCTION_ALG:
-                        return child_history
-
-        return None
-
-    def _get_reduction_workflow_alg_histories(self, ws):
-        """
-        Return a list containing all the occurrences of the reduction workflow algorithm in the workspace history
-        """
-        ws_history = ws.getHistory()
-        if ws_history.empty():
-            return []
-
-        return [history for history in ws_history.getAlgorithmHistories() if history.name() == self._REDUCTION_WORKFLOW_ALG]
 
 
 # Register algorithm with Mantid
