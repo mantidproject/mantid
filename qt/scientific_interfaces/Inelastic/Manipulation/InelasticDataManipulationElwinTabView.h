@@ -102,6 +102,9 @@ private:
   void setHorizontalHeaders();
   void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
+  void disconnectSignals();
+  void connectSignals();
+
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
                         const QPair<double, double> &range,

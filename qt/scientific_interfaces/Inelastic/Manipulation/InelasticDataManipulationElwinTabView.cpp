@@ -407,51 +407,25 @@ void InelasticDataManipulationElwinTabView::notifyCheckboxValueChanged(QtPropert
 }
 
 void InelasticDataManipulationElwinTabView::notifyMinChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationStart"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundStart"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  auto prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")) ? m_properties["IntegrationStart"]
+                                                                                   : m_properties["BackgroundStart"];
+  m_dblManager->setValue(prop, val);
 }
 
 void InelasticDataManipulationElwinTabView::notifyMaxChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationEnd"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundEnd"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  auto prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")) ? m_properties["IntegrationEnd"]
+                                                                                   : m_properties["BackgroundEnd"];
+  m_dblManager->setValue(prop, val);
 }
 
 void InelasticDataManipulationElwinTabView::notifyDoubleValueChanged(QtProperty *prop, double val) {
   auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
   auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), val);
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-
+  disconnectSignals();
   if (prop == m_properties["IntegrationStart"])
     setRangeSelectorMin(m_properties["IntegrationStart"], m_properties["IntegrationEnd"], integrationRangeSelector,
                         val);
@@ -462,9 +436,33 @@ void InelasticDataManipulationElwinTabView::notifyDoubleValueChanged(QtProperty 
     setRangeSelectorMin(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
   else if (prop == m_properties["BackgroundEnd"])
     setRangeSelectorMax(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
+  connectSignals();
+}
 
+void InelasticDataManipulationElwinTabView::disconnectSignals() {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(notifyMaxChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
+             SLOT(notifyMinChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(notifyMaxChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
+             SLOT(notifyMinChanged(double)));
+}
+
+void InelasticDataManipulationElwinTabView::connectSignals() {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(notifyMaxChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
+          SLOT(notifyMinChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(notifyMaxChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
+          SLOT(notifyMinChanged(double)));
 }
 
 void InelasticDataManipulationElwinTabView::setIntegrationStart(double value) {
