@@ -418,6 +418,11 @@ Resolution
 ELow, EHigh
   The rebinning range.
 
+Enforce Normalization
+  The LHSWorkspace from the output from :ref:`algm-ExtractFFTSpectrum` is used in both branches
+  to perform the final workspace division and the two intermediate workspace divisions are skipped by unchecking
+  this option.
+
 SampleBinning
   The number of neighbouring bins are summed.
 
