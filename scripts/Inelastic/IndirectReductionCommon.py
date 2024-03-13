@@ -647,22 +647,27 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace_name, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
+def group_spectra(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
-    @param workspace_name Name of workspace to group spectra of
+    @param workspace A workspace object, or the name of a workspace in the ADS
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], method, group_file, group_ws, group_string, number_of_groups, spectra_range)
-
-    if grouped_ws is not None:
-        mtd.addOrReplace(workspace_name, grouped_ws)
+    return group_spectra_of(
+        mtd[workspace] if isinstance(workspace, str) else workspace,
+        method,
+        group_file,
+        group_ws,
+        group_string,
+        number_of_groups,
+        spectra_range,
+    )
 
 
 def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
@@ -671,12 +676,22 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
 
     @param workspace Workspace to group spectra of
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
+    # If grouping file is a *.cal file
+    if method == "File" and group_file is not None and group_file.endswith(".cal"):
+        grouped = DiffractionFocussing(
+            InputWorkspace=workspace,
+            GroupingFileName=group_file,
+            StoreInADS=False,
+            EnableLogging=False,
+        )
+        return grouped
+
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)
@@ -699,7 +714,7 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
 
     if grouping_method == "Individual":
         # Nothing to do here
-        return None
+        return workspace
 
     elif grouping_method == "All":
         # Get a list of all spectra minus those which are masked
@@ -1050,14 +1065,14 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
 # -------------------------------------------------------------------------------
 
 
-def calibrate_and_group(workspace, calibration_file: str):
+def calibrate(workspace, calibration_file: str):
     """
-    Calibrates the workspace using the calibration file, converts from TOF to dSpacing, and then groups the detectors.
+    Calibrates the workspace using the calibration file, and converts from TOF to dSpacing.
 
     @param workspace The workspace or workspace name to be calibrated.
     @param calibration_file The calibration file to use.
 
-    @return The calibrated and grouped workspace.
+    @return The calibrated workspace.
     """
     ApplyDiffCal(InstrumentWorkspace=workspace, CalibrationFile=calibration_file, StoreInADS=False, EnableLogging=False)
 
@@ -1069,14 +1084,7 @@ def calibrate_and_group(workspace, calibration_file: str):
     )
 
     ApplyDiffCal(InstrumentWorkspace=converted, ClearCalibration=True, StoreInADS=False, EnableLogging=False)
-
-    focussed = DiffractionFocussing(
-        InputWorkspace=converted,
-        GroupingFileName=calibration_file,
-        StoreInADS=False,
-        EnableLogging=False,
-    )
-    return focussed
+    return converted
 
 
 # -------------------------------------------------------------------------------

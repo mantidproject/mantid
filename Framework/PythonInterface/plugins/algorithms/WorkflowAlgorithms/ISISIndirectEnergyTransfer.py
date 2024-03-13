@@ -280,7 +280,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     Scale(InputWorkspace=ws_name, OutputWorkspace=ws_name, Factor=self._scale_factor, Operation="Multiply")
 
                 # Group spectra
-                group_spectra(
+                grouped = group_spectra(
                     ws_name,
                     method=self._grouping_method,
                     group_file=self._grouping_map_file,
@@ -289,6 +289,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     number_of_groups=self._number_of_groups,
                     spectra_range=self._spectra_range,
                 )
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)

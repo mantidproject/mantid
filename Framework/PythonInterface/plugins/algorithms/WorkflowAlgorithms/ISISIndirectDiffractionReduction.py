@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import calibrate_and_group, load_files, load_file_ranges
+from IndirectReductionCommon import calibrate, group_spectra, load_files, load_file_ranges
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -361,7 +361,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
-                group_spectra(
+                grouped = group_spectra(
                     ws_name,
                     method=self._grouping_method,
                     group_file=self._grouping_map_file,
@@ -370,6 +370,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                     number_of_groups=self._number_of_groups,
                     spectra_range=self._spectra_range,
                 )
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -447,13 +448,15 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         """
         if self._cal_file != "":
             for ws_name in self._workspace_names:
-                focussed = calibrate_and_group(ws_name, self._cal_file)
-                AnalysisDataService.addOrReplace(ws_name, focussed)
+                calibrated = calibrate(ws_name, self._cal_file)
+                grouped = group_spectra(calibrated, "File", self._cal_file)
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if self._vanadium_ws:
                 for van_ws_name in self._vanadium_ws:
-                    focussed = calibrate_and_group(van_ws_name, self._cal_file)
-                    AnalysisDataService.addOrReplace(van_ws_name, focussed)
+                    calibrated = calibrate(van_ws_name, self._cal_file)
+                    grouped = group_spectra(calibrated, "File", self._cal_file)
+                    AnalysisDataService.addOrReplace(van_ws_name, grouped)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """
