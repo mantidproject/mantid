@@ -112,9 +112,9 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
   convertAlg->setProperty("EMode", eMode);
 
   if (eMode == "Indirect" && eFixed == 0.0) {
-    try {
-      eFixed = WorkspaceUtils::getEFixed(ws);
-    } catch (std::exception const &) {
+    if (auto const eFixedFromWs = WorkspaceUtils::getEFixed(ws)) {
+      eFixed = *eFixedFromWs;
+    } else {
       showMessageBox("Please enter an Efixed value.");
       return boost::none;
     }

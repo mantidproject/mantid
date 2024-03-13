@@ -518,9 +518,9 @@ void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &corre
 void AbsorptionCorrections::convertSpectrumAxes(const MatrixWorkspace_sptr &correction,
                                                 const MatrixWorkspace_sptr &sample) {
   if (correction && sample && sample->getEMode() == DeltaEMode::Type::Indirect) {
-    try {
-      convertSpectrumAxis(correction, WorkspaceUtils::getEFixed(correction));
-    } catch (std::runtime_error const &) {
+    if (auto const eFixed = WorkspaceUtils::getEFixed(correction)) {
+      convertSpectrumAxis(correction, *eFixed);
+    } else {
       convertSpectrumAxis(correction);
     }
   }

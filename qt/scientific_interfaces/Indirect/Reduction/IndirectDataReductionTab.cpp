@@ -234,7 +234,6 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   loadParamAlg->execute();
   energyWs = loadParamAlg->getProperty("Workspace");
 
-  double efixed = WorkspaceUtils::getEFixed(energyWs);
   auto spectraMinDbl = energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
   Mantid::specnum_t spectraMin = boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 
@@ -250,7 +249,9 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->setProperty("OutputWorkspace", "__tof");
   convUnitsAlg->setProperty("Target", "TOF");
   convUnitsAlg->setProperty("EMode", "Indirect");
-  convUnitsAlg->setProperty("EFixed", efixed);
+  if (auto const efixed = WorkspaceUtils::getEFixed(energyWs)) {
+    convUnitsAlg->setProperty("EFixed", *efixed);
+  }
   convUnitsAlg->execute();
   MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 

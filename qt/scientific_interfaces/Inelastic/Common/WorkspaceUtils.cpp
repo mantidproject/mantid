@@ -108,25 +108,24 @@ std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws) {
  * @param ws Pointer to the workspace
  * @return eFixed value
  */
-double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
+std::optional<double> getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
   Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
   if (!inst)
-    throw std::runtime_error("No instrument on workspace");
+    return std::nullopt;
 
-  // Try to get the parameter form the base instrument
-  if (inst->hasParameter("Efixed"))
-    return inst->getNumberParameter("Efixed")[0];
-
-  // Try to get it form the analyser component
+  // Try to get it from the analyser component
   if (inst->hasParameter("analyser")) {
-    std::string analyserName = inst->getStringParameter("analyser")[0];
-    auto analyserComp = inst->getComponentByName(analyserName);
+    auto const analyserName = inst->getStringParameter("analyser")[0];
+    auto const analyserComp = inst->getComponentByName(analyserName != "fmica" ? analyserName : "mica");
 
     if (analyserComp && analyserComp->hasParameter("Efixed"))
       return analyserComp->getNumberParameter("Efixed")[0];
   }
 
-  throw std::runtime_error("Instrument has no efixed parameter");
+  // Try to get the parameter form the base instrument
+  if (inst->hasParameter("Efixed"))
+    return inst->getNumberParameter("Efixed")[0];
+  return std::nullopt;
 }
 
 /**
