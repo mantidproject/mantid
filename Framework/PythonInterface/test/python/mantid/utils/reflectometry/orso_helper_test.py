@@ -109,6 +109,21 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_error_column_header(header[5], extra_error_col[0], extra_error_col[1], extra_error_col[2])
         self._check_column_data(columns, col_values, col_length)
 
+    def test_adding_additional_column_using_unit_enum(self):
+        col_length = 5
+
+        extra_col = ["test_1", MantidORSODataColumns.Unit.Angstrom, "angstrom_unit_test"]
+        columns = MantidORSODataColumns(
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+        )
+        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, 1))
+
+        header = columns.header_info
+        self._check_column_header(header[4], extra_col[0], extra_col[1].value, extra_col[2])
+
     def test_adding_additional_column_with_no_resolution(self):
         col_length = 5
         col_values = [1, 2, 3, np.nan, 5]

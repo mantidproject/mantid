@@ -144,6 +144,7 @@ class MantidORSODataColumns:
     class Unit(Enum):
         Angstrom = "1/angstrom"
         Nm = "1/nm"
+        Degrees = "degrees"
 
     # Data column labels
     LABEL_Q = "Qz"
@@ -177,7 +178,7 @@ class MantidORSODataColumns:
         self._data = []
 
         # Add the first two mandatory columns
-        self._add_column(name=self.LABEL_Q, unit=q_unit.value, physical_quantity=self.QUANTITY_Q, data=q_data)
+        self._add_column(name=self.LABEL_Q, unit=q_unit, physical_quantity=self.QUANTITY_Q, data=q_data)
         self._add_column(name=self.LABEL_REFLECTIVITY, unit=None, physical_quantity=self.QUANTITY_REFLECTIVITY, data=reflectivity_data)
 
         # Add the third and fourth strongly recommended columns, if data is available
@@ -198,7 +199,7 @@ class MantidORSODataColumns:
     def data(self) -> np.ndarray:
         return np.array(self._data).T
 
-    def add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
+    def add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
         self._ensure_recommended_columns_are_present(data)
         self._add_column(name, unit, physical_quantity, data)
@@ -208,8 +209,9 @@ class MantidORSODataColumns:
         self._ensure_recommended_columns_are_present(data)
         self._add_error_column(error_of, error_type, value_is, data)
 
-    def _add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
-        self._header_info.append(Column(name=name, unit=unit, physical_quantity=physical_quantity))
+    def _add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:
+        unit_value = unit.value if isinstance(unit, self.Unit) else unit
+        self._header_info.append(Column(name=name, unit=unit_value, physical_quantity=physical_quantity))
         self._data.append(data)
 
     def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: Optional[ErrorValue], data: np.ndarray) -> None:
