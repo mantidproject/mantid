@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, DeleteWorkspace, DiffractionFocussing, Load
+from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -682,15 +682,6 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
-    # If grouping file is a *.cal file
-    if method == "File" and group_file is not None and group_file.endswith(".cal"):
-        grouped = DiffractionFocussing(
-            InputWorkspace=workspace,
-            GroupingFileName=group_file,
-            StoreInADS=False,
-            EnableLogging=False,
-        )
-        return grouped
 
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
@@ -727,6 +718,13 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
     elif grouping_method == "File":
         # Get the filename for the grouping file
         if group_file is not None:
+            # If grouping file is a *.cal file
+            if group_file.endswith(".cal"):
+                group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=instrument.getName(), OldCalFilename=group_file, StoreInADS=False)
+                group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
+                group_detectors.execute()
+                return group_detectors.getProperty("OutputWorkspace").value
+
             grouping_file = group_file
             group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
@@ -758,7 +756,6 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 
-    group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
 

@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import calibrate, group_spectra, load_files, load_file_ranges
+from IndirectReductionCommon import calibrate, load_files, load_file_ranges
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -363,8 +363,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Group spectra
                 grouped = group_spectra(
                     ws_name,
-                    method=self._grouping_method,
-                    group_file=self._grouping_map_file,
+                    method=self._grouping_method if self._cal_file == "" else "File",
+                    group_file=self._grouping_map_file if self._cal_file == "" else self._cal_file,
                     group_ws=self._grouping_workspace,
                     group_string=self._grouping_string,
                     number_of_groups=self._number_of_groups,
@@ -449,14 +449,14 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if self._cal_file != "":
             for ws_name in self._workspace_names:
                 calibrated = calibrate(ws_name, self._cal_file)
-                grouped = group_spectra(calibrated, "File", self._cal_file)
-                AnalysisDataService.addOrReplace(ws_name, grouped)
+                # grouped = group_spectra(calibrated, "File", self._cal_file)
+                AnalysisDataService.addOrReplace(ws_name, calibrated)
 
             if self._vanadium_ws:
                 for van_ws_name in self._vanadium_ws:
                     calibrated = calibrate(van_ws_name, self._cal_file)
-                    grouped = group_spectra(calibrated, "File", self._cal_file)
-                    AnalysisDataService.addOrReplace(van_ws_name, grouped)
+                    # grouped = group_spectra(calibrated, "File", self._cal_file)
+                    AnalysisDataService.addOrReplace(van_ws_name, calibrated)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """

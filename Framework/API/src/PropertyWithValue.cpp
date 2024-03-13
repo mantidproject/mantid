@@ -41,6 +41,7 @@ template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::MatrixWorks
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::Workspace>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::WorkspaceGroup>>;
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ExperimentInfo>>;
+
 /// @endcond
 
 } // namespace Mantid::Kernel
