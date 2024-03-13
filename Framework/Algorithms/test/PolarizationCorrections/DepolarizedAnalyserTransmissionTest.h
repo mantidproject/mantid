@@ -27,6 +27,7 @@ constexpr double COV_DELTA = 1e-10;
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::DepolarizedAnalyserTransmission;
+using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 
 class DepolarizedAnalyserTransmissionTest : public CxxTest::TestSuite {
@@ -45,26 +46,15 @@ public:
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
 
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
-    alg.execute();
+    auto alg = createAlgorithm(mtWs, depWs);
+    alg->execute();
 
     // THEN
-    TS_ASSERT(alg.isExecuted());
-    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
-    Mantid::API::MatrixWorkspace_sptr const &fitWs = alg.getProperty("OutputFitCurves");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_ERROR * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_ERROR * FIT_DELTA);
-    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT(alg->isExecuted());
+    ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
+    validateOutputParameters(outputWs);
     TS_ASSERT_EQUALS(fitWs, nullptr)
   }
 
@@ -72,27 +62,17 @@ public:
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
+    auto alg = createAlgorithm(mtWs, depWs);
 
     // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
-    alg.setPropertyValue("OutputFitCurves", "__unused_for_child");
-    alg.execute();
+    alg->setPropertyValue("OutputFitCurves", "__unused_for_child");
+    alg->execute();
 
     // THEN
-    TS_ASSERT(alg.isExecuted());
-    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
-    Mantid::API::MatrixWorkspace_sptr const &fitWs = alg.getProperty("OutputFitCurves");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT(alg->isExecuted());
+    ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
+    validateOutputParameters(outputWs);
     TS_ASSERT_EQUALS(fitWs->getNumberHistograms(), 3);
   }
 
@@ -100,27 +80,15 @@ public:
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
-    alg.setPropertyValue("OutputCovarianceMatrix", "__unused_for_child");
-    alg.execute();
+    auto alg = createAlgorithm(mtWs, depWs);
+    alg->setPropertyValue("OutputCovarianceMatrix", "__unused_for_child");
+    alg->execute();
 
     // THEN
-    TS_ASSERT(alg.isExecuted());
-    Mantid::API::ITableWorkspace_sptr const &outputWs = alg.getProperty("OutputWorkspace");
-    Mantid::API::ITableWorkspace_sptr const &covWs = alg.getProperty("OutputCovarianceMatrix");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT(alg->isExecuted());
+    ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
+    ITableWorkspace_sptr const &covWs = alg->getProperty("OutputCovarianceMatrix");
+    validateOutputParameters(outputWs);
     TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(0), T_E_COV, T_E_COV * COV_DELTA);
     TS_ASSERT_DELTA(covWs->getColumn("T_E")->toDouble(1), OFF_DIAG_COV, OFF_DIAG_COV * COV_DELTA);
     TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(0), OFF_DIAG_COV, OFF_DIAG_COV * COV_DELTA);
@@ -131,108 +99,68 @@ public:
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setProperty("TEStartingValue", 1e50);
-    alg.setProperty("PxDStartingValue", 1e50);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    auto alg = createAlgorithm(mtWs, depWs);
+    alg->setProperty("TEStartingValue", 1e50);
+    alg->setProperty("PxDStartingValue", 1e50);
 
     // THEN
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Failed to fit to transmission workspace, : Changes in function value are too small");
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!alg->isExecuted());
   }
 
   void test_apparently_successful_fit() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "0*x");
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Failed to fit to transmission workspace, : Fit quality (chi-squared) is too poor "
                             "(0.000000. Should be 0 < x < 1). You may want to check that the correct monitor spectrum "
                             "and starting fitting values were provided.");
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!alg->isExecuted());
   }
 
   void test_invalid_workspace_lengths() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 12);
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 2);
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarizedWorkspace: DepolarizedWorkspace must "
                             "contain a single spectrum. Contains 2 spectra.\n EmptyCellWorkspace: EmptyCellWorkspace "
                             "must contain a single spectrum. Contains 12 spectra.");
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!alg->isExecuted());
   }
 
   void test_non_matching_workspace_bins() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, true, 0.2);
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1);
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarizedWorkspace: The bins in the "
                             "DepolarizedWorkspace and EmptyCellWorkspace do not match.");
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!alg->isExecuted());
   }
 
   void test_non_monitor_spectra() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, false);
     auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1, false);
-    DepolarizedAnalyserTransmission alg;
-    alg.setChild(true);
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized());
-
-    // WHEN
-    alg.setProperty("DepolarizedWorkspace", depWs);
-    alg.setProperty("EmptyCellWorkspace", mtWs);
-    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarizedWorkspace: DepolarizedWorkspace must be a "
                             "monitor workspace.\n EmptyCellWorkspace: EmptyCellWorkspace must be a monitor workspace.");
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!alg->isExecuted());
   }
 
 private:
@@ -258,5 +186,25 @@ private:
     makeWsAlg.setProperty("BinWidth", binWidth);
     makeWsAlg.execute();
     return makeWsAlg.getProperty("OutputWorkspace");
+  }
+
+  std::shared_ptr<DepolarizedAnalyserTransmission> createAlgorithm(MatrixWorkspace_sptr const &mtWs,
+                                                                   MatrixWorkspace_sptr const &depWs) {
+    auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
+    alg->setChild(true);
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized());
+    alg->setProperty("DepolarizedWorkspace", depWs);
+    alg->setProperty("EmptyCellWorkspace", mtWs);
+    alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
+    return alg;
+  }
+
+  void validateOutputParameters(ITableWorkspace_sptr const &paramsWs) {
+    TS_ASSERT_DELTA(paramsWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(paramsWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(paramsWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(paramsWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_LESS_THAN(paramsWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
   }
 };
