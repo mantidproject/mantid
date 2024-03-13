@@ -35,12 +35,18 @@ class ReflectometryDataset:
     _STITCH_ALG = "Stitch1DMany"
 
     def __init__(self, ws):
+        self._name = None
         self._ws = ws
         self._reduction_history = None
         self._reduction_workflow_histories = []
         self._stitch_history = None
 
         self._populate_histories()
+        self._set_name()
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def ws(self):
@@ -85,6 +91,18 @@ class ReflectometryDataset:
                     if child_history.name() == self._REDUCTION_ALG:
                         self._reduction_history = child_history
                         return
+
+    def _set_name(self):
+        if self.is_stitched:
+            self._name = "Stitched"
+        elif self._reduction_history:
+            self._name = self._reduction_history.getPropertyValue("ThetaIn")
+        else:
+            self._name = self._ws.name()
+
+        # Temporary solution for POLREF to give unique dataset names until we can specify the polarization spin state
+        if self._ws.getInstrument().getName() == "POLREF" and self._name is not self._ws.name():
+            self._name = f"{self._ws.name()} {self._name}"
 
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
@@ -143,9 +161,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             if not AnalysisDataService.doesExist(ws_name):
                 issues[Prop.WORKSPACE_LIST] = f"Cannot find workspace with name {ws_name} in the ADS."
             else:
-                ws = AnalysisDataService.retrieve(ws_name)
-                if not self._is_momentum_transfer_ws(ws):
-                    issues[Prop.WORKSPACE_LIST] = f"Workspace {ws_name} must have units of {self._Q_UNIT}"
+                workspace = AnalysisDataService.retrieve(ws_name)
+                for ws in workspace if isinstance(workspace, WorkspaceGroup) else [workspace]:
+                    if not self._is_momentum_transfer_ws(ws):
+                        issues[Prop.WORKSPACE_LIST] = f"Workspace {ws_name} must have units of {self._Q_UNIT}"
         return issues
 
     def _is_momentum_transfer_ws(self, ws) -> bool:
@@ -225,7 +244,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         Create a dataset with the data columns and the mandatory information populated in the header
         """
         return MantidORSODataset(
-            refl_dataset.ws.name(),
+            refl_dataset.name,
             data_columns,
             refl_dataset.ws,
             reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
