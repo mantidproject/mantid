@@ -308,8 +308,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 line.remove()
 
         if self.fit_result_ws_name:
-            ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
-            self.get_axes().remove_workspace_artists(ws)
+            if AnalysisDataService.doesExist(self.fit_result_ws_name):
+                ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
+                self.get_axes().remove_workspace_artists(ws)
             self.fit_result_ws_name = ""
         self.update_legend()
 
