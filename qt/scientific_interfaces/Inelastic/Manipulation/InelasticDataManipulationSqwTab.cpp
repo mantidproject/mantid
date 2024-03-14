@@ -36,7 +36,7 @@ InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent
       m_view(view) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
 
 void InelasticDataManipulationSqwTab::setup() {}
