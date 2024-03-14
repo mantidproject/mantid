@@ -330,7 +330,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         reduction_workflow_histories = refl_dataset.reduction_workflow_histories
         if not refl_dataset.reduction_workflow_histories:
-            self.log().warning(
+            self.log().debug(
                 f"Unable to find history for {ReflectometryDataset.REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file."
             )
             return
@@ -384,7 +384,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                     # The absolute value of the middle rebin parameter is the resolution
                     return abs(float(rebin_params[1]))
 
-        self.log().warning("Unable to find resolution from workspace history.")
+        self.log().debug("Unable to find resolution from workspace history.")
         return None
 
     def _get_reduction_timestamp(self, reduction_history):
@@ -398,9 +398,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         try:
             return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
         except ValueError:
-            self.log().warning(
-                "Could not parse reduction timestamp into required format - this information will be excluded from the file."
-            )
+            self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
             return None
 
     def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
@@ -415,7 +413,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             try:
                 angle_files.extend([(file, theta) for file in self._get_file_names_from_history_run_list(input_runs, instrument_name)])
             except RuntimeError as ex:
-                self.log().warning(f"{ex}. Angle file information will be excluded from the file.")
+                self.log().debug(f"{ex}. Angle file information will be excluded from the file.")
                 return []
         return angle_files
 
@@ -439,7 +437,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
                 add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
             except RuntimeError as ex:
-                self.log().warning(f"{ex}. Transmission file information will be excluded from the file.")
+                self.log().debug(f"{ex}. Transmission file information will be excluded from the file.")
                 return [], []
 
         return list(first_trans_files.keys()), list(second_trans_files.keys())
