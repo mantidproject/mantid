@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
 from collections import OrderedDict
+import numpy as np
 
 
 class Prop:
@@ -32,6 +33,7 @@ class ReflectometryDataset:
     REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
 
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _RRO_ALG = "ReflectometryReductionOne"
     _STITCH_ALG = "Stitch1DMany"
 
     def __init__(self, ws):
@@ -53,6 +55,10 @@ class ReflectometryDataset:
         return self._ws
 
     @property
+    def instrument_name(self):
+        return self._ws.getInstrument().getName()
+
+    @property
     def reduction_history(self):
         return self._reduction_history
 
@@ -67,6 +73,19 @@ class ReflectometryDataset:
     @property
     def is_stitched(self) -> bool:
         return self._stitch_history is not None
+
+    @property
+    def q_conversion_history(self):
+        if self._reduction_history is None:
+            return None
+
+        for child in self._reduction_history.getChildHistories():
+            if child.name() == self._RRO_ALG:
+                rro_child_algs = child.getChildHistories()
+                if rro_child_algs:
+                    return rro_child_algs[-1]
+
+        return None
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -101,7 +120,7 @@ class ReflectometryDataset:
             self._name = self._ws.name()
 
         # Temporary solution for POLREF to give unique dataset names until we can specify the polarization spin state
-        if self._ws.getInstrument().getName() == "POLREF" and self._name is not self._ws.name():
+        if self.instrument_name == "POLREF" and self._name is not self._ws.name():
             self._name = f"{self._ws.name()} {self._name}"
 
 
@@ -115,9 +134,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
     _RUN_NUM_LOG = "run_number"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
+    _Q_UNIT = "MomentumTransfer"
+
+    # Algorithms
     _REBIN_ALG = "Rebin"
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
-    _Q_UNIT = "MomentumTransfer"
+    _CONVERT_ALG = "ConvertUnits"
+    _REF_ROI_ALG = "RefRoi"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -221,10 +244,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         Set up the column headers and data values
         """
         resolution = self._get_resolution(refl_dataset)
-
-        alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=refl_dataset.ws, OutputWorkspace="pointData")
-        alg.execute()
-        point_data = alg.getProperty("OutputWorkspace").value
+        point_data = self._convert_to_point_data(refl_dataset.ws, "pointData")
 
         q_data = point_data.extractX()[0]
         reflectivity = point_data.extractY()[0]
@@ -233,7 +253,52 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
+        if not refl_dataset.is_stitched and refl_dataset.reduction_history and refl_dataset.instrument_name == "POLREF":
+            # Add additional data columns
+            size = q_data.size
+            theta = float(refl_dataset.reduction_history.getPropertyValue("ThetaIn"))
+            try:
+                l_data = self._convert_from_q_to_wavelength(refl_dataset, q_data)
+                l_error = np.full(size, 0)
+            except RuntimeError as ex:
+                self.log().debug(ex)
+                l_data = np.full(size, np.nan)
+                l_error = np.full(size, np.nan)
+
+            data_columns.add_column("lambda", MantidORSODataColumns.Unit.Angstrom, "wavelength", l_data)
+            data_columns.add_error_column("lambda", MantidORSODataColumns.ErrorType.Resolution, None, l_error)
+            data_columns.add_column("incident theta", MantidORSODataColumns.Unit.Degrees, "incident theta", np.full(size, theta))
+            # We set the error for incident theta to the q_resolution as we are currently assuming dlambda is 0
+            # (and q_resolution = dincident_theta + dlambda)
+            data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, q_resolution)
+
         return data_columns
+
+    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDataset, q_data: np.ndarray) -> np.ndarray:
+        q_convert_history = refl_dataset.q_conversion_history
+        if q_convert_history is None:
+            raise RuntimeError(
+                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
+            )
+
+        # The method to convert back to wavelength depends on which algorithm was used to perform the conversion to Q
+        if q_convert_history.name() == self._REF_ROI_ALG:
+            theta = float(q_convert_history.getPropertyValue("ScatteringAngle"))
+            return 4 * np.pi * np.sin(np.radians(theta)) / q_data
+
+        if q_convert_history.name() == self._CONVERT_ALG:
+            alg = self.createChildAlgorithm(
+                self._CONVERT_ALG, InputWorkspace=refl_dataset.ws, Target="Wavelength", AlignBins=False, OutputWorkspace="lambdaWs"
+            )
+            alg.execute()
+            lambda_ws = alg.getProperty("OutputWorkspace").value
+            lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
+            return lambda_point_data.extractX()[0]
+
+    def _convert_to_point_data(self, ws, out_ws_name):
+        alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=out_ws_name)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
 
     def _create_dataset_with_mandatory_header(
         self,
@@ -270,7 +335,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
             return
 
-        instrument_name = refl_dataset.ws.getInstrument().getName()
+        instrument_name = refl_dataset.instrument_name
 
         for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
             dataset.add_measurement_data_file(file, comment=f"Incident angle {theta}")
