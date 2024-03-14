@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import itertools
 
-from IndirectReductionCommon import calibrate, group_spectra, load_files
+from IndirectReductionCommon import calibrate, create_grouping_workspace, group_spectra, load_files, rebin_logarithmic
 
 from mantid.kernel import *
 from mantid.api import *
@@ -18,14 +18,12 @@ from mantid.simpleapi import (
     Divide,
     MergeRuns,
     NormaliseByCurrent,
-    Rebin,
     RebinToWorkspace,
     ReplaceSpecialValues,
     ConjoinSpectra,
     CreateWorkspace,
 )
 import numpy as np
-from math import expm1, log
 
 # pylint: disable=too-few-public-methods
 
@@ -400,11 +398,10 @@ def diffraction_calibrator(calibration_file):
 
         calibrated = calibrate(normalised, calibration_file)
 
-        min_value = 2.8386401369910570  # 3.100474254799675
-        max_value = 3.9818297354976391  # 3.981829735497815
-        step = expm1((log(max_value) - log(min_value)) / calibrated.blocksize())
-        output_ws = Rebin(InputWorkspace=calibrated, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
-        grouped = group_spectra(output_ws, "File", calibration_file)
+        group_ws = create_grouping_workspace(calibrated, calibration_file)
+        rebinned = rebin_logarithmic(calibrated, group_ws)
+
+        grouped = group_spectra(rebinned, "File", calibration_file)
 
         return CropWorkspace(
             InputWorkspace=grouped,

@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import calibrate, load_files, load_file_ranges
+from IndirectReductionCommon import calibrate, create_grouping_workspace, load_files, load_file_ranges, rebin_logarithmic
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -449,12 +449,16 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if self._cal_file != "":
             for ws_name in self._workspace_names:
                 calibrated = calibrate(ws_name, self._cal_file)
-                AnalysisDataService.addOrReplace(ws_name, calibrated)
+                group_ws = create_grouping_workspace(calibrated, self._cal_file)
+                rebinned = rebin_logarithmic(calibrated, group_ws)
+                AnalysisDataService.addOrReplace(ws_name, rebinned)
 
             if self._vanadium_ws:
                 for van_ws_name in self._vanadium_ws:
                     calibrated = calibrate(van_ws_name, self._cal_file)
-                    AnalysisDataService.addOrReplace(van_ws_name, calibrated)
+                    group_ws = create_grouping_workspace(calibrated, self._cal_file)
+                    rebinned = rebin_logarithmic(calibrated, group_ws)
+                    AnalysisDataService.addOrReplace(van_ws_name, rebinned)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """

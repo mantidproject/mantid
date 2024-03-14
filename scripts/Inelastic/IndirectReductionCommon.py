@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load
-from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
+from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load, Rebin
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, AlgorithmManager
+from mantid.dataobjects import GroupingWorkspace
 from mantid import mtd, logger, config
 
 try:
@@ -16,6 +17,7 @@ except ImportError:
 
 import os
 import numpy as np
+from math import expm1, log
 
 
 # -------------------------------------------------------------------------------
@@ -720,7 +722,7 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
         if group_file is not None:
             # If grouping file is a *.cal file
             if group_file.endswith(".cal"):
-                group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=instrument.getName(), OldCalFilename=group_file, StoreInADS=False)
+                group_ws = create_grouping_workspace(workspace, group_file)
                 group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
                 group_detectors.execute()
                 return group_detectors.getProperty("OutputWorkspace").value
@@ -782,6 +784,11 @@ def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spe
     if remainder != 0:
         grouping_string += f",{create_range_string(spectra_min + number_of_spectra - remainder, spectra_min + number_of_spectra - 1)}"
     return grouping_string
+
+
+def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> GroupingWorkspace:
+    group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=workspace.getInstrument().getName(), OldCalFilename=cal_file, StoreInADS=False)
+    return group_ws
 
 
 # -------------------------------------------------------------------------------
@@ -1019,6 +1026,36 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 
 
 # -------------------------------------------------------------------------------
+
+
+def rebin_logarithmic(workspace, group_ws):
+    all_neg = []
+    for group_id in group_ws.getGroupIDs():
+        if group_id < 0:
+            all_neg.extend(group_ws.getDetectorIDsOfGroup(int(group_id)))
+
+    min_value_overall = float("inf")
+    max_value_overall = float("-inf")
+    spec_info = workspace.spectrumInfo()
+    for i in range(workspace.getNumberHistograms()):
+        if spec_info.isMasked(i) or not spec_info.hasDetectors(i):
+            continue
+        dets = workspace.getSpectrum(i).getDetectorIDs()
+        if dets[0] in all_neg:
+            continue
+        data_x = workspace.readX(i)
+        min_value = data_x[0]
+        max_value = data_x[-1]
+        if min_value < min_value_overall:
+            min_value_overall = min_value
+        if max_value > max_value_overall:
+            max_value_overall = max_value
+
+    print(min_value_overall)
+    print(max_value_overall)
+    step = expm1((log(max_value_overall) - log(min_value_overall)) / workspace.blocksize())
+
+    return Rebin(InputWorkspace=workspace, Params=[min_value_overall, step, max_value_overall], BinningMode="Logarithmic", StoreInADS=False)
 
 
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
