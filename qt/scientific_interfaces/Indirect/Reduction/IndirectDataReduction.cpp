@@ -253,6 +253,8 @@ void IndirectDataReduction::loadInstrumentDetails() {
   }
   if (auto const eFixed = WorkspaceUtils::getEFixed(instWorkspace)) {
     m_instDetails["Efixed"] = QString::number(*eFixed);
+  } else {
+    m_instDetails["Efixed"] = "";
   }
 
   auto const instrument = instWorkspace->getInstrument();

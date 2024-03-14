@@ -69,9 +69,32 @@ public:
     TS_ASSERT_EQUALS(getEMode(testWorkspace), "Indirect");
   }
 
-  void test_getEFixed_throws_for_no_instrument() {
+  void test_getEFixed_returns_std_nullopt_for_no_instrument() {
     auto const testWorkspace = createWorkspace(5);
-    TS_ASSERT_THROWS(getEFixed(testWorkspace), const std::runtime_error &);
+    TS_ASSERT(!getEFixed(testWorkspace));
+  }
+
+  void test_getEFixed_returns_std_nullopt_for_instrument_but_no_efixed_parameter() {
+    auto const testWorkspace = createWorkspaceWithInelasticInstrument(2);
+    TS_ASSERT(!getEFixed(testWorkspace));
+  }
+
+  void test_getEFixed_returns_an_efixed_for_a_workspace_with_parameters() {
+    auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters();
+
+    auto const efixed = getEFixed(testWorkspace);
+
+    TS_ASSERT(efixed);
+    TS_ASSERT_EQUALS(1.845, *efixed);
+  }
+
+  void test_getEFixed_returns_an_efixed_for_fmica_analyser() {
+    auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters("fmica");
+
+    auto const efixed = getEFixed(testWorkspace);
+
+    TS_ASSERT(efixed);
+    TS_ASSERT_DELTA(0.2067, *efixed, 0.00001);
   }
 
   void test_extractAxisLabels_gives_labels() {
