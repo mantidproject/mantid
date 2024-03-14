@@ -19,6 +19,7 @@ from mantid.simpleapi import (
     NRCalculateSlitResolution,
     LoadNexus,
     DeleteLog,
+    GroupWorkspaces,
 )
 from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime
@@ -42,6 +43,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _FLOOD_WS_COMMENT = "Flood correction workspace or file"
     _FLOOD_RUN_COMMENT = "Flood correction run file"
     _CALIB_FILE_COMMENT = "Calibration file"
+    _STITCHED_DATASET_NAME = "Stitched"
 
     # Algorithm names
     _SAVE_ALG = "SaveISISReflectometryORSO"
@@ -94,7 +96,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
         mock_alg_histories.return_value = [history]
 
-        SaveISISReflectometryORSO(WorkspaceList=input_ws, Filename=self._output_filename)
+        self._run_save_alg(input_ws)
 
         self._check_file_header(
             [
@@ -105,7 +107,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_create_file_from_workspace_with_no_reduction_history(self):
         ws = self._create_sample_workspace()
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_data_in_file(ws, None)
 
@@ -116,7 +118,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {"Params": "0.02"})])
         mock_history_empty.return_value = True
 
-        SaveISISReflectometryORSO(WorkspaceList=[input_ws], Filename=self._output_filename)
+        self._run_save_alg(input_ws)
 
         excluded_values = [self._REDUCTION_CALL_HEADING]
 
@@ -124,13 +126,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_create_file_with_write_resolution_set_to_false_omits_resolution_column(self):
         ws = self._create_sample_workspace()
-        SaveISISReflectometryORSO(WorkspaceList=ws, WriteResolution=False, Filename=self._output_filename)
+        self._run_save_alg(ws, write_resolution=False)
 
         self._check_data_in_file(ws, None)
 
     def test_file_excludes_proposal_id_and_doi_if_logs_missing(self):
         ws = self._create_sample_workspace(rb_num_log_name="")
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         excluded_metadata = [self._header_entries_for_sample_ws[0], self._header_entries_for_sample_ws[1]]
 
@@ -138,7 +140,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_file_includes_proposal_id_and_doi_for_alternative_rb_num_log(self):
         ws = self._create_sample_workspace(rb_num_log_name=self._LOG_EXP_IDENTIFIER)
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(self._header_entries_for_sample_ws)
 
@@ -146,17 +148,25 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws_correct = self._create_sample_workspace()
         ws_invalid = CreateSampleWorkspace()
         with self.assertRaisesRegex(RuntimeError, "must have units of"):
-            SaveISISReflectometryORSO(WorkspaceList=[ws_correct, ws_invalid], WriteResolution=False, Filename=self._output_filename)
+            self._run_save_alg([ws_correct, ws_invalid], write_resolution=False)
+
+    def test_all_workspaces_in_group_must_be_in_correct_units(self):
+        grp_name = "test_ws_group"
+        ws_correct = self._create_sample_workspace()
+        ws_invalid = CreateSampleWorkspace()
+        GroupWorkspaces(InputWorkspaces=[ws_correct.name(), ws_invalid.name()], OutputWorkspace=grp_name)
+        with self.assertRaisesRegex(RuntimeError, "must have units of"):
+            self._run_save_alg(grp_name, write_resolution=False)
 
     def test_all_input_workspaces_must_exist_in_ADS(self):
         ws = self._create_sample_workspace()
         with self.assertRaisesRegex(RuntimeError, "Cannot find workspace"):
-            SaveISISReflectometryORSO(WorkspaceList=[ws, "invalid"], WriteResolution=False, Filename=self._output_filename)
+            self._run_save_alg([ws, "invalid"], write_resolution=False)
 
     def test_comment_added_to_top_of_file(self):
         # The comment is needed until we are able to output all the mandatory information required by the standard
         ws = self._create_sample_workspace()
-        SaveISISReflectometryORSO(WorkspaceList=ws, WriteResolution=False, Filename=self._output_filename)
+        self._run_save_alg(ws, write_resolution=False)
 
         self._check_file_header([self._INVALID_HEADER_COMMENT])
 
@@ -183,7 +193,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                 }
                 self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-                SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+                self._run_save_alg(ws)
 
                 self._check_file_header([self._get_expected_data_file_metadata([expected_file_name], self._REDUCTION_HEADING)])
 
@@ -212,7 +222,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                 }
                 self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-                SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+                self._run_save_alg(ws)
 
                 self._check_file_header(
                     [self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)]
@@ -229,7 +239,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
         self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
 
@@ -244,12 +254,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
         self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_run_is_ws_name_retrieves_run_number_from_log(self, mock_alg_histories):
+    def test_input_run_is_ws_name_retrieves_run_number_from_log(self, mock_alg_histories):
         ws = self._create_sample_workspace(instrument_name="INTER")
         ws.mutableRun().addProperty(self._LOG_RUN_NUM, "12345", True)
         theta = "0.5"
@@ -260,12 +270,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
         self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header([self._get_expected_data_file_metadata(expected_file_names, self._REDUCTION_HEADING)])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_run_is_ws_name_without_run_num_log_omits_datafiles(self, mock_alg_histories):
+    def test_input_run_is_ws_name_without_run_num_log_omits_datafiles(self, mock_alg_histories):
         ws = self._create_sample_workspace(instrument_name="INTER")
         property_values = {
             "InputRunList": "ws",
@@ -273,7 +283,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
         self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header([f"{self._DATA_FILES_HEADING} []\n{self._REDUCTION_HEADING}"])
 
@@ -286,7 +296,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         }
         self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header([f"{self._DATA_FILES_HEADING} []\n{self._REDUCTION_HEADING}"])
 
@@ -300,7 +310,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ]
         self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         expected_data_files = [("INTER00013460", "0.5"), ("INTER00013460", "1.0"), ("INTER00038393", "2.3")]
 
@@ -316,7 +326,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ]
         self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         expected_additional_file_entries = {
             "INTER00013463": self._FIRST_TRANS_COMMENT,
@@ -329,7 +339,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_file_populates_reduction_call_from_ws_history(self):
         ws = self._create_sample_workspace(instrument_name="INTER")
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(
             [
@@ -352,7 +362,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                 }
                 self._configure_mock_alg_history(mock_alg_histories, [(self._REDUCTION_WORKFLOW_ALG, property_values)])
 
-                SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+                self._run_save_alg(ws)
 
                 self._check_file_header(
                     [self._get_expected_additional_file_metadata({expected_entry: self._FLOOD_WS_COMMENT}, self._REDUCTION_HEADING)]
@@ -373,7 +383,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         ws = self._create_sample_workspace()
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(
             [self._get_expected_additional_file_metadata({flood_run_file: self._FLOOD_RUN_COMMENT}, self._REDUCTION_HEADING)]
@@ -394,7 +404,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         ws = self._create_sample_workspace()
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(None, [filename])
 
@@ -407,7 +417,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(
             [self._get_expected_additional_file_metadata({filename: self._CALIB_FILE_COMMENT}, self._REDUCTION_HEADING)]
@@ -419,16 +429,30 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace()
         self._configure_mock_alg_history(mock_alg_histories, histories_to_create)
 
-        SaveISISReflectometryORSO(WorkspaceList=ws, Filename=self._output_filename)
+        self._run_save_alg(ws)
 
         self._check_file_header(None, [self._CALIB_FILE_COMMENT])
 
-    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name=""):
-        ws = CreateSampleWorkspace(InstrumentName=instrument_name)
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_stitched_data_has_correct_dataset_name(self, mock_alg_histories):
+        ws = self._create_sample_workspace()
+        self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {})])
+
+        self._run_save_alg(ws, write_resolution=False)
+
+        self._check_file_header([self._get_dataset_name_entry(self._STITCHED_DATASET_NAME)])
+
+    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
+        ws = CreateSampleWorkspace(InstrumentName=instrument_name, OutputWorkspace=ws_name)
         self._set_units_as_momentum_transfer(ws)
         if rb_num_log_name:
             ws.mutableRun().addProperty(rb_num_log_name, self._rb_number, True)
         return ws
+
+    def _create_sample_workspace_group(self, group_name, member_ws_names, instrument_name=""):
+        for ws_name in member_ws_names:
+            self._create_sample_workspace(ws_name=ws_name, instrument_name=instrument_name)
+        GroupWorkspaces(InputWorkspaces=",".join(member_ws_names), OutputWorkspace=group_name)
 
     def _set_units_as_momentum_transfer(self, ws):
         ws.getAxis(0).setUnit(self._Q_UNIT)
@@ -452,6 +476,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         files_entry.append(expected_section_end)
         return "".join(files_entry)
+
+    def _get_dataset_name_entry(self, dataset_name):
+        return f"{self._DATA_SET_HEADING} {dataset_name}"
 
     def _configure_mock_alg_history(self, mock_alg_histories, histories_to_create):
         histories = []
@@ -519,6 +546,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         if resolution is not None:
             sq_data = orso_data[:, 3]
             self.assertTrue(np.allclose(sq_data, q_data * resolution, atol=1e-10, equal_nan=True))
+
+    def _run_save_alg(self, ws_list, write_resolution=True):
+        SaveISISReflectometryORSO(WorkspaceList=ws_list, WriteResolution=write_resolution, Filename=self._output_filename)
 
 
 if __name__ == "__main__":
