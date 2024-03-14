@@ -110,6 +110,8 @@ void LoadErrorEventsNexus::exec() {
     max_tof = std::max(max_tof, tof);
   }
 
+  g_log.information() << "TOF min = " << min_tof << ", max = " << max_tof << "\n";
+
   eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
 
   outWS->getAxis(0)->setUnit("TOF");
