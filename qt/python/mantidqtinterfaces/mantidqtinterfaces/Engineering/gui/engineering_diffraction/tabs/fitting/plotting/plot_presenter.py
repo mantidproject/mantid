@@ -7,7 +7,8 @@
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver, GenericObservable
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
-from mantid.simpleapi import Fit, logger
+from mantid.simpleapi import Fit, logger, FindPeaksConvolve
+from mantid.api import AnalysisDataService as ADS
 from mantidqt.utils.asynchronous import AsyncTask
 from copy import deepcopy
 
@@ -36,10 +37,14 @@ class FittingPlotPresenter(object):
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
         self.fit_all_started_notifier = GenericObservable()
         self.fit_all_done_notifier = GenericObservable()
+        self.find_peaks_convolve_started_notifier = GenericObservable()
+        self.find_peaks_convolve_done_notifier = GenericObservable()
 
         self.setup_toolbar()
         self.worker = None
         self.fitprop_list = None
+        self.find_peak_convolve_waiting_peak_count = 0
+        self.find_peak_convolve_total_peak_count = 0
 
     def setup_toolbar(self):
         self.view.set_slot_for_display_all()
@@ -47,6 +52,8 @@ class FittingPlotPresenter(object):
         self.view.set_slot_for_serial_fit(self.do_serial_fit)
         self.view.set_slot_for_seq_fit(self.do_seq_fit)
         self.view.set_slot_for_legend_toggled()
+        self.view.set_slot_for_find_peaks_convolve(self.run_find_peaks_convolve)
+        self.view.add_subscriber_for_convolve_peak_added(self.handle_convolve_peak_added)
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
@@ -68,6 +75,7 @@ class FittingPlotPresenter(object):
         self.view.clear_figure()
         self.view.update_fitbrowser()
         self.set_progress_bar_zero()
+        self.view.set_find_peaks_convolve_button_status(False)
 
     def on_cancel_clicked(self):
         if self.worker:
@@ -102,6 +110,58 @@ class FittingPlotPresenter(object):
 
     def do_seq_fit(self):
         self.fit_all_started_notifier.notify_subscribers(True)
+
+    def _re_organize_keys_find_peaks_convolve(self, table_ws):
+        if table_ws.rowCount() == 1:
+            table_dict = table_ws.row(0)
+            table_dict.pop("SpecIndex", None)
+            return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
+        return None
+
+    def run_find_peaks_convolve(self):
+        self.find_peaks_convolve_started_notifier.notify_subscribers()
+        self.find_peak_convolve_waiting_peak_count = 0
+        self.find_peak_convolve_total_peak_count = 0
+        try:
+            input_ws_name = self.view.fit_browser.workspaceName()
+            fit_prop_ws = ADS.retrieve(input_ws_name)
+            groupWs = FindPeaksConvolve(
+                InputWorkspace=fit_prop_ws,
+                OutputWorkspace="FindPeaksConvolve_" + input_ws_name,
+                IOverSigmaThreshold=4,
+                EstimatedPeakExtent=200,
+                StoreInADS=True,
+            )
+            peak_x_values = dict()
+            peak_y_values = dict()
+            for tab_ws in groupWs:
+                if tab_ws.getName() == "PeakCentre":
+                    peak_x_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
+                elif tab_ws.getName() == "PeakYPosition":
+                    peak_y_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
+
+            if peak_x_values is None or peak_y_values is None:
+                logger.error("Failed extracting columns from FindPeakConvolve output")
+                self.find_peaks_convolve_done_notifier.notify_subscribers(False)
+                return
+
+            if set(peak_x_values.keys()) == set(peak_y_values.keys()):
+                self.find_peak_convolve_total_peak_count = len(peak_x_values)
+                self.find_peak_convolve_waiting_peak_count = self.find_peak_convolve_total_peak_count
+                logger.notice(f"Started adding {self.find_peak_convolve_total_peak_count} peaks found via FindPeaksConvolve")
+                for col, x_value in peak_x_values.items():
+                    y_value = peak_y_values[col]
+                    self.view.fit_browser.tool.add_peak(x_value, y_value)
+            else:
+                logger.error("Incompatible columns returned from FindPeaksConvolve!")
+                self.find_peak_convolve_total_peak_count = 0
+                self.find_peak_convolve_waiting_peak_count = 0
+                self.find_peaks_convolve_done_notifier.notify_subscribers(False)
+        except RuntimeError as err:
+            logger.error(f"Failed to run FindPeaksConvolve for workspace:{input_ws_name}! Error:{err}")
+            self.find_peak_convolve_total_peak_count = 0
+            self.find_peak_convolve_waiting_peak_count = 0
+            self.find_peaks_convolve_done_notifier.notify_subscribers(False)
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
@@ -166,10 +226,12 @@ class FittingPlotPresenter(object):
         if self.view.is_fit_browser_visible():
             self.view.hide_fit_browser()
             self.view.hide_fit_progress_bar()
+            self.view.set_find_peaks_convolve_button_status(False)
         else:
             self.view.show_fit_browser()  # if no data is plotted, the fit browser will fail to show
             if self.view.is_fit_browser_visible():
                 self.view.show_fit_progress_bar()
+                self.view.set_find_peaks_convolve_button_status(True)
         self.set_progress_bar_zero()
 
     def update_progress_bar(self):
@@ -198,3 +260,18 @@ class FittingPlotPresenter(object):
 
     def set_progress_bar_zero(self):
         self.view.set_progress_bar(status="", minimum=0, maximum=100, value=0, style_sheet=EMPTY_STYLE_SHEET)
+
+    def handle_convolve_peak_added(self):
+        if self.find_peak_convolve_waiting_peak_count > 0:
+            self.find_peak_convolve_waiting_peak_count -= 1
+            self.view.set_progress_bar(
+                status="adding peaks...",
+                minimum=0,
+                maximum=self.find_peak_convolve_total_peak_count,
+                value=self.find_peak_convolve_total_peak_count - self.find_peak_convolve_waiting_peak_count,
+                style_sheet=IN_PROGRESS_STYLE_SHEET,
+            )
+
+            if self.find_peak_convolve_waiting_peak_count == 0:
+                self.find_peak_convolve_total_peak_count = 0
+                self.find_peaks_convolve_done_notifier.notify_subscribers(True)
