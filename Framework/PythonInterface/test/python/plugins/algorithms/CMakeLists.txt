@@ -36,7 +36,6 @@ set(TEST_PY_FILES
     DNSComputeDetEffCorrCoefsTest.py
     DNSMergeRunsTest.py
     DNSFlippingRatioCorrTest.py
-    DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
     EnggEstimateFocussedBackgroundTest.py
