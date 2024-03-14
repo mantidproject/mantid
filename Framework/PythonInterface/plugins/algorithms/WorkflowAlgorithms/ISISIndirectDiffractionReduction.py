@@ -449,13 +449,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if self._cal_file != "":
             for ws_name in self._workspace_names:
                 calibrated = calibrate(ws_name, self._cal_file)
-                # grouped = group_spectra(calibrated, "File", self._cal_file)
                 AnalysisDataService.addOrReplace(ws_name, calibrated)
 
             if self._vanadium_ws:
                 for van_ws_name in self._vanadium_ws:
                     calibrated = calibrate(van_ws_name, self._cal_file)
-                    # grouped = group_spectra(calibrated, "File", self._cal_file)
                     AnalysisDataService.addOrReplace(van_ws_name, calibrated)
 
     def _load_and_scale_container(self, scale_factor, load_opts):

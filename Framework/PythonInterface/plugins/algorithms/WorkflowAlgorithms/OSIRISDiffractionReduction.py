@@ -18,13 +18,14 @@ from mantid.simpleapi import (
     Divide,
     MergeRuns,
     NormaliseByCurrent,
+    Rebin,
     RebinToWorkspace,
     ReplaceSpecialValues,
     ConjoinSpectra,
     CreateWorkspace,
 )
 import numpy as np
-
+from math import expm1, log
 
 # pylint: disable=too-few-public-methods
 
@@ -398,7 +399,12 @@ def diffraction_calibrator(calibration_file):
         normalised = NormaliseByCurrent(InputWorkspace=workspace, StoreInADS=False, EnableLogging=False)
 
         calibrated = calibrate(normalised, calibration_file)
-        grouped = group_spectra(calibrated, "File", calibration_file)
+
+        min_value = 2.8386401369910570  # 3.100474254799675
+        max_value = 3.9818297354976391  # 3.981829735497815
+        step = expm1((log(max_value) - log(min_value)) / calibrated.blocksize())
+        output_ws = Rebin(InputWorkspace=calibrated, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
+        grouped = group_spectra(output_ws, "File", calibration_file)
 
         return CropWorkspace(
             InputWorkspace=grouped,
