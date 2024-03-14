@@ -6,18 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import itertools
 
-from IndirectReductionCommon import load_files
+from IndirectReductionCommon import calibrate_and_group, load_files
 
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (
     AddSampleLog,
-    AlignDetectors,
     CloneWorkspace,
     CropWorkspace,
     DeleteWorkspace,
     Divide,
-    DiffractionFocussing,
     MergeRuns,
     NormaliseByCurrent,
     RebinToWorkspace,
@@ -397,25 +395,9 @@ def diffraction_calibrator(calibration_file):
     """
 
     def calibrator(d_range, workspace):
-        normalised = NormaliseByCurrent(
-            InputWorkspace=workspace, OutputWorkspace="normalised_sample", StoreInADS=False, EnableLogging=False
-        )
+        normalised = NormaliseByCurrent(InputWorkspace=workspace, StoreInADS=False, EnableLogging=False)
 
-        aligned = AlignDetectors(
-            InputWorkspace=normalised,
-            CalibrationFile=calibration_file,
-            OutputWorkspace="aligned_sample",
-            StoreInADS=False,
-            EnableLogging=False,
-        )
-
-        focussed = DiffractionFocussing(
-            InputWorkspace=aligned,
-            GroupingFileName=calibration_file,
-            OutputWorkspace="focussed_sample",
-            StoreInADS=False,
-            EnableLogging=False,
-        )
+        focussed = calibrate_and_group(normalised, calibration_file)
 
         return CropWorkspace(
             InputWorkspace=focussed,

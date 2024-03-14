@@ -44,7 +44,7 @@ public:
   /// Check that the given WorkspaceSelector is not empty.
   bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
   /// Check that the given FileFinderWidget widget has valid files.
-  bool checkFileFinderWidgetIsValid(const QString &name, FileFinderWidget *widget);
+  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget);
   /// Check that the given DataSelector widget has valid input.
   bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false);
   /// Check that the given start and end range is valid.

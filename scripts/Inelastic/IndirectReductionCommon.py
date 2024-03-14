@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
+from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, DeleteWorkspace, DiffractionFocussing, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -1045,6 +1045,38 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
             Rebin(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, Params=params)
         except RuntimeError:
             logger.warning("Rebinning failed, will try to continue anyway.")
+
+
+# -------------------------------------------------------------------------------
+
+
+def calibrate_and_group(workspace, calibration_file: str):
+    """
+    Calibrates the workspace using the calibration file, converts from TOF to dSpacing, and then groups the detectors.
+
+    @param workspace The workspace or workspace name to be calibrated.
+    @param calibration_file The calibration file to use.
+
+    @return The calibrated and grouped workspace.
+    """
+    ApplyDiffCal(InstrumentWorkspace=workspace, CalibrationFile=calibration_file, StoreInADS=False, EnableLogging=False)
+
+    converted = ConvertUnits(
+        InputWorkspace=workspace,
+        Target="dSpacing",
+        StoreInADS=False,
+        EnableLogging=False,
+    )
+
+    ApplyDiffCal(InstrumentWorkspace=converted, ClearCalibration=True, StoreInADS=False, EnableLogging=False)
+
+    focussed = DiffractionFocussing(
+        InputWorkspace=converted,
+        GroupingFileName=calibration_file,
+        StoreInADS=False,
+        EnableLogging=False,
+    )
+    return focussed
 
 
 # -------------------------------------------------------------------------------
