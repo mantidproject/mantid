@@ -545,7 +545,7 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -561,7 +561,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("InputWorkspace", "NotARealWS"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
   }
 
@@ -580,7 +580,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -596,18 +596,18 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMin", -1));
     // then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "5"));
-    // the problem is that this"ll throw regardless as no numbers below zero can
+    // the problem is that this will throw regardless as no numbers below zero can
     // get in so i have to go over the bounds
     // so i have to either force Max higher or overlap, and both are tested
     // separatly
     // the validator seems to replace "-1" with the same as EMPTY_INT() so the
-    // bounds aren"t checked
+    // bounds aren't checked
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "7"));
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm didn"t run so there should be no file
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm didn't run so there should be no file
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -641,7 +641,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -676,7 +676,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -693,7 +693,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(Poco::File(filename).exists());
 
     // Now make some checks on the content of the file
@@ -769,7 +769,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -786,7 +786,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -803,7 +803,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -820,7 +820,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -838,7 +838,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -856,7 +856,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -874,7 +874,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -892,7 +892,7 @@ public:
 
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -942,7 +942,7 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
-    // the algorithm shouldn"t have written a file to disk
+    // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
@@ -1199,22 +1199,23 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
 
-    // Test the first three lines
-    std::vector<std::string> lines(3, "");
-    for (int i = 0; i < 3; i++) {
+    // Check the first four lines
+    std::vector<std::string> lines(4, "");
+    for (int i = 0; i < 4; i++) {
       std::getline(in, lines[i]);
     }
     TS_ASSERT_EQUALS(
         lines[0],
         "# {InputWorkspace: SaveAscii2WS, AxisAligned: 0, AlignedDim0: , AlignedDim1: , AlignedDim2: , AlignedDim3: , "
         "AlignedDim4: , AlignedDim5: , BasisVector0: (0.0+1.0x 0.0 0.0), in 7.26 Ang^-1, 1.0,0.0,0.0, BasisVector1: "
-        "u2, in 7.26 Ang ^ -1, 0.0, 1.0, 0.0, BasisVector2: u3, in 3.14 Ang ^ -1,0.0,0.0,1.0, BasisVector3: , "
-        "BasisVector4: , BasisVector5: , Translation: , OutputExtents: -2.5,2.5,-0.16,0.16,-0.05,0.05, OutputBins: "
-        "50,1,1, NormalizeBasisVectors: 1, ForceOrthogonal: 0, ImplicitFunctionXML: , IterateEvents: 1, Parallel: 0, "
+        "u2, in 7.26 Ang^-1, 0.0,1.0,0.0, BasisVector2: u3, in 3.14 Ang^-1,0.0,0.0,1.0, BasisVector3: , BasisVector4: "
+        ", BasisVector5: , Translation: , OutputExtents: -2.5,2.5,-0.16,0.16,-0.05,0.05, OutputBins: 1,50,1, "
+        "NormalizeBasisVectors: 1, ForceOrthogonal: 0, ImplicitFunctionXML: , IterateEvents: 1, Parallel: 0, "
         "TemporaryDataWorkspace: , OutputWorkspace: " +
             m_name + " }");
-    TS_ASSERT_EQUALS(lines[1], "-2.45,1,1");
-    TS_ASSERT_EQUALS(lines[2], "-2.35,0,0");
+    TS_ASSERT_EQUALS(lines[1], "# u2 in 7.26 Ang^-1, Signal, Error");
+    TS_ASSERT_EQUALS(lines[2], "-0.1568,3,1.73205");
+    TS_ASSERT_EQUALS(lines[3], "-0.1504,0,0");
 
     in.close();
 
@@ -1296,9 +1297,9 @@ private:
 
     FrameworkManager::Instance().exec(
         "BinMD", 18, "InputWorkspace", name.c_str(), "AxisAligned", "0", "BasisVector0",
-        "(0.0+1.0x 0.0 0.0), in 7.26 Ang^-1, 1.0,0.0,0.0", "BasisVector1", "u2, in 7.26 Ang ^ -1, 0.0, 1.0, 0.0",
-        "BasisVector2", "u3, in 3.14 Ang ^ -1,0.0,0.0,1.0", "OutputExtents", "-2.5,2.5,-0.16,0.16,-0.05,0.05",
-        "OutputBins", "50,1,1", "NormalizeBasisVectors", "1", "OutputWorkspace", name.c_str());
+        "(0.0+1.0x 0.0 0.0), in 7.26 Ang^-1, 1.0,0.0,0.0", "BasisVector1", "u2, in 7.26 Ang^-1, 0.0,1.0,0.0",
+        "BasisVector2", "u3, in 3.14 Ang^-1,0.0,0.0,1.0", "OutputExtents", "-2.5,2.5,-0.16,0.16,-0.05,0.05",
+        "OutputBins", "1,50,1", "NormalizeBasisVectors", "1", "OutputWorkspace", name.c_str());
   }
 
   std::string initSaveAscii2(SaveAscii2 &save, std::vector<std::string> logList = {}) {

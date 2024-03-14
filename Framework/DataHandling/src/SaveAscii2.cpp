@@ -610,16 +610,8 @@ void SaveAscii2::writeFileHeader(const std::vector<std::string> &logList, std::o
 void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const std::string &filename,
                                  bool appendToFile, bool writeHeader, int prec, bool scientific,
                                  const std::string &comment) {
-  int count = 0;
-  size_t dimIndex = -1;
-  for (size_t i = 0; i < mdws->getNumDims(); i++) {
-    if (mdws->getDimension(i)->getNBins() > 1) {
-      ++count;
-      dimIndex = i;
-    }
-  }
-
-  if (count != 1) {
+  auto dims = mdws->getNonIntegratedDimensions();
+  if (dims.size() != 1) {
     throw std::runtime_error("SaveAscii does not support saving multidimentional MDHistoWorkspace, and only supports "
                              "1D MDHistoWorkspaces cuts");
   }
@@ -639,21 +631,31 @@ void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const
   }
 
   auto lastAlg = mdws->getHistory().lastAlgorithm();
-  auto propsVec = lastAlg->getProperties();
+  auto &propsVec = lastAlg->getProperties();
+
+  Mantid::Geometry::IMDDimension_const_sptr dim = dims[0];
 
   if (writeHeader) {
+    // write last algorithm arguments
     file << comment << " {";
     for (size_t i = 0; i < propsVec.size(); i++) {
       file << propsVec[i]->name() << ": " << propsVec[i]->valueAsPrettyStr();
       if (i < propsVec.size() - 1)
-        file << ", ";
+        file << m_sep << " ";
     }
     file << " }\n";
+
+    // write columns labels
+    auto dimName = dim->getName();
+    auto dimUnit = dim->getUnits().latex();
+
+    file << comment << " " << dimName << " " << dimUnit << m_sep << " "
+         << "Signal" << m_sep << " "
+         << "Error"
+         << "\n";
   }
 
-  auto dim = mdws->getDimension(dimIndex);
   auto nbins = dim->getNBins();
-
   auto binWidth = dim->getBinWidth() / 2;
   auto binMax = dim->getMaximum();
   auto binMin = dim->getMinimum();
@@ -668,8 +670,9 @@ void SaveAscii2::write1DHistoCut(const IMDHistoWorkspace_const_sptr &mdws, const
 
   Progress progress(this, 0.0, 1.0, nbins);
 
+  // write data
   for (size_t i = 0; i < nPoints; ++i) {
-    file << start + step * float(i) << m_sep << signal[i] << m_sep << error[i] << "\n";
+    file << start + step * float(i) << m_sep << signal[i] << m_sep << std::sqrt(error[i]) << "\n";
     progress.report();
   }
 
