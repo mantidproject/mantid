@@ -349,10 +349,10 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
         convertSpecAlgo->setProperty("Target", "ElasticQ");
         convertSpecAlgo->setProperty("EMode", "Indirect");
 
-        try {
-          convertSpecAlgo->setProperty("EFixed", WorkspaceUtils::getEFixed(factorWs));
-        } catch (std::runtime_error &) {
+        if (auto const eFixed = WorkspaceUtils::getEFixed(factorWs)) {
+          convertSpecAlgo->setProperty("EFixed", *eFixed);
         }
+
         m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
       }
     }
@@ -420,10 +420,8 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
     return;
   }
 
-  try {
-    m_uiForm.doubleEfixed->setValue(WorkspaceUtils::getEFixed(ws));
-  } catch (std::runtime_error &) {
-    // do nothing if there is no efixed
+  if (auto const eFixed = WorkspaceUtils::getEFixed(ws)) {
+    m_uiForm.doubleEfixed->setValue(*eFixed);
   }
 
   auto emode = QString::fromStdString(WorkspaceUtils::getEMode(ws));

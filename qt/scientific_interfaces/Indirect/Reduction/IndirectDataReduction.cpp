@@ -10,6 +10,7 @@
 #include "IndirectDataReduction.h"
 #include "Common/Settings.h"
 
+#include "Common/WorkspaceUtils.h"
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
@@ -237,9 +238,9 @@ void IndirectDataReduction::loadInstrumentDetails() {
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements{
-      "analysis-type",     "spectra-min",       "spectra-max",        "Efixed",        "peak-start",
-      "peak-end",          "back-start",        "back-end",           "rebin-default", "cm-1-convert-choice",
-      "save-nexus-choice", "save-ascii-choice", "fold-frames-choice", "resolution"};
+      "analysis-type",     "spectra-min",        "spectra-max",   "peak-start",          "peak-end",
+      "back-start",        "back-end",           "rebin-default", "cm-1-convert-choice", "save-nexus-choice",
+      "save-ascii-choice", "fold-frames-choice", "resolution"};
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
@@ -249,6 +250,11 @@ void IndirectDataReduction::loadInstrumentDetails() {
   auto const instWorkspace = instrumentWorkspace();
   if (!instWorkspace) {
     return;
+  }
+  if (auto const eFixed = WorkspaceUtils::getEFixed(instWorkspace)) {
+    m_instDetails["Efixed"] = QString::number(*eFixed);
+  } else {
+    m_instDetails["Efixed"] = "";
   }
 
   auto const instrument = instWorkspace->getInstrument();
