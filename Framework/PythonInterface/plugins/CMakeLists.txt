@@ -43,7 +43,6 @@ set(PYTHON_PLUGINS
     algorithms/DNSFlippingRatioCorr.py
     algorithms/DNSMergeRuns.py
     algorithms/DPDFreduction.py
-    algorithms/DSFinterp.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
     algorithms/LoadElementalAnalysisData.py
@@ -347,7 +346,6 @@ set(PYTHON_PLUGINS
     functions/ChudleyElliot.py
     functions/CombGaussLorentzKT.py
     functions/CompositePCRmagnet.py
-    functions/DSFinterp1DFit.py
     functions/DampedBessel.py
     functions/EISFDiffCylinder.py
     functions/EISFDiffSphere.py

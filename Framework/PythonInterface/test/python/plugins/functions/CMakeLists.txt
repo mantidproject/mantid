@@ -9,7 +9,6 @@ set(TEST_PY_FILES
     CombGaussLorentzKTTest.py
     DampedBesselTest.py
     CompositePCRmagnetTest.py
-    DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
