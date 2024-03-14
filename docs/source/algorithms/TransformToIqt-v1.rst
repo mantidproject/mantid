@@ -88,6 +88,12 @@ Workflow
 
 .. diagram:: TransformToIqt-v1_wkflw.dot
 
+By default, the above workflow is executed.
+If EnforceNormalization is set to False,
+the LHSWorkspace from the output from :ref:`algm-ExtractFFTSpectrum` is used in both branches
+to perform the final workspace division and the two intermediate workspace divisions
+are skipped.
+
 Usage
 -----
 

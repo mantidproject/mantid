@@ -247,6 +247,19 @@
      </item>
     </layout>
    </item>
+    <item>
+        <widget class="QCheckBox" name="enEnforceNormalization">
+            <property name="toolTip">
+                <string>Normalization to enforce I(t=0)</string>
+            </property>
+            <property name="text">
+                <string>Enforce Normalization</string>
+            </property>
+            <property name="checked">
+                <bool>true</bool>
+            </property>
+        </widget>
+ </item>
    <item>
     <widget class="QGroupBox" name="ErrorCalc">
      <property name="title">
