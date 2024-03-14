@@ -36,9 +36,10 @@ class ReflectometryDataset:
     _RRO_ALG = "ReflectometryReductionOne"
     _STITCH_ALG = "Stitch1DMany"
 
-    def __init__(self, ws):
+    def __init__(self, ws, is_ws_grp_member: bool):
         self._name = None
         self._ws = ws
+        self._is_ws_grp_member = is_ws_grp_member
         self._reduction_history = None
         self._reduction_workflow_histories = []
         self._stitch_history = None
@@ -119,8 +120,9 @@ class ReflectometryDataset:
         else:
             self._name = self._ws.name()
 
-        # Temporary solution for POLREF to give unique dataset names until we can specify the polarization spin state
-        if self.instrument_name == "POLREF" and self._name is not self._ws.name():
+        # Ensure unique dataset names for workspace group members.
+        # Eventually we will specify the polarization spin state to provide the unique names for polarised datasets.
+        if self._is_ws_grp_member and self._name is not self._ws.name():
             self._name = f"{self._ws.name()} {self._name}"
 
 
@@ -221,10 +223,15 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         stitched_workspaces = []
 
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
-            workspace = AnalysisDataService.retrieve(ws_name)
-            group = workspace if isinstance(workspace, WorkspaceGroup) else [workspace]
-            for ws in group:
-                refl_dataset = ReflectometryDataset(ws)
+            ws_list = AnalysisDataService.retrieve(ws_name)
+            if isinstance(ws_list, WorkspaceGroup):
+                is_ws_grp = True
+            else:
+                is_ws_grp = False
+                ws_list = [ws_list]
+
+            for ws in ws_list:
+                refl_dataset = ReflectometryDataset(ws, is_ws_grp)
                 if refl_dataset.is_stitched:
                     stitched_workspaces.append(refl_dataset)
                 else:
