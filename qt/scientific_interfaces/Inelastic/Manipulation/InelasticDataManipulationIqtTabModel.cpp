@@ -33,6 +33,7 @@ void InelasticDataManipulationIqtTabModel::setupTransformToIqt(MantidQt::API::Ba
   IqtAlg->setProperty("ResolutionWorkspace", m_resWorkspace);
   IqtAlg->setProperty("NumberOfIterations", m_nIterations);
   IqtAlg->setProperty("CalculateErrors", m_calculateErrors);
+  IqtAlg->setProperty("EnforceNormalization", m_enforceNormalization);
   IqtAlg->setProperty("EnergyMin", m_energyMin);
   IqtAlg->setProperty("EnergyMax", m_energyMax);
   IqtAlg->setProperty("BinReductionFactor", m_numBins);
@@ -62,6 +63,10 @@ void InelasticDataManipulationIqtTabModel::setNumBins(double numBins) { m_numBin
 
 void InelasticDataManipulationIqtTabModel::setCalculateErrors(bool calculateErrors) {
   m_calculateErrors = calculateErrors;
+}
+
+void InelasticDataManipulationIqtTabModel::setEnforceNormalization(bool enforceNormalization) {
+  m_enforceNormalization = enforceNormalization;
 }
 
 } // namespace MantidQt::CustomInterfaces

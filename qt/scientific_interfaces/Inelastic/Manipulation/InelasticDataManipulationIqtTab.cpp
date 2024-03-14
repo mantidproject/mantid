@@ -103,6 +103,8 @@ void InelasticDataManipulationIqtTab::handlePlotCurrentPreview() {
 
 void InelasticDataManipulationIqtTab::handleErrorsClicked(int state) { m_model->setCalculateErrors(state); }
 
+void InelasticDataManipulationIqtTab::handleNormalizationClicked(int state) { m_model->setEnforceNormalization(state); }
+
 void InelasticDataManipulationIqtTab::handleValueChanged(std::string const &propName, double value) {
   if (propName == "ELow") {
     m_model->setEnergyMin(value);
