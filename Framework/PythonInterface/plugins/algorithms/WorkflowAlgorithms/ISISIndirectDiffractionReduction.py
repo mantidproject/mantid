@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import calibrate, create_grouping_workspace, load_files, load_file_ranges, rebin_logarithmic
+from IndirectReductionCommon import calibrate, load_files, load_file_ranges, rebin_logarithmic
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -103,7 +103,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             FileProperty("CalFile", "", action=FileAction.OptionalLoad),
-            doc="Filename of the .cal file to use in the [[AlignDetectors]] and " + "[[DiffractionFocussing]] child algorithms.",
+            doc="Filename of the .cal file to use in the [[ApplyDiffCal]] and [[ConvertUnits]] child algorithms.",
         )
 
         self.declareProperty(
@@ -443,21 +443,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def _apply_calibration(self):
         """
-        Checks to ensure a calibration file has been given
-        and if so performs AlignDetectors and DiffractionFocussing.
+        Checks to ensure a calibration file has been given and if so performs a calibration and
+        a logarithmic rebinning for the spectra which are not excluded from the grouping.
         """
         if self._cal_file != "":
             for ws_name in self._workspace_names:
                 calibrated = calibrate(ws_name, self._cal_file)
-                group_ws = create_grouping_workspace(calibrated, self._cal_file)
-                rebinned = rebin_logarithmic(calibrated, group_ws)
+                rebinned = rebin_logarithmic(calibrated, self._cal_file)
                 AnalysisDataService.addOrReplace(ws_name, rebinned)
 
             if self._vanadium_ws:
                 for van_ws_name in self._vanadium_ws:
                     calibrated = calibrate(van_ws_name, self._cal_file)
-                    group_ws = create_grouping_workspace(calibrated, self._cal_file)
-                    rebinned = rebin_logarithmic(calibrated, group_ws)
+                    rebinned = rebin_logarithmic(calibrated, self._cal_file)
                     AnalysisDataService.addOrReplace(van_ws_name, rebinned)
 
     def _load_and_scale_container(self, scale_factor, load_opts):

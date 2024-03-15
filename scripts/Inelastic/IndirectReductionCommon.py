@@ -1082,7 +1082,16 @@ def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: 
     return min_value, max_value
 
 
-def rebin_logarithmic(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> MatrixWorkspace:
+def rebin_logarithmic(workspace: MatrixWorkspace, calibration_file: str) -> MatrixWorkspace:
+    """
+    Performs logarithmic rebinning on the provided workspace. The rebinning parameters are calculated
+    based on the spectra which are included in the grouping provided in the calibration file.
+    @param workspace The workspace to be logarithmically rebinned.
+    @param calibration_file The *.cal file to use to find which detectors are excluded from the grouping.
+    @return A rebinned workspace.
+    """
+    grouping_workspace = create_grouping_workspace(workspace, calibration_file)
+
     min_value, max_value = _get_x_range_when_bins_vary(workspace, grouping_workspace)
     step = expm1((log(max_value) - log(min_value)) / workspace.blocksize())
 

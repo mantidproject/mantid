@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import itertools
 
-from IndirectReductionCommon import calibrate, create_grouping_workspace, group_spectra, load_files, rebin_logarithmic
+from IndirectReductionCommon import calibrate, group_spectra, load_files, rebin_logarithmic
 
 from mantid.kernel import *
 from mantid.api import *
@@ -398,8 +398,7 @@ def diffraction_calibrator(calibration_file):
 
         calibrated = calibrate(normalised, calibration_file)
 
-        group_ws = create_grouping_workspace(calibrated, calibration_file)
-        rebinned = rebin_logarithmic(calibrated, group_ws)
+        rebinned = rebin_logarithmic(calibrated, calibration_file)
 
         grouped = group_spectra(rebinned, "File", calibration_file)
 
@@ -502,7 +501,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.declareProperty(
             FileProperty("CalFile", "", action=FileAction.Load),
-            doc="Filename of the .cal file to use in the [[AlignDetectors]] and " + "[[DiffractionFocussing]] child algorithms.",
+            doc="Filename of the .cal file to use in the [[ApplyDiffCal]] and [[ConvertUnits]] child algorithms.",
         )
 
         self.declareProperty("SpectraMin", 3, doc="Minimum Spectrum to Load from (Must be more than 3)")
