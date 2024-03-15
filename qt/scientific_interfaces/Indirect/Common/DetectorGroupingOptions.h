@@ -31,11 +31,6 @@ public:
   void setGroupingMethod(QString const &option);
   void setSaveCustomVisible(bool const visible);
 
-  std::string groupingMethod() const;
-  std::string mapFile() const;
-  std::string customGrouping() const;
-  int nGroups() const;
-
   std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
                                                         std::size_t const &spectraMax) const;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() const;
@@ -48,6 +43,11 @@ private slots:
   void emitSaveCustomGrouping();
 
 private:
+  std::string groupingMethod() const;
+  std::string groupingFile() const;
+  std::string customGrouping() const;
+  int nGroups() const;
+
   int optionIndex(QString const &option) const;
 
   Ui::DetectorGroupingWidget m_uiForm;

@@ -66,7 +66,7 @@ private:
 
     declareProperty("GroupingMethod", "");
     declareProperty("GroupingString", "");
-    declareProperty("MapFile", "");
+    declareProperty("GroupingFile", "");
     declareProperty("NGroups", 1);
   };
 
@@ -95,7 +95,7 @@ private:
 
     outputWS->addColumn("str", "GroupingMethod");
     outputWS->addColumn("str", "GroupingString");
-    outputWS->addColumn("str", "MapFile");
+    outputWS->addColumn("str", "GroupingFile");
 
     TableRow newRow = outputWS->appendRow();
 
@@ -116,11 +116,11 @@ private:
     auto outputWorkspace = getPropertyValue("OutputWorkspace");
     auto groupingMethod = getPropertyValue("GroupingMethod");
     auto groupingString = getPropertyValue("GroupingString");
-    auto mapFile = getPropertyValue("MapFile");
+    auto groupingFile = getPropertyValue("GroupingFile");
 
     newRow << instrument << analyser << reflection << inputFiles << sumFiles << loadLogFiles << calibrationWorkspace
            << eFixed << spectraRange << backgroundRange << rebinString << detailedBalance << unitX << foldMultipleFrames
-           << outputWorkspace << groupingMethod << groupingString << mapFile;
+           << outputWorkspace << groupingMethod << groupingString << groupingFile;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("outputWS", outputWS);
   };
@@ -371,7 +371,7 @@ public:
 
       TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "GroupingMethod");
       TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingString");
-      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "MapFile");
+      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "GroupingFile");
     }
   }
 

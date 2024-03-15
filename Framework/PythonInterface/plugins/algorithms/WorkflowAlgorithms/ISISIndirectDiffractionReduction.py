@@ -151,7 +151,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
         self.declareProperty(
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
-            doc="A map file containing a detector grouping.",
+            doc="This property is deprecated (since v6.10), please use the 'GroupingFile' property instead.",
+        )
+        self.declareProperty(
+            FileProperty("GroupingFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A file containing a detector grouping.",
         )
         self.declareProperty(
             name="NGroups",
@@ -216,6 +220,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         if (grouping_method == "Workspace" or grouping_policy == "Workspace") and grouping_ws is None:
             issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
+
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        if map_file is not None:
+            logger.warning(
+                "The 'MapFile' algorithm property has been deprecated (since v6.10). Please use the 'GroupingFile' "
+                "algorithm property instead."
+            )
 
         return issues
 
@@ -364,7 +375,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 grouped = group_spectra(
                     ws_name,
                     method=self._grouping_method,
-                    group_file=self._grouping_map_file,
+                    group_file=self._grouping_file,
                     group_ws=self._grouping_workspace,
                     group_string=self._grouping_string,
                     number_of_groups=self._number_of_groups,
@@ -416,7 +427,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._grouping_method = grouping_policy if grouping_policy != "" and grouping_method == "All" else grouping_method
         self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
-        self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
+        # 'MapFile' is deprecated, but if it is provided instead of 'GroupingFile' then try to use it anyway
+        self._grouping_file = map_file if map_file is not None and grouping_file is None else grouping_file
         self._number_of_groups = self.getProperty("NGroups").value
 
         if self._rebin_string == "":

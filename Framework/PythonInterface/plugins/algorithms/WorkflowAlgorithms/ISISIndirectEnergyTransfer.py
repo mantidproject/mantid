@@ -48,7 +48,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _grouping_method = None
     _grouping_ws = None
     _grouping_string = None
-    _grouping_map_file = None
+    _grouping_file = None
     _output_x_units = None
     _output_ws = None
     _sum_files = None
@@ -131,7 +131,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
         self.declareProperty(
             FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
-            doc="A map file containing a detector grouping.",
+            doc="This property is deprecated (since v6.10), please use the 'GroupingFile' property instead.",
+        )
+        self.declareProperty(
+            FileProperty("GroupingFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A file containing a detector grouping.",
         )
         self.declareProperty(
             name="NGroups",
@@ -283,7 +287,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 grouped = group_spectra(
                     ws_name,
                     method=self._grouping_method,
-                    group_file=self._grouping_map_file,
+                    group_file=self._grouping_file,
                     group_ws=self._grouping_ws,
                     group_string=self._grouping_string,
                     number_of_groups=self._number_of_groups,
@@ -359,6 +363,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if grouping_method == "Workspace" and grouping_ws is None:
             issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
 
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        if map_file is not None:
+            logger.warning(
+                "The 'MapFile' algorithm property has been deprecated (since v6.10). Please use the 'GroupingFile' "
+                "algorithm property instead."
+            )
+
         efixed = self.getProperty("Efixed").value
         if efixed != Property.EMPTY_DBL and instrument_name not in ["IRIS", "OSIRIS"]:
             issues["Efixed"] = "Can only override Efixed on IRIS and OSIRIS"
@@ -391,7 +402,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_method = self.getPropertyValue("GroupingMethod")
         self._grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
-        self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
+        # 'MapFile' is deprecated, but if it is provided instead of 'GroupingFile' then try to use it anyway
+        self._grouping_file = map_file if map_file is not None and grouping_file is None else grouping_file
         self._number_of_groups = self.getProperty("NGroups").value
 
         self._output_x_units = self.getPropertyValue("UnitX")
@@ -415,8 +429,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if self._grouping_method != "Workspace" and self._grouping_ws is not None:
             logger.warning("GroupingWorkspace will be ignored by selected GroupingMethod")
 
-        if self._grouping_method != "File" and self._grouping_map_file is not None:
-            logger.warning("MapFile will be ignored by selected GroupingMethod")
+        if self._grouping_method != "File" and self._grouping_file is not None:
+            logger.warning("GroupingFile will be ignored by selected GroupingMethod")
 
         # The list of workspaces being processed
         self._workspace_names = []

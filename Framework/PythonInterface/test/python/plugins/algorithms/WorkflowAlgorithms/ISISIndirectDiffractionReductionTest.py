@@ -309,7 +309,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         reduced_workspace = ISISIndirectDiffractionReduction(
             InputFiles=["29244"],
             GroupingMethod="File",
-            MapFile="vesuvio_4_by_24.map",
+            GroupingFile="vesuvio_4_by_24.map",
             InstrumentParFile="IP0005.dat",
             Instrument="VESUVIO",
             mode="diffspec",

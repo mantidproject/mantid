@@ -206,7 +206,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
             Reflection="002",
             SpectraRange=[963, 1004],
             GroupingMethod="File",
-            MapFile="osi_002_14Groups.map",
+            GroupingFile="osi_002_14Groups.map",
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")

@@ -44,7 +44,7 @@ bool groupingStrInRange(std::string const &customString, std::size_t const &spec
 std::optional<std::string> validateGroupingProperties(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties,
                                                       std::size_t const &spectraMin, std::size_t const &spectraMax) {
   std::string groupingType = properties->getProperty("GroupingMethod");
-  if (groupingType == "File" && !properties->existsProperty("MapFile")) {
+  if (groupingType == "File" && !properties->existsProperty("GroupingFile")) {
     return "Please supply a map file for grouping detectors.";
   } else if (groupingType == "Custom") {
     if (!properties->existsProperty("GroupingString")) {
