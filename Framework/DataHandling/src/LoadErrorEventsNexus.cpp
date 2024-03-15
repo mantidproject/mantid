@@ -12,6 +12,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/PulseIndexer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusIOHelper.h"
 
@@ -60,8 +61,8 @@ void LoadErrorEventsNexus::exec() {
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
 
   // load logs
-  int nPeriods = 1;                                                               // Unused
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
+  int nPeriods = 1;
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, outWS, *this, false, nPeriods, periodLog);
 
   if (nPeriods != 1)
@@ -89,25 +90,51 @@ void LoadErrorEventsNexus::exec() {
   file.openGroup("entry", "NXentry");
   file.openGroup("bank_error_events", "NXevent_data");
 
-  auto event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(file, "event_time_offset");
-  // auto event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(file, "event_id");
-  // auto event_index = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
-  // auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_time_zero");
+  const auto event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(file, "event_time_offset");
+  const auto event_index = std::make_shared<std::vector<uint64_t>>(
+      Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index"));
+  const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(file), periodLog->valuesAsVector());
+
   file.closeGroup(); // bank_error_events
   file.closeGroup(); // entry
   file.close();
 
   // add event data to output workspace
+
+  const auto numEvents = event_times.size();
+
+  // this assumes that pulse indices are sorted
+  if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
+    throw std::runtime_error("Event index is not sorted");
+
   auto eventWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(outWS);
   auto &ev = eventWS->getSpectrum(0);
 
-  auto min_tof = std::numeric_limits<float>::max();
-  auto max_tof = std::numeric_limits<float>::lowest();
+  auto min_tof = std::numeric_limits<double>::max();
+  auto max_tof = std::numeric_limits<double>::lowest();
 
-  for (const auto &tof : event_times) {
-    ev.addEventQuickly(Mantid::Types::Event::TofEvent(tof));
-    min_tof = std::min(min_tof, tof);
-    max_tof = std::max(max_tof, tof);
+  const PulseIndexer pulseIndexer(event_index, event_index->at(0), numEvents, "bank_error_events");
+  const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex();
+  const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();
+
+  for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
+    // determine range of events for the pulse
+    const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
+    if (eventIndexRange.first > numEvents)
+      break;
+    else if (eventIndexRange.first == eventIndexRange.second)
+      continue;
+
+    // Save the pulse time at this index for creating those events
+    const auto &pulsetime = bankPulseTimes->pulseTime(pulseIndex);
+
+    // loop through events associated with a single pulse
+    for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
+      const auto tof = static_cast<double>(event_times[eventIndex]);
+      ev.addEventQuickly(Mantid::Types::Event::TofEvent(tof, pulsetime));
+      min_tof = std::min(min_tof, tof);
+      max_tof = std::max(max_tof, tof);
+    }
   }
 
   g_log.information() << "TOF min = " << min_tof << ", max = " << max_tof << "\n";
