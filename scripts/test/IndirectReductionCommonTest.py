@@ -6,7 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from IndirectReductionCommon import create_detector_grouping_string, create_grouping_string, create_range_string
+from mantid.dataobjects import GroupingWorkspace
+from mantid.simpleapi import Load
+from IndirectReductionCommon import (
+    create_detector_grouping_string,
+    create_grouping_string,
+    create_grouping_workspace,
+    create_range_string,
+    _excluded_detector_ids,
+)
 
 
 class IndirectReductionCommonTest(unittest.TestCase):
@@ -37,6 +45,23 @@ class IndirectReductionCommonTest(unittest.TestCase):
     def test_create_detector_grouping_for_non_divisible_number_of_groups(self):
         # An extra group is created with the remaining detectors
         self.assertEqual("7-9,10-12,13-15,16-18,19-21,22-24,25-27,28-32", create_detector_grouping_string(7, 7, 32))
+
+    def test_create_grouping_workspace_will_create_a_workspace_with_the_expected_size(self):
+        workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
+
+        grouping_workspace = create_grouping_workspace(workspace, "osiris_041_RES10.cal")
+
+        self.assertTrue(isinstance(grouping_workspace, GroupingWorkspace))
+        self.assertEquals(1008, grouping_workspace.getNumberHistograms())
+
+    def test_excluded_detector_ids_returns_the_expected_detector_ids(self):
+        workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
+        grouping_workspace = create_grouping_workspace(workspace, "osiris_041_RES10.cal")
+
+        excluded_ids = _excluded_detector_ids(grouping_workspace)
+
+        self.assertEquals(904, len(excluded_ids))
+        self.assertEquals([i for i in range(16, 116)], excluded_ids[:100])
 
 
 if __name__ == "__main__":

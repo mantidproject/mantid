@@ -808,6 +808,19 @@ def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> Grou
     return group_ws
 
 
+def _excluded_detector_ids(grouping_workspace: GroupingWorkspace) -> List[int]:
+    """
+    Finds the detector IDs which are not included in the grouping. These detector IDs will be in a group with a negative group ID.
+    @param grouping_workspace The GroupingWorkspace containing the detector grouping information.
+    @return A list of detector IDs which are excluded from the grouping.
+    """
+    excluded_ids = []
+    for group_id in grouping_workspace.getGroupIDs():
+        if group_id < 0:
+            excluded_ids.extend(grouping_workspace.getDetectorIDsOfGroup(int(group_id)))
+    return excluded_ids
+
+
 # -------------------------------------------------------------------------------
 
 
@@ -1046,10 +1059,7 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 
 
 def rebin_logarithmic(workspace, group_ws):
-    all_neg = []
-    for group_id in group_ws.getGroupIDs():
-        if group_id < 0:
-            all_neg.extend(group_ws.getDetectorIDsOfGroup(int(group_id)))
+    excluded_ids = _excluded_detector_ids(group_ws)
 
     min_value_overall = float("inf")
     max_value_overall = float("-inf")
@@ -1058,7 +1068,7 @@ def rebin_logarithmic(workspace, group_ws):
         if spec_info.isMasked(i) or not spec_info.hasDetectors(i):
             continue
         dets = workspace.getSpectrum(i).getDetectorIDs()
-        if dets[0] in all_neg:
+        if dets[0] in excluded_ids:
             continue
         data_x = workspace.readX(i)
         min_value = data_x[0]
