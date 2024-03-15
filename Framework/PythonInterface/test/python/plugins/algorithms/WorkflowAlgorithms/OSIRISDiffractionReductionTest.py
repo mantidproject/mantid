@@ -158,6 +158,75 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         }
         self._assert_valid_reduction_output(1, **alg_kwargs)
 
+    def test_reduction_with_individual_grouping(self):
+        """
+        Test when the GroupingMethod is Individual.
+        """
+        alg_kwargs = {
+            "Sample": ["OSI10203.raw"],
+            "CalFile": "osiris_041_RES10.cal",
+            "Vanadium": ["OSI10156.raw"],
+            "Container": ["OSI10241.raw"],
+            "ContainerScaleFactor": 0.5,
+            "SpectraMin": 3,
+            "SpectraMax": 361,
+            "GroupingMethod": "Individual",
+        }
+        self._assert_valid_reduction_output(359, **alg_kwargs)
+
+    def test_reduction_with_n_groups_that_has_a_remainder(self):
+        """
+        Test when the GroupingMethod is Groups and there is a remaining number of groups.
+        """
+        alg_kwargs = {
+            "Sample": ["OSI10203.raw"],
+            "CalFile": "osiris_041_RES10.cal",
+            "Vanadium": ["OSI10156.raw"],
+            "Container": ["OSI10241.raw"],
+            "ContainerScaleFactor": 0.5,
+            "SpectraMin": 3,
+            "SpectraMax": 361,
+            "GroupingMethod": "Groups",
+            "NGroups": 5,
+        }
+        # There are 6 spectra because the last spectra contains the remainder
+        self._assert_valid_reduction_output(6, **alg_kwargs)
+
+    def test_reduction_with_n_groups_and_there_is_no_remainder(self):
+        """
+        Test when the GroupingMethod is Groups and there is no remainder.
+        """
+        alg_kwargs = {
+            "Sample": ["OSI10203.raw"],
+            "CalFile": "osiris_041_RES10.cal",
+            "Vanadium": ["OSI10156.raw"],
+            "Container": ["OSI10241.raw"],
+            "ContainerScaleFactor": 0.5,
+            "SpectraMin": 12,
+            "SpectraMax": 361,
+            "GroupingMethod": "Groups",
+            "NGroups": 10,
+        }
+        # The number of spectra is equally divisible into 10 so there is no extra group.
+        self._assert_valid_reduction_output(10, **alg_kwargs)
+
+    def test_reduction_with_a_custom_grouping_string(self):
+        """
+        Test when the GroupingMethod is Custom.
+        """
+        alg_kwargs = {
+            "Sample": ["OSI10203.raw"],
+            "CalFile": "osiris_041_RES10.cal",
+            "Vanadium": ["OSI10156.raw"],
+            "Container": ["OSI10241.raw"],
+            "ContainerScaleFactor": 0.5,
+            "SpectraMin": 12,
+            "SpectraMax": 361,
+            "GroupingMethod": "Custom",
+            "GroupingString": "12-50,51-103,104+105,107:353",
+        }
+        self._assert_valid_reduction_output(250, **alg_kwargs)
+
     def test_mismatch_sample_container_d_ranges(self):
         """
         Test error handling when there is no overlap between the sample and container d-ranges

@@ -720,7 +720,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 group_ws=self._grouping_workspace,
                 group_string=self._grouping_string,
                 number_of_groups=self._number_of_groups,
-                spectra_range=[self._spec_min, self._spec_max],
+                spectra_range=[int(self._spec_min), int(self._spec_max)],
             )
 
             return CropWorkspace(
