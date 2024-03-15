@@ -18,6 +18,7 @@ except ImportError:
 import os
 import numpy as np
 from math import expm1, log
+from typing import List
 
 
 # -------------------------------------------------------------------------------
@@ -649,7 +650,15 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
+def group_spectra(
+    workspace: str | MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[float] = None,
+) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
@@ -672,7 +681,15 @@ def group_spectra(workspace, method, group_file=None, group_ws=None, group_strin
     )
 
 
-def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
+def group_spectra_of(
+    workspace: MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[int] = None,
+) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
