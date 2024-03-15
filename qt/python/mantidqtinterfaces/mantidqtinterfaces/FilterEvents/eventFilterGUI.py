@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
-import numpy
+import numpy as np
 
 from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget
 from qtpy.QtGui import QDoubleValidator, QDesktopServices, QPalette, QColor  # noqa
@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
 
         # Set up horizontal slide (integer) and string value
         self._leftSlideValue = 0
-        self._rightSlideValue = 99
+        self._rightSlideValue = 100
 
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
         for edit in self.doubleLineEdits.values():
             edit[0].setValidator(self.dvalidator)
             edit[0].editingFinished.connect(self.reformat)
+        self.populateLineEditsDefault()
 
         # Filter by time
         self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
@@ -208,6 +209,15 @@ class MainWindow(QMainWindow):
         callback = self.doubleLineEdits[self.sender().objectName()][1]
         if callback is not None:
             callback()
+
+    def populateLineEditsDefault(self):
+        ylim = self.ui.mainplot.get_ylim()
+        xlim = self.ui.mainplot.get_xlim()
+
+        self.ui.leStartTime.setText(f"{xlim[0]:.6f}")
+        self.ui.leStopTime.setText(f"{xlim[1]:.6f}")
+        self.ui.leMinimumValue.setText(f"{ylim[0]:.6f}")
+        self.ui.leMaximumValue.setText(f"{ylim[1]:.6f}")
 
     def computeMock(self):
         """Compute vecx and vecy as mocking"""
@@ -295,6 +305,8 @@ class MainWindow(QMainWindow):
 
         if resetT is True:
             newtime0 = xlim[0] + ileftvalue * (xlim[1] - xlim[0]) * 0.01
+            newtime0 = np.clip(newtime0, xlim[0], float(self.ui.leStopTime.text()))
+
         info_msg = "Corrected iLeftSlide = {} (vs. right = {})".format(ileftvalue, self._rightSlideValue)
         Logger("Filter_Events").information(info_msg)
 
@@ -375,6 +387,7 @@ class MainWindow(QMainWindow):
 
         if resetT:
             newtimef = xlim[0] + irightvalue * (xlim[1] - xlim[0]) * 0.01
+            newtimef = np.clip(newtimef, float(self.ui.leStartTime.text()), xlim[1])
 
         # Move the slide bar (right)
         self._rightSlideValue = irightvalue
@@ -450,13 +463,16 @@ class MainWindow(QMainWindow):
 
         # Set value if out of range
         resetL = True
-        if iminlogval >= self._upperSlideValue:
-            iminlogval = self._upperSlideValue - 1
+        if iminlogval < 0:
+            iminlogval = 0
+        elif iminlogval >= self._upperSlideValue:
+            iminlogval = self._upperSlideValue
         else:
             resetL = False
 
         if resetL:
             newminY = ylim[0] + iminlogval * (ylim[1] - ylim[0]) * 0.01
+            newminY = np.clip(newminY, ylim[0], float(self.ui.leMaximumValue.text()))
 
         # Move the vertical line
         lowerx = self.ui.mainplot.get_xlim()
@@ -533,16 +549,17 @@ class MainWindow(QMainWindow):
 
         # Set to default if out of range
         resetL = True
-        # if imaxlogval >= 100:
-        #     imaxlogval = 100
-        if imaxlogval < self._lowerSlideValue:
-            imaxlogval = self._lowerSlideValue + 1
+        if imaxlogval >= 100:
+            imaxlogval = 100
+        elif imaxlogval < self._lowerSlideValue:
+            imaxlogval = self._lowerSlideValue
         else:
             resetL = False
 
         # Set newmaxY if necessary
         if resetL is True:
             newmaxY = ylim[0] + imaxlogval * (ylim[1] - ylim[0]) * 0.01
+            newmaxY = np.clip(newmaxY, float(self.ui.leMinimumValue.text()), ylim[1])
 
         # Move the vertical line
         upperx = self.ui.mainplot.get_xlim()
@@ -620,10 +637,10 @@ class MainWindow(QMainWindow):
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
-        vectimes = numpy.append(vectimes, tf)
-        vecvalue = numpy.append(vecvalue, vecvalue[-1])
+        vectimes = np.append(vectimes, tf)
+        vecvalue = np.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = (vectimes - t0) / numpy.timedelta64(1, "s")
+        vecreltimes = (vectimes - t0) / np.timedelta64(1, "s")
 
         # Set to plot
         xlim = [vecreltimes.min(), vecreltimes.max()]
@@ -718,7 +735,7 @@ class MainWindow(QMainWindow):
         for p in plist:
             try:
                 times = p.times
-                if len(times) > 1 and numpy.isreal(p.value[0]):
+                if len(times) > 1 and np.isreal(p.value[0]):
                     self._sampleLogNames.append(p.name)
             # This is here for FloatArrayProperty. If a log value is of this type it does not have times
             except AttributeError:
@@ -1103,20 +1120,14 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit.clear()
 
         # Plot related
-        self.ui.leStartTime.clear()
-        self.ui.leStopTime.clear()
         self.ui.horizontalSlider.setValue(0)
         self.ui.horizontalSlider_2.setValue(100)
+        self.ui.verticalSlider_2.setValue(0)
+        self.ui.verticalSlider.setValue(100)
+        self.populateLineEditsDefault()
 
         self.ui.lineEdit_outwsname.clear()
         self.ui.lineEdit_title.clear()
-
-        # Filter by log value
-        self.ui.leMinimumValue.clear()
-        self.ui.leMaximumValue.clear()
-
-        self.ui.verticalSlider_2.setValue(0)
-        self.ui.verticalSlider.setValue(100)
 
         ylim = self.ui.mainplot.get_ylim()
         miny = ylim[0]
