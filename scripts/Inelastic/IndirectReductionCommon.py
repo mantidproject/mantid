@@ -18,7 +18,7 @@ except ImportError:
 import os
 import numpy as np
 from math import expm1, log
-from typing import List
+from typing import List, Tuple
 
 
 # -------------------------------------------------------------------------------
@@ -1058,31 +1058,35 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 # -------------------------------------------------------------------------------
 
 
-def rebin_logarithmic(workspace, group_ws):
-    excluded_ids = _excluded_detector_ids(group_ws)
+def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> Tuple[float]:
+    """
+    Finds the minimum and maximum X values for a workspace with varying bins. It will only search for the min
+    and max x values in spectra which are included in the grouping provided by the GroupingWorkspace.
+    @param workspace The workspace to search for the min and max X.
+    @param grouping_workspace The workspace containing detector grouping information.
+    @return A minimum and maximum X value.
+    """
+    excluded_ids = _excluded_detector_ids(grouping_workspace)
 
-    min_value_overall = float("inf")
-    max_value_overall = float("-inf")
+    min_value, max_value = float("inf"), float("-inf")
     spec_info = workspace.spectrumInfo()
     for i in range(workspace.getNumberHistograms()):
         if spec_info.isMasked(i) or not spec_info.hasDetectors(i):
             continue
-        dets = workspace.getSpectrum(i).getDetectorIDs()
-        if dets[0] in excluded_ids:
+        detector_ids = workspace.getSpectrum(i).getDetectorIDs()
+        if detector_ids[0] in excluded_ids:
             continue
-        data_x = workspace.readX(i)
-        min_value = data_x[0]
-        max_value = data_x[-1]
-        if min_value < min_value_overall:
-            min_value_overall = min_value
-        if max_value > max_value_overall:
-            max_value_overall = max_value
+        x = workspace.extractX()[i]
+        min_value = x.min() if x.min() < min_value else min_value
+        max_value = x.max() if x.max() > max_value else max_value
+    return min_value, max_value
 
-    print(min_value_overall)
-    print(max_value_overall)
-    step = expm1((log(max_value_overall) - log(min_value_overall)) / workspace.blocksize())
 
-    return Rebin(InputWorkspace=workspace, Params=[min_value_overall, step, max_value_overall], BinningMode="Logarithmic", StoreInADS=False)
+def rebin_logarithmic(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> MatrixWorkspace:
+    min_value, max_value = _get_x_range_when_bins_vary(workspace, grouping_workspace)
+    step = expm1((log(max_value) - log(min_value)) / workspace.blocksize())
+
+    return Rebin(InputWorkspace=workspace, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
 
 
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):

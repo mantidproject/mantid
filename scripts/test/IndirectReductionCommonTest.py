@@ -14,10 +14,16 @@ from IndirectReductionCommon import (
     create_grouping_workspace,
     create_range_string,
     _excluded_detector_ids,
+    _get_x_range_when_bins_vary,
 )
 
 
 class IndirectReductionCommonTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
+        cls._workspace = workspace
 
     def test_create_range_string_returns_expected_string(self):
         self.assertEqual("3-5", create_range_string(3, 5))
@@ -47,21 +53,26 @@ class IndirectReductionCommonTest(unittest.TestCase):
         self.assertEqual("7-9,10-12,13-15,16-18,19-21,22-24,25-27,28-32", create_detector_grouping_string(7, 7, 32))
 
     def test_create_grouping_workspace_will_create_a_workspace_with_the_expected_size(self):
-        workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
-
-        grouping_workspace = create_grouping_workspace(workspace, "osiris_041_RES10.cal")
+        grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         self.assertTrue(isinstance(grouping_workspace, GroupingWorkspace))
         self.assertEquals(1008, grouping_workspace.getNumberHistograms())
 
     def test_excluded_detector_ids_returns_the_expected_detector_ids(self):
-        workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
-        grouping_workspace = create_grouping_workspace(workspace, "osiris_041_RES10.cal")
+        grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         excluded_ids = _excluded_detector_ids(grouping_workspace)
 
         self.assertEquals(904, len(excluded_ids))
         self.assertEquals([i for i in range(16, 116)], excluded_ids[:100])
+
+    def test_get_x_range_when_bins_vary_returns_the_expected_min_and_max_x(self):
+        grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
+
+        x_min, x_max = _get_x_range_when_bins_vary(self._workspace, grouping_workspace)
+
+        self.assertEquals(50100.00, x_min)
+        self.assertEquals(70100.00, x_max)
 
 
 if __name__ == "__main__":
