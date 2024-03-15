@@ -15,6 +15,48 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+namespace IqtTypes {
+
+enum class ExponentialType {
+  None,
+  OneExponential,
+  TwoExponentials,
+};
+
+enum class StretchExpType { None, StretchExponential };
+
+enum class BackgroundType { None, Flat };
+
+enum class TieIntensitiesType { False, True };
+
+enum SubTypeIndex {
+  Exponential = 0,
+  StretchExponential = 1,
+  Background = 2,
+  TieIntensities = 3,
+};
+
+struct ExponentialSubType : public TemplateSubTypeImpl<ExponentialType> {
+  std::string name() const override { return "Exponentials"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(int); }
+};
+
+struct StretchExpSubType : public TemplateSubTypeImpl<StretchExpType> {
+  std::string name() const override { return "Stretch Exponential"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
+};
+
+struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
+  std::string name() const override { return "Background"; }
+};
+
+struct TieIntensitiesSubType : public TemplateSubTypeImpl<TieIntensitiesType> {
+  std::string name() const override { return "Tie Intensities"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
+};
+
+} // namespace IqtTypes
+
 namespace ConvTypes {
 
 enum class LorentzianType {

@@ -10,6 +10,36 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
+template <>
+std::map<IqtTypes::ExponentialType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<IqtTypes::ExponentialType>::g_typeMap{
+        {IqtTypes::ExponentialType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {IqtTypes::ExponentialType::OneExponential,
+         {"One Exponential", "ExpDecay", {ParamID::EXP1_HEIGHT, ParamID::EXP1_LIFETIME}}},
+        {IqtTypes::ExponentialType::TwoExponentials,
+         {"Two Exponentials", "ExpDecay", {ParamID::EXP2_HEIGHT, ParamID::EXP2_LIFETIME}}},
+    };
+
+template <>
+std::map<IqtTypes::StretchExpType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<IqtTypes::StretchExpType>::g_typeMap{
+    {IqtTypes::StretchExpType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {IqtTypes::StretchExpType::StretchExponential,
+     {"Stretch Exponential", "StretchExp", {ParamID::STRETCH_HEIGHT, ParamID::STRETCH_STRETCHING}}},
+};
+
+template <>
+std::map<IqtTypes::BackgroundType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<IqtTypes::BackgroundType>::g_typeMap{
+    {IqtTypes::BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {IqtTypes::BackgroundType::Flat, {"FlatBackground", "FlatBackground", {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
+};
+
+template <>
+std::map<IqtTypes::TieIntensitiesType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<IqtTypes::TieIntensitiesType>::g_typeMap{
+        {IqtTypes::TieIntensitiesType::False, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {IqtTypes::TieIntensitiesType::True, {"Tie Intensities", "", {ParamID::NONE, ParamID::NONE}}},
+    };
+
 namespace ConvTypes {
 
 std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
@@ -106,7 +136,7 @@ std::map<ConvTypes::DeltaType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<Co
 template <>
 std::map<ConvTypes::TempCorrectionType, TemplateSubTypeDescriptor>
     TemplateSubTypeImpl<ConvTypes::TempCorrectionType>::g_typeMap{
-        {ConvTypes::TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
+        {ConvTypes::TempCorrectionType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
         {ConvTypes::TempCorrectionType::Exponential,
          {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
     };
