@@ -363,8 +363,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Group spectra
                 grouped = group_spectra(
                     ws_name,
-                    method=self._grouping_method if self._cal_file == "" else "File",
-                    group_file=self._grouping_map_file if self._cal_file == "" else self._cal_file,
+                    method=self._grouping_method,
+                    group_file=self._grouping_map_file,
                     group_ws=self._grouping_workspace,
                     group_string=self._grouping_string,
                     number_of_groups=self._number_of_groups,

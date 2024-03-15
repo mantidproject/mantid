@@ -19,6 +19,8 @@ class ISISIndirectDiffractionReductionTest(MantidSystemTest):
             InputFiles=["OSI137793.RAW"],
             VanadiumFiles=["OSI137713.RAW"],
             CalFile="osiris_041_RES10.cal",
+            GroupingMethod="File",
+            MapFile="osiris_041_RES10.cal",
             Instrument="OSIRIS",
             Mode="diffspec",
             SpectraRange=[3, 962],
