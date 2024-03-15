@@ -28,6 +28,14 @@ import numpy as np
 # pylint: disable=too-few-public-methods
 
 
+def _str_or_none(string):
+    return string if string != "" else None
+
+
+def _ws_or_none(workspace_name):
+    return mtd[workspace_name] if workspace_name != "" else None
+
+
 class DRange(object):
     """
     A class to represent a dRange.
@@ -384,36 +392,6 @@ def delete_workspaces(workspace_names):
             DeleteWorkspace(workspace_name)
 
 
-def diffraction_calibrator(calibration_file):
-    """
-    Creates a diffraction calibrator, which takes a DRange and a workspace
-    and returns a calibrated workspace.
-
-    :param calibration_file:    The calibration file to use.
-    :return:                    A diffraction calibrator.
-    """
-
-    def calibrator(d_range, workspace):
-        normalised = NormaliseByCurrent(InputWorkspace=workspace, StoreInADS=False, EnableLogging=False)
-
-        calibrated = calibrate(normalised, calibration_file)
-
-        rebinned = rebin_logarithmic(calibrated, calibration_file)
-
-        grouped = group_spectra(rebinned, "File", calibration_file)
-
-        return CropWorkspace(
-            InputWorkspace=grouped,
-            XMin=d_range[0],
-            XMax=d_range[1],
-            OutputWorkspace="calibrated_sample",
-            StoreInADS=False,
-            EnableLogging=False,
-        )
-
-    return calibrator
-
-
 def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, load_opts):
     """
     Creates a loader which loads a supplied string containing the runs to load.
@@ -509,6 +487,29 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty("SpectraMax", 962, doc="Maximum Spectrum to Load from file (Must be less than 962)")
 
         self.declareProperty(
+            name="GroupingMethod",
+            defaultValue="All",
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            doc="The method used to group detectors.",
+        )
+        self.declareProperty(
+            WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="A workspace containing a detector grouping.",
+        )
+        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
+        self.declareProperty(
+            FileProperty("GroupingFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A file containing a detector grouping.",
+        )
+        self.declareProperty(
+            name="NGroups",
+            defaultValue=1,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of groups for grouping the detectors.",
+        )
+
+        self.declareProperty(
             MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
             doc="Name to give the output workspace. If no name is provided, " + "one will be generated based on the run numbers.",
         )
@@ -534,6 +535,12 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._spec_min = self.getPropertyValue("SpectraMin")
         self._spec_max = self.getPropertyValue("SpectraMax")
+
+        self._grouping_method = self.getPropertyValue("GroupingMethod")
+        self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
+        self._grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
+        self._number_of_groups = self.getProperty("NGroups").value
 
     def validateInputs(self):
         issues = dict()
@@ -577,7 +584,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         else:
             result_map = self._sam_ws_map
 
-        calibrator = diffraction_calibrator(self._cal)
+        calibrator = self._diffraction_calibrator()
 
         # Calibrate the Sample workspaces.
         result_map.transform(calibrator)
@@ -690,6 +697,42 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             output_ws.setE(i, result_e)
 
         self.setProperty("OutputWorkspace", output_ws)
+
+    def _diffraction_calibrator(self):
+        """
+        Creates a diffraction calibrator, which takes a DRange and a workspace
+        and returns a calibrated workspace.
+
+        :return: A diffraction calibrator.
+        """
+
+        def calibrator(d_range, workspace):
+            normalised = NormaliseByCurrent(InputWorkspace=workspace, StoreInADS=False, EnableLogging=False)
+
+            calibrated = calibrate(normalised, self._cal)
+
+            rebinned = rebin_logarithmic(calibrated, self._cal)
+
+            grouped = group_spectra(
+                rebinned,
+                method=self._grouping_method,
+                group_file=self._grouping_file,
+                group_ws=self._grouping_workspace,
+                group_string=self._grouping_string,
+                number_of_groups=self._number_of_groups,
+                spectra_range=[self._spec_min, self._spec_max],
+            )
+
+            return CropWorkspace(
+                InputWorkspace=grouped,
+                XMin=d_range[0],
+                XMax=d_range[1],
+                OutputWorkspace="calibrated_sample",
+                StoreInADS=False,
+                EnableLogging=False,
+            )
+
+        return calibrator
 
     def _extract_ws_spectra(self, ws_to_split, drange):
         """

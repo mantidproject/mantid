@@ -1079,6 +1079,10 @@ def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: 
         x = workspace.extractX()[i]
         min_value = x.min() if x.min() < min_value else min_value
         max_value = x.max() if x.max() > max_value else max_value
+
+    assert min_value > 0, "The minimum x value in a dSpacing workspace should be a positive number."
+    assert max_value == float("-inf") or max_value > 0, "The maximum x value in a dSpacing workspace should be a positive number."
+
     return min_value, max_value
 
 
@@ -1093,6 +1097,10 @@ def rebin_logarithmic(workspace: MatrixWorkspace, calibration_file: str) -> Matr
     grouping_workspace = create_grouping_workspace(workspace, calibration_file)
 
     min_value, max_value = _get_x_range_when_bins_vary(workspace, grouping_workspace)
+
+    if min_value == float("inf") or max_value == float("-inf"):
+        raise RuntimeError("No selected Detectors found in .cal file for input range.")
+
     step = expm1((log(max_value) - log(min_value)) / workspace.blocksize())
 
     return Rebin(InputWorkspace=workspace, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
