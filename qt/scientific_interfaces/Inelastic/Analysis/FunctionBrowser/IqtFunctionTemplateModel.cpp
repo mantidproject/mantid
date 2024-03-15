@@ -59,9 +59,17 @@ void IqtFunctionTemplateModel::clearData() {
   m_exponentialType = ExponentialType::None;
   m_stretchExpType = StretchExpType::None;
   m_backgroundType = BackgroundType::None;
-  m_tieIntensitiesType = TieIntensitiesType::False;
 
   m_model->clear();
+}
+
+void IqtFunctionTemplateModel::setModel() {
+  m_model->setFunctionString(buildFunctionString());
+  m_model->setGlobalParameters(makeGlobalList());
+
+  tieIntensities();
+
+  estimateFunctionParameters();
 }
 
 void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
@@ -177,9 +185,17 @@ void IqtFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInde
     throw std::logic_error("A matching IqtTypes::SubTypeIndex could not be found.");
   }
 
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
+}
+
+std::map<std::size_t, int> IqtFunctionTemplateModel::getSubTypes() const {
+  std::map<std::size_t, int> subTypes;
+  subTypes[IqtTypes::SubTypeIndex::Exponential] = static_cast<int>(m_exponentialType);
+  subTypes[IqtTypes::SubTypeIndex::StretchExponential] = static_cast<int>(m_stretchExpType);
+  subTypes[IqtTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
+  subTypes[IqtTypes::SubTypeIndex::TieIntensities] = static_cast<int>(m_tieIntensitiesType);
+  return subTypes;
 }
 
 void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
@@ -263,6 +279,19 @@ void IqtFunctionTemplateModel::setResolution(const std::vector<std::pair<std::st
 }
 
 void IqtFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+
+void IqtFunctionTemplateModel::tieIntensities() {
+  auto heightName = getParameterName(ParamID::STRETCH_HEIGHT);
+  if (!heightName)
+    heightName = getParameterName(ParamID::EXP1_HEIGHT);
+  auto const a0Name = getParameterName(ParamID::FLAT_BG_A0);
+  if (!heightName || !a0Name)
+    return;
+  auto const tie = m_tieIntensitiesType == TieIntensitiesType::True ? "1-" + *a0Name : "";
+  for (auto i = 0; i < getNumberDomains(); ++i) {
+    setLocalParameterTie(*heightName, i, tie);
+  }
+}
 
 std::optional<std::string> IqtFunctionTemplateModel::getPrefix(ParamID name) const {
   if (name <= ParamID::EXP1_LIFETIME) {

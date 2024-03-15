@@ -33,7 +33,7 @@ public:
   void addFunction(std::string const &prefix, std::string const &funStr) override;
 
   void setSubType(std::size_t, int) override;
-  std::map<std::size_t, int> getSubTypes() const override { throw std::logic_error("Not implemented yet"); };
+  std::map<std::size_t, int> getSubTypes() const override;
   std::string setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void setQValues(const std::vector<double> &qValues) override;
@@ -52,6 +52,9 @@ private:
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
 
   void clearData();
+  void setModel();
+
+  void tieIntensities();
 
   std::optional<std::string> getExp1Prefix() const;
   std::optional<std::string> getExp2Prefix() const;

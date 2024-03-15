@@ -72,12 +72,12 @@ void MultiFunctionTemplateView::createFunctionParameterProperties() {
       auto const paramIDs = subType->getParameterIDs(index);
       auto const names = subType->getParameterNames(index);
       auto const descriptions = subType->getParameterDescriptions(index);
-      QList<QtProperty *> props;
+      std::vector<QtProperty *> props;
       for (auto i = 0u; i < names.size(); ++i) {
         auto prop = m_parameterManager->addProperty(QString::fromStdString(names[i]));
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);
-        props.append(prop);
+        props.emplace_back(prop);
         auto const id = paramIDs[i];
         m_parameterMap[prop] = id;
         m_parameterReverseMap[id] = prop;
@@ -125,7 +125,7 @@ void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeInd
   auto &subTypeParameters = m_subTypeParameters[subTypeIndex];
   for (auto &&prop : subTypeParameters[typeIndex]) {
     subTypeProp->addSubProperty(prop);
-    currentParameters.append(prop);
+    currentParameters.emplace_back(prop);
   }
   setProperty(subTypeIndex, typeIndex);
 }

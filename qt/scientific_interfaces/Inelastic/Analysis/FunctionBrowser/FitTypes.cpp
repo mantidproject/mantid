@@ -17,7 +17,7 @@ std::map<IqtTypes::ExponentialType, TemplateSubTypeDescriptor>
         {IqtTypes::ExponentialType::OneExponential,
          {"One Exponential", "ExpDecay", {ParamID::EXP1_HEIGHT, ParamID::EXP1_LIFETIME}}},
         {IqtTypes::ExponentialType::TwoExponentials,
-         {"Two Exponentials", "ExpDecay", {ParamID::EXP2_HEIGHT, ParamID::EXP2_LIFETIME}}},
+         {"Two Exponentials", "ExpDecay", {ParamID::EXP1_HEIGHT, ParamID::EXP2_LIFETIME}}},
     };
 
 template <>
@@ -114,7 +114,7 @@ std::map<ConvTypes::LorentzianType, TemplateSubTypeDescriptor>
         {ConvTypes::LorentzianType::OneLorentzian,
          {"One Lorentzian", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
         {ConvTypes::LorentzianType::TwoLorentzians,
-         {"Two Lorentzians", "Lorentzian", {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
+         {"Two Lorentzians", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR2_FWHM}}},
     };
 
 template <>
