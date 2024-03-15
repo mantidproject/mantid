@@ -56,9 +56,11 @@ IqtFunctionTemplateModel::IqtFunctionTemplateModel()
                                  std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
 void IqtFunctionTemplateModel::clearData() {
-  m_numberOfExponentials = 0;
-  m_hasStretchExponential = false;
-  m_background.clear();
+  m_exponentialType = ExponentialType::None;
+  m_stretchExpType = StretchExpType::None;
+  m_backgroundType = BackgroundType::None;
+  m_tieIntensitiesType = TieIntensitiesType::False;
+
   m_model->clear();
 }
 
@@ -69,11 +71,11 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   if (fun->nFunctions() == 0) {
     auto const name = fun->name();
     if (name == "ExpDecay") {
-      m_numberOfExponentials = 1;
+      m_exponentialType = ExponentialType::OneExponential;
     } else if (name == "StretchExp") {
-      m_hasStretchExponential = true;
+      m_stretchExpType = StretchExpType::StretchExponential;
     } else if (name == "FlatBackground") {
-      m_background = name;
+      m_backgroundType = BackgroundType::Flat;
     } else {
       throw std::runtime_error("Cannot set function " + name);
     }
@@ -90,24 +92,24 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
       if (areExponentialsSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      if (m_numberOfExponentials == 0) {
-        m_numberOfExponentials = 1;
+      if (m_exponentialType == ExponentialType::None) {
+        m_exponentialType = ExponentialType::OneExponential;
       } else {
-        m_numberOfExponentials = 2;
+        m_exponentialType = ExponentialType::TwoExponentials;
         areExponentialsSet = true;
       }
     } else if (name == "StretchExp") {
       if (isStretchSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_hasStretchExponential = true;
+      m_stretchExpType = StretchExpType::StretchExponential;
       areExponentialsSet = true;
       isStretchSet = true;
     } else if (name == "FlatBackground") {
       if (isBackgroundSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_background = name;
+      m_backgroundType = BackgroundType::Flat;
       areExponentialsSet = true;
       isStretchSet = true;
       isBackgroundSet = true;
@@ -126,10 +128,10 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
   auto const name = fun->name();
   std::string newPrefix;
   if (name == "ExpDecay") {
-    auto const ne = getNumberOfExponentials();
-    if (ne > 1)
+    if (numberOfExponentials() > 1)
       throw std::runtime_error("Cannot add more exponentials.");
-    setNumberOfExponentials(ne + 1);
+    m_exponentialType =
+        m_exponentialType == ExponentialType::None ? ExponentialType::OneExponential : ExponentialType::TwoExponentials;
     if (auto const exp2Prefix = getExp2Prefix()) {
       newPrefix = *exp2Prefix;
     } else {
@@ -138,12 +140,12 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
   } else if (name == "StretchExp") {
     if (hasStretchExponential())
       throw std::runtime_error("Cannot add more stretched exponentials.");
-    setStretchExponential(true);
+    m_stretchExpType = StretchExpType::StretchExponential;
     newPrefix = *getStretchPrefix();
   } else if (name == "FlatBackground") {
     if (hasBackground())
       throw std::runtime_error("Cannot add more backgrounds.");
-    setBackground(name);
+    m_backgroundType = BackgroundType::Flat;
     newPrefix = *getBackgroundPrefix();
   } else {
     throw std::runtime_error("Cannot add function " + name);
@@ -155,6 +157,31 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
   }
 }
 
+void IqtFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeIndex) {
+  auto oldValues = getCurrentValues();
+
+  switch (IqtTypes::SubTypeIndex(subTypeIndex)) {
+  case IqtTypes::SubTypeIndex::Exponential:
+    m_exponentialType = static_cast<IqtTypes::ExponentialType>(typeIndex);
+    break;
+  case IqtTypes::SubTypeIndex::StretchExponential:
+    m_stretchExpType = static_cast<IqtTypes::StretchExpType>(typeIndex);
+    break;
+  case IqtTypes::SubTypeIndex::Background:
+    m_backgroundType = static_cast<IqtTypes::BackgroundType>(typeIndex);
+    break;
+  case IqtTypes::SubTypeIndex::TieIntensities:
+    m_tieIntensitiesType = static_cast<IqtTypes::TieIntensitiesType>(typeIndex);
+    break;
+  default:
+    throw std::logic_error("A matching IqtTypes::SubTypeIndex could not be found.");
+  }
+
+  m_model->setFunctionString(buildFunctionString());
+  m_model->setGlobalParameters(makeGlobalList());
+  setCurrentValues(oldValues);
+}
+
 void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
   if (prefix.empty()) {
     clear();
@@ -162,17 +189,17 @@ void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
   }
   auto prefix1 = getExp1Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setNumberOfExponentials(0);
+    m_exponentialType = ExponentialType::None;
     return;
   }
   prefix1 = getExp2Prefix();
   if (prefix1 && *prefix1 == prefix) {
-    setNumberOfExponentials(1);
+    m_exponentialType = ExponentialType::OneExponential;
     return;
   }
   prefix1 = getStretchPrefix();
   if (prefix1 && *prefix1 == prefix) {
-    setStretchExponential(false);
+    m_stretchExpType = StretchExpType::None;
     return;
   }
   prefix1 = getBackgroundPrefix();
@@ -183,45 +210,21 @@ void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
   throw std::runtime_error("Function doesn't have member function with prefix " + prefix);
 }
 
-void IqtFunctionTemplateModel::setNumberOfExponentials(int n) {
-  auto oldValues = getCurrentValues();
-  m_numberOfExponentials = n;
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
-  setCurrentValues(oldValues);
-  estimateFunctionParameters();
-}
+int IqtFunctionTemplateModel::numberOfExponentials() const { return static_cast<int>(m_exponentialType); }
 
-int IqtFunctionTemplateModel::getNumberOfExponentials() const { return m_numberOfExponentials; }
+bool IqtFunctionTemplateModel::hasExponential() const { return m_exponentialType != ExponentialType::None; }
 
-void IqtFunctionTemplateModel::setStretchExponential(bool on) {
-  auto oldValues = getCurrentValues();
-  m_hasStretchExponential = on;
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
-  setCurrentValues(oldValues);
-  estimateFunctionParameters();
-}
-
-bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_hasStretchExponential; }
-
-void IqtFunctionTemplateModel::setBackground(std::string const &name) {
-  auto oldValues = getCurrentValues();
-  m_background = name;
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
-  setCurrentValues(oldValues);
-}
+bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_stretchExpType != StretchExpType::None; }
 
 void IqtFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();
-  m_background.clear();
+  m_backgroundType = BackgroundType::None;
   m_model->setFunctionString(buildFunctionString());
   m_model->setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
 }
 
-bool IqtFunctionTemplateModel::hasBackground() const { return !m_background.empty(); }
+bool IqtFunctionTemplateModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
 void IqtFunctionTemplateModel::tieIntensities(bool on) {
   auto heightName = getParameterName(ParamID::STRETCH_HEIGHT);
@@ -274,20 +277,20 @@ std::optional<std::string> IqtFunctionTemplateModel::getPrefix(ParamID name) con
 }
 
 void IqtFunctionTemplateModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
-  if (m_numberOfExponentials > 0) {
+  if (hasExponential()) {
     paramFun(ParamID::EXP1_HEIGHT);
     paramFun(ParamID::EXP1_LIFETIME);
   }
-  if (m_numberOfExponentials > 1) {
+  if (numberOfExponentials() > 1) {
     paramFun(ParamID::EXP2_HEIGHT);
     paramFun(ParamID::EXP2_LIFETIME);
   }
-  if (m_hasStretchExponential) {
+  if (hasStretchExponential()) {
     paramFun(ParamID::STRETCH_HEIGHT);
     paramFun(ParamID::STRETCH_LIFETIME);
     paramFun(ParamID::STRETCH_STRETCHING);
   }
-  if (!m_background.empty()) {
+  if (hasBackground()) {
     paramFun(ParamID::FLAT_BG_A0);
   }
 }
@@ -307,49 +310,49 @@ std::string IqtFunctionTemplateModel::buildBackgroundFunctionString() const {
 
 std::string IqtFunctionTemplateModel::buildFunctionString() const {
   QStringList functions;
-  if (m_numberOfExponentials > 0) {
+  if (hasExponential()) {
     functions << QString::fromStdString(buildExpDecayFunctionString());
   }
-  if (m_numberOfExponentials > 1) {
+  if (numberOfExponentials() > 1) {
     functions << QString::fromStdString(buildExpDecayFunctionString());
   }
-  if (m_hasStretchExponential) {
+  if (hasStretchExponential()) {
     functions << QString::fromStdString(buildStretchExpFunctionString());
   }
-  if (!m_background.empty()) {
+  if (hasBackground()) {
     functions << QString::fromStdString(buildBackgroundFunctionString());
   }
   return functions.join(";").toStdString();
 }
 
 std::optional<std::string> IqtFunctionTemplateModel::getExp1Prefix() const {
-  if (m_numberOfExponentials == 0)
+  if (!hasExponential())
     return std::optional<std::string>();
-  if (m_numberOfExponentials == 1 && !m_hasStretchExponential && m_background.empty())
+  if (numberOfExponentials() == 1 && !hasStretchExponential() && !hasBackground())
     return std::string("");
   return std::string("f0.");
 }
 
 std::optional<std::string> IqtFunctionTemplateModel::getExp2Prefix() const {
-  if (m_numberOfExponentials < 2)
+  if (numberOfExponentials() < 2)
     return std::optional<std::string>();
   return std::string("f1.");
 }
 
 std::optional<std::string> IqtFunctionTemplateModel::getStretchPrefix() const {
-  if (!m_hasStretchExponential)
+  if (!hasStretchExponential())
     return std::optional<std::string>();
-  if (m_numberOfExponentials == 0 && m_background.empty())
+  if (!hasExponential() && !hasBackground())
     return std::string("");
-  return "f" + std::to_string(m_numberOfExponentials) + ".";
+  return "f" + std::to_string(numberOfExponentials()) + ".";
 }
 
 std::optional<std::string> IqtFunctionTemplateModel::getBackgroundPrefix() const {
-  if (m_background.empty())
+  if (!hasBackground())
     return std::optional<std::string>();
-  if (m_numberOfExponentials == 0 && !m_hasStretchExponential)
+  if (!hasExponential() && !hasStretchExponential())
     return std::string("");
-  return "f" + std::to_string(m_numberOfExponentials + (m_hasStretchExponential ? 1 : 0)) + ".";
+  return "f" + std::to_string(numberOfExponentials() + (hasStretchExponential() ? 1 : 0)) + ".";
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

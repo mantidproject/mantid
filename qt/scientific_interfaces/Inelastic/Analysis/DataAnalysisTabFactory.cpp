@@ -15,8 +15,6 @@
 #include "FunctionBrowser/ConvFunctionTemplateModel.h"
 #include "FunctionBrowser/FqFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionTemplateModel.h"
-#include "FunctionBrowser/IqtFunctionTemplateView.h"
-#include "FunctionBrowser/IqtTemplatePresenter.h"
 #include "FunctionBrowser/MSDFunctionModel.h"
 #include "FunctionBrowser/MultiFunctionTemplatePresenter.h"
 #include "FunctionBrowser/MultiFunctionTemplateView.h"
