@@ -32,10 +32,6 @@ def _str_or_none(string):
     return string if string != "" else None
 
 
-def _ws_or_none(workspace_name):
-    return mtd[workspace_name] if workspace_name != "" else None
-
-
 class DRange(object):
     """
     A class to represent a dRange.
@@ -489,12 +485,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="All",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(["Individual", "All", "File", "IPF", "Custom", "Groups"]),
             doc="The method used to group detectors.",
-        )
-        self.declareProperty(
-            WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="A workspace containing a detector grouping.",
         )
         self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
         self.declareProperty(
@@ -537,7 +529,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._spec_max = self.getPropertyValue("SpectraMax")
 
         self._grouping_method = self.getPropertyValue("GroupingMethod")
-        self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
         self._grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
         self._number_of_groups = self.getProperty("NGroups").value
@@ -717,7 +708,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 rebinned,
                 method=self._grouping_method,
                 group_file=self._grouping_file,
-                group_ws=self._grouping_workspace,
                 group_string=self._grouping_string,
                 number_of_groups=self._number_of_groups,
                 spectra_range=[int(self._spec_min), int(self._spec_max)],
