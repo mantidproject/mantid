@@ -83,9 +83,6 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         fit_enabled_observer = GenericObserverWithArgPassing(self.set_sequential_serial_fit_enabled)
         self.fit_browser.fit_enabled_notifier.add_subscriber(fit_enabled_observer)
 
-        fit_enabled_find_peaks_convolve_observer = GenericObserverWithArgPassing(self.set_find_peaks_convolve_button_status)
-        self.fit_browser.fit_enabled_notifier.add_subscriber(fit_enabled_find_peaks_convolve_observer)
-
         self.vLayout_fitprop.addWidget(self.fit_browser)
         self.hide_fit_browser()
         self.hide_fit_progress_bar()
@@ -149,9 +146,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def set_slot_for_find_peaks_convolve(self, presenter_func):
         self.toolbar.sig_find_peaks_convolve.connect(presenter_func)
 
-    def add_subscriber_for_convolve_peak_added(self, presenter_func):
-        peak_added_observer = GenericObserver(presenter_func)
-        self.fit_browser.function_changed_notifier.add_subscriber(peak_added_observer)
+    def set_subscriber_for_function_changed(self, presenter_func):
+        func_changed_observer = GenericObserver(presenter_func)
+        self.fit_browser.function_changed_notifier.add_subscriber(func_changed_observer)
 
     def toggle_legend(self):
         self.update_legend(self.get_axes()[0])

@@ -84,15 +84,15 @@ class FittingPresenter(object):
             self.plot_widget.set_final_state_progress_bar(None, status="Failed, invalid fit.")
 
     def find_peaks_convolve_started(self):
-        self.plot_widget.set_progress_bar_zero()
+        self.plot_widget.set_progress_bar_to_in_progress()
         self.disable_view()
 
     def find_peaks_convolve_completed(self, is_success):
         if is_success:
             self.plot_widget.set_progress_bar_success(status="success")
-            self.enable_view()
         else:
             self.plot_widget.set_progress_bar_failed(status="failed")
+        self.enable_view()
 
     def disable_view(self, _=None, fit_all=False):
         self.data_widget.view.setEnabled(False)
