@@ -10,8 +10,6 @@ Filter Events Interface Testing
 
 - Download the `Usage Examples <https://www.mantidproject.org/installation/index#sample-data>`
 
-*Note: At the time of writing this test, there's an issue pending with data validation on this interface(#36073); if this issue hasn't been
-corrected yet, please remind the team about it, else update documentation and remove this note.*
 
 Filter Events
 --------------
@@ -26,13 +24,14 @@ Filter Events
 #. Click ``Load``. After a few seconds, plot should be updated with a graph of summed up Counts vs.Time.
 #. ``_Summed_..`` workspace should be generated on the ADS, as well as ``CNCS_7860_Event`` workspace.
 #. Clicking on the ``Refresh`` button should update the drop-down list with the name of the loaded workspace.
-#. Check Vertical Range Sliders work properly. You can't overlap the sliders or cross the sliders.
-#. Check Horizontal Range Sliders work properly. You can't overlap or cross the sliders.
+#. Check Vertical Range Sliders work properly. You can't cross the sliders.
+#. Check Horizontal Range Sliders work properly. You can't cross the sliders.
 #. Check that the Text Edits for ``Starting Time`` and ``Stopping Time`` work correctly:
 
-   - Position of vertical bars on the plot are updated appropiately when changing the numerical value of the edits and clicking ``Set``.
+   - Position of vertical bars on the plot are updated appropriately when changing the numerical value of the edits and clicking ``Set``.
    - Setting a value on ``Starting Time`` larger than the current value on ``Stopping Time`` is not allowed, and viceversa.
-   - Data Validation is working, you can't set non-numeric characters on the edits (except for `-` sign, see note).
+   - Data Validation is working, you can't set non-numeric characters on the edits.
+   - A red label with information is displayed on top of the plot whenever the input validation is wrong.
 
 #. Clicking anywhere on the plot raises a dialog with the `(x,y)` position clicked on the graph.
 #. On ``Output Name`` write `FilteredTemp`.
