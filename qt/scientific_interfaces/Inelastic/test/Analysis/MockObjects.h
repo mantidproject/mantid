@@ -12,14 +12,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Analysis/DataAnalysisTab.h"
+#include "Analysis/FitPropertyBrowser.h"
 #include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
-#include "Analysis/IIndirectFitDataView.h"
-#include "Analysis/IIndirectFitOutputOptionsModel.h"
-#include "Analysis/IIndirectFitOutputOptionsView.h"
-#include "Analysis/IIndirectFitPlotView.h"
-#include "Analysis/IndirectDataAnalysisTab.h"
-#include "Analysis/IndirectFitPropertyBrowser.h"
+#include "Analysis/IFitDataView.h"
+#include "Analysis/IFitOutputOptionsModel.h"
+#include "Analysis/IFitOutputOptionsView.h"
+#include "Analysis/IFitPlotView.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
 #include <string>

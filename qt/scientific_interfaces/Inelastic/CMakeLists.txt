@@ -3,9 +3,25 @@ set(SRC_FILES
     Analysis/ConvFitModel.cpp
     Analysis/ConvFitDataView.cpp
     Analysis/ConvFitDataPresenter.cpp
+    Analysis/DataAnalysis.cpp
+    Analysis/DataAnalysisTab.cpp
     Analysis/DataAnalysisTabFactory.cpp
-    Analysis/IndirectDataAnalysis.cpp
-    Analysis/IndirectDataAnalysisTab.cpp
+    Analysis/DockWidgetArea.cpp
+    Analysis/EditResultsDialog.cpp
+    Analysis/FitStatusWidget.cpp
+    Analysis/FitData.cpp
+    Analysis/FitDataModel.cpp
+    Analysis/FitDataPresenter.cpp
+    Analysis/FitDataView.cpp
+    Analysis/FitOutput.cpp
+    Analysis/FitOutputOptionsModel.cpp
+    Analysis/FitOutputOptionsPresenter.cpp
+    Analysis/FitOutputOptionsView.cpp
+    Analysis/FitPlotModel.cpp
+    Analysis/FitPlotPresenter.cpp
+    Analysis/FitPlotView.cpp
+    Analysis/FitPropertyBrowser.cpp
+    Analysis/FittingModel.cpp
     Analysis/FqFitAddWorkspaceDialog.cpp
     Analysis/FqFitDataPresenter.cpp
     Analysis/FqFitDataView.cpp
@@ -13,22 +29,6 @@ set(SRC_FILES
     Analysis/IqtFitModel.cpp
     Analysis/MSDFitModel.cpp
     Analysis/IDAFunctionParameterEstimation.cpp
-    Analysis/FitStatusWidget.cpp
-    Analysis/IndirectDockWidgetArea.cpp
-    Analysis/IndirectEditResultsDialog.cpp
-    Analysis/IndirectFitData.cpp
-    Analysis/IndirectFitDataModel.cpp
-    Analysis/IndirectFitDataPresenter.cpp
-    Analysis/IndirectFitDataView.cpp
-    Analysis/IndirectFitOutput.cpp
-    Analysis/IndirectFitOutputOptionsModel.cpp
-    Analysis/IndirectFitOutputOptionsPresenter.cpp
-    Analysis/IndirectFitOutputOptionsView.cpp
-    Analysis/IndirectFitPlotModel.cpp
-    Analysis/IndirectFitPlotPresenter.cpp
-    Analysis/IndirectFitPlotView.cpp
-    Analysis/IndirectFitPropertyBrowser.cpp
-    Analysis/IndirectFittingModel.cpp
     Analysis/FunctionBrowser/ConvFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/FitTypes.cpp
     Analysis/FunctionBrowser/FunctionTemplateView.cpp
@@ -90,17 +90,17 @@ set(SRC_FILES
 set(MOC_FILES
     Analysis/ConvFitAddWorkspaceDialog.h
     Analysis/ConvFitDataView.h
-    Analysis/IndirectDataAnalysis.h
-    Analysis/IndirectDataAnalysisTab.h
+    Analysis/DataAnalysis.h
+    Analysis/DataAnalysisTab.h
+    Analysis/DockWidgetArea.h
+    Analysis/EditResultsDialog.h
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
-    Analysis/IndirectDockWidgetArea.h
-    Analysis/IndirectEditResultsDialog.h
-    Analysis/IndirectFitDataView.h
-    Analysis/IndirectFitOutputOptionsView.h
-    Analysis/IndirectFitPlotView.h
-    Analysis/IndirectFitPropertyBrowser.h
+    Analysis/FitDataView.h
+    Analysis/FitOutputOptionsView.h
+    Analysis/FitPlotView.h
+    Analysis/FitPropertyBrowser.h
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
@@ -142,22 +142,22 @@ set(INC_FILES
     Analysis/MSDFitModel.h
     Analysis/ConvFitModel.h
     Analysis/FitTabConstants.h
-    Analysis/IIndirectFitDataModel.h
-    Analysis/IIndirectFitDataView.h
-    Analysis/IIndirectFitOutput.h
-    Analysis/IIndirectFitOutputOptionsModel.h
-    Analysis/IIndirectFitOutputOptionsView.h
-    Analysis/IIndirectFitPlotView.h
-    Analysis/IIndirectFittingModel.h
-    Analysis/IndirectFitData.h
-    Analysis/IndirectFitDataModel.h
-    Analysis/IndirectFitDataPresenter.h
-    Analysis/IndirectFitOutput.h
-    Analysis/IndirectFitOutputOptionsModel.h
-    Analysis/IndirectFitOutputOptionsPresenter.h
-    Analysis/IndirectFitPlotModel.h
-    Analysis/IndirectFitPlotPresenter.h
-    Analysis/IndirectFittingModel.h
+    Analysis/IFitDataModel.h
+    Analysis/IFitDataView.h
+    Analysis/IFitOutput.h
+    Analysis/IFitOutputOptionsModel.h
+    Analysis/IFitOutputOptionsView.h
+    Analysis/IFitPlotView.h
+    Analysis/IFittingModel.h
+    Analysis/FitData.h
+    Analysis/FitDataModel.h
+    Analysis/FitDataPresenter.h
+    Analysis/FitOutput.h
+    Analysis/FitOutputOptionsModel.h
+    Analysis/FitOutputOptionsPresenter.h
+    Analysis/FitPlotModel.h
+    Analysis/FitPlotPresenter.h
+    Analysis/FittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionTemplateModel.h
     Analysis/FunctionBrowser/FitTypes.h
@@ -199,13 +199,13 @@ set(INC_FILES
 set(UI_FILES
     Analysis/ConvFitAddWorkspaceDialog.ui
     Analysis/FqFitAddWorkspaceDialog.ui
-    Analysis/IndirectDataAnalysis.ui
-    Analysis/IndirectEditResultsDialog.ui
-    Analysis/IndirectFitDataView.ui
-    Analysis/IndirectFitPreviewPlot.ui
-    Analysis/IndirectFitOutputOptions.ui
-    Analysis/IndirectFitTab.ui
-    Analysis/IndirectSpectrumSelector.ui
+    Analysis/DataAnalysis.ui
+    Analysis/EditResultsDialog.ui
+    Analysis/FitDataView.ui
+    Analysis/FitPreviewPlot.ui
+    Analysis/FitOutputOptions.ui
+    Analysis/FitTab.ui
+    Analysis/SpectrumSelector.ui
     BayesFitting/BayesFitting.ui
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui

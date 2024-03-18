@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IndirectFitDataModel.h"
+#include "Analysis/FitDataModel.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"

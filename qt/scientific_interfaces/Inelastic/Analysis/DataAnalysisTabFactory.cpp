@@ -7,6 +7,8 @@
 #include "DataAnalysisTabFactory.h"
 
 #include "ConvFitDataPresenter.h"
+#include "DataAnalysisTab.h"
+#include "FitDataPresenter.h"
 #include "FitTabConstants.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
@@ -20,8 +22,6 @@
 #include "FunctionBrowser/MultiFunctionTemplateView.h"
 #include "FunctionBrowser/SingleFunctionTemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
-#include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataPresenter.h"
 #include "IqtFitModel.h"
 #include "MSDFitModel.h"
 

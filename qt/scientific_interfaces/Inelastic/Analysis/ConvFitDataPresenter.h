@@ -8,7 +8,7 @@
 
 #include "Analysis/ConvFitDataView.h"
 #include "ConvFitModel.h"
-#include "IndirectFitDataPresenter.h"
+#include "FitDataPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

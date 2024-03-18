@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FitDataPresenter.h"
+#include "FitPropertyBrowser.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataView.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
-#include "IndirectFitDataPresenter.h"
-#include "IndirectFitPropertyBrowser.h"
 
 namespace {
 struct FqFitParameters {
