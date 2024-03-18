@@ -90,9 +90,8 @@ void DataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
 }
 
 void DataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
-  auto model = std::make_unique<IndirectFitPlotModel>();
-  m_plotPresenter =
-      std::make_unique<IndirectFitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView, std::move(model));
+  auto model = std::make_unique<FitPlotModel>();
+  m_plotPresenter = std::make_unique<FitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView, std::move(model));
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
   if (xPlotBounds) {

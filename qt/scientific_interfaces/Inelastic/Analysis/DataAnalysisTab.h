@@ -139,7 +139,7 @@ protected:
   void setRunEnabled(bool enable);
   void setEditResultVisible(bool visible);
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
-  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   WorkspaceID m_activeWorkspaceID;

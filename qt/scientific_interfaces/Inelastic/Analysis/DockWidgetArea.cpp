@@ -19,7 +19,7 @@ DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
 
   QDockWidget *plotViewArea = new QDockWidget();
   plotViewArea->setWindowTitle("Mini plots");
-  m_fitPlotView = new IndirectFitPlotView();
+  m_fitPlotView = new FitPlotView();
   plotViewArea->setWidget(m_fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 

@@ -50,11 +50,11 @@ public:
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
 };
 
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockFitPlotView : public IFitPlotView {
 public:
-  virtual ~MockIndirectFitPlotView() = default;
+  virtual ~MockFitPlotView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));
 

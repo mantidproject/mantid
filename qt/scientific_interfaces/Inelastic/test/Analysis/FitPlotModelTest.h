@@ -70,16 +70,16 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 
 } // namespace
 
-class IndirectFitPlotModelTest : public CxxTest::TestSuite {
+class FitPlotModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitPlotModelTest *createSuite() { return new IndirectFitPlotModelTest(); }
+  static FitPlotModelTest *createSuite() { return new FitPlotModelTest(); }
 
-  static void destroySuite(IndirectFitPlotModelTest *suite) { delete suite; }
+  static void destroySuite(FitPlotModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<IndirectFitPlotModel>();
+    m_model = std::make_unique<FitPlotModel>();
     m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
     m_fitOutput = std::make_unique<FitOutput>();
@@ -280,7 +280,7 @@ public:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<IndirectFitPlotModel> m_model;
+  std::unique_ptr<FitPlotModel> m_model;
   std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<FitOutput> m_fitOutput;
   MultiDomainFunction_sptr m_activeFunction;

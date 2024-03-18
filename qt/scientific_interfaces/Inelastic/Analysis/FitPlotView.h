@@ -52,14 +52,14 @@ private:
   QIcon m_icon;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotView : public API::MantidWidget, public IIndirectFitPlotView {
+class MANTIDQT_INELASTIC_DLL FitPlotView : public API::MantidWidget, public IFitPlotView {
   Q_OBJECT
 
 public:
-  IndirectFitPlotView(QWidget *parent = nullptr);
-  virtual ~IndirectFitPlotView();
+  FitPlotView(QWidget *parent = nullptr);
+  virtual ~FitPlotView();
 
-  void subscribePresenter(IIndirectFitPlotPresenter *presenter) override;
+  void subscribePresenter(IFitPlotPresenter *presenter) override;
 
   void watchADS(bool watch) override;
 
@@ -158,7 +158,7 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;
-  IIndirectFitPlotPresenter *m_presenter;
+  IFitPlotPresenter *m_presenter;
 };
 
 } // namespace IDA

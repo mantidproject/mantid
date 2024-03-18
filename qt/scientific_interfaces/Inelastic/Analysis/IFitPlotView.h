@@ -15,11 +15,11 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class IIndirectFitPlotPresenter;
+class IFitPlotPresenter;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitPlotView {
+class MANTIDQT_INELASTIC_DLL IFitPlotView {
 public:
-  virtual void subscribePresenter(IIndirectFitPlotPresenter *presenter) = 0;
+  virtual void subscribePresenter(IFitPlotPresenter *presenter) = 0;
 
   virtual void watchADS(bool watch) = 0;
 

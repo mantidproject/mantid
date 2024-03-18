@@ -43,21 +43,21 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 }
 } // namespace
 
-class IndirectFitPlotPresenterTest : public CxxTest::TestSuite {
+class FitPlotPresenterTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitPlotPresenterTest *createSuite() { return new IndirectFitPlotPresenterTest(); }
+  static FitPlotPresenterTest *createSuite() { return new FitPlotPresenterTest(); }
 
-  static void destroySuite(IndirectFitPlotPresenterTest *suite) { delete suite; }
+  static void destroySuite(FitPlotPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    /// Note that the IndirectFitPlotModel could not be mocked as the
+    /// Note that the FitPlotModel could not be mocked as the
     /// Presenter takes an IndirectFittingModel. This means the
     /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
-    auto model = std::make_unique<IndirectFitPlotModel>();
-    m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
+    auto model = std::make_unique<FitPlotModel>();
+    m_view = std::make_unique<NiceMock<MockFitPlotView>>();
+    m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
@@ -363,8 +363,8 @@ public:
 
 private:
   std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
-  std::unique_ptr<NiceMock<MockIndirectFitPlotView>> m_view;
-  std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockFitPlotView>> m_view;
+  std::unique_ptr<FitPlotPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

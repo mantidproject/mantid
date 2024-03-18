@@ -23,10 +23,10 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotModel {
+class MANTIDQT_INELASTIC_DLL FitPlotModel {
 public:
-  IndirectFitPlotModel();
-  ~IndirectFitPlotModel();
+  FitPlotModel();
+  ~FitPlotModel();
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;

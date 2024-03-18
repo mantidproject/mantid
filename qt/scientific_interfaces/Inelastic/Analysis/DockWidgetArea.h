@@ -16,7 +16,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class FitDataView;
-class IndirectFitPlotView;
+class FitPlotView;
 
 class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
   Q_OBJECT
@@ -27,7 +27,7 @@ public:
   void setFitDataView(FitDataView *fitDataView);
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   FitDataView *m_fitDataView;
-  IndirectFitPlotView *m_fitPlotView;
+  FitPlotView *m_fitPlotView;
 };
 
 } // namespace IDA

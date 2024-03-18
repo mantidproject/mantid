@@ -16,9 +16,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class IDataAnalysisTab;
-class IIndirectFitPlotView;
+class IFitPlotView;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitPlotPresenter {
+class MANTIDQT_INELASTIC_DLL IFitPlotPresenter {
 public:
   virtual void handleSelectedFitDataChanged(WorkspaceID workspaceID) = 0;
   virtual void handlePlotSpectrumChanged(WorkspaceIndex spectrum) = 0;
@@ -36,11 +36,10 @@ public:
   virtual void handleBackgroundChanged(double value) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter final : public IIndirectFitPlotPresenter {
+class MANTIDQT_INELASTIC_DLL FitPlotPresenter final : public IFitPlotPresenter {
 
 public:
-  IndirectFitPlotPresenter(IDataAnalysisTab *tab, IIndirectFitPlotView *view,
-                           std::unique_ptr<IndirectFitPlotModel> model);
+  FitPlotPresenter(IDataAnalysisTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model);
 
   void watchADS(bool watch);
 
@@ -106,8 +105,8 @@ private:
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
   IDataAnalysisTab *m_tab;
-  IIndirectFitPlotView *m_view;
-  std::unique_ptr<IndirectFitPlotModel> m_model;
+  IFitPlotView *m_view;
+  std::unique_ptr<FitPlotModel> m_model;
 
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
