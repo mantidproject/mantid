@@ -200,20 +200,23 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_25">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QLabel" name="labelFeedback">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Preferred</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+          <property name="minimumSize">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>250</width>
+            <height>0</height>
            </size>
           </property>
-         </spacer>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -286,23 +289,26 @@
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <spacer name="horizontalSpacer_2">
+         <spacer name="horizontalSpacer_10">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>27</width>
+            <height>27</height>
            </size>
           </property>
          </spacer>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -314,7 +320,7 @@
          <widget class="QLineEdit" name="leStartTime"/>
         </item>
         <item>
-         <spacer name="horizontalSpacer_9">
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -335,6 +341,19 @@
         </item>
         <item>
          <widget class="QLineEdit" name="leStopTime"/>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_9">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -405,7 +424,7 @@
                <x>0</x>
                <y>0</y>
                <width>674</width>
-               <height>285</height>
+               <height>288</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_5">
@@ -941,7 +960,7 @@
                <x>0</x>
                <y>0</y>
                <width>674</width>
-               <height>285</height>
+               <height>288</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_6">
