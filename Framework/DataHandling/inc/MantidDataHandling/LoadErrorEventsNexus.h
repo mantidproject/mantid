@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadErrorEventsNexus : TODO: DESCRIPTION
+/** LoadErrorEventsNexus : Load events from bank_error_events
  */
 class MANTID_DATAHANDLING_DLL LoadErrorEventsNexus : public API::Algorithm {
 public:
@@ -20,6 +20,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus"}; }
 
 private:
   void init() override;

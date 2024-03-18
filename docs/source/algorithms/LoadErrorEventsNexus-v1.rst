@@ -10,7 +10,7 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Load the events from the ``bank_error_events`` entry in the NeXus file. All events will be loaded, regardless of detector ID, into a single event spectrum.
 
 
 Usage
@@ -24,21 +24,14 @@ Usage
 
 .. testcode:: LoadErrorEventsNexusExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = LoadErrorEventsNexus()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+   ws = LoadErrorEventsNexus("REF_L_183110.nxs.h5")
+   print(f"The output workspace has {ws.getNumberEvents()} events in {ws.getNumberHistograms()} spectra")
 
 Output:
 
 .. testoutput:: LoadErrorEventsNexusExample
 
-  The output workspace has ?? spectra
+  The output workspace has 82980 events in 1 spectra
 
 .. categories::
 

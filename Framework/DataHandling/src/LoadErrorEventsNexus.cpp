@@ -34,10 +34,10 @@ const std::string LoadErrorEventsNexus::name() const { return "LoadErrorEventsNe
 int LoadErrorEventsNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadErrorEventsNexus::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string LoadErrorEventsNexus::category() const { return "DataHandling\\Nexus"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadErrorEventsNexus::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string LoadErrorEventsNexus::summary() const { return "Load error events from NeXus file"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -60,6 +60,11 @@ void LoadErrorEventsNexus::exec() {
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
 
+  const Kernel::NexusHDF5Descriptor descriptor(filename);
+
+  if (!descriptor.isEntry("/entry/bank_error_events"))
+    throw std::runtime_error("entry bank_error_events does not exist");
+
   // load logs
   int nPeriods = 1;
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
@@ -67,8 +72,6 @@ void LoadErrorEventsNexus::exec() {
 
   if (nPeriods != 1)
     g_log.warning("This algorithm does not correctly handle period data");
-
-  const Kernel::NexusHDF5Descriptor descriptor(filename);
 
   // Load the instrument
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, outWS, "entry", this, &descriptor);
@@ -79,9 +82,6 @@ void LoadErrorEventsNexus::exec() {
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
-
-  if (!descriptor.isEntry("/entry/bank_error_events"))
-    throw std::runtime_error("entry bank_error_events does not exist");
 
   // load the data
   ::NeXus::File file(filename);
@@ -137,7 +137,8 @@ void LoadErrorEventsNexus::exec() {
     }
   }
 
-  g_log.information() << "TOF min = " << min_tof << ", max = " << max_tof << "\n";
+  g_log.information() << "Loaded " << numEvents << " events with TOF min = " << min_tof << ", max = " << max_tof
+                      << "\n";
 
   eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
 
