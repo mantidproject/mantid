@@ -8,7 +8,7 @@
 import numpy as np
 
 from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget
-from qtpy.QtGui import QDoubleValidator, QDesktopServices, QPalette, QColor  # noqa
+from qtpy.QtGui import QDoubleValidator, QDesktopServices
 from qtpy.QtCore import QUrl, QLocale
 
 import mantid
@@ -217,12 +217,11 @@ class MainWindow(QMainWindow):
             self.ui.labelFeedback.setStyleSheet("color:green")
 
     def reformat_and_callback(self):
-        if self.dvalidator.validate(self.sender().text(), 0)[0] == QDoubleValidator.Acceptable:
-            self.sender().setText(f"{float(self.sender().text()):.6f}")
-            self.ui.labelFeedback.setText("")
-            callback = self.doubleLineEdits[self.sender().objectName()][1]
-            if callback is not None:
-                callback()
+        self.sender().setText(f"{float(self.sender().text()):.6f}")
+        self.ui.labelFeedback.setText("")
+        callback = self.doubleLineEdits[self.sender().objectName()][1]
+        if callback is not None:
+            callback()
 
     def populate_line_edits_default(self):
         ylim = self.ui.mainplot.get_ylim()
