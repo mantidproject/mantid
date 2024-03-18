@@ -119,7 +119,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         if all(empty_axes):
             self.window.emit_close()
         elif redraw:
-            self.canvas.draw()
+            self.canvas.draw_idle()
 
     @_catch_exceptions
     def replaceHandle(self, _, workspace):
@@ -137,7 +137,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 continue
             redraw = redraw | redraw_this
         if redraw:
-            self.canvas.draw()
+            self.canvas.draw_idle()
 
     @_catch_exceptions
     def renameHandle(self, oldName, newName):
@@ -161,7 +161,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             self.canvas.manager.set_window_title(
                 _replace_workspace_name_in_string(oldName, newName, self.canvas.manager.get_window_title())
             )
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
