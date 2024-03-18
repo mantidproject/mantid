@@ -49,7 +49,7 @@ public:
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
-  void setFittingData(std::vector<IndirectFitData> *fittingData);
+  void setFittingData(std::vector<FitData> *fittingData);
   void setFitOutput(IIndirectFitOutput *fitOutput);
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   void setFitSingleSpectrumIsFitting(bool fitting);

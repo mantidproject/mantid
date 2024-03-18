@@ -45,9 +45,9 @@ DataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
   tab->setupFittingModel<MSDFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
       MSDFit::HIDDEN_PROPS);
-  tab->setupFitDataView<IndirectFitDataView>();
+  tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter();
-  tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
+  tab->setUpFitDataPresenter<FitDataPresenter>();
   tab->setupPlotView();
   return tab;
 }
@@ -56,9 +56,9 @@ DataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
   auto tab = new DataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<IqtFitModel>();
   tab->setupFitPropertyBrowser<IqtFunctionTemplateView, IqtTemplatePresenter, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
-  tab->setupFitDataView<IndirectFitDataView>();
+  tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter(true);
-  tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
+  tab->setUpFitDataPresenter<FitDataPresenter>();
   tab->setupPlotView();
   return tab;
 }

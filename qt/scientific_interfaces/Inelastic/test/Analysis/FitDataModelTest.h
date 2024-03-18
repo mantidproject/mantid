@@ -12,7 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitConversion.h"
 #include <cxxtest/TestSuite.h>
@@ -27,17 +27,17 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
 
-class IndirectFitDataModelTest : public CxxTest::TestSuite {
+class FitDataModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitDataModelTest *createSuite() { return new IndirectFitDataModelTest(); }
+  static FitDataModelTest *createSuite() { return new FitDataModelTest(); }
 
-  static void destroySuite(IndirectFitDataModelTest *suite) { delete suite; }
+  static void destroySuite(FitDataModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_fitData = std::make_unique<IndirectFitDataModel>();
-    auto resolutionWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    auto dataWorkspace1 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    auto dataWorkspace2 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
+    m_fitData = std::make_unique<FitDataModel>();
+    auto resolutionWorkspace = Mantid::FitDataCreationHelper::createWorkspace(4, 5);
+    auto dataWorkspace1 = Mantid::FitDataCreationHelper::createWorkspace(4, 5);
+    auto dataWorkspace2 = Mantid::FitDataCreationHelper::createWorkspace(4, 5);
     ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
     ads_instance.addOrReplace("data workspace 1", std::move(dataWorkspace1));
     ads_instance.addOrReplace("data workspace 2", std::move(dataWorkspace2));
@@ -88,7 +88,7 @@ public:
 
   void test_getNumberOfWorkspaces_returns_correct_number_of_workspaces() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 2);
-    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
+    auto dataWorkspace = Mantid::FitDataCreationHelper::createWorkspace(4, 5);
     ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
     m_fitData->addWorkspace("data workspace 3", FunctionModelSpectra("0"));
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 3);
@@ -96,7 +96,7 @@ public:
 
   void test_getNumberOfSpectra_returns_correct_number_of_spectra() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{0}), 4);
-    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(5, 5);
+    auto dataWorkspace = Mantid::FitDataCreationHelper::createWorkspace(5, 5);
     ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
     m_fitData->addWorkspace("data workspace 3", FunctionModelSpectra("0-4"));
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{2}), 5);
@@ -120,7 +120,7 @@ public:
   }
 
   void test_getQValuesForData_returns_correct_value() {
-    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspaceWithInelasticInstrument(4);
+    auto dataWorkspace = Mantid::FitDataCreationHelper::createWorkspaceWithInelasticInstrument(4);
     ads_instance.addOrReplace("data workspace Inelastic", dataWorkspace);
     m_fitData->addWorkspace("data workspace Inelastic", FunctionModelSpectra("0"));
     auto spectrumInfo = dataWorkspace->spectrumInfo();
@@ -206,5 +206,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IIndirectFitDataModel> m_fitData;
+  std::unique_ptr<IFitDataModel> m_fitData;
 };

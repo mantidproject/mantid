@@ -14,11 +14,11 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {

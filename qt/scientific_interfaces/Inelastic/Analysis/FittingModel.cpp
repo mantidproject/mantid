@@ -119,7 +119,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const Ma
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
 }
 
-void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IIndirectFitDataModel *fittingData) {
+void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IFitDataModel *fittingData) {
   for (auto index = FitDomainIndex{0}; index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix = index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(fitAlgorithm, fittingData->getWorkspace(index), fittingData->getSpectrum(index),
@@ -182,7 +182,7 @@ std::ostringstream &addInputString(const std::string &workspaceName, size_t work
     throw std::runtime_error("Workspace name is empty. The sample workspace may not be loaded.");
 }
 
-std::string constructInputString(const IIndirectFitDataModel *fittingData) {
+std::string constructInputString(const IFitDataModel *fittingData) {
   std::ostringstream input;
   for (auto index = FitDomainIndex{0}; index < fittingData->getNumberOfDomains(); index++) {
     addInputString(fittingData->getWorkspace(index)->getName(), fittingData->getSpectrum(index), input);
@@ -286,10 +286,10 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_fitDataModel(std::make_unique<IndirectFitDataModel>()), m_previousModelSelected(false),
+    : m_fitDataModel(std::make_unique<FitDataModel>()), m_previousModelSelected(false),
       m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutput>()) {}
 
-// Functions that interact with IndirectFitDataModel
+// Functions that interact with FitDataModel
 
 void IndirectFittingModel::addDefaultParameters() {
   m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
@@ -578,6 +578,6 @@ void IndirectFittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAl
   cleanTemporaries(base + "_0");
 }
 
-IIndirectFitDataModel *IndirectFittingModel::getFitDataModel() { return m_fitDataModel.get(); }
+IFitDataModel *IndirectFittingModel::getFitDataModel() { return m_fitDataModel.get(); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectFitDataView;
+class FitDataView;
 class IndirectFitPlotView;
 
 class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
@@ -24,9 +24,9 @@ class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
 public:
   DockWidgetArea(QWidget *parent = nullptr);
   virtual ~DockWidgetArea(){};
-  void setFitDataView(IndirectFitDataView *fitDataView);
+  void setFitDataView(FitDataView *fitDataView);
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
-  IndirectFitDataView *m_fitDataView;
+  FitDataView *m_fitDataView;
   IndirectFitPlotView *m_fitPlotView;
 };
 

@@ -171,7 +171,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
+FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
     : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
   setSpectra(spectra);
   auto const range = !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
@@ -180,7 +180,7 @@ IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace, const Fu
   }
 }
 
-std::string IndirectFitData::displayName(const std::string &formatString, const std::string &) const {
+std::string FitData::displayName(const std::string &formatString, const std::string &) const {
   const auto workspaceName = getBasename();
   const auto spectraString = m_spectra.getString();
 
@@ -193,7 +193,7 @@ std::string IndirectFitData::displayName(const std::string &formatString, const 
   return name;
 }
 
-std::string IndirectFitData::displayName(const std::string &formatString, WorkspaceIndex spectrum) const {
+std::string FitData::displayName(const std::string &formatString, WorkspaceIndex spectrum) const {
   const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
@@ -202,25 +202,25 @@ std::string IndirectFitData::displayName(const std::string &formatString, Worksp
   return formatted.str();
 }
 
-std::string IndirectFitData::getBasename() const { return cutLastOf(workspace()->getName(), "_red"); }
+std::string FitData::getBasename() const { return cutLastOf(workspace()->getName(), "_red"); }
 
-Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const { return m_workspace; }
+Mantid::API::MatrixWorkspace_sptr FitData::workspace() const { return m_workspace; }
 
-const FunctionModelSpectra &IndirectFitData::spectra() const { return m_spectra; }
+const FunctionModelSpectra &FitData::spectra() const { return m_spectra; }
 
-FunctionModelSpectra &IndirectFitData::getMutableSpectra() { return m_spectra; }
+FunctionModelSpectra &FitData::getMutableSpectra() { return m_spectra; }
 
-WorkspaceIndex IndirectFitData::getSpectrum(FitDomainIndex index) const { return m_spectra[index]; }
+WorkspaceIndex FitData::getSpectrum(FitDomainIndex index) const { return m_spectra[index]; }
 
-FitDomainIndex IndirectFitData::numberOfSpectra() const { return m_spectra.size(); }
+FitDomainIndex FitData::numberOfSpectra() const { return m_spectra.size(); }
 
-bool IndirectFitData::zeroSpectra() const {
+bool FitData::zeroSpectra() const {
   if (m_workspace->getNumberHistograms())
     return m_spectra.empty();
   return true;
 }
 
-std::pair<double, double> IndirectFitData::getRange(WorkspaceIndex spectrum) const {
+std::pair<double, double> FitData::getRange(WorkspaceIndex spectrum) const {
   auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end()) {
     return range->second;
@@ -232,20 +232,20 @@ std::pair<double, double> IndirectFitData::getRange(WorkspaceIndex spectrum) con
   return getBinRange(m_workspace);
 }
 
-std::string IndirectFitData::getExcludeRegion(WorkspaceIndex spectrum) const {
+std::string FitData::getExcludeRegion(WorkspaceIndex spectrum) const {
   const auto region = m_excludeRegions.find(spectrum);
   if (region != m_excludeRegions.end())
     return region->second;
   return "";
 }
 
-std::vector<double> IndirectFitData::excludeRegionsVector(WorkspaceIndex spectrum) const {
+std::vector<double> FitData::excludeRegionsVector(WorkspaceIndex spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
 }
 
-std::vector<double> IndirectFitData::getQValues() const { return extractQValues(m_workspace, m_spectra); }
+std::vector<double> FitData::getQValues() const { return extractQValues(m_workspace, m_spectra); }
 
-void IndirectFitData::setSpectra(std::string const &spectra) {
+void FitData::setSpectra(std::string const &spectra) {
   try {
     const FunctionModelSpectra spec = FunctionModelSpectra(createSpectraString(spectra));
     setSpectra(spec);
@@ -254,17 +254,17 @@ void IndirectFitData::setSpectra(std::string const &spectra) {
   }
 }
 
-void IndirectFitData::setSpectra(FunctionModelSpectra &&spectra) {
+void FitData::setSpectra(FunctionModelSpectra &&spectra) {
   validateSpectra(spectra);
   m_spectra = std::move(spectra);
 }
 
-void IndirectFitData::setSpectra(FunctionModelSpectra const &spectra) {
+void FitData::setSpectra(FunctionModelSpectra const &spectra) {
   validateSpectra(spectra);
   m_spectra = spectra;
 }
 
-void IndirectFitData::validateSpectra(FunctionModelSpectra const &spectra) {
+void FitData::validateSpectra(FunctionModelSpectra const &spectra) {
   size_t maxValue = workspace()->getNumberHistograms() - 1;
   std::vector<size_t> notInRange;
   for (auto const &i : spectra) {
@@ -279,7 +279,7 @@ void IndirectFitData::validateSpectra(FunctionModelSpectra const &spectra) {
   }
 }
 
-void IndirectFitData::setStartX(double const &startX, WorkspaceIndex const &spectrum) {
+void FitData::setStartX(double const &startX, WorkspaceIndex const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end()) {
     if (range->second.second < startX) {
@@ -294,13 +294,13 @@ void IndirectFitData::setStartX(double const &startX, WorkspaceIndex const &spec
   }
 }
 
-void IndirectFitData::setStartX(double const &startX) {
+void FitData::setStartX(double const &startX) {
   for (auto const &spectrum : m_spectra) {
     setStartX(startX, spectrum);
   }
 }
 
-void IndirectFitData::setEndX(double const &endX, WorkspaceIndex const &spectrum) {
+void FitData::setEndX(double const &endX, WorkspaceIndex const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end()) {
     if (range->second.first > endX) {
@@ -315,20 +315,20 @@ void IndirectFitData::setEndX(double const &endX, WorkspaceIndex const &spectrum
   }
 }
 
-void IndirectFitData::setEndX(double const &endX) {
+void FitData::setEndX(double const &endX) {
   for (auto const &spectrum : m_spectra) {
     setEndX(endX, spectrum);
   }
 }
 
-void IndirectFitData::setExcludeRegionString(std::string const &excludeRegionString, WorkspaceIndex const &spectrum) {
+void FitData::setExcludeRegionString(std::string const &excludeRegionString, WorkspaceIndex const &spectrum) {
   if (!excludeRegionString.empty())
     m_excludeRegions[spectrum] = createExcludeRegionString(excludeRegionString);
   else
     m_excludeRegions[spectrum] = excludeRegionString;
 }
 
-IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
+FitData &FitData::combine(FitData const &fitData) {
   m_workspace = fitData.m_workspace;
   setSpectra(m_spectra.combine(fitData.m_spectra));
   m_excludeRegions.insert(std::begin(fitData.m_excludeRegions), std::end(fitData.m_excludeRegions));

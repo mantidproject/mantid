@@ -20,7 +20,7 @@ class FqFitAddWorkspaceDialog;
 /**
 Presenter for a table of convolution fitting data.
 */
-class MANTIDQT_INELASTIC_DLL FqFitDataView : public IndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL FqFitDataView : public FitDataView {
   Q_OBJECT
 public:
   FqFitDataView(QWidget *parent = nullptr);

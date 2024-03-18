@@ -198,8 +198,8 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
+FqFitDataPresenter::FqFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view)
+    : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
 
 void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {

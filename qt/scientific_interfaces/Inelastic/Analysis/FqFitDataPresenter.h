@@ -32,10 +32,10 @@ public:
   virtual void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter, public IFqFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public FitDataPresenter, public IFqFitDataPresenter {
 
 public:
-  FqFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  FqFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view);
   bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;

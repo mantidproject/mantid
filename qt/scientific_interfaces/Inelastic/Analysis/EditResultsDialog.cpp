@@ -8,7 +8,7 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent) : QDialog(parent) {
+EditResultsDialog::EditResultsDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.wsInputWorkspace->setLowerBinLimit(2);
   m_uiForm.wsSingleFitWorkspace->setUpperBinLimit(1);
@@ -18,33 +18,29 @@ IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent) : QDialog(
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-void IndirectEditResultsDialog::setWorkspaceSelectorSuffices(QStringList const &suffices) {
+void EditResultsDialog::setWorkspaceSelectorSuffices(QStringList const &suffices) {
   m_uiForm.wsInputWorkspace->setSuffixes(suffices);
   m_uiForm.wsSingleFitWorkspace->setSuffixes(suffices);
 }
 
-void IndirectEditResultsDialog::setOutputWorkspaceName() {
+void EditResultsDialog::setOutputWorkspaceName() {
   m_uiForm.leOutputWorkspace->setText(QString::fromStdString(getSelectedInputWorkspaceName()));
 }
 
-std::string IndirectEditResultsDialog::getSelectedInputWorkspaceName() const {
+std::string EditResultsDialog::getSelectedInputWorkspaceName() const {
   return m_uiForm.wsInputWorkspace->currentText().toStdString();
 }
 
-std::string IndirectEditResultsDialog::getSelectedSingleFitWorkspaceName() const {
+std::string EditResultsDialog::getSelectedSingleFitWorkspaceName() const {
   return m_uiForm.wsSingleFitWorkspace->currentText().toStdString();
 }
 
-std::string IndirectEditResultsDialog::getOutputWorkspaceName() const {
+std::string EditResultsDialog::getOutputWorkspaceName() const {
   return m_uiForm.leOutputWorkspace->text().toStdString();
 }
 
-void IndirectEditResultsDialog::setReplaceFitResultText(QString const &text) {
-  m_uiForm.pbReplaceFitResult->setText(text);
-}
+void EditResultsDialog::setReplaceFitResultText(QString const &text) { m_uiForm.pbReplaceFitResult->setText(text); }
 
-void IndirectEditResultsDialog::setReplaceFitResultEnabled(bool enable) {
-  m_uiForm.pbReplaceFitResult->setEnabled(enable);
-}
+void EditResultsDialog::setReplaceFitResultEnabled(bool enable) { m_uiForm.pbReplaceFitResult->setEnabled(enable); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

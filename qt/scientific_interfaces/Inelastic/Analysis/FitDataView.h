@@ -23,15 +23,15 @@ class IAddWorkspaceDialog;
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectFitDataPresenter;
+class IFitDataPresenter;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public QTabWidget, public IIndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL FitDataView : public QTabWidget, public IFitDataView {
   Q_OBJECT
 public:
-  IndirectFitDataView(QWidget *parent);
-  ~IndirectFitDataView() override = default;
+  FitDataView(QWidget *parent);
+  ~FitDataView() override = default;
 
-  void subscribePresenter(IIndirectFitDataPresenter *presenter) override;
+  void subscribePresenter(IFitDataPresenter *presenter) override;
 
   QTableWidget *getDataTable() const override;
   bool isTableEmpty() const override;
@@ -56,9 +56,9 @@ protected slots:
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 protected:
-  IndirectFitDataView(const QStringList &headers, QWidget *parent);
+  FitDataView(const QStringList &headers, QWidget *parent);
 
-  std::unique_ptr<Ui::IndirectFitDataView> m_uiForm;
+  std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
 
   QStringList m_wsSampleSuffixes;
@@ -66,7 +66,7 @@ protected:
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
 
-  IIndirectFitDataPresenter *m_presenter;
+  IFitDataPresenter *m_presenter;
 
 protected slots:
   virtual void showAddWorkspaceDialog();

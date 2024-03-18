@@ -18,7 +18,7 @@ using namespace MantidWidgets;
 
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IFitData - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
 class MANTIDQT_INELASTIC_DLL IIndirectFittingModel {
@@ -41,7 +41,7 @@ public:
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
 
-  // Functions that interact with IndirectFitDataModel
+  // Functions that interact with FitDataModel
   virtual void clearWorkspaces() = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
@@ -72,7 +72,7 @@ public:
   virtual void removeFittingData() = 0;
   virtual void addDefaultParameters() = 0;
   virtual void removeDefaultParameters() = 0;
-  virtual IIndirectFitDataModel *getFitDataModel() = 0;
+  virtual IFitDataModel *getFitDataModel() = 0;
 };
 
 } // namespace IDA

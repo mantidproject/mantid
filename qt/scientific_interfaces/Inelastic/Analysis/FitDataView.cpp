@@ -92,10 +92,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataView::IndirectFitDataView(QWidget *parent) : IndirectFitDataView(defaultHeaders(), parent) {}
+FitDataView::FitDataView(QWidget *parent) : FitDataView(defaultHeaders(), parent) {}
 
-IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *parent)
-    : QTabWidget(parent), m_uiForm(new Ui::IndirectFitDataView) {
+FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
+    : QTabWidget(parent), m_uiForm(new Ui::FitDataView) {
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);
@@ -106,11 +106,11 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
   connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
 }
 
-void IndirectFitDataView::subscribePresenter(IIndirectFitDataPresenter *presenter) { m_presenter = presenter; }
+void FitDataView::subscribePresenter(IFitDataPresenter *presenter) { m_presenter = presenter; }
 
-QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFitData; }
+QTableWidget *FitDataView::getDataTable() const { return m_uiForm->tbFitData; }
 
-void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
+void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->setColumnCount(headers.size());
   m_uiForm->tbFitData->setHorizontalHeaderLabels(headers);
   m_HeaderLabels = headers;
@@ -125,17 +125,17 @@ void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
-UserInputValidator &IndirectFitDataView::validate(UserInputValidator &validator) {
+UserInputValidator &FitDataView::validate(UserInputValidator &validator) {
   if (m_uiForm->tbFitData->rowCount() == 0)
     validator.addErrorMessage("No input data has been provided.");
   return validator;
 }
 
-void IndirectFitDataView::displayWarning(const std::string &warning) {
+void FitDataView::displayWarning(const std::string &warning) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(warning));
 }
 
-void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void FitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   m_uiForm->tbFitData->insertRow(static_cast<int>(row));
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.name));
@@ -158,45 +158,45 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   setCell(std::move(cell), row, getColumnIndexFromName("Mask X Range"));
 }
 
-void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
+void FitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
   QTableWidgetItem *selectedItem;
   selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
   selectedItem->setText(InterfaceUtils::makeQStringNumber(numEntry, NUMERICAL_PRECISION));
 }
 
-bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
+bool FitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::getColumnIndexFromName(std::string const &ColName) {
+int FitDataView::getColumnIndexFromName(std::string const &ColName) {
   return m_HeaderLabels.indexOf(QString::fromStdString(ColName));
 }
 
-void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
+void FitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 
-void IndirectFitDataView::setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column) {
+void FitDataView::setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column) {
   m_uiForm->tbFitData->setItem(static_cast<int>(row), static_cast<int>(column), cell.release());
 }
 
-bool IndirectFitDataView::dataColumnContainsText(std::string const &columnText) const {
+bool FitDataView::dataColumnContainsText(std::string const &columnText) const {
   return !m_uiForm->tbFitData->findItems(QString::fromStdString(columnText), Qt::MatchContains).isEmpty();
 }
 
-QString IndirectFitDataView::getText(int row, int column) const {
+QString FitDataView::getText(int row, int column) const {
   return m_uiForm->tbFitData->item(static_cast<int>(row), column)->text();
 }
 
-QModelIndexList IndirectFitDataView::getSelectedIndexes() const {
+QModelIndexList FitDataView::getSelectedIndexes() const {
   return m_uiForm->tbFitData->selectionModel()->selectedIndexes();
 }
 
-void IndirectFitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
+void FitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 
-void IndirectFitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
+void FitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
 
-void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
+void FitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
 
-void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
+void FitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
 
-void IndirectFitDataView::showAddWorkspaceDialog() {
+void FitDataView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
@@ -208,15 +208,13 @@ void IndirectFitDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
-void IndirectFitDataView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
-  m_presenter->handleAddData(dialog);
-}
+void FitDataView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) { m_presenter->handleAddData(dialog); }
 
-void IndirectFitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
+void FitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
 
-void IndirectFitDataView::notifyUnifyClicked() { m_presenter->handleUnifyClicked(); }
+void FitDataView::notifyUnifyClicked() { m_presenter->handleUnifyClicked(); }
 
-void IndirectFitDataView::notifyCellChanged(int row, int column) { m_presenter->handleCellChanged(row, column); }
+void FitDataView::notifyCellChanged(int row, int column) { m_presenter->handleCellChanged(row, column); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

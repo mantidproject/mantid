@@ -35,7 +35,7 @@ struct ResultLocationNew {
   WorkspaceID index = WorkspaceID{0};
 };
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IFitData - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
 class MANTIDQT_INELASTIC_DLL IIndirectFitOutput {

@@ -18,11 +18,11 @@
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -97,19 +97,19 @@ EstimationDataSelector getEstimationDataSelector() {
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectFitDataPresenterTest : public CxxTest::TestSuite {
+class FitDataPresenterTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitDataPresenterTest *createSuite() { return new IndirectFitDataPresenterTest(); }
+  static FitDataPresenterTest *createSuite() { return new FitDataPresenterTest(); }
 
-  static void destroySuite(IndirectFitDataPresenterTest *suite) { delete suite; }
+  static void destroySuite(FitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
+    m_presenter = std::make_unique<FitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
   }
@@ -246,8 +246,8 @@ private:
 
   std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
-  std::unique_ptr<IndirectFitDataPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
+  std::unique_ptr<FitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

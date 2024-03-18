@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class IIndirectFitOutputOptionsPresenter;
-class IndirectEditResultsDialog;
+class EditResultsDialog;
 
 class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsView final : public API::MantidWidget,
                                                                   public IIndirectFitOutputOptionsView {
@@ -66,7 +66,7 @@ private slots:
   void handleEditResultClicked();
 
 private:
-  IndirectEditResultsDialog *m_editResultsDialog;
+  EditResultsDialog *m_editResultsDialog;
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
   IIndirectFitOutputOptionsPresenter *m_presenter;
 };

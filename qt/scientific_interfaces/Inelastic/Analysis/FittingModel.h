@@ -45,7 +45,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  // Functions that interact with IndirectFitDataModel
+  // Functions that interact with FitDataModel
   void clearWorkspaces() override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
   WorkspaceID getNumberOfWorkspaces() const override;
@@ -92,7 +92,7 @@ public:
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
 
-  IIndirectFitDataModel *getFitDataModel() override;
+  IFitDataModel *getFitDataModel() override;
 
 protected:
   std::string createOutputName(const std::string &fitMode, const std::string &workspaceName,
@@ -103,7 +103,7 @@ protected:
   std::string m_fitType = "FitType";
   std::string m_fitString = "FitString";
 
-  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
+  std::unique_ptr<IFitDataModel> m_fitDataModel;
 
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);

@@ -180,11 +180,11 @@ public:
                void(std::string const &inputName, std::string const &singleBinName, std::string const &outputName));
 };
 
-class MockIndirectFitDataModel : public IIndirectFitDataModel {
+class MockFitDataModel : public IFitDataModel {
 public:
-  virtual ~MockIndirectFitDataModel() = default;
+  virtual ~MockFitDataModel() = default;
 
-  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
+  MOCK_METHOD0(getFittingData, std::vector<FitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
@@ -232,11 +232,11 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
-class MockFitDataView : public IIndirectFitDataView {
+class MockFitDataView : public IFitDataView {
 public:
   virtual ~MockFitDataView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitDataPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitDataPresenter *presenter));
 
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());

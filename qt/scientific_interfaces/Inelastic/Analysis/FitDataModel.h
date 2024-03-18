@@ -20,14 +20,14 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-   IndirectFitDataModel - Specifies an interface for updating, querying and
+   FitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
-class MANTIDQT_INELASTIC_DLL IndirectFitDataModel : public IIndirectFitDataModel {
+class MANTIDQT_INELASTIC_DLL FitDataModel : public IFitDataModel {
 public:
-  IndirectFitDataModel();
-  virtual ~IndirectFitDataModel() = default;
-  std::vector<IndirectFitData> *getFittingData() override;
+  FitDataModel();
+  virtual ~FitDataModel() = default;
+  std::vector<FitData> *getFittingData() override;
 
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
@@ -78,7 +78,7 @@ public:
 private:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
 
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
+  std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };

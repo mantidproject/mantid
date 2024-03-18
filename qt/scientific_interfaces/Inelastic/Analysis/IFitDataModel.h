@@ -19,17 +19,17 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-using IndirectFitDataCollectionType = IndexCollectionType<WorkspaceID, std::unique_ptr<IndirectFitData>>;
+using FitDataCollectionType = IndexCollectionType<WorkspaceID, std::unique_ptr<FitData>>;
 
 /*
-   IIndirectFitDataModel - Specifies an interface for updating, querying and
+   IFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitDataModel {
+class MANTIDQT_INELASTIC_DLL IFitDataModel {
 public:
-  virtual ~IIndirectFitDataModel() = default;
-  virtual std::vector<IndirectFitData> *getFittingData() = 0;
+  virtual ~IFitDataModel() = default;
+  virtual std::vector<FitData> *getFittingData() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;

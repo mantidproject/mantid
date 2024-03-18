@@ -15,11 +15,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectEditResultsDialog : public QDialog {
+class EditResultsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit IndirectEditResultsDialog(QWidget *parent);
+  explicit EditResultsDialog(QWidget *parent);
 
   void setWorkspaceSelectorSuffices(QStringList const &suffices);
 
@@ -37,7 +37,7 @@ private slots:
   void setOutputWorkspaceName();
 
 private:
-  Ui::IndirectEditResultsDialog m_uiForm;
+  Ui::EditResultsDialog m_uiForm;
 };
 
 } // namespace IDA

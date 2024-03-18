@@ -93,7 +93,7 @@ private:
 
   IElwinView *m_view;
   std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
-  std::unique_ptr<IndirectFitDataModel> m_dataModel;
+  std::unique_ptr<FitDataModel> m_dataModel;
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;

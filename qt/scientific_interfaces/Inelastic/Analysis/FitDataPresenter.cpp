@@ -14,20 +14,19 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitDataPresenter::IndirectFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model,
-                                                   IIndirectFitDataView *view)
+FitDataPresenter::FitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);
 }
 
-IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
+FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
 
-std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { return m_model->getFittingData(); }
+std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFittingData(); }
 
-IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
+IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
-bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+bool FitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
     return true;
@@ -35,67 +34,60 @@ bool IndirectFitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspa
   return false;
 }
 
-void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName,
-                                            const FunctionModelSpectra &workspaceIndices) {
+void FitDataPresenter::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices) {
   m_model->addWorkspace(workspaceName, workspaceIndices);
 }
 
-void IndirectFitDataPresenter::setResolution(const std::string &name) {
+void FitDataPresenter::setResolution(const std::string &name) {
   if (m_model->setResolution(name) == false) {
     m_model->removeSpecialValues(name);
     displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
   }
 }
 
-void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) {
-  m_view->setSampleWSSuffices(suffixes);
-}
+void FitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_view->setSampleWSSuffices(suffixes); }
 
-void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) {
-  m_view->setSampleFBSuffices(suffixes);
-}
+void FitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_view->setSampleFBSuffices(suffixes); }
 
-void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
+void FitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
   m_view->setResolutionWSSuffices(suffixes);
 }
 
-void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
+void FitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
   m_view->setResolutionFBSuffices(suffixes);
 }
 
-void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
+void FitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
   if (m_model->getNumberOfWorkspaces() > workspaceID) {
     m_model->setStartX(startX, workspaceID);
   }
 }
 
-void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void FitDataPresenter::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_model->getNumberOfWorkspaces() > workspaceID) {
     m_model->setStartX(startX, workspaceID, spectrum);
   }
 }
 
-void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID) {
+void FitDataPresenter::setEndX(double endX, WorkspaceID workspaceID) {
   if (m_model->getNumberOfWorkspaces() > workspaceID) {
     m_model->setEndX(endX, workspaceID);
   }
 }
 
-void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void FitDataPresenter::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_model->getNumberOfWorkspaces() > workspaceID) {
     m_model->setEndX(endX, workspaceID, spectrum);
   }
 }
 
-std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolutionsForFit() const {
+std::vector<std::pair<std::string, size_t>> FitDataPresenter::getResolutionsForFit() const {
   return m_model->getResolutionsForFit();
 }
 
-UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {
-  return m_view->validate(validator);
-}
+UserInputValidator &FitDataPresenter::validate(UserInputValidator &validator) { return m_view->validate(validator); }
 
-void IndirectFitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     m_tab->handleDataAdded(dialog);
     updateTableFromModel();
@@ -107,23 +99,23 @@ void IndirectFitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog 
   }
 }
 
-void IndirectFitDataPresenter::updateTableFromModel() {
+void FitDataPresenter::updateTableFromModel() {
   m_view->clearTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
   }
 }
 
-WorkspaceID IndirectFitDataPresenter::getNumberOfWorkspaces() const { return m_model->getNumberOfWorkspaces(); }
+WorkspaceID FitDataPresenter::getNumberOfWorkspaces() const { return m_model->getNumberOfWorkspaces(); }
 
-size_t IndirectFitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
+size_t FitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
 
-FunctionModelSpectra IndirectFitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
+FunctionModelSpectra FitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
   return m_model->getSpectra(workspaceID);
 }
 
 DataForParameterEstimationCollection
-IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
+FitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
   DataForParameterEstimationCollection dataCollection;
   for (auto i = WorkspaceID{0}; i < m_model->getNumberOfWorkspaces(); ++i) {
     auto const ws = m_model->getWorkspace(i);
@@ -137,11 +129,11 @@ IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSele
   return dataCollection;
 }
 
-std::vector<double> IndirectFitDataPresenter::getQValuesForData() const { return m_model->getQValuesForData(); }
+std::vector<double> FitDataPresenter::getQValuesForData() const { return m_model->getQValuesForData(); }
 
-void IndirectFitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }
+void FitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }
 
-void IndirectFitDataPresenter::addTableEntry(FitDomainIndex row) {
+void FitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
   const auto workspaceIndex = m_model->getSpectrum(row);
   const auto range = m_model->getFittingRange(row);
@@ -157,7 +149,7 @@ void IndirectFitDataPresenter::addTableEntry(FitDomainIndex row) {
   m_view->addTableEntry(row.value, newRow);
 }
 
-void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
+void FitDataPresenter::handleCellChanged(int row, int column) {
   if (m_view->getColumnIndexFromName("StartX") == column) {
     setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
   } else if (m_view->getColumnIndexFromName("EndX") == column) {
@@ -167,7 +159,7 @@ void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
   }
 }
 
-void IndirectFitDataPresenter::setTableStartXAndEmit(double X, int row, int column) {
+void FitDataPresenter::setTableStartXAndEmit(double X, int row, int column) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setStartX(X, subIndices.first, subIndices.second);
@@ -175,7 +167,7 @@ void IndirectFitDataPresenter::setTableStartXAndEmit(double X, int row, int colu
   m_tab->handleTableStartXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column) {
+void FitDataPresenter::setTableEndXAndEmit(double X, int row, int column) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setEndX(X, subIndices.first, subIndices.second);
@@ -183,21 +175,21 @@ void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column
   m_tab->handleTableEndXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
+void FitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setStartX(startX, subIndices.first, subIndices.second);
   m_tab->handleTableStartXChanged(startX, subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataPresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
+void FitDataPresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setEndX(endX, subIndices.first, subIndices.second);
   m_tab->handleTableEndXChanged(endX, subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
+void FitDataPresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
   m_model->setExcludeRegion(exclude, subIndices.first, subIndices.second);
 }
@@ -207,7 +199,7 @@ void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude
  * @param selectedIndices:: [input] the list of QModelIndex's
  * @returns map of unique (by row) QModelIndex's
  */
-std::map<int, QModelIndex> IndirectFitDataPresenter::getUniqueIndices(const QModelIndexList &selectedIndices) {
+std::map<int, QModelIndex> FitDataPresenter::getUniqueIndices(const QModelIndexList &selectedIndices) {
   // remove repeated rows
   std::map<int, QModelIndex> uniqueIndices;
   for (auto item : selectedIndices) {
@@ -219,7 +211,7 @@ std::map<int, QModelIndex> IndirectFitDataPresenter::getUniqueIndices(const QMod
 /**
  * Removes selected rows, with no repeats
  */
-void IndirectFitDataPresenter::handleRemoveClicked() {
+void FitDataPresenter::handleRemoveClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
@@ -234,7 +226,7 @@ void IndirectFitDataPresenter::handleRemoveClicked() {
   m_tab->handleDataChanged();
 }
 
-void IndirectFitDataPresenter::handleUnifyClicked() {
+void FitDataPresenter::handleUnifyClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
@@ -250,7 +242,7 @@ void IndirectFitDataPresenter::handleUnifyClicked() {
   updateTableFromModel();
 }
 
-std::vector<std::string> IndirectFitDataPresenter::createDisplayNames() const {
+std::vector<std::string> FitDataPresenter::createDisplayNames() const {
   std::vector<std::string> displayNames;
   for (auto i = WorkspaceID(0); i < m_model->getNumberOfWorkspaces(); i++) {
     displayNames.push_back(m_model->createDisplayName(i));

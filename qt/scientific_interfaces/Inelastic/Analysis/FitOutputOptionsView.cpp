@@ -117,7 +117,7 @@ void IndirectFitOutputOptionsView::setEditResultVisible(bool visible) {
 }
 
 void IndirectFitOutputOptionsView::handleEditResultClicked() {
-  m_editResultsDialog = new IndirectEditResultsDialog(this);
+  m_editResultsDialog = new EditResultsDialog(this);
   m_editResultsDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();

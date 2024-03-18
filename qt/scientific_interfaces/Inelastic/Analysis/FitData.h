@@ -25,13 +25,13 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-   IndirectFitData - Stores the data to be fit; workspace, spectra,
+   FitData - Stores the data to be fit; workspace, spectra,
    fitting range and exclude regions. Provides methods for accessing
    and applying the fitting data.
 */
-class MANTIDQT_INELASTIC_DLL IndirectFitData {
+class MANTIDQT_INELASTIC_DLL FitData {
 public:
-  IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
+  FitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
 
   std::string displayName(const std::string &formatString, const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString, WorkspaceIndex spectrum) const;
@@ -45,7 +45,7 @@ public:
   bool zeroSpectra() const;
   std::pair<double, double> getRange(WorkspaceIndex spectrum) const;
   std::string getExcludeRegion(WorkspaceIndex spectrum) const;
-  IndirectFitData &combine(IndirectFitData const &fitData);
+  FitData &combine(FitData const &fitData);
 
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
   std::vector<double> getQValues() const;

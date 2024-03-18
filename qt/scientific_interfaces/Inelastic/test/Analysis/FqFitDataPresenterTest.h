@@ -15,12 +15,12 @@
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateView.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -55,7 +55,7 @@ public:
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
 
@@ -132,7 +132,7 @@ private:
 
   std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
+  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
   std::unique_ptr<FqFitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

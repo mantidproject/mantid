@@ -36,32 +36,32 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitDataModel::IndirectFitDataModel()
-    : m_fittingData(std::make_unique<std::vector<IndirectFitData>>()),
+FitDataModel::FitDataModel()
+    : m_fittingData(std::make_unique<std::vector<FitData>>()),
       m_resolutions(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
-std::vector<IndirectFitData> *IndirectFitDataModel::getFittingData() { return m_fittingData.get(); }
+std::vector<FitData> *FitDataModel::getFittingData() { return m_fittingData.get(); }
 
-bool IndirectFitDataModel::hasWorkspace(std::string const &workspaceName) const {
+bool FitDataModel::hasWorkspace(std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();
   auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);
   return iter != names.cend();
 }
 
-Mantid::API::MatrixWorkspace_sptr IndirectFitDataModel::getWorkspace(WorkspaceID workspaceID) const {
+Mantid::API::MatrixWorkspace_sptr FitDataModel::getWorkspace(WorkspaceID workspaceID) const {
   if (workspaceID < m_fittingData->size())
     return m_fittingData->at(workspaceID.value).workspace();
   return nullptr;
 }
 
-FunctionModelSpectra IndirectFitDataModel::getSpectra(WorkspaceID workspaceID) const {
+FunctionModelSpectra FitDataModel::getSpectra(WorkspaceID workspaceID) const {
   if (workspaceID < m_fittingData->size())
     return m_fittingData->at(workspaceID.value).spectra();
   return FunctionModelSpectra("");
 }
 
-std::string IndirectFitDataModel::createDisplayName(WorkspaceID workspaceID) const {
+std::string FitDataModel::createDisplayName(WorkspaceID workspaceID) const {
   if (getNumberOfWorkspaces() > workspaceID)
     return getFitDataName(getWorkspaceNames()[workspaceID.value], getSpectra(workspaceID));
   else
@@ -69,9 +69,9 @@ std::string IndirectFitDataModel::createDisplayName(WorkspaceID workspaceID) con
                              "the workspace index provided is too large.");
 }
 
-WorkspaceID IndirectFitDataModel::getNumberOfWorkspaces() const { return WorkspaceID{m_fittingData->size()}; }
+WorkspaceID FitDataModel::getNumberOfWorkspaces() const { return WorkspaceID{m_fittingData->size()}; }
 
-size_t IndirectFitDataModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
+size_t FitDataModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
   if (workspaceID < m_fittingData->size())
     return m_fittingData->at(workspaceID.value).numberOfSpectra().value;
   else
@@ -79,7 +79,7 @@ size_t IndirectFitDataModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
                              "index provided is too large.");
 }
 
-size_t IndirectFitDataModel::getNumberOfDomains() const {
+size_t FitDataModel::getNumberOfDomains() const {
   size_t init(0);
   auto const numberOfSpectra = [](size_t sum, auto const &fittingData) {
     return sum + fittingData.numberOfSpectra().value;
@@ -87,7 +87,7 @@ size_t IndirectFitDataModel::getNumberOfDomains() const {
   return std::accumulate(m_fittingData->cbegin(), m_fittingData->cend(), init, numberOfSpectra);
 }
 
-std::vector<double> IndirectFitDataModel::getQValuesForData() const {
+std::vector<double> FitDataModel::getQValuesForData() const {
   std::vector<double> qValues;
   for (auto &fitData : *m_fittingData) {
     auto indexQValues = fitData.getQValues();
@@ -96,7 +96,7 @@ std::vector<double> IndirectFitDataModel::getQValuesForData() const {
   return qValues;
 }
 
-std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutionsForFit() const {
+std::vector<std::pair<std::string, size_t>> FitDataModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, size_t>> resolutionVector;
   for (size_t index = 0; index < m_resolutions->size(); ++index) {
     const auto resolutionWorkspace = m_resolutions->at(index).lock();
@@ -117,11 +117,11 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutions
   return resolutionVector;
 }
 
-bool IndirectFitDataModel::setResolution(const std::string &name) {
+bool FitDataModel::setResolution(const std::string &name) {
   return setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
 }
 
-bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+bool FitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
   bool hasValidValues = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
@@ -142,7 +142,7 @@ bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   return hasValidValues;
 }
 
-void IndirectFitDataModel::removeSpecialValues(const std::string &name) {
+void FitDataModel::removeSpecialValues(const std::string &name) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("ReplaceSpecialValues");
   alg->initialize();
   alg->setProperty("InputWorkspace", name);
@@ -152,23 +152,23 @@ void IndirectFitDataModel::removeSpecialValues(const std::string &name) {
   alg->execute();
 }
 
-void IndirectFitDataModel::setSpectra(const std::string &spectra, WorkspaceID workspaceID) {
+void FitDataModel::setSpectra(const std::string &spectra, WorkspaceID workspaceID) {
   setSpectra(FunctionModelSpectra(spectra), workspaceID);
 }
 
-void IndirectFitDataModel::setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) {
+void FitDataModel::setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setSpectra(std::forward<FunctionModelSpectra>(spectra));
 }
 
-void IndirectFitDataModel::setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) {
+void FitDataModel::setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setSpectra(spectra);
 }
 
-std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
+std::vector<std::string> FitDataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData->size());
   std::transform(m_fittingData->cbegin(), m_fittingData->cend(), std::back_inserter(names),
@@ -176,7 +176,7 @@ std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   return names;
 }
 
-void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
+void FitDataModel::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) {
   if (workspaceName.empty() || !m_adsInstance.doesExist(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
   if (spectra.empty())
@@ -186,12 +186,11 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName, const 
   addWorkspace(ws, spectra);
 }
 
-void IndirectFitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                        const FunctionModelSpectra &spectra) {
+void FitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
     for (auto &fitData : *m_fittingData) {
       if (equivalentWorkspaces(workspace, fitData.workspace())) {
-        fitData.combine(IndirectFitData(workspace, spectra));
+        fitData.combine(FitData(workspace, spectra));
         return;
       }
     }
@@ -199,12 +198,12 @@ void IndirectFitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr worksp
   addNewWorkspace(workspace, spectra);
 }
 
-void IndirectFitDataModel::addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                                           const FunctionModelSpectra &spectra) {
+void FitDataModel::addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                   const FunctionModelSpectra &spectra) {
   m_fittingData->emplace_back(workspace, spectra);
 }
 
-FitDomainIndex IndirectFitDataModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
+FitDomainIndex FitDataModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   FitDomainIndex index{0};
   for (size_t iws = 0; iws < m_fittingData->size(); ++iws) {
     if (iws < workspaceID.value) {
@@ -223,69 +222,67 @@ FitDomainIndex IndirectFitDataModel::getDomainIndex(WorkspaceID workspaceID, Wor
   return index;
 }
 
-void IndirectFitDataModel::clear() { m_fittingData->clear(); }
+void FitDataModel::clear() { m_fittingData->clear(); }
 
-std::pair<double, double> IndirectFitDataModel::getFittingRange(WorkspaceID workspaceID,
-                                                                WorkspaceIndex spectrum) const {
+std::pair<double, double> FitDataModel::getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   if (workspaceID.value < m_fittingData->size() && !m_fittingData->at(workspaceID.value).zeroSpectra()) {
     return m_fittingData->at(workspaceID.value).getRange(spectrum);
   }
   return std::make_pair(0., 0.);
 }
 
-std::string IndirectFitDataModel::getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
+std::string FitDataModel::getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   if (workspaceID.value < m_fittingData->size() && !m_fittingData->at(workspaceID.value).zeroSpectra()) {
     return m_fittingData->at(workspaceID.value).getExcludeRegion(spectrum);
   }
   return "";
 }
 
-void IndirectFitDataModel::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void FitDataModel::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setStartX(startX, spectrum);
 }
 
-void IndirectFitDataModel::setStartX(double startX, WorkspaceID workspaceID) {
+void FitDataModel::setStartX(double startX, WorkspaceID workspaceID) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setStartX(startX);
 }
 
-void IndirectFitDataModel::setStartX(double startX, FitDomainIndex fitDomainIndex) {
+void FitDataModel::setStartX(double startX, FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
   if (m_fittingData->empty())
     return;
   m_fittingData->at(subIndices.first.value).setStartX(startX, subIndices.second);
 }
 
-void IndirectFitDataModel::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void FitDataModel::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setEndX(endX, spectrum);
 }
 
-void IndirectFitDataModel::setEndX(double endX, WorkspaceID workspaceID) {
+void FitDataModel::setEndX(double endX, WorkspaceID workspaceID) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setEndX(endX);
 }
 
-void IndirectFitDataModel::setEndX(double endX, FitDomainIndex fitDomainIndex) {
+void FitDataModel::setEndX(double endX, FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
   if (m_fittingData->empty())
     return;
   m_fittingData->at(subIndices.first.value).setEndX(endX, subIndices.second);
 }
 
-void IndirectFitDataModel::setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID,
-                                            WorkspaceIndex spectrum) {
+void FitDataModel::setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setExcludeRegionString(exclude, spectrum);
 }
 
-void IndirectFitDataModel::removeWorkspace(WorkspaceID workspaceID) {
+void FitDataModel::removeWorkspace(WorkspaceID workspaceID) {
   if (workspaceID < m_fittingData->size()) {
     m_fittingData->erase(m_fittingData->begin() + workspaceID.value);
   } else {
@@ -293,7 +290,7 @@ void IndirectFitDataModel::removeWorkspace(WorkspaceID workspaceID) {
   }
 }
 
-void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
+void FitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
   auto &spectra = m_fittingData->at(subIndices.first.value).getMutableSpectra();
   spectra.erase(subIndices.second);
@@ -304,45 +301,44 @@ void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   }
 }
 
-std::vector<double> IndirectFitDataModel::getExcludeRegionVector(WorkspaceID workspaceID,
-                                                                 WorkspaceIndex spectrum) const {
+std::vector<double> FitDataModel::getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   auto fitData = m_fittingData->at(workspaceID.value);
   return fitData.excludeRegionsVector(spectrum);
 }
 
-Mantid::API::MatrixWorkspace_sptr IndirectFitDataModel::getWorkspace(FitDomainIndex index) const {
+Mantid::API::MatrixWorkspace_sptr FitDataModel::getWorkspace(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getWorkspace(subIndices.first);
 }
 
-std::pair<double, double> IndirectFitDataModel::getFittingRange(FitDomainIndex index) const {
+std::pair<double, double> FitDataModel::getFittingRange(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getFittingRange(subIndices.first, subIndices.second);
 }
 
-size_t IndirectFitDataModel::getSpectrum(FitDomainIndex index) const {
+size_t FitDataModel::getSpectrum(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return subIndices.second.value;
 }
 
-std::vector<double> IndirectFitDataModel::getExcludeRegionVector(FitDomainIndex index) const {
+std::vector<double> FitDataModel::getExcludeRegionVector(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getExcludeRegionVector(subIndices.first, subIndices.second);
 }
 
-std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
+std::string FitDataModel::getExcludeRegion(FitDomainIndex index) const {
   auto subIndices = getSubIndices(index);
   return getExcludeRegion(subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataModel::setExcludeRegion(const std::string &exclude, FitDomainIndex index) {
+void FitDataModel::setExcludeRegion(const std::string &exclude, FitDomainIndex index) {
   if (m_fittingData->empty())
     return;
   const auto subIndices = getSubIndices(index);
   m_fittingData->at(subIndices.first.value).setExcludeRegionString(exclude, subIndices.second);
 }
 
-std::pair<WorkspaceID, WorkspaceIndex> IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
+std::pair<WorkspaceID, WorkspaceIndex> FitDataModel::getSubIndices(FitDomainIndex index) const {
   size_t sum{0};
   for (size_t workspaceID = 0; workspaceID < m_fittingData->size(); workspaceID++) {
     for (size_t workspaceIndex = 0; workspaceIndex < m_fittingData->at(workspaceID).spectra().size().value;

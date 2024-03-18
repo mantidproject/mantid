@@ -19,7 +19,7 @@ namespace IDA {
 /**
 Presenter for a table of convolution fitting data.
 */
-class MANTIDQT_INELASTIC_DLL ConvFitDataView : public IndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL ConvFitDataView : public FitDataView {
   Q_OBJECT
 public:
   ConvFitDataView(QWidget *parent = nullptr);

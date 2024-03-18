@@ -22,7 +22,7 @@ namespace IDA {
 
 class IDataAnalysisTab;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL IFitDataPresenter {
 public:
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveClicked() = 0;
@@ -30,12 +30,11 @@ public:
   virtual void handleCellChanged(int row, int column) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public IIndirectFitDataPresenter,
-                                                        public AnalysisDataServiceObserver {
+class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
-  IndirectFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
-  ~IndirectFitDataPresenter();
-  std::vector<IndirectFitData> *getFittingData();
+  FitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view);
+  ~FitDataPresenter();
+  std::vector<FitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
@@ -84,13 +83,13 @@ public:
   void handleCellChanged(int row, int column) override;
 
 protected:
-  IIndirectFitDataView const *getView() const;
+  IFitDataView const *getView() const;
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
 
   IDataAnalysisTab *m_tab;
-  IIndirectFitDataModel *m_model;
-  IIndirectFitDataView *m_view;
+  IFitDataModel *m_model;
+  IFitDataView *m_view;
 
 private:
   void setModelStartXAndEmit(double startX, FitDomainIndex row);

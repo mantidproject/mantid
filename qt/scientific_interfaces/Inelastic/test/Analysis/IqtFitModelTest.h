@@ -15,10 +15,10 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
 class IqtFitModelTest : public CxxTest::TestSuite {

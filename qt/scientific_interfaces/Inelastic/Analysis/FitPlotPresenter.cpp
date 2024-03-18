@@ -74,7 +74,7 @@ void IndirectFitPlotPresenter::setXBounds(std::pair<double, double> const &bound
   m_view->setFitRangeBounds(bounds);
 }
 
-void IndirectFitPlotPresenter::setFittingData(std::vector<IndirectFitData> *fittingData) {
+void IndirectFitPlotPresenter::setFittingData(std::vector<FitData> *fittingData) {
   m_model->setFittingData(fittingData);
 }
 

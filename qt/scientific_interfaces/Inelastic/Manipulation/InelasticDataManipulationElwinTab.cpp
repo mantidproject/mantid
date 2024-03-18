@@ -85,7 +85,7 @@ using namespace IDA;
 InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent, IElwinView *view)
     : InelasticDataManipulationTab(parent), m_view(view),
       m_model(std::make_unique<InelasticDataManipulationElwinTabModel>()),
-      m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
+      m_dataModel(std::make_unique<FitDataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));

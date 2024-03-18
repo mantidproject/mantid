@@ -35,7 +35,7 @@ DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);
 }
 
-void DockWidgetArea::setFitDataView(IndirectFitDataView *fitDataView) {
+void DockWidgetArea::setFitDataView(FitDataView *fitDataView) {
   QDockWidget *dataViewArea = new QDockWidget();
   dataViewArea->setWindowTitle("Data Input");
   m_fitDataView = fitDataView;

@@ -11,9 +11,8 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-ConvFitDataPresenter::ConvFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model,
-                                           IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(tab, model, view) {}
+ConvFitDataPresenter::ConvFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view)
+    : FitDataPresenter(tab, model, view) {}
 
 bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {

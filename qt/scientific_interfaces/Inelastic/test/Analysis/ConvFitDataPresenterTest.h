@@ -13,12 +13,12 @@
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IFitDataView.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -43,7 +43,7 @@ public:
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 6);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
@@ -117,7 +117,7 @@ private:
 
   std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
+  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

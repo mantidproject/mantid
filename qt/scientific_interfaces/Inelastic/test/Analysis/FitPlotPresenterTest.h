@@ -17,11 +17,11 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 #include "MockObjects.h"
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -61,7 +61,7 @@ public:
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_fittingData = std::make_unique<std::vector<IndirectFitData>>();
+    m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
     m_fitOutput = std::make_unique<IndirectFitOutput>();
     m_presenter->setFittingData(m_fittingData.get());
@@ -368,6 +368,6 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
+  std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
 };

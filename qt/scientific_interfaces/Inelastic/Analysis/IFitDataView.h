@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectFitDataPresenter;
+class IFitDataPresenter;
 
 struct FitDataRow {
   std::string name;
@@ -28,10 +28,10 @@ struct FitDataRow {
   std::string parameter;
 };
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL IFitDataView {
 
 public:
-  virtual void subscribePresenter(IIndirectFitDataPresenter *presenter) = 0;
+  virtual void subscribePresenter(IFitDataPresenter *presenter) = 0;
 
   virtual QTableWidget *getDataTable() const = 0;
   virtual bool isTableEmpty() const = 0;

@@ -95,7 +95,7 @@ void IndirectFitPlotModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr 
   m_activeFunction = std::move(function);
 }
 
-void IndirectFitPlotModel::setFittingData(std::vector<IndirectFitData> *fittingData) { m_fittingData = fittingData; }
+void IndirectFitPlotModel::setFittingData(std::vector<FitData> *fittingData) { m_fittingData = fittingData; }
 
 void IndirectFitPlotModel::setFitOutput(IIndirectFitOutput *fitOutput) { m_fitOutput = fitOutput; }
 

@@ -16,12 +16,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace MantidQt::CustomInterfaces::IDA;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 
 namespace {
@@ -80,7 +80,7 @@ public:
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
     m_model = std::make_unique<IndirectFitPlotModel>();
-    m_fittingData = std::make_unique<std::vector<IndirectFitData>>();
+    m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
     m_fitOutput = std::make_unique<IndirectFitOutput>();
     m_model->setFittingData(m_fittingData.get());
@@ -281,7 +281,7 @@ public:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<IndirectFitPlotModel> m_model;
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
+  std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
   MultiDomainFunction_sptr m_activeFunction;
 };

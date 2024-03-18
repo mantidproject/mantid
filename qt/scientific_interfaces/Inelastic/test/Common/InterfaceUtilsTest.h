@@ -10,14 +10,14 @@
 #include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
 
 #include <QPair>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
-using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::FitDataCreationHelper;
 
 class InterfaceUtilsTest : public CxxTest::TestSuite {
 public:
