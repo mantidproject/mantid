@@ -17,6 +17,7 @@ from functools import wraps
 import matplotlib
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backends.backend_qt import FigureManagerQT
 from matplotlib.collections import PathCollection, LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
@@ -164,7 +165,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.canvas.draw()
 
 
-class FigureManagerWorkbench(FigureManagerBase, QObject):
+class FigureManagerWorkbench(FigureManagerQT, QObject):
     """
     Attributes
     ----------
