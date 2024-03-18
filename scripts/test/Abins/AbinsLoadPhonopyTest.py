@@ -33,7 +33,7 @@ class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
             _ = EuphonicLoader(input_ab_initio_filename=1)
 
     def test_with_hdf_fc(self):
-        self.check(name=self._hexane_phonopy, loader=EuphonicLoader, extension=".yaml")
+        self.check(name=self._hexane_phonopy, loader=EuphonicLoader, extension="yaml")
 
 
 if __name__ == "__main__":
