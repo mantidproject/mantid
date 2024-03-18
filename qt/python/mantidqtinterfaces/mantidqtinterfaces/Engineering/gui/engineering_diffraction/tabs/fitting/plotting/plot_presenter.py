@@ -67,6 +67,8 @@ class FittingPlotPresenter(object):
             self.view.remove_ws_from_fitbrowser(ws)
         self.view.update_figure()
         self.set_progress_bar_zero()
+        if len(self.model.get_plotted_workspaces()) == 0:
+            self.view.set_find_peaks_convolve_button_status(False)
 
     def clear_plot(self):
         for ax in self.view.get_axes():

@@ -10,6 +10,7 @@ from unittest import mock
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model, plot_view, plot_presenter
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
+from mantid.simpleapi import CreateEmptyTableWorkspace, GroupWorkspaces
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter"
 
@@ -168,6 +169,8 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.view.set_slot_for_fit_toggled.assert_called_once_with(self.presenter.fit_toggle)
         self.view.set_slot_for_serial_fit.assert_called_once_with(self.presenter.do_serial_fit)
         self.view.set_slot_for_seq_fit.assert_called_once_with(self.presenter.do_seq_fit)
+        self.view.set_slot_for_legend_toggled.assert_called_once()
+        self.view.set_slot_for_find_peaks_convolve.assert_called_once_with(self.presenter.run_find_peaks_convolve)
 
     def test_hide_toolbar_fit_toggle(self):
         self.view.is_fit_browser_visible.return_value = True
@@ -175,12 +178,14 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.view.hide_fit_browser.assert_called_once()
         self.view.hide_fit_progress_bar.assert_called_once()
         self.view.set_progress_bar.assert_called_once()
+        self.view.set_find_peaks_convolve_button_status.assert_called_once_with(False)
 
     def test_show_fail_toolbar_fit_toggle(self):
         self.view.is_fit_browser_visible.return_value = False
         self.presenter.fit_toggle()
         self.view.show_fit_browser.assert_called_once()
         self.view.show_fit_progress_bar.assert_not_called()
+        self.view.set_find_peaks_convolve_button_status.assert_not_called()
         self.view.set_progress_bar.assert_called_once()
 
     def test_show_success_toolbar_fit_toggle(self):
@@ -189,6 +194,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.fit_toggle()
         self.view.show_fit_browser.assert_called_once()
         self.view.show_fit_progress_bar.assert_called_once()
+        self.view.set_find_peaks_convolve_button_status.assert_called_once_with(True)
         self.view.set_progress_bar.assert_called_once()
 
     def set_browser_visible(self):
@@ -240,6 +246,81 @@ class FittingPlotPresenterTest(unittest.TestCase):
         error_message = "KeyboardInterrupt: There was an error in the fitting routine."
         self.presenter._on_worker_error(error_message)
         mock_logger.assert_not_called()
+
+    @mock.patch(dir_path + ".GenericObservable.notify_subscribers")
+    def test_handle_convolve_peaks_added_when_waiting(self, mock_notify):
+        self.presenter.is_waiting_convolve_peaks = True
+        self.presenter.handle_convolve_peaks_added()
+        mock_notify.assert_called_once_with(True)
+        self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)
+
+    @mock.patch(dir_path + ".GenericObservable.notify_subscribers")
+    def test_handle_convolve_peaks_added_when_not_waiting(self, mock_notify):
+        self.presenter.is_waiting_convolve_peaks = False
+        self.presenter.handle_convolve_peaks_added()
+        mock_notify.assert_not_called()
+        self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)
+
+    @mock.patch(dir_path + ".logger.error")
+    @mock.patch(dir_path + ".ADS.doesExist")
+    def test_run_find_peaks_convolve_non_existing_ws(self, mock_ads_exist, mock_error):
+        self.view = mock.MagicMock()
+        self.view.fit_browser.workspaceName.return_value = "non_existing_ws"
+        self.presenter.view = self.view
+        mock_ads_exist.return_value = False
+        self.presenter.find_peaks_convolve_started_notifier = mock.MagicMock()
+        self.presenter.find_peaks_convolve_done_notifier = mock.MagicMock()
+        self.presenter.run_find_peaks_convolve()
+        self.presenter.find_peaks_convolve_started_notifier.notify_subscribers.assert_called_once()
+        self.presenter.find_peaks_convolve_done_notifier.notify_subscribers.assert_called_once_with(False)
+        mock_error.assert_called()
+
+    def _get_sample_findpeaksconvolve_group_ws(self):
+        peak_centers = CreateEmptyTableWorkspace(OutputWorkspace="PeakCentre")
+        peak_centers.addColumn("int", "SpecIndex")
+        peak_centers.addColumn("double", "PeakCentre_0")
+        peak_centers.addRow([1, 0.09])
+
+        peak_y = CreateEmptyTableWorkspace(OutputWorkspace="PeakYPosition")
+        peak_y.addColumn("int", "SpecIndex")
+        peak_y.addColumn("double", "PeakYPosition_0")
+        peak_y.addRow([1, 798])
+
+        i_over_sigma = CreateEmptyTableWorkspace(OutputWorkspace="PeakIOverSigma")
+        i_over_sigma.addColumn("int", "SpecIndex")
+        i_over_sigma.addColumn("double", "PeakIOverSigma_0")
+        i_over_sigma.addRow([1, 12.5])
+        return GroupWorkspaces([peak_centers, peak_y, i_over_sigma], OutputWorkspace="test")
+
+    @mock.patch(dir_path + ".FunctionWrapper")
+    @mock.patch(dir_path + ".FunctionFactory")
+    @mock.patch(dir_path + ".FindPeaksConvolve")
+    @mock.patch(dir_path + ".logger.error")
+    @mock.patch(dir_path + ".ADS")
+    def test_run_find_peaks_convolve_existing_ws(self, mock_ads, mock_error, mock_find_peaks_convolve, mock_func_fac, mock_func_wrapper):
+        self.view = mock.MagicMock()
+        self.view.fit_browser.workspaceName.return_value = "ws_1"
+        self.presenter.view = self.view
+        mock_ads.doesExist.return_value = True
+        mock_ads.retrieve.return_value = mock.MagicMock()
+        mock_find_peaks_convolve.return_value = self._get_sample_findpeaksconvolve_group_ws()
+        self.presenter.find_peaks_convolve_started_notifier = mock.MagicMock()
+        self.presenter.find_peaks_convolve_done_notifier = mock.MagicMock()
+        self.view.fit_browser.defaultPeakType.return_value = "BackToBackExponential"
+        mock_peak_func = mock.MagicMock()
+        mock_func_fac.Instance().createPeakFunction.return_value = mock_peak_func
+
+        self.presenter.run_find_peaks_convolve()
+
+        self.presenter.find_peaks_convolve_started_notifier.notify_subscribers.assert_called_once()
+        mock_peak_func.setCentre.assert_called_once()
+        mock_peak_func.setHeight.assert_called_once()
+        mock_peak_func.setMatrixWorkspace.assert_called_once()
+        self.view.fit_browser.loadFunction.assert_called_once_with(str(mock_func_wrapper()))
+        self.presenter.handle_convolve_peaks_added()
+        self.presenter.find_peaks_convolve_done_notifier.notify_subscribers.assert_called_once_with(True)
+        mock_error.assert_not_called()
+        self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)
 
 
 if __name__ == "__main__":

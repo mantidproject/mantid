@@ -1,0 +1,1 @@
+- Added functionality to call FindPeaksConvolve algorithm with good default values for ENGIN-X from the fitproperty browser in the Engineering UI :ref:`Fitting tab <ui engineering fitting>`
