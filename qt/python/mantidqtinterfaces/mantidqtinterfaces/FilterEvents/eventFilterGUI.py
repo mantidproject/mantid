@@ -105,26 +105,6 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_load.clicked.connect(self.load_File)
         self.ui.pushButton_3.clicked.connect(self.use_existWS)
 
-        # Set up validators for numeric edits
-        self.dvalidator = QDoubleValidator()
-        locale = QLocale.c()
-        locale.setNumberOptions(QLocale.RejectGroupSeparator)
-        self.dvalidator.setLocale(locale)
-        self.doubleLineEdits = {
-            "leStartTime": (self.ui.leStartTime, self.set_startTime),
-            "leStopTime": (self.ui.leStopTime, self.set_stopTime),
-            "leMinimumValue": (self.ui.leMinimumValue, self.set_minLogValue),
-            "leMaximumValue": (self.ui.leMaximumValue, self.set_maxLogValue),
-            "leStepSize": (self.ui.leStepSize, None),
-            "leValueTolerance": (self.ui.leValueTolerance, None),
-            "leTimeTolerance": (self.ui.leTimeTolerance, None),
-            "leIncidentEnergy": (self.ui.leIncidentEnergy, None),
-        }
-        for edit in self.doubleLineEdits.values():
-            edit[0].setValidator(self.dvalidator)
-            edit[0].editingFinished.connect(self.reformat)
-        self.populateLineEditsDefault()
-
         # Filter by time
         self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
         self.ui.lineEdit_timeInterval.returnPressed.connect(self.filterByTime)
@@ -155,6 +135,29 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
         self.ui.verticalSlider_2.setTracking(True)
         self.ui.verticalSlider_2.valueChanged.connect(self.move_lowerSlider)
+
+        # Set up validators for numeric edits
+        self.ui.labelFeedback.setStyleSheet("color:green;")
+        self.dvalidator = QDoubleValidator()
+        locale = QLocale.c()
+        locale.setNumberOptions(QLocale.RejectGroupSeparator)
+        self.dvalidator.setLocale(locale)
+        self.dvalidator.setDecimals(6)
+        self.populate_line_edits_default()
+        self.doubleLineEdits = {
+            "leStartTime": (self.ui.leStartTime, self.set_startTime),
+            "leStopTime": (self.ui.leStopTime, self.set_stopTime),
+            "leMinimumValue": (self.ui.leMinimumValue, self.set_minLogValue),
+            "leMaximumValue": (self.ui.leMaximumValue, self.set_maxLogValue),
+            "leStepSize": (self.ui.leStepSize, None),
+            "leValueTolerance": (self.ui.leValueTolerance, None),
+            "leTimeTolerance": (self.ui.leTimeTolerance, None),
+            "leIncidentEnergy": (self.ui.leIncidentEnergy, None),
+        }
+        for edit in self.doubleLineEdits.values():
+            edit[0].setValidator(self.dvalidator)
+            edit[0].textChanged.connect(self.validation_feedback)
+            edit[0].editingFinished.connect(self.reformat_and_callback)
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
@@ -204,13 +207,24 @@ class MainWindow(QMainWindow):
             msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
             QMessageBox.information(self, "Click!", msg)
 
-    def reformat(self):
-        self.sender().setText(f"{float(self.sender().text()):.6f}")
-        callback = self.doubleLineEdits[self.sender().objectName()][1]
-        if callback is not None:
-            callback()
+    def validation_feedback(self):
+        input_txt = self.sender().text()
+        if self.dvalidator.validate(input_txt, 0)[0] != QDoubleValidator.Acceptable:
+            self.ui.labelFeedback.setText(f"Input value {input_txt} is not a valid number")
+            self.ui.labelFeedback.setStyleSheet("color:red")
+        else:
+            self.ui.labelFeedback.setText(f"Input value {input_txt} is valid")
+            self.ui.labelFeedback.setStyleSheet("color:green")
 
-    def populateLineEditsDefault(self):
+    def reformat_and_callback(self):
+        if self.dvalidator.validate(self.sender().text(), 0)[0] == QDoubleValidator.Acceptable:
+            self.sender().setText(f"{float(self.sender().text()):.6f}")
+            self.ui.labelFeedback.setText("")
+            callback = self.doubleLineEdits[self.sender().objectName()][1]
+            if callback is not None:
+                callback()
+
+    def populate_line_edits_default(self):
         ylim = self.ui.mainplot.get_ylim()
         xlim = self.ui.mainplot.get_xlim()
 
@@ -272,40 +286,17 @@ class MainWindow(QMainWindow):
 
     def set_startTime(self):
         """Set the starting time and left slide bar"""
-        inps = str(self.ui.leStartTime.text())
-        info_msg = "Starting time = %s" % (inps)
+        inps = float(self.ui.leStartTime.text())
+        info_msg = "Starting time = %s" % inps
         Logger("Filter_Events").information(info_msg)
 
         xlim = self.ui.mainplot.get_xlim()
-        if inps == "":
-            # Empty. Use default
-            newtime0 = xlim[0]
-        else:
-            newtime0 = float(inps)
-
+        # Set value to valid range
+        newtime0 = np.clip(inps, xlim[0], float(self.ui.leStopTime.text()))
         # Convert to integer slide value
-        ileftvalue = int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100)
+        ileftvalue = np.clip(int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100), 0, self._rightSlideValue)
         debug_msg = "iLeftSlide = %s" % str(ileftvalue)
         Logger("Filter_Events").debug(debug_msg)
-
-        # Skip if same as original
-        if ileftvalue == self._leftSlideValue:
-            return
-
-        # Set the value if out of range
-        resetT = True
-        if ileftvalue < 0:
-            # Minimum value as 0
-            ileftvalue = 0
-        elif ileftvalue > self._rightSlideValue:
-            # Maximum value as right slide value
-            ileftvalue = self._rightSlideValue
-        else:
-            resetT = False
-
-        if resetT is True:
-            newtime0 = xlim[0] + ileftvalue * (xlim[1] - xlim[0]) * 0.01
-            newtime0 = np.clip(newtime0, xlim[0], float(self.ui.leStopTime.text()))
 
         info_msg = "Corrected iLeftSlide = {} (vs. right = {})".format(ileftvalue, self._rightSlideValue)
         Logger("Filter_Events").information(info_msg)
@@ -322,7 +313,7 @@ class MainWindow(QMainWindow):
         # Set the value to left slider
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         # Reset the value of line edit
-        if resetT is True:
+        if newtime0 != inps:
             self.ui.leStartTime.setText(f"{newtime0:.6f}")
 
     def move_rightSlider(self):
@@ -357,37 +348,15 @@ class MainWindow(QMainWindow):
 
     def set_stopTime(self):
         """Set the stopping time and right slide bar"""
-        inps = str(self.ui.leStopTime.text())
+        inps = float(self.ui.leStopTime.text())
         Logger("Filter_Events").information("Stopping time = {}".format(inps))
 
         xlim = self.ui.mainplot.get_xlim()
-        if inps == "":
-            # Empty. Use default
-            newtimef = xlim[1]
-        else:
-            # Parse
-            newtimef = float(inps)
-
+        # Set value to valid range
+        newtimef = np.clip(inps, float(self.ui.leStartTime.text()), xlim[1])
         # Convert to integer slide value
-        irightvalue = int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100)
+        irightvalue = np.clip(int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100), self._leftSlideValue, 100)
         Logger("Filter_Events").information("iRightSlide = {}".format(irightvalue))
-
-        # Return if no change
-        if irightvalue == self._rightSlideValue:
-            return
-
-        # Correct value
-        resetT = True
-        if irightvalue > 100:
-            irightvalue = 100
-        elif irightvalue < self._leftSlideValue:
-            irightvalue = self._leftSlideValue
-        else:
-            resetT = False
-
-        if resetT:
-            newtimef = xlim[0] + irightvalue * (xlim[1] - xlim[0]) * 0.01
-            newtimef = np.clip(newtimef, float(self.ui.leStartTime.text()), xlim[1])
 
         # Move the slide bar (right)
         self._rightSlideValue = irightvalue
@@ -402,7 +371,7 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
 
         # Reset to line edit
-        if resetT:
+        if newtimef != inps:
             self.ui.leStopTime.setText(f"{newtimef:.6f}")
 
     def move_lowerSlider(self):
@@ -441,38 +410,16 @@ class MainWindow(QMainWindow):
 
     def set_minLogValue(self):
         """Set the starting time and left slide bar"""
+        inps = float(self.ui.leMinimumValue.text())
         debug_msg = "Minimum Log Value = {}".format(self.ui.leMinimumValue.text())
         Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
-
-        if str(self.ui.leMinimumValue.text()) == "":
-            # Empty. Default to minY
-            newminY = ylim[0]
-        else:
-            # Non empty.  Parse
-            newminY = float(self.ui.leMinimumValue.text())
-
+        # Set value to valid range
+        newminY = np.clip(inps, ylim[0], float(self.ui.leMaximumValue.text()))
         # Convert to integer slide value
-        iminlogval = int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
+        iminlogval = np.clip(int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100), 0, self._upperSlideValue)
         Logger("Filter_Events").debug("ilowerSlide = {}".format(iminlogval))
-
-        # Return if no change
-        if iminlogval == self._lowerSlideValue:
-            return
-
-        # Set value if out of range
-        resetL = True
-        if iminlogval < 0:
-            iminlogval = 0
-        elif iminlogval >= self._upperSlideValue:
-            iminlogval = self._upperSlideValue
-        else:
-            resetL = False
-
-        if resetL:
-            newminY = ylim[0] + iminlogval * (ylim[1] - ylim[0]) * 0.01
-            newminY = np.clip(newminY, ylim[0], float(self.ui.leMaximumValue.text()))
 
         # Move the vertical line
         lowerx = self.ui.mainplot.get_xlim()
@@ -487,7 +434,7 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
 
         # Reset line Edit if using default
-        if resetL is True:
+        if newminY != inps:
             self.ui.leMinimumValue.setText(f"{newminY:.6f}")
 
     def move_upperSlider(self):
@@ -526,40 +473,18 @@ class MainWindow(QMainWindow):
 
     def set_maxLogValue(self):
         """Set maximum log value from line-edit"""
-        inps = str(self.ui.leMaximumValue.text())
+        inps = float(self.ui.leMaximumValue.text())
         debug_msg = "Maximum Log Value = {}".format(inps)
         Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
-        if inps == "":
-            # Empty. Default to minY
-            newmaxY = ylim[1]
-        else:
-            # Parse
-            newmaxY = float(inps)
-
+        # Set value to valid range
+        newmaxY = np.clip(inps, float(self.ui.leMinimumValue.text()), ylim[1])
         # Convert to integer slide value
-        imaxlogval = int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
+        imaxlogval = np.clip(int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100), self._lowerSlideValue, 100)
+
         debug_msg = "iUpperSlide = {}".format(imaxlogval)
         Logger("Filter_Events").debug(debug_msg)
-
-        # Return if no change
-        if imaxlogval == self._upperSlideValue:
-            return
-
-        # Set to default if out of range
-        resetL = True
-        if imaxlogval >= 100:
-            imaxlogval = 100
-        elif imaxlogval < self._lowerSlideValue:
-            imaxlogval = self._lowerSlideValue
-        else:
-            resetL = False
-
-        # Set newmaxY if necessary
-        if resetL is True:
-            newmaxY = ylim[0] + imaxlogval * (ylim[1] - ylim[0]) * 0.01
-            newmaxY = np.clip(newmaxY, float(self.ui.leMinimumValue.text()), ylim[1])
 
         # Move the vertical line
         upperx = self.ui.mainplot.get_xlim()
@@ -572,7 +497,7 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider.setValue(self._upperSlideValue)
 
         # Set the value to editor if necessary
-        if resetL is True:
+        if newmaxY != inps:
             self.ui.leMaximumValue.setText(f"{newmaxY:.6f}")
 
     def browse_File(self):
@@ -643,6 +568,7 @@ class MainWindow(QMainWindow):
         vecreltimes = (vectimes - t0) / np.timedelta64(1, "s")
 
         # Set to plot
+        self.disconnect_signals()
         xlim = [vecreltimes.min(), vecreltimes.max()]
         ylim = [vecvalue.min(), vecvalue.max()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
@@ -665,12 +591,12 @@ class MainWindow(QMainWindow):
         setp(self.lowerslideline, xdata=xlim, ydata=[ylim[0], ylim[0]])
         self._lowerSlideValue = 0
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
-        self.ui.leMinimumValue.setText("")
 
         setp(self.upperslideline, xdata=xlim, ydata=[ylim[1], ylim[1]])
         self._upperSlideValue = 100
         self.ui.verticalSlider.setValue(self._upperSlideValue)
-        self.ui.leMaximumValue.setText("")
+        self.populate_line_edits_default()
+        self.connect_signals()
         self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
@@ -1114,20 +1040,31 @@ class MainWindow(QMainWindow):
             url = "http://docs.mantidproject.org/nightly/interfaces/{}.html" "".format("Filter Events")
             QDesktopServices.openUrl(QUrl(url))
 
+    def connect_signals(self):
+        for edit in self.doubleLineEdits.values():
+            edit[0].textChanged.connect(self.validation_feedback)
+            edit[0].editingFinished.connect(self.reformat_and_callback)
+
+    def disconnect_signals(self):
+        for edit in self.doubleLineEdits.values():
+            edit[0].textChanged.disconnect(self.validation_feedback)
+            edit[0].editingFinished.disconnect(self.reformat_and_callback)
+
     def _resetGUI(self, resetfilerun=False):
         """Reset GUI including all text edits and etc."""
         if resetfilerun is True:
             self.ui.lineEdit.clear()
 
         # Plot related
+        self.disconnect_signals()
         self.ui.horizontalSlider.setValue(0)
         self.ui.horizontalSlider_2.setValue(100)
         self.ui.verticalSlider_2.setValue(0)
         self.ui.verticalSlider.setValue(100)
-        self.populateLineEditsDefault()
-
+        self.populate_line_edits_default()
         self.ui.lineEdit_outwsname.clear()
         self.ui.lineEdit_title.clear()
+        self.connect_signals()
 
         ylim = self.ui.mainplot.get_ylim()
         miny = ylim[0]
