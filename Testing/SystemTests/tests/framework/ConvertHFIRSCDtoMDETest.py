@@ -78,6 +78,16 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         g = peak0.getGoniometerMatrix()
         self.assertDelta(np.rad2deg(np.arccos(g[0][0])), 77.5, 1e-2)
 
+        ConvertHFIRSCDtoMDETest_Qlorentz = ConvertHFIRSCDtoMDE(
+            InputWorkspace="ConvertHFIRSCDtoMDETest_data", LorentzCorrection=True, Wavelength=1.488
+        )
+
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(
+            InputWorkspace=ConvertHFIRSCDtoMDETest_Qlorentz, PeakDistanceThreshold=2.2, CalculateGoniometerForCW=True, Wavelength=1.488
+        )
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks.getNumberPeaks(), 14)
+
 
 class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
     def skipTests(self):
@@ -123,6 +133,22 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 1)
         np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(), [-0.417683, 1.792265, 2.238072], rtol=1e-3)
+
+        ConvertHFIRSCDtoMDETest_Qlorentz = ConvertHFIRSCDtoMDE(
+            InputWorkspace="ConvertHFIRSCDtoMDE_HB3ATest_data", LorentzCorrection=True, Wavelength=1.008
+        )
+
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(
+            InputWorkspace=ConvertHFIRSCDtoMDETest_Qlorentz,
+            PeakDistanceThreshold=0.25,
+            DensityThresholdFactor=20000,
+            CalculateGoniometerForCW=True,
+            Wavelength=1.008,
+            FlipX=True,
+            InnerGoniometer=False,
+        )
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks.getNumberPeaks(), 1)
 
     def validate(self):
         results = "ConvertHFIRSCDtoMDETest_Q"
