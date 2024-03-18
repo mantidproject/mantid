@@ -202,7 +202,7 @@ FqFitDataPresenter::FqFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *mod
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
 
-void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {
+void FqFitDataPresenter::subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) {
   m_fitPropertyBrowser = browser;
 }
 

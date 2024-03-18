@@ -10,8 +10,8 @@
 #include <gmock/gmock.h>
 #include <utility>
 
-#include "Analysis/FitPropertyBrowser.h"
 #include "Analysis/FunctionBrowser/FunctionTemplateView.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
 #include "Analysis/ParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -37,14 +37,14 @@ namespace {
 TableWorkspace_sptr createTableWorkspace(std::size_t const &size) { return std::make_shared<TableWorkspace>(size); }
 } // namespace
 
-class IndirectFitPropertyBrowserTest : public CxxTest::TestSuite {
+class InelasticFitPropertyBrowserTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitPropertyBrowserTest *createSuite() { return new IndirectFitPropertyBrowserTest(); }
+  static InelasticFitPropertyBrowserTest *createSuite() { return new InelasticFitPropertyBrowserTest(); }
 
-  static void destroySuite(IndirectFitPropertyBrowserTest *suite) { delete suite; }
+  static void destroySuite(InelasticFitPropertyBrowserTest *suite) { delete suite; }
 
   void setUp() override {
-    m_browser = std::make_unique<IndirectFitPropertyBrowser>();
+    m_browser = std::make_unique<InelasticFitPropertyBrowser>();
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
     m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateView>>();
@@ -187,7 +187,7 @@ public:
 
   void test_updateFitStatusData_does_not_throw() {
 
-    auto browser = std::make_unique<IndirectFitPropertyBrowser>();
+    auto browser = std::make_unique<InelasticFitPropertyBrowser>();
     auto templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateView>>();
     auto templatePresenter = std::make_unique<NiceMock<MockFunctionTemplatePresenter>>(templateBrowser.get());
     browser->setFunctionTemplatePresenter(std::move(templatePresenter));
@@ -253,7 +253,7 @@ public:
   }
 
 private:
-  std::unique_ptr<IndirectFitPropertyBrowser> m_browser;
+  std::unique_ptr<InelasticFitPropertyBrowser> m_browser;
   std::unique_ptr<NiceMock<MockFunctionTemplateView>> m_templateBrowser;
   NiceMock<MockFunctionTemplatePresenter> *m_templatePresenter;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;

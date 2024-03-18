@@ -15,7 +15,7 @@ set(TEST_FILES
     Analysis/FitOutputOptionsPresenterTest.h
     Analysis/FitPlotModelTest.h
     Analysis/FitPlotPresenterTest.h
-    Analysis/FitPropertyBrowserTest.h
+    Analysis/InelasticFitPropertyBrowserTest.h
     Analysis/FittingModelTest.h
     Analysis/IqtFitModelTest.h
     Common/IndirectDataValidationHelperTest.h

@@ -13,13 +13,13 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "Analysis/DataAnalysisTab.h"
-#include "Analysis/FitPropertyBrowser.h"
 #include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 #include "Analysis/IFitDataView.h"
 #include "Analysis/IFitOutputOptionsModel.h"
 #include "Analysis/IFitOutputOptionsView.h"
 #include "Analysis/IFitPlotView.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
 #include <string>
@@ -349,9 +349,9 @@ private:
   FunctionTemplateView *m_view;
 };
 
-class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {
+class MockInelasticFitPropertyBrowser : public IInelasticFitPropertyBrowser {
 public:
-  virtual ~MockFitPropertyBrowser() = default;
+  virtual ~MockInelasticFitPropertyBrowser() = default;
 
   MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
 };

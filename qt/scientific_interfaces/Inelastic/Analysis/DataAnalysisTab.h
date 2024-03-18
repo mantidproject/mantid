@@ -11,9 +11,9 @@
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
 #include "FitPlotPresenter.h"
-#include "FitPropertyBrowser.h"
 #include "FittingModel.h"
 #include "FunctionBrowser/TemplateSubType.h"
+#include "InelasticFitPropertyBrowser.h"
 #include "ui_FitTab.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
@@ -141,7 +141,7 @@ protected:
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<FittingModel> m_fittingModel;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
+  InelasticFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
 

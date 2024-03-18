@@ -20,7 +20,7 @@ set(SRC_FILES
     Analysis/FitPlotModel.cpp
     Analysis/FitPlotPresenter.cpp
     Analysis/FitPlotView.cpp
-    Analysis/FitPropertyBrowser.cpp
+    Analysis/InelasticFitPropertyBrowser.cpp
     Analysis/FittingModel.cpp
     Analysis/FqFitAddWorkspaceDialog.cpp
     Analysis/FqFitDataPresenter.cpp
@@ -100,7 +100,7 @@ set(MOC_FILES
     Analysis/FitDataView.h
     Analysis/FitOutputOptionsView.h
     Analysis/FitPlotView.h
-    Analysis/FitPropertyBrowser.h
+    Analysis/InelasticFitPropertyBrowser.h
     Analysis/FunctionBrowser/FunctionTemplateView.h
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h

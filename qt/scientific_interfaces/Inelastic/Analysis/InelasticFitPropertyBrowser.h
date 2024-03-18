@@ -42,16 +42,16 @@ using namespace MantidWidgets;
 class FunctionTemplateView;
 class FitStatusWidget;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitPropertyBrowser {
+class MANTIDQT_INELASTIC_DLL IInelasticFitPropertyBrowser {
 public:
-  virtual ~IIndirectFitPropertyBrowser() = default;
+  virtual ~IInelasticFitPropertyBrowser() = default;
   virtual void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings) = 0;
 };
-class MANTIDQT_INELASTIC_DLL IndirectFitPropertyBrowser : public QDockWidget, public IIndirectFitPropertyBrowser {
+class MANTIDQT_INELASTIC_DLL InelasticFitPropertyBrowser : public QDockWidget, public IInelasticFitPropertyBrowser {
   Q_OBJECT
 
 public:
-  IndirectFitPropertyBrowser(QWidget *parent = nullptr);
+  InelasticFitPropertyBrowser(QWidget *parent = nullptr);
 
   void init();
   void setFunctionTemplatePresenter(std::unique_ptr<ITemplatePresenter> templatePresenter);

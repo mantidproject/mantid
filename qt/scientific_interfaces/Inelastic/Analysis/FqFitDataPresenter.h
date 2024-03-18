@@ -7,10 +7,10 @@
 #pragma once
 
 #include "FitDataPresenter.h"
-#include "FitPropertyBrowser.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataView.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
+#include "InelasticFitPropertyBrowser.h"
 
 namespace {
 struct FqFitParameters {
@@ -40,7 +40,7 @@ public:
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
-  void subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) override;
+  void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) override;
 
   void handleAddClicked() override;
   void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) override;
@@ -62,7 +62,7 @@ private:
   WorkspaceID m_activeWorkspaceID;
 
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
-  IIndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  IInelasticFitPropertyBrowser *m_fitPropertyBrowser;
 };
 
 } // namespace IDA

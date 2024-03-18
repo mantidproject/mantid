@@ -14,7 +14,7 @@ DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
 
-  m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
+  m_fitPropertyBrowser = new InelasticFitPropertyBrowser();
   m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
   QDockWidget *plotViewArea = new QDockWidget();

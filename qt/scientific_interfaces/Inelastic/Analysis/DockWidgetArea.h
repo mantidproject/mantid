@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "FitPropertyBrowser.h"
+#include "InelasticFitPropertyBrowser.h"
 
 #include <QMainWindow>
 #include <QObject>
@@ -17,6 +17,7 @@ namespace IDA {
 
 class FitDataView;
 class FitPlotView;
+class InelasticFitPropertyBrowser;
 
 class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
   Q_OBJECT
@@ -25,7 +26,7 @@ public:
   DockWidgetArea(QWidget *parent = nullptr);
   virtual ~DockWidgetArea(){};
   void setFitDataView(FitDataView *fitDataView);
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  InelasticFitPropertyBrowser *m_fitPropertyBrowser;
   FitDataView *m_fitDataView;
   FitPlotView *m_fitPlotView;
 };

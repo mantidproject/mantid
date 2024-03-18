@@ -10,11 +10,11 @@
 #include <gmock/gmock.h>
 
 #include "Analysis/FitDataView.h"
-#include "Analysis/FitPropertyBrowser.h"
 #include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateView.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
@@ -65,7 +65,7 @@ public:
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
 
-    m_fitPropertyBrowser = std::make_unique<NiceMock<MockFitPropertyBrowser>>();
+    m_fitPropertyBrowser = std::make_unique<NiceMock<MockInelasticFitPropertyBrowser>>();
     m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser.get());
   }
 
@@ -137,5 +137,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<NiceMock<MockFitPropertyBrowser>> m_fitPropertyBrowser;
+  std::unique_ptr<NiceMock<MockInelasticFitPropertyBrowser>> m_fitPropertyBrowser;
 };
