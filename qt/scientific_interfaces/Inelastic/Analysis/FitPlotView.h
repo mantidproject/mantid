@@ -154,7 +154,7 @@ private:
   void clearTopPreview();
   void clearBottomPreview();
 
-  std::unique_ptr<Ui::IndirectFitPreviewPlot> m_plotForm;
+  std::unique_ptr<Ui::FitPreviewPlot> m_plotForm;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;

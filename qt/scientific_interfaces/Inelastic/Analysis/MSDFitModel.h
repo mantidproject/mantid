@@ -12,7 +12,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MSDFitModel : public IndirectFittingModel {
+class MSDFitModel : public FittingModel {
 public:
   MSDFitModel();
 

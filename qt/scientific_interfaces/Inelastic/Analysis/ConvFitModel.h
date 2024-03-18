@@ -15,7 +15,7 @@ namespace IDA {
 using ResolutionCollectionType = IndexCollectionType<WorkspaceID, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 
-class MANTIDQT_INELASTIC_DLL ConvFitModel : public IndirectFittingModel {
+class MANTIDQT_INELASTIC_DLL ConvFitModel : public FittingModel {
 public:
   ConvFitModel();
   ~ConvFitModel() = default;

@@ -30,7 +30,7 @@ MultiDomainFunction_sptr getFunction(std::string const &functionString) {
 
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
-void setFittingFunction(std::unique_ptr<IndirectFittingModel> &model, std::string const &functionString) {
+void setFittingFunction(std::unique_ptr<FittingModel> &model, std::string const &functionString) {
   model->setFitFunction(getFunction(functionString));
 }
 
@@ -51,8 +51,8 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::st
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<IndirectFittingModel> &model,
-                                     const MatrixWorkspace_sptr &workspace, std::string const &workspaceName) {
+IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<FittingModel> &model, const MatrixWorkspace_sptr &workspace,
+                                     std::string const &workspaceName) {
   std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
                                "(composite=Convolution,FixResolution=true,NumDeriv=true;"
                                "name=Resolution,Workspace=" +
@@ -65,7 +65,7 @@ IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<IndirectFittingModel> &mode
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<IndirectFittingModel> &model, MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<FittingModel> &model, MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
   auto const alg = getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
@@ -74,13 +74,13 @@ IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<IndirectFittingModel> &m
 
 } // namespace
 
-class IndirectFittingModelTest : public CxxTest::TestSuite {
+class FittingModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectFittingModelTest *createSuite() { return new IndirectFittingModelTest(); }
+  static FittingModelTest *createSuite() { return new FittingModelTest(); }
 
-  static void destroySuite(IndirectFittingModelTest *suite) { delete suite; }
+  static void destroySuite(FittingModelTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<IndirectFittingModel>(); }
+  void setUp() override { m_model = std::make_unique<FittingModel>(); }
 
   void tearDown() override {
     m_model.reset();
@@ -453,5 +453,5 @@ private:
     m_model->addOutput(alg);
   }
 
-  std::unique_ptr<IndirectFittingModel> m_model;
+  std::unique_ptr<FittingModel> m_model;
 };

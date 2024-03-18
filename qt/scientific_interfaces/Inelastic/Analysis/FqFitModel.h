@@ -12,7 +12,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL FqFitModel : public IndirectFittingModel {
+class MANTIDQT_INELASTIC_DLL FqFitModel : public FittingModel {
 public:
   FqFitModel();
 

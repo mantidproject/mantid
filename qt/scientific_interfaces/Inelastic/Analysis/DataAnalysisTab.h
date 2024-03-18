@@ -121,7 +121,7 @@ public slots:
   void handleEndXChanged(double endX) override;
 
 protected:
-  IndirectFittingModel *getFittingModel() const;
+  FittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
   void setSampleFBSuffixes(const QStringList &suffices);
@@ -140,12 +140,12 @@ protected:
   void setEditResultVisible(bool visible);
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
-  std::unique_ptr<IndirectFittingModel> m_fittingModel;
+  std::unique_ptr<FittingModel> m_fittingModel;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
 
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  std::unique_ptr<Ui::FitTab> m_uiForm;
 
 private:
   void setup() override;

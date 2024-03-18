@@ -21,9 +21,9 @@ extern std::unordered_map<FittingMode, std::string> fitModeToName;
     IFitData - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
-class MANTIDQT_INELASTIC_DLL IIndirectFittingModel {
+class MANTIDQT_INELASTIC_DLL IFittingModel {
 public:
-  virtual ~IIndirectFittingModel(){};
+  virtual ~IFittingModel(){};
   virtual bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual boost::optional<std::string> isInvalidFunction() const = 0;
   virtual std::vector<std::string> getFitParameterNames() const = 0;
@@ -36,7 +36,7 @@ public:
   virtual void setBackground(double fwhm, WorkspaceID WorkspaceID) = 0;
   virtual void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) = 0;
 
-  // IIndirectFittingModel
+  // IFittingModel
   virtual std::unordered_map<std::string, ParameterValue> getFitParameters(WorkspaceID workspaceID,
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;

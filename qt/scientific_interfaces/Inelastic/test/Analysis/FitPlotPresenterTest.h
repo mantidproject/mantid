@@ -51,8 +51,8 @@ public:
 
   void setUp() override {
     /// Note that the FitPlotModel could not be mocked as the
-    /// Presenter takes an IndirectFittingModel. This means the
-    /// IndirectFittingModel is mocked instead - which is a good
+    /// Presenter takes an FittingModel. This means the
+    /// FittingModel is mocked instead - which is a good
     /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     auto model = std::make_unique<FitPlotModel>();

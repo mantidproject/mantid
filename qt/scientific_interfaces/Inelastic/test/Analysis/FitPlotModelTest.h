@@ -94,7 +94,7 @@ public:
     m_fitOutput.reset();
   }
 
-  void test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
+  void test_that_FittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
     TS_ASSERT_EQUALS(m_model->getActiveWorkspaceID(), WorkspaceID{0});
     TS_ASSERT_EQUALS(m_model->getActiveWorkspaceIndex(), WorkspaceIndex{0});
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), WorkspaceID{1});

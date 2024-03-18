@@ -323,7 +323,7 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &
 void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
-  //  indirectFittingModel get table workspace index
+  //  FittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
   auto wsVector = m_model->getWorkspaceNames();

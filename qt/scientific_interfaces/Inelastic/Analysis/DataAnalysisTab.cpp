@@ -63,7 +63,7 @@ size_t DataAnalysisTab::getNumberOfSpecificFunctionContained(const std::string &
 }
 
 DataAnalysisTab::DataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
-    : IndirectTab(parent), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
+    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
   m_uiForm->setupUi(parent);
 }
 
@@ -147,7 +147,7 @@ bool DataAnalysisTab::isRangeCurrentlySelected(WorkspaceID workspaceID, Workspac
   return m_plotPresenter->isCurrentlySelected(workspaceID, spectrum);
 }
 
-IndirectFittingModel *DataAnalysisTab::getFittingModel() const { return m_fittingModel.get(); }
+FittingModel *DataAnalysisTab::getFittingModel() const { return m_fittingModel.get(); }
 
 /**
  * @param functionName  The name of the function.

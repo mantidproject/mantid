@@ -37,13 +37,13 @@ static const std::string FQFIT_STRING = "FQ";
 static const std::string MULTI_STRING = "Multi";
 
 /*
-    IndirectFittingModel - Provides methods for specifying and
+    FittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INELASTIC_DLL IndirectFittingModel : public IIndirectFittingModel {
+class MANTIDQT_INELASTIC_DLL FittingModel : public IFittingModel {
 public:
-  IndirectFittingModel();
-  virtual ~IndirectFittingModel() = default;
+  FittingModel();
+  virtual ~FittingModel() = default;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;
@@ -51,7 +51,7 @@ public:
   WorkspaceID getNumberOfWorkspaces() const override;
   bool isMultiFit() const override;
 
-  // IIndirectFittingModel
+  // IFittingModel
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
   virtual boost::optional<std::string> isInvalidFunction() const override;

@@ -32,7 +32,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 using namespace MantidWidgets;
 
 FitPlotView::FitPlotView(QWidget *parent)
-    : API::MantidWidget(parent), m_plotForm(new Ui::IndirectFitPreviewPlot), m_presenter() {
+    : API::MantidWidget(parent), m_plotForm(new Ui::FitPreviewPlot), m_presenter() {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedFitDataChanged(int)));
