@@ -16,10 +16,10 @@
 #include "Analysis/IFitOutputOptionsView.h"
 #include "MockObjects.h"
 
-#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
-using namespace Mantid::FitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 

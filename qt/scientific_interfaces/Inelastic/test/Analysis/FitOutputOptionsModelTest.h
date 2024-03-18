@@ -12,10 +12,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
-using namespace Mantid::FitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {

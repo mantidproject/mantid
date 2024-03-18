@@ -16,12 +16,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace MantidQt::CustomInterfaces::IDA;
-using namespace Mantid::FitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 
 namespace {

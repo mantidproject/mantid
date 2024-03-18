@@ -12,14 +12,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitConversion.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;
-using namespace Mantid::FitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 
 namespace {

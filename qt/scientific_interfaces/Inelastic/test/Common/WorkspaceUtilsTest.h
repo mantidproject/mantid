@@ -7,14 +7,14 @@
 #pragma once
 
 #include "Common/WorkspaceUtils.h"
-#include "MantidFrameworkTestHelpers/FitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 #include <QPair>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::WorkspaceUtils;
-using namespace Mantid::FitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 
 class WorkspaceUtilsTest : public CxxTest::TestSuite {
 public:
