@@ -21,7 +21,7 @@ using namespace MantidWidgets;
 
 /*
    IndirectFitOutput - Specifies an interface for updating, querying and
-   accessing the raw data in IndirectDataAnalysisTabs
+   accessing the raw data in DataAnalysisTabs
 */
 class MANTIDQT_INELASTIC_DLL IndirectFitOutput : public IIndirectFitOutput {
 public:

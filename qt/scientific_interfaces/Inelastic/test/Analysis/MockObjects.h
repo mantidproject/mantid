@@ -30,9 +30,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
+class MockDataAnalysisTab : public IDataAnalysisTab {
 public:
-  virtual ~MockIndirectDataAnalysisTab() = default;
+  virtual ~MockDataAnalysisTab() = default;
 
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());

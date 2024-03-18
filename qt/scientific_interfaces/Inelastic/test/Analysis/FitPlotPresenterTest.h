@@ -54,7 +54,7 @@ public:
     /// Presenter takes an IndirectFittingModel. This means the
     /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
-    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
+    m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     auto model = std::make_unique<IndirectFitPlotModel>();
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
@@ -362,7 +362,7 @@ public:
   }
 
 private:
-  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
+  std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockIndirectFitPlotView>> m_view;
   std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
 

@@ -22,14 +22,14 @@ enum IDATabChoice { MSD_FIT, IQT_FIT, CONV_FIT, FQ_FIT };
 static const unsigned int NUM_DECIMALS = 6;
 
 // Forward Declaration
-class IndirectDataAnalysisTab;
+class DataAnalysisTab;
 
 /**
- * The IndirectDataAnalysis class is the main class that handles the interface
+ * The DataAnalysis class is the main class that handles the interface
  *and controls
  * its tabs.
  */
-class MANTIDQT_INELASTIC_DLL IndirectDataAnalysis final : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL DataAnalysis final : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -38,7 +38,7 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Inelastic"; }
   /// Default Constructor
-  explicit IndirectDataAnalysis(QWidget *parent = nullptr);
+  explicit DataAnalysis(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout
@@ -54,12 +54,12 @@ private:
   void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   /// UI form containing all Qt elements.
-  Ui::IndirectDataAnalysis m_uiForm;
+  Ui::DataAnalysis m_uiForm;
   /// The settings group
   QString m_settingsGroup;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
-  std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;
+  std::map<unsigned int, DataAnalysisTab *> m_tabs;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

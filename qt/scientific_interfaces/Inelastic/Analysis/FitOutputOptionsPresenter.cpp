@@ -14,8 +14,7 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
-    IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
-    std::unique_ptr<IIndirectFitOutputOptionsModel> model)
+    IDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view, std::unique_ptr<IIndirectFitOutputOptionsModel> model)
     : m_tab(tab), m_view(view), m_model(std::move(model)) {
   setMultiWorkspaceOptionsVisible(false);
   m_view->subscribePresenter(this);

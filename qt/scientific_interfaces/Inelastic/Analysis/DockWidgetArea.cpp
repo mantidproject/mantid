@@ -10,7 +10,7 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(parent) {
+DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
 
@@ -35,7 +35,7 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(pa
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);
 }
 
-void IndirectDockWidgetArea::setFitDataView(IndirectFitDataView *fitDataView) {
+void DockWidgetArea::setFitDataView(IndirectFitDataView *fitDataView) {
   QDockWidget *dataViewArea = new QDockWidget();
   dataViewArea->setWindowTitle("Data Input");
   m_fitDataView = fitDataView;

@@ -11,9 +11,9 @@
 #include "DataAnalysisTabFactory.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
-DECLARE_SUBWINDOW(IndirectDataAnalysis)
+DECLARE_SUBWINDOW(DataAnalysis)
 
-IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
+DataAnalysis::DataAnalysis(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
@@ -25,7 +25,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
 }
 
-void IndirectDataAnalysis::applySettings(std::map<std::string, QVariant> const &settings) {
+void DataAnalysis::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->setFileExtensionsByName(settings.at("RestrictInput").toBool());
   }
@@ -34,7 +34,7 @@ void IndirectDataAnalysis::applySettings(std::map<std::string, QVariant> const &
 /**
  * Initialised the layout of the interface.  MUST be called.
  */
-void IndirectDataAnalysis::initLayout() {
+void DataAnalysis::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
@@ -49,12 +49,12 @@ void IndirectDataAnalysis::initLayout() {
   IndirectInterface::initLayout();
 }
 
-std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
+std::string DataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
 
 /**
  * Handles exporting a Python script for the current tab.
  */
-void IndirectDataAnalysis::exportTabPython() {
+void DataAnalysis::exportTabPython() {
   unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
   m_tabs[currentTab]->exportPythonScript();
 }

@@ -35,7 +35,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter, public IFqFitDataPresenter {
 
 public:
-  FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  FqFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;

@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="MantidQt::CustomInterfaces::IDA::IndirectDockWidgetArea" name="dockArea" native="true">
+    <widget class="MantidQt::CustomInterfaces::IDA::DockWidgetArea" name="dockArea" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -106,7 +106,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectDockWidgetArea</class>
+   <class>MantidQt::CustomInterfaces::IDA::DockWidgetArea</class>
    <extends>QWidget</extends>
    <header>Analysis/DockWidgetArea.h</header>
    <container>1</container>

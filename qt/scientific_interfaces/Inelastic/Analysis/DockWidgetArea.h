@@ -18,12 +18,12 @@ namespace IDA {
 class IndirectFitDataView;
 class IndirectFitPlotView;
 
-class MANTIDQT_INELASTIC_DLL IndirectDockWidgetArea : public QMainWindow {
+class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
   Q_OBJECT
 
 public:
-  IndirectDockWidgetArea(QWidget *parent = nullptr);
-  virtual ~IndirectDockWidgetArea(){};
+  DockWidgetArea(QWidget *parent = nullptr);
+  virtual ~DockWidgetArea(){};
   void setFitDataView(IndirectFitDataView *fitDataView);
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   IndirectFitDataView *m_fitDataView;

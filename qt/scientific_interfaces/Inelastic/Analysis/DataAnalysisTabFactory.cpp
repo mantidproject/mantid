@@ -40,8 +40,8 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 DataAnalysisTabFactory::DataAnalysisTabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
-IndirectDataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
-  auto tab = new IndirectDataAnalysisTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+DataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
+  auto tab = new DataAnalysisTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<MSDFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
       MSDFit::HIDDEN_PROPS);
@@ -52,8 +52,8 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) 
   return tab;
 }
 
-IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
-  auto tab = new IndirectDataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+DataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
+  auto tab = new DataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<IqtFitModel>();
   tab->setupFitPropertyBrowser<IqtFunctionTemplateView, IqtTemplatePresenter, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
   tab->setupFitDataView<IndirectFitDataView>();
@@ -63,8 +63,8 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
   return tab;
 }
 
-IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
-  auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+DataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
+  auto tab = new DataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
   auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, ConvFunctionTemplateModel>(
@@ -76,8 +76,8 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index)
   return tab;
 }
 
-IndirectDataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) const {
-  auto tab = new IndirectDataAnalysisTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+DataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) const {
+  auto tab = new DataAnalysisTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<FqFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(
       FqFit::HIDDEN_PROPS);

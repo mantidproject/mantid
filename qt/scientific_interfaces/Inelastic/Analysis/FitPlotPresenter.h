@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectDataAnalysisTab;
+class IDataAnalysisTab;
 class IIndirectFitPlotView;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitPlotPresenter {
@@ -39,7 +39,7 @@ public:
 class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter final : public IIndirectFitPlotPresenter {
 
 public:
-  IndirectFitPlotPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitPlotView *view,
+  IndirectFitPlotPresenter(IDataAnalysisTab *tab, IIndirectFitPlotView *view,
                            std::unique_ptr<IndirectFitPlotModel> model);
 
   void watchADS(bool watch);
@@ -105,7 +105,7 @@ private:
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
-  IIndirectDataAnalysisTab *m_tab;
+  IDataAnalysisTab *m_tab;
   IIndirectFitPlotView *m_view;
   std::unique_ptr<IndirectFitPlotModel> m_model;
 

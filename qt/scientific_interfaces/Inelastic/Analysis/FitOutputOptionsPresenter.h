@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectDataAnalysisTab;
+class IDataAnalysisTab;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsPresenter {
 public:
@@ -29,7 +29,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public IIndirectFitOutputOptionsPresenter {
 public:
-  IndirectFitOutputOptionsPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
+  IndirectFitOutputOptionsPresenter(IDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
                                     std::unique_ptr<IIndirectFitOutputOptionsModel> model);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -70,7 +70,7 @@ private:
 
   void displayWarning(std::string const &message);
 
-  IIndirectDataAnalysisTab *m_tab;
+  IDataAnalysisTab *m_tab;
   IIndirectFitOutputOptionsView *m_view;
   std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
 };

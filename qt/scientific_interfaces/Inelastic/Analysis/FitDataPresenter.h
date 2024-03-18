@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectDataAnalysisTab;
+class IDataAnalysisTab;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
 public:
@@ -33,7 +33,7 @@ public:
 class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public IIndirectFitDataPresenter,
                                                         public AnalysisDataServiceObserver {
 public:
-  IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
   std::vector<IndirectFitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
@@ -88,7 +88,7 @@ protected:
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
 
-  IIndirectDataAnalysisTab *m_tab;
+  IDataAnalysisTab *m_tab;
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
 

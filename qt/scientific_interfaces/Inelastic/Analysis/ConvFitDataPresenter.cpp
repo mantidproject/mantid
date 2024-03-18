@@ -11,7 +11,7 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-ConvFitDataPresenter::ConvFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
+ConvFitDataPresenter::ConvFitDataPresenter(IDataAnalysisTab *tab, IIndirectFitDataModel *model,
                                            IIndirectFitDataView *view)
     : IndirectFitDataPresenter(tab, model, view) {}
 
