@@ -76,15 +76,15 @@ extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutput::IndirectFitOutput() = default;
+FitOutput::FitOutput() = default;
 
-bool IndirectFitOutput::isEmpty() const { return m_parameters.empty(); }
+bool FitOutput::isEmpty() const { return m_parameters.empty(); }
 
-bool IndirectFitOutput::isSpectrumFit(FitDomainIndex index) const {
+bool FitOutput::isSpectrumFit(FitDomainIndex index) const {
   return static_cast<size_t>(index.value) < m_parameters.size();
 }
 
-std::unordered_map<std::string, ParameterValue> IndirectFitOutput::getParameters(FitDomainIndex index) const {
+std::unordered_map<std::string, ParameterValue> FitOutput::getParameters(FitDomainIndex index) const {
   if (isSpectrumFit(index)) {
     return m_parameters.at(index.value);
   } else {
@@ -92,14 +92,14 @@ std::unordered_map<std::string, ParameterValue> IndirectFitOutput::getParameters
   }
 }
 
-boost::optional<ResultLocationNew> IndirectFitOutput::getResultLocation(FitDomainIndex index) const {
+boost::optional<ResultLocationNew> FitOutput::getResultLocation(FitDomainIndex index) const {
   if (m_outputResultLocations.count(index.value) == 1) {
     return m_outputResultLocations.at(index.value);
   }
   return boost::none;
 }
 
-std::vector<std::string> IndirectFitOutput::getResultParameterNames() const {
+std::vector<std::string> FitOutput::getResultParameterNames() const {
   if (auto resultWorkspace = getLastResultWorkspace()) {
     if (auto workspace = getMatrixWorkspaceFromGroup(resultWorkspace, 0)) {
       return getAxisLabels(workspace, 1);
@@ -107,19 +107,19 @@ std::vector<std::string> IndirectFitOutput::getResultParameterNames() const {
   }
   return std::vector<std::string>();
 }
-Mantid::API::WorkspaceGroup_sptr IndirectFitOutput::getLastResultWorkspace() const { return m_resultWorkspace.lock(); }
-Mantid::API::WorkspaceGroup_sptr IndirectFitOutput::getLastResultGroup() const { return m_resultGroup.lock(); }
+Mantid::API::WorkspaceGroup_sptr FitOutput::getLastResultWorkspace() const { return m_resultWorkspace.lock(); }
+Mantid::API::WorkspaceGroup_sptr FitOutput::getLastResultGroup() const { return m_resultGroup.lock(); }
 
-void IndirectFitOutput::clear() {
+void FitOutput::clear() {
   m_resultGroup.reset();
   m_resultWorkspace.reset();
   m_parameters.clear();
   m_outputResultLocations.clear();
 }
 
-void IndirectFitOutput::addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                                  const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) {
+void FitOutput::addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                          Mantid::API::ITableWorkspace_sptr parameterTable,
+                          const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) {
   m_parameters = extractParametersFromTable(parameterTable);
   m_resultGroup = resultGroup;
   m_resultWorkspace = resultWorkspace;
@@ -129,10 +129,10 @@ void IndirectFitOutput::addOutput(const Mantid::API::WorkspaceGroup_sptr &result
   }
 }
 
-void IndirectFitOutput::addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                                        Mantid::API::ITableWorkspace_sptr parameterTable,
-                                        const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
-                                        FitDomainIndex fitDomainIndex) {
+void FitOutput::addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                                Mantid::API::ITableWorkspace_sptr parameterTable,
+                                const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+                                FitDomainIndex fitDomainIndex) {
   TableRowExtractor extractRowFromTable(std::move(parameterTable));
   m_parameters.insert_or_assign(fitDomainIndex.value, extractRowFromTable(0));
   m_outputResultLocations.insert_or_assign(fitDomainIndex.value, ResultLocationNew(resultGroup, WorkspaceID{0}));

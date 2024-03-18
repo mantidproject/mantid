@@ -166,7 +166,7 @@ private:
   std::string m_tabName;
   bool m_hasResolution;
 
-  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
+  std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 
 protected slots:

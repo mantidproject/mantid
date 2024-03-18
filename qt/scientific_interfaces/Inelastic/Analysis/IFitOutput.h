@@ -38,9 +38,9 @@ struct ResultLocationNew {
     IFitData - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
-class MANTIDQT_INELASTIC_DLL IIndirectFitOutput {
+class MANTIDQT_INELASTIC_DLL IFitOutput {
 public:
-  virtual ~IIndirectFitOutput() = default;
+  virtual ~IFitOutput() = default;
   virtual bool isSpectrumFit(FitDomainIndex index) const = 0;
 
   virtual std::unordered_map<std::string, ParameterValue> getParameters(FitDomainIndex index) const = 0;

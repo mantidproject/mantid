@@ -287,7 +287,7 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
 
 IndirectFittingModel::IndirectFittingModel()
     : m_fitDataModel(std::make_unique<FitDataModel>()), m_previousModelSelected(false),
-      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutput>()) {}
+      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<FitOutput>()) {}
 
 // Functions that interact with FitDataModel
 
@@ -355,7 +355,7 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
   return std::vector<std::string>();
 }
 
-IIndirectFitOutput *IndirectFittingModel::getFitOutput() const { return m_fitOutput.get(); }
+IFitOutput *IndirectFittingModel::getFitOutput() const { return m_fitOutput.get(); }
 
 Mantid::API::MultiDomainFunction_sptr IndirectFittingModel::getFitFunction() const { return m_activeFunction; }
 

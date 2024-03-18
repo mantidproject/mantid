@@ -51,7 +51,7 @@ public:
   void setActiveSpectrum(WorkspaceIndex spectrum);
 
   void setFittingData(std::vector<FitData> *fittingData);
-  void setFitOutput(IIndirectFitOutput *fitOutput);
+  void setFitOutput(IFitOutput *fitOutput);
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
 
 private:
@@ -84,7 +84,7 @@ private:
   void deleteWorkspace(const std::string &name) const;
 
   std::vector<FitData> *m_fittingData;
-  IIndirectFitOutput *m_fitOutput;
+  IFitOutput *m_fitOutput;
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeWorkspaceIndex;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;

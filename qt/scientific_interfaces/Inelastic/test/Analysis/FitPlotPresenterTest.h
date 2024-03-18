@@ -63,7 +63,7 @@ public:
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
     m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
-    m_fitOutput = std::make_unique<IndirectFitOutput>();
+    m_fitOutput = std::make_unique<FitOutput>();
     m_presenter->setFittingData(m_fittingData.get());
     m_presenter->setFitOutput(m_fitOutput.get());
   }
@@ -369,5 +369,5 @@ private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<std::vector<FitData>> m_fittingData;
-  std::unique_ptr<IndirectFitOutput> m_fitOutput;
+  std::unique_ptr<FitOutput> m_fitOutput;
 };

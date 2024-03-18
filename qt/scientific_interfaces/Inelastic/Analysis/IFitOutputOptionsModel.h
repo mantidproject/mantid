@@ -15,10 +15,10 @@ namespace IDA {
 
 using SpectrumToPlot = std::pair<std::string, std::size_t>;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsModel {
+class MANTIDQT_INELASTIC_DLL IFitOutputOptionsModel {
 public:
-  IIndirectFitOutputOptionsModel(){};
-  virtual ~IIndirectFitOutputOptionsModel() = default;
+  IFitOutputOptionsModel(){};
+  virtual ~IFitOutputOptionsModel() = default;
 
   virtual void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;
   virtual void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;

@@ -12,9 +12,9 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
-    : API::MantidWidget(parent), m_editResultsDialog(),
-      m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()), m_presenter() {
+FitOutputOptionsView::FitOutputOptionsView(QWidget *parent)
+    : API::MantidWidget(parent), m_editResultsDialog(), m_outputOptions(std::make_unique<Ui::FitOutputOptions>()),
+      m_presenter() {
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
@@ -25,98 +25,90 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(handleEditResultClicked()));
 }
 
-void IndirectFitOutputOptionsView::subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) {
-  m_presenter = presenter;
-}
+void FitOutputOptionsView::subscribePresenter(IFitOutputOptionsPresenter *presenter) { m_presenter = presenter; }
 
-void IndirectFitOutputOptionsView::notifyGroupWorkspaceChanged(QString const &group) {
+void FitOutputOptionsView::notifyGroupWorkspaceChanged(QString const &group) {
   m_presenter->handleGroupWorkspaceChanged(group.toStdString());
 }
 
-void IndirectFitOutputOptionsView::notifyPlotClicked() { m_presenter->handlePlotClicked(); }
+void FitOutputOptionsView::notifyPlotClicked() { m_presenter->handlePlotClicked(); }
 
-void IndirectFitOutputOptionsView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
+void FitOutputOptionsView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
-void IndirectFitOutputOptionsView::notifyReplaceSingleFitResult() {
+void FitOutputOptionsView::notifyReplaceSingleFitResult() {
   m_presenter->handleReplaceSingleFitResult(m_editResultsDialog->getSelectedInputWorkspaceName(),
                                             m_editResultsDialog->getSelectedSingleFitWorkspaceName(),
                                             m_editResultsDialog->getOutputWorkspaceName());
 }
 
-void IndirectFitOutputOptionsView::setGroupWorkspaceComboBoxVisible(bool visible) {
+void FitOutputOptionsView::setGroupWorkspaceComboBoxVisible(bool visible) {
   m_outputOptions->cbGroupWorkspace->setVisible(visible);
 }
 
-void IndirectFitOutputOptionsView::setWorkspaceComboBoxVisible(bool visible) {
+void FitOutputOptionsView::setWorkspaceComboBoxVisible(bool visible) {
   m_outputOptions->cbWorkspace->setVisible(visible);
 }
 
-void IndirectFitOutputOptionsView::clearPlotWorkspaces() { m_outputOptions->cbWorkspace->clear(); }
+void FitOutputOptionsView::clearPlotWorkspaces() { m_outputOptions->cbWorkspace->clear(); }
 
-void IndirectFitOutputOptionsView::clearPlotTypes() { m_outputOptions->cbPlotType->clear(); }
+void FitOutputOptionsView::clearPlotTypes() { m_outputOptions->cbPlotType->clear(); }
 
-void IndirectFitOutputOptionsView::setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames) {
+void FitOutputOptionsView::setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames) {
   for (auto const &name : workspaceNames)
     m_outputOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
-void IndirectFitOutputOptionsView::setAvailablePlotTypes(std::vector<std::string> const &parameterNames) {
+void FitOutputOptionsView::setAvailablePlotTypes(std::vector<std::string> const &parameterNames) {
   m_outputOptions->cbPlotType->addItem("All");
   for (auto const &name : parameterNames)
     m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
 }
 
-void IndirectFitOutputOptionsView::setPlotGroupWorkspaceIndex(int index) {
+void FitOutputOptionsView::setPlotGroupWorkspaceIndex(int index) {
   m_outputOptions->cbGroupWorkspace->setCurrentIndex(index);
 }
 
-void IndirectFitOutputOptionsView::setPlotWorkspacesIndex(int index) {
-  m_outputOptions->cbWorkspace->setCurrentIndex(index);
-}
+void FitOutputOptionsView::setPlotWorkspacesIndex(int index) { m_outputOptions->cbWorkspace->setCurrentIndex(index); }
 
-void IndirectFitOutputOptionsView::setPlotTypeIndex(int index) { m_outputOptions->cbPlotType->setCurrentIndex(index); }
+void FitOutputOptionsView::setPlotTypeIndex(int index) { m_outputOptions->cbPlotType->setCurrentIndex(index); }
 
-std::string IndirectFitOutputOptionsView::getSelectedGroupWorkspace() const {
+std::string FitOutputOptionsView::getSelectedGroupWorkspace() const {
   return m_outputOptions->cbGroupWorkspace->currentText().toStdString();
 }
 
-std::string IndirectFitOutputOptionsView::getSelectedWorkspace() const {
+std::string FitOutputOptionsView::getSelectedWorkspace() const {
   return m_outputOptions->cbWorkspace->currentText().toStdString();
 }
 
-std::string IndirectFitOutputOptionsView::getSelectedPlotType() const {
+std::string FitOutputOptionsView::getSelectedPlotType() const {
   return m_outputOptions->cbPlotType->currentText().toStdString();
 }
 
-void IndirectFitOutputOptionsView::setPlotText(std::string const &text) {
+void FitOutputOptionsView::setPlotText(std::string const &text) {
   m_outputOptions->pbPlot->setText(QString::fromStdString(text));
 }
 
-void IndirectFitOutputOptionsView::setSaveText(std::string const &text) {
+void FitOutputOptionsView::setSaveText(std::string const &text) {
   m_outputOptions->pbSave->setText(QString::fromStdString(text));
 }
 
-void IndirectFitOutputOptionsView::setPlotExtraOptionsEnabled(bool enable) {
+void FitOutputOptionsView::setPlotExtraOptionsEnabled(bool enable) {
   m_outputOptions->cbGroupWorkspace->setEnabled(enable);
   m_outputOptions->cbWorkspace->setEnabled(enable);
 }
 
-void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
+void FitOutputOptionsView::setPlotEnabled(bool enable) {
   m_outputOptions->pbPlot->setEnabled(enable);
   m_outputOptions->cbPlotType->setEnabled(enable);
 }
 
-void IndirectFitOutputOptionsView::setEditResultEnabled(bool enable) {
-  m_outputOptions->pbEditResult->setEnabled(enable);
-}
+void FitOutputOptionsView::setEditResultEnabled(bool enable) { m_outputOptions->pbEditResult->setEnabled(enable); }
 
-void IndirectFitOutputOptionsView::setSaveEnabled(bool enable) { m_outputOptions->pbSave->setEnabled(enable); }
+void FitOutputOptionsView::setSaveEnabled(bool enable) { m_outputOptions->pbSave->setEnabled(enable); }
 
-void IndirectFitOutputOptionsView::setEditResultVisible(bool visible) {
-  m_outputOptions->pbEditResult->setVisible(visible);
-}
+void FitOutputOptionsView::setEditResultVisible(bool visible) { m_outputOptions->pbEditResult->setVisible(visible); }
 
-void IndirectFitOutputOptionsView::handleEditResultClicked() {
+void FitOutputOptionsView::handleEditResultClicked() {
   m_editResultsDialog = new EditResultsDialog(this);
   m_editResultsDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
@@ -124,7 +116,7 @@ void IndirectFitOutputOptionsView::handleEditResultClicked() {
   connect(m_editResultsDialog, SIGNAL(replaceSingleFitResult()), this, SLOT(notifyReplaceSingleFitResult()));
 }
 
-void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {
+void FitOutputOptionsView::displayWarning(std::string const &message) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(message));
 }
 

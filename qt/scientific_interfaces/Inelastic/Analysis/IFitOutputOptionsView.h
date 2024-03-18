@@ -15,12 +15,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectFitOutputOptionsPresenter;
+class IFitOutputOptionsPresenter;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsView {
+class MANTIDQT_INELASTIC_DLL IFitOutputOptionsView {
 
 public:
-  virtual void subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) = 0;
+  virtual void subscribePresenter(IFitOutputOptionsPresenter *presenter) = 0;
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;
   virtual void setWorkspaceComboBoxVisible(bool visible) = 0;

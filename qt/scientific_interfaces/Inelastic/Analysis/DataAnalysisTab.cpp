@@ -83,9 +83,9 @@ void DataAnalysisTab::subscribeFitBrowserToDataPresenter() {
 }
 
 void DataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
-  auto model = std::make_unique<IndirectFitOutputOptionsModel>();
+  auto model = std::make_unique<FitOutputOptionsModel>();
   m_outOptionsPresenter =
-      std::make_unique<IndirectFitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView, std::move(model));
+      std::make_unique<FitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView, std::move(model));
   m_outOptionsPresenter->setEditResultVisible(editResults);
 }
 

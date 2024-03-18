@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectFitOutputOptions</class>
- <widget class="QWidget" name="IndirectFitOutputOptions">
+ <class>FitOutputOptions</class>
+ <widget class="QWidget" name="FitOutputOptions">
   <property name="geometry">
    <rect>
     <x>0</x>

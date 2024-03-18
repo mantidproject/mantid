@@ -20,12 +20,12 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-   IndirectFitOutput - Specifies an interface for updating, querying and
+   FitOutput - Specifies an interface for updating, querying and
    accessing the raw data in DataAnalysisTabs
 */
-class MANTIDQT_INELASTIC_DLL IndirectFitOutput : public IIndirectFitOutput {
+class MANTIDQT_INELASTIC_DLL FitOutput : public IFitOutput {
 public:
-  IndirectFitOutput();
+  FitOutput();
   bool isSpectrumFit(FitDomainIndex index) const override;
 
   std::unordered_map<std::string, ParameterValue> getParameters(FitDomainIndex index) const override;

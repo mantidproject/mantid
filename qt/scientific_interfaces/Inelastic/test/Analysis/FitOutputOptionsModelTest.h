@@ -49,17 +49,17 @@ std::vector<SpectrumToPlot> getExpectedParameterSpectra(std::size_t const &numbe
 
 } // namespace
 
-class IndirectFitOutputOptionsModelTest : public CxxTest::TestSuite {
+class FitOutputOptionsModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitOutputOptionsModelTest *createSuite() { return new IndirectFitOutputOptionsModelTest(); }
+  static FitOutputOptionsModelTest *createSuite() { return new FitOutputOptionsModelTest(); }
 
-  static void destroySuite(IndirectFitOutputOptionsModelTest *suite) { delete suite; }
+  static void destroySuite(FitOutputOptionsModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", createWorkspace(3, 4));
 
     m_groupWorkspace = createGroupWorkspaceWithTextAxes(NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA);
-    m_model = std::make_unique<IndirectFitOutputOptionsModel>();
+    m_model = std::make_unique<FitOutputOptionsModel>();
   }
 
   void tearDown() override {
@@ -266,5 +266,5 @@ public:
 private:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   WorkspaceGroup_sptr m_groupWorkspace;
-  std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
+  std::unique_ptr<FitOutputOptionsModel> m_model;
 };

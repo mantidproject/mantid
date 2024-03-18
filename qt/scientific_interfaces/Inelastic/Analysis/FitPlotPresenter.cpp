@@ -78,7 +78,7 @@ void IndirectFitPlotPresenter::setFittingData(std::vector<FitData> *fittingData)
   m_model->setFittingData(fittingData);
 }
 
-void IndirectFitPlotPresenter::setFitOutput(IIndirectFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
+void IndirectFitPlotPresenter::setFitOutput(IFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
 
 void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();

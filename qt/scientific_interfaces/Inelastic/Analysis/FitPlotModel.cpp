@@ -97,7 +97,7 @@ void IndirectFitPlotModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr 
 
 void IndirectFitPlotModel::setFittingData(std::vector<FitData> *fittingData) { m_fittingData = fittingData; }
 
-void IndirectFitPlotModel::setFitOutput(IIndirectFitOutput *fitOutput) { m_fitOutput = fitOutput; }
+void IndirectFitPlotModel::setFitOutput(IFitOutput *fitOutput) { m_fitOutput = fitOutput; }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
   if (m_activeWorkspaceID < m_fittingData->size())

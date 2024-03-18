@@ -113,11 +113,11 @@ public:
   MOCK_METHOD0(clearPreviews, void());
 };
 
-class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
+class MockFitOutputOptionsView : public IFitOutputOptionsView {
 public:
-  virtual ~MockIndirectFitOutputOptionsView() = default;
+  virtual ~MockFitOutputOptionsView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitOutputOptionsPresenter *presenter));
 
   MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
   MOCK_METHOD1(setWorkspaceComboBoxVisible, void(bool visible));
@@ -148,9 +148,9 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
-class MockIndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
+class MockFitOutputOptionsModel : public IFitOutputOptionsModel {
 public:
-  virtual ~MockIndirectFitOutputOptionsModel() = default;
+  virtual ~MockFitOutputOptionsModel() = default;
 
   MOCK_METHOD1(setResultWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
   MOCK_METHOD1(setPDFWorkspace, void(WorkspaceGroup_sptr groupWorkspace));

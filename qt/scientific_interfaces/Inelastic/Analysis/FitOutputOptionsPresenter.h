@@ -18,7 +18,7 @@ namespace IDA {
 
 class IDataAnalysisTab;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL IFitOutputOptionsPresenter {
 public:
   virtual void handleGroupWorkspaceChanged(std::string const &selectedGroup) = 0;
   virtual void handlePlotClicked() = 0;
@@ -27,10 +27,10 @@ public:
                                             std::string const &outputName) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public IIndirectFitOutputOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL FitOutputOptionsPresenter final : public IFitOutputOptionsPresenter {
 public:
-  IndirectFitOutputOptionsPresenter(IDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
-                                    std::unique_ptr<IIndirectFitOutputOptionsModel> model);
+  FitOutputOptionsPresenter(IDataAnalysisTab *tab, IFitOutputOptionsView *view,
+                            std::unique_ptr<IFitOutputOptionsModel> model);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
@@ -71,8 +71,8 @@ private:
   void displayWarning(std::string const &message);
 
   IDataAnalysisTab *m_tab;
-  IIndirectFitOutputOptionsView *m_view;
-  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
+  IFitOutputOptionsView *m_view;
+  std::unique_ptr<IFitOutputOptionsModel> m_model;
 };
 
 } // namespace IDA

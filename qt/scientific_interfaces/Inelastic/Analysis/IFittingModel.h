@@ -47,11 +47,11 @@ public:
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
   virtual bool isMultiFit() const = 0;
 
-  // IIndirectFitOutput
+  // IFitOutput
   virtual void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                                   WorkspaceIndex spectrum) = 0;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
-  virtual IIndirectFitOutput *getFitOutput() const = 0;
+  virtual IFitOutput *getFitOutput() const = 0;
 
   // Generic
   virtual void setFittingMode(FittingMode mode) = 0;

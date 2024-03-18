@@ -64,13 +64,13 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 
 } // namespace
 
-class IndirectFitOutputTest : public CxxTest::TestSuite {
+class FitOutputTest : public CxxTest::TestSuite {
 public:
-  static IndirectFitOutputTest *createSuite() { return new IndirectFitOutputTest(); }
+  static FitOutputTest *createSuite() { return new FitOutputTest(); }
 
-  static void destroySuite(IndirectFitOutputTest *suite) { delete suite; }
+  static void destroySuite(FitOutputTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<IndirectFitOutput>(); }
+  void setUp() override { m_model = std::make_unique<FitOutput>(); }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
@@ -156,5 +156,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IndirectFitOutput> m_model;
+  std::unique_ptr<FitOutput> m_model;
 };

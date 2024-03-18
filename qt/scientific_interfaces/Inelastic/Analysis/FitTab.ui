@@ -91,7 +91,7 @@
        </widget>
       </item>
       <item>
-       <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView" name="ovOutputOptionsView" native="true"/>
+       <widget class="MantidQt::CustomInterfaces::IDA::FitOutputOptionsView" name="ovOutputOptionsView" native="true"/>
       </item>
      </layout>
     </widget>
@@ -100,7 +100,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView</class>
+   <class>MantidQt::CustomInterfaces::IDA::FitOutputOptionsView</class>
    <extends>QWidget</extends>
    <header>Analysis/FitOutputOptionsView.h</header>
    <container>1</container>

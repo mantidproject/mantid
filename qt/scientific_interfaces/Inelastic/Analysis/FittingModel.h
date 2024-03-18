@@ -67,11 +67,11 @@ public:
                                                                    WorkspaceIndex spectrum) const override;
   std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const override;
 
-  // IIndirectFitOutput
+  // IFitOutput
   void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                           WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-  IIndirectFitOutput *getFitOutput() const override;
+  IFitOutput *getFitOutput() const override;
 
   // Generic
   void setFittingMode(FittingMode mode) override;
@@ -125,7 +125,7 @@ private:
 
   bool m_previousModelSelected;
   FittingMode m_fittingMode;
-  std::unique_ptr<IIndirectFitOutput> m_fitOutput;
+  std::unique_ptr<IFitOutput> m_fitOutput;
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
   // stores the single domain function
   Mantid::API::IFunction_sptr m_fitFunction;

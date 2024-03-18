@@ -18,17 +18,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IIndirectFitOutputOptionsPresenter;
+class IFitOutputOptionsPresenter;
 class EditResultsDialog;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsView final : public API::MantidWidget,
-                                                                  public IIndirectFitOutputOptionsView {
+class MANTIDQT_INELASTIC_DLL FitOutputOptionsView final : public API::MantidWidget, public IFitOutputOptionsView {
   Q_OBJECT
 
 public:
-  IndirectFitOutputOptionsView(QWidget *parent = nullptr);
+  FitOutputOptionsView(QWidget *parent = nullptr);
 
-  void subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) override;
+  void subscribePresenter(IFitOutputOptionsPresenter *presenter) override;
 
   void setGroupWorkspaceComboBoxVisible(bool visible) override;
   void setWorkspaceComboBoxVisible(bool visible) override;
@@ -67,8 +66,8 @@ private slots:
 
 private:
   EditResultsDialog *m_editResultsDialog;
-  std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
-  IIndirectFitOutputOptionsPresenter *m_presenter;
+  std::unique_ptr<Ui::FitOutputOptions> m_outputOptions;
+  IFitOutputOptionsPresenter *m_presenter;
 };
 
 } // namespace IDA

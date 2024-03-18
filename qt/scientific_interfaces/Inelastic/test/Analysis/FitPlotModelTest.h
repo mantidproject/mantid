@@ -82,7 +82,7 @@ public:
     m_model = std::make_unique<IndirectFitPlotModel>();
     m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
-    m_fitOutput = std::make_unique<IndirectFitOutput>();
+    m_fitOutput = std::make_unique<FitOutput>();
     m_model->setFittingData(m_fittingData.get());
     m_model->setFitOutput(m_fitOutput.get());
   }
@@ -282,6 +282,6 @@ public:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<IndirectFitPlotModel> m_model;
   std::unique_ptr<std::vector<FitData>> m_fittingData;
-  std::unique_ptr<IndirectFitOutput> m_fitOutput;
+  std::unique_ptr<FitOutput> m_fitOutput;
   MultiDomainFunction_sptr m_activeFunction;
 };

@@ -19,10 +19,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
+class MANTIDQT_INELASTIC_DLL FitOutputOptionsModel : public IFitOutputOptionsModel {
 public:
-  IndirectFitOutputOptionsModel();
-  virtual ~IndirectFitOutputOptionsModel() override = default;
+  FitOutputOptionsModel();
+  virtual ~FitOutputOptionsModel() override = default;
 
   void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) override;
   void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) override;
