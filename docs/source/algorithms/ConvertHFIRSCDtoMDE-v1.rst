@@ -21,6 +21,8 @@ convert to HKL using :ref:`algm-ConvertWANDSCDtoQ`
 . :ref:`algm-IntegratePeaksMD` will also work on the output of this
 algorithm.
 
+There is an option to apply the LorentzCorrection using the formula :math:`|\sin(2\theta)\cos(\phi)|/\lambda^3`. This helps lower the sloping background at low :math:`Q`.
+
 Usage
 -----
 
