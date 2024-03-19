@@ -36,7 +36,7 @@ static const std::string DownDown = "00";
 
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
-static const std::string OUTPUT_T_WORKSPACE = "OutputTransmissionWorkspace";
+static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
 static const std::string P_HE = "HeliumPolarisation";
 static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
 static const std::string OUTPUT_T_ANTI_WORKSPACE = "OutputTransmissionAntiWorkspace";
@@ -58,7 +58,7 @@ void HeliumAnalyserEfficiency::init() {
   val->add<WorkspaceUnitValidator>("Wavelength");
   val->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, val));
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_WORKSPACE, "T", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "T", Direction::Output));
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "p_He", Direction::Output));
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_PARA_WORKSPACE, "T_para", Direction::Output));
@@ -341,7 +341,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   scale->setProperty("Operation", "Multiply");
   scale->executeAsChildAlg();
 
-  setProperty(PropertyNames::OUTPUT_T_WORKSPACE, transmissionWorkspace);
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, transmissionWorkspace);
 }
 
 Workspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
