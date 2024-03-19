@@ -11,7 +11,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h"
+#include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 #include <boost/format.hpp>
 #include <cxxtest/TestSuite.h>
 
