@@ -52,6 +52,7 @@ set(SRC_FILES
     src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
+    src/LoadErrorEventsNexus.cpp
     src/LoadEventAsWorkspace2D.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
@@ -273,6 +274,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
+    inc/MantidDataHandling/LoadErrorEventsNexus.h
     inc/MantidDataHandling/LoadEventAsWorkspace2D.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
@@ -488,6 +490,7 @@ set(TEST_FILES
     LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
+    LoadErrorEventsNexusTest.h
     LoadEventAsWorkspace2DTest.h
     LoadEventNexusIndexSetupTest.h
     LoadEventNexusTest.h
