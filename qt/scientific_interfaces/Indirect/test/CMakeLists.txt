@@ -2,6 +2,8 @@ set(ALL_TEST_FILES)
 
 add_subdirectory(Reduction)
 
+set(TEST_HELPERS Reduction/MockObjects.h)
+
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
 mtd_add_qt_tests(
@@ -9,6 +11,7 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${ALL_TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
+  TEST_HELPER_SRCS ${TEST_HELPERS}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
