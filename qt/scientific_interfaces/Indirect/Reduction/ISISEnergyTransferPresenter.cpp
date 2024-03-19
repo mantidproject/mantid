@@ -28,7 +28,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IETView *view, std::unique_ptr<IETModel> model)
+IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IETModel> model)
     : IndirectDataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 
@@ -36,9 +36,6 @@ IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IETView *view, std::uni
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
 IETPresenter::~IETPresenter() = default;
@@ -180,11 +177,16 @@ void IETPresenter::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
+  m_view->setRunButtonText("Running...");
+  m_view->setEnableOutputOptions(false);
+
   m_outputGroupName = m_model->runIETAlgorithm(m_batchAlgoRunner, instrumentData, runData);
 }
 
 void IETPresenter::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_view->setRunButtonText("Run");
+  m_view->setEnableOutputOptions(!error);
 
   if (!error) {
     InstrumentData instrumentData = getInstrumentData();
@@ -261,12 +263,11 @@ void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrou
 
 void IETPresenter::notifyRunFinished() {
   if (!m_view->isRunFilesValid()) {
-    m_view->updateRunButton(false, "unchanged", "Invalid Run(s)",
-                            "Cannot find data files for some of the run numbers entered.");
+    m_view->setRunButtonText("Invalid Run(s)");
   } else {
     double detailedBalance = m_model->loadDetailedBalance(m_view->getFirstFilename());
     m_view->setDetailedBalance(detailedBalance);
-    m_view->updateRunButton();
+    m_view->setRunButtonText("Run");
   }
   m_view->setRunFilesEnabled(true);
 }
@@ -279,11 +280,6 @@ void IETPresenter::setFileExtensionsByName(bool filter) {
   auto wsSuffixes = filter ? InterfaceUtils::getCalibrationWSSuffixes(tabName) : noSuffixes;
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
-}
-
-void IETPresenter::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                   QString const &tooltip) {
-  m_view->updateRunButton(enabled, enableOutputButtons, message, tooltip);
 }
 
 void IETPresenter::notifyNewMessage(QString const &message) { showMessageBox(message); }

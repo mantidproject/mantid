@@ -30,7 +30,7 @@ class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, publ
   Q_OBJECT
 
 public:
-  IETPresenter(IndirectDataReduction *idrUI, IETView *view, std::unique_ptr<IETModel> model);
+  IETPresenter(IndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IETModel> model);
   ~IETPresenter() override;
 
   void setup() override;
@@ -49,9 +49,6 @@ public slots:
 private slots:
   void algorithmComplete(bool error);
   void plotRawComplete(bool error);
-
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
   void setInstrumentDefault();
 
 private:
@@ -64,7 +61,7 @@ private:
   std::string m_outputGroupName;
   std::vector<std::string> m_outputWorkspaces;
 
-  IETView *m_view;
+  IIETView *m_view;
   std::unique_ptr<IETModel> m_model;
 };
 } // namespace CustomInterfaces

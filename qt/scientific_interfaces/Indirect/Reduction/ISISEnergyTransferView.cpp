@@ -201,7 +201,7 @@ void IETView::setSaveEnabled(bool enable) {
 
 void IETView::setPlotTimeIsPlotting(bool plotting) {
   m_uiForm.pbPlotTime->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
+  setEnableOutputOptions(!plotting);
 }
 
 void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) {
@@ -279,16 +279,16 @@ void IETView::setInstrumentSpecDefault(std::map<std::string, bool> &specMap) {
   m_uiForm.ckFold->setChecked(specMap["defaultFoldMultiple"]);
 }
 
-void IETView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                              QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged") {
-    auto const enableButtons = enableOutputButtons == "enable";
-    setPlotTimeEnabled(enableButtons);
-    setSaveEnabled(enableButtons);
-  }
+void IETView::setRunButtonText(std::string const &runText) {
+  m_uiForm.pbRun->setText(QString::fromStdString(runText));
+  m_uiForm.pbRun->setEnabled(runText == "Run");
+  m_uiForm.pbRun->setToolTip(runText == "Invalid Run(s)" ? "Cannot find data files for some of the run numbers entered."
+                                                         : "");
+}
+
+void IETView::setEnableOutputOptions(bool const enable) {
+  setPlotTimeEnabled(enable);
+  setSaveEnabled(enable);
 }
 
 void IETView::showMessageBox(const QString &message) { m_presenter->notifyNewMessage(message); }
@@ -314,16 +314,12 @@ void IETView::handleDataReady() {
     emit showMessageBox(errorMessage);
 }
 
-void IETView::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...", "Run numbers are currently being edited.");
-}
+void IETView::pbRunEditing() { setRunButtonText("Editing..."); }
 
 void IETView::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...", "Searching for data files for the run numbers entered...");
+  setRunButtonText("Finding files...");
   m_uiForm.dsRunFiles->setEnabled(false);
 }
-
-void IETView::setRunEnabled(bool enable) { m_uiForm.pbRun->setEnabled(enable); }
 
 void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.pbPlotTime->setEnabled(enable);
@@ -331,9 +327,4 @@ void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.spPlotTimeSpecMax->setEnabled(enable);
 }
 
-void IETView::setButtonsEnabled(bool enable) {
-  setRunEnabled(enable);
-  setPlotTimeEnabled(enable);
-  setSaveEnabled(enable);
-}
 } // namespace MantidQt::CustomInterfaces
