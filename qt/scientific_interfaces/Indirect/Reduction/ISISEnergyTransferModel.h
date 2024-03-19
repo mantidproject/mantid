@@ -64,7 +64,7 @@ public:
   std::vector<std::string> groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                            std::string const &groupOption, bool const shouldGroup) override;
 
-private:
+  // Public for testing purposes
   void setInputProperties(IAlgorithmRuntimeProps &properties, IETInputData const &inputData);
   void setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                std::string const &instrument);
@@ -73,8 +73,9 @@ private:
   void setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData);
   void setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                            std::string const &outputGroupName);
-  std::string getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles);
+  std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
+private:
   void saveDaveGroup(std::string const &workspaceName, std::string const &outputName);
   void saveAclimax(std::string const &workspaceName, std::string const &outputName,
                    std::string const &xUnits = "DeltaE_inWavenumber");

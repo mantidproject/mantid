@@ -110,7 +110,7 @@ void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutput
   Mantid::API::AlgorithmProperties::update("OutputWorkspace", outputGroupName, properties);
 }
 
-std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
+std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
@@ -129,7 +129,7 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   setRebinProperties(*properties, runData.getRebinData());
   setAnalysisProperties(*properties, runData.getAnalysisData());
 
-  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
+  std::string outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(*properties, runData.getOutputData(), outputGroupName);
 
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
