@@ -8,6 +8,7 @@
 #include "ISISEnergyTransferView.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "ISISEnergyTransferPresenter.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -19,7 +20,7 @@ using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(subscriber) {
+IETView::IETView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
@@ -39,6 +40,8 @@ IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(
 }
 
 IETView::~IETView() {}
+
+void IETView::subscribePresenter(IIETPresenter *presenter) { m_presenter = presenter; }
 
 IETRunData IETView::getRunData() const {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
@@ -288,19 +291,19 @@ void IETView::updateRunButton(bool enabled, std::string const &enableOutputButto
   }
 }
 
-void IETView::showMessageBox(const QString &message) { m_subscriber->notifyNewMessage(message); }
+void IETView::showMessageBox(const QString &message) { m_presenter->notifyNewMessage(message); }
 
-void IETView::saveClicked() { m_subscriber->notifySaveClicked(); }
+void IETView::saveClicked() { m_presenter->notifySaveClicked(); }
 
-void IETView::runClicked() { m_subscriber->notifyRunClicked(); }
+void IETView::runClicked() { m_presenter->notifyRunClicked(); }
 
-void IETView::plotRawClicked() { m_subscriber->notifyPlotRawClicked(); }
+void IETView::plotRawClicked() { m_presenter->notifyPlotRawClicked(); }
 
 void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
-  m_subscriber->notifySaveCustomGroupingClicked(customGrouping);
+  m_presenter->notifySaveCustomGroupingClicked(customGrouping);
 }
 
-void IETView::pbRunFinished() { m_subscriber->notifyRunFinished(); }
+void IETView::pbRunFinished() { m_presenter->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
   UserInputValidator uiv;

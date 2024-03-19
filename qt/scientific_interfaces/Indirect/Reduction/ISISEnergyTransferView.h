@@ -16,23 +16,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
-
-class MANTIDQT_INDIRECT_DLL IETViewSubscriber {
-public:
-  virtual void notifyNewMessage(const QString &message) = 0;
-  virtual void notifySaveClicked() = 0;
-  virtual void notifyRunClicked() = 0;
-  virtual void notifyPlotRawClicked() = 0;
-  virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
-  virtual void notifyRunFinished() = 0;
-};
+class IIETPresenter;
 
 class MANTIDQT_INDIRECT_DLL IETView : public QWidget {
   Q_OBJECT
 
 public:
-  IETView(IETViewSubscriber *subscriber, QWidget *parent = nullptr);
+  IETView(QWidget *parent = nullptr);
   ~IETView();
+
+  void subscribePresenter(IIETPresenter *presenter);
 
   IETRunData getRunData() const;
   IETPlotData getPlotData() const;
@@ -108,7 +101,7 @@ private:
 
   std::vector<std::string> m_outputWorkspaces;
   Ui::ISISEnergyTransfer m_uiForm;
-  IETViewSubscriber *m_subscriber;
+  IIETPresenter *m_presenter;
   DetectorGroupingOptions *m_groupingWidget;
 };
 } // namespace CustomInterfaces

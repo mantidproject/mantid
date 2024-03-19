@@ -77,7 +77,7 @@ void IndirectDataReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
-  addTab<IETPresenter>("ISIS Energy Transfer");
+  addMVPTab<IETPresenter, IETView>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");

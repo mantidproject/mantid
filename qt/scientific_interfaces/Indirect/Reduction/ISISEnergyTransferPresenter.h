@@ -15,11 +15,22 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, public IETViewSubscriber {
+
+class MANTIDQT_INDIRECT_DLL IIETPresenter {
+public:
+  virtual void notifyNewMessage(const QString &message) = 0;
+  virtual void notifySaveClicked() = 0;
+  virtual void notifyRunClicked() = 0;
+  virtual void notifyPlotRawClicked() = 0;
+  virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
+  virtual void notifyRunFinished() = 0;
+};
+
+class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, public IIETPresenter {
   Q_OBJECT
 
 public:
-  IETPresenter(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  IETPresenter(IndirectDataReduction *idrUI, IETView *view);
   ~IETPresenter() override;
 
   void setup() override;
@@ -54,7 +65,7 @@ private:
   std::vector<std::string> m_outputWorkspaces;
 
   std::unique_ptr<IETModel> m_model;
-  std::unique_ptr<IETView> m_view;
+  IETView *m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

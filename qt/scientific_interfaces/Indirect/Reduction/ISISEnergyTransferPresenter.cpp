@@ -28,16 +28,16 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IETModel>()),
-      m_view(std::make_unique<IETView>(this, parent)) {
+IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IETView *view)
+    : IndirectDataReductionTab(idrUI), m_model(std::make_unique<IETModel>()), m_view(view) {
+  m_view->subscribePresenter(this);
 
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view,
           SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
