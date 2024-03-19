@@ -13,16 +13,18 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IIndirectDataReduction;
+
 /** ILLEnergyTransfer
 
-  @author Dan Nixon
-  @date 23/07/2014
+@author Dan Nixon
+@date 23/07/2014
 */
 class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ILLEnergyTransfer(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
   void setup() override;

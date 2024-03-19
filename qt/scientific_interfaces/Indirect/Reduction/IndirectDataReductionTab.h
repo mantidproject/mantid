@@ -31,7 +31,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDataReduction;
+class IIndirectDataReduction;
 
 /** IndirectDataReductionTab
 
@@ -45,7 +45,7 @@ class MANTIDQT_INDIRECT_DLL IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent = nullptr);
+  IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
   /// Set the presenter for the output plotting options
@@ -84,7 +84,7 @@ protected:
                                                         QString reflection = "");
 
 protected:
-  IndirectDataReduction *m_idrUI;
+  IIndirectDataReduction *m_idrUI;
 
 private slots:
   void tabExecutionComplete(bool error);

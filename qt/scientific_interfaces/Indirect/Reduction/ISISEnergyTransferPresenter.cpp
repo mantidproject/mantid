@@ -28,7 +28,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
+IETPresenter::IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
     : IndirectDataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 

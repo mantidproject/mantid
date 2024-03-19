@@ -24,7 +24,7 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent)
+IndirectDataReductionTab::IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
@@ -128,7 +128,7 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const 
  * @return Instrument config widget
  */
 MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
-  return m_idrUI->m_uiForm.iicInstrumentConfiguration;
+  return m_idrUI->getInstrumentConfiguration();
 }
 
 QString IndirectDataReductionTab::getInstrumentName() const {

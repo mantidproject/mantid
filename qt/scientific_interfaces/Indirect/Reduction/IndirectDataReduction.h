@@ -22,6 +22,16 @@ namespace CustomInterfaces {
 
 class IndirectDataReductionTab;
 
+class IIndirectDataReduction {
+public:
+  virtual Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() = 0;
+
+  virtual MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const = 0;
+  virtual QMap<QString, QString> getInstrumentDetails() = 0;
+
+  virtual void showAnalyserAndReflectionOptions(bool visible) = 0;
+};
+
 /**
 This class defines the IndirectDataReduction interface. It handles the overall
 instrument settings
@@ -33,7 +43,7 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 @author Michael Whitty
 */
 
-class IndirectDataReduction : public IndirectInterface {
+class IndirectDataReduction : public IndirectInterface, public IIndirectDataReduction {
   Q_OBJECT
 
 public:
@@ -54,14 +64,15 @@ public:
   /// Handled configuration changes
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace();
+  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() override;
 
   void loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser = "",
                                 const std::string &reflection = "");
 
-  QMap<QString, QString> getInstrumentDetails();
+  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const override;
+  QMap<QString, QString> getInstrumentDetails() override;
 
-  void showAnalyserAndReflectionOptions(bool visible);
+  void showAnalyserAndReflectionOptions(bool visible) override;
 
 signals:
   /// Emitted when the instrument setup is changed
