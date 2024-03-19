@@ -24,13 +24,20 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         super().__init__(*args, **kwargs)
         self._q_bins = None
 
-    def category(self) -> str:
+    @staticmethod
+    def category() -> str:
         return "Simulation"
 
-    def summary(self) -> str:
+    @staticmethod
+    def summary() -> str:
         return "Calculates inelastic neutron scattering over 2D (q,ω) space."
 
-    def seeAlso(self):
+    @staticmethod
+    def version() -> int:
+        return 1
+
+    @staticmethod
+    def seeAlso():
         return ["Abins"]
 
     def PyInit(self) -> None:
@@ -73,10 +80,9 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             if (self.getProperty("ChopperFrequency").value) == "" and (default_frequency is None):
                 issues["ChopperFrequency"] = "This instrument does not have a default chopper frequency"
             elif self.getProperty("ChopperFrequency").value and int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies:
-                issues[
-                    "ChopperFrequency"
-                ] = f"This chopper frequency is not valid for the instrument {instrument_name}. " "Valid frequencies: " + ", ".join(
-                    [str(freq) for freq in allowed_frequencies]
+                issues["ChopperFrequency"] = (
+                    f"This chopper frequency is not valid for the instrument {instrument_name}. "
+                    "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies])
                 )
 
         if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):

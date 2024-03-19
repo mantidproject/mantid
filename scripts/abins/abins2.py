@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,7 +12,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -22,8 +22,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._sample_form = None
-
         self._experimental_file = None
         self._scale = None
         self._setting = None
@@ -31,37 +29,27 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # Save a copy of bin_width for cleanup after it is mutated
         self._initial_parameters_bin_width = abins.parameters.sampling["bin_width"]
 
-    @staticmethod
-    def category() -> str:
+    @classmethod
+    def subscribe(cls) -> None:
+        AlgorithmFactory.subscribe(cls)
+
+    def category(self) -> str:
         return "Simulation"
 
-    @staticmethod
-    def summary() -> str:
-        return "Calculates inelastic neutron scattering against 1-D ω axis."
+    def version(self) -> int:
+        return 2
 
-    @staticmethod
-    def version() -> int:
-        return 1
+    def summary(self) -> str:
+        return "Calculates inelastic neutron scattering against 1-D ω axis."
 
     def seeAlso(self):
         return ["Abins2D"]
 
     def PyInit(self) -> None:
-        from abins.constants import ALL_SAMPLE_FORMS, ONE_DIMENSIONAL_INSTRUMENTS
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
-
-        # Soon-to-be-deprecated properties (i.e. already removed from 2D)
-        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0, doc="Width of bins used during rebinning.")
-
-        self.declareProperty(
-            name="SampleForm",
-            direction=Direction.Input,
-            defaultValue="Powder",
-            validator=StringListValidator(ALL_SAMPLE_FORMS),
-            doc="Form of the sample: Powder.",
-        )
 
         # Declare properties specific to 1D
         self.declareProperty(
@@ -86,10 +74,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
-
-        bin_width = self.getProperty("BinWidthInWavenumber").value
-        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         self._check_advanced_parameter()
 
@@ -117,7 +101,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         s_calculator = abins.SCalculatorFactory.init(
             filename=self._vibrational_or_phonon_data_file,
             temperature=self._temperature,
-            sample_form=self._sample_form,
+            sample_form="Powder",
             abins_data=ab_initio_data,
             instrument=self._instrument,
             quantum_order_num=self._num_quantum_order_events,
@@ -125,9 +109,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
-
-        # Clean up parameter modified by _get_properties()
-        abins.parameters.sampling["bin_width"] = self._initial_parameters_bin_width
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
@@ -172,7 +153,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
-            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
+            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._instrument.get_energy_bin_width()))
             prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -307,9 +288,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         """
         self.get_common_properties()
 
-        self._bin_width = self.getProperty("BinWidthInWavenumber").value
-        self._sample_form = self.getProperty("SampleForm").value
-
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
@@ -317,7 +295,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
 
-        abins.parameters.sampling["bin_width"] = self._bin_width
         self._bins = self.get_instrument().get_energy_bins()
 
         # Increase max event order if using autoconvolution
@@ -325,6 +302,3 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             self._max_event_order = abins.parameters.autoconvolution["max_order"]
         else:
             self._max_event_order = self._num_quantum_order_events
-
-
-AlgorithmFactory.subscribe(Abins)
