@@ -12,11 +12,22 @@
 #include "Reduction/ISISEnergyTransferPresenter.h"
 #include "Reduction/IndirectDataReduction.h"
 
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 using namespace MantidQt::CustomInterfaces;
 using MantidQt::API::BatchAlgorithmRunner;
 using namespace testing;
+
+namespace {
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> defaultGroupingProps() {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("IPF"), *properties);
+  return properties;
+}
+
+} // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -35,7 +46,7 @@ public:
   MOCK_CONST_METHOD0(getCustomGrouping, std::string());
 
   MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
-  MOCK_CONST_METHOD0(getPlotOptionsView, IndirectPlotOptionsView *());
+  MOCK_CONST_METHOD0(getPlotOptionsView, OutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
 
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
@@ -71,16 +82,9 @@ public:
   MOCK_METHOD1(setOutputWorkspaces, void(std::vector<std::string> const &outputWorkspaces));
 
   MOCK_METHOD1(setInstrumentDefault, void(InstrumentData const &instrumentDetails));
-  MOCK_METHOD4(updateRunButton, void(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                     QString const &tooltip));
 };
 
-class MockIndirectDataReduction : public IndirectDataReduction {
-  Q_OBJECT
-
-public:
-  MockIndirectDataReduction() : IndirectDataReduction(nullptr) {}
-};
+class MockIndirectDataReduction : public IIndirectDataReduction {};
 
 class IETPresenterTest : public CxxTest::TestSuite {
 public:
@@ -88,50 +92,26 @@ public:
   static void destroySuite(IETPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    auto view = std::make_unique<NiceMock<MockIETView>>();
     auto model = std::make_unique<NiceMock<MockIETModel>>();
 
-    m_view = view.get();
+    m_view = std::make_unique<NiceMock<MockIETView>>();
     m_model = model.get();
-    m_idrUI = new MockIndirectDataReduction();
+    m_idrUI = std::make_unique<NiceMock<MockIndirectDataReduction>>();
 
-    m_presenter = std::make_unique<IETPresenter>(std::move(view), std::move(model), m_idrUI);
+    m_presenter = std::make_unique<IETPresenter>(m_idrUI.get(), m_view.get(), std::move(model));
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_idrUI));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_idrUI));
 
     m_presenter.reset();
   }
 
   void test_fetch_instrument_data() {
-    QMap<QString, QString> instDetails;
-    instDetails["spectra-min"] = "1";
-    instDetails["spectra-max"] = "10";
-    instDetails["Efixed"] = "0.85";
-    instDetails["cm-1-convert-choice"] = "true";
-    instDetails["save-nexus-choice"] = "true";
-    instDetails["save-ascii-choice"] = "true";
-    instDetails["fold-frames-choice"] = "true";
-
-    IETInputData inputData("iris26184_multi_graphite002_red");
-    IETConversionData conversionData(0.5, 1, 2);
-    IETGroupingData groupingData(IETGroupingType::DEFAULT);
-    IETBackgroundData backgroundData(false);
-    IETAnalysisData analysisData;
-    IETRebinData rebinData;
-    IETOutputData outputData;
-
-    IETRunData runData(inputData, conversionData, groupingData, backgroundData, analysisData, rebinData, outputData);
-
-    auto instrument = QString::fromStdString("IRIS");
-    auto analyser = QString::fromStdString("Analyser");
-    auto reflection = QString::fromStdString("Reflection");
-
     ON_CALL(*m_model, runIETAlgorithm(_, _, _)).WillByDefault(Return(""));
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    ON_CALL(*m_view, getRunData());
 
     ExpectationSet expectRunData = EXPECT_CALL(*m_view, getRunData()).Times(1);
     ExpectationSet expectRunAlgo = EXPECT_CALL(*m_model, runIETAlgorithm(_, _, _)).Times(1).After(expectRunData);
@@ -142,7 +122,7 @@ public:
 private:
   std::unique_ptr<IETPresenter> m_presenter;
 
-  MockIETView *m_view;
-  MockIETModel *m_model;
-  IndirectDataReduction *m_idrUI;
+  std::unique_ptr<NiceMock<MockIETView>> m_view;
+  NiceMock<MockIETModel> *m_model;
+  std::unique_ptr<NiceMock<MockIndirectDataReduction>> m_idrUI;
 };
