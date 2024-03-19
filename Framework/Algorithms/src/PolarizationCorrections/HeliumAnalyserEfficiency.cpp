@@ -49,9 +49,6 @@ static const std::string END_LAMBDA = "EndLambda";
 static const std::string STOP_ON_FIT_ERROR = "StopOnFitError";
 } // namespace PropertyNames
 
-/// Empty default constructor algorithm() calls the constructor in the base class
-HeliumAnalyserEfficiency::HeliumAnalyserEfficiency() : Algorithm() {}
-
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
   auto validator = std::make_shared<CompositeValidator>();

@@ -23,7 +23,6 @@ Docs
 */
 class MANTID_ALGORITHMS_DLL HeliumAnalyserEfficiency final : public API::Algorithm {
 public:
-  HeliumAnalyserEfficiency();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "HeliumAnalyserEfficiency"; }
   /// Summary of algorithms purpose
