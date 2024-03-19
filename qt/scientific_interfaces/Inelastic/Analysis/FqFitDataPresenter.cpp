@@ -306,12 +306,12 @@ void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog,
     dialog->setParameterNames({});
 }
 
-void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters) {
+void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters const &parameters) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(parameters));
 }
 
-std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &parameters) const {
+std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters const &parameters) const {
   std::vector<std::string> types;
   if (!parameters.widths.empty())
     types.emplace_back("Width");

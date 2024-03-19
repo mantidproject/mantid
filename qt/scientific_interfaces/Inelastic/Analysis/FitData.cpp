@@ -90,7 +90,7 @@ std::string rearrangeSpectraRangeStrings(std::string const &string) {
   std::vector<std::string> subStrings = splitStringBy(string, ",");
   for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
     spectraString += rearrangeSpectraSubString(*it);
-    spectraString += it != subStrings.end() ? "," : "";
+    spectraString += it != subStrings.end() - 1 ? "," : "";
   }
   return spectraString;
 }

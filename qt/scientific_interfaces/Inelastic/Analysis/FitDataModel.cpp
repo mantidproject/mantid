@@ -89,7 +89,7 @@ size_t FitDataModel::getNumberOfDomains() const {
 
 std::vector<double> FitDataModel::getQValuesForData() const {
   std::vector<double> qValues;
-  for (auto &fitData : *m_fittingData) {
+  for (auto const &fitData : *m_fittingData) {
     auto indexQValues = fitData.getQValues();
     qValues.insert(std::end(qValues), std::begin(indexQValues), std::end(indexQValues));
   }
@@ -109,7 +109,7 @@ std::vector<std::pair<std::string, size_t>> FitDataModel::getResolutionsForFit()
     }
 
     const auto singleSpectraResolution = m_resolutions->at(index).lock()->getNumberHistograms() == 1;
-    for (auto &spectraIndex : spectra) {
+    for (auto const &spectraIndex : spectra) {
       const auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
       resolutionVector.emplace_back(m_resolutions->at(index).lock()->getName(), resolutionIndex);
     }
@@ -188,11 +188,11 @@ void FitDataModel::addWorkspace(const std::string &workspaceName, const Function
 
 void FitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
-    for (auto &fitData : *m_fittingData) {
-      if (equivalentWorkspaces(workspace, fitData.workspace())) {
-        fitData.combine(FitData(workspace, spectra));
-        return;
-      }
+    auto it = std::find_if((*m_fittingData).begin(), (*m_fittingData).end(), [&](FitData const &fitData) {
+      return equivalentWorkspaces(workspace, fitData.workspace());
+    });
+    if (it != (*m_fittingData).end()) {
+      (*it).combine(FitData(workspace, spectra));
     }
   }
   addNewWorkspace(workspace, spectra);

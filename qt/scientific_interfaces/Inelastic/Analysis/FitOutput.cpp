@@ -56,8 +56,7 @@ std::vector<std::string> getAxisLabels(Mantid::API::TextAxis const *axis) {
 }
 
 std::vector<std::string> getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace, std::size_t index) {
-  auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(index));
-  if (axis)
+  if (auto const *axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(index)))
     return getAxisLabels(axis);
   return std::vector<std::string>();
 }

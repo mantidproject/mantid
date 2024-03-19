@@ -17,7 +17,6 @@ namespace IDA {
 
 class FitDataView;
 class FitPlotView;
-class InelasticFitPropertyBrowser;
 
 class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
   Q_OBJECT

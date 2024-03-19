@@ -120,7 +120,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const Ma
 }
 
 void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IFitDataModel *fittingData) {
-  for (auto index = FitDomainIndex{0}; index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
+  for (auto index = FitDomainIndex{0}; index < FitDomainIndex{fittingData->getNumberOfDomains()}; ++index) {
     std::string suffix = index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(fitAlgorithm, fittingData->getWorkspace(index), fittingData->getSpectrum(index),
                                   fittingData->getFittingRange(index), fittingData->getExcludeRegionVector(index),
@@ -184,7 +184,7 @@ std::ostringstream &addInputString(const std::string &workspaceName, size_t work
 
 std::string constructInputString(const IFitDataModel *fittingData) {
   std::ostringstream input;
-  for (auto index = FitDomainIndex{0}; index < fittingData->getNumberOfDomains(); index++) {
+  for (auto index = FitDomainIndex{0}; index < fittingData->getNumberOfDomains(); ++index) {
     addInputString(fittingData->getWorkspace(index)->getName(), fittingData->getSpectrum(index), input);
   }
   return input.str();
@@ -275,7 +275,7 @@ void setFunctionParameters(const MultiDomainFunction_sptr &function, const std::
 }
 
 void setFirstBackground(IFunction_sptr function, double value) {
-  firstFunctionWithParameter(std::move(function), "Background", "A0")->setParameter("A0", value);
+  firstFunctionWithParameter(function, "Background", "A0")->setParameter("A0", value);
 }
 
 } // namespace
