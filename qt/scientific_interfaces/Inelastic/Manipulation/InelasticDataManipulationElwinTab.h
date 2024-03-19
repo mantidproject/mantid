@@ -31,7 +31,6 @@ public:
   virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
   virtual void handlePlotPreviewClicked() = 0;
-  virtual void handleFilesFound() = 0;
   virtual void handlePreviewSpectrumChanged(int spectrum) = 0;
   virtual void handlePreviewIndexChanged(int index) = 0;
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
@@ -56,7 +55,6 @@ public:
   void handleRunClicked() override;
   void handleSaveClicked() override;
   void handlePlotPreviewClicked() override;
-  void handleFilesFound() override;
   void handlePreviewSpectrumChanged(int spectrum) override;
   void handlePreviewIndexChanged(int index) override;
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
@@ -65,16 +63,11 @@ public:
 
 protected:
   void runComplete(bool error) override;
-  void newInputFilesFromDialog();
+  void newInputDataFromDialog();
   virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
-  void runFileInput();
-  void runWorkspaceInput();
-
-  void setFileExtensionsByName(bool filter) override;
   void updateTableFromModel();
-  void newInputFiles();
   void updateIntegrationRange();
 
   int getSelectedSpectrum() const;

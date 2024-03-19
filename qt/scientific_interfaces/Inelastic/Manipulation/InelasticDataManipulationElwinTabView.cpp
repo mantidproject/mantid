@@ -144,7 +144,6 @@ void InelasticDataManipulationElwinTabView::setup() {
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(notifyAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveDataClicked()));
 
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(notifyFilesFound()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
   connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
@@ -172,8 +171,6 @@ void InelasticDataManipulationElwinTabView::notifySaveClicked() { m_presenter->h
 
 void InelasticDataManipulationElwinTabView::notifyPlotPreviewClicked() { m_presenter->handlePlotPreviewClicked(); }
 
-void InelasticDataManipulationElwinTabView::notifyFilesFound() { m_presenter->handleFilesFound(); }
-
 void InelasticDataManipulationElwinTabView::notifySelectedSpectrumChanged(int index) {
   m_presenter->handlePreviewSpectrumChanged(index);
 }
@@ -199,14 +196,13 @@ void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
 }
 
 void InelasticDataManipulationElwinTabView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
-  addDataWksOrFile(dialog);
+  addData(dialog);
 }
 
 /** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
- * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is
- * already filtered.
+ *
  */
-void InelasticDataManipulationElwinTabView::addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
     const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     if (indirectDialog) {
@@ -258,14 +254,6 @@ QModelIndexList InelasticDataManipulationElwinTabView::getSelectedData() {
   return m_uiForm.tbElwinData->selectionModel()->selectedIndexes();
 }
 
-MantidQt::API::FileFinderWidget *InelasticDataManipulationElwinTabView::getFileFinderWidget() {
-  return m_uiForm.dsInputFiles;
-}
-
-void InelasticDataManipulationElwinTabView::setFBSuffixes(QStringList const &suffix) {
-  m_uiForm.dsInputFiles->setFileExtensions(suffix);
-}
-
 void InelasticDataManipulationElwinTabView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   auto inst = ws->getInstrument();
   // Set sample environment log name
@@ -291,30 +279,7 @@ void InelasticDataManipulationElwinTabView::setDefaultSampleLog(const Mantid::AP
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTabView::newInputFiles() {
-  // Clear the existing list of files
-  m_uiForm.cbPreviewFile->clear();
-
-  // Populate the combo box with the filenames
-  QStringList filenames = getInputFilenames();
-  for (auto rawFilename : filenames) {
-    QFileInfo inputFileInfo(rawFilename);
-    QString sampleName = inputFileInfo.baseName();
-    // Add the item using the base filename as the display string and the raw
-    // filename as the data value
-    m_uiForm.cbPreviewFile->addItem(sampleName, rawFilename);
-  }
-
-  // Default to the first file
-  setPreviewToDefault();
-}
-
-/**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(std::vector<std::string> const &names) {
+void InelasticDataManipulationElwinTabView::newInputDataFromDialog(std::vector<std::string> const &names) {
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
@@ -336,14 +301,6 @@ void InelasticDataManipulationElwinTabView::setPreviewToDefault() {
                    m_properties["IntegrationEnd"], range);
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
                    m_properties["BackgroundEnd"], range);
-}
-
-void InelasticDataManipulationElwinTabView::newPreviewFileSelected(const MatrixWorkspace_sptr &workspace) {
-  if (m_uiForm.inputChoice->currentIndex() == 0) {
-    int const numHist = static_cast<int>(workspace->getNumberHistograms()) - 1;
-    m_uiForm.spPlotSpectrum->setMaximum(numHist);
-    m_uiForm.spPlotSpectrum->setValue(0);
-  }
 }
 
 /**
@@ -545,8 +502,6 @@ void InelasticDataManipulationElwinTabView::setSaveResultEnabled(const bool enab
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void InelasticDataManipulationElwinTabView::clearInputFiles() { m_uiForm.dsInputFiles->clear(); }
-
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
   m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
@@ -555,17 +510,14 @@ void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex m
 
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                                                 const std::vector<WorkspaceIndex>::const_iterator &to) {
-  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this,
-             SIGNAL(notifySelectedSpectrumChanged(int)));
+  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
     m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SIGNAL(notifySelectedSpectrumChanged(int)));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
 }
-
-int InelasticDataManipulationElwinTabView::getCurrentInputIndex() { return m_uiForm.inputChoice->currentIndex(); }
 
 std::string InelasticDataManipulationElwinTabView::getPreviewWorkspaceName(int index) const {
   return m_uiForm.cbPreviewFile->itemText(index).toStdString();
@@ -575,18 +527,16 @@ std::string InelasticDataManipulationElwinTabView::getPreviewFilename(int index)
   return m_uiForm.cbPreviewFile->itemData(index).toString().toStdString();
 }
 
-int InelasticDataManipulationElwinTabView::getPreviewSpec() { return m_uiForm.spPlotSpectrum->value(); }
+int InelasticDataManipulationElwinTabView::getPreviewSpec() {
+  int tabIndex = m_uiForm.elwinPreviewSpec->currentIndex();
+  return tabIndex == 0 ? m_uiForm.spPlotSpectrum->value() : m_uiForm.cbPlotSpectrum->currentText().toInt();
+}
 
 std::string InelasticDataManipulationElwinTabView::getCurrentPreview() const {
   return m_uiForm.cbPreviewFile->currentText().toStdString();
 }
 
-QStringList InelasticDataManipulationElwinTabView::getInputFilenames() { return m_uiForm.dsInputFiles->getFilenames(); }
-
-bool InelasticDataManipulationElwinTabView::isLoadHistory() { return m_uiForm.ckLoadHistory->isChecked(); }
-
-bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupInput->isChecked(); }
-
+bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupOutput->isChecked(); }
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {

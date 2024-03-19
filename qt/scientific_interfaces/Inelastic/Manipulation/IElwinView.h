@@ -29,28 +29,20 @@ public:
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
   virtual OutputPlotOptionsView *getPlotOptions() const = 0;
-  virtual void setFBSuffixes(QStringList const &suffix) = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &from,
                                    const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &to) = 0;
 
-  virtual void newPreviewFileSelected(const Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
-  virtual int getCurrentInputIndex() = 0;
-  virtual MantidQt::API::FileFinderWidget *getFileFinderWidget() = 0;
-
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
-  virtual void newInputFiles() = 0;
-  virtual void newInputFilesFromDialog(std::vector<std::string> const &names) = 0;
+  virtual void newInputDataFromDialog(std::vector<std::string> const &names) = 0;
   virtual void clearPreviewFile() = 0;
-  virtual void clearInputFiles() = 0;
   virtual void setRunIsRunning(const bool running) = 0;
   virtual void setSaveResultEnabled(const bool enabled) = 0;
   virtual int getPreviewSpec() = 0;
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
   virtual std::string getPreviewFilename(int index) const = 0;
   virtual std::string getCurrentPreview() const = 0;
-  virtual QStringList getInputFilenames() = 0;
 
   // controls for dataTable
   virtual void clearDataTable() = 0;
@@ -59,7 +51,7 @@ public:
   virtual QModelIndexList getSelectedData() = 0;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
-  virtual bool isLoadHistory() = 0;
+  // virtual bool isLoadHistory() = 0;
   virtual bool isGroupInput() = 0;
 
   // getters/setters for m_properties

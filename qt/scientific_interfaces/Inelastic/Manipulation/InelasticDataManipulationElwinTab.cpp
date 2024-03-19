@@ -99,66 +99,6 @@ void InelasticDataManipulationElwinTab::setup() {
 }
 
 void InelasticDataManipulationElwinTab::run() {
-  if (m_view->getCurrentInputIndex() == 0) {
-    runFileInput();
-  } else {
-    runWorkspaceInput();
-  }
-}
-
-void InelasticDataManipulationElwinTab::runFileInput() {
-  m_view->setRunIsRunning(true);
-
-  QStringList inputFilenames = m_view->getInputFilenames();
-  inputFilenames.sort();
-
-  // Get workspace names
-  std::string inputGroupWsName = "IDA_Elwin_Input";
-
-  QFileInfo firstFileInfo(inputFilenames[0]);
-  const auto filename = firstFileInfo.baseName().toStdString();
-  auto workspaceBaseName = filename.substr(0, filename.find_last_of("_"));
-
-  if (inputFilenames.size() > 1) {
-    QFileInfo fileInfo(inputFilenames[inputFilenames.length() - 1]);
-    auto runNumber = fileInfo.baseName().toStdString();
-    runNumber = runNumber.substr(0, runNumber.find_first_of("_"));
-    size_t runNumberStart = 0;
-    const auto strLength = runNumber.length();
-    for (size_t i = 0; i < strLength; i++) {
-      if (std::isdigit(static_cast<unsigned char>(runNumber[i]))) {
-        runNumberStart = i;
-        break;
-      }
-    }
-    // reassemble workspace base name with additional run number
-    runNumber = runNumber.substr(runNumberStart, strLength);
-    auto baseName = firstFileInfo.baseName().toStdString();
-    const auto prefix = baseName.substr(0, baseName.find_first_of("_"));
-    const auto suffix = baseName.substr(baseName.find_first_of("_"));
-    workspaceBaseName = prefix + "-" + runNumber + suffix;
-  }
-
-  // Load input files
-  std::string inputWorkspacesString;
-
-  for (auto &inputFilename : inputFilenames) {
-    QFileInfo inputFileInfo(inputFilename);
-    auto const workspaceName = inputFileInfo.baseName().toStdString();
-    m_model->setupLoadAlgorithm(m_batchAlgoRunner, inputFilename.toStdString(), workspaceName);
-    inputWorkspacesString += workspaceName + ",";
-  }
-  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, workspaceBaseName, inputGroupWsName, m_view->getLogName(),
-                                      m_view->getLogValue());
-
-  m_batchAlgoRunner->executeBatchAsync();
-
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = workspaceBaseName + "_elwin_eq2";
-}
-
-void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   m_view->setRunIsRunning(true);
 
   // Get workspace names
@@ -215,14 +155,6 @@ void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
 
 bool InelasticDataManipulationElwinTab::validate() {
   UserInputValidator uiv;
-  if (m_view->getCurrentInputIndex() == 0) {
-    auto const inputFileWidget = m_view->getFileFinderWidget();
-    uiv.checkFileFinderWidgetIsValid("Input", inputFileWidget);
-    auto const suffixes = getFilteredSuffixes(inputFileWidget->getFilenames());
-    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
-      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-  }
-
   auto rangeOne = std::make_pair(m_view->getIntegrationStart(), m_view->getIntegrationEnd());
   uiv.checkValidRange("Range One", rangeOne);
   bool useTwoRanges = m_view->getBackgroundSubtraction();
@@ -236,11 +168,6 @@ bool InelasticDataManipulationElwinTab::validate() {
   if (!errorMessage.isEmpty())
     m_view->showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
-}
-
-void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
-  auto const tabName("Elwin");
-  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
 }
 
 void InelasticDataManipulationElwinTab::handleValueChanged(std::string const &propName, double value) {
@@ -268,24 +195,10 @@ void InelasticDataManipulationElwinTab::handleValueChanged(std::string const &pr
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTab::newInputFiles() {
-  m_view->clearPreviewFile();
-  m_view->newInputFiles();
-
-  std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
-  setInputWorkspace(inputWs);
-}
-
-/**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void InelasticDataManipulationElwinTab::newInputFilesFromDialog() {
+void InelasticDataManipulationElwinTab::newInputDataFromDialog() {
   // Clear the existing list of files
   m_view->clearPreviewFile();
-  m_view->newInputFilesFromDialog(m_dataModel->getWorkspaceNames());
+  m_view->newInputDataFromDialog(m_dataModel->getWorkspaceNames());
 
   std::string const wsname = m_view->getPreviewWorkspaceName(0);
   auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
@@ -314,25 +227,22 @@ void InelasticDataManipulationElwinTab::handlePreviewIndexChanged(int index) {
 
 void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string &workspaceName,
                                                                const std::string &filename) {
-  auto loadHistory = m_view->isLoadHistory();
+  auto loadHistory = true;
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
     auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
 
     setInputWorkspace(workspace);
 
-    m_view->newPreviewFileSelected(workspace);
     updateAvailableSpectra();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   }
 }
 
 void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const std::string &workspaceName) {
-  if (m_view->getCurrentInputIndex() == 1) {
-    auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
-    setInputWorkspace(workspace);
-    updateAvailableSpectra();
-    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  }
+  auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
+  setInputWorkspace(workspace);
+  updateAvailableSpectra();
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged(int spectrum) {
@@ -399,7 +309,7 @@ void InelasticDataManipulationElwinTab::handleAddData(MantidWidgets::IAddWorkspa
   try {
     addDataToModel(dialog);
     updateTableFromModel();
-    newInputFilesFromDialog();
+    newInputDataFromDialog();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -436,14 +346,11 @@ void InelasticDataManipulationElwinTab::handleRemoveSelectedData() {
 
 void InelasticDataManipulationElwinTab::updateAvailableSpectra() {
   auto spectra = m_dataModel->getSpectra(findWorkspaceID());
-  if (m_view->getCurrentInputIndex() == 1) {
-    if (spectra.isContinuous()) {
-      auto const minmax = spectra.getMinMax();
-      m_view->setAvailableSpectra(minmax.first, minmax.second);
-    } else {
-      m_view->setAvailableSpectra(spectra.begin(), spectra.end());
-    }
-  }
+  if (spectra.isContinuous()) {
+    auto const minmax = spectra.getMinMax();
+    m_view->setAvailableSpectra(minmax.first, minmax.second);
+  } else
+    m_view->setAvailableSpectra(spectra.begin(), spectra.end());
 }
 
 size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
@@ -452,13 +359,6 @@ size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
   auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
   size_t workspaceID = findWorkspace - allWorkspaces.begin();
   return workspaceID;
-}
-
-void InelasticDataManipulationElwinTab::handleFilesFound() {
-  if (validate()) {
-    newInputFiles();
-    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  }
 }
 
 /**

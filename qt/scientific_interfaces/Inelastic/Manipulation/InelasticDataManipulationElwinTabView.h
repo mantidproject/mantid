@@ -33,28 +33,20 @@ public:
   void setup() override;
 
   OutputPlotOptionsView *getPlotOptions() const override;
-  void setFBSuffixes(QStringList const &suffix) override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
   void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                            const std::vector<WorkspaceIndex>::const_iterator &to) override;
 
-  void newPreviewFileSelected(const MatrixWorkspace_sptr &workspace) override;
-  int getCurrentInputIndex() override;
-  MantidQt::API::FileFinderWidget *getFileFinderWidget() override;
-
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
-  void newInputFiles() override;
-  void newInputFilesFromDialog(std::vector<std::string> const &names) override;
+  void newInputDataFromDialog(std::vector<std::string> const &names) override;
   void clearPreviewFile() override;
-  void clearInputFiles() override;
   void setRunIsRunning(const bool running) override;
   void setSaveResultEnabled(const bool enabled) override;
   int getPreviewSpec() override;
   std::string getPreviewWorkspaceName(int index) const override;
   std::string getPreviewFilename(int index) const override;
   std::string getCurrentPreview() const override;
-  QStringList getInputFilenames() override;
 
   // controls for dataTable
   void clearDataTable() override;
@@ -62,7 +54,6 @@ public:
   QModelIndexList getSelectedData() override;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
-  bool isLoadHistory() override;
   bool isGroupInput() override;
 
   // getters/setters for m_properties
@@ -90,7 +81,6 @@ private slots:
   void notifyPlotPreviewClicked();
   void notifyRunClicked();
   void notifySaveClicked();
-  void notifyFilesFound();
   void notifySelectedSpectrumChanged(int);
   void notifyPreviewIndexChanged(int);
   void notifyAddWorkspaceDialog();
@@ -119,7 +109,7 @@ private:
   void setButtonsEnabled(const bool enabled);
   void setRunEnabled(const bool enabled);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
-  void addDataWksOrFile(MantidWidgets::IAddWorkspaceDialog const *dialog);
+  void addData(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   IElwinPresenter *m_presenter;
   QtTreePropertyBrowser *m_elwTree;
