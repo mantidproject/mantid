@@ -27,7 +27,7 @@ public:
   virtual IETSaveData getSaveData() const = 0;
 
   virtual std::string getGroupOutputOption() const = 0;
-  virtual OutputPlotOptionsView *getPlotOptionsView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptionsView() const = 0;
   virtual bool getGroupOutputCheckbox() const = 0;
 
   virtual std::string getFirstFilename() const = 0;
@@ -91,7 +91,7 @@ public:
   IETSaveData getSaveData() const override;
 
   std::string getGroupOutputOption() const override;
-  OutputPlotOptionsView *getPlotOptionsView() const override;
+  IOutputPlotOptionsView *getPlotOptionsView() const override;
   bool getGroupOutputCheckbox() const override;
 
   std::string getFirstFilename() const override;

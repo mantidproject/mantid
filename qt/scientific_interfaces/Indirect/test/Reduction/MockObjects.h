@@ -24,6 +24,9 @@ using namespace MantidQt::CustomInterfaces;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockIndirectDataReduction : public IIndirectDataReduction {
+public:
+  virtual ~MockIndirectDataReduction() = default;
+
   MOCK_METHOD0(instrumentWorkspace, Mantid::API::MatrixWorkspace_sptr());
 
   MOCK_CONST_METHOD0(getInstrumentConfiguration, MantidQt::MantidWidgets::IndirectInstrumentConfig *());
@@ -33,8 +36,9 @@ class MockIndirectDataReduction : public IIndirectDataReduction {
 };
 
 class MockIETModel : public IIETModel {
-
 public:
+  virtual ~MockIETModel() = default;
+
   MOCK_METHOD2(setInstrumentProperties, void(IAlgorithmRuntimeProps &properties, InstrumentData const &instData));
 
   MOCK_METHOD1(validateRunData, std::vector<std::string>(IETRunData const &runData));
@@ -59,13 +63,15 @@ public:
 
 class MockIETView : public IIETView {
 public:
+  virtual ~MockIETView() = default;
+
   MOCK_METHOD1(subscribePresenter, void(IIETPresenter *presenter));
 
   MOCK_CONST_METHOD0(getRunData, IETRunData());
   MOCK_CONST_METHOD0(getPlotData, IETPlotData());
   MOCK_CONST_METHOD0(getSaveData, IETSaveData());
   MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
-  MOCK_CONST_METHOD0(getPlotOptionsView, OutputPlotOptionsView *());
+  MOCK_CONST_METHOD0(getPlotOptionsView, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
   MOCK_CONST_METHOD0(isRunFilesValid, bool());
