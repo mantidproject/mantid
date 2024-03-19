@@ -54,10 +54,11 @@ HeliumAnalyserEfficiency::HeliumAnalyserEfficiency() : Algorithm() {}
 
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto val = std::make_shared<CompositeValidator>();
-  val->add<WorkspaceUnitValidator>("Wavelength");
-  val->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, val));
+  auto validator = std::make_shared<CompositeValidator>();
+  validator->add<WorkspaceUnitValidator>("Wavelength");
+  validator->add<HistogramValidator>();
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator));
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "T", Direction::Output));
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "p_He", Direction::Output));
   declareProperty(
