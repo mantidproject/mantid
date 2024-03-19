@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAlgorithms/PolarisedSANS/HeliumAnalyserEfficiency.h"
+#include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
