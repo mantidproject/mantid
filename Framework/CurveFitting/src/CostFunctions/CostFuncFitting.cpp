@@ -329,6 +329,8 @@ double CostFuncFitting::val() const {
   return m_value;
 }
 
+int orderOfMagnitude(double num) { return (num == 0) ? 0 : static_cast<int>(floor(log10(fabs(num)))); }
+
 void CostFuncFitting::normPenalties() {
   if (m_includePenalty) {
     for (size_t i = 0; i < m_function->nParams(); ++i) {
@@ -338,10 +340,10 @@ void CostFuncFitting::normPenalties() {
       if (c) {
         // std::cout << "Setting penalty from " << c->check();
         // double dp = c->getSpacing();
-        // if (dp > 0) c->setPenaltyFactor(m_value / (2 * dp * dp));
+        // if (dp > 0) c->setPenaltyFactor(m_value / (2 * dp * dp));   // At beginning of fitting, dp is always zero
         // std::cout << " to " << c->check() << std::endl;
         double par_val = c->getParameter();
-        double new_factor = 10e3 * std::log(1 / par_val * 10);
+        double new_factor = 1e4 / pow(10, 2 * orderOfMagnitude(par_val));
         std::cout << "Setting penalty from " << c->getPenaltyFactor() << " to " << new_factor << std::endl;
         c->setPenaltyFactor(new_factor);
       }

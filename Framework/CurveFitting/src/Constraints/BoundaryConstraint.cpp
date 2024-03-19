@@ -175,7 +175,7 @@ double BoundaryConstraint::check() {
 
   double dp = getSpacing();
 
-  penalty = m_penaltyFactor * dp;
+  penalty = m_penaltyFactor * dp * dp;
   g_log.notice() << parameterName() << " penalty: " << penalty << "\n";
 
   return penalty;
