@@ -30,7 +30,7 @@ class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, publ
   Q_OBJECT
 
 public:
-  IETPresenter(IndirectDataReduction *idrUI, IETView *view);
+  IETPresenter(IndirectDataReduction *idrUI, IETView *view, std::unique_ptr<IETModel> model);
   ~IETPresenter() override;
 
   void setup() override;
@@ -64,8 +64,8 @@ private:
   std::string m_outputGroupName;
   std::vector<std::string> m_outputWorkspaces;
 
-  std::unique_ptr<IETModel> m_model;
   IETView *m_view;
+  std::unique_ptr<IETModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -28,8 +28,8 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IETView *view)
-    : IndirectDataReductionTab(idrUI), m_model(std::make_unique<IETModel>()), m_view(view) {
+IETPresenter::IETPresenter(IndirectDataReduction *idrUI, IETView *view, std::unique_ptr<IETModel> model)
+    : IndirectDataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 
   setOutputPlotOptionsPresenter(

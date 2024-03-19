@@ -139,7 +139,7 @@ private:
    * @param name Name to be displayed on tab
    */
 
-  template <typename TabPresenter, typename TabView> void addMVPTab(const QString &name) {
+  template <typename TabPresenter, typename TabView, typename TabModel> void addMVPTab(const QString &name) {
     QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
     QVBoxLayout *tabLayout = new QVBoxLayout(tabWidget);
     tabWidget->setLayout(tabLayout);
@@ -153,7 +153,8 @@ private:
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    IndirectDataReductionTab *tabIDRContent = new TabPresenter(this, new TabView(tabContent));
+    IndirectDataReductionTab *tabIDRContent =
+        new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>());
 
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
