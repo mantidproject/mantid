@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,8 +42,20 @@ private:
   bool processGroups() override;
   void validateGroupInput();
   void calculateAnalyserEfficiency();
-  Workspace_sptr workspaceForSpinConfig(WorkspaceGroup_sptr group, const std::vector<std::string> &spinConfigOrder,
-                                        const std::string &spinConfig);
+  MatrixWorkspace_sptr workspaceForSpinConfig(WorkspaceGroup_sptr group,
+                                              const std::vector<std::string> &spinConfigOrder,
+                                              const std::string &spinConfig);
+  MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);
+  MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
+                                       const MantidVec &yData, const MantidVec &eData,
+                                       const std::string &xUnit = "Wavelength");
+  MatrixWorkspace_sptr subtractWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsToSubtract);
+  MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
+  void fitAnalyserEfficiency(const double &mu, MatrixWorkspace_sptr p, double &pHe, double &pHeError,
+                             MantidVec &wavelengthValues);
+  void calculateTransmission(const MantidVec &wavelengthValues, const double &pHe, const double &pHeError,
+                             const double &mu, MantidVec &tPara, MantidVec &tAnti, MantidVec &tParaErrors,
+                             MantidVec &tAntiErrors);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
 };
