@@ -20,6 +20,8 @@ class IIETPresenter;
 
 class MANTIDQT_INDIRECT_DLL IIETView {
 public:
+  virtual ~IIETView() = default;
+
   virtual void subscribePresenter(IIETPresenter *presenter) = 0;
 
   virtual IETRunData getRunData() const = 0;
@@ -83,7 +85,6 @@ class MANTIDQT_INDIRECT_DLL IETView : public QWidget, public IIETView {
 
 public:
   IETView(QWidget *parent = nullptr);
-  ~IETView();
 
   void subscribePresenter(IIETPresenter *presenter) override;
 

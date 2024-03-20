@@ -15,16 +15,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class IIndirectDataReduction;
 
-/** IndirectTransmission
-
-Provides the UI interface to the IndirectTransmissionMonitor algorithm to
-calculate
-sample transmission using a sample and container raw run file.
-
-
-@author Samuel Jackson
-@date 13/08/2013
-*/
 class MANTIDQT_INDIRECT_DLL IndirectTransmission : public IndirectDataReductionTab {
   Q_OBJECT
 

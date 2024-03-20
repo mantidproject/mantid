@@ -39,8 +39,6 @@ IETView::IETView(QWidget *parent) {
           SLOT(saveCustomGroupingClicked(std::string const &)));
 }
 
-IETView::~IETView() {}
-
 void IETView::subscribePresenter(IIETPresenter *presenter) { m_presenter = presenter; }
 
 IETRunData IETView::getRunData() const {

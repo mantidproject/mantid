@@ -24,6 +24,8 @@ class IndirectDataReductionTab;
 
 class IIndirectDataReduction {
 public:
+  virtual ~IIndirectDataReduction() = default;
+
   virtual Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() = 0;
 
   virtual MantidWidgets::IInstrumentConfig *getInstrumentConfiguration() const = 0;

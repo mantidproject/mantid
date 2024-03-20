@@ -20,6 +20,8 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IIETModel {
 public:
+  virtual ~IIETModel() = default;
+
   virtual void setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData) = 0;
 
   virtual std::vector<std::string> validateRunData(IETRunData const &runData) = 0;

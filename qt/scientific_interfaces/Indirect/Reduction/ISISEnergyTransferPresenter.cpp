@@ -38,8 +38,6 @@ IETPresenter::IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::u
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 }
 
-IETPresenter::~IETPresenter() = default;
-
 void IETPresenter::setup() {}
 
 bool IETPresenter::validateInstrumentDetails() {

@@ -20,6 +20,8 @@ namespace MantidWidgets {
 
 class IInstrumentConfig {
 public:
+  virtual ~IInstrumentConfig() = default;
+
   virtual QStringList getTechniques() = 0;
   virtual void setTechniques(const QStringList &techniques) = 0;
 
