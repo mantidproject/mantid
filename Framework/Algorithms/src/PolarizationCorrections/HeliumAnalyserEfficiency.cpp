@@ -98,14 +98,20 @@ void HeliumAnalyserEfficiency::init() {
  */
 std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
-  const auto ws = AnalysisDataService::Instance().retrieve(getProperty(PropertyNames::INPUT_WORKSPACE));
-  if (!ws->isGroup()) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
+  const std::string inputWorkspaceName = getProperty(PropertyNames::INPUT_WORKSPACE);
+  if (!AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
+    errorList[PropertyNames::INPUT_WORKSPACE] =
+        "The input workspace " + inputWorkspaceName + " does not exist in the ADS.";
   } else {
-    const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
-    if (wsGroup->size() != 4) {
-      errorList[PropertyNames::INPUT_WORKSPACE] =
-          "The input group workspace must have four periods corresponding to the four spin configurations.";
+    const auto ws = AnalysisDataService::Instance().retrieve(getProperty(PropertyNames::INPUT_WORKSPACE));
+    if (!ws->isGroup()) {
+      errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
+    } else {
+      const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      if (wsGroup->size() != 4) {
+        errorList[PropertyNames::INPUT_WORKSPACE] =
+            "The input group workspace must have four periods corresponding to the four spin configurations.";
+      }
     }
   }
 
