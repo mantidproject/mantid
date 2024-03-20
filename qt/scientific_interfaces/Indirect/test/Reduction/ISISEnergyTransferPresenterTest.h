@@ -93,14 +93,29 @@ public:
     m_presenter->notifySaveClicked();
   }
 
-  void test_fetch_instrument_data() {
-    // ON_CALL(*m_model, runIETAlgorithm(_, _, _)).WillByDefault(Return(""));
-    // ON_CALL(*m_view, getRunData());
+  void test_notifyRunFinished_sets_run_text_to_invalid_if_the_run_files_are_not_valid() {
+    ON_CALL(*m_view, isRunFilesValid()).WillByDefault(Return(false));
 
-    // ExpectationSet expectRunData = EXPECT_CALL(*m_view, getRunData()).Times(1);
-    // ExpectationSet expectRunAlgo = EXPECT_CALL(*m_model, runIETAlgorithm(_, _, _)).Times(1).After(expectRunData);
+    EXPECT_CALL(*m_view, setRunButtonText("Invalid Run(s)")).Times(1);
+    EXPECT_CALL(*m_view, setRunFilesEnabled(true)).Times(1);
 
-    // m_presenter->run();
+    m_presenter->notifyRunFinished();
+  }
+
+  void test_notifyRunFinished_sets_the_run_text_when_the_run_files_are_valid() {
+    std::string const filename = "filename.nxs";
+    double const detailedBalance = 1.1;
+
+    ON_CALL(*m_view, isRunFilesValid()).WillByDefault(Return(true));
+
+    ON_CALL(*m_view, getFirstFilename()).WillByDefault(Return(filename));
+    ON_CALL(*m_model, loadDetailedBalance(filename)).WillByDefault(Return(detailedBalance));
+
+    EXPECT_CALL(*m_view, setDetailedBalance(detailedBalance)).Times(1);
+    EXPECT_CALL(*m_view, setRunButtonText("Run")).Times(1);
+    EXPECT_CALL(*m_view, setRunFilesEnabled(true)).Times(1);
+
+    m_presenter->notifyRunFinished();
   }
 
 private:
