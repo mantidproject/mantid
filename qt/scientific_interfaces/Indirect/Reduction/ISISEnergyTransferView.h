@@ -77,8 +77,14 @@ public:
   void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes);
   void setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
+  void setInstrumentSpectraRange(int specMin, int specMax);
+  void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
+                              int tabIndex);
+  void setInstrumentEFixed(std::string const &instrumentName, double eFixed);
+  void setInstrumentGrouping(std::string const &instrumentName);
+  void setInstrumentSpecDefault(std::map<std::string, bool> &specMap);
+
 public slots:
-  void setInstrumentDefault(InstrumentData const &instrumentDetails);
   void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
                        QString const &message = "Run", QString const &tooltip = "");
 
