@@ -147,6 +147,7 @@ void InelasticDataManipulationElwinTabView::setup() {
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
   connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
+  connect(m_uiForm.ckCollapse, SIGNAL(stateChanged(int)), this, SLOT(notifyRowModeChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
@@ -178,6 +179,8 @@ void InelasticDataManipulationElwinTabView::notifySelectedSpectrumChanged(int in
 void InelasticDataManipulationElwinTabView::notifyPreviewIndexChanged(int index) {
   m_presenter->handlePreviewIndexChanged(index);
 }
+
+void InelasticDataManipulationElwinTabView::notifyRowModeChanged() { m_presenter->handleRowModeChanged(); }
 
 void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presenter->handleRemoveSelectedData(); }
 
@@ -538,6 +541,7 @@ std::string InelasticDataManipulationElwinTabView::getCurrentPreview() const {
 }
 
 bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupOutput->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isRowCollapsed() { return m_uiForm.ckCollapse->isChecked(); }
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {

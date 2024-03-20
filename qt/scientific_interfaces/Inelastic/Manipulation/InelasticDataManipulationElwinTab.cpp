@@ -106,6 +106,7 @@ void InelasticDataManipulationElwinTab::run() {
     auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
     inputWorkspacesString += spectraWS + ",";
   }
+
   // Group input workspaces
   m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
 
@@ -327,10 +328,15 @@ void InelasticDataManipulationElwinTab::addDataToModel(MantidWidgets::IAddWorksp
 
 void InelasticDataManipulationElwinTab::updateTableFromModel() {
   m_view->clearDataTable();
-  for (auto workspaceIndex = WorkspaceID{0}; workspaceIndex < m_dataModel->getNumberOfWorkspaces(); workspaceIndex++) {
-    m_view->addTableEntry(static_cast<int>(workspaceIndex.value), m_dataModel->getWorkspace(workspaceIndex)->getName(),
-                          m_dataModel->getSpectra(workspaceIndex).getString());
-  }
+  if (m_view->isRowCollapsed())
+    for (auto workspaceIndex = WorkspaceID{0}; workspaceIndex < m_dataModel->getNumberOfWorkspaces(); workspaceIndex++)
+      m_view->addTableEntry(static_cast<int>(workspaceIndex.value),
+                            m_dataModel->getWorkspace(workspaceIndex)->getName(),
+                            m_dataModel->getSpectra(workspaceIndex).getString());
+  else
+    for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++)
+      m_view->addTableEntry(static_cast<int>(domainIndex.value), m_dataModel->getWorkspace(domainIndex)->getName(),
+                            std::to_string(m_dataModel->getSpectrum(domainIndex)));
 }
 
 void InelasticDataManipulationElwinTab::handleRemoveSelectedData() {
@@ -338,11 +344,14 @@ void InelasticDataManipulationElwinTab::handleRemoveSelectedData() {
   std::sort(selectedIndices.begin(), selectedIndices.end());
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
-    m_dataModel->removeWorkspace(WorkspaceID(item->row()));
+    m_view->isRowCollapsed() ? m_dataModel->removeWorkspace(WorkspaceID(item->row()))
+                             : m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
   updateTableFromModel();
   updateAvailableSpectra();
 }
+
+void InelasticDataManipulationElwinTab::handleRowModeChanged() { updateTableFromModel(); }
 
 void InelasticDataManipulationElwinTab::updateAvailableSpectra() {
   auto spectra = m_dataModel->getSpectra(findWorkspaceID());

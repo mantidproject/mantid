@@ -54,6 +54,7 @@ public:
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
   bool isGroupInput() override;
+  bool isRowCollapsed() override;
 
   // getters/setters for m_properties
   bool getNormalise() override;
@@ -82,6 +83,7 @@ private slots:
   void notifySaveClicked();
   void notifySelectedSpectrumChanged(int);
   void notifyPreviewIndexChanged(int);
+  void notifyRowModeChanged();
   void notifyAddWorkspaceDialog();
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
   void notifyRemoveDataClicked();
