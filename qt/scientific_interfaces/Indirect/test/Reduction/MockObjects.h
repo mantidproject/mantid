@@ -29,7 +29,7 @@ public:
 
   MOCK_METHOD0(instrumentWorkspace, Mantid::API::MatrixWorkspace_sptr());
 
-  MOCK_CONST_METHOD0(getInstrumentConfiguration, MantidQt::MantidWidgets::IndirectInstrumentConfig *());
+  MOCK_CONST_METHOD0(getInstrumentConfiguration, MantidQt::MantidWidgets::IInstrumentConfig *());
   MOCK_METHOD0(getInstrumentDetails, QMap<QString, QString>());
 
   MOCK_METHOD1(showAnalyserAndReflectionOptions, void(bool visible));
