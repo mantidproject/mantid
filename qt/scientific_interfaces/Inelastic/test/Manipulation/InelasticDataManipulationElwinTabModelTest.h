@@ -127,6 +127,9 @@ public:
 
     m_model->ungroupAlgorithm("groupedWS");
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("groupedWS"));
+
+    m_model->groupAlgorithm(workspaceInputString, "groupedWS");
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("groupedWS"));
   }
 
   void test_LoadAlgorithm_set_up() {
