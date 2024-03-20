@@ -16,7 +16,7 @@
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-IETModel::IETModel() {}
+IETModel::IETModel() : m_outputWorkspaces() {}
 
 std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
   std::vector<std::string> errors;
@@ -274,11 +274,11 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
 
 std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                                    std::string const &groupOption, bool const shouldGroup) {
-  std::vector<std::string> outputWorkspaces;
+  m_outputWorkspaces.clear();
 
   if (WorkspaceUtils::doesExistInADS(groupName)) {
     if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
-      outputWorkspaces = outputGroup->getNames();
+      m_outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {
         if (!shouldGroup) {
@@ -296,7 +296,7 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
     }
   }
 
-  return outputWorkspaces;
+  return m_outputWorkspaces;
 }
 
 void IETModel::ungroupWorkspace(std::string const &workspaceName) {

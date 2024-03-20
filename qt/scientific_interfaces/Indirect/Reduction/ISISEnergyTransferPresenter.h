@@ -57,7 +57,6 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   std::string m_outputGroupName;
-  std::vector<std::string> m_outputWorkspaces;
 
   IIETView *m_view;
   std::unique_ptr<IIETModel> m_model;

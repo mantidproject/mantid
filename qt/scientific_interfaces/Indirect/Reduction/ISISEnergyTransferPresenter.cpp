@@ -190,15 +190,13 @@ void IETPresenter::algorithmComplete(bool error) {
 
   if (!error) {
     InstrumentData instrumentData = getInstrumentData();
-    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(),
-                                                  m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
-    m_pythonExportWsName = m_outputWorkspaces[0];
+    auto const outputWorkspaceNames =
+        m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(), m_view->getGroupOutputOption(),
+                                 m_view->getGroupOutputCheckbox());
+    m_pythonExportWsName = outputWorkspaceNames[0];
 
-    if (m_outputWorkspaces.size() != 0) {
-      setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
-      m_view->setOutputWorkspaces(m_outputWorkspaces);
-      m_view->setSaveEnabled(true);
-    }
+    setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
+    m_view->setSaveEnabled(!outputWorkspaceNames.empty());
   }
 }
 
@@ -239,7 +237,7 @@ void IETPresenter::plotRawComplete(bool error) {
 
 void IETPresenter::notifySaveClicked() {
   IETSaveData saveData = m_view->getSaveData();
-  for (auto const &workspaceName : m_outputWorkspaces)
+  for (auto const &workspaceName : m_model->outputWorkspaceNames())
     if (WorkspaceUtils::doesExistInADS(workspaceName))
       m_model->saveWorkspace(workspaceName, saveData);
 }

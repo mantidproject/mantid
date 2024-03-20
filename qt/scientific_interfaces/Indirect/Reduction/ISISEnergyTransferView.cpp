@@ -190,7 +190,6 @@ void IETView::setSingleRebin(bool enable) {
 void IETView::setMultipleRebin(bool enable) { m_uiForm.valRebinString->setVisible(enable); }
 
 void IETView::setSaveEnabled(bool enable) {
-  enable = !m_outputWorkspaces.empty() ? enable : false;
   m_uiForm.pbSave->setEnabled(enable);
   m_uiForm.ckSaveAclimax->setEnabled(enable);
   m_uiForm.ckSaveASCII->setEnabled(enable);
@@ -207,10 +206,6 @@ void IETView::setPlotTimeIsPlotting(bool plotting) {
 void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) {
   m_uiForm.dsCalibrationFile->setFBSuffixes(calibrationFbSuffixes);
   m_uiForm.dsCalibrationFile->setWSSuffixes(calibrationWSSuffixes);
-}
-
-void IETView::setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces) {
-  m_outputWorkspaces = outputWorkspaces;
 }
 
 void IETView::setInstrumentSpectraRange(int specMin, int specMax) {

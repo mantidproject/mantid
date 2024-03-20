@@ -38,6 +38,8 @@ public:
 
   virtual std::vector<std::string> groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                                    std::string const &groupOption, bool const shouldGroup) = 0;
+
+  virtual std::vector<std::string> outputWorkspaceNames() const = 0;
 };
 
 class MANTIDQT_INDIRECT_DLL IETModel : public IIETModel {
@@ -75,6 +77,10 @@ public:
                            std::string const &outputGroupName);
   std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
+  [[nodiscard]] inline std::vector<std::string> outputWorkspaceNames() const noexcept override {
+    return m_outputWorkspaces;
+  }
+
 private:
   void saveDaveGroup(std::string const &workspaceName, std::string const &outputName);
   void saveAclimax(std::string const &workspaceName, std::string const &outputName,
@@ -88,6 +94,8 @@ private:
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename, std::string const &instrumentName,
                         std::vector<int> const &detectorList, IETBackgroundData const &backgroundData) const;
+
+  std::vector<std::string> m_outputWorkspaces;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

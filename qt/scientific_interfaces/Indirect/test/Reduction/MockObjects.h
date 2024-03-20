@@ -59,6 +59,8 @@ public:
 
   MOCK_METHOD4(groupWorkspaces, std::vector<std::string>(std::string const &groupName, std::string const &instrument,
                                                          std::string const &groupOption, bool const shouldGroup));
+
+  MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
 };
 
 class MockIETView : public IIETView {
@@ -104,9 +106,10 @@ public:
   MOCK_METHOD1(setSaveEnabled, void(bool enable));
   MOCK_METHOD1(setPlotTimeIsPlotting, void(bool plotting));
   MOCK_METHOD2(setFileExtensionsByName, void(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes));
-  MOCK_METHOD1(setOutputWorkspaces, void(std::vector<std::string> const &outputWorkspaces));
   MOCK_METHOD1(setRunButtonText, void(std::string const &runText));
   MOCK_METHOD1(setEnableOutputOptions, void(bool const enable));
+
+  MOCK_METHOD1(showMessageBox, void(std::string const &message));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

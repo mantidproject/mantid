@@ -65,7 +65,6 @@ public:
   virtual void setSaveEnabled(bool enable) = 0;
   virtual void setPlotTimeIsPlotting(bool plotting) = 0;
   virtual void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) = 0;
-  virtual void setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void setRunButtonText(std::string const &runText) = 0;
   virtual void setEnableOutputOptions(bool const enable) = 0;
 
@@ -129,7 +128,6 @@ public:
   void setSaveEnabled(bool enable) override;
   void setPlotTimeIsPlotting(bool plotting) override;
   void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) override;
-  void setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces) override;
   void setRunButtonText(std::string const &runText) override;
   void setEnableOutputOptions(bool const enable) override;
 
@@ -157,7 +155,6 @@ private slots:
 private:
   void setPlotTimeEnabled(bool enable);
 
-  std::vector<std::string> m_outputWorkspaces;
   Ui::ISISEnergyTransfer m_uiForm;
   IIETPresenter *m_presenter;
   DetectorGroupingOptions *m_groupingWidget;

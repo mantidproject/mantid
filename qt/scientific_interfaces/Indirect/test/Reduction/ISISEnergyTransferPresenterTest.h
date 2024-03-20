@@ -15,6 +15,7 @@
 #include "Reduction/ISISEnergyTransferPresenter.h"
 
 #include "MantidAPI/AlgorithmProperties.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -27,6 +28,8 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> defaultGroupingProps() {
   Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("IPF"), *properties);
   return properties;
 }
+
+IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true); }
 
 } // namespace
 
@@ -63,6 +66,31 @@ public:
     m_view.reset();
     m_outputOptionsView.reset();
     m_instrumentConfig.reset();
+  }
+
+  void test_notifySaveClicked_will_not_save_the_workspace_if_its_not_in_the_ADS() {
+    std::vector<std::string> names{"NotInADS"};
+
+    ON_CALL(*m_view, getSaveData()).WillByDefault(Return(createSaveData()));
+    ON_CALL(*m_model, outputWorkspaceNames()).WillByDefault(Return(names));
+
+    // Expect no call because the workspace is not in the ADS
+    EXPECT_CALL(*m_model, saveWorkspace(_, _)).Times(0);
+
+    m_presenter->notifySaveClicked();
+  }
+
+  void test_notifySaveClicked_will_save_the_workspace_if_its_not_in_the_ADS() {
+    std::vector<std::string> names{"InADS"};
+    auto const workspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
+    AnalysisDataService::Instance().addOrReplace(names[0], workspace);
+
+    ON_CALL(*m_view, getSaveData()).WillByDefault(Return(createSaveData()));
+    ON_CALL(*m_model, outputWorkspaceNames()).WillByDefault(Return(names));
+
+    EXPECT_CALL(*m_model, saveWorkspace(names[0], _)).Times(1);
+
+    m_presenter->notifySaveClicked();
   }
 
   void test_fetch_instrument_data() {
