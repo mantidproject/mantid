@@ -210,7 +210,7 @@ void IndirectDataReduction::loadInstrumentIfNotExist(const std::string &instrume
   }
 }
 
-MantidWidgets::IndirectInstrumentConfig *IndirectDataReduction::getInstrumentConfiguration() const {
+MantidWidgets::IInstrumentConfig *IndirectDataReduction::getInstrumentConfiguration() const {
   return m_uiForm.iicInstrumentConfiguration;
 }
 

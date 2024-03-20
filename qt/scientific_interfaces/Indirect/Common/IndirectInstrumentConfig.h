@@ -17,6 +17,39 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class IInstrumentConfig {
+public:
+  virtual QStringList getTechniques() = 0;
+  virtual void setTechniques(const QStringList &techniques) = 0;
+
+  virtual QStringList getDisabledInstruments() = 0;
+  virtual void setDisabledInstruments(const QStringList &instrumentNames) = 0;
+
+  virtual QString getFacility() = 0;
+  virtual void setFacility(const QString &facilityName) = 0;
+
+  virtual bool isDiffractionEnabled() = 0;
+  virtual void enableDiffraction(bool enabled) = 0;
+
+  virtual bool isDiffractionForced() = 0;
+  virtual void forceDiffraction(bool forced) = 0;
+
+  virtual bool isInstrumentLabelShown() = 0;
+  virtual void setShowInstrumentLabel(bool visible) = 0;
+
+  virtual QString getInstrumentName() = 0;
+  virtual void setInstrument(const QString &instrumentName) = 0;
+
+  virtual QString getAnalyserName() = 0;
+  virtual void setAnalyser(const QString &analyserName) = 0;
+
+  virtual QString getReflectionName() = 0;
+  virtual void setReflection(const QString &reflectionName) = 0;
+
+  virtual void showAnalyserAndReflectionOptions(bool visible) = 0;
+};
+
 /**
 Widget used to select an instrument configuration for indirect geometry
 spectrometers
@@ -29,7 +62,7 @@ are populated by loading an empty instrument.
 @author Dan Nixon
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig : public API::MantidWidget, public IInstrumentConfig {
   Q_OBJECT
 
   Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)
@@ -44,41 +77,41 @@ public:
   ~IndirectInstrumentConfig() override;
 
   /* Getters and setters for Qt properties */
-  QStringList getTechniques();
-  void setTechniques(const QStringList &techniques);
+  QStringList getTechniques() override;
+  void setTechniques(const QStringList &techniques) override;
 
-  QStringList getDisabledInstruments();
-  void setDisabledInstruments(const QStringList &instrumentNames);
+  QStringList getDisabledInstruments() override;
+  void setDisabledInstruments(const QStringList &instrumentNames) override;
 
-  QString getFacility();
-  void setFacility(const QString &facilityName);
+  QString getFacility() override;
+  void setFacility(const QString &facilityName) override;
 
-  bool isDiffractionEnabled();
-  void enableDiffraction(bool enabled);
+  bool isDiffractionEnabled() override;
+  void enableDiffraction(bool enabled) override;
 
-  bool isDiffractionForced();
-  void forceDiffraction(bool forced);
+  bool isDiffractionForced() override;
+  void forceDiffraction(bool forced) override;
 
-  bool isInstrumentLabelShown();
-  void setShowInstrumentLabel(bool visible);
+  bool isInstrumentLabelShown() override;
+  void setShowInstrumentLabel(bool visible) override;
 
   /// Gets the name of the selected instrument
-  QString getInstrumentName();
+  QString getInstrumentName() override;
   /// Set the displayed instrument (if exists)
-  void setInstrument(const QString &instrumentName);
+  void setInstrument(const QString &instrumentName) override;
 
   /// Gets the name of the selected analyser
-  QString getAnalyserName();
+  QString getAnalyserName() override;
   /// Set the displayed analyser bank (if exists)
-  void setAnalyser(const QString &analyserName);
+  void setAnalyser(const QString &analyserName) override;
 
   /// Gets the name of the selected reflection
-  QString getReflectionName();
+  QString getReflectionName() override;
   /// Set the displayed reflection mode (if exists)
-  void setReflection(const QString &reflectionName);
+  void setReflection(const QString &reflectionName) override;
 
   /// Controls where to show analyser and reflection options or not
-  void showAnalyserAndReflectionOptions(bool visible);
+  void showAnalyserAndReflectionOptions(bool visible) override;
 
 public slots:
   /// Called when an instrument configuration is selected

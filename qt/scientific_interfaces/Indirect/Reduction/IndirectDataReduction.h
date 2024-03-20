@@ -26,7 +26,7 @@ class IIndirectDataReduction {
 public:
   virtual Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() = 0;
 
-  virtual MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const = 0;
+  virtual MantidWidgets::IInstrumentConfig *getInstrumentConfiguration() const = 0;
   virtual QMap<QString, QString> getInstrumentDetails() = 0;
 
   virtual void showAnalyserAndReflectionOptions(bool visible) = 0;
@@ -69,7 +69,7 @@ public:
   void loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser = "",
                                 const std::string &reflection = "");
 
-  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const override;
+  MantidWidgets::IInstrumentConfig *getInstrumentConfiguration() const override;
   QMap<QString, QString> getInstrumentDetails() override;
 
   void showAnalyserAndReflectionOptions(bool visible) override;

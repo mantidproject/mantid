@@ -127,7 +127,7 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const 
  *
  * @return Instrument config widget
  */
-MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
+MantidWidgets::IInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
   return m_idrUI->getInstrumentConfiguration();
 }
 
