@@ -33,10 +33,10 @@ IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true);
 
 } // namespace
 
-class IETPresenterTest : public CxxTest::TestSuite {
+class ISISEnergyTransferPresenterTest : public CxxTest::TestSuite {
 public:
-  static IETPresenterTest *createSuite() { return new IETPresenterTest(); }
-  static void destroySuite(IETPresenterTest *suite) { delete suite; }
+  static ISISEnergyTransferPresenterTest *createSuite() { return new ISISEnergyTransferPresenterTest(); }
+  static void destroySuite(ISISEnergyTransferPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     auto model = std::make_unique<NiceMock<MockIETModel>>();
