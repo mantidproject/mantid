@@ -20,7 +20,8 @@ using namespace MantidQt::CustomInterfaces;
 
 class ISISEnergyTransferModelUtilsTest : public CxxTest::TestSuite {
 public:
-  ISISEnergyTransferModelUtilsTest() = default;
+  static ISISEnergyTransferModelUtilsTest *createSuite() { return new ISISEnergyTransferModelUtilsTest(); }
+  static void destroySuite(ISISEnergyTransferModelUtilsTest *suite) { delete suite; }
 
   void testGetCustomGroupingNumbers() {
     auto result = getCustomGroupingNumbers("1,2,3-5,6");

@@ -130,7 +130,9 @@ DECLARE_ALGORITHM(ISISIndirectEnergyTransfer)
 
 class ISISEnergyTransferModelTest : public CxxTest::TestSuite {
 public:
-  ISISEnergyTransferModelTest() = default;
+  static ISISEnergyTransferModelTest *createSuite() { return new ISISEnergyTransferModelTest(); }
+  static void destroySuite(ISISEnergyTransferModelTest *suite) { delete suite; }
+
   void setUp() override {
     m_model = std::make_unique<IETModel>();
     AnalysisDataService::Instance().clear();
