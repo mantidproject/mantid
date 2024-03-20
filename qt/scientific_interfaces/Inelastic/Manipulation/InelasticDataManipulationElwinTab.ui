@@ -384,6 +384,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="toolTip">
+      <string>For every workspace added, it checks whether to show every spectra of the each workspace as individual rows, or collapse all spectra into one row per workspace</string>
+     </property>
      <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0">
       <item row="0" column="1" alignment="Qt::AlignTop">
        <widget class="QFrame" name="frame_2">
@@ -411,6 +414,19 @@
           <widget class="QPushButton" name="wkspRemove">
            <property name="text">
             <string>Remove Selected</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ckCollapse">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Collapse rows?</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
