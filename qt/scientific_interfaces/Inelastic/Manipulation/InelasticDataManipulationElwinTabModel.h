@@ -34,12 +34,15 @@ public:
                                   std::string const &sampleEnvironmentLogName,
                                   std::string const &sampleEnvironmentLogValue);
   void ungroupAlgorithm(std::string const &InputWorkspace);
+  void groupAlgorithm(std::string const &InputWorkspaces, std::string const &OutputWorkspace);
   void setIntegrationStart(double integrationStart);
   void setIntegrationEnd(double integrationEnd);
   void setBackgroundStart(double backgroundStart);
   void setBackgroundEnd(double backgroundEnd);
   void setBackgroundSubtraction(bool backgroundSubtraction);
   void setNormalise(bool normalise);
+  void setOutputWorkspaceNames(std::string const &workspaceBaseName);
+  std::string getOutputWorkspaceNames();
 
 private:
   double m_integrationStart;
@@ -48,6 +51,7 @@ private:
   double m_backgroundEnd;
   bool m_backgroundSubtraction;
   bool m_normalise;
+  std::unordered_map<std::string, std::string> m_outputWorkspaceNames;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -46,7 +46,7 @@ public:
 
   // controls for dataTable
   virtual void clearDataTable() = 0;
-  virtual void addTableEntry(int row, std::string const &name, int spectrum) = 0;
+  virtual void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) = 0;
 
   virtual QModelIndexList getSelectedData() = 0;
 

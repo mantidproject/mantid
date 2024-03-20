@@ -233,7 +233,8 @@ void InelasticDataManipulationElwinTabView::setHorizontalHeaders() {
 
 void InelasticDataManipulationElwinTabView::clearDataTable() { m_uiForm.tbElwinData->setRowCount(0); }
 
-void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string const &name, int spectrum) {
+void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string const &name,
+                                                          std::string const &wsIndexes) {
   m_uiForm.tbElwinData->insertRow(static_cast<int>(row));
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
@@ -241,7 +242,7 @@ void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string c
   cell->setFlags(flags);
   setCell(std::move(cell), row, 0);
 
-  cell = std::make_unique<QTableWidgetItem>(QString::number(spectrum));
+  cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(wsIndexes));
   cell->setFlags(flags);
   setCell(std::move(cell), row, 1);
 }

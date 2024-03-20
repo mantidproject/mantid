@@ -77,7 +77,7 @@ private:
   std::string getOutputBasename();
   MatrixWorkspace_sptr getInputWorkspace() const;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
-  void checkForELTWorkspace();
+  bool checkForELTWorkspace();
   void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
   void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);

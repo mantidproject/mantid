@@ -53,20 +53,15 @@ void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
     std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
     std::string const &sampleEnvironmentLogValue) {
 
-  auto elwinSuffix = "_elwin_";
-
-  auto const qWorkspace = (workspaceBaseName + elwinSuffix + "eq");
-  auto const qSquaredWorkspace = (workspaceBaseName + elwinSuffix + "eq2");
-  auto const elfWorkspace = (workspaceBaseName + elwinSuffix + "elf");
-  auto const eltWorkspace = (workspaceBaseName + elwinSuffix + "elt");
+  setOutputWorkspaceNames(workspaceBaseName);
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
-  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
+  elwinMultAlg->setProperty("OutputInQ", m_outputWorkspaceNames["qWorkspace"]);
+  elwinMultAlg->setProperty("OutputInQSquared", m_outputWorkspaceNames["qSquaredWorkspace"]);
+  elwinMultAlg->setProperty("OutputELF", m_outputWorkspaceNames["elfWorkspace"]);
 
   elwinMultAlg->setProperty("SampleEnvironmentLogName", sampleEnvironmentLogName);
   elwinMultAlg->setProperty("SampleEnvironmentLogValue", sampleEnvironmentLogValue);
@@ -80,7 +75,7 @@ void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
   }
 
   if (m_normalise) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
+    elwinMultAlg->setProperty("OutputELT", m_outputWorkspaceNames["eltWorkspace"]);
   }
   auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
@@ -92,6 +87,15 @@ void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(std::string const 
   ungroupAlg->initialize();
   ungroupAlg->setProperty("InputWorkspace", InputWorkspace);
   ungroupAlg->execute();
+}
+
+void InelasticDataManipulationElwinTabModel::groupAlgorithm(std::string const &InputWorkspaces,
+                                                            std::string const &OutputWorkspace) {
+  auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setProperty("InputWorkspaces", InputWorkspaces);
+  groupAlg->setProperty("OutputWorkspace", OutputWorkspace);
+  groupAlg->execute();
 }
 
 std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(MatrixWorkspace_sptr workspace,
@@ -116,6 +120,22 @@ std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(Matr
   }
   AnalysisDataService::Instance().remove("specWSnext");
   return workspace->getName() + "_extracted_spectra";
+}
+void InelasticDataManipulationElwinTabModel::setOutputWorkspaceNames(std::string const &workspaceBaseName) {
+  auto elwinSuffix = "_elwin_";
+  m_outputWorkspaceNames["qWorkspace"] = workspaceBaseName + elwinSuffix + "eq";
+  m_outputWorkspaceNames["qSquaredWorkspace"] = workspaceBaseName + elwinSuffix + "eq2";
+  m_outputWorkspaceNames["elfWorkspace"] = workspaceBaseName + elwinSuffix + "elf";
+  m_outputWorkspaceNames["eltWorkspace"] = workspaceBaseName + elwinSuffix + "elt";
+}
+
+std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() {
+  std::string outputWorkspaceNames;
+  for (auto &element : m_outputWorkspaceNames) {
+    outputWorkspaceNames += static_cast<std::string>(element.second) + ',';
+  }
+  outputWorkspaceNames.resize(outputWorkspaceNames.size() - 1);
+  return outputWorkspaceNames;
 }
 
 void InelasticDataManipulationElwinTabModel::setIntegrationStart(double integrationStart) {

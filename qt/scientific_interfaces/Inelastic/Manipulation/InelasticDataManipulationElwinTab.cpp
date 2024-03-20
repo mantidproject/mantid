@@ -60,13 +60,6 @@ std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, s
   return transformElements(strings.begin(), strings.end(), [&prefix](std::string const &str) { return prefix + str; });
 }
 
-std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
-  auto suffixes = extractSuffixes(files, "_");
-
-  removeElementsIf(suffixes, [&](std::string const &suffix) { return suffix != "red" && suffix != "sqw"; });
-  return suffixes;
-}
-
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -134,23 +127,30 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
   if (!error) {
     if (!m_view->isGroupInput()) {
       m_model->ungroupAlgorithm("IDA_Elwin_Input");
+    } else {
+      std::string outputNames =
+          checkForELTWorkspace()
+              ? m_model->getOutputWorkspaceNames()
+              : m_model->getOutputWorkspaceNames().substr(0, m_model->getOutputWorkspaceNames().find_last_of(','));
+      m_model->groupAlgorithm(outputNames, "IDA_Elwin_Output");
     }
 
     setOutputPlotOptionsWorkspaces(getOutputWorkspaceNames());
 
-    if (m_view->getNormalise())
-      checkForELTWorkspace();
-
+    if (m_view->getNormalise() && !checkForELTWorkspace())
+      m_view->showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
+                             "was not produced - temperatures were not found.");
   } else {
     m_view->setSaveResultEnabled(false);
   }
 }
 
-void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
+bool InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   auto const workspaceName = getOutputBasename() + "_elt";
-  if (!WorkspaceUtils::doesExistInADS(workspaceName))
-    m_view->showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
-                           "was not produced - temperatures were not found.");
+  if (!WorkspaceUtils::doesExistInADS(workspaceName)) {
+    return false;
+  }
+  return true;
 }
 
 bool InelasticDataManipulationElwinTab::validate() {
@@ -327,9 +327,9 @@ void InelasticDataManipulationElwinTab::addDataToModel(MantidWidgets::IAddWorksp
 
 void InelasticDataManipulationElwinTab::updateTableFromModel() {
   m_view->clearDataTable();
-  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
-    m_view->addTableEntry(static_cast<int>(domainIndex.value), m_dataModel->getWorkspace(domainIndex)->getName(),
-                          static_cast<int>(m_dataModel->getSpectrum(domainIndex)));
+  for (auto workspaceIndex = WorkspaceID{0}; workspaceIndex < m_dataModel->getNumberOfWorkspaces(); workspaceIndex++) {
+    m_view->addTableEntry(static_cast<int>(workspaceIndex.value), m_dataModel->getWorkspace(workspaceIndex)->getName(),
+                          m_dataModel->getSpectra(workspaceIndex).getString());
   }
 }
 
@@ -338,7 +338,7 @@ void InelasticDataManipulationElwinTab::handleRemoveSelectedData() {
   std::sort(selectedIndices.begin(), selectedIndices.end());
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
-    m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
+    m_dataModel->removeWorkspace(WorkspaceID(item->row()));
   }
   updateTableFromModel();
   updateAvailableSpectra();

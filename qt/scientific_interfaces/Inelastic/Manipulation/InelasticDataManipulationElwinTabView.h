@@ -12,7 +12,6 @@
 #include "InelasticDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
@@ -50,7 +49,7 @@ public:
 
   // controls for dataTable
   void clearDataTable() override;
-  void addTableEntry(int row, std::string const &name, int spectrum) override;
+  void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) override;
   QModelIndexList getSelectedData() override;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
