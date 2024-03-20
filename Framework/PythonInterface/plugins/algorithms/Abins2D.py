@@ -124,12 +124,17 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         # so insert placeholder "1" for now.
         prog_reporter.resetNumSteps(1, 0.1, 0.8)
 
+        if self._autoconvolution:
+            autoconvolution_max = self._max_event_order
+        else:
+            autoconvolution_max = 0
+
         s_calculator = abins.SCalculatorFactory.init(
             filename=self._vibrational_or_phonon_data_file,
             temperature=self._temperature,
             sample_form="Powder",
             abins_data=ab_initio_data,
-            autoconvolution=self._autoconvolution,
+            autoconvolution_max=autoconvolution_max,
             instrument=self._instrument,
             quantum_order_num=self._num_quantum_order_events,
         )

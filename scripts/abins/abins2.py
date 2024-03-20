@@ -98,14 +98,37 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # so insert placeholder "1" for now.
         prog_reporter.resetNumSteps(1, 0.1, 0.8)
 
+        # Usually order 2 is enumerated over mode pairs, but if autoconvolution min_order is set to 2
+        # then this is skipped and we obtain any orders above 1 by convolution
+        if abins.parameters.autoconvolution["min_order"] not in (2, 3):
+            raise ValueError("abins.parameters.autoconvolution['min_order'] must be 2 or 3")
+        convolve_order_2 = abins.parameters.autoconvolution["min_order"] == 2
+
+        match self._num_quantum_order_events, convolve_order_2:
+            case 1, _:
+                autoconvolution_max = 0
+                quantum_order_num = 1
+            case 2, True:
+                autoconvolution_max = 2
+                quantum_order_num = 1
+            case 2, False:
+                autoconvolution_max = 0
+                quantum_order_num = 2
+            case max_order, True:
+                autoconvolution_max = max_order
+                quantum_order_num = 1
+            case max_order, False:
+                autoconvolution_max = max_order
+                quantum_order_num = 2
+
         s_calculator = abins.SCalculatorFactory.init(
             filename=self._vibrational_or_phonon_data_file,
             temperature=self._temperature,
             sample_form="Powder",
             abins_data=ab_initio_data,
             instrument=self._instrument,
-            quantum_order_num=self._num_quantum_order_events,
-            autoconvolution=self._autoconvolution,
+            quantum_order_num=quantum_order_num,
+            autoconvolution_max=autoconvolution_max,
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
@@ -252,36 +275,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         self._check_common_advanced_parameters(message)
 
-        self._check_tosca_parameters(message)
-
-    def _check_tosca_parameters(self, message_end=""):
-        """
-        Checks TOSCA parameters.
-        :param message_end: closing part of the error message.
-        """
-
-        # TOSCA final energy in cm^-1
-        tosca_parameters = abins.parameters.instruments["TOSCA"]
-        final_energy = tosca_parameters["final_neutron_energy"]
-        if not (isinstance(final_energy, float) and final_energy > 0.0):
-            raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
-
-        angle = tosca_parameters["cos_scattering_angle"]
-        if not isinstance(angle, float):
-            raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
-
-        resolution_const_a = tosca_parameters["a"]
-        if not isinstance(resolution_const_a, float):
-            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" + message_end)
-
-        resolution_const_b = tosca_parameters["b"]
-        if not isinstance(resolution_const_b, float):
-            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" + message_end)
-
-        resolution_const_c = tosca_parameters["c"]
-        if not isinstance(resolution_const_c, float):
-            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" + message_end)
-
     def _get_properties(self):
         """
         Loads all properties to object's attributes.
@@ -291,14 +284,9 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
-        self._autoconvolution = self.getProperty("Autoconvolution").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
 
         self._bins = self.get_instrument().get_energy_bins()
 
-        # Increase max event order if using autoconvolution
-        if self._autoconvolution:
-            self._max_event_order = abins.parameters.autoconvolution["max_order"]
-        else:
-            self._max_event_order = self._num_quantum_order_events
+        self._max_event_order = self._num_quantum_order_events
