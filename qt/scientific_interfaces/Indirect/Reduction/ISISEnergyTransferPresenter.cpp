@@ -45,7 +45,7 @@ void IETPresenter::setup() {}
 bool IETPresenter::validateInstrumentDetails() {
   auto const instrument = getInstrumentName().toStdString();
   if (instrument.empty()) {
-    showMessageBox("Please select a valid facility and/or instrument.");
+    m_view->showMessageBox("Please select a valid facility and/or instrument.");
     return false;
   }
 
@@ -54,8 +54,8 @@ bool IETPresenter::validateInstrumentDetails() {
   for (const auto &key : keys) {
     if (!instrumentDetails.contains(QString::fromStdString(key)) ||
         instrumentDetails[QString::fromStdString(key)].isEmpty()) {
-      showMessageBox(QString::fromStdString("Could not find " + key + " for the " + instrument +
-                                            " instrument. Please select a valid instrument."));
+      m_view->showMessageBox("Could not find " + key + " for the " + instrument +
+                             " instrument. Please select a valid instrument.");
       return false;
     }
   }
@@ -163,7 +163,7 @@ bool IETPresenter::validate() {
 
   QString error = uiv.generateErrorMessage();
   if (!error.isEmpty())
-    showMessageBox(error);
+    m_view->showMessageBox(error.toStdString());
 
   return validateInstrumentDetails() && uiv.isAllInputValid();
 }
@@ -219,7 +219,7 @@ void IETPresenter::notifyPlotRawClicked() {
     m_view->setPlotTimeIsPlotting(false);
     for (auto const &error : errors) {
       if (!error.empty())
-        showMessageBox(QString::fromStdString(error));
+        m_view->showMessageBox(error);
     }
   }
 }
@@ -281,7 +281,5 @@ void IETPresenter::setFileExtensionsByName(bool filter) {
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }
-
-void IETPresenter::notifyNewMessage(QString const &message) { showMessageBox(message); }
 
 } // namespace MantidQt::CustomInterfaces

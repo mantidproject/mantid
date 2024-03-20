@@ -18,7 +18,6 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IIETPresenter {
 public:
-  virtual void notifyNewMessage(const QString &message) = 0;
   virtual void notifySaveClicked() = 0;
   virtual void notifyRunClicked() = 0;
   virtual void notifyPlotRawClicked() = 0;
@@ -36,7 +35,6 @@ public:
   void setup() override;
   void run() override;
 
-  void notifyNewMessage(const QString &message) override;
   void notifySaveClicked() override;
   void notifyRunClicked() override;
   void notifyPlotRawClicked() override;

@@ -75,6 +75,8 @@ public:
   virtual void setInstrumentEFixed(std::string const &instrumentName, double eFixed) = 0;
   virtual void setInstrumentGrouping(std::string const &instrumentName) = 0;
   virtual void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) = 0;
+
+  virtual void showMessageBox(std::string const &message) = 0;
 };
 
 class MANTIDQT_INDIRECT_DLL IETView : public QWidget, public IIETView {
@@ -138,8 +140,9 @@ public:
   void setInstrumentGrouping(std::string const &instrumentName) override;
   void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) override;
 
+  void showMessageBox(std::string const &message) override;
+
 private slots:
-  void showMessageBox(const QString &message);
   void saveClicked();
   void runClicked();
   void plotRawClicked();

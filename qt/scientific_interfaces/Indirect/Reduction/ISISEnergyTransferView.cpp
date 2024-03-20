@@ -291,7 +291,9 @@ void IETView::setEnableOutputOptions(bool const enable) {
   setSaveEnabled(enable);
 }
 
-void IETView::showMessageBox(const QString &message) { m_presenter->notifyNewMessage(message); }
+void IETView::showMessageBox(std::string const &message) {
+  QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
+}
 
 void IETView::saveClicked() { m_presenter->notifySaveClicked(); }
 
@@ -311,7 +313,7 @@ void IETView::handleDataReady() {
 
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
+    showMessageBox(errorMessage.toStdString());
 }
 
 void IETView::pbRunEditing() { setRunButtonText("Editing..."); }
