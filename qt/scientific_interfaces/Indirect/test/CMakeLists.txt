@@ -2,7 +2,7 @@ set(ALL_TEST_FILES)
 
 add_subdirectory(Reduction)
 
-set(TEST_HELPERS Reduction/MockObjects.h)
+set(TEST_HELPERS Common/MockObjects.h Reduction/MockObjects.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
