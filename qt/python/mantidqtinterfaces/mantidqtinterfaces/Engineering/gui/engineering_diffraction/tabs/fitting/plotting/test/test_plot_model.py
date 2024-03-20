@@ -13,6 +13,7 @@ from mantid import FunctionFactory
 from mantid.kernel import UnitParams, UnitParametersMap
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model
 from mantid.api import CompositeFunction
+from mantid.simpleapi import CreateEmptyTableWorkspace, GroupWorkspaces
 
 plot_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model"
 
@@ -459,6 +460,50 @@ class FittingPlotModelTest(unittest.TestCase):
 
         self.assertAlmostEqual(tof / d, 18000, delta=1e-10)
         self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1e-10)
+
+    def _get_sample_findpeaksconvolve_group_ws(self):
+        peak_centers = CreateEmptyTableWorkspace(OutputWorkspace="PeakCentre")
+        peak_centers.addColumn("int", "SpecIndex")
+        peak_centers.addColumn("double", "PeakCentre_0")
+        peak_centers.addRow([1, 0.09])
+
+        peak_y = CreateEmptyTableWorkspace(OutputWorkspace="PeakYPosition")
+        peak_y.addColumn("int", "SpecIndex")
+        peak_y.addColumn("double", "PeakYPosition_0")
+        peak_y.addRow([1, 798])
+
+        i_over_sigma = CreateEmptyTableWorkspace(OutputWorkspace="PeakIOverSigma")
+        i_over_sigma.addColumn("int", "SpecIndex")
+        i_over_sigma.addColumn("double", "PeakIOverSigma_0")
+        i_over_sigma.addRow([1, 12.5])
+        return GroupWorkspaces([peak_centers, peak_y, i_over_sigma], OutputWorkspace="test")
+
+    @mock.patch(plot_model_path + ".FunctionWrapper")
+    @mock.patch(plot_model_path + ".FunctionFactory")
+    @mock.patch(plot_model_path + ".FindPeaksConvolve")
+    @mock.patch(plot_model_path + ".logger.error")
+    @mock.patch(plot_model_path + ".ADS")
+    def test_run_find_peaks_convolve_existing_ws(self, mock_ads, mock_error, mock_find_peaks_convolve, mock_func_fac, mock_func_wrapper):
+        mock_ads.doesExist.return_value = True
+        mock_ads.retrieve.return_value = mock.MagicMock()
+        mock_find_peaks_convolve.return_value = self._get_sample_findpeaksconvolve_group_ws()
+        mock_peak_func = mock.MagicMock()
+        mock_func_fac.Instance().createPeakFunction.return_value = mock_peak_func
+
+        ret_str = self.model.run_find_peaks_convolve("ws_1", "BackToBackExponential")
+        self.assertNotEqual(ret_str, None)
+        mock_peak_func.setCentre.assert_called_once()
+        mock_peak_func.setHeight.assert_called_once()
+        mock_peak_func.setMatrixWorkspace.assert_called_once()
+        mock_error.assert_not_called()
+
+    @mock.patch(plot_model_path + ".logger.error")
+    @mock.patch(plot_model_path + ".ADS")
+    def test_run_find_peaks_convolve_non_existing_ws(self, mock_ads, mock_error):
+        mock_ads.doesExist.return_value = False
+        ret_str = self.model.run_find_peaks_convolve("non_existing_ws", "BackToBackExponential")
+        self.assertEqual(ret_str, None)
+        mock_error.assert_called()
 
 
 if __name__ == "__main__":

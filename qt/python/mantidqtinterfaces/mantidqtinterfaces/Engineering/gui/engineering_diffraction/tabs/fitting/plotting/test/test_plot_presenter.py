@@ -10,7 +10,6 @@ from unittest import mock
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model, plot_view, plot_presenter
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
-from mantid.simpleapi import CreateEmptyTableWorkspace, GroupWorkspaces
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter"
 
@@ -261,63 +260,39 @@ class FittingPlotPresenterTest(unittest.TestCase):
         mock_notify.assert_not_called()
         self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)
 
-    @mock.patch(dir_path + ".logger.error")
-    @mock.patch(dir_path + ".ADS.doesExist")
-    def test_run_find_peaks_convolve_non_existing_ws(self, mock_ads_exist, mock_error):
+    def test_run_find_peaks_convolve_failure(self):
         self.view = mock.MagicMock()
         self.view.fit_browser.workspaceName.return_value = "non_existing_ws"
         self.presenter.view = self.view
-        mock_ads_exist.return_value = False
         self.presenter.find_peaks_convolve_started_notifier = mock.MagicMock()
         self.presenter.find_peaks_convolve_done_notifier = mock.MagicMock()
+        self.model.run_find_peaks_convolve.return_value = None
+
         self.presenter.run_find_peaks_convolve()
+
         self.presenter.find_peaks_convolve_started_notifier.notify_subscribers.assert_called_once()
         self.presenter.find_peaks_convolve_done_notifier.notify_subscribers.assert_called_once_with(False)
-        mock_error.assert_called()
+        self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)
 
-    def _get_sample_findpeaksconvolve_group_ws(self):
-        peak_centers = CreateEmptyTableWorkspace(OutputWorkspace="PeakCentre")
-        peak_centers.addColumn("int", "SpecIndex")
-        peak_centers.addColumn("double", "PeakCentre_0")
-        peak_centers.addRow([1, 0.09])
-
-        peak_y = CreateEmptyTableWorkspace(OutputWorkspace="PeakYPosition")
-        peak_y.addColumn("int", "SpecIndex")
-        peak_y.addColumn("double", "PeakYPosition_0")
-        peak_y.addRow([1, 798])
-
-        i_over_sigma = CreateEmptyTableWorkspace(OutputWorkspace="PeakIOverSigma")
-        i_over_sigma.addColumn("int", "SpecIndex")
-        i_over_sigma.addColumn("double", "PeakIOverSigma_0")
-        i_over_sigma.addRow([1, 12.5])
-        return GroupWorkspaces([peak_centers, peak_y, i_over_sigma], OutputWorkspace="test")
-
-    @mock.patch(dir_path + ".FunctionWrapper")
-    @mock.patch(dir_path + ".FunctionFactory")
-    @mock.patch(dir_path + ".FindPeaksConvolve")
     @mock.patch(dir_path + ".logger.error")
-    @mock.patch(dir_path + ".ADS")
-    def test_run_find_peaks_convolve_existing_ws(self, mock_ads, mock_error, mock_find_peaks_convolve, mock_func_fac, mock_func_wrapper):
+    def test_run_find_peaks_convolve_success(self, mock_error):
         self.view = mock.MagicMock()
         self.view.fit_browser.workspaceName.return_value = "ws_1"
         self.presenter.view = self.view
-        mock_ads.doesExist.return_value = True
-        mock_ads.retrieve.return_value = mock.MagicMock()
-        mock_find_peaks_convolve.return_value = self._get_sample_findpeaksconvolve_group_ws()
         self.presenter.find_peaks_convolve_started_notifier = mock.MagicMock()
         self.presenter.find_peaks_convolve_done_notifier = mock.MagicMock()
         self.view.fit_browser.defaultPeakType.return_value = "BackToBackExponential"
-        mock_peak_func = mock.MagicMock()
-        mock_func_fac.Instance().createPeakFunction.return_value = mock_peak_func
+        fun_wrap_str = "name=BackToBackExponential,I=115.146,A=0.0917901,B=0.0315446,X0=19405.5,S=12.0013,ties=(A=0.0917901,B=0.0315446);"
+        self.model.run_find_peaks_convolve.return_value = fun_wrap_str
 
         self.presenter.run_find_peaks_convolve()
 
+        self.assertEqual(self.presenter.is_waiting_convolve_peaks, True)
         self.presenter.find_peaks_convolve_started_notifier.notify_subscribers.assert_called_once()
-        mock_peak_func.setCentre.assert_called_once()
-        mock_peak_func.setHeight.assert_called_once()
-        mock_peak_func.setMatrixWorkspace.assert_called_once()
-        self.view.fit_browser.loadFunction.assert_called_once_with(str(mock_func_wrapper()))
+        self.view.fit_browser.loadFunction.assert_called_once_with(fun_wrap_str)
+
         self.presenter.handle_convolve_peaks_added()
+
         self.presenter.find_peaks_convolve_done_notifier.notify_subscribers.assert_called_once_with(True)
         mock_error.assert_not_called()
         self.assertEqual(self.presenter.is_waiting_convolve_peaks, False)

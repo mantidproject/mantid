@@ -7,11 +7,9 @@
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver, GenericObservable
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
-from mantid.simpleapi import Fit, logger, FindPeaksConvolve
-from mantid.api import AnalysisDataService as ADS, FunctionFactory
+from mantid.simpleapi import Fit, logger
 from mantidqt.utils.asynchronous import AsyncTask
 from copy import deepcopy
-from mantid.fitfunctions import FunctionWrapper
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
 FAILED_STYLE_SHEET = """QProgressBar {border: 1px solid red; border-radius: 2px}"""
@@ -112,65 +110,17 @@ class FittingPlotPresenter(object):
     def do_seq_fit(self):
         self.fit_all_started_notifier.notify_subscribers(True)
 
-    def _re_organize_keys_find_peaks_convolve(self, table_ws):
-        if table_ws.rowCount() == 1:
-            table_dict = table_ws.row(0)
-            table_dict.pop("SpecIndex", None)
-            return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
-        return None
-
     def run_find_peaks_convolve(self):
         self.is_waiting_convolve_peaks = False
         self.find_peaks_convolve_started_notifier.notify_subscribers()
         try:
             input_ws_name = self.view.fit_browser.workspaceName()
-            if not ADS.doesExist(input_ws_name):
-                logger.error(f"{input_ws_name} does not exist!")
-                self.find_peaks_convolve_done_notifier.notify_subscribers(False)
-                return
-            fit_prop_ws = ADS.retrieve(input_ws_name)
-            groupWs = FindPeaksConvolve(
-                InputWorkspace=fit_prop_ws,
-                OutputWorkspace="FindPeaksConvolve_" + input_ws_name,
-                IOverSigmaThreshold=4,
-                EstimatedPeakExtent=200,
-                StoreInADS=True,
-            )
-            peak_x_values = dict()
-            peak_y_values = dict()
-            for tab_ws in groupWs:
-                if tab_ws.getName() == "PeakCentre":
-                    peak_x_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
-                elif tab_ws.getName() == "PeakYPosition":
-                    peak_y_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
-
-            if peak_x_values is None or peak_y_values is None:
-                logger.error("Failed extracting columns from FindPeakConvolve output")
-                self.find_peaks_convolve_done_notifier.notify_subscribers(False)
-                return
-
-            if set(peak_x_values.keys()) == set(peak_y_values.keys()):
-                logger.notice(f"Adding {len(peak_x_values)} peaks found via FindPeaksConvolve")
-                func_wrapper = None
-                for col, x_value in peak_x_values.items():
-                    y_value = peak_y_values[col]
-                    peak_func = FunctionFactory.Instance().createPeakFunction(self.view.fit_browser.defaultPeakType())
-                    peak_func.setCentre(x_value)
-                    peak_func.setHeight(y_value)
-                    peak_func.setMatrixWorkspace(fit_prop_ws, 0, 0, 0)
-                    f_wrapper = FunctionWrapper(peak_func)
-                    if func_wrapper is None:
-                        func_wrapper = f_wrapper
-                    else:
-                        func_wrapper += f_wrapper
-                if func_wrapper is not None:
-                    self.is_waiting_convolve_peaks = True
-                    self.view.fit_browser.loadFunction(str(func_wrapper))
-                else:
-                    logger.error("No peak functions were created from the results of FindPeaksConvolve")
-                    self.find_peaks_convolve_done_notifier.notify_subscribers(False)
+            func_wrapper_str = self.model.run_find_peaks_convolve(input_ws_name, self.view.fit_browser.defaultPeakType())
+            if func_wrapper_str is not None:
+                self.is_waiting_convolve_peaks = True
+                self.view.fit_browser.loadFunction(func_wrapper_str)
             else:
-                logger.error("Incompatible columns returned from FindPeaksConvolve!")
+                self.is_waiting_convolve_peaks = False
                 self.find_peaks_convolve_done_notifier.notify_subscribers(False)
         except RuntimeError as err:
             logger.error(f"Failed to run FindPeaksConvolve for workspace:{input_ws_name}! Error:{err}")
