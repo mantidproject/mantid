@@ -511,7 +511,11 @@ public:
   }
 
 private:
-  IAlgorithm_sptr makeReductionAlgorithm() { return AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer"); }
+  IAlgorithm_sptr makeReductionAlgorithm() {
+    auto alg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+    alg->setLogging(false);
+    return alg;
+  }
 
   std::unique_ptr<IETModel> m_model;
   IAlgorithm_sptr m_reductionAlg;
