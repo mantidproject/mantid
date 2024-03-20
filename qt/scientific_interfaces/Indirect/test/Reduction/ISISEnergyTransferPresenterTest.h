@@ -14,7 +14,6 @@
 #include "MockObjects.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 
-#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -22,12 +21,6 @@ using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
 namespace {
-
-std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> defaultGroupingProps() {
-  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  Mantid::API::AlgorithmProperties::update("GroupingMethod", std::string("IPF"), *properties);
-  return properties;
-}
 
 IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true); }
 

@@ -59,7 +59,6 @@ public:
   virtual void setGroupOutputCheckBoxVisible(bool visible) = 0;
   virtual void setGroupOutputDropdownVisible(bool visible) = 0;
 
-  virtual void setInstrumentDefault(InstrumentData const &instrumentDetails) = 0;
   virtual void setDetailedBalance(double detailedBalance) = 0;
   virtual void setRunFilesEnabled(bool enable) = 0;
   virtual void setSingleRebin(bool enable) = 0;
@@ -71,8 +70,8 @@ public:
   virtual void setEnableOutputOptions(bool const enable) = 0;
 
   virtual void setInstrumentSpectraRange(int specMin, int specMax) = 0;
-  virtual void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
-                                int tabIndex) = 0;
+  virtual void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText,
+                                      bool checked, int tabIndex) = 0;
   virtual void setInstrumentEFixed(std::string const &instrumentName, double eFixed) = 0;
   virtual void setInstrumentGrouping(std::string const &instrumentName) = 0;
   virtual void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) = 0;

@@ -98,7 +98,6 @@ public:
   MOCK_METHOD1(setOutputInCm1Visible, void(bool visible));
   MOCK_METHOD1(setGroupOutputCheckBoxVisible, void(bool visible));
   MOCK_METHOD1(setGroupOutputDropdownVisible, void(bool visible));
-  MOCK_METHOD1(setInstrumentDefault, void(InstrumentData const &instrumentDetails));
   MOCK_METHOD1(setDetailedBalance, void(double detailedBalance));
   MOCK_METHOD1(setRunFilesEnabled, void(bool enable));
   MOCK_METHOD1(setSingleRebin, void(bool enable));
@@ -108,6 +107,13 @@ public:
   MOCK_METHOD2(setFileExtensionsByName, void(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes));
   MOCK_METHOD1(setRunButtonText, void(std::string const &runText));
   MOCK_METHOD1(setEnableOutputOptions, void(bool const enable));
+
+  MOCK_METHOD2(setInstrumentSpectraRange, void(int specMin, int specMax));
+  MOCK_METHOD4(setInstrumentRebinning,
+               void(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked, int tabIndex));
+  MOCK_METHOD2(setInstrumentEFixed, void(std::string const &instrumentName, double eFixed));
+  MOCK_METHOD1(setInstrumentGrouping, void(std::string const &instrumentName));
+  MOCK_METHOD1(setInstrumentSpecDefault, void(std::map<std::string, bool> &specMap));
 
   MOCK_METHOD1(showMessageBox, void(std::string const &message));
 };
