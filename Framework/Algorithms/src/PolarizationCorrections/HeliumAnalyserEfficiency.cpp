@@ -163,55 +163,76 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   const auto t00Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::DownDown);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)
-  auto plus = createChildAlgorithm("Plus");
-  plus->initialize();
-  plus->setProperty("LHSWorkspace", t11Ws);
-  plus->setProperty("RHSWorkspace", t00Ws);
-  plus->setProperty("OutputWorkspace", "tnsf");
-  plus->executeAsChildAlg();
-  MatrixWorkspace_sptr tnsfWs = plus->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr tnsfWs = addTwoWorkspaces(t11Ws, t00Ws);
 
   // T_SF = T01 + T10 (SF = spin flipped)
-  plus->initialize();
-  plus->setProperty("LHSWorkspace", t01Ws);
-  plus->setProperty("RHSWorkspace", t10Ws);
-  plus->setProperty("OutputWorkspace", "tsf");
-  plus->executeAsChildAlg();
-  MatrixWorkspace_sptr tsfWs = plus->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr tsfWs = addTwoWorkspaces(t01Ws, t10Ws);
 
   // P = tanh(mu * phe) where P is the polarisation of an unpolarised incoming beam
   // after the analyser cell. We're going to calculate P from the data,
   // P = (T_NSF - T_SF) / (T_NSF + T_SF), then fit tanh(mu * phe) to it in order
   // to calculate phe.
-
-  plus->initialize();
-  plus->setProperty("LHSWorkspace", tnsfWs);
-  plus->setProperty("RHSWorkspace", tsfWs);
-  plus->setProperty("OutputWorkspace", "denominator");
-  plus->executeAsChildAlg();
-  MatrixWorkspace_sptr denom = plus->getProperty("OutputWorkspace");
-
-  auto minus = createChildAlgorithm("Minus");
-  minus->initialize();
-  minus->setProperty("LHSWorkspace", tnsfWs);
-  minus->setProperty("RHSWorkspace", tsfWs);
-  minus->setProperty("OutputWorkspace", "numerator");
-  minus->executeAsChildAlg();
-  MatrixWorkspace_sptr numerator = minus->getProperty("OutputWorkspace");
-
-  auto divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty("LHSWorkspace", numerator);
-  divide->setProperty("RHSWorkspace", denom);
-  divide->setProperty("OutputWorkspace", "p");
-  divide->executeAsChildAlg();
-  MatrixWorkspace_sptr p = divide->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr denom = addTwoWorkspaces(tnsfWs, tsfWs);
+  MatrixWorkspace_sptr numerator = subtractWorkspaces(tnsfWs, tsfWs);
+  MatrixWorkspace_sptr p = divideWorkspace(numerator, denom);
 
   // Now we fit tanh(mu*pHe*x) to P to give us pHe
 
   const double pxd = getProperty(PropertyNames::PXD);
   const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pxd;
 
+  double pHe, pHeError;
+  std::vector<double> wavelengthValues;
+  fitAnalyserEfficiency(mu, p, pHe, pHeError, wavelengthValues);
+
+  auto createSingleValuedWorkspace = createChildAlgorithm("CreateSingleValuedWorkspace");
+  createSingleValuedWorkspace->initialize();
+  createSingleValuedWorkspace->setProperty("DataValue", pHe);
+  createSingleValuedWorkspace->setProperty("ErrorValue", pHeError);
+  createSingleValuedWorkspace->setProperty("OutputWorkspace", "phe");
+  createSingleValuedWorkspace->execute();
+  MatrixWorkspace_sptr pheWs = createSingleValuedWorkspace->getProperty("OutputWorkspace");
+
+  setProperty(PropertyNames::P_HE, pheWs);
+
+  // Now we have all the parameters to calculate T(lambda), the transmission of the helium
+  // analyser for an incident unpolarised beam. T_para and T_anti are also calculated, the
+  // transmission of the wanted and unwanted spin state. T = (T_para + T_anti) / 2
+
+  MantidVec tPara, tAnti, tParaErrors, tAntiErrors;
+  calculateTransmission(wavelengthValues, pHe, pHeError, mu, tPara, tAnti, tParaErrors, tAntiErrors);
+
+  MatrixWorkspace_sptr tParaWorkspace =
+      createWorkspace("tPara", "Helium Analyser Transmission T_para", wavelengthValues, tPara, tParaErrors);
+  setProperty(PropertyNames::OUTPUT_T_PARA_WORKSPACE, tParaWorkspace);
+
+  MatrixWorkspace_sptr tAntiWorkspace =
+      createWorkspace("tAnti", "Helium Analyser Transmission T_anti", wavelengthValues, tAnti, tAntiErrors);
+  setProperty(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, tAntiWorkspace);
+
+  MatrixWorkspace_sptr transmissionWorkspace = addTwoWorkspaces(tParaWorkspace, tAntiWorkspace);
+
+  auto scale = createChildAlgorithm("Scale");
+  scale->initialize();
+  scale->setProperty("InputWorkspace", transmissionWorkspace);
+  scale->setProperty("OutputWorkspace", transmissionWorkspace);
+  scale->setProperty("Factor", 0.5);
+  scale->setProperty("Operation", "Multiply");
+  scale->execute();
+
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, transmissionWorkspace);
+}
+
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
+                                                                      const std::vector<std::string> &spinConfigOrder,
+                                                                      const std::string &spinConfig) {
+  const auto wsIndex =
+      std::find(spinConfigOrder.cbegin(), spinConfigOrder.cend(), spinConfig) - spinConfigOrder.cbegin();
+  return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(wsIndex));
+}
+
+void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double &mu, MatrixWorkspace_sptr p, double &pHe,
+                                                     double &pHeError, MantidVec &wavelengthValues) {
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=tanh(" + std::to_string(mu) + "*phe*x),phe=0.1");
@@ -221,13 +242,12 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   const double endLambda = getProperty("EndLambda");
   fit->setProperty("EndX", endLambda);
   fit->setProperty("CreateOutput", true);
-  fit->executeAsChildAlg();
+  fit->execute();
 
   const bool stopOnFitError = getProperty(PropertyNames::STOP_ON_FIT_ERROR);
   const std::string &status = fit->getProperty("OutputStatus");
   if (stopOnFitError && (!fit->isExecuted() || status != "success")) {
-    auto const &errMsg{"Failed to fit to workspace, " + groupWorkspace->getName() +
-                       " + in the calculation of p_He: " + status};
+    auto const &errMsg{"Failed to fit to data in the calculation of p_He: " + status};
     g_log.error(errMsg);
     throw std::runtime_error(errMsg);
   }
@@ -235,29 +255,19 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
   MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
 
-  const double pHe = fitParameters->getRef<double>("Value", 0);
-  const double pHeError = fitParameters->getRef<double>("Error", 0);
-
-  auto createSingleValuedWorkspace = createChildAlgorithm("CreateSingleValuedWorkspace");
-  createSingleValuedWorkspace->initialize();
-  createSingleValuedWorkspace->setProperty("DataValue", pHe);
-  createSingleValuedWorkspace->setProperty("ErrorValue", pHeError);
-  createSingleValuedWorkspace->setProperty("OutputWorkspace", "phe");
-  createSingleValuedWorkspace->executeAsChildAlg();
-  MatrixWorkspace_sptr pheWs = createSingleValuedWorkspace->getProperty("OutputWorkspace");
-
-  setProperty(PropertyNames::P_HE, pheWs);
-
-  // Now we have all the parameters to calculate T(lambda), the transmission of the helium
-  // analyser for an incident unpolarised beam. T_para and T_anti are also calculated, the
-  // transmission of the wanted and unwanted spin state. T = (T_para + T_anti) / 2
-
+  pHe = fitParameters->getRef<double>("Value", 0);
+  pHeError = fitParameters->getRef<double>("Error", 0);
   const auto wavelengthValuesHist = fitWorkspace->x(0);
-  std::vector<double> wavelengthValues(wavelengthValuesHist.cbegin(), wavelengthValuesHist.cend());
-  std::vector<double> tPara(wavelengthValues.size());
-  std::vector<double> tAnti(wavelengthValues.size());
-  std::vector<double> tParaErrors(wavelengthValues.size());
-  std::vector<double> tAntiErrors(wavelengthValues.size());
+  wavelengthValues = MantidVec(wavelengthValuesHist.cbegin(), wavelengthValuesHist.cend());
+}
+
+void HeliumAnalyserEfficiency::calculateTransmission(const MantidVec &wavelengthValues, const double &pHe,
+                                                     const double &pHeError, const double &mu, MantidVec &tPara,
+                                                     MantidVec &tAnti, MantidVec &tParaErrors, MantidVec &tAntiErrors) {
+  tPara = MantidVec(wavelengthValues.size());
+  tAnti = MantidVec(wavelengthValues.size());
+  tParaErrors = MantidVec(wavelengthValues.size());
+  tAntiErrors = MantidVec(wavelengthValues.size());
 
   double s00, s01, s10, s11;
   s00 = s01 = s10 = s11 = 0;
@@ -306,54 +316,52 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
         tPpf * std::sqrt(dTa_dpHe * dTa_dpHe * pHe_variance + dTa_dT_E * dTa_dT_E * s00 + dTa_dT_E * dTa_dpxd * s01 +
                          dTa_dpxd * dTa_dT_E * s10 + dTa_dpxd * dTa_dpxd * s11);
   }
-
-  auto createWorkspace = createChildAlgorithm("CreateWorkspace");
-  createWorkspace->initialize();
-  createWorkspace->setProperty("OutputWorkspace", "tPara");
-  createWorkspace->setProperty("DataX", wavelengthValues);
-  createWorkspace->setProperty("DataY", tPara);
-  createWorkspace->setProperty("DataE", tParaErrors);
-  createWorkspace->setProperty("UnitX", "Wavelength");
-  createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_para");
-  createWorkspace->executeAsChildAlg();
-  MatrixWorkspace_sptr tParaWorkspace = createWorkspace->getProperty("OutputWorkspace");
-  setProperty(PropertyNames::OUTPUT_T_PARA_WORKSPACE, tParaWorkspace);
-
-  createWorkspace->initialize();
-  createWorkspace->setProperty("OutputWorkspace", "tAnti");
-  createWorkspace->setProperty("DataX", wavelengthValues);
-  createWorkspace->setProperty("DataY", tAnti);
-  createWorkspace->setProperty("DataE", tAntiErrors);
-  createWorkspace->setProperty("UnitX", "Wavelength");
-  createWorkspace->setProperty("WorkspaceTitle", "Helium Analyser Transmission T_anti");
-  createWorkspace->executeAsChildAlg();
-  MatrixWorkspace_sptr tAntiWorkspace = createWorkspace->getProperty("OutputWorkspace");
-  setProperty(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, tAntiWorkspace);
-
-  plus->initialize();
-  plus->setProperty("LHSWorkspace", tParaWorkspace);
-  plus->setProperty("RHSWorkspace", tAntiWorkspace);
-  plus->setProperty("OutputWorkspace", "Tsum");
-  plus->executeAsChildAlg();
-  MatrixWorkspace_sptr transmissionWorkspace = plus->getProperty("OutputWorkspace");
-
-  auto scale = createChildAlgorithm("Scale");
-  scale->initialize();
-  scale->setProperty("InputWorkspace", transmissionWorkspace);
-  scale->setProperty("OutputWorkspace", transmissionWorkspace);
-  scale->setProperty("Factor", 0.5);
-  scale->setProperty("Operation", "Multiply");
-  scale->executeAsChildAlg();
-
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, transmissionWorkspace);
 }
 
-Workspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
-                                                                const std::vector<std::string> &spinConfigOrder,
-                                                                const std::string &spinConfig) {
-  const auto wsIndex =
-      std::find(spinConfigOrder.cbegin(), spinConfigOrder.cend(), spinConfig) - spinConfigOrder.cbegin();
-  return group->getItem(wsIndex);
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs) {
+  auto plus = createChildAlgorithm("Plus");
+  plus->initialize();
+  plus->setProperty("LHSWorkspace", ws);
+  plus->setProperty("RHSWorkspace", otherWs);
+  plus->execute();
+  return plus->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::createWorkspace(const std::string &name, const std::string &title,
+                                                               const MantidVec &xData, const MantidVec &yData,
+                                                               const MantidVec &eData, const std::string &xUnit) {
+  auto createWorkspace = createChildAlgorithm("CreateWorkspace");
+  createWorkspace->initialize();
+  createWorkspace->setProperty("OutputWorkspace", name);
+  createWorkspace->setProperty("DataX", xData);
+  createWorkspace->setProperty("DataY", yData);
+  createWorkspace->setProperty("DataE", eData);
+  createWorkspace->setProperty("UnitX", xUnit);
+  createWorkspace->setProperty("WorkspaceTitle", title);
+  createWorkspace->execute();
+  return createWorkspace->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::subtractWorkspaces(MatrixWorkspace_sptr ws,
+                                                                  MatrixWorkspace_sptr wsToSubtract) {
+  auto minus = createChildAlgorithm("Minus");
+  minus->initialize();
+  minus->setProperty("LHSWorkspace", ws);
+  minus->setProperty("RHSWorkspace", wsToSubtract);
+  minus->setProperty("OutputWorkspace", "minus");
+  minus->execute();
+  return minus->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::divideWorkspace(MatrixWorkspace_sptr numerator,
+                                                               MatrixWorkspace_sptr denominator) {
+  auto divide = createChildAlgorithm("Divide");
+  divide->initialize();
+  divide->setProperty("LHSWorkspace", numerator);
+  divide->setProperty("RHSWorkspace", denominator);
+  divide->setProperty("OutputWorkspace", "p");
+  divide->execute();
+  return divide->getProperty("OutputWorkspace");
 }
 
 const double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
