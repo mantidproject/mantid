@@ -90,13 +90,13 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                   |
+| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in Elwin                                           |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                   |
+| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in Elwin                                           |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Analysis <interface-inelastic-data-analysis>` in I(Q,t)                                                  |
+| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in I(Q,t)                                          |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`Data Analysis <interface-inelastic-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                      |
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS fitting <interface-inelastic-qens-fitting>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                        |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name

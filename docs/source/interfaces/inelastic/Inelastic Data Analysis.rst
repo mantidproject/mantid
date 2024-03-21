@@ -1,4 +1,4 @@
-﻿.. _interface-inelastic-data-analysis:
+﻿.. _interface-inelastic-qens-fitting:
 
 Inelastic Data Analysis
 =======================
