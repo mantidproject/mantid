@@ -290,14 +290,14 @@ public:
 %End
 
   // set maintain aspect ratio
-  void setMaintainAspectRatio(int index);
+  void setMaintainAspectRatio(bool on);
 %Docstring
-    void setMaintainAspectRatio(int index)
+    void setMaintainAspectRatio(bool on)
     ------------------------------
-    Set the maintain aspect ratio of the current window.
+    Set the maintain aspect ratio option in the current window.
 
     Args:
-      on: boolean indicating whether to turn on or off
+      on: boolean indicating whether to turn maintain aspect ratio on or off
 %End
 
   void setMinValue(double value, bool apply);

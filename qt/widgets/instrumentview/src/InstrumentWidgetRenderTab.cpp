@@ -746,18 +746,6 @@ void InstrumentWidgetRenderTab::setSurfaceType(int index) {
 }
 
 /**
- * Set to maintain aspect ratio.
- * @param on:: Whether or not to maintain aspect ratio.
- */
-void InstrumentWidgetRenderTab::setMaintainAspectRatio(bool on) {
-  if (m_instrWidget->getSurfaceType() == InstrumentWidget::FULL3D) {
-    g_log.warning("Instruction to set maintain aspect ratio was ignored because the surface type is 'Full 3D'");
-  } else {
-    m_instrWidget->setMaintainAspectRatio(on);
-  }
-}
-
-/**
  * Respond to surface change from script.
  * @param index :: Index selected in the surface type combo box.
  */
@@ -775,8 +763,20 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
 }
 
 /**
+ * Set to maintain aspect ratio.
+ * @param on:: Boolean to turn maintain aspect ratio on or off.
+ */
+void InstrumentWidgetRenderTab::setMaintainAspectRatio(bool on) {
+  if (m_instrWidget->getSurfaceType() == InstrumentWidget::FULL3D) {
+    g_log.warning("Method to set maintain aspect ratio was ignored because the surface type is 'Full 3D'");
+  } else {
+    m_instrWidget->setMaintainAspectRatio(on);
+  }
+}
+
+/**
  * Respond to change to maintain aspect ratio from script.
- * @param on :: Boolean to turn aspect ratio on or off.
+ * @param on :: Boolean to turn maintain aspect ratio on or off.
  */
 void InstrumentWidgetRenderTab::maintainAspectRatioChanged(bool on) {
   if (m_maintainAspectRatio->isChecked() != on) {
