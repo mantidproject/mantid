@@ -131,7 +131,7 @@ void InelasticDataManipulationElwinTabModel::setOutputWorkspaceNames(std::string
 
 std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() {
   std::string outputWorkspaceNames;
-  for (auto &element : m_outputWorkspaceNames) {
+  for (auto const &element : m_outputWorkspaceNames) {
     outputWorkspaceNames += static_cast<std::string>(element.second) + ',';
   }
   outputWorkspaceNames.resize(outputWorkspaceNames.size() - 1);

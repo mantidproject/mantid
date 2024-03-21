@@ -23,9 +23,12 @@ Elwin tab
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
 #. Go to the ``Elwin`` tab
-#. Enter ``MAR27691_red.nxs`` in ``Input file``
-#. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
-#. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files, ``MAR27691_red.nxs`` and ``MAR27698_red.nxs``, by using shift key
+#. Click on ``Add Workspaces``, a dialog window should prompt.
+#. Enter ``MAR27691_red.nxs`` in ``Input file``, table of the dialog should be populated with ``MAR2791_red`` workspace
+#. Select the workspace from the table and click on ``Add Data``, close dialog
+#. Back on ``Elwin`` tab, click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
+#. Open again ``Add Workspaces`` dialog and in ``Input file`` choose ``browse``, navigate to the ISIS-Sample data and select the two files, ``MAR27691_red.nxs`` and ``MAR27698_red.nxs``, by using shift key
+#. Add the loaded workspaces
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``MAR27691-27698_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
@@ -37,10 +40,12 @@ Elwin tab
 ################
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
-#. Go to the ``Elwin`` tab
-#. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
-#. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
-#. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select ``irs26176_graphite002_red.nxs`` and ``irs26174_graphite002_red.nxs`` simultaneously, by using shift key
+#. Click on ``Add Workspaces``, a dialog window should prompt
+#. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``, table of the dialog should be populated with ``irs26176_graphite002_red`` workspace
+#. Select the workspace from the table and click on ``Add Data``, close dialog
+#. Back on ``Elwin`` tab, click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
+#. Open again ``Add Workspaces`` dialog and in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files, ``irs26174_graphite002_red.nxs`` and ``irs26176_graphite002_red.nxs``, by using shift key
+#. Add the loaded workspaces
 #. Change the integration range from -0.2 to 0.2
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
