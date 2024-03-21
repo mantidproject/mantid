@@ -32,8 +32,8 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
-* `37033 <https://github.com/mantidproject/mantid/pull/37033>`_ Replace draw with draw_idle for some functions
-* `37047 <https://github.com/mantidproject/mantid/pull/37047>`_ Load instrument after loading sample logs in ReflectometryReductionOneLiveData
+* `37052 <https://github.com/mantidproject/mantid/pull/37052>`_ Replace draw with draw_idle for some functions
+* `37053 <https://github.com/mantidproject/mantid/pull/37053>`_ Load instrument after loading sample logs in ReflectometryReductionOneLiveData
 * `37016 <https://github.com/mantidproject/mantid/pull/37016>`_ Fix sliders not changing integration limits in Elwin tab
 * `36935 <https://github.com/mantidproject/mantid/pull/36935>`_ Fix regular live data crashes on OFFSPEC
 
