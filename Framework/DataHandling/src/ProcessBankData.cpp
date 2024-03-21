@@ -111,15 +111,16 @@ void ProcessBankData::run() {
   const double TOF_MAX = alg->filter_tof_max;
   const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
-  const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name);
+  // TODO don't bother with pulse filtering...yet
+  const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name, std::vector<size_t>());
   const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex(); // for whole file reading is 0
   const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();   // for whole file reading is event_index->size()
   for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
     // determine range of events for the pulse
     const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
-    if (eventIndexRange.first > numEvents)
+    if (eventIndexRange.first >= numEvents) // already process all the events that were requested
       break;
-    else if (eventIndexRange.first == eventIndexRange.second)
+    else if (eventIndexRange.first == eventIndexRange.second) // empty range
       continue;
 
     // Save the pulse time at this index for creating those events
