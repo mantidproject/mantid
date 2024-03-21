@@ -96,7 +96,7 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in I(Q,t)                                          |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS fitting <interface-inelastic-qens-fitting>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                        |
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                        |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
@@ -131,28 +131,14 @@ Sample Suffixes
 Resolution Suffixes
   _res
 
-Data Analysis Suffixes
-~~~~~~~~~~~~~~~~~~~~~~
-Elwin
-#####
-
-Input Suffixes
-  _red, _sqw
+QENS Fitting Suffixes
+~~~~~~~~~~~~~~~~~~~~~
 
 MSDFit
 ######
 
 Sample Suffixes
   _eq
-
-I(Q,t)
-######
-
-Sample Suffixes
-  _red, _sqw
-
-Resolution Suffixes
-  _res, _red, _sqw
 
 I(Q,t)Fit
 #########
@@ -242,6 +228,8 @@ Transmission
 ############
 No restrictions.
 
+Data Manipulation Suffixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 Symmetrise
 ##########
 
@@ -259,6 +247,21 @@ Moments
 
 Input Suffixes
   _sqw
+
+Elwin
+#####
+
+Input Suffixes
+  _red, _sqw
+
+I(Q,t)
+######
+
+Sample Suffixes
+  _red, _sqw
+
+Resolution Suffixes
+  _res, _red, _sqw
 
 Diffraction Suffixes
 ~~~~~~~~~~~~~~~~~~~~
