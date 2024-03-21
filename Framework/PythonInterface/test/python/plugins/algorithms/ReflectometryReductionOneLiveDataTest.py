@@ -158,11 +158,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_defaults()
         expected = [
             "CloneWorkspace",
-            "LoadInstrument",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "AddSampleLogMultiple",
+            "LoadInstrument",
             "SetInstrumentParameter",
             "SetInstrumentParameter",
             "ReflectometryISISLoadAndProcess",
@@ -269,11 +269,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_zero_theta()
         expected = [
             "CloneWorkspace",
-            "LoadInstrument",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "AddSampleLogMultiple",
+            "LoadInstrument",
             "SetInstrumentParameter",
             "SetInstrumentParameter",
             "ReflectometryISISLoadAndProcess",
