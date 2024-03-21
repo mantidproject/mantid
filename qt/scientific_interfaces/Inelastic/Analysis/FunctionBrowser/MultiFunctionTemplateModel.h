@@ -95,9 +95,9 @@ protected:
   QList<ParamID> m_globals;
 
 private:
-  std::optional<double> getParameter(ParamID name) const;
-  std::optional<double> getParameterError(ParamID name) const;
-  std::optional<std::string> getParameterDescription(ParamID name) const;
+  double getParameter(ParamID name) const;
+  double getParameterError(ParamID name) const;
+  std::string getParameterDescription(ParamID name) const;
   std::optional<ParamID> getParameterId(std::string const &parameterName);
 
   virtual std::optional<std::string> getPrefix(ParamID name) const = 0;

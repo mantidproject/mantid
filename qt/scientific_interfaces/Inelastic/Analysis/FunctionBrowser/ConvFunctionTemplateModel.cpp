@@ -271,7 +271,8 @@ std::string ConvFunctionTemplateModel::setBackgroundA0(double value) {
   if (hasBackground()) {
     auto const paramID = (m_backgroundType == BackgroundType::Flat) ? ParamID::FLAT_BG_A0 : ParamID::LINEAR_BG_A0;
     setParameter(paramID, value);
-    return *getParameterName(paramID);
+    if (auto const paramName = getParameterName(paramID))
+      return *paramName;
   }
   return "";
 }

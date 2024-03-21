@@ -185,14 +185,14 @@ void MultiFunctionTemplateModel::estimateFunctionParameters() {
 
 std::map<ParamID, double> MultiFunctionTemplateModel::getCurrentValues() const {
   std::map<ParamID, double> values;
-  auto store = [&values, this](ParamID name) { values[name] = *getParameter(name); };
+  auto store = [&values, this](ParamID name) { values[name] = getParameter(name); };
   applyParameterFunction(store);
   return values;
 }
 
 std::map<ParamID, double> MultiFunctionTemplateModel::getCurrentErrors() const {
   std::map<ParamID, double> errors;
-  auto store = [&errors, this](ParamID name) { errors[name] = *getParameterError(name); };
+  auto store = [&errors, this](ParamID name) { errors[name] = getParameterError(name); };
   applyParameterFunction(store);
   return errors;
 }
@@ -227,30 +227,32 @@ void MultiFunctionTemplateModel::setCurrentValues(const std::map<ParamID, double
   }
 }
 
-std::optional<double> MultiFunctionTemplateModel::getParameter(ParamID name) const {
+double MultiFunctionTemplateModel::getParameter(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameter(*paramName) : std::optional<double>();
+  return paramName ? m_model->getParameter(*paramName) : 0.0;
 }
 
-std::optional<double> MultiFunctionTemplateModel::getParameterError(ParamID name) const {
+double MultiFunctionTemplateModel::getParameterError(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterError(*paramName) : std::optional<double>();
+  return paramName ? m_model->getParameterError(*paramName) : 0.0;
 }
 
 std::optional<std::string> MultiFunctionTemplateModel::getParameterName(ParamID name) const {
-  auto const prefix = getPrefix(name);
-  return prefix ? *prefix + g_paramName.at(name) : std::optional<std::string>();
+  if (auto const prefix = getPrefix(name))
+    return *prefix + g_paramName.at(name);
+  return std::nullopt;
 }
 
-std::optional<std::string> MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
+std::string MultiFunctionTemplateModel::getParameterDescription(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model->getParameterDescription(*paramName) : std::optional<std::string>();
+  return paramName ? m_model->getParameterDescription(*paramName) : "";
 }
 
 std::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string const &parameterName) {
   std::optional<ParamID> result;
   auto getter = [&result, parameterName, this](ParamID pid) {
-    if (parameterName == *getParameterName(pid))
+    auto const paramNameFromID = getParameterName(pid);
+    if (paramNameFromID && parameterName == *paramNameFromID)
       result = pid;
   };
   applyParameterFunction(getter);
