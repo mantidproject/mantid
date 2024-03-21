@@ -14,16 +14,16 @@ DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
 
-  m_fitPropertyBrowser = new InelasticFitPropertyBrowser();
+  m_fitPropertyBrowser = new InelasticFitPropertyBrowser(this);
   m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
-  QDockWidget *plotViewArea = new QDockWidget();
+  QDockWidget *plotViewArea = new QDockWidget(this);
   plotViewArea->setWindowTitle("Mini plots");
-  m_fitPlotView = new FitPlotView();
+  m_fitPlotView = new FitPlotView(this);
   plotViewArea->setWidget(m_fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
-  QFrame *line = new QFrame();
+  QFrame *line = new QFrame(this);
   line->setFrameShape(QFrame::HLine);
   line->setFrameShadow(QFrame::Raised);
   line->setLineWidth(0);
@@ -36,7 +36,7 @@ DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
 }
 
 void DockWidgetArea::setFitDataView(FitDataView *fitDataView) {
-  QDockWidget *dataViewArea = new QDockWidget();
+  QDockWidget *dataViewArea = new QDockWidget(this);
   dataViewArea->setWindowTitle("Data Input");
   m_fitDataView = fitDataView;
   dataViewArea->setWidget(m_fitDataView);
