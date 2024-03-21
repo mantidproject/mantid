@@ -16,9 +16,13 @@
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+double constexpr EPSILON = std::numeric_limits<double>::epsilon();
+
 std::tuple<double, double> calculateLifetimeAndHeight(Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
-  auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-  if (lifeTime <= 0 || std::isinf(lifeTime))
+  auto const logY0 = log(y[0]);
+  auto const logY1 = log(y[1]);
+  auto lifeTime = std::abs(logY0 - logY1) > EPSILON ? (x[1] - x[0]) / (logY0 - logY1) : 1.0;
+  if (lifeTime <= 0)
     lifeTime = 1.0;
   auto const height = y[0] * exp(x[0] / lifeTime);
   return {lifeTime, height};
