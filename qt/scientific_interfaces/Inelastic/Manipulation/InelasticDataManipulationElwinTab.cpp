@@ -28,13 +28,6 @@ Mantid::Kernel::Logger g_log("Elwin");
 
 std::vector<std::string> getOutputWorkspaceSuffices() { return {"_eq", "_eq2", "_elf", "_elt"}; }
 
-std::string extractLastOf(std::string const &str, std::string const &delimiter) {
-  auto const cutIndex = str.rfind(delimiter);
-  if (cutIndex != std::string::npos)
-    return str.substr(cutIndex + 1, str.size() - cutIndex);
-  return str;
-}
-
 template <typename Iterator, typename Functor>
 std::vector<std::string> transformElements(Iterator const fromIter, Iterator const toIter, Functor const &functor) {
   std::vector<std::string> newVector;
@@ -47,13 +40,6 @@ template <typename T, typename Predicate> void removeElementsIf(std::vector<T> &
   auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
   if (iter != vector.end())
     vector.erase(iter, vector.end());
-}
-
-std::vector<std::string> extractSuffixes(QStringList const &files, std::string const &delimiter) {
-  return transformElements(files.begin(), files.end(), [&](QString const &file) {
-    QFileInfo const fileInfo(file);
-    return extractLastOf(fileInfo.baseName().toStdString(), delimiter);
-  });
 }
 
 std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, std::string const &prefix) {
@@ -154,7 +140,7 @@ bool InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   return true;
 }
 
-std::string InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> &workspaceNames) {
+std::string InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> workspaceNames) {
   std::transform(workspaceNames.cbegin(), workspaceNames.cend(), workspaceNames.begin(),
                  [](auto &name) { return name.substr(0, name.find_first_of('_')); });
   std::regex re("\\d+");
