@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os.path
 import unittest
 
 import abins.input
@@ -12,6 +13,8 @@ from abins.input import EuphonicLoader
 
 
 class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
+    _hexane_phonopy = os.path.join("hexane_phonopy", "hexane_LoadPhonopy")
+
     def setUp(self):
         # A small cutoff is used to limit number of data files
         self.default_cutoff = abins.parameters.sampling["force_constants"]["qpt_cutoff"]
@@ -28,6 +31,9 @@ class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
 
         with self.assertRaises(TypeError):
             _ = EuphonicLoader(input_ab_initio_filename=1)
+
+    def test_with_hdf_fc(self):
+        self.check(name=self._hexane_phonopy, loader=EuphonicLoader, extension="yaml", max_displacement_kpt=-1)
 
 
 if __name__ == "__main__":
