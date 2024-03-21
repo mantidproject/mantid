@@ -193,6 +193,7 @@ void FitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, con
     });
     if (it != (*m_fittingData).end()) {
       (*it).combine(FitData(workspace, spectra));
+      return;
     }
   }
   addNewWorkspace(workspace, spectra);

@@ -20,6 +20,8 @@ class IFitOutputOptionsPresenter;
 class MANTIDQT_INELASTIC_DLL IFitOutputOptionsView {
 
 public:
+  virtual ~IFitOutputOptionsView() = default;
+
   virtual void subscribePresenter(IFitOutputOptionsPresenter *presenter) = 0;
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;

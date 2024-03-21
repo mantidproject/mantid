@@ -19,6 +19,8 @@ class IFitPlotPresenter;
 
 class MANTIDQT_INELASTIC_DLL IFitPlotView {
 public:
+  virtual ~IFitPlotView() = default;
+
   virtual void subscribePresenter(IFitPlotPresenter *presenter) = 0;
 
   virtual void watchADS(bool watch) = 0;

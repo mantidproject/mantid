@@ -52,12 +52,12 @@ private:
   QIcon m_icon;
 };
 
-class MANTIDQT_INELASTIC_DLL FitPlotView : public API::MantidWidget, public IFitPlotView {
+class MANTIDQT_INELASTIC_DLL FitPlotView final : public API::MantidWidget, public IFitPlotView {
   Q_OBJECT
 
 public:
   FitPlotView(QWidget *parent = nullptr);
-  virtual ~FitPlotView();
+  ~FitPlotView();
 
   void subscribePresenter(IFitPlotPresenter *presenter) override;
 
