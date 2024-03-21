@@ -88,6 +88,7 @@ InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() = default;
 void InstrumentWidgetRenderTab::connectInstrumentWidgetSignals() const {
   // Connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(surfaceTypeChanged(int)), this, SLOT(surfaceTypeChanged(int)));
+  connect(m_instrWidget, SIGNAL(maintainAspectRatioChanged(bool)), this, SLOT(maintainAspectRatioChanged(bool)));
   connect(m_instrWidget, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(m_instrWidget, SIGNAL(colorMapMaxValueChanged(double)), this, SLOT(setMaxValue(double)));
   connect(m_instrWidget, SIGNAL(colorMapMinValueChanged(double)), this, SLOT(setMinValue(double)));
@@ -187,7 +188,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   m_maintainAspectRatio = new QAction("Maintain Aspect Ratio", this);
   m_maintainAspectRatio->setCheckable(true);
   m_maintainAspectRatio->setChecked(true);
-  connect(m_maintainAspectRatio, SIGNAL(toggled(bool)), m_instrWidget, SLOT(setMaintainAspectRatio(bool)));
+  connect(m_maintainAspectRatio, SIGNAL(toggled(bool)), this, SLOT(setMaintainAspectRatio(bool)));
   m_tooltipInfo = new QAction("Tooltip", this);
   m_tooltipInfo->setToolTip("Show detector info in a tooltip when hovering.");
   m_tooltipInfo->setCheckable(true);
@@ -741,6 +742,16 @@ void InstrumentWidgetRenderTab::setSurfaceType(int index) {
 }
 
 /**
+ * Set to maintain aspect ratio.
+ * @param on:: Whether or not to maintain aspect ratio.
+ */
+void InstrumentWidgetRenderTab::setMaintainAspectRatio(bool on) {
+  if (m_instrWidget->getSurfaceType() != InstrumentWidget::FULL3D) {
+    m_instrWidget->setMaintainAspectRatio(on);
+  }
+}
+
+/**
  * Respond to surface change from script.
  * @param index :: Index selected in the surface type combo box.
  */
@@ -755,6 +766,16 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
     action->setChecked(true);
   }
   showOrHideBoxes(index);
+}
+
+/**
+ * Respond to change to maintain aspect ratio from script.
+ * @param on :: Boolean to turn aspect ratio on or off.
+ */
+void InstrumentWidgetRenderTab::maintainAspectRatioChanged(bool on) {
+  if (m_maintainAspectRatio->isChecked() != on) {
+    m_maintainAspectRatio->setChecked(on);
+  }
 }
 
 /**

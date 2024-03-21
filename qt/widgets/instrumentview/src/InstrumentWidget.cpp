@@ -1096,6 +1096,7 @@ void InstrumentWidget::setMaintainAspectRatio(bool on) {
   m_maintainAspectRatio = on;
   setSurfaceType(m_surfaceType);
   updateInstrumentView();
+  emit maintainAspectRatioChanged(on);
 }
 
 /**

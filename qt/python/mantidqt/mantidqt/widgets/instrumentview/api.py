@@ -39,6 +39,7 @@ def get_instrumentview(workspace, wait=True):
     ivp.reset_view = ivp.get_render_tab().resetView
     ivp.select_tab = ivp.container.select_tab
     ivp.select_surface_type = ivp.get_render_tab().setSurfaceType
+    ivp.set_maintain_aspect_ratio = ivp.get_render_tab().setMaintainAspectRatio
     ivp.set_auto_scaling = ivp.get_render_tab().setColorMapAutoscaling
     ivp.set_axis = ivp.get_render_tab().setAxis
     ivp.set_bin_range = safe_qthread(ivp.container.widget.setBinRange)
