@@ -1,12 +1,12 @@
 ﻿.. _interface-inelastic-qens-fitting:
 
-Inelastic Data Analysis
-=======================
+Inelastic QENS Fitting
+======================
 
 Overview
 --------
 
-The Inelastic Data Analysis interface is a collection of tools within Mantid
+The Inelastic QENS Fitting interface is a collection of tools within Mantid
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
 OSIRIS and data from direct geometry spectrometer LET.
 
@@ -16,10 +16,10 @@ Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
 workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
 
-QENS fitting tabs
+QENS Fitting tabs
 -----------------
 
-There are four QENS fitting interfaces that share a common layout and features:
+There are four QENS Fitting interfaces that share a common layout and features:
 
 * MSD Fit
 * I(Q,t) Fit,
@@ -191,7 +191,7 @@ The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-M
 (towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2] reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma
 equal to zero.
 
-.. interface:: Data Analysis
+.. interface:: QENS Fitting
   :width: 450
   :widget: tabMSD
 
@@ -241,7 +241,7 @@ are also available via the fit wizard.
 The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>` and
 :ref:`Stretched Exponential <func-StretchExp>`.
 
-.. interface:: Data Analysis
+.. interface:: QENS Fitting
   :width: 450
   :widget: tabIqtFit
 
@@ -303,7 +303,7 @@ The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, 
 :ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
 :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
 
-.. interface:: Data Analysis
+.. interface:: QENS Fitting
   :width: 450
   :widget: tabConvFit
 
@@ -440,7 +440,7 @@ The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`
 :ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`,
 :ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
 
-.. interface:: Data Analysis
+.. interface:: QENS Fitting
   :width: 450
   :widget: tabJumpFit
 
@@ -474,7 +474,7 @@ sample file used in this workflow is produced on the Conv Fit tab as seen in the
 Bayesian (FABADA minimizer)
 ---------------------------
 
-There is the option to perform Bayesian data analysis on the I(Q, t) Fit ConvFit
+There is the option to perform Bayesian analysis on the I(Q, t) Fit and ConvFit
 tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
 order to to use this you will need to use better starting parameters than the
 defaults provided by the interface.
