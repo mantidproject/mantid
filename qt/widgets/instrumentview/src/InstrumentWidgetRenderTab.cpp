@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
@@ -34,6 +35,9 @@
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
+
+Mantid::Kernel::Logger g_log("InstrumentWidgetRenderTab");
+
 // QSettings entry names
 const char *EntryManualUCorrection = "ManualUCorrection";
 const char *EntryUCorrectionMin = "UCorrectionMin";
@@ -746,7 +750,9 @@ void InstrumentWidgetRenderTab::setSurfaceType(int index) {
  * @param on:: Whether or not to maintain aspect ratio.
  */
 void InstrumentWidgetRenderTab::setMaintainAspectRatio(bool on) {
-  if (m_instrWidget->getSurfaceType() != InstrumentWidget::FULL3D) {
+  if (m_instrWidget->getSurfaceType() == InstrumentWidget::FULL3D) {
+    g_log.warning("Instruction to set maintain aspect ratio was ignored because the surface type is 'Full 3D'");
+  } else {
     m_instrWidget->setMaintainAspectRatio(on);
   }
 }
