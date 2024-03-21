@@ -16,9 +16,9 @@
 
 #include <QFileInfo>
 
-#include <algorithm>
-
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
+#include <algorithm>
+#include <regex>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -96,7 +96,7 @@ void InelasticDataManipulationElwinTab::run() {
 
   // Get workspace names
   std::string inputGroupWsName = "IDA_Elwin_Input";
-
+  std::string outputWsBasename = prepareOutputPrefix(m_dataModel->getWorkspaceNames());
   // Load input files
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
@@ -110,13 +110,13 @@ void InelasticDataManipulationElwinTab::run() {
   // Group input workspaces
   m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
 
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, "ELWIN_workspace_output", inputGroupWsName,
-                                      m_view->getLogName(), m_view->getLogValue());
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, outputWsBasename, inputGroupWsName, m_view->getLogName(),
+                                      m_view->getLogValue());
 
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = "ELWIN_workspace_output_elwin_eq2";
+  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
 
 /**
@@ -154,6 +154,27 @@ bool InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   return true;
 }
 
+std::string InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> &workspaceNames) {
+  std::transform(workspaceNames.cbegin(), workspaceNames.cend(), workspaceNames.begin(),
+                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
+  std::regex re("\\d+");
+  std::smatch match;
+  std::vector<int> runNumbers;
+  std::string prefix;
+  for (auto const &name : workspaceNames)
+    if (std::regex_search(name, match, re)) {
+      runNumbers.push_back(std::stoi(match.str(0)));
+      if (prefix.empty())
+        prefix = match.prefix().str();
+    }
+  if (runNumbers.empty() || runNumbers.size() == 1)
+    return "ELWIN_workspace_output";
+  else {
+    auto min = std::min_element(runNumbers.cbegin(), runNumbers.cend());
+    auto max = std::max_element(runNumbers.cbegin(), runNumbers.cend());
+    return prefix + std::to_string(*min) + "-" + std::to_string(*max);
+  }
+}
 bool InelasticDataManipulationElwinTab::validate() {
   UserInputValidator uiv;
   auto rangeOne = std::make_pair(m_view->getIntegrationStart(), m_view->getIntegrationEnd());
