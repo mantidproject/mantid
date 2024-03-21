@@ -9,7 +9,7 @@
 Description
 -----------
 
-During a sequential fit in Indirect Data Analysis, the parameters fitted for a spectrum become the start parameters
+During a sequential fit in Inelastic QENS Fitting, the parameters fitted for a spectrum become the start parameters
 for the next spectrum. This can be a problem if the next spectrum is not 'related' to the previous spectrum and will
 lead to a poor fit for that spectrum. The ReplaceIndirectFitResult algorithm allows you to replace this poorly fitted
 value.
