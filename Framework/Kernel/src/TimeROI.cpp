@@ -478,7 +478,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
     return;
   }
 
-  auto output = Mantid::Kernel::calculate_intersection(m_roi, other.m_roi);
+  auto output = calculate_intersection(m_roi, other.m_roi);
 
   if (output.empty())
     this->replaceROI(USE_NONE);
