@@ -12,14 +12,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Analysis/DataAnalysisTab.h"
 #include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
-#include "Analysis/IIndirectFitDataView.h"
-#include "Analysis/IIndirectFitOutputOptionsModel.h"
-#include "Analysis/IIndirectFitOutputOptionsView.h"
-#include "Analysis/IIndirectFitPlotView.h"
-#include "Analysis/IndirectDataAnalysisTab.h"
-#include "Analysis/IndirectFitPropertyBrowser.h"
+#include "Analysis/IFitDataView.h"
+#include "Analysis/IFitOutputOptionsModel.h"
+#include "Analysis/IFitOutputOptionsView.h"
+#include "Analysis/IFitPlotView.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
 #include <string>
@@ -30,9 +30,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
+class MockDataAnalysisTab : public IDataAnalysisTab {
 public:
-  virtual ~MockIndirectDataAnalysisTab() = default;
+  virtual ~MockDataAnalysisTab() = default;
 
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());
@@ -50,11 +50,11 @@ public:
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
 };
 
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockFitPlotView : public IFitPlotView {
 public:
-  virtual ~MockIndirectFitPlotView() = default;
+  virtual ~MockFitPlotView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));
 
@@ -113,11 +113,11 @@ public:
   MOCK_METHOD0(clearPreviews, void());
 };
 
-class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
+class MockFitOutputOptionsView : public IFitOutputOptionsView {
 public:
-  virtual ~MockIndirectFitOutputOptionsView() = default;
+  virtual ~MockFitOutputOptionsView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitOutputOptionsPresenter *presenter));
 
   MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
   MOCK_METHOD1(setWorkspaceComboBoxVisible, void(bool visible));
@@ -148,9 +148,9 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
-class MockIndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
+class MockFitOutputOptionsModel : public IFitOutputOptionsModel {
 public:
-  virtual ~MockIndirectFitOutputOptionsModel() = default;
+  virtual ~MockFitOutputOptionsModel() = default;
 
   MOCK_METHOD1(setResultWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
   MOCK_METHOD1(setPDFWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
@@ -180,11 +180,11 @@ public:
                void(std::string const &inputName, std::string const &singleBinName, std::string const &outputName));
 };
 
-class MockIndirectFitDataModel : public IIndirectFitDataModel {
+class MockFitDataModel : public IFitDataModel {
 public:
-  virtual ~MockIndirectFitDataModel() = default;
+  virtual ~MockFitDataModel() = default;
 
-  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
+  MOCK_METHOD0(getFittingData, std::vector<FitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
@@ -232,11 +232,11 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
-class MockFitDataView : public IIndirectFitDataView {
+class MockFitDataView : public IFitDataView {
 public:
   virtual ~MockFitDataView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitDataPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitDataPresenter *presenter));
 
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());
@@ -349,9 +349,9 @@ private:
   FunctionTemplateView *m_view;
 };
 
-class MockFitPropertyBrowser : public IIndirectFitPropertyBrowser {
+class MockInelasticFitPropertyBrowser : public IInelasticFitPropertyBrowser {
 public:
-  virtual ~MockFitPropertyBrowser() = default;
+  virtual ~MockInelasticFitPropertyBrowser() = default;
 
   MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
 };

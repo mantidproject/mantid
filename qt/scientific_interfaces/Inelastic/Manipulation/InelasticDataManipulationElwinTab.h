@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IndirectFitDataModel.h"
+#include "Analysis/FitDataModel.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"
@@ -93,7 +93,7 @@ private:
 
   IElwinView *m_view;
   std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
-  std::unique_ptr<IndirectFitDataModel> m_dataModel;
+  std::unique_ptr<FitDataModel> m_dataModel;
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;

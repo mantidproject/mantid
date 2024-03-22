@@ -9,12 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/FitDataView.h"
 #include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateView.h"
-#include "Analysis/IndirectFitDataView.h"
-#include "Analysis/IndirectFitPropertyBrowser.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
@@ -53,9 +53,9 @@ public:
   static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
+    m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
 
@@ -65,7 +65,7 @@ public:
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
 
-    m_fitPropertyBrowser = std::make_unique<NiceMock<MockFitPropertyBrowser>>();
+    m_fitPropertyBrowser = std::make_unique<NiceMock<MockInelasticFitPropertyBrowser>>();
     m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser.get());
   }
 
@@ -130,12 +130,12 @@ public:
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
 
-  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
+  std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
+  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
   std::unique_ptr<FqFitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<NiceMock<MockFitPropertyBrowser>> m_fitPropertyBrowser;
+  std::unique_ptr<NiceMock<MockInelasticFitPropertyBrowser>> m_fitPropertyBrowser;
 };

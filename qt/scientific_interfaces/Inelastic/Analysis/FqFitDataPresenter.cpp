@@ -198,12 +198,11 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
-                                       IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
+FqFitDataPresenter::FqFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view)
+    : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
 
-void FqFitDataPresenter::subscribeFitPropertyBrowser(IIndirectFitPropertyBrowser *browser) {
+void FqFitDataPresenter::subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) {
   m_fitPropertyBrowser = browser;
 }
 
@@ -307,12 +306,12 @@ void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog,
     dialog->setParameterNames({});
 }
 
-void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters) {
+void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters const &parameters) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(parameters));
 }
 
-std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &parameters) const {
+std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters const &parameters) const {
   std::vector<std::string> types;
   if (!parameters.widths.empty())
     types.emplace_back("Width");
@@ -324,7 +323,7 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &
 void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
-  //  indirectFittingModel get table workspace index
+  //  FittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
   auto wsVector = m_model->getWorkspaceNames();

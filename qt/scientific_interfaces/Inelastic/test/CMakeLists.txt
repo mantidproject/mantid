@@ -6,17 +6,17 @@ set(TEST_FILES
     Analysis/FqFitDataPresenterTest.h
     Analysis/FqFitModelTest.h
     Analysis/IDAFunctionParameterEstimationTest.h
-    Analysis/IndirectDataAnalysisTabTest.h
-    Analysis/IndirectFitDataPresenterTest.h
-    Analysis/IndirectFitDataTest.h
-    Analysis/IndirectFitDataModelTest.h
-    Analysis/IndirectFitOutputTest.h
-    Analysis/IndirectFitOutputOptionsModelTest.h
-    Analysis/IndirectFitOutputOptionsPresenterTest.h
-    Analysis/IndirectFitPlotModelTest.h
-    Analysis/IndirectFitPlotPresenterTest.h
-    Analysis/IndirectFitPropertyBrowserTest.h
-    Analysis/IndirectFittingModelTest.h
+    Analysis/DataAnalysisTabTest.h
+    Analysis/FitDataPresenterTest.h
+    Analysis/FitDataTest.h
+    Analysis/FitDataModelTest.h
+    Analysis/FitOutputTest.h
+    Analysis/FitOutputOptionsModelTest.h
+    Analysis/FitOutputOptionsPresenterTest.h
+    Analysis/FitPlotModelTest.h
+    Analysis/FitPlotPresenterTest.h
+    Analysis/InelasticFitPropertyBrowserTest.h
+    Analysis/FittingModelTest.h
     Analysis/IqtFitModelTest.h
     Common/IndirectDataValidationHelperTest.h
     Common/OutputPlotOptionsModelTest.h

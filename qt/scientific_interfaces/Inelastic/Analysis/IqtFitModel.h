@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFittingModel.h"
+#include "FittingModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IqtFitModel : public IndirectFittingModel {
+class MANTIDQT_INELASTIC_DLL IqtFitModel : public FittingModel {
 public:
   IqtFitModel();
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;

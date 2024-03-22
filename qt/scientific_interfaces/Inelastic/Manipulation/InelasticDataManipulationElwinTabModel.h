@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IndirectFitDataModel.h"
+#include "Analysis/FitDataModel.h"
 #include "Common/IndirectDataValidationHelper.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"

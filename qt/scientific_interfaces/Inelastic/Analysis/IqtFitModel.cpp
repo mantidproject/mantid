@@ -87,7 +87,7 @@ double computeHeightApproximation(IFunction_sptr function) {
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IqtFitModel::IqtFitModel() : IndirectFittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
+IqtFitModel::IqtFitModel() : FittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -102,7 +102,7 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 }
 
 void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
-  IndirectFittingModel::setFitFunction(function);
+  FittingModel::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
 }

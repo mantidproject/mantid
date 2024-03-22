@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFittingModel.h"
+#include "FittingModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MSDFitModel : public IndirectFittingModel {
+class MSDFitModel : public FittingModel {
 public:
   MSDFitModel();
 

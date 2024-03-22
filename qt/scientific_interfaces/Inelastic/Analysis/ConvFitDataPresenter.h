@@ -8,16 +8,16 @@
 
 #include "Analysis/ConvFitDataView.h"
 #include "ConvFitModel.h"
-#include "IndirectFitDataPresenter.h"
+#include "FitDataPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
-class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public FitDataPresenter {
 public:
-  ConvFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view);
 
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 
