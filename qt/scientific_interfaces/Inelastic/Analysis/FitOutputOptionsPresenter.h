@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IDataAnalysisTab;
+class ITab;
 
 class MANTIDQT_INELASTIC_DLL IFitOutputOptionsPresenter {
 public:
@@ -29,8 +29,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitOutputOptionsPresenter final : public IFitOutputOptionsPresenter {
 public:
-  FitOutputOptionsPresenter(IDataAnalysisTab *tab, IFitOutputOptionsView *view,
-                            std::unique_ptr<IFitOutputOptionsModel> model);
+  FitOutputOptionsPresenter(ITab *tab, IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
@@ -70,7 +69,7 @@ private:
 
   void displayWarning(std::string const &message);
 
-  IDataAnalysisTab *m_tab;
+  ITab *m_tab;
   IFitOutputOptionsView *m_view;
   std::unique_ptr<IFitOutputOptionsModel> m_model;
 };

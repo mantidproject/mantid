@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
 #include "FitTabConstants.h"
-#include "IDAFunctionParameterEstimation.h"
 #include "MantidAPI/TextAxis.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 
@@ -198,7 +198,7 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view)
+FqFitDataPresenter::FqFitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view)
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
 

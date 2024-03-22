@@ -17,7 +17,7 @@ namespace IDA {
 class ConvFitAddWorkspaceDialog;
 class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public FitDataPresenter {
 public:
-  ConvFitDataPresenter(IDataAnalysisTab *tab, IFitDataModel *model, IFitDataView *view);
+  ConvFitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view);
 
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 

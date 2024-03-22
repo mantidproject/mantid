@@ -21,7 +21,7 @@ using namespace MantidWidgets;
 
 /*
    FitDataModel - Specifies an interface for updating, querying and
-   accessing the raw data in DataAnalysisTabs
+   accessing the raw data in Tabs
 */
 class MANTIDQT_INELASTIC_DLL FitDataModel : public IFitDataModel {
 public:

@@ -9,11 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/DataAnalysisTab.h"
 #include "Analysis/FitOutputOptionsPresenter.h"
 #include "Analysis/FitOutputOptionsView.h"
 #include "Analysis/IFitOutputOptionsModel.h"
 #include "Analysis/IFitOutputOptionsView.h"
+#include "Analysis/Tab.h"
 #include "MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -36,7 +36,7 @@ public:
   static void destroySuite(FitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
+    m_tab = std::make_unique<NiceMock<MockTab>>();
     m_view = std::make_unique<NiceMock<MockFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockFitOutputOptionsModel>>();
     m_model = model.get();
@@ -312,7 +312,7 @@ public:
   }
 
 private:
-  std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
+  std::unique_ptr<NiceMock<MockTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitOutputOptionsView>> m_view;
   NiceMock<MockFitOutputOptionsModel> *m_model;
   std::unique_ptr<FitOutputOptionsPresenter> m_presenter;

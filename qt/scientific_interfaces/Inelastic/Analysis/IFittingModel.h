@@ -19,7 +19,7 @@ using namespace MantidWidgets;
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 /*
     IFitData - Specifies an interface for updating, querying and
-   accessing the raw data in DataAnalysisTabs
+   accessing the raw data in Tabs
 */
 class MANTIDQT_INELASTIC_DLL IFittingModel {
 public:

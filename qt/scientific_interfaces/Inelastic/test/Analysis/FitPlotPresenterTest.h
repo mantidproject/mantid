@@ -54,7 +54,7 @@ public:
     /// Presenter takes an FittingModel. This means the
     /// FittingModel is mocked instead - which is a good
     /// substitute anyway
-    m_tab = std::make_unique<NiceMock<MockDataAnalysisTab>>();
+    m_tab = std::make_unique<NiceMock<MockTab>>();
     auto model = std::make_unique<FitPlotModel>();
     m_view = std::make_unique<NiceMock<MockFitPlotView>>();
     m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
@@ -362,7 +362,7 @@ public:
   }
 
 private:
-  std::unique_ptr<NiceMock<MockDataAnalysisTab>> m_tab;
+  std::unique_ptr<NiceMock<MockTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitPlotView>> m_view;
   std::unique_ptr<FitPlotPresenter> m_presenter;
 
