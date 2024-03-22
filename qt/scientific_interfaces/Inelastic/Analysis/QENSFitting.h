@@ -8,7 +8,7 @@
 #include "Common/IndirectInterface.h"
 #include "Common/IndirectTab.h"
 #include "DllConfig.h"
-#include "ui_DataAnalysis.h"
+#include "ui_QENSFitting.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,11 +25,10 @@ static const unsigned int NUM_DECIMALS = 6;
 class Tab;
 
 /**
- * The DataAnalysis class is the main class that handles the interface
- *and controls
- * its tabs.
+ * The QENSFitting class is the main class that handles the interface
+ *and controls its tabs.
  */
-class MANTIDQT_INELASTIC_DLL DataAnalysis final : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL QENSFitting final : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -38,7 +37,7 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Inelastic"; }
   /// Default Constructor
-  explicit DataAnalysis(QWidget *parent = nullptr);
+  explicit QENSFitting(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout
@@ -54,7 +53,7 @@ private:
   void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   /// UI form containing all Qt elements.
-  Ui::DataAnalysis m_uiForm;
+  Ui::QENSFitting m_uiForm;
   /// The settings group
   QString m_settingsGroup;
 

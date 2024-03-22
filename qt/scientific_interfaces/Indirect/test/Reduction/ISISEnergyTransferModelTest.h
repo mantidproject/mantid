@@ -366,7 +366,7 @@ public:
     }
   }
 
-  void testValidateRunDataAnalysisInvalid() {
+  void testValidateRunDetailedBalanceInvalid() {
     IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
     IETBackgroundData backgroundData(false);

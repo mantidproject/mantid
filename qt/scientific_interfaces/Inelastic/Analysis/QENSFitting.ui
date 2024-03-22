@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DataAnalysis</class>
- <widget class="QMainWindow" name="DataAnalysis">
+ <class>QENSFitting</class>
+ <widget class="QMainWindow" name="QENSFitting">
   <property name="geometry">
    <rect>
     <x>0</x>

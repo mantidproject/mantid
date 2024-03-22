@@ -4,16 +4,16 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "DataAnalysis.h"
+#include "QENSFitting.h"
 #include "Common/Settings.h"
 
 #include "Tab.h"
 #include "TabFactory.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
-DECLARE_SUBWINDOW(DataAnalysis)
+DECLARE_SUBWINDOW(QENSFitting)
 
-DataAnalysis::DataAnalysis(QWidget *parent)
+QENSFitting::QENSFitting(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
@@ -25,7 +25,7 @@ DataAnalysis::DataAnalysis(QWidget *parent)
   m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
 }
 
-void DataAnalysis::applySettings(std::map<std::string, QVariant> const &settings) {
+void QENSFitting::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->setFileExtensionsByName(settings.at("RestrictInput").toBool());
   }
@@ -34,7 +34,7 @@ void DataAnalysis::applySettings(std::map<std::string, QVariant> const &settings
 /**
  * Initialised the layout of the interface.  MUST be called.
  */
-void DataAnalysis::initLayout() {
+void QENSFitting::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
@@ -49,12 +49,12 @@ void DataAnalysis::initLayout() {
   IndirectInterface::initLayout();
 }
 
-std::string DataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
+std::string QENSFitting::documentationPage() const { return "Inelastic Data Analysis"; }
 
 /**
  * Handles exporting a Python script for the current tab.
  */
-void DataAnalysis::exportTabPython() {
+void QENSFitting::exportTabPython() {
   unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
   m_tabs[currentTab]->exportPythonScript();
 }
