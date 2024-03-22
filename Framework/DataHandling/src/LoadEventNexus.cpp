@@ -572,7 +572,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     }
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
-      auto *temp = run.getProperty("period_log");
+      const auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
       std::string status = "";
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
@@ -1361,7 +1361,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   for (auto &det : detList) {
     bool keep = false;
     std::string det_name = det->getName();
-    for (auto &bankName : bankNames) {
+    for (const auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
       if (det_name == bankName.substr(0, pos))
         keep = true;
