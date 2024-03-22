@@ -7,7 +7,7 @@
 #include "FqFunctionModel.h"
 
 #include "Analysis/FitTabConstants.h"
-#include "Analysis/IDAFunctionParameterEstimation.h"
+#include "Analysis/ParameterEstimation.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <memory>

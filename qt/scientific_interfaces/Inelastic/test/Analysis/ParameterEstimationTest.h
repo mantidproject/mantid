@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/IDAFunctionParameterEstimation.h"
+#include "Analysis/ParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
@@ -48,9 +48,9 @@ Mantid::API::IFunction_sptr createMultiDomainFunction(std::string const &functio
 
 } // namespace
 
-class IDAFunctionParameterEstimationTest : public CxxTest::TestSuite {
+class ParameterEstimationTest : public CxxTest::TestSuite {
 public:
-  IDAFunctionParameterEstimationTest() {
+  ParameterEstimationTest() {
     IDAFunctionParameterEstimation::ParameterEstimator linearBackground = [](Mantid::MantidVec const &x,
                                                                              Mantid::MantidVec const &y) {
       return std::unordered_map<std::string, double>{{"A0", x[0]}, {"A1", y[0]}};
@@ -65,9 +65,9 @@ public:
     m_parameterEstimators = std::make_unique<IDAFunctionParameterEstimation>(estimators);
   }
 
-  static IDAFunctionParameterEstimationTest *createSuite() { return new IDAFunctionParameterEstimationTest(); }
+  static ParameterEstimationTest *createSuite() { return new ParameterEstimationTest(); }
 
-  static void destroySuite(IDAFunctionParameterEstimationTest *suite) { delete suite; }
+  static void destroySuite(ParameterEstimationTest *suite) { delete suite; }
 
   void test_estimateFunctionParameters_does_nothing_if_nDataPoints_is_too_small() {
     auto multiDomainFunction = createMultiDomainFunction("name=LinearBackground", "name=ExpDecay");
