@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "DataAnalysisTabFactory.h"
+#include "TabFactory.h"
 
 #include "ConvFitDataPresenter.h"
 #include "DataAnalysisTab.h"
@@ -36,9 +36,9 @@ TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<Template
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-DataAnalysisTabFactory::DataAnalysisTabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
+TabFactory::TabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
-DataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
+DataAnalysisTab *TabFactory::makeMSDFitTab(int const index) const {
   auto tab = new DataAnalysisTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<MSDFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
@@ -50,7 +50,7 @@ DataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
   return tab;
 }
 
-DataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
+DataAnalysisTab *TabFactory::makeIqtFitTab(int const index) const {
   auto tab = new DataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<IqtFitModel>();
   auto browserCustomizations = packBrowserCustomizations(IqtFit::templateSubTypes());
@@ -63,7 +63,7 @@ DataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
   return tab;
 }
 
-DataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
+DataAnalysisTab *TabFactory::makeConvFitTab(int const index) const {
   auto tab = new DataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<ConvFitModel>();
   auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
@@ -76,7 +76,7 @@ DataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
   return tab;
 }
 
-DataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) const {
+DataAnalysisTab *TabFactory::makeFqFitTab(int const index) const {
   auto tab = new DataAnalysisTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<FqFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(

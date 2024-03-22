@@ -8,7 +8,7 @@
 #include "Common/Settings.h"
 
 #include "DataAnalysisTab.h"
-#include "DataAnalysisTabFactory.h"
+#include "TabFactory.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 DECLARE_SUBWINDOW(DataAnalysis)
@@ -18,7 +18,7 @@ DataAnalysis::DataAnalysis(QWidget *parent)
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
-  auto const tabFactory = std::make_unique<DataAnalysisTabFactory>(m_uiForm.twIDATabs);
+  auto const tabFactory = std::make_unique<TabFactory>(m_uiForm.twIDATabs);
   m_tabs.emplace(MSD_FIT, tabFactory->makeMSDFitTab(MSD_FIT));
   m_tabs.emplace(IQT_FIT, tabFactory->makeIqtFitTab(IQT_FIT));
   m_tabs.emplace(CONV_FIT, tabFactory->makeConvFitTab(CONV_FIT));
