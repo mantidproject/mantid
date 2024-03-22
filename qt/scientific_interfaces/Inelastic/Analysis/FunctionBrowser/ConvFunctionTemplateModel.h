@@ -11,7 +11,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
-#include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "FitTypes.h"
 #include "MultiFunctionTemplateModel.h"

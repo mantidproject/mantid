@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "FunctionTemplatePresenter.h"
