@@ -1,41 +1,12 @@
-set(ALL_SRC_FILES
-    Reduction/IndirectDataReduction.cpp
-    Reduction/IndirectDataReductionTab.cpp
-    Reduction/IndirectTransmission.cpp
-    Reduction/ILLEnergyTransfer.cpp
-    Reduction/ISISCalibration.cpp
-    Reduction/ISISDiagnostics.cpp
-    Reduction/ISISEnergyTransferValidator.cpp
-    Reduction/ISISEnergyTransferModel.cpp
-    Reduction/ISISEnergyTransferView.cpp
-    Reduction/ISISEnergyTransferPresenter.cpp
-    Reduction/ReductionAlgorithmUtils.cpp
-)
-
-set(ALL_MOC_FILES
-    Reduction/IndirectDataReduction.h
-    Reduction/IndirectDataReductionTab.h
-    Reduction/IndirectTransmission.h
-    Reduction/ILLEnergyTransfer.h
-    Reduction/ISISCalibration.h
-    Reduction/ISISDiagnostics.h
-    Reduction/ISISEnergyTransferView.h
-    Reduction/ISISEnergyTransferPresenter.h
-)
-
-set(ALL_INC_FILES
-    DllConfig.h Reduction/ISISEnergyTransferData.h Reduction/ISISEnergyTransferValidator.h
-    Reduction/ISISEnergyTransferModelUtils.h Reduction/ISISEnergyTransferModel.h Reduction/ReductionAlgorithmUtils.h
-)
-
-set(ALL_UI_FILES Reduction/IndirectDataReduction.ui Reduction/IndirectTransmission.ui Reduction/ILLEnergyTransfer.ui
-                 Reduction/ISISCalibration.ui Reduction/ISISDiagnostics.ui Reduction/ISISEnergyTransfer.ui
-)
-
+set(ALL_SRC_FILES)
+set(ALL_MOC_FILES)
+set(ALL_INC_FILES DllConfig.h PrecompiledHeader.h)
+set(ALL_UI_FILES)
 set(ALL_RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 add_subdirectory(Common)
 add_subdirectory(Diffraction)
+add_subdirectory(Reduction)
 add_subdirectory(Simulation)
 add_subdirectory(Tools)
 
