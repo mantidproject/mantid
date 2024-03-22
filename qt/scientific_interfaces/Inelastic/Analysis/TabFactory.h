@@ -12,9 +12,9 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 class DataAnalysisTab;
 
-class DataAnalysisTabFactory {
+class TabFactory {
 public:
-  explicit DataAnalysisTabFactory(QTabWidget *tabWidget);
+  explicit TabFactory(QTabWidget *tabWidget);
   DataAnalysisTab *makeMSDFitTab(int const index) const;
   DataAnalysisTab *makeIqtFitTab(int const index) const;
   DataAnalysisTab *makeConvFitTab(int const index) const;
