@@ -65,7 +65,7 @@ Usage
     wsAnti1 = CloneWorkspace(wsAnti)
 
     grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
-    HeliumAnalyserEfficiency(grp, SpinConfigurations='11,01,00,10')
+    HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10')
 
     print("p_He Value = " + str(mtd["p_He"].dataY(0)[0]) + ".")
 
