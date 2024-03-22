@@ -10,13 +10,12 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/math/distributions/students_t.hpp>
 #include <vector>
 
@@ -27,20 +26,13 @@ DECLARE_ALGORITHM(HeliumAnalyserEfficiency)
 using namespace Kernel;
 using namespace API;
 
-namespace SpinConfigurations {
-static const std::string UpUp = "11";
-static const std::string UpDown = "10";
-static const std::string DownUp = "01";
-static const std::string DownDown = "00";
-} // namespace SpinConfigurations
-
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
 static const std::string P_HE = "HeliumPolarisation";
 static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
 static const std::string OUTPUT_T_ANTI_WORKSPACE = "OutputTransmissionAntiWorkspace";
-static const std::string SPIN_CONFIGURATIONS = "SpinConfigurations";
+static const std::string SPIN_STATES = "SpinStates";
 static const std::string T_E = "TransmissionEmptyCell";
 static const std::string PXD = "GasPressureTimesCellLength";
 static const std::string COVARIANCE = "Covariance";
@@ -63,20 +55,10 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, "T_anti", Direction::Output));
 
-  std::vector<std::string> initialSpinConfig{
-      {SpinConfigurations::UpUp, SpinConfigurations::UpDown, SpinConfigurations::DownUp, SpinConfigurations::DownDown}};
-  std::sort(initialSpinConfig.begin(), initialSpinConfig.end());
-  std::vector<std::string> allowedSpinConfigs;
-  allowedSpinConfigs.push_back(boost::algorithm::join(initialSpinConfig, ","));
-  while (std::next_permutation(initialSpinConfig.begin(), initialSpinConfig.end())) {
-    allowedSpinConfigs.push_back(boost::algorithm::join(initialSpinConfig, ","));
-  }
-  declareProperty(
-      PropertyNames::SPIN_CONFIGURATIONS,
-      boost::algorithm::join(std::vector<std::string>{{SpinConfigurations::UpUp, SpinConfigurations::DownUp,
-                                                       SpinConfigurations::DownDown, SpinConfigurations::UpDown}},
-                             ","),
-      std::make_shared<ListValidator<std::string>>(allowedSpinConfigs));
+  auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
+  std::string initialSpinConfig = "11,10,01,00";
+  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator);
+
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::T_E, 0.9, mustBePositive, "Transmission of the empty cell");
@@ -153,14 +135,16 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
   const auto groupWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
-  std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_CONFIGURATIONS);
-  std::vector<std::string> spinConfigurations;
-  boost::split(spinConfigurations, spinConfigurationInput, boost::is_any_of(","));
+  std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
-  const auto t11Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::UpUp);
-  const auto t10Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::UpDown);
-  const auto t01Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::DownUp);
-  const auto t00Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::DownDown);
+  const auto t11Ws =
+      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ONE_ONE);
+  const auto t10Ws =
+      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ONE_ZERO);
+  const auto t01Ws =
+      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ZERO_ONE);
+  const auto t00Ws =
+      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ZERO_ZERO);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)
   MatrixWorkspace_sptr tnsfWs = addTwoWorkspaces(t11Ws, t00Ws);
@@ -221,14 +205,6 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   scale->execute();
 
   setProperty(PropertyNames::OUTPUT_WORKSPACE, transmissionWorkspace);
-}
-
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
-                                                                      const std::vector<std::string> &spinConfigOrder,
-                                                                      const std::string &spinConfig) {
-  const auto wsIndex =
-      std::find(spinConfigOrder.cbegin(), spinConfigOrder.cend(), spinConfig) - spinConfigOrder.cbegin();
-  return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(wsIndex));
 }
 
 void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double &mu, MatrixWorkspace_sptr p, double &pHe,

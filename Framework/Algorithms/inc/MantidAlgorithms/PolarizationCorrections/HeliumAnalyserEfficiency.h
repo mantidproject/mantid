@@ -42,9 +42,6 @@ private:
   bool processGroups() override;
   void validateGroupInput();
   void calculateAnalyserEfficiency();
-  MatrixWorkspace_sptr workspaceForSpinConfig(WorkspaceGroup_sptr group,
-                                              const std::vector<std::string> &spinConfigOrder,
-                                              const std::string &spinConfig);
   MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);
   MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
                                        const MantidVec &yData, const MantidVec &eData,

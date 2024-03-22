@@ -91,15 +91,13 @@ public:
     TS_ASSERT_EQUALS(0, AnalysisDataService::Instance().size());
   }
 
-  void testSpinConfigurations() {
+  void testSpinStates() {
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "bad"), std::invalid_argument &);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "10,01"), std::invalid_argument &);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "00,00,11,11"),
-                     std::invalid_argument &);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "02,20,22,00"),
-                     std::invalid_argument &);
-    TS_ASSERT_THROWS_NOTHING(heliumAnalyserEfficiency->setProperty("SpinConfigurations", "00,11,01,10"));
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(heliumAnalyserEfficiency->setProperty("SpinStates", "00,11,01,10"));
   }
 
   void testNonWavelengthInput() {
@@ -131,7 +129,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", grpWs->getName());
-    heliumAnalyserEfficiency->setProperty("SpinConfigurations", "11,10,00,01");
+    heliumAnalyserEfficiency->setProperty("SpinStates", "11,10,00,01");
     heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
     heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
     heliumAnalyserEfficiency->execute();
