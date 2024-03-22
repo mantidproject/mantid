@@ -10,11 +10,6 @@ set(ALL_SRC_FILES
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
     Reduction/ReductionAlgorithmUtils.cpp
-    Simulation/DensityOfStates.cpp
-    Simulation/IndirectMolDyn.cpp
-    Simulation/IndirectSassena.cpp
-    Simulation/IndirectSimulation.cpp
-    Simulation/IndirectSimulationTab.cpp
 )
 
 set(ALL_MOC_FILES
@@ -26,11 +21,6 @@ set(ALL_MOC_FILES
     Reduction/ISISDiagnostics.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
-    Simulation/DensityOfStates.h
-    Simulation/IndirectMolDyn.h
-    Simulation/IndirectSassena.h
-    Simulation/IndirectSimulation.h
-    Simulation/IndirectSimulationTab.h
 )
 
 set(ALL_INC_FILES
@@ -38,23 +28,15 @@ set(ALL_INC_FILES
     Reduction/ISISEnergyTransferModelUtils.h Reduction/ISISEnergyTransferModel.h Reduction/ReductionAlgorithmUtils.h
 )
 
-set(ALL_UI_FILES
-    Reduction/IndirectDataReduction.ui
-    Reduction/IndirectTransmission.ui
-    Reduction/ILLEnergyTransfer.ui
-    Reduction/ISISCalibration.ui
-    Reduction/ISISDiagnostics.ui
-    Reduction/ISISEnergyTransfer.ui
-    Simulation/DensityOfStates.ui
-    Simulation/IndirectMolDyn.ui
-    Simulation/IndirectSassena.ui
-    Simulation/IndirectSimulation.ui
+set(ALL_UI_FILES Reduction/IndirectDataReduction.ui Reduction/IndirectTransmission.ui Reduction/ILLEnergyTransfer.ui
+                 Reduction/ISISCalibration.ui Reduction/ISISDiagnostics.ui Reduction/ISISEnergyTransfer.ui
 )
 
 set(ALL_RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 add_subdirectory(Common)
 add_subdirectory(Diffraction)
+add_subdirectory(Simulation)
 add_subdirectory(Tools)
 
 # XML is required to parse the settings file
