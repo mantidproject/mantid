@@ -114,8 +114,8 @@ std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseInd
   const auto stop = this->getStopEventIndex(pulseIndex);
   if (start > stop) {
     std::stringstream msg;
-    msg << "Something went really wrong: " << start << " > " << stop << "| " << m_entry_name
-        << " startAt=" << m_firstEventIndex << " numEvents=" << m_event_index->size() << " RAWINDICES=["
+    msg << "Something went really wrong with pulseIndex=" << pulseIndex << ": " << start << " > " << stop << "| "
+        << m_entry_name << " startAt=" << m_firstEventIndex << " numEvents=" << m_event_index->size() << " RAWINDICES=["
         << start + m_firstEventIndex << ",?)"
         << " pulseIndex=" << pulseIndex << " of " << m_event_index->size();
     throw std::runtime_error(msg.str());
@@ -174,7 +174,13 @@ size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
   const auto pulseIndexEnd = pulseIndex + 1;
 
   // check if the requests have gone past the end - order of if/else matters
-  const size_t eventIndex = (pulseIndexEnd >= m_roi.back()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
+  // const size_t eventIndex = (pulseIndexEnd >= m_roi.back()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
+  size_t eventIndex = m_event_index->operator[](pulseIndexEnd);
+  if (pulseIndexEnd == m_roi.back()) {
+    eventIndex = std::min(m_numEvents, eventIndex);
+    if (pulseIndexEnd == m_event_index->size())
+      eventIndex = m_numEvents;
+  }
 
   if (eventIndex > m_firstEventIndex)
     return eventIndex - m_firstEventIndex;
