@@ -1,4 +1,4 @@
-set(SRC_FILES
+set(ALL_SRC_FILES
     Analysis/ConvFitAddWorkspaceDialog.cpp
     Analysis/ConvFitModel.cpp
     Analysis/ConvFitDataView.cpp
@@ -44,11 +44,6 @@ set(SRC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
-    BayesFitting/BayesFitting.cpp
-    BayesFitting/BayesFittingTab.cpp
-    BayesFitting/Quasi.cpp
-    BayesFitting/ResNorm.cpp
-    BayesFitting/Stretch.cpp
     Common/IndirectDataValidationHelper.cpp
     Common/IndirectInterface.cpp
     Common/OutputPlotOptionsModel.cpp
@@ -88,7 +83,7 @@ set(SRC_FILES
     Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp
 )
 
-set(MOC_FILES
+set(ALL_MOC_FILES
     Analysis/ConvFitAddWorkspaceDialog.h
     Analysis/ConvFitDataView.h
     Analysis/DataAnalysis.h
@@ -106,11 +101,6 @@ set(MOC_FILES
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
     Analysis/FunctionBrowser/MultiFunctionTemplateView.h
-    BayesFitting/BayesFitting.h
-    BayesFitting/BayesFittingTab.h
-    BayesFitting/Quasi.h
-    BayesFitting/ResNorm.h
-    BayesFitting/Stretch.h
     Common/IndirectInterface.h
     Common/OutputPlotOptionsView.h
     Common/Settings.h
@@ -131,7 +121,7 @@ set(MOC_FILES
     Manipulation/InelasticDataManipulationTab.h
 )
 
-set(INC_FILES
+set(ALL_INC_FILES
     DllConfig.h
     PrecompiledHeader.h
     Analysis/ConvFitDataPresenter.h
@@ -198,7 +188,7 @@ set(INC_FILES
     Manipulation/IIqtView.h
 )
 
-set(UI_FILES
+set(ALL_UI_FILES
     Analysis/ConvFitAddWorkspaceDialog.ui
     Analysis/FqFitAddWorkspaceDialog.ui
     Analysis/DataAnalysis.ui
@@ -208,10 +198,6 @@ set(UI_FILES
     Analysis/FitOutputOptions.ui
     Analysis/FitTab.ui
     Analysis/SpectrumSelector.ui
-    BayesFitting/BayesFitting.ui
-    BayesFitting/Quasi.ui
-    BayesFitting/ResNorm.ui
-    BayesFitting/Stretch.ui
     Common/InterfaceSettings.ui
     Common/OutputPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
@@ -229,6 +215,8 @@ set(UI_FILES
 
 set(RES_FILES Common/InterfaceResources.qrc)
 
+add_subdirectory(BayesFitting)
+
 # XML is required to parse the settings file
 find_package(
   Qt5 ${QT_MIN_VERSION}
@@ -239,10 +227,10 @@ find_package(
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesInelastic
   QT_VERSION 5
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
+  SRC ${ALL_SRC_FILES}
+  MOC ${ALL_MOC_FILES}
+  NOMOC ${ALL_INC_FILES}
+  UI ${ALL_UI_FILES}
   RES ${RES_FILES}
   DEFS IN_MANTIDQT_INELASTIC PRECOMPILED PrecompiledHeader.h
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
