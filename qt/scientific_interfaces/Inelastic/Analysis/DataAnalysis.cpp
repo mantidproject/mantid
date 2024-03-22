@@ -7,7 +7,7 @@
 #include "DataAnalysis.h"
 #include "Common/Settings.h"
 
-#include "DataAnalysisTab.h"
+#include "Tab.h"
 #include "TabFactory.h"
 
 namespace MantidQt::CustomInterfaces::IDA {

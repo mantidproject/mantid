@@ -12,7 +12,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "Analysis/DataAnalysisTab.h"
 #include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "Analysis/FunctionBrowser/ITemplatePresenter.h"
 #include "Analysis/IFitDataView.h"
@@ -20,6 +19,7 @@
 #include "Analysis/IFitOutputOptionsView.h"
 #include "Analysis/IFitPlotView.h"
 #include "Analysis/InelasticFitPropertyBrowser.h"
+#include "Analysis/Tab.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
 #include <map>
@@ -31,9 +31,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockDataAnalysisTab : public IDataAnalysisTab {
+class MockTab : public ITab {
 public:
-  virtual ~MockDataAnalysisTab() = default;
+  virtual ~MockTab() = default;
 
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());
