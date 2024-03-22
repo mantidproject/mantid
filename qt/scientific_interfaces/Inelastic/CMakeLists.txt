@@ -44,23 +44,6 @@ set(ALL_SRC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
-    Manipulation/InelasticDataManipulation.cpp
-    Manipulation/InelasticDataManipulationElwinTab.cpp
-    Manipulation/InelasticDataManipulationElwinTabModel.cpp
-    Manipulation/InelasticDataManipulationElwinTabView.cpp
-    Manipulation/InelasticDataManipulationIqtTab.cpp
-    Manipulation/InelasticDataManipulationIqtTabView.cpp
-    Manipulation/InelasticDataManipulationIqtTabModel.cpp
-    Manipulation/InelasticDataManipulationMomentsTab.cpp
-    Manipulation/InelasticDataManipulationMomentsTabModel.cpp
-    Manipulation/InelasticDataManipulationMomentsTabView.cpp
-    Manipulation/InelasticDataManipulationTab.cpp
-    Manipulation/InelasticDataManipulationSqwTab.cpp
-    Manipulation/InelasticDataManipulationSqwTabModel.cpp
-    Manipulation/InelasticDataManipulationSqwTabView.cpp
-    Manipulation/InelasticDataManipulationSymmetriseTab.cpp
-    Manipulation/InelasticDataManipulationSymmetriseTabView.cpp
-    Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp
 )
 
 set(ALL_MOC_FILES
@@ -81,13 +64,6 @@ set(ALL_MOC_FILES
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
     Analysis/FunctionBrowser/MultiFunctionTemplateView.h
-    Manipulation/InelasticDataManipulation.h
-    Manipulation/InelasticDataManipulationElwinTabView.h
-    Manipulation/InelasticDataManipulationIqtTabView.h
-    Manipulation/InelasticDataManipulationMomentsTabView.h
-    Manipulation/InelasticDataManipulationSqwTabView.h
-    Manipulation/InelasticDataManipulationSymmetriseTabView.h
-    Manipulation/InelasticDataManipulationTab.h
 )
 
 set(ALL_INC_FILES
@@ -131,21 +107,6 @@ set(ALL_INC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.h
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.h
     Analysis/FunctionBrowser/TemplateSubType.h
-    Manipulation/InelasticDataManipulationElwinTabModel.h
-    Manipulation/InelasticDataManipulationElwinTab.h
-    Manipulation/InelasticDataManipulationIqtTabModel.h
-    Manipulation/InelasticDataManipulationIqtTab.h
-    Manipulation/InelasticDataManipulationMomentsTabModel.h
-    Manipulation/InelasticDataManipulationMomentsTab.h
-    Manipulation/InelasticDataManipulationSqwTabModel.h
-    Manipulation/InelasticDataManipulationSqwTab.h
-    Manipulation/InelasticDataManipulationSymmetriseTabModel.h
-    Manipulation/InelasticDataManipulationSymmetriseTab.h
-    Manipulation/ISqwView.h
-    Manipulation/IMomentsView.h
-    Manipulation/ISymmetriseView.h
-    Manipulation/IElwinView.h
-    Manipulation/IIqtView.h
 )
 
 set(ALL_UI_FILES
@@ -158,12 +119,6 @@ set(ALL_UI_FILES
     Analysis/FitOutputOptions.ui
     Analysis/FitTab.ui
     Analysis/SpectrumSelector.ui
-    Manipulation/InelasticDataManipulation.ui
-    Manipulation/InelasticDataManipulationElwinTab.ui
-    Manipulation/InelasticDataManipulationIqtTab.ui
-    Manipulation/InelasticDataManipulationMomentsTab.ui
-    Manipulation/InelasticDataManipulationSqwTab.ui
-    Manipulation/InelasticDataManipulationSymmetriseTab.ui
 )
 
 set(RES_FILES Common/InterfaceResources.qrc)
@@ -171,6 +126,7 @@ set(RES_FILES Common/InterfaceResources.qrc)
 add_subdirectory(BayesFitting)
 add_subdirectory(Common)
 add_subdirectory(Corrections)
+add_subdirectory(Manipulation)
 
 # XML is required to parse the settings file
 find_package(
