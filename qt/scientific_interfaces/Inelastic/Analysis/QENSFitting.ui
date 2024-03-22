@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Inelastic Data Analysis</string>
+   <string>Inelastic QENS Fitting</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
