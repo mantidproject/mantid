@@ -1,1 +1,0 @@
-- Fix bug in  :ref:`Elwin Tab <elwin>` of  :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>` where changing integration range with the sliders did not change default integration range.

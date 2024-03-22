@@ -1,1 +1,0 @@
-- Removed slit lookup that was specific to OFFSPEC in :ref:`algm-ReflectometryReductionOneLiveData` as it is no longer required and was causing regular crashes when running live data on OFFSPEC.
