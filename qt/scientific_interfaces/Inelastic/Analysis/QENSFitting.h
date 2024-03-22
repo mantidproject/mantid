@@ -33,7 +33,7 @@ class MANTIDQT_INELASTIC_DLL QENSFitting final : public IndirectInterface {
 
 public:
   /// The name of the interface as registered into the factory
-  static std::string name() { return "Data Analysis"; }
+  static std::string name() { return "QENS Fitting"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Inelastic"; }
   /// Default Constructor

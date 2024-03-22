@@ -49,7 +49,7 @@ void QENSFitting::initLayout() {
   IndirectInterface::initLayout();
 }
 
-std::string QENSFitting::documentationPage() const { return "Inelastic Data Analysis"; }
+std::string QENSFitting::documentationPage() const { return "Inelastic QENS Fitting"; }
 
 /**
  * Handles exporting a Python script for the current tab.
