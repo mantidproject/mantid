@@ -1,6 +1,4 @@
-set(SRC_FILES
-    Common/DetectorGroupingOptions.cpp
-    Common/IndirectInstrumentConfig.cpp
+set(ALL_SRC_FILES
     Diffraction/IndirectDiffractionReduction.cpp
     Reduction/IndirectDataReduction.cpp
     Reduction/IndirectDataReductionTab.cpp
@@ -23,9 +21,7 @@ set(SRC_FILES
     Tools/IndirectTransmissionCalc.cpp
 )
 
-set(MOC_FILES
-    Common/DetectorGroupingOptions.h
-    Common/IndirectInstrumentConfig.h
+set(ALL_MOC_FILES
     Diffraction/IndirectDiffractionReduction.h
     Reduction/IndirectDataReduction.h
     Reduction/IndirectDataReductionTab.h
@@ -45,14 +41,12 @@ set(MOC_FILES
     Tools/IndirectTransmissionCalc.h
 )
 
-set(INC_FILES
+set(ALL_INC_FILES
     DllConfig.h Reduction/ISISEnergyTransferData.h Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h Reduction/ISISEnergyTransferModel.h Reduction/ReductionAlgorithmUtils.h
 )
 
-set(UI_FILES
-    Common/DetectorGroupingOptions.ui
-    Common/IndirectInstrumentConfig.ui
+set(ALL_UI_FILES
     Diffraction/IndirectDiffractionReduction.ui
     Reduction/IndirectDataReduction.ui
     Reduction/IndirectTransmission.ui
@@ -68,7 +62,9 @@ set(UI_FILES
     Tools/IndirectTransmissionCalc.ui
 )
 
-set(RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
+set(ALL_RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
+
+add_subdirectory(Common)
 
 # XML is required to parse the settings file
 find_package(
@@ -80,11 +76,11 @@ find_package(
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect
   QT_VERSION 5
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  RES ${RES_FILES}
+  SRC ${ALL_SRC_FILES}
+  MOC ${ALL_MOC_FILES}
+  NOMOC ${ALL_INC_FILES}
+  UI ${ALL_UI_FILES}
+  RES ${ALL_RES_FILES}
   DEFS IN_MANTIDQT_INDIRECT PRECOMPILED PrecompiledHeader.h
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS}
