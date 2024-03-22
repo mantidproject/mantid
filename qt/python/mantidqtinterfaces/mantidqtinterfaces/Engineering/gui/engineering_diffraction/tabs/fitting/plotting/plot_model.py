@@ -178,11 +178,12 @@ class FittingPlotModel(object):
     def get_fit_results(self):
         return self._fit_results
 
-    def run_find_peaks_convolve(self, input_ws_name, peak_type):
+    def run_find_peaks_convolve(self, input_ws_name, peak_type, x_range):
         """
         Run FindPeaksConvolve algorithm with default values for ENGIN-X
         :param input_ws_name: Name of the input workspace to run against
         :param peak_type: Name of the selected peak type
+        :param x_range: min and max values of the fitting range
         :return string: Function wrapper string for the peaks detected via the algorithm, None otherwise
         """
         if not ADS.doesExist(input_ws_name):
@@ -208,13 +209,15 @@ class FittingPlotModel(object):
             logger.error("Failed extracting columns from FindPeakConvolve output")
             return None
 
-        return self._get_func_wrapper_str_for_peak_x_y(peak_x_values, peak_y_values, peak_type, fit_prop_ws)
+        return self._get_func_wrapper_str_for_peak_x_y(peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range)
 
-    def _get_func_wrapper_str_for_peak_x_y(self, peak_x_values, peak_y_values, peak_type, fit_prop_ws):
+    def _get_func_wrapper_str_for_peak_x_y(self, peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range):
         if set(peak_x_values.keys()) == set(peak_y_values.keys()):
             logger.notice(f"Adding {len(peak_x_values)} peaks found via FindPeaksConvolve")
             func_wrapper = None
             for col, x_value in peak_x_values.items():
+                if x_value < x_range[0] or x_value > x_range[1]:
+                    continue
                 y_value = peak_y_values[col]
                 peak_func = FunctionFactory.Instance().createPeakFunction(peak_type)
                 peak_func.setCentre(x_value)

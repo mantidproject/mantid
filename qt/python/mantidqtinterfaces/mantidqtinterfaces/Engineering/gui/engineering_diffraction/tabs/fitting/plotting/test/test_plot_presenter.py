@@ -278,6 +278,8 @@ class FittingPlotPresenterTest(unittest.TestCase):
     def test_run_find_peaks_convolve_success(self, mock_error):
         self.view = mock.MagicMock()
         self.view.fit_browser.workspaceName.return_value = "ws_1"
+        self.view.fit_browser.startX.return_value = 1000
+        self.view.fit_browser.endX.return_value = 2000
         self.presenter.view = self.view
         self.presenter.find_peaks_convolve_started_notifier = mock.MagicMock()
         self.presenter.find_peaks_convolve_done_notifier = mock.MagicMock()
@@ -287,6 +289,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
 
         self.presenter.run_find_peaks_convolve()
 
+        self.model.run_find_peaks_convolve.assert_called_once_with("ws_1", "BackToBackExponential", (1000, 2000))
         self.assertEqual(self.presenter.is_waiting_convolve_peaks, True)
         self.presenter.find_peaks_convolve_started_notifier.notify_subscribers.assert_called_once()
         self.view.fit_browser.loadFunction.assert_called_once_with(fun_wrap_str)

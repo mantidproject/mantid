@@ -115,7 +115,9 @@ class FittingPlotPresenter(object):
         self.find_peaks_convolve_started_notifier.notify_subscribers()
         try:
             input_ws_name = self.view.fit_browser.workspaceName()
-            func_wrapper_str = self.model.run_find_peaks_convolve(input_ws_name, self.view.fit_browser.defaultPeakType())
+            func_wrapper_str = self.model.run_find_peaks_convolve(
+                input_ws_name, self.view.fit_browser.defaultPeakType(), (self.view.fit_browser.startX(), self.view.fit_browser.endX())
+            )
             if func_wrapper_str is not None:
                 self.is_waiting_convolve_peaks = True
                 self.view.fit_browser.loadFunction(func_wrapper_str)
