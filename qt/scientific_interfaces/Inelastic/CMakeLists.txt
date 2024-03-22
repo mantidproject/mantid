@@ -44,12 +44,6 @@ set(ALL_SRC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
-    Corrections/AbsorptionCorrections.cpp
-    Corrections/ApplyAbsorptionCorrections.cpp
-    Corrections/CalculatePaalmanPings.cpp
-    Corrections/ContainerSubtraction.cpp
-    Corrections/Corrections.cpp
-    Corrections/CorrectionsTab.cpp
     Manipulation/InelasticDataManipulation.cpp
     Manipulation/InelasticDataManipulationElwinTab.cpp
     Manipulation/InelasticDataManipulationElwinTabModel.cpp
@@ -87,12 +81,6 @@ set(ALL_MOC_FILES
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
     Analysis/FunctionBrowser/MultiFunctionTemplateView.h
-    Corrections/AbsorptionCorrections.h
-    Corrections/ApplyAbsorptionCorrections.h
-    Corrections/CalculatePaalmanPings.h
-    Corrections/ContainerSubtraction.h
-    Corrections/Corrections.h
-    Corrections/CorrectionsTab.h
     Manipulation/InelasticDataManipulation.h
     Manipulation/InelasticDataManipulationElwinTabView.h
     Manipulation/InelasticDataManipulationIqtTabView.h
@@ -170,11 +158,6 @@ set(ALL_UI_FILES
     Analysis/FitOutputOptions.ui
     Analysis/FitTab.ui
     Analysis/SpectrumSelector.ui
-    Corrections/AbsorptionCorrections.ui
-    Corrections/ApplyAbsorptionCorrections.ui
-    Corrections/CalculatePaalmanPings.ui
-    Corrections/ContainerSubtraction.ui
-    Corrections/Corrections.ui
     Manipulation/InelasticDataManipulation.ui
     Manipulation/InelasticDataManipulationElwinTab.ui
     Manipulation/InelasticDataManipulationIqtTab.ui
@@ -187,6 +170,7 @@ set(RES_FILES Common/InterfaceResources.qrc)
 
 add_subdirectory(BayesFitting)
 add_subdirectory(Common)
+add_subdirectory(Corrections)
 
 # XML is required to parse the settings file
 find_package(
