@@ -15,9 +15,6 @@ set(ALL_SRC_FILES
     Simulation/IndirectSassena.cpp
     Simulation/IndirectSimulation.cpp
     Simulation/IndirectSimulationTab.cpp
-    Tools/IndirectTools.cpp
-    Tools/IndirectToolsTab.cpp
-    Tools/IndirectTransmissionCalc.cpp
 )
 
 set(ALL_MOC_FILES
@@ -34,9 +31,6 @@ set(ALL_MOC_FILES
     Simulation/IndirectSassena.h
     Simulation/IndirectSimulation.h
     Simulation/IndirectSimulationTab.h
-    Tools/IndirectTools.h
-    Tools/IndirectToolsTab.h
-    Tools/IndirectTransmissionCalc.h
 )
 
 set(ALL_INC_FILES
@@ -55,14 +49,13 @@ set(ALL_UI_FILES
     Simulation/IndirectMolDyn.ui
     Simulation/IndirectSassena.ui
     Simulation/IndirectSimulation.ui
-    Tools/IndirectTools.ui
-    Tools/IndirectTransmissionCalc.ui
 )
 
 set(ALL_RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 add_subdirectory(Common)
 add_subdirectory(Diffraction)
+add_subdirectory(Tools)
 
 # XML is required to parse the settings file
 find_package(
