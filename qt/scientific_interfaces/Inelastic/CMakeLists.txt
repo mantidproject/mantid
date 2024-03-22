@@ -44,20 +44,6 @@ set(ALL_SRC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplateView.cpp
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.cpp
-    Common/IndirectDataValidationHelper.cpp
-    Common/IndirectInterface.cpp
-    Common/OutputPlotOptionsModel.cpp
-    Common/OutputPlotOptionsPresenter.cpp
-    Common/OutputPlotOptionsView.cpp
-    Common/Settings.cpp
-    Common/SettingsHelper.cpp
-    Common/SettingsModel.cpp
-    Common/SettingsPresenter.cpp
-    Common/SettingsView.cpp
-    Common/IndirectTab.cpp
-    Common/InterfaceUtils.cpp
-    Common/WorkspaceUtils.cpp
-    Common/ValidationUtils.cpp
     Corrections/AbsorptionCorrections.cpp
     Corrections/ApplyAbsorptionCorrections.cpp
     Corrections/CalculatePaalmanPings.cpp
@@ -101,11 +87,6 @@ set(ALL_MOC_FILES
     Analysis/FunctionBrowser/IqtFunctionTemplateView.h
     Analysis/FunctionBrowser/SingleFunctionTemplateView.h
     Analysis/FunctionBrowser/MultiFunctionTemplateView.h
-    Common/IndirectInterface.h
-    Common/OutputPlotOptionsView.h
-    Common/Settings.h
-    Common/SettingsView.h
-    Common/IndirectTab.h
     Corrections/AbsorptionCorrections.h
     Corrections/ApplyAbsorptionCorrections.h
     Corrections/CalculatePaalmanPings.h
@@ -162,15 +143,6 @@ set(ALL_INC_FILES
     Analysis/FunctionBrowser/MultiFunctionTemplateModel.h
     Analysis/FunctionBrowser/MultiFunctionTemplatePresenter.h
     Analysis/FunctionBrowser/TemplateSubType.h
-    Common/IndirectDataValidationHelper.h
-    Common/ISettingsView.h
-    Common/OutputPlotOptionsModel.h
-    Common/OutputPlotOptionsPresenter.h
-    Common/SettingsHelper.h
-    Common/SettingsPresenter.h
-    Common/InterfaceUtils.h
-    Common/WorkspaceUtils.h
-    Common/ValidationUtils.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
@@ -198,8 +170,6 @@ set(ALL_UI_FILES
     Analysis/FitOutputOptions.ui
     Analysis/FitTab.ui
     Analysis/SpectrumSelector.ui
-    Common/InterfaceSettings.ui
-    Common/OutputPlotOptions.ui
     Corrections/AbsorptionCorrections.ui
     Corrections/ApplyAbsorptionCorrections.ui
     Corrections/CalculatePaalmanPings.ui
@@ -216,6 +186,7 @@ set(ALL_UI_FILES
 set(RES_FILES Common/InterfaceResources.qrc)
 
 add_subdirectory(BayesFitting)
+add_subdirectory(Common)
 
 # XML is required to parse the settings file
 find_package(
