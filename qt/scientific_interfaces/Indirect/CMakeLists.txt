@@ -1,5 +1,4 @@
 set(ALL_SRC_FILES
-    Diffraction/IndirectDiffractionReduction.cpp
     Reduction/IndirectDataReduction.cpp
     Reduction/IndirectDataReductionTab.cpp
     Reduction/IndirectTransmission.cpp
@@ -22,7 +21,6 @@ set(ALL_SRC_FILES
 )
 
 set(ALL_MOC_FILES
-    Diffraction/IndirectDiffractionReduction.h
     Reduction/IndirectDataReduction.h
     Reduction/IndirectDataReductionTab.h
     Reduction/IndirectTransmission.h
@@ -47,7 +45,6 @@ set(ALL_INC_FILES
 )
 
 set(ALL_UI_FILES
-    Diffraction/IndirectDiffractionReduction.ui
     Reduction/IndirectDataReduction.ui
     Reduction/IndirectTransmission.ui
     Reduction/ILLEnergyTransfer.ui
@@ -65,6 +62,7 @@ set(ALL_UI_FILES
 set(ALL_RES_FILES ../Inelastic/Common/InterfaceResources.qrc)
 
 add_subdirectory(Common)
+add_subdirectory(Diffraction)
 
 # XML is required to parse the settings file
 find_package(
