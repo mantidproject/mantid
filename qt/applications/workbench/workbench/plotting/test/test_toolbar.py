@@ -19,7 +19,7 @@ from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace
 
 
 @start_qapplication
@@ -50,6 +50,26 @@ class ToolBarTest(unittest.TestCase):
         self.assertTrue(self._is_button_enabled(fig, "waterfall_offset_amount"))
         self.assertTrue(self._is_button_enabled(fig, "waterfall_reverse_order"))
         self.assertTrue(self._is_button_enabled(fig, "waterfall_fill_area"))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_fitbrowser_and_superplot_disabled_for_MDHisto_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        # make workspace
+        ws_histo = CreateMDHistoWorkspace(
+            SignalInput="1,1",
+            ErrorInput="1,1",
+            Dimensionality=3,
+            Extents="-1,1,-1,1,-1,1",
+            NumberOfBins="2,1,1",
+            Names="H,K,L",
+            Units="rlu,rlu,rlu",
+        )
+
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        axes.plot(ws_histo)
+
+        self.assertFalse(self._is_button_enabled(fig, "toggle_fit"))
+        self.assertFalse(self._is_button_enabled(fig, "toggle_superplot"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_line_color_selection_buttons_correctly_enabled_for_contour_wireframe_plots(self, mock_qappthread):
