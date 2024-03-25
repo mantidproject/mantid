@@ -108,6 +108,7 @@ class Polaris(AbstractInst):
             freq_params=self._inst_settings.freq_params,
             per_detector=self._inst_settings.per_detector_vanadium,
             debug=self._inst_settings.debug,
+            pdf_output_name=self._inst_settings.pdf_output_name,
         )
         return pdf_output
 
