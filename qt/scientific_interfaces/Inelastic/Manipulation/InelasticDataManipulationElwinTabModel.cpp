@@ -99,7 +99,7 @@ void InelasticDataManipulationElwinTabModel::groupAlgorithm(std::string const &i
 }
 
 std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(MatrixWorkspace_sptr workspace,
-                                                                            FunctionModelSpectra &spectra) {
+                                                                            FunctionModelSpectra const &spectra) {
   auto extractSpectra = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   extractSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");

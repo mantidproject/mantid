@@ -26,7 +26,7 @@ public:
   ~InelasticDataManipulationElwinTabModel() = default;
   void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
                           std::string const &outputName);
-  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra &spectra);
+  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra);
   void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                            std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
   void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
