@@ -43,6 +43,16 @@ constexpr auto LOG_SCALE = "Log";
 constexpr auto SQUARE_SCALE = "Square";
 constexpr auto SHOWALLERRORS = "Show all errors";
 constexpr auto HIDEALLERRORS = "Hide all errors";
+
+template <typename Observer> void modifyObserver(Observer &observer, bool const turnOn) {
+  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  if (turnOn && !notificationCenter.hasObserver(observer)) {
+    notificationCenter.addObserver(observer);
+  } else if (!turnOn && notificationCenter.hasObserver(observer)) {
+    notificationCenter.removeObserver(observer);
+  }
+}
+
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -77,14 +87,8 @@ PreviewPlot::~PreviewPlot() { watchADS(false); }
  * @param on If true ADS observers are enabled else they are disabled
  */
 void PreviewPlot::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
-  if (on) {
-    notificationCenter.addObserver(m_wsRemovedObserver);
-    notificationCenter.addObserver(m_wsReplacedObserver);
-  } else {
-    notificationCenter.removeObserver(m_wsReplacedObserver);
-    notificationCenter.removeObserver(m_wsRemovedObserver);
-  }
+  modifyObserver(m_wsReplacedObserver, on);
+  modifyObserver(m_wsRemovedObserver, on);
 }
 
 /**
