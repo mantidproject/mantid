@@ -73,20 +73,40 @@ public:
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
     heliumAnalyserEfficiency->execute();
 
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist("T"));
-    AnalysisDataService::Instance().remove("T");
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist("p_He"));
-    AnalysisDataService::Instance().remove("p_He");
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist("T_para"));
-    AnalysisDataService::Instance().remove("T_para");
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist("T_anti"));
-    AnalysisDataService::Instance().remove("T_anti");
+    const std::string t = "T";
+    const std::string pHe = "p_He";
+    const std::string tPara = "T_para";
+    const std::string tAnti = "T_anti";
+
+    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(t));
+    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(pHe));
+    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(tPara));
+    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(tAnti));
+
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputTransmissionWorkspace", t);
+    heliumAnalyserEfficiency->setProperty("HeliumPolarisation", pHe);
+    heliumAnalyserEfficiency->setProperty("OutputTransmissionParaWorkspace", tPara);
+    heliumAnalyserEfficiency->setProperty("OutputTransmissionAntiWorkspace", tAnti);
+    heliumAnalyserEfficiency->execute();
+
+    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(t));
+    AnalysisDataService::Instance().remove(t);
+    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(pHe));
+    AnalysisDataService::Instance().remove(pHe);
+    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(tPara));
+    AnalysisDataService::Instance().remove(tPara);
+    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(tAnti));
+    AnalysisDataService::Instance().remove(tAnti);
 
     auto members = wsGrp->getNames();
     AnalysisDataService::Instance().remove(wsGrp->getName());
     for (size_t i = 0; i < members.size(); ++i) {
       AnalysisDataService::Instance().remove(members[i]);
     }
+
+    AnalysisDataService::Instance().remove(heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
 
     TS_ASSERT_EQUALS(0, AnalysisDataService::Instance().size());
   }
@@ -132,6 +152,7 @@ public:
     heliumAnalyserEfficiency->setProperty("SpinStates", "11,10,00,01");
     heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
     heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
+    heliumAnalyserEfficiency->setProperty("HeliumPolarisation", "p_He");
     heliumAnalyserEfficiency->execute();
 
     MatrixWorkspace_sptr pHeWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("p_He");

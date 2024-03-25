@@ -48,11 +48,16 @@ private:
                                        const std::string &xUnit = "Wavelength");
   MatrixWorkspace_sptr subtractWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsToSubtract);
   MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
-  void fitAnalyserEfficiency(const double &mu, MatrixWorkspace_sptr p, double &pHe, double &pHeError,
-                             MantidVec &wavelengthValues);
-  void calculateTransmission(const MantidVec &wavelengthValues, const double &pHe, const double &pHeError,
-                             const double &mu, MantidVec &tPara, MantidVec &tAnti, MantidVec &tParaErrors,
-                             MantidVec &tAntiErrors);
+  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr p, double &pHe, double &pHeError,
+                             MantidVec &wavelengthValues, MantidVec &pCalc);
+  MatrixWorkspace_sptr createEfficiencyWorkspace(const double pd, const double pHe, const double pHeError,
+                                                 const double tCrit, const MantidVec &wavelengthValues,
+                                                 const MantidVec &pCalc);
+  void calculateTransmission(const MantidVec &wavelengthValues, const double pHe, const double pHeError,
+                             const double mu, const double tCrit, MantidVec &tPara, MantidVec &tAnti,
+                             MantidVec &tParaErrors, MantidVec &tAntiErrors);
+  double calculateTCrit(const size_t numberOfBins);
+  bool propertyHasValue(const std::string &property);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
 };
