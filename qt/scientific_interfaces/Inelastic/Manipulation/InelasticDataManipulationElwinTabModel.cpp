@@ -82,24 +82,24 @@ void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
   batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(runtimeProps));
 }
 
-void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(std::string const &InputWorkspace) {
+void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(std::string const &inputWorkspace) const {
   auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
   ungroupAlg->initialize();
-  ungroupAlg->setProperty("InputWorkspace", InputWorkspace);
+  ungroupAlg->setProperty("InputWorkspace", inputWorkspace);
   ungroupAlg->execute();
 }
 
-void InelasticDataManipulationElwinTabModel::groupAlgorithm(std::string const &InputWorkspaces,
-                                                            std::string const &OutputWorkspace) {
+void InelasticDataManipulationElwinTabModel::groupAlgorithm(std::string const &inputWorkspaces,
+                                                            std::string const &outputWorkspace) const {
   auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupAlg->initialize();
-  groupAlg->setProperty("InputWorkspaces", InputWorkspaces);
-  groupAlg->setProperty("OutputWorkspace", OutputWorkspace);
+  groupAlg->setProperty("InputWorkspaces", inputWorkspaces);
+  groupAlg->setProperty("OutputWorkspace", outputWorkspace);
   groupAlg->execute();
 }
 
 std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(MatrixWorkspace_sptr workspace,
-                                                                            FunctionModelSpectra spectra) {
+                                                                            FunctionModelSpectra &spectra) {
   auto extractSpectra = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   extractSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
@@ -129,7 +129,7 @@ void InelasticDataManipulationElwinTabModel::setOutputWorkspaceNames(std::string
   m_outputWorkspaceNames["eltWorkspace"] = workspaceBaseName + elwinSuffix + "elt";
 }
 
-std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() {
+std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() const {
   std::string outputWorkspaceNames;
   for (auto const &element : m_outputWorkspaceNames) {
     outputWorkspaceNames += static_cast<std::string>(element.second) + ',';

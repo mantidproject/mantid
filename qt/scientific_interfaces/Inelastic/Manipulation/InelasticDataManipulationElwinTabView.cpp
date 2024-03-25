@@ -531,7 +531,7 @@ std::string InelasticDataManipulationElwinTabView::getPreviewFilename(int index)
   return m_uiForm.cbPreviewFile->itemData(index).toString().toStdString();
 }
 
-int InelasticDataManipulationElwinTabView::getPreviewSpec() {
+int InelasticDataManipulationElwinTabView::getPreviewSpec() const {
   int tabIndex = m_uiForm.elwinPreviewSpec->currentIndex();
   return tabIndex == 0 ? m_uiForm.spPlotSpectrum->value() : m_uiForm.cbPlotSpectrum->currentText().toInt();
 }
@@ -540,8 +540,8 @@ std::string InelasticDataManipulationElwinTabView::getCurrentPreview() const {
   return m_uiForm.cbPreviewFile->currentText().toStdString();
 }
 
-bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupOutput->isChecked(); }
-bool InelasticDataManipulationElwinTabView::isRowCollapsed() { return m_uiForm.ckCollapse->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isGroupInput() const { return m_uiForm.ckGroupOutput->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isRowCollapsed() const { return m_uiForm.ckCollapse->isChecked(); }
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {

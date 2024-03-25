@@ -39,7 +39,7 @@ public:
   virtual void clearPreviewFile() = 0;
   virtual void setRunIsRunning(const bool running) = 0;
   virtual void setSaveResultEnabled(const bool enabled) = 0;
-  virtual int getPreviewSpec() = 0;
+  virtual int getPreviewSpec() const = 0;
 
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
   virtual std::string getPreviewFilename(int index) const = 0;
@@ -52,8 +52,8 @@ public:
   virtual QModelIndexList getSelectedData() = 0;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
-  virtual bool isGroupInput() = 0;
-  virtual bool isRowCollapsed() = 0;
+  virtual bool isGroupInput() const = 0;
+  virtual bool isRowCollapsed() const = 0;
 
   // getters/setters for m_properties
   virtual bool getNormalise() = 0;

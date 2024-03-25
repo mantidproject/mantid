@@ -57,6 +57,7 @@ public:
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
 
+auto const regDigits = std::regex("\\d+");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -134,21 +135,18 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
 
 bool InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   auto const workspaceName = getOutputBasename() + "_elt";
-  if (!WorkspaceUtils::doesExistInADS(workspaceName)) {
-    return false;
-  }
-  return true;
+  return !WorkspaceUtils::doesExistInADS(workspaceName);
 }
 
-std::string InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> workspaceNames) {
-  std::transform(workspaceNames.cbegin(), workspaceNames.cend(), workspaceNames.begin(),
-                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
-  std::regex re("\\d+");
+std::string
+InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> const &workspaceNames) const {
+  auto names = transformElements(workspaceNames.begin(), workspaceNames.end(),
+                                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
   std::smatch match;
   std::vector<int> runNumbers;
   std::string prefix;
-  for (auto const &name : workspaceNames)
-    if (std::regex_search(name, match, re)) {
+  for (auto const &name : names)
+    if (std::regex_search(name, match, regDigits)) {
       runNumbers.push_back(std::stoi(match.str(0)));
       if (prefix.empty())
         prefix = match.prefix().str();
@@ -156,8 +154,7 @@ std::string InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<s
   if (runNumbers.empty() || runNumbers.size() == 1)
     return "ELWIN_workspace_output";
   else {
-    auto min = std::min_element(runNumbers.cbegin(), runNumbers.cend());
-    auto max = std::max_element(runNumbers.cbegin(), runNumbers.cend());
+    auto [min, max] = std::minmax_element(runNumbers.cbegin(), runNumbers.cend());
     return prefix + std::to_string(*min) + "-" + std::to_string(*max);
   }
 }

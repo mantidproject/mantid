@@ -42,7 +42,7 @@ public:
   void clearPreviewFile() override;
   void setRunIsRunning(const bool running) override;
   void setSaveResultEnabled(const bool enabled) override;
-  int getPreviewSpec() override;
+  int getPreviewSpec() const override;
   std::string getPreviewWorkspaceName(int index) const override;
   std::string getPreviewFilename(int index) const override;
   std::string getCurrentPreview() const override;
@@ -53,8 +53,8 @@ public:
   QModelIndexList getSelectedData() override;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
-  bool isGroupInput() override;
-  bool isRowCollapsed() override;
+  bool isGroupInput() const override;
+  bool isRowCollapsed() const override;
 
   // getters/setters for m_properties
   bool getNormalise() override;

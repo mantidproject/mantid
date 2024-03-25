@@ -80,7 +80,7 @@ private:
   MatrixWorkspace_sptr getInputWorkspace() const;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   bool checkForELTWorkspace();
-  std::string prepareOutputPrefix(std::vector<std::string> workspaceNames);
+  std::string prepareOutputPrefix(std::vector<std::string> const &workspaceNames) const;
   void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
   void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
