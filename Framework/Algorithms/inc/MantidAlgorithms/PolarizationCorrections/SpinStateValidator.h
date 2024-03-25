@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/TypedValidator.h"
+#include <unordered_set>
 
 namespace Mantid::Algorithms {
 

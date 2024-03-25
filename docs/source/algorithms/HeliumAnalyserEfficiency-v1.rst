@@ -11,8 +11,8 @@ Description
 
 Takes a normalised group workspace with four periods representing a run, combines this with the transmission of the empty
 cell (``TransmissionEmptyCell``) and the cell path length multiplied by the gas pressure (``GasPressureTimesCellLength``) to calculate the efficiency of the analyser.
-It will output the calculated efficiency in ``p_He``, as well as the transmission curves for the parallel (``T_para``), and
-anti-parallel (``T_anti``) cases.
+It will output the calculated efficiency curve in ``OutputWorkspace``, the value of :math:`p_{He}` in ``HeliumPolarisation``, as well as the transmission curves for
+the parallel (``T_para``), and anti-parallel (``T_anti``) cases.
 
 The parameters ``TransmissionEmptyCell`` and ``GasPressureTimesCellLength`` are going to be calculated by fitting to data, and the covariance matrix of these
 two parameters can be provided in order to calculate the errors on the transmission curves.
@@ -65,17 +65,19 @@ Usage
     wsAnti1 = CloneWorkspace(wsAnti)
 
     grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
-    HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10')
+    HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10', HeliumPolarisation='p_He')
 
-    print("p_He Value = " + str(mtd["p_He"].dataY(0)[0]) + ".")
+    print('PA at ' + str(mtd['PA'].dataX(0)[0]) + 'A = ' + str(mtd['PA'].dataY(0)[0]))
+    print('Error in PA at ' + str(mtd['PA'].dataX(0)[0]) + 'A = ' + str(mtd['PA'].dataE(0)[0]))
+    print("p_He Value = " + str(mtd["p_He"].dataY(0)[0]))
 
 Output:
 
 .. testoutput:: ExHeliumAnalyserEfficiencyCalc
-   :hide:
-   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-   p_He Value = ...
+    PA at 2.0A = 0.962520839134
+    Error in PA at 2.0A = 2.84935838704
+    p_He Value = 0.900000000409
 
 .. categories::
 
