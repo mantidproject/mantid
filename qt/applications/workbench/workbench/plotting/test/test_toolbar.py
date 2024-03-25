@@ -72,6 +72,16 @@ class ToolBarTest(unittest.TestCase):
         self.assertFalse(self._is_button_enabled(fig, "toggle_superplot"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_fitbrowser_and_superplot_disabled_for_non_MantidAxes(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots()
+        axes.plot([-10, 10], [1, 2])
+
+        self.assertFalse(self._is_button_enabled(fig, "toggle_fit"))
+        self.assertFalse(self._is_button_enabled(fig, "toggle_superplot"))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_line_color_selection_buttons_correctly_enabled_for_contour_wireframe_plots(self, mock_qappthread):
         """Checks that line_colour selection button is correctly enabled for wireframe and contour plots"""
         mock_qappthread.return_value = mock_qappthread
@@ -85,6 +95,8 @@ class ToolBarTest(unittest.TestCase):
 
             # line_colour button should be enabled for contour and wireframe plots
             self.assertTrue(self._is_button_enabled(fig, "line_colour"))
+            self.assertFalse(self._is_button_enabled(fig, "toggle_fit"))
+            self.assertFalse(self._is_button_enabled(fig, "toggle_superplot"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_unchecked_for_plot_with_no_grid(self, mock_qappthread):
