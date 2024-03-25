@@ -12,6 +12,7 @@ Release Notes
    */index
 
 * :doc:`v6.10.0 <v6.10.0/index>`
+* :doc:`v6.9.1 <v6.9.1/index>`
 * :doc:`v6.9.0 <v6.9.0/index>`
 * :doc:`v6.8.0 <v6.8.0/index>`
 * :doc:`v6.7.0 <v6.7.0/index>`
