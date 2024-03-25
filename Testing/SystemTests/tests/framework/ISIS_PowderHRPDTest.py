@@ -56,12 +56,37 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False)
+        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, do_empty_subtraction=True)
 
     def validate(self):
         self.checkInstrument = False  # want to check focused results, not the instrument geometry
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
         return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+            _try_delete(spline_path)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class CreateVanadiumNoSolidAngleNoEmptySubtractionTest(systemtesting.MantidSystemTest):
+    calibration_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, do_empty_subtraction=False)
+
+    def validate(self):
+        self.checkInstrument = False  # want to check focused results, not the instrument geometry
+        self.tolerance = 0.05  # Required for difference in spline data between operating systems
+        return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_NoEmpty_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -176,7 +201,7 @@ def gen_required_run_numbers():
     return ["66028", "66031", "66063"]  # Sample empty  # Vanadium  # Run to focus
 
 
-def run_vanadium_calibration(do_solid_angle_corrections):
+def run_vanadium_calibration(do_solid_angle_corrections, do_empty_subtraction=True):
     vanadium_run = 66031  # Choose arbitrary run from cycle 16_5
     inst_obj = setup_inst_object()
     inst_obj.create_vanadium(
@@ -184,6 +209,7 @@ def run_vanadium_calibration(do_solid_angle_corrections):
         do_solid_angle_corrections=do_solid_angle_corrections,
         do_absorb_corrections=True,
         multiple_scattering=False,
+        subtract_empty_instrument=do_empty_subtraction,
         window=WINDOW,
     )
 
