@@ -15,6 +15,7 @@ The changes are:
  - Removed slit lookup that was specific to OFFSPEC in :ref:`algm-ReflectometryReductionOneLiveData` as it is no longer required and was causing regular crashes when running live data on OFFSPEC.
  - Fixed a bug in :ref:`Elwin Tab <elwin>` of :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>` where changing integration range with the sliders did not change default integration range.
  - Add sample log values to the live data workspace before the instrument is loaded in :ref:`algm-ReflectometryReductionOneLiveData` to ensure log values are available when setting the detector positions.
+ - Fixed a crash when using multiple Indirect or Inelastic interfaces. This crash was present on the :ref:`Bayes Fitting <interface-inelastic-bayes-fitting>` interface, but could also be replicated elsewhere.
 
 Citation
 --------
@@ -36,6 +37,7 @@ Changes in this version
 * `37053 <https://github.com/mantidproject/mantid/pull/37053>`_ Load instrument after loading sample logs in ReflectometryReductionOneLiveData
 * `37016 <https://github.com/mantidproject/mantid/pull/37016>`_ Fix sliders not changing integration limits in Elwin tab
 * `36935 <https://github.com/mantidproject/mantid/pull/36935>`_ Fix regular live data crashes on OFFSPEC
+* `37074 <https://github.com/mantidproject/mantid/pull/37074>`_ Fix crash on Indirect/Inelastic interfaces.
 
 .. _download page: http://download.mantidproject.org
 
