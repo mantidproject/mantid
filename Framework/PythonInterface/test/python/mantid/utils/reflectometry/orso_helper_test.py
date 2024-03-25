@@ -112,7 +112,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
     def test_adding_additional_column_using_unit_enum(self):
         col_length = 5
 
-        extra_col = ["test_1", MantidORSODataColumns.Unit.Angstrom, "angstrom_unit_test"]
+        extra_col = ["test_1", MantidORSODataColumns.Unit.InverseAngstrom, "angstrom_unit_test"]
         columns = MantidORSODataColumns(
             np.full(col_length, 1),
             np.full(col_length, 1),
@@ -158,7 +158,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self,
         columns,
         num_columns_expected,
-        q_unit=MantidORSODataColumns.Unit.Angstrom,
+        q_unit=MantidORSODataColumns.Unit.InverseAngstrom,
         r_error_is=MantidORSODataColumns.ErrorValue.Sigma,
         q_error_is=MantidORSODataColumns.ErrorValue.Sigma,
     ):

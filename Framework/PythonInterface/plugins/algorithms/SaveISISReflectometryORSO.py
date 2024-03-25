@@ -26,29 +26,35 @@ import numpy as np
 class Prop:
     WORKSPACE_LIST = "WorkspaceList"
     WRITE_RESOLUTION = "WriteResolution"
+    INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
 
 
 class ReflectometryDataset:
     REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    CONVERT_ALG = "ConvertUnits"
+    REF_ROI_ALG = "RefRoi"
 
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _RRO_ALG = "ReflectometryReductionOne"
     _STITCH_ALG = "Stitch1DMany"
 
     def __init__(self, ws, is_ws_grp_member: bool):
-        self._name = None
+        self._name: str = ""
         self._ws = ws
-        self._is_ws_grp_member = is_ws_grp_member
+        self._is_ws_grp_member: bool = is_ws_grp_member
         self._reduction_history = None
         self._reduction_workflow_histories = []
         self._stitch_history = None
+        self._q_conversion_history = None
+        self._q_conversion_theta: Optional[float] = None
 
         self._populate_histories()
+        self._populate_q_conversion_info()
         self._set_name()
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
@@ -56,7 +62,7 @@ class ReflectometryDataset:
         return self._ws
 
     @property
-    def instrument_name(self):
+    def instrument_name(self) -> str:
         return self._ws.getInstrument().getName()
 
     @property
@@ -77,16 +83,11 @@ class ReflectometryDataset:
 
     @property
     def q_conversion_history(self):
-        if self._reduction_history is None:
-            return None
+        return self._q_conversion_history
 
-        for child in self._reduction_history.getChildHistories():
-            if child.name() == self._RRO_ALG:
-                rro_child_algs = child.getChildHistories()
-                if rro_child_algs:
-                    return rro_child_algs[-1]
-
-        return None
+    @property
+    def q_conversion_theta(self) -> Optional[float]:
+        return self._q_conversion_theta
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -112,11 +113,31 @@ class ReflectometryDataset:
                         self._reduction_history = child_history
                         return
 
+    def _populate_q_conversion_info(self):
+        if self.is_stitched or self._reduction_history is None:
+            # Q conversion information isn't relevant for a stitched dataset
+            return
+
+        for child in self._reduction_history.getChildHistories():
+            if child.name() == self._RRO_ALG:
+                rro_child_algs = child.getChildHistories()
+                if rro_child_algs:
+                    self._q_conversion_history = rro_child_algs[-1]
+                    break
+
+        if self._q_conversion_history is None:
+            return
+
+        if self._q_conversion_history.name() == self.REF_ROI_ALG:
+            self._q_conversion_theta = float(self._q_conversion_history.getPropertyValue("ScatteringAngle"))
+        elif self._q_conversion_history.name() == self.CONVERT_ALG:
+            self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
+
     def _set_name(self):
         if self.is_stitched:
             self._name = "Stitched"
-        elif self._reduction_history:
-            self._name = self._reduction_history.getPropertyValue("ThetaIn")
+        elif self._q_conversion_theta is not None:
+            self._name = str(self._q_conversion_theta)
         else:
             self._name = self._ws.name()
 
@@ -141,8 +162,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     # Algorithms
     _REBIN_ALG = "Rebin"
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
-    _CONVERT_ALG = "ConvertUnits"
-    _REF_ROI_ALG = "RefRoi"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -171,6 +190,15 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             defaultValue=True,
             direction=Direction.Input,
             doc="Whether to compute resolution values and write them as the fourth data column.",
+        )
+
+        self.declareProperty(
+            name=Prop.INCLUDE_EXTRA_COLS,
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="Whether to include the four additional columns lambda, dlambda, theta and dtheta for unstitched datasets. "
+            "If set to True then a resolution column will be included for all datasets, regardless of the value of "
+            f"the {Prop.WRITE_RESOLUTION} parameter.",
         )
 
         self.declareProperty(
@@ -260,24 +288,25 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
-        if not refl_dataset.is_stitched and refl_dataset.reduction_history and refl_dataset.instrument_name == "POLREF":
+        if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and not refl_dataset.is_stitched:
             # Add additional data columns
             size = q_data.size
-            theta = float(refl_dataset.reduction_history.getPropertyValue("ThetaIn"))
             try:
                 l_data = self._convert_from_q_to_wavelength(refl_dataset, q_data)
                 l_error = np.full(size, 0)
+                theta = refl_dataset.q_conversion_theta
             except RuntimeError as ex:
                 self.log().debug(ex)
                 l_data = np.full(size, np.nan)
                 l_error = np.full(size, np.nan)
+                theta = np.nan
 
             data_columns.add_column("lambda", MantidORSODataColumns.Unit.Angstrom, "wavelength", l_data)
             data_columns.add_error_column("lambda", MantidORSODataColumns.ErrorType.Resolution, None, l_error)
             data_columns.add_column("incident theta", MantidORSODataColumns.Unit.Degrees, "incident theta", np.full(size, theta))
-            # We set the error for incident theta to the q_resolution as we are currently assuming dlambda is 0
-            # (and q_resolution = dincident_theta + dlambda)
-            data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, q_resolution)
+            # d incident theta = dQ/Q * incident theta
+            d_theta = np.nan if resolution is None else resolution * theta
+            data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, np.full(size, d_theta))
 
         return data_columns
 
@@ -289,18 +318,24 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
 
         # The method to convert back to wavelength depends on which algorithm was used to perform the conversion to Q
-        if q_convert_history.name() == self._REF_ROI_ALG:
-            theta = float(q_convert_history.getPropertyValue("ScatteringAngle"))
-            return 4 * np.pi * np.sin(np.radians(theta)) / q_data
+        if q_convert_history.name() == ReflectometryDataset.REF_ROI_ALG:
+            return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
 
-        if q_convert_history.name() == self._CONVERT_ALG:
+        if q_convert_history.name() == ReflectometryDataset.CONVERT_ALG:
             alg = self.createChildAlgorithm(
-                self._CONVERT_ALG, InputWorkspace=refl_dataset.ws, Target="Wavelength", AlignBins=False, OutputWorkspace="lambdaWs"
+                ReflectometryDataset.CONVERT_ALG,
+                InputWorkspace=refl_dataset.ws,
+                Target="Wavelength",
+                AlignBins=False,
+                OutputWorkspace="lambdaWs",
             )
             alg.execute()
             lambda_ws = alg.getProperty("OutputWorkspace").value
             lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
-            return lambda_point_data.extractX()[0]
+            # There is an inverse relationship between lambda and Q, and workspace X values are in ascending order.
+            # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
+            # reduced workspace.
+            return np.flip(lambda_point_data.extractX()[0])
 
     def _convert_to_point_data(self, ws, out_ws_name):
         alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=out_ws_name)
@@ -375,7 +410,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         return None, None
 
     def _get_resolution(self, refl_dataset: ReflectometryDataset) -> Optional[float]:
-        if not self.getProperty(Prop.WRITE_RESOLUTION).value:
+        if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             return None
 
         # Attempt to get the resolution from the workspace history

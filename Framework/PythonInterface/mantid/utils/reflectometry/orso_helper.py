@@ -142,7 +142,8 @@ class MantidORSODataset:
 class MantidORSODataColumns:
     # Data column units
     class Unit(Enum):
-        Angstrom = "1/angstrom"
+        Angstrom = "angstrom"
+        InverseAngstrom = "1/angstrom"
         Nm = "1/nm"
         Degrees = "degrees"
 
@@ -170,7 +171,7 @@ class MantidORSODataColumns:
         reflectivity_data: np.ndarray,
         reflectivity_error: Optional[np.ndarray] = None,
         q_resolution: Optional[np.ndarray] = None,
-        q_unit: Unit = Unit.Angstrom,
+        q_unit: Unit = Unit.InverseAngstrom,
         r_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
         q_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
     ):
