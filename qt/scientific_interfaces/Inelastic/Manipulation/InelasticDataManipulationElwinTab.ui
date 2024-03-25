@@ -292,7 +292,7 @@
       <item>
        <widget class="QCheckBox" name="ckGroupOutput">
         <property name="text">
-         <string>Group Output?</string>
+         <string>Group Output</string>
         </property>
        </widget>
       </item>
@@ -423,7 +423,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Collapse rows?</string>
+            <string>Collapse rows</string>
            </property>
            <property name="checked">
             <bool>true</bool>
