@@ -32,5 +32,7 @@ void export_IPeakFunction() {
            "parameters.")
       .def("setIntensity", &IPeakFunction::setIntensity, (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
-           "height.");
+           "height.")
+      .def("setHeight", &IPeakFunction::setHeight, arg("self"), "Sets height of the peak function.")
+      .def("setCentre", &IPeakFunction::setCentre, arg("self"), "Sets setCentre of the peak function.");
 }
