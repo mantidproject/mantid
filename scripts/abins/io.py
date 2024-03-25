@@ -131,6 +131,8 @@ class IO(object):
             return True
 
         if isinstance(new, (np.ndarray, float)):
+            if previous is None:
+                return False
             return np.allclose(previous, new)
         # Tuples are converted to list in caching
         elif isinstance(new, tuple):
