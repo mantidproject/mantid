@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -8,13 +8,17 @@
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
+#include "ParamID.h"
+
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
-#include <QMap>
-#include <boost/optional.hpp>
+#include <QList>
+
+#include <map>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,38 +27,38 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IqtFunctionModel : public IFunctionModel {
+class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateModel : public IFunctionModel {
 public:
-  IqtFunctionModel();
-  void setFunction(IFunction_sptr fun) override;
+  MultiFunctionTemplateModel(std::unique_ptr<FunctionModel> model,
+                             std::unique_ptr<IDAFunctionParameterEstimation> estimators);
+
+  bool hasFunction() const override;
   IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
-  bool hasFunction() const override;
-  void addFunction(std::string const &prefix, std::string const &funStr) override;
-  void removeFunction(std::string const &prefix) override;
+  IFunction_sptr getSingleFunction(int index) const override;
+  IFunction_sptr getCurrentFunction() const override;
+
   void setParameter(std::string const &parameterName, double value) override;
   void setParameterError(std::string const &parameterName, double value) override;
   double getParameter(std::string const &parameterName) const override;
   double getParameterError(std::string const &parameterName) const override;
   std::string getParameterDescription(std::string const &parameterName) const override;
   std::vector<std::string> getParameterNames() const override;
-  IFunction_sptr getSingleFunction(int index) const override;
-  IFunction_sptr getCurrentFunction() const override;
+
   void setNumberDomains(int) override;
+  int getNumberDomains() const override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   QStringList getDatasetNames() const override;
   QStringList getDatasetDomainNames() const override;
-  int getNumberDomains() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
-  void changeTie(std::string const &parameterName, std::string const &tie) override;
-  void addConstraint(std::string const &functionIndex, std::string const &constraint) override;
-  void removeConstraint(std::string const &parameterName) override;
-  std::vector<std::string> getGlobalParameters() const override;
+
   void setGlobalParameters(std::vector<std::string> const &globals) override;
+  std::vector<std::string> getGlobalParameters() const override;
   bool isGlobal(std::string const &parameterName) const override;
   void setGlobal(std::string const &parameterName, bool on) override;
   std::vector<std::string> getLocalParameters() const override;
+
   void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
@@ -69,64 +73,44 @@ public:
   void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) override;
   void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) override;
   void setGlobalParameterValue(std::string const &parameterName, double value) override;
-  std::string setBackgroundA0(double value) override;
-  void setNumberOfExponentials(int);
-  int getNumberOfExponentials() const;
-  void setStretchExponential(bool);
-  bool hasStretchExponential() const;
-  void setBackground(std::string const &name);
-  void removeBackground();
-  bool hasBackground() const;
-  void tieIntensities(bool on);
-  EstimationDataSelector getEstimationDataSelector() const;
+
+  virtual void setSubType(std::size_t subTypeIndex, int typeIndex) = 0;
+  virtual std::map<std::size_t, int> getSubTypes() const = 0;
+
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
-  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void setQValues(const std::vector<double> &qValues) override;
 
-  enum class ParamID {
-    EXP1_HEIGHT,
-    EXP1_LIFETIME,
-    EXP2_HEIGHT,
-    EXP2_LIFETIME,
-    STRETCH_HEIGHT,
-    STRETCH_LIFETIME,
-    STRETCH_STRETCHING,
-    BG_A0
-  };
-  QMap<ParamID, double> getCurrentValues() const;
-  QMap<ParamID, double> getCurrentErrors() const;
-  QMap<int, std::string> getParameterNameMap() const;
+  std::map<ParamID, double> getCurrentValues() const;
+  std::map<ParamID, double> getCurrentErrors() const;
+  std::map<int, std::string> getParameterNameMap() const;
 
-private:
-  void clearData();
-  std::string buildFunctionString() const;
-  boost::optional<std::string> getExp1Prefix() const;
-  boost::optional<std::string> getExp2Prefix() const;
-  boost::optional<std::string> getStretchPrefix() const;
-  boost::optional<std::string> getBackgroundPrefix() const;
+protected:
   void setParameter(ParamID name, double value);
-  boost::optional<double> getParameter(ParamID name) const;
-  boost::optional<double> getParameterError(ParamID name) const;
-  boost::optional<std::string> getParameterName(ParamID name) const;
-  boost::optional<std::string> getParameterDescription(ParamID name) const;
-  boost::optional<std::string> getPrefix(ParamID name) const;
-  void setCurrentValues(const QMap<ParamID, double> &);
-  void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
-  boost::optional<ParamID> getParameterId(std::string const &parameterName);
-  std::string buildExpDecayFunctionString() const;
-  std::string buildStretchExpFunctionString() const;
-  std::string buildBackgroundFunctionString() const;
-  void addGlobal(std::string const &parameterName);
-  void removeGlobal(std::string const &parameterName);
+  std::optional<std::string> getParameterName(ParamID name) const;
+  void setCurrentValues(const std::map<ParamID, double> &);
   std::vector<std::string> makeGlobalList() const;
 
-  FunctionModel m_model;
-  int m_numberOfExponentials = 0;
-  bool m_hasStretchExponential = false;
-  std::string m_background;
-  DataForParameterEstimationCollection m_estimationData;
+  std::unique_ptr<FunctionModel> m_model;
   QList<ParamID> m_globals;
+
+private:
+  double getParameter(ParamID name) const;
+  double getParameterError(ParamID name) const;
+  std::string getParameterDescription(ParamID name) const;
+  std::optional<ParamID> getParameterId(std::string const &parameterName);
+
+  virtual std::optional<std::string> getPrefix(ParamID name) const = 0;
+  virtual void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const = 0;
+
+  void changeTie(std::string const &parameterName, std::string const &tie) override;
+  void removeConstraint(std::string const &parameterName) override;
+  void addConstraint(std::string const &functionIndex, std::string const &constraint) override;
+
+  void removeGlobal(std::string const &parameterName);
+  void addGlobal(std::string const &parameterName);
+
+  DataForParameterEstimationCollection m_estimationData;
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };
 

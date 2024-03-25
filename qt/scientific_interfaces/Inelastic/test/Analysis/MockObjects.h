@@ -22,6 +22,7 @@
 #include "Analysis/InelasticFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -274,7 +275,7 @@ public:
   MOCK_METHOD1(updateMultiDatasetParameters, void(const IFunction &fun));
   MOCK_METHOD1(setCurrentDataset, void(int i));
   MOCK_METHOD0(getCurrentDataset, int());
-  MOCK_METHOD1(updateParameterNames, void(const QMap<int, std::string> &parameterNames));
+  MOCK_METHOD1(updateParameterNames, void(const std::map<int, std::string> &parameterNames));
   MOCK_METHOD1(setGlobalParametersQuiet, void(std::vector<std::string> const &globals));
   MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
   MOCK_METHOD1(setBackgroundA0, void(double value));

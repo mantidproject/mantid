@@ -46,7 +46,7 @@ public:
   void setStretchStretching(double, double);
   void setA0(double, double);
 
-  void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
+  void updateParameterNames(const std::map<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
 

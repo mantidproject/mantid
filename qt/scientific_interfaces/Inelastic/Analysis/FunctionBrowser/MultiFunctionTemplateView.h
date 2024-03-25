@@ -27,7 +27,7 @@ class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateView : public FunctionTemplate
   Q_OBJECT
 public:
   explicit MultiFunctionTemplateView(TemplateBrowserCustomizations customizations);
-  void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
+  void updateParameterNames(const std::map<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
 
   void setSubTypes(std::map<std::size_t, int> const &subTypes);

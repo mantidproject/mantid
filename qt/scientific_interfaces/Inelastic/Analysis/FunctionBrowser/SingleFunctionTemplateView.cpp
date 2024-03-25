@@ -99,7 +99,7 @@ void SingleFunctionTemplateView::setParameterValueQuietly(std::string const &par
   setParameterSilent(m_parameterMap[parameterName], parameterValue, parameterError);
 }
 
-void SingleFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &) {}
+void SingleFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &) {}
 
 void SingleFunctionTemplateView::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {

@@ -16,6 +16,13 @@ namespace IDA {
 
 enum class ParamID {
   NONE,
+  EXP1_HEIGHT,
+  EXP1_LIFETIME,
+  EXP2_HEIGHT,
+  EXP2_LIFETIME,
+  STRETCH_HEIGHT,
+  STRETCH_LIFETIME,
+  STRETCH_STRETCHING,
   LOR1_AMPLITUDE,
   LOR1_PEAKCENTRE,
   LOR1_FWHM,
@@ -85,6 +92,13 @@ enum class ParamID {
 };
 
 static std::map<ParamID, std::string> g_paramName{
+    {ParamID::EXP1_HEIGHT, "Height"},
+    {ParamID::EXP1_LIFETIME, "Lifetime"},
+    {ParamID::EXP2_HEIGHT, "Height"},
+    {ParamID::EXP2_LIFETIME, "Lifetime"},
+    {ParamID::STRETCH_HEIGHT, "Height"},
+    {ParamID::STRETCH_LIFETIME, "Lifetime"},
+    {ParamID::STRETCH_STRETCHING, "Stretching"},
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
     {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
     {ParamID::LOR1_FWHM, "FWHM"},

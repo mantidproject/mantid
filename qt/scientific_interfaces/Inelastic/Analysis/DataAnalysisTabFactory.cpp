@@ -14,7 +14,7 @@
 #include "FqFitModel.h"
 #include "FunctionBrowser/ConvFunctionTemplateModel.h"
 #include "FunctionBrowser/FqFunctionModel.h"
-#include "FunctionBrowser/IqtFunctionModel.h"
+#include "FunctionBrowser/IqtFunctionTemplateModel.h"
 #include "FunctionBrowser/IqtFunctionTemplateView.h"
 #include "FunctionBrowser/IqtTemplatePresenter.h"
 #include "FunctionBrowser/MSDFunctionModel.h"
@@ -55,7 +55,8 @@ DataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
 DataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
   auto tab = new DataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
   tab->setupFittingModel<IqtFitModel>();
-  tab->setupFitPropertyBrowser<IqtFunctionTemplateView, IqtTemplatePresenter, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
+  tab->setupFitPropertyBrowser<IqtFunctionTemplateView, IqtTemplatePresenter, IqtFunctionTemplateModel>(
+      IqtFit::HIDDEN_PROPS);
   tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<FitDataPresenter>();

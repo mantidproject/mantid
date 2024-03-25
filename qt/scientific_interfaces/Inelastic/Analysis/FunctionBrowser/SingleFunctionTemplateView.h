@@ -31,7 +31,7 @@ public:
   explicit SingleFunctionTemplateView(TemplateBrowserCustomizations customizations);
   virtual ~SingleFunctionTemplateView() = default;
 
-  void updateParameterNames(const QMap<int, std::string> &parameterNames) override;
+  void updateParameterNames(const std::map<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;
   void clear() override;
   void addParameter(std::string const &parameterName, std::string const &parameterDescription);
