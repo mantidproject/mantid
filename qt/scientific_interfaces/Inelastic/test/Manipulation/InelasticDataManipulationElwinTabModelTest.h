@@ -134,8 +134,10 @@ public:
 
   void test_getOutputWorkspaceNames_retrieves_correct_output_string() {
     m_model->setOutputWorkspaceNames("Workspace_name_out");
-    TS_ASSERT_EQUALS(m_model->getOutputWorkspaceNames(), "Workspace_name_out_elwin_eq,Workspace_name_out_elwin_eq2,"
-                                                         "Workspace_name_out_elwin_elf,Workspace_name_out_elwin_elt");
+    std::string stringOut1 = "Workspace_name_out_elwin_eq,Workspace_name_out_elwin_eq2,";
+    std::string stringOut2 = "Workspace_name_out_elwin_elf,Workspace_name_out_elwin_elt";
+
+    TS_ASSERT_EQUALS(m_model->getOutputWorkspaceNames(), stringOut1 + stringOut2);
   }
 
   void test_prepareOutputPrefix_calls_with_different_inputs() {
