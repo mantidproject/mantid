@@ -601,7 +601,10 @@ class PeakFitter:
         params[-self.nparams_bg] = bg  # constant is always first parameter in supported background functions
 
     def estimate_intensity_sigma_and_background(self, irow, icol):
-        bg = np.min(self.y[irow, icol, :][self.y[irow, icol, :] > 0])
+        ipositive = self.y[irow, icol, :] > 0
+        if not ipositive.any():
+            return 0.0, 0.0, 0.0
+        bg = np.min(self.y[irow, icol, :][ipositive])
         bin_width = np.diff(self.tofs)
         intensity = np.sum((0.5 * (self.y[irow, icol, 1:] + self.y[irow, icol, :-1]) - bg) * bin_width)
         sigma = np.sqrt(np.sum(0.5 * (self.esq[irow, icol, 1:] + self.esq[irow, icol, :-1]) * (bin_width**2)))
