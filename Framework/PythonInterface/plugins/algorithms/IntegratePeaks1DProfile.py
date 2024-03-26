@@ -494,6 +494,7 @@ class PeakFitter:
             args=(self.profile_func, self.tofs, self.y[irow, icol, :], weights, self.cost_func),
             bounds=tuple(bounds),
             method="Nelder-Mead",
+            options={"adaptive": True, "maxfev": 2000},
         )
         # set parameters (is this altered in-place?)
         [self.profile_func.setParameter(iparam, param) for iparam, param in enumerate(result.x)]
