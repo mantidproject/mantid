@@ -48,7 +48,9 @@ std::string DetectorGroupingOptions::groupingMethod() const {
   return m_uiForm.cbGroupingOptions->currentText().toStdString();
 }
 
-std::string DetectorGroupingOptions::mapFile() const { return m_uiForm.dsMapFile->getFirstFilename().toStdString(); }
+std::string DetectorGroupingOptions::groupingFile() const {
+  return m_uiForm.dsMapFile->getFirstFilename().toStdString();
+}
 
 std::string DetectorGroupingOptions::customGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
@@ -65,7 +67,7 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
   Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
   switch (GROUPING_METHODS[method]) {
   case GroupingMethod::File:
-    Mantid::API::AlgorithmProperties::update("MapFile", mapFile(), *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingFile", groupingFile(), *properties);
     break;
   case GroupingMethod::Groups:
     Mantid::API::AlgorithmProperties::update("NGroups", std::to_string(nGroups()), *properties);

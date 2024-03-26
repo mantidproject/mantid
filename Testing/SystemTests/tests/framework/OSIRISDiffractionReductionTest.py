@@ -23,6 +23,8 @@ class OSIRISDiffractionReductionTest(MantidSystemTest):
             ContainerScaleFactor=0.5,
             SpectraMin=3,
             SpectraMax=361,
+            GroupingMethod="File",
+            GroupingFile="osiris_041_RES10.cal",
             OutputWorkspace="diffraction_result",
         )
 
