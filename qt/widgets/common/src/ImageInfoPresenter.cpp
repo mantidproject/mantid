@@ -56,10 +56,10 @@ void ImageInfoPresenter::fillTableCells(const ImageInfoModel::ImageInfo &info) {
     return;
   int signalIndex = -1;
 
-  const auto itemCount(info.size());
+  const auto &itemCount(info.size());
   m_view->setColumnCount(itemCount);
   for (int i = 0; i < itemCount; ++i) {
-    const auto name = info.name(i);
+    const auto &name = info.name(i);
     if (name == "Signal") {
       signalIndex = i;
     }
