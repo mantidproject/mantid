@@ -21,6 +21,8 @@ std::string_view constexpr DEP_WORKSPACE{"DepolarizedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
 std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
+std::string_view constexpr START_X = "StartX";
+std::string_view constexpr END_X = "EndX";
 std::string_view constexpr FIT_QUALITY_OVERRIDE{"OverrideFitQualityError"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
@@ -39,8 +41,8 @@ double constexpr EMPTY_CELL_TRANS_START = 0.9;
 double constexpr DEPOL_OPACITY_START = 12.6;
 std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_E";
 std::string_view constexpr DEPOL_OPACITY_NAME = "pxd";
-double constexpr START_X = 1.75;
-double constexpr END_X = 14;
+double constexpr START_X_START = 1.75;
+double constexpr END_X_START = 14;
 std::string_view constexpr FIT_SUCCESS{"success"};
 
 std::shared_ptr<IFunction> createFunction(std::string const &mtTransStart, std::string const &depolOpacStart) {
@@ -95,6 +97,8 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
                   "Starting value for the depolarized cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
+  declareProperty(std::string(PropNames::START_X), FitValues::START_X_START, "StartX value for the fit.");
+  declareProperty(std::string(PropNames::END_X), FitValues::END_X_START, "EndX value for the fit.");
   declareProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE), false,
                   "Whether the algorithm should ignore a chi-squared (fit cost value) greater than 1 and therefore not "
                   "throw an error.");
@@ -165,11 +169,13 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
   auto func = FitValues::createFunction(getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START)),
                                         getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START)));
   auto fitAlg = createChildAlgorithm("Fit");
+  double const &startX = getProperty(std::string(PropNames::START_X));
+  double const &endX = getProperty(std::string(PropNames::END_X));
   fitAlg->setProperty("Function", func);
   fitAlg->setProperty("InputWorkspace", inputWs);
   fitAlg->setProperty("IgnoreInvalidData", true);
-  fitAlg->setProperty("StartX", FitValues::START_X);
-  fitAlg->setProperty("EndX", FitValues::END_X);
+  fitAlg->setProperty("StartX", startX);
+  fitAlg->setProperty("EndX", endX);
   fitAlg->setPropertyValue("Output", outputWsName);
   fitAlg->execute();
 

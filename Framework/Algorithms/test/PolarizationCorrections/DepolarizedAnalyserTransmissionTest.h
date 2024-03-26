@@ -95,6 +95,30 @@ public:
     TS_ASSERT_DELTA(covWs->getColumn("pxd")->toDouble(1), PXD_COV, PXD_COV * COV_DELTA);
   }
 
+  void test_different_start_end_x() {
+    // GIVEN
+    auto constexpr T_E_ERROR_DIFX = 25693283.9;
+    auto constexpr PXD_ERROR_DIFX = 458.447482;
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
+    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+
+    auto alg = createAlgorithm(mtWs, depWs);
+    alg->setProperty("StartX", 1.5);
+    alg->setProperty("EndX", 14.5);
+    alg->execute();
+
+    // THEN
+    TS_ASSERT(alg->isExecuted());
+    ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR_DIFX, T_E_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR_DIFX, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT_EQUALS(fitWs, nullptr)
+  }
+
   void test_failed_fit() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
