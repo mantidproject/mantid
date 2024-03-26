@@ -54,14 +54,17 @@ void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &workspa
 void ImageInfoPresenter::fillTableCells(const ImageInfoModel::ImageInfo &info) {
   if (info.empty())
     return;
-  int signalIndex = -1;
 
   const auto &itemCount(info.size());
   m_view->setColumnCount(itemCount);
   for (int i = 0; i < itemCount; ++i) {
     const auto &name = info.name(i);
     if (name == "Signal") {
-      signalIndex = i;
+      if (m_showSignal) {
+        m_view->showColumn(i);
+      } else {
+        m_view->hideColumn(i);
+      }
     }
     auto header = new QTableWidgetItem(name);
     header->setFlags(header->flags() & ~Qt::ItemIsEditable);
@@ -69,13 +72,6 @@ void ImageInfoPresenter::fillTableCells(const ImageInfoModel::ImageInfo &info) {
     auto value = new QTableWidgetItem(info.value(i));
     value->setFlags(header->flags() & ~Qt::ItemIsEditable);
     m_view->setItem(1, i, value);
-  }
-  if (signalIndex >= 0) {
-    if (!m_showSignal) {
-      m_view->hideColumn(signalIndex);
-    } else {
-      m_view->showColumn(signalIndex);
-    }
   }
 }
 
