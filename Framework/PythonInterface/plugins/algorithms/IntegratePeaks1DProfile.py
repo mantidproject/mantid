@@ -422,13 +422,16 @@ class PeakFitter:
         self.ispecs = None
         self.peak_func = None
         self.profile_func = None
+        self.nparams_pk = None
+        self.nparams_bg = None
         self.iparam_cen = None
         self.ifix_initial = None  # parameters to keep fixed on initial fit
         self.ifix_final = None
 
         self.get_data_arrays(ws, peak_data, nbins)
         self.update_initial_peak_position(ws, peaks, ipk)
-        self.get_composite_function_with_initial_params(ws, peak_func_name, bg_func, peak_params_to_fix)
+        self.get_composite_function_with_initial_params(ws, peak_func_name, bg_func)
+        self.get_index_of_parameters_to_fix(peak_params_to_fix)
 
     def get_data_arrays(self, ws, peak_data, nbins):
         self.tofs, self.y, self.esq, self.ispecs = get_and_clip_data_arrays(ws, peak_data, self.pk.getTOF(), nbins)
@@ -438,7 +441,7 @@ class PeakFitter:
         peak_pos = find_nearest_peak_in_data_window(self.y, self.ispecs, self.tofs, ws, peaks, ipk, *self.peak_pos, itof, threshold=0.0)
         self.peak_pos = (peak_pos[0], peak_pos[1]) if peak_pos is not None else None  # omit tof index
 
-    def get_composite_function_with_initial_params(self, ws, peak_func_name, bg_func, peak_params_to_fix):
+    def get_composite_function_with_initial_params(self, ws, peak_func_name, bg_func):
         # need to create from scratch for setMatrxiWorkspace to overwrite parameters
         self.peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
         # set centre and determine the index of the centre parameter
@@ -451,22 +454,23 @@ class PeakFitter:
         if self.peak_pos is not None:
             # initilaise instrument specific parameters (e.g A,B,S for case of BackTobackExponential)
             self.peak_func.setMatrixWorkspace(ws, int(self.ispecs[self.peak_pos]), 0, 0)
-            # setup background function
-            yspec = self.y[self.peak_pos[0], self.peak_pos[1], :]
-            bg = yspec[yspec > 0].min()
-            bg_func.setParameter("A0", bg)
-            # set peak height and get index of height parameter
-            self.peak_func.setHeight(yspec.max() - bg)
             if np.isclose(self.peak_func.fwhm(), 0.0):
-                # width not set by default - set width based on d-sapcing tolerance (min must be bin-width)
+                # width not set by default - set width based max of d-spacing tolerance or bin-width
                 fwhm = max(self.frac_dspac_delta * self.pk.getTOF(), self.tofs[1] - self.tofs[0])
                 self.peak_func.setFwhm(fwhm)
-        # combine peak and background funtion wrappers
+        # combine peak and background function wrappers
         self.profile_func = FunctionWrapper(self.peak_func) + bg_func
-        # get indec of fixed parameters
+        self.nparams_pk = self.peak_func.nParams()
+        self.nparams_bg = bg_func.nParams()
+        self.p_guess = np.array([self.profile_func.getParameter(iparam) for iparam in range(self.profile_func.nParams())])
+
+    def get_index_of_parameters_to_fix(self, peak_params_to_fix):
+        # get index of fixed peak parameters
         self.ifix_final = [self.peak_func.getParameterIndex(param) for param in peak_params_to_fix]
-        self.ifix_initial = [iparam for iparam in range(nparams) if self.peak_func.isFixed(iparam)]
-        # make sure inital fit includes fixed paramters specified
+        self.ifix_initial = [iparam for iparam in range(self.nparams_pk) if self.peak_func.isFixed(iparam)]
+        # fix background parameter in initial fit
+        self.ifix_initial = [iparam + self.nparams_pk for iparam in range(self.nparams_bg)]
+        # make sure initial fit includes fixed parameters specified
         self.ifix_initial = list(set(self.ifix_initial).union(set(self.ifix_final)))
 
     def calc_tof_peak_centre_and_bounds(self, ispec):
@@ -482,6 +486,7 @@ class PeakFitter:
         for iparam in ifix:
             bounds[iparam, :] = p_guess[iparam]
         bounds[self.iparam_cen, :] = [cen_min, cen_max]
+        bounds[self.nparams_pk + 1 : self.profile_func.nParams(), 0] = -np.inf  # reset lower bound of higher order bg terms
         # fit
         result = minimize(
             calc_cost_func,
@@ -501,27 +506,29 @@ class PeakFitter:
         inearest = [self.peak_pos]  # index of initial spectrum to fit
         yfits = np.zeros(self.y.shape)
         intens_sum, sigma_sq_sum = 0.0, 0.0
-        p_guess = [self.profile_func.getParameter(iparam) for iparam in range(self.profile_func.nParams())]
         if self.peak_pos is None:
             # no peak found
             return successful, attempted, yfits, intens_sum, sigma_sq_sum
         else:
-            return self.fit_nearest(p_guess, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
+            return self.fit_nearest(attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
 
-    def fit_nearest(self, p_guess, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits):
+    def fit_nearest(self, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits):
         # fit in order of max intensity
         isort = np.argsort([-self.y.sum(axis=2)[inear] for inear in inearest])
         any_successful = False
         for inear in isort:
             irow, icol = inearest[inear]
             attempted[irow, icol] = True
-            # check enough counts in spectrum (upper limit assume bg = 0)
-            intens = np.sum(self.y[irow, icol, :])
-            sigma = calc_sigma_from_summation(self.tofs, self.esq[irow, icol, :], self.y[irow, icol, :])
+            # check enough counts in spectrum
+            intens, sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
             intens_over_sigma = intens / sigma if sigma > 0 else 0.0
             if intens_over_sigma < self.i_over_sig_threshold:
                 continue  # skip this spectrum
-            # update peak centre and bounds
+            # update initial parameter guesses
+            p_guess = self.p_guess.copy()
+            self.set_peak_intensity(intens, p_guess)
+            self.set_constant_background(bg, p_guess)
+            # set centre
             tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(self.ispecs[irow, icol])
             p_guess[self.iparam_cen] = tof_pk
             # fit
@@ -531,7 +538,7 @@ class PeakFitter:
             if result.success:
                 any_successful = True
                 if len(self.ifix_final) < len(self.ifix_initial):
-                    # fit again but free some previosuly fixed parameters
+                    # fit again but free some previously fixed parameters
                     result_final, yfit_final = self.fit_spectrum(
                         result.x, weights, irow, icol, tof_pk_min, tof_pk_max, ifix=self.ifix_final
                     )
@@ -558,7 +565,7 @@ class PeakFitter:
             return successful, attempted, yfits, intens_sum, sigma_sq_sum
         # if did break start process again
         inearest = self.find_neighbours(successful, attempted)
-        return self.fit_nearest(p_guess, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
+        return self.fit_nearest(attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
 
     def find_neighbours(self, successful, attempted):
         mask = binary_dilation(successful)
@@ -568,6 +575,22 @@ class PeakFitter:
     def get_intensity_from_function_wrapper(self):
         [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.peak_func.nParams())]
         return self.peak_func.intensity()
+
+    def set_peak_intensity(self, intensity, params):
+        [self.peak_func.setParameter(iparam, params[iparam]) for iparam in range(self.nparams_pk)]
+        self.peak_func.setIntensity(intensity)
+        params[: self.nparams_pk] = [self.peak_func.getParameterValue(iparam) for iparam in range(self.nparams_pk)]
+
+    def set_constant_background(self, bg, params):
+        params[-self.nparams_bg :] = 0  # reset all background terms to zero
+        params[-self.nparams_bg] = bg  # constant is always first parameter in supported background functions
+
+    def estimate_intensity_sigma_and_background(self, irow, icol):
+        bg = np.min(self.y[irow, icol, :][self.y[irow, icol, :] > 0])
+        bin_width = np.diff(self.tofs)
+        intensity = np.sum((0.5 * (self.y[irow, icol, 1:] + self.y[irow, icol, :-1]) - bg) * bin_width)
+        sigma = np.sqrt(np.sum(0.5 * (self.esq[irow, icol, 1:] + self.esq[irow, icol, :-1]) * (bin_width**2)))
+        return intensity, sigma, bg
 
 
 class PEAK_STATUS(Enum):
