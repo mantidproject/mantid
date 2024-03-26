@@ -55,6 +55,7 @@ public:
   // boolean flags for LoadHistory/GroupInput Checkboxes
   bool isGroupInput() const override;
   bool isRowCollapsed() const override;
+  bool isTableEmpty() const override;
 
   // getters/setters for m_properties
   bool getNormalise() override;

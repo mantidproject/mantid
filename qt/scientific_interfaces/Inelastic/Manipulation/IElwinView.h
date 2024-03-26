@@ -54,6 +54,7 @@ public:
   // boolean flags for LoadHistory/GroupInput Checkboxes
   virtual bool isGroupInput() const = 0;
   virtual bool isRowCollapsed() const = 0;
+  virtual bool isTableEmpty() const = 0;
 
   // getters/setters for m_properties
   virtual bool getNormalise() = 0;

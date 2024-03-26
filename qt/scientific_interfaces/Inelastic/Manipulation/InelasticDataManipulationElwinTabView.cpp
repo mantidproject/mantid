@@ -542,6 +542,7 @@ std::string InelasticDataManipulationElwinTabView::getCurrentPreview() const {
 
 bool InelasticDataManipulationElwinTabView::isGroupInput() const { return m_uiForm.ckGroupOutput->isChecked(); }
 bool InelasticDataManipulationElwinTabView::isRowCollapsed() const { return m_uiForm.ckCollapse->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isTableEmpty() const { return m_uiForm.tbElwinData->rowCount() == 0; }
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {
