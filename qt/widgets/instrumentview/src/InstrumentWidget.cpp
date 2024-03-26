@@ -1093,9 +1093,12 @@ void InstrumentWidget::setWireframe(bool on) {
 }
 
 void InstrumentWidget::setMaintainAspectRatio(bool on) {
-  m_maintainAspectRatio = on;
-  setSurfaceType(m_surfaceType);
-  updateInstrumentView();
+  if (m_maintainAspectRatio != on) {
+    m_maintainAspectRatio = on;
+    setSurfaceType(m_surfaceType);
+    updateInstrumentView();
+    emit maintainAspectRatioChanged(on);
+  }
 }
 
 /**
