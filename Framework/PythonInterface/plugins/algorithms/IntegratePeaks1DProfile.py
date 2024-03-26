@@ -651,8 +651,8 @@ def calc_sigma_from_summation(xspec, esq_spec, ypeak, cutoff=0.025):
     ypeak_cumsum /= ypeak_cumsum[-1]
     ilo = np.clip(np.argmin(abs(ypeak_cumsum - cutoff)), a_min=0, a_max=nbins // 2)
     ihi = np.clip(np.argmin(abs(ypeak_cumsum - (1 - cutoff))), a_min=nbins // 2, a_max=nbins - 1) + 1
-    dx_sq = np.mean(np.diff(xspec)) ** 2
-    return np.sqrt(np.sum(esq_spec[ilo:ihi] * dx_sq))
+    bin_width = np.diff(xspec[ilo:ihi])
+    return np.sqrt(np.sum(0.5 * (esq_spec[ilo : ihi - 1] + esq_spec[ilo + 1 : ihi]) * (bin_width**2)))
 
 
 def calc_sigma_from_hessian(result, profile_func, x, y, weights, cost_func, nfixed, min_step=1e-5):
