@@ -18,7 +18,6 @@
 
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 #include <algorithm>
-#include <regex>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -27,24 +26,6 @@ namespace {
 Mantid::Kernel::Logger g_log("Elwin");
 
 std::vector<std::string> getOutputWorkspaceSuffices() { return {"_eq", "_eq2", "_elf", "_elt"}; }
-
-template <typename Iterator, typename Functor>
-std::vector<std::string> transformElements(Iterator const fromIter, Iterator const toIter, Functor const &functor) {
-  std::vector<std::string> newVector;
-  newVector.reserve(toIter - fromIter);
-  std::transform(fromIter, toIter, std::back_inserter(newVector), functor);
-  return newVector;
-}
-
-template <typename T, typename Predicate> void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
-  auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
-  if (iter != vector.end())
-    vector.erase(iter, vector.end());
-}
-
-std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, std::string const &prefix) {
-  return transformElements(strings.begin(), strings.end(), [&prefix](std::string const &str) { return prefix + str; });
-}
 
 class ScopedFalse {
   bool &m_ref;
@@ -56,8 +37,6 @@ public:
   explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
-
-auto const regDigits = std::regex("\\d+");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -83,7 +62,7 @@ void InelasticDataManipulationElwinTab::run() {
 
   // Get workspace names
   std::string inputGroupWsName = "IDA_Elwin_Input";
-  std::string outputWsBasename = prepareOutputPrefix(m_dataModel->getWorkspaceNames());
+  std::string outputWsBasename = m_model->prepareOutputPrefix(m_dataModel->getWorkspaceNames());
   // Load input files
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
@@ -120,6 +99,7 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
           checkForELTWorkspace()
               ? m_model->getOutputWorkspaceNames()
               : m_model->getOutputWorkspaceNames().substr(0, m_model->getOutputWorkspaceNames().find_last_of(','));
+      std::cout << outputNames << std::endl;
       m_model->groupAlgorithm(outputNames, "IDA_Elwin_Output");
     }
 
@@ -135,29 +115,9 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
 
 bool InelasticDataManipulationElwinTab::checkForELTWorkspace() {
   auto const workspaceName = getOutputBasename() + "_elt";
-  return !WorkspaceUtils::doesExistInADS(workspaceName);
+  return WorkspaceUtils::doesExistInADS(workspaceName);
 }
 
-std::string
-InelasticDataManipulationElwinTab::prepareOutputPrefix(std::vector<std::string> const &workspaceNames) const {
-  auto names = transformElements(workspaceNames.begin(), workspaceNames.end(),
-                                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
-  std::smatch match;
-  std::vector<int> runNumbers;
-  std::string prefix;
-  for (auto const &name : names)
-    if (std::regex_search(name, match, regDigits)) {
-      runNumbers.push_back(std::stoi(match.str(0)));
-      if (prefix.empty())
-        prefix = match.prefix().str();
-    }
-  if (runNumbers.empty() || runNumbers.size() == 1)
-    return "ELWIN_workspace_output";
-  else {
-    auto [min, max] = std::minmax_element(runNumbers.cbegin(), runNumbers.cend());
-    return prefix + std::to_string(*min) + "-" + std::to_string(*max);
-  }
-}
 bool InelasticDataManipulationElwinTab::validate() {
   UserInputValidator uiv;
   auto rangeOne = std::make_pair(m_view->getIntegrationStart(), m_view->getIntegrationEnd());
@@ -287,7 +247,8 @@ void InelasticDataManipulationElwinTab::updateIntegrationRange() {
 
 void InelasticDataManipulationElwinTab::handleRunClicked() {
   clearOutputPlotOptionsWorkspaces();
-  runTab();
+  if (!m_view->isTableEmpty())
+    runTab();
 }
 
 /**
@@ -300,9 +261,9 @@ void InelasticDataManipulationElwinTab::handleSaveClicked() {
 }
 
 std::vector<std::string> InelasticDataManipulationElwinTab::getOutputWorkspaceNames() {
-  auto outputNames = attachPrefix(getOutputWorkspaceSuffices(), getOutputBasename());
-  removeElementsIf(outputNames,
-                   [](std::string const &workspaceName) { return !WorkspaceUtils::doesExistInADS(workspaceName); });
+  auto outputNames = WorkspaceUtils::attachPrefix(getOutputWorkspaceSuffices(), getOutputBasename());
+  WorkspaceUtils::removeElementsIf(
+      outputNames, [](std::string const &workspaceName) { return !WorkspaceUtils::doesExistInADS(workspaceName); });
   return outputNames;
 }
 
@@ -359,11 +320,7 @@ void InelasticDataManipulationElwinTab::handleRowModeChanged() { updateTableFrom
 
 void InelasticDataManipulationElwinTab::updateAvailableSpectra() {
   auto spectra = m_dataModel->getSpectra(findWorkspaceID());
-  if (spectra.isContinuous()) {
-    auto const minmax = spectra.getMinMax();
-    m_view->setAvailableSpectra(minmax.first, minmax.second);
-  } else
-    m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+  m_view->setAvailableSpectra(spectra.begin(), spectra.end());
 }
 
 size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
