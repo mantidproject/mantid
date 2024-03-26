@@ -61,9 +61,6 @@ inline void validateWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace
     result[prop] = prop + " must contain a single spectrum. Contains " +
                    std::to_string(workspace->getNumberHistograms()) + " spectra.";
   }
-  if (!workspace->spectrumInfo().isMonitor(0)) {
-    result[prop] = prop + " must be a monitor workspace.";
-  }
 }
 
 } // namespace

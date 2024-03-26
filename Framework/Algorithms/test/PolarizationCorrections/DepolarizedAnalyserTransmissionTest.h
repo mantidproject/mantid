@@ -174,19 +174,6 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
-  void test_non_monitor_spectra() {
-    // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, false);
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1, false);
-    auto alg = createAlgorithm(mtWs, depWs);
-
-    // THEN
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
-                            "Some invalid Properties found: \n DepolarizedWorkspace: DepolarizedWorkspace must be a "
-                            "monitor workspace.\n EmptyCellWorkspace: EmptyCellWorkspace must be a monitor workspace.");
-    TS_ASSERT(!alg->isExecuted());
-  }
-
 private:
   MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula,
                                               int const numSpectra = 1, bool const isMonitor = true,
