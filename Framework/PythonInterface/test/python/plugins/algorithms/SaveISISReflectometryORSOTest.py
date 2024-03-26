@@ -77,7 +77,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             f"proposalID: '{self._rb_number}'",
             f"doi: 10.5286/ISIS.E.RB{self._rb_number}",
             "facility: ISIS",
-            f"creator:\n#     name: {self._SAVE_ALG}\n#     affiliation: {MantidORSODataset.SOFTWARE_NAME}\n#",
+            f"creator:\n#     name: {self._SAVE_ALG}\n{self._get_affiliation_entry()}\n#",
         ]
 
     def tearDown(self):
@@ -342,9 +342,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws)
 
         self._check_file_header(
-            [
-                f"{self._REDUCTION_CALL_HEADING} CreateSampleWorkspace(OutputWorkspace='ws', InstrumentName='INTER')\n{self._DATA_SET_HEADING}"
-            ]
+            [f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING} CreateSampleWorkspace(OutputWorkspace='ws'"]
         )
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
@@ -443,8 +441,10 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_file_header([self._get_dataset_name_entry(self._STITCHED_DATASET_NAME)])
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
-        ws = CreateSampleWorkspace(InstrumentName=instrument_name, OutputWorkspace=ws_name)
-        self._set_units_as_momentum_transfer(ws)
+        # Create a single spectrum workspace in units of momentum transfer
+        ws = CreateSampleWorkspace(
+            InstrumentName=instrument_name, OutputWorkspace=ws_name, XUnit=self._Q_UNIT, NumBanks=1, BankPixelWidth=1
+        )
         if rb_num_log_name:
             ws.mutableRun().addProperty(rb_num_log_name, self._rb_number, True)
         return ws
@@ -454,15 +454,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             self._create_sample_workspace(ws_name=ws_name, instrument_name=instrument_name)
         GroupWorkspaces(InputWorkspaces=",".join(member_ws_names), OutputWorkspace=group_name)
 
-    def _set_units_as_momentum_transfer(self, ws):
-        ws.getAxis(0).setUnit(self._Q_UNIT)
-
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
         files_entry = [f"{self._DATA_FILES_HEADING}\n"]
 
         for run_file, theta in expected_entries:
             files_entry.append(f"#     - file: {run_file}\n")
-            files_entry.append(f"#       comment: Incident angle {theta}\n")
+            files_entry.append(f"#       comment: Reduction input angle {theta}\n")
 
         files_entry.append(expected_section_end)
         return "".join(files_entry)
@@ -479,6 +476,10 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def _get_dataset_name_entry(self, dataset_name):
         return f"{self._DATA_SET_HEADING} {dataset_name}"
+
+    @staticmethod
+    def _get_affiliation_entry():
+        return f"#     affiliation: {MantidORSODataset.SOFTWARE_NAME}"
 
     def _configure_mock_alg_history(self, mock_alg_histories, histories_to_create):
         histories = []

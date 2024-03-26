@@ -62,6 +62,10 @@ class ReflectometryDataset:
         return self._ws
 
     @property
+    def is_ws_grp_member(self) -> bool:
+        return self._is_ws_grp_member
+
+    @property
     def instrument_name(self) -> str:
         return self._ws.getInstrument().getName()
 
@@ -211,17 +215,26 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         ws_list = self.getProperty(Prop.WORKSPACE_LIST).value
         for ws_name in ws_list:
-            if not AnalysisDataService.doesExist(ws_name):
-                issues[Prop.WORKSPACE_LIST] = f"Cannot find workspace with name {ws_name} in the ADS."
-            else:
-                workspace = AnalysisDataService.retrieve(ws_name)
-                for ws in workspace if isinstance(workspace, WorkspaceGroup) else [workspace]:
-                    if not self._is_momentum_transfer_ws(ws):
-                        issues[Prop.WORKSPACE_LIST] = f"Workspace {ws_name} must have units of {self._Q_UNIT}"
+            ws_issue = self._validate_ws(ws_name)
+            if ws_issue:
+                issues[Prop.WORKSPACE_LIST] = ws_issue
+                break
+
         return issues
 
-    def _is_momentum_transfer_ws(self, ws) -> bool:
-        return ws.getAxis(0).getUnit().unitID() == self._Q_UNIT
+    def _validate_ws(self, ws_name: str) -> str:
+        if not AnalysisDataService.doesExist(ws_name):
+            return f"Cannot find workspace with name {ws_name} in the ADS."
+
+        workspace = AnalysisDataService.retrieve(ws_name)
+        for ws in workspace if isinstance(workspace, WorkspaceGroup) else [workspace]:
+            if not ws.getAxis(0).getUnit().unitID() == self._Q_UNIT:
+                return f"Workspace {ws_name} must have units of {self._Q_UNIT}"
+
+            if ws.spectrumInfo().size() != 1:
+                return f"Workspace {ws_name} must contain only one spectrum"
+
+        return ""
 
     def PyExec(self):
         # We cannot include all the mandatory information required by the standard, so we include a comment to highlight
@@ -368,7 +381,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
-        dataset.set_reduction_call(self._get_reduction_script(refl_dataset.ws))
+        dataset.set_reduction_call(self._get_reduction_script(refl_dataset))
 
         reduction_workflow_histories = refl_dataset.reduction_workflow_histories
         if not refl_dataset.reduction_workflow_histories:
@@ -380,7 +393,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         instrument_name = refl_dataset.instrument_name
 
         for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
-            dataset.add_measurement_data_file(file, comment=f"Incident angle {theta}")
+            dataset.add_measurement_data_file(file, comment=f"Reduction input angle {theta}")
 
         first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
         for file in first_trans_files:
@@ -563,14 +576,19 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         calibration_file = reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
         return Path(calibration_file).name if calibration_file else None
 
-    def _get_reduction_script(self, ws) -> Optional[str]:
+    def _get_reduction_script(self, refl_dataset: ReflectometryDataset) -> Optional[str]:
         """
         Get the workspace reduction history as a script.
         """
-        if ws.getHistory().empty():
+        if refl_dataset.is_ws_grp_member:
+            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
+            # include this if the workspace is not part of a group
             return None
 
-        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=ws, ExcludeHeader=True)
+        if refl_dataset.ws.getHistory().empty():
+            return None
+
+        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=refl_dataset.ws, ExcludeHeader=True)
         alg.execute()
         script = alg.getPropertyValue("ScriptText")
         return "\n".join(script.split("\n")[2:])  # trim the import statement
