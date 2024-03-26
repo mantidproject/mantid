@@ -456,7 +456,8 @@ class PeakFitter:
             self.peak_func.setMatrixWorkspace(ws, int(self.ispecs[self.peak_pos]), 0, 0)
             if np.isclose(self.peak_func.fwhm(), 0.0):
                 # width not set by default - set width based max of d-spacing tolerance or bin-width
-                fwhm = max(self.frac_dspac_delta * self.pk.getTOF(), self.tofs[1] - self.tofs[0])
+                bin_width = self.tofs[-1] - self.tofs[-2]
+                fwhm = max(self.frac_dspac_delta * self.pk.getTOF(), bin_width)
                 self.peak_func.setFwhm(fwhm)
         # combine peak and background function wrappers
         self.profile_func = FunctionWrapper(self.peak_func) + bg_func
@@ -514,6 +515,9 @@ class PeakFitter:
             return self.fit_nearest(attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
 
     def fit_nearest(self, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits):
+        # pre-calculate values used later to check validity of fit
+        bin_width = self.tofs[-1] - self.tofs[-2]
+        tof_range = self.tofs[-1] - self.tofs[0]
         # fit in order of max intensity
         isort = np.argsort([-self.y.sum(axis=2)[inear] for inear in inearest])
         any_successful = False
@@ -521,8 +525,8 @@ class PeakFitter:
             irow, icol = inearest[inear]
             attempted[irow, icol] = True
             # check enough counts in spectrum
-            intens, sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
-            intens_over_sigma = intens / sigma if sigma > 0 else 0.0
+            intial_intens, intial_sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
+            intens_over_sigma = intial_intens / intial_sigma if intial_sigma > 0 else 0.0
             if intens_over_sigma < self.i_over_sig_threshold:
                 continue  # skip this spectrum
             # get center and check min data extent
@@ -532,9 +536,8 @@ class PeakFitter:
             # update initial parameter guesses
             p_guess = self.p_guess.copy()
             p_guess[self.iparam_cen] = tof_pk
-            self.set_peak_intensity(intens, p_guess)
+            self.set_peak_intensity(intial_intens, p_guess)
             self.set_constant_background(bg, p_guess)
-
             # fit
             weights = self.weight_func(self.y[irow, icol, :], self.esq[irow, icol, :])
             nfix = len(self.ifix_initial)
@@ -550,8 +553,12 @@ class PeakFitter:
                         result = result_final
                         yfit = yfit_final
                         nfix = len(self.ifix_final)
+                # check fit realistic (unfortunately Nelder-Mead does not support non-linear constraints in fit)
+                fwhm = self.get_fwhm_from_function_with_params()
+                if fwhm < bin_width or fwhm > tof_range:
+                    continue  # skip
+                intens = self.get_intensity_from_function()
                 # calculate intensity and errors
-                intens = self.get_intensity_from_function_wrapper()
                 if self.error_strategy == "Hessian":
                     sigma = calc_sigma_from_hessian(
                         result, self.profile_func, self.tofs, self.y[irow, icol, :], weights, self.cost_func, nfix
@@ -576,8 +583,12 @@ class PeakFitter:
         mask = np.logical_and(mask, ~attempted)
         return list(zip(*np.where(mask)))
 
-    def get_intensity_from_function_wrapper(self):
-        [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.peak_func.nParams())]
+    def get_fwhm_from_function_with_params(self):
+        [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.nparams_pk)]
+        return self.peak_func.fwhm()
+
+    def get_intensity_from_function(self):
+        [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.nparams_pk)]
         return self.peak_func.intensity()
 
     def set_peak_intensity(self, intensity, params):
