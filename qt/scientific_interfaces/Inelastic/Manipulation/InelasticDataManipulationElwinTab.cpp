@@ -99,7 +99,6 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
           checkForELTWorkspace()
               ? m_model->getOutputWorkspaceNames()
               : m_model->getOutputWorkspaceNames().substr(0, m_model->getOutputWorkspaceNames().find_last_of(','));
-      std::cout << outputNames << std::endl;
       m_model->groupAlgorithm(outputNames, "IDA_Elwin_Output");
     }
 
