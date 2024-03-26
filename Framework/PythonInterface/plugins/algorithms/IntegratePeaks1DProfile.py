@@ -476,8 +476,8 @@ class PeakFitter:
     def calc_tof_peak_centre_and_bounds(self, ispec):
         diff_consts = self.spec_info.diffractometerConstants(int(ispec))
         tof_pk = UnitConversion.run("dSpacing", "TOF", self.pk.getDSpacing(), 0, DeltaEModeType.Elastic, diff_consts)
-        tof_pk_min = tof_pk * (1 - self.frac_dspac_delta)
-        tof_pk_max = tof_pk * (1 + self.frac_dspac_delta)
+        tof_pk_min = np.clip(tof_pk * (1 - self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
+        tof_pk_max = np.clip(tof_pk * (1 + self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
         return tof_pk, tof_pk_min, tof_pk_max
 
     def fit_spectrum(self, p_guess, weights, irow, icol, cen_min, cen_max, ifix):
@@ -525,13 +525,16 @@ class PeakFitter:
             intens_over_sigma = intens / sigma if sigma > 0 else 0.0
             if intens_over_sigma < self.i_over_sig_threshold:
                 continue  # skip this spectrum
+            # get center and check min data extent
+            tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(self.ispecs[irow, icol])
+            if tof_pk < self.tofs[0] or tof_pk > self.tofs[-1]:
+                continue  # peak not in data limits
             # update initial parameter guesses
             p_guess = self.p_guess.copy()
+            p_guess[self.iparam_cen] = tof_pk
             self.set_peak_intensity(intens, p_guess)
             self.set_constant_background(bg, p_guess)
-            # set centre
-            tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(self.ispecs[irow, icol])
-            p_guess[self.iparam_cen] = tof_pk
+
             # fit
             weights = self.weight_func(self.y[irow, icol, :], self.esq[irow, icol, :])
             nfix = len(self.ifix_initial)
