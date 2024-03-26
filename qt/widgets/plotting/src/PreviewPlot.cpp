@@ -584,9 +584,12 @@ QStringList PreviewPlot::linesWithErrors() const {
 
 /**
  * Observer method called when a workspace is removed from the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been removed.
+ * @param ws The workspace which has been removed.
  */
 void PreviewPlot::deleteHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
@@ -607,9 +610,12 @@ void PreviewPlot::deleteHandle(const std::string &wsName, const Workspace_sptr &
 
 /**
  * Observer method called when a workspace is replaced in the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been replaced.
+ * @param ws The new workspace.
  */
 void PreviewPlot::replaceHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
