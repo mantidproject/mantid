@@ -6,8 +6,6 @@ set(TEST_FILES
     ConvFunctionTemplateModelTest.h
     FqFitDataPresenterTest.h
     FqFitModelTest.h
-    IDAFunctionParameterEstimationTest.h
-    DataAnalysisTabTest.h
     FitDataPresenterTest.h
     FitDataTest.h
     FitDataModelTest.h
@@ -19,6 +17,8 @@ set(TEST_FILES
     InelasticFitPropertyBrowserTest.h
     FittingModelTest.h
     IqtFitModelTest.h
+    ParameterEstimationTest.h
+    TabTest.h
 )
 
 set(TEST_HELPERS MockObjects.h)
