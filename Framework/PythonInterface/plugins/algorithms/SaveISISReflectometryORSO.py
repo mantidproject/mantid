@@ -147,7 +147,7 @@ class ReflectometryDataset:
 
         # Ensure unique dataset names for workspace group members.
         # Eventually we will specify the polarization spin state to provide the unique names for polarised datasets.
-        if self._is_ws_grp_member and self._name is not self._ws.name():
+        if self._is_ws_grp_member and self._name != self._ws.name():
             self._name = f"{self._ws.name()} {self._name}"
 
 
@@ -309,7 +309,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 l_error = np.full(size, 0)
                 theta = refl_dataset.q_conversion_theta
             except RuntimeError as ex:
-                self.log().debug(ex)
+                self.log().debug(f"{ex}")
                 l_data = np.full(size, np.nan)
                 l_error = np.full(size, np.nan)
                 theta = np.nan
@@ -349,6 +349,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
             # reduced workspace.
             return np.flip(lambda_point_data.extractX()[0])
+
+        raise RuntimeError("Unable to calculate lambda values as cannot find a supported Q conversion algorithm in the workspace history.")
 
     def _convert_to_point_data(self, ws, out_ws_name):
         alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=out_ws_name)
