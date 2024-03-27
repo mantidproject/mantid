@@ -130,17 +130,24 @@ DECLARE_ALGORITHM(ISISIndirectEnergyTransfer)
 
 class ISISEnergyTransferModelTest : public CxxTest::TestSuite {
 public:
-  ISISEnergyTransferModelTest() = default;
-  void setUp() override { AnalysisDataService::Instance().clear(); }
+  static ISISEnergyTransferModelTest *createSuite() { return new ISISEnergyTransferModelTest(); }
+  static void destroySuite(ISISEnergyTransferModelTest *suite) { delete suite; }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void setUp() override {
+    m_model = std::make_unique<IETModel>();
+    AnalysisDataService::Instance().clear();
+  }
+
+  void tearDown() override {
+    m_model.reset();
+    AnalysisDataService::Instance().clear();
+  }
 
   void testSetInstrumentProperties() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     InstrumentData instData("instrument", "analyser", "reflection");
-    model->setInstrumentProperties(*properties, instData);
+    m_model->setInstrumentProperties(*properties, instData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("Instrument"), "instrument");
     TS_ASSERT_EQUALS(properties->getPropertyValue("Analyser"), "analyser");
@@ -148,11 +155,10 @@ public:
   }
 
   void testSetInputPropertiesWithAllEnabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETInputData inputData("input_workspace", "input_workspace", true, true, true, "calibration_workspace");
-    model->setInputProperties(*properties, inputData);
+    m_model->setInputProperties(*properties, inputData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("InputFiles"), "input_workspace");
     TS_ASSERT_EQUALS(properties->getPropertyValue("SumFiles"), "1");
@@ -161,11 +167,10 @@ public:
   }
 
   void testSetInputPropertiesWithAllDisabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETInputData inputData("input_workspace", "input_workspace", false, false, false, "");
-    model->setInputProperties(*properties, inputData);
+    m_model->setInputProperties(*properties, inputData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("InputFiles"), "input_workspace");
     TS_ASSERT_EQUALS(properties->getPropertyValue("SumFiles"), "0");
@@ -174,123 +179,111 @@ public:
   }
 
   void testSetConversionPropertiesWithoutEfixed() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETConversionData conversionData(1.0, 1, 2);
-    model->setConversionProperties(*properties, conversionData, "instrument");
+    m_model->setConversionProperties(*properties, conversionData, "instrument");
 
     TS_ASSERT(!properties->existsProperty("Efixed"));
     TS_ASSERT_EQUALS(properties->getPropertyValue("SpectraRange"), "1, 2");
   }
 
   void testSetConversionPropertiesWithEfixed() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETConversionData conversionData(1.0, 1, 2);
-    model->setConversionProperties(*properties, conversionData, "IRIS");
+    m_model->setConversionProperties(*properties, conversionData, "IRIS");
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("Efixed"), "1");
     TS_ASSERT_EQUALS(properties->getPropertyValue("SpectraRange"), "1, 2");
   }
 
   void testSetBackgroundPropertiesWithBackgroundEnabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETBackgroundData backgroundData(true, 1.0, 2.0);
-    model->setBackgroundProperties(*properties, backgroundData);
+    m_model->setBackgroundProperties(*properties, backgroundData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("BackgroundRange"), "1, 2");
   }
 
   void testSetBackgroundPropertiesWithBackgroundDisabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETBackgroundData backgroundData(false, 1.0, 2.0);
-    model->setBackgroundProperties(*properties, backgroundData);
+    m_model->setBackgroundProperties(*properties, backgroundData);
 
     TS_ASSERT(!properties->existsProperty("BackgroundRange"));
   }
 
   void testSetRebinPropertiesWithMultipleRebin() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "1,2,10");
-    model->setRebinProperties(*properties, rebinData);
+    m_model->setRebinProperties(*properties, rebinData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("RebinString"), "1,2,10");
   }
 
   void testSetRebinPropertiesWithMultipleLogRebin() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "2,-0.035,10");
-    model->setRebinProperties(*properties, rebinData);
+    m_model->setRebinProperties(*properties, rebinData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("RebinString"), "2,-0.035,10");
   }
 
   void testSetRebinPropertiesWithMultipleVariableRangeRebin() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "0,2,10,4,20");
-    model->setRebinProperties(*properties, rebinData);
+    m_model->setRebinProperties(*properties, rebinData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("RebinString"), "0,2,10,4,20");
   }
 
   void testSetRebinPropertiesWithSingleRebin() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETRebinData rebinData(true, "Single", 0.0, 2.0, 6.0, "");
-    model->setRebinProperties(*properties, rebinData);
+    m_model->setRebinProperties(*properties, rebinData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("RebinString"), "0.000000,6.000000,2.000000");
   }
 
   void testSetRebinPropertiesWithNoRebin() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETRebinData rebinData(false, "Single", 0.0, 0.0, 0.0, "1.0, 3.0, 5.0");
-    model->setRebinProperties(*properties, rebinData);
+    m_model->setRebinProperties(*properties, rebinData);
 
     TS_ASSERT(!properties->existsProperty("RebinString"));
   }
 
   void testSetAnalysisPropertiesWithPropsEnabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETAnalysisData analysisData(true, 2.5);
-    model->setAnalysisProperties(*properties, analysisData);
+    m_model->setAnalysisProperties(*properties, analysisData);
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("DetailedBalance"), "2.5");
   }
 
   void testSetAnalysisPropertiesWithPropsDisabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETAnalysisData analysisData(false, 2.5);
-    model->setAnalysisProperties(*properties, analysisData);
+    m_model->setAnalysisProperties(*properties, analysisData);
 
     TS_ASSERT(!properties->existsProperty("DetailedBalance"));
   }
 
   void testSetOutputPropertiesWithPropsEnabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETOutputData outputData(true, true);
-    model->setOutputProperties(*properties, outputData, "output");
+    m_model->setOutputProperties(*properties, outputData, "output");
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("UnitX"), "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(properties->getPropertyValue("FoldMultipleFrames"), "1");
@@ -298,11 +291,10 @@ public:
   }
 
   void testSetOutputPropertiesWithPropsDisabled() {
-    auto model = makeModel();
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETOutputData outputData(false, false);
-    model->setOutputProperties(*properties, outputData, "output");
+    m_model->setOutputProperties(*properties, outputData, "output");
 
     TS_ASSERT(!properties->existsProperty("UnitX"));
     TS_ASSERT_EQUALS(properties->getPropertyValue("FoldMultipleFrames"), "0");
@@ -310,11 +302,10 @@ public:
   }
 
   void testGetOutputGroupName() {
-    auto model = makeModel();
 
     InstrumentData instData("instrument", "analyser", "reflection");
     std::string inputFiles("1234, 1235");
-    std::string outputName = model->getOuputGroupName(instData, inputFiles);
+    std::string outputName = m_model->getOutputGroupName(instData, inputFiles);
 
     TS_ASSERT_EQUALS(outputName, "instrument1234, 1235_analyser_reflection_Reduced");
   }
@@ -520,8 +511,11 @@ public:
   }
 
 private:
-  std::unique_ptr<IETModel> makeModel() { return std::make_unique<IETModel>(); }
-  IAlgorithm_sptr makeReductionAlgorithm() { return AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer"); }
+  IAlgorithm_sptr makeReductionAlgorithm() {
+    auto alg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+    alg->setLogging(false);
+    return alg;
+  }
 
   std::unique_ptr<IETModel> m_model;
   IAlgorithm_sptr m_reductionAlg;

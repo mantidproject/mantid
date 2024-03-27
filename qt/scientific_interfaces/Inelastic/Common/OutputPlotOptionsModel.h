@@ -8,7 +8,7 @@
 
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <optional>

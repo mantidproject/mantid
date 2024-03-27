@@ -28,27 +28,22 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IETModel>()),
-      m_view(std::make_unique<IETView>(this, parent)) {
+IETPresenter::IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
+    : IndirectDataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
+  m_view->subscribePresenter(this);
 
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
-
-IETPresenter::~IETPresenter() = default;
 
 void IETPresenter::setup() {}
 
 bool IETPresenter::validateInstrumentDetails() {
   auto const instrument = getInstrumentName().toStdString();
   if (instrument.empty()) {
-    showMessageBox("Please select a valid facility and/or instrument.");
+    m_view->showMessageBox("Please select a valid facility and/or instrument.");
     return false;
   }
 
@@ -57,8 +52,8 @@ bool IETPresenter::validateInstrumentDetails() {
   for (const auto &key : keys) {
     if (!instrumentDetails.contains(QString::fromStdString(key)) ||
         instrumentDetails[QString::fromStdString(key)].isEmpty()) {
-      showMessageBox(QString::fromStdString("Could not find " + key + " for the " + instrument +
-                                            " instrument. Please select a valid instrument."));
+      m_view->showMessageBox("Could not find " + key + " for the " + instrument +
+                             " instrument. Please select a valid instrument.");
       return false;
     }
   }
@@ -166,7 +161,7 @@ bool IETPresenter::validate() {
 
   QString error = uiv.generateErrorMessage();
   if (!error.isEmpty())
-    showMessageBox(error);
+    m_view->showMessageBox(error.toStdString());
 
   return validateInstrumentDetails() && uiv.isAllInputValid();
 }
@@ -180,23 +175,26 @@ void IETPresenter::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
+  m_view->setRunButtonText("Running...");
+  m_view->setEnableOutputOptions(false);
+
   m_outputGroupName = m_model->runIETAlgorithm(m_batchAlgoRunner, instrumentData, runData);
 }
 
 void IETPresenter::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_view->setRunButtonText("Run");
+  m_view->setEnableOutputOptions(!error);
 
   if (!error) {
     InstrumentData instrumentData = getInstrumentData();
-    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(),
-                                                  m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
-    m_pythonExportWsName = m_outputWorkspaces[0];
+    auto const outputWorkspaceNames =
+        m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(), m_view->getGroupOutputOption(),
+                                 m_view->getGroupOutputCheckbox());
+    m_pythonExportWsName = outputWorkspaceNames[0];
 
-    if (m_outputWorkspaces.size() != 0) {
-      setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
-      m_view->setOutputWorkspaces(m_outputWorkspaces);
-      m_view->setSaveEnabled(true);
-    }
+    setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
+    m_view->setSaveEnabled(!outputWorkspaceNames.empty());
   }
 }
 
@@ -217,7 +215,7 @@ void IETPresenter::notifyPlotRawClicked() {
     m_view->setPlotTimeIsPlotting(false);
     for (auto const &error : errors) {
       if (!error.empty())
-        showMessageBox(QString::fromStdString(error));
+        m_view->showMessageBox(error);
     }
   }
 }
@@ -237,7 +235,7 @@ void IETPresenter::plotRawComplete(bool error) {
 
 void IETPresenter::notifySaveClicked() {
   IETSaveData saveData = m_view->getSaveData();
-  for (auto const &workspaceName : m_outputWorkspaces)
+  for (auto const &workspaceName : m_model->outputWorkspaceNames())
     if (WorkspaceUtils::doesExistInADS(workspaceName))
       m_model->saveWorkspace(workspaceName, saveData);
 }
@@ -261,12 +259,11 @@ void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrou
 
 void IETPresenter::notifyRunFinished() {
   if (!m_view->isRunFilesValid()) {
-    m_view->updateRunButton(false, "unchanged", "Invalid Run(s)",
-                            "Cannot find data files for some of the run numbers entered.");
+    m_view->setRunButtonText("Invalid Run(s)");
   } else {
     double detailedBalance = m_model->loadDetailedBalance(m_view->getFirstFilename());
     m_view->setDetailedBalance(detailedBalance);
-    m_view->updateRunButton();
+    m_view->setRunButtonText("Run");
   }
   m_view->setRunFilesEnabled(true);
 }
@@ -280,12 +277,5 @@ void IETPresenter::setFileExtensionsByName(bool filter) {
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }
-
-void IETPresenter::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                   QString const &tooltip) {
-  m_view->updateRunButton(enabled, enableOutputButtons, message, tooltip);
-}
-
-void IETPresenter::notifyNewMessage(QString const &message) { showMessageBox(message); }
 
 } // namespace MantidQt::CustomInterfaces

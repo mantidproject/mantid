@@ -77,7 +77,7 @@ void IndirectDataReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
-  addTab<IETPresenter>("ISIS Energy Transfer");
+  addMVPTab<IETPresenter, IETView, IETModel>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");
@@ -208,6 +208,10 @@ void IndirectDataReduction::loadInstrumentIfNotExist(const std::string &instrume
                     << ". The current facility may not be fully supported.\n";
     m_instWorkspace = MatrixWorkspace_sptr();
   }
+}
+
+MantidWidgets::IInstrumentConfig *IndirectDataReduction::getInstrumentConfiguration() const {
+  return m_uiForm.iicInstrumentConfiguration;
 }
 
 /**
