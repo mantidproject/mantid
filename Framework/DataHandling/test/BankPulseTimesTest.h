@@ -111,7 +111,7 @@ public:
       std::vector<DateAndTime> starting({start, pulse_times.front()});
       std::vector<DateAndTime> stopping({stop, stop + .5 * SECONDS_DELTA});
 
-      const std::vector<size_t> roi_exp({0, pulse_times.size() - 3});
+      const std::vector<size_t> roi_exp({0, pulse_times.size() - 2});
 
       doROITest(bank_pulse_times, starting, stopping, roi_exp);
     }
