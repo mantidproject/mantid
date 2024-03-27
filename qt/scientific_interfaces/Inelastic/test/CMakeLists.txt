@@ -1,48 +1,18 @@
-# Testing
-set(TEST_FILES
-    Analysis/ConvFitModelTest.h
-    Analysis/ConvFitDataPresenterTest.h
-    Analysis/ConvFunctionTemplateModelTest.h
-    Analysis/FqFitDataPresenterTest.h
-    Analysis/FqFitModelTest.h
-    Analysis/IDAFunctionParameterEstimationTest.h
-    Analysis/DataAnalysisTabTest.h
-    Analysis/FitDataPresenterTest.h
-    Analysis/FitDataTest.h
-    Analysis/FitDataModelTest.h
-    Analysis/FitOutputTest.h
-    Analysis/FitOutputOptionsModelTest.h
-    Analysis/FitOutputOptionsPresenterTest.h
-    Analysis/FitPlotModelTest.h
-    Analysis/FitPlotPresenterTest.h
-    Analysis/InelasticFitPropertyBrowserTest.h
-    Analysis/FittingModelTest.h
-    Analysis/IqtFitModelTest.h
-    Common/IndirectDataValidationHelperTest.h
-    Common/OutputPlotOptionsModelTest.h
-    Common/OutputPlotOptionsPresenterTest.h
-    Common/SettingsModelTest.h
-    Common/SettingsPresenterTest.h
-    Common/WorkspaceUtilsTest.h
-    Common/InterfaceUtilsTest.h
-    Common/ValidationUtilsTest.h
-    Manipulation/InelasticDataManipulationElwinTabModelTest.h
-    Manipulation/InelasticDataManipulationIqtTabModelTest.h
-    Manipulation/InelasticDataManipulationMomentsTabModelTest.h
-    Manipulation/InelasticDataManipulationSqwTabModelTest.h
-    Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
-)
+set(ALL_TEST_FILES)
+set(ALL_TEST_HELPERS)
 
-set(TEST_HELPERS Analysis/MockObjects.h Common/MockObjects.h)
+add_subdirectory(Analysis)
+add_subdirectory(Common)
+add_subdirectory(Manipulation)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesInelasticTest
   QT_VERSION 5
-  SRC ${TEST_FILES}
+  SRC ${ALL_TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  TEST_HELPER_SRCS ${TEST_HELPERS}
+  TEST_HELPER_SRCS ${ALL_TEST_HELPERS}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
