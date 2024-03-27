@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplatePresenter.h"
-#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
+#include "FunctionTemplateView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

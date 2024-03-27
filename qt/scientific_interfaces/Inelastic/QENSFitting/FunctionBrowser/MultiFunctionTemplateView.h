@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "DllConfig.h"
 #include "FitTypes.h"
+#include "FunctionTemplateView.h"
 
 #include <optional>
 #include <string>

@@ -9,18 +9,18 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "QENSFitting/FunctionBrowser/FunctionTemplateView.h"
+#include "QENSFitting/FunctionBrowser/ITemplatePresenter.h"
+#include "QENSFitting/IFitDataView.h"
+#include "QENSFitting/IFitOutputOptionsModel.h"
+#include "QENSFitting/IFitOutputOptionsView.h"
+#include "QENSFitting/IFitPlotView.h"
+#include "QENSFitting/InelasticFitPropertyBrowser.h"
+#include "QENSFitting/Tab.h"
 
-#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
-#include "Analysis/FunctionBrowser/ITemplatePresenter.h"
-#include "Analysis/IFitDataView.h"
-#include "Analysis/IFitOutputOptionsModel.h"
-#include "Analysis/IFitOutputOptionsView.h"
-#include "Analysis/IFitPlotView.h"
-#include "Analysis/InelasticFitPropertyBrowser.h"
-#include "Analysis/Tab.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
 #include <string>

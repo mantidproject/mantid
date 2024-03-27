@@ -9,11 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/FitOutput.h"
-#include "Analysis/FitPlotPresenter.h"
-#include "Analysis/FitPlotView.h"
-#include "Analysis/FittingModel.h"
-#include "Analysis/IFitPlotView.h"
+#include "QENSFitting/FitOutput.h"
+#include "QENSFitting/FitPlotPresenter.h"
+#include "QENSFitting/FitPlotView.h"
+#include "QENSFitting/FittingModel.h"
+#include "QENSFitting/IFitPlotView.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"

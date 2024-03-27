@@ -102,13 +102,13 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::FitOutputOptionsView</class>
    <extends>QWidget</extends>
-   <header>Analysis/FitOutputOptionsView.h</header>
+   <header>FitOutputOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::DockWidgetArea</class>
    <extends>QWidget</extends>
-   <header>Analysis/DockWidgetArea.h</header>
+   <header>DockWidgetArea.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

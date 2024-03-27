@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/ParameterEstimation.h"
+#include "../ParameterEstimation.h"
 #include "DllConfig.h"
 #include "FunctionTemplatePresenter.h"
 #include "SingleFunctionTemplateModel.h"
+
 #include <QMap>
 
 class QtProperty;

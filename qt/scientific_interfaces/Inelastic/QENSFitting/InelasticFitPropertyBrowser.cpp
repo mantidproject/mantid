@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticFitPropertyBrowser.h"
-#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
 #include "FitStatusWidget.h"
+#include "FunctionBrowser/FunctionTemplateView.h"
 #include "FunctionBrowser/ITemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 

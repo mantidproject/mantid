@@ -9,10 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/ConvFitAddWorkspaceDialog.h"
-#include "Analysis/ConvFitDataPresenter.h"
-#include "Analysis/ConvFitModel.h"
-#include "Analysis/IFitDataView.h"
+#include "QENSFitting/ConvFitAddWorkspaceDialog.h"
+#include "QENSFitting/ConvFitDataPresenter.h"
+#include "QENSFitting/ConvFitModel.h"
+#include "QENSFitting/IFitDataView.h"
+
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"

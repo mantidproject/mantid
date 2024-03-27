@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FitDataModel.h"
-#include "Analysis/Tab.h"
+#include "QENSFitting/FitDataModel.h"
+#include "QENSFitting/Tab.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"

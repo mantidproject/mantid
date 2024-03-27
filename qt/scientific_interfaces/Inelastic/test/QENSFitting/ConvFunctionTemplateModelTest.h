@@ -8,7 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/FunctionBrowser/ConvFunctionTemplateModel.h"
+#include "QENSFitting/FunctionBrowser/ConvFunctionTemplateModel.h"
+
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::API;

@@ -10,9 +10,10 @@
 #include <gmock/gmock.h>
 #include <utility>
 
-#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
-#include "Analysis/InelasticFitPropertyBrowser.h"
-#include "Analysis/ParameterEstimation.h"
+#include "QENSFitting/FunctionBrowser/FunctionTemplateView.h"
+#include "QENSFitting/InelasticFitPropertyBrowser.h"
+#include "QENSFitting/ParameterEstimation.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"

@@ -9,9 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "Analysis/ConvFitModel.h"
-#include "Analysis/FitOutput.h"
-#include "Analysis/FitPlotModel.h"
+#include "QENSFitting/ConvFitModel.h"
+#include "QENSFitting/FitOutput.h"
+#include "QENSFitting/FitPlotModel.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"

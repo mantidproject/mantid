@@ -9,12 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/FitOutputOptionsPresenter.h"
-#include "Analysis/FitOutputOptionsView.h"
-#include "Analysis/IFitOutputOptionsModel.h"
-#include "Analysis/IFitOutputOptionsView.h"
-#include "Analysis/Tab.h"
 #include "MockObjects.h"
+#include "QENSFitting/FitOutputOptionsPresenter.h"
+#include "QENSFitting/FitOutputOptionsView.h"
+#include "QENSFitting/IFitOutputOptionsModel.h"
+#include "QENSFitting/IFitOutputOptionsView.h"
+#include "QENSFitting/Tab.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
