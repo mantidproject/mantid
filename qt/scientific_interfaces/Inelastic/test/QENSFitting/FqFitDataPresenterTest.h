@@ -9,12 +9,13 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Analysis/FitDataView.h"
-#include "Analysis/FqFitAddWorkspaceDialog.h"
-#include "Analysis/FqFitDataPresenter.h"
-#include "Analysis/FqFitModel.h"
-#include "Analysis/FunctionBrowser/SingleFunctionTemplateView.h"
-#include "Analysis/InelasticFitPropertyBrowser.h"
+#include "QENSFitting/FitDataView.h"
+#include "QENSFitting/FqFitAddWorkspaceDialog.h"
+#include "QENSFitting/FqFitDataPresenter.h"
+#include "QENSFitting/FqFitModel.h"
+#include "QENSFitting/FunctionBrowser/SingleFunctionTemplateView.h"
+#include "QENSFitting/InelasticFitPropertyBrowser.h"
+
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"

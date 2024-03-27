@@ -8,7 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/FitData.h"
+#include "QENSFitting/FitData.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"

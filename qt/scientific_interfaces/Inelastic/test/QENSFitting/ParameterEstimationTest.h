@@ -8,7 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/ParameterEstimation.h"
+#include "QENSFitting/ParameterEstimation.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 

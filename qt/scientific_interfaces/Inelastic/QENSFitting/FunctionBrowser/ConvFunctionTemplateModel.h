@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../ParameterEstimation.h"
 #include "DllConfig.h"
+#include "FitTypes.h"
+#include "MultiFunctionTemplateModel.h"
+
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-
-#include "Analysis/ParameterEstimation.h"
-#include "FitTypes.h"
-#include "MultiFunctionTemplateModel.h"
 
 #include <optional>
 

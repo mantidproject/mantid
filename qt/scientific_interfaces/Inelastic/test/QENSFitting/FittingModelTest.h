@@ -9,7 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "Analysis/FittingModel.h"
+#include "QENSFitting/FittingModel.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"

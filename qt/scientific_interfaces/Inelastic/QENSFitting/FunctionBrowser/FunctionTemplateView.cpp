@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionTemplateView.h"
 
-#include "Analysis/FunctionBrowser/ITemplatePresenter.h"
+#include "ITemplatePresenter.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Analysis/ConvFitModel.h"
+#include "QENSFitting/ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

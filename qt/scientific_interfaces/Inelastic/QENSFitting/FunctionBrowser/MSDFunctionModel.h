@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/SingleFunctionTemplateModel.h"
+#include "SingleFunctionTemplateModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

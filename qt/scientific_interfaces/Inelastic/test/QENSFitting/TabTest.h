@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/Tab.h"
+#include "QENSFitting/Tab.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

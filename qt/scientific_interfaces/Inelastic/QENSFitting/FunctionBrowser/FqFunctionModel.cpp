@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFunctionModel.h"
 
-#include "Analysis/FitTabConstants.h"
-#include "Analysis/ParameterEstimation.h"
+#include "../FitTabConstants.h"
+#include "../ParameterEstimation.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <memory>

@@ -5,14 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <string>
 
-#include "Analysis/FitData.h"
-#include "Analysis/IFitDataModel.h"
 #include "DllConfig.h"
+#include "FitData.h"
+#include "IFitDataModel.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

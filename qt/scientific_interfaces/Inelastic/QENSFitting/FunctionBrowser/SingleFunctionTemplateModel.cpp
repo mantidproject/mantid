@@ -5,13 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SingleFunctionTemplateModel.h"
-#include "Analysis/ParameterEstimation.h"
+#include "../ParameterEstimation.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+
 #include <unordered_map>
 
 namespace MantidQt::CustomInterfaces::IDA {
