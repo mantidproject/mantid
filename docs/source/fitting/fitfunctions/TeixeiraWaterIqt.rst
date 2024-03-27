@@ -22,7 +22,7 @@ where:
 - :math:`A` is the amplitude.
 - :math:`\Gamma` is the spectrum linewidth.
 - :math:`\tau_{1}` is the relaxation time associated with rotation diffusion.
-- :math:`Q` is the elastic momentum transfer, :math:`0.4\AA_{-1}` by default, but should be set to a correct value prior to fitting.
+- :math:`Q` is the elastic momentum transfer, :math:`0.4\AA^{-1}` by default, but should be set to a correct value prior to fitting.
 - :math:`a` is the molecular radius of rotation, set by default to :math:`0.98\AA`.
 
 Units of :math:`a` are inverse units of :math:`Q`.
