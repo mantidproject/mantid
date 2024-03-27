@@ -5,9 +5,6 @@ set(SRC_FILES
     ConvFitModel.cpp
     ConvFitDataView.cpp
     ConvFitDataPresenter.cpp
-    DataAnalysis.cpp
-    DataAnalysisTab.cpp
-    DataAnalysisTabFactory.cpp
     DockWidgetArea.cpp
     EditResultsDialog.cpp
     FitStatusWidget.cpp
@@ -42,16 +39,18 @@ set(SRC_FILES
     FunctionBrowser/MultiFunctionTemplateModel.cpp
     FunctionBrowser/MultiFunctionTemplatePresenter.cpp
     FunctionBrowser/MultiFunctionTemplateView.cpp
-    IDAFunctionParameterEstimation.cpp
     InelasticFitPropertyBrowser.cpp
     IqtFitModel.cpp
     MSDFitModel.cpp
+    ParameterEstimation.cpp
+    Tab.cpp
+    TabFactory.cpp
+    QENSFitting.cpp
 )
 
 set(INC_FILES
     ConvFitDataPresenter.h
     ConvFitModel.h
-    DataAnalysisTabFactory.h
     FitData.h
     FitDataModel.h
     FitDataPresenter.h
@@ -77,7 +76,6 @@ set(INC_FILES
     FunctionBrowser/MultiFunctionTemplateModel.h
     FunctionBrowser/MultiFunctionTemplatePresenter.h
     FunctionBrowser/TemplateSubType.h
-    IDAFunctionParameterEstimation.h
     IFitDataModel.h
     IFitDataView.h
     IFitOutput.h
@@ -88,13 +86,12 @@ set(INC_FILES
     IqtFitModel.h
     MSDFitModel.h
     ParameterEstimation.h
+    TabFactory.h
 )
 
 set(MOC_FILES
     ConvFitAddWorkspaceDialog.h
     ConvFitDataView.h
-    DataAnalysis.h
-    DataAnalysisTab.h
     DockWidgetArea.h
     EditResultsDialog.h
     FqFitAddWorkspaceDialog.h
@@ -108,11 +105,12 @@ set(MOC_FILES
     FunctionBrowser/SingleFunctionTemplateView.h
     FunctionBrowser/MultiFunctionTemplateView.h
     InelasticFitPropertyBrowser.h
+    Tab.h
+    QENSFitting.h
 )
 
 set(UI_FILES
     ConvFitAddWorkspaceDialog.ui
-    DataAnalysis.ui
     EditResultsDialog.ui
     FitDataView.ui
     FitPreviewPlot.ui
@@ -120,6 +118,7 @@ set(UI_FILES
     FitTab.ui
     FqFitAddWorkspaceDialog.ui
     SpectrumSelector.ui
+    QENSFitting.ui
 )
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
