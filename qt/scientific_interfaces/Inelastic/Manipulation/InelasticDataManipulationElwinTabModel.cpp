@@ -12,19 +12,16 @@
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
-#include <regex>
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace {
-auto const regDigits = std::regex("\\d+");
-}
 namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
@@ -142,28 +139,6 @@ std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() co
   std::string outputWorkspaceNames = oss.str();
   outputWorkspaceNames.resize(outputWorkspaceNames.size() - 1);
   return outputWorkspaceNames;
-}
-
-std::string
-InelasticDataManipulationElwinTabModel::prepareOutputPrefix(std::vector<std::string> const &workspaceNames) const {
-  auto names = WorkspaceUtils::transformElements(workspaceNames.begin(), workspaceNames.end(),
-                                                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
-  std::smatch match;
-  std::vector<int> runNumbers;
-  std::string prefix;
-  std::string suffix = workspaceNames[0].substr(workspaceNames[0].find_first_of('_'));
-  for (auto const &name : names)
-    if (std::regex_search(name, match, regDigits)) {
-      runNumbers.push_back(std::stoi(match.str(0)));
-      if (prefix.empty())
-        prefix = match.prefix().str();
-    }
-  if (runNumbers.empty() || runNumbers.size() == 1)
-    return workspaceNames[0];
-  else {
-    auto [min, max] = std::minmax_element(runNumbers.cbegin(), runNumbers.cend());
-    return prefix + std::to_string(*min) + "-" + std::to_string(*max) + suffix;
-  }
 }
 
 void InelasticDataManipulationElwinTabModel::setIntegrationStart(double integrationStart) {

@@ -61,8 +61,8 @@ void InelasticDataManipulationElwinTab::run() {
   m_view->setRunIsRunning(true);
 
   // Get workspace names
-  std::string inputGroupWsName = "IDA_Elwin_Input";
-  std::string outputWsBasename = m_model->prepareOutputPrefix(m_dataModel->getWorkspaceNames());
+  std::string inputGroupWsName = "Elwin_Input";
+  std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
   // Load input files
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
@@ -93,13 +93,13 @@ void InelasticDataManipulationElwinTab::runComplete(bool error) {
 
   if (!error) {
     if (!m_view->isGroupInput()) {
-      m_model->ungroupAlgorithm("IDA_Elwin_Input");
+      m_model->ungroupAlgorithm("Elwin_Input");
     } else {
       std::string outputNames =
           checkForELTWorkspace()
               ? m_model->getOutputWorkspaceNames()
               : m_model->getOutputWorkspaceNames().substr(0, m_model->getOutputWorkspaceNames().find_last_of(','));
-      m_model->groupAlgorithm(outputNames, "IDA_Elwin_Output");
+      m_model->groupAlgorithm(outputNames, "Elwin_Output");
     }
 
     setOutputPlotOptionsWorkspaces(getOutputWorkspaceNames());

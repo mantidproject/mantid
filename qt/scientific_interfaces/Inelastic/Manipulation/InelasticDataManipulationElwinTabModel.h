@@ -43,7 +43,6 @@ public:
   void setNormalise(bool normalise);
   void setOutputWorkspaceNames(std::string const &workspaceBaseName);
   std::string getOutputWorkspaceNames() const;
-  std::string prepareOutputPrefix(std::vector<std::string> const &workspaceNames) const;
 
 private:
   double m_integrationStart;
