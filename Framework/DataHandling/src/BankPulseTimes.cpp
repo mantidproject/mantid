@@ -214,7 +214,7 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
         // do a linear search with the assumption that the index will be near the beginning
         for (size_t index = this->pulseTimes.size() - 1; index > start_index; --index) {
           if (this->pulseTime(index) <= stop) {
-            roi.push_back(index);
+            roi.push_back(index + 1); // include this pulse
             break;
           }
         }
