@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 namespace ConvTypes {
 
 enum class LorentzianType {
@@ -82,6 +82,6 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
 };
 
 } // namespace ConvTypes
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

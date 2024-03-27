@@ -9,12 +9,12 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
 MultiFunctionTemplateModel::MultiFunctionTemplateModel(std::unique_ptr<FunctionModel> model,
-                                                       std::unique_ptr<IDAFunctionParameterEstimation> estimators)
+                                                       std::unique_ptr<FunctionParameterEstimation> estimators)
     : m_model(std::move(model)), m_parameterEstimation(std::move(estimators)) {}
 
 bool MultiFunctionTemplateModel::hasFunction() const { return m_model->hasFunction(); }
@@ -285,4 +285,4 @@ void MultiFunctionTemplateModel::addGlobal(std::string const &parameterName) {
   }
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

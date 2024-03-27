@@ -12,7 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 class IFitPlotPresenter;
@@ -77,6 +77,6 @@ public:
 
   virtual void clearPreviews() = 0;
 };
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

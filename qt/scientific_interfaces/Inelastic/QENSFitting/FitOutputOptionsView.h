@@ -16,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class IFitOutputOptionsPresenter;
 class EditResultsDialog;
@@ -70,6 +70,6 @@ private:
   IFitOutputOptionsPresenter *m_presenter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

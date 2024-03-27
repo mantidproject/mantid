@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
   Q_OBJECT
@@ -49,6 +49,6 @@ private:
   Ui::FqFitAddWorkspaceDialog m_uiForm;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

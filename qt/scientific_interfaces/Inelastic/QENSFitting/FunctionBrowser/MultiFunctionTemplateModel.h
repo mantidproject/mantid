@@ -21,7 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
@@ -29,7 +29,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateModel : public IFunctionModel {
 public:
   MultiFunctionTemplateModel(std::unique_ptr<FunctionModel> model,
-                             std::unique_ptr<IDAFunctionParameterEstimation> estimators);
+                             std::unique_ptr<FunctionParameterEstimation> estimators);
 
   bool hasFunction() const override;
   IFunction_sptr getFullFunction() const override;
@@ -110,9 +110,9 @@ private:
   void addGlobal(std::string const &parameterName);
 
   DataForParameterEstimationCollection m_estimationData;
-  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
+  std::unique_ptr<FunctionParameterEstimation> m_parameterEstimation;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

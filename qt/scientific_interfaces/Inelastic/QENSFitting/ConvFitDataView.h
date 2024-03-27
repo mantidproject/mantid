@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 /**
 Presenter for a table of convolution fitting data.
@@ -32,6 +32,6 @@ protected slots:
   void showAddWorkspaceDialog() override;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

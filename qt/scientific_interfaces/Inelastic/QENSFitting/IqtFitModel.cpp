@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "Analysis/IqtFitModel.h"
+#include "IqtFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -40,12 +40,13 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function, const std::string &ca
 }
 
 std::vector<std::string> getParameters(const IFunction_sptr &function, const std::string &shortParameterName) {
-  std::vector<std::string> parameters;
+  auto const parameterNames = function->getParameterNames();
 
-  for (const auto &longName : function->getParameterNames()) {
-    if (boost::algorithm::ends_with(longName, shortParameterName))
-      parameters.emplace_back(longName);
-  }
+  std::vector<std::string> parameters;
+  std::copy_if(parameterNames.cbegin(), parameterNames.cend(), std::back_inserter(parameters),
+               [&shortParameterName](std::string const &longName) {
+                 return boost::algorithm::ends_with(longName, shortParameterName);
+               });
   return parameters;
 }
 
@@ -85,7 +86,7 @@ double computeHeightApproximation(IFunction_sptr function) {
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 IqtFitModel::IqtFitModel() : FittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
@@ -120,4 +121,4 @@ std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParame
   return parameters;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

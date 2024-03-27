@@ -16,7 +16,7 @@
 
 #include <unordered_map>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 namespace {
 // Sort the function list, keep existing order just rotate the None entry into
@@ -39,7 +39,7 @@ using namespace Mantid::API;
 SingleFunctionTemplateModel::SingleFunctionTemplateModel() = default;
 
 SingleFunctionTemplateModel::SingleFunctionTemplateModel(
-    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation)
+    std::unique_ptr<FunctionParameterEstimation> parameterEstimation)
     : m_parameterEstimation(std::move(parameterEstimation)) {}
 
 void SingleFunctionTemplateModel::updateAvailableFunctions(
@@ -160,4 +160,4 @@ boost::optional<std::string> SingleFunctionTemplateModel::findFitTypeForFunction
   return boost::none;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

@@ -28,7 +28,7 @@
 
 #include <limits>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 IqtFunctionTemplateView::IqtFunctionTemplateView(TemplateBrowserCustomizations customizations)
     : FunctionTemplateView() {
@@ -252,4 +252,4 @@ void IqtFunctionTemplateView::updateState() {
   m_tieIntensities->setEnabled(on);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

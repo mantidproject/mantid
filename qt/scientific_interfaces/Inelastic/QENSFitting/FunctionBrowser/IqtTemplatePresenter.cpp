@@ -10,7 +10,7 @@
 
 #include <cmath>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace MantidWidgets;
 
@@ -167,4 +167,4 @@ void IqtTemplatePresenter::updateView() {
   view()->updateState();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

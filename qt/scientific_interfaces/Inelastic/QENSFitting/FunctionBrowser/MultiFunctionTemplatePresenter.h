@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MultiFunctionTemplateModel;
 class MultiFunctionTemplateView;
@@ -40,6 +40,6 @@ private:
   void updateViewParameterNames();
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

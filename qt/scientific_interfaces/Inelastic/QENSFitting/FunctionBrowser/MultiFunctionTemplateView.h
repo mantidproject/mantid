@@ -21,7 +21,7 @@ class QtProperty;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL MultiFunctionTemplateView : public FunctionTemplateView {
   Q_OBJECT
@@ -56,6 +56,6 @@ private:
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

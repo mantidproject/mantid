@@ -16,7 +16,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 namespace {
 

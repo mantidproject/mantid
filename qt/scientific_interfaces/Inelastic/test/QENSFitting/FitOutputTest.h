@@ -20,7 +20,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::IndirectFitDataCreationHelper;
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 namespace {
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {

@@ -21,7 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 /*
@@ -75,6 +75,6 @@ private:
   std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

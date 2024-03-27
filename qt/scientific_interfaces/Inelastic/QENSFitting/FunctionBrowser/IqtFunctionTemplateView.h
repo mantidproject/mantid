@@ -17,7 +17,7 @@ class QtProperty;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 /**
  * Class FunctionTemplateView implements QtPropertyBrowser to display
@@ -79,6 +79,6 @@ private:
   friend class IqtTemplatePresenter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

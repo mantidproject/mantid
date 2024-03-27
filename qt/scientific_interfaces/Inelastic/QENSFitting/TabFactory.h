@@ -8,7 +8,7 @@
 
 #include <QTabWidget>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 class Tab;
 
@@ -24,4 +24,4 @@ private:
   QTabWidget *m_tabWidget;
 };
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

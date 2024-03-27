@@ -16,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class FunctionTemplateView;
 
@@ -96,6 +96,6 @@ protected:
   std::unique_ptr<MantidWidgets::IFunctionModel> m_model;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

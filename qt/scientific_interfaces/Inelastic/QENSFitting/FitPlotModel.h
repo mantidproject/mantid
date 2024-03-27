@@ -20,7 +20,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 class MANTIDQT_INELASTIC_DLL FitPlotModel {
@@ -90,6 +90,6 @@ private:
   Mantid::API::MultiDomainFunction_sptr m_activeFunction;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -11,7 +11,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitOutputOptionsPresenter::FitOutputOptionsPresenter(ITab *tab, IFitOutputOptionsView *view,
                                                      std::unique_ptr<IFitOutputOptionsModel> model)
@@ -146,4 +146,4 @@ void FitOutputOptionsPresenter::setEditingResult(bool editing) {
 
 void FitOutputOptionsPresenter::displayWarning(std::string const &message) { m_view->displayWarning(message); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

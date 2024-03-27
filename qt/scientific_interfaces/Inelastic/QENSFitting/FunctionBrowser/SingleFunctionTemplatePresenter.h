@@ -20,7 +20,7 @@ namespace MantidWidgets {
 class EditLocalParameterDialog;
 }
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class SingleFunctionTemplateView;
 
@@ -49,6 +49,6 @@ protected:
   void updateView() override;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

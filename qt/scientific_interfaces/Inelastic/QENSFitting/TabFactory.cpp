@@ -26,7 +26,7 @@
 #include "Tab.h"
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<TemplateSubTypes> subTypes) {
   auto browserCustomizations = TemplateBrowserCustomizations();
@@ -36,7 +36,7 @@ TemplateBrowserCustomizations packBrowserCustomizations(std::unique_ptr<Template
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 TabFactory::TabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
@@ -90,4 +90,4 @@ Tab *TabFactory::makeFqFitTab(int const index) const {
   return tab;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

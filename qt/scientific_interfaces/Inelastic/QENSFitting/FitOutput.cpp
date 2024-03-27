@@ -15,7 +15,7 @@
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 struct TableRowExtractor {
   explicit TableRowExtractor(Mantid::API::ITableWorkspace_sptr table)
@@ -23,7 +23,7 @@ struct TableRowExtractor {
     m_chiIndex = std::find(m_columns.begin(), m_columns.end(), "Chi_squared") - m_columns.begin();
   }
 
-  std::unordered_map<std::string, MantidQt::CustomInterfaces::IDA::ParameterValue> operator()(size_t index) {
+  std::unordered_map<std::string, MantidQt::CustomInterfaces::Inelastic::ParameterValue> operator()(size_t index) {
     Mantid::API::TableRow row = m_table->getRow(index);
     std::unordered_map<std::string, ParameterValue> parameters;
 
@@ -73,7 +73,7 @@ extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitOutput::FitOutput() = default;
 
@@ -139,4 +139,4 @@ void FitOutput::addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGr
   m_resultGroup = resultGroup;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

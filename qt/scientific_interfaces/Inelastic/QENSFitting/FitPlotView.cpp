@@ -27,7 +27,7 @@ QHash<QString, QVariant> tightLayoutKwargs() {
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace MantidWidgets;
 
@@ -362,4 +362,4 @@ void FitPlotView::notifyFWHMChanged(double minimum, double maximum) {
 
 void FitPlotView::notifyBackgroundChanged(double value) { m_presenter->handleBackgroundChanged(value); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

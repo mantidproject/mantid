@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class ITab;
 class IFitPlotView;
@@ -111,6 +111,6 @@ private:
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

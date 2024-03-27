@@ -10,7 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MSDFitModel : public FittingModel {
 public:
@@ -20,6 +20,6 @@ private:
   std::string getResultXAxisUnit() const override;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

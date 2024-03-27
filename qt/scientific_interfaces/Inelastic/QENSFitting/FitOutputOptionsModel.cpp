@@ -166,7 +166,7 @@ std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitOutputOptionsModel::FitOutputOptionsModel() : m_resultGroup(), m_pdfGroup(), m_spectraToPlot() {}
 
@@ -322,4 +322,4 @@ void FitOutputOptionsModel::setResultWorkspace(std::string const &groupName) {
     throw std::runtime_error("The result group could not be found in the ADS.");
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

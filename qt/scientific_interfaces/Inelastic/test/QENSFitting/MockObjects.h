@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

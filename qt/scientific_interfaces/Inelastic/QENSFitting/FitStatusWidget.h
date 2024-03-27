@@ -12,7 +12,7 @@ class QLabel;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 class FitStatusWidget : public QWidget {
   Q_OBJECT
 public:
@@ -25,6 +25,6 @@ private:
   QLabel *m_fitStatus;
   QLabel *m_fitChiSquared;
 };
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

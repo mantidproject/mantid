@@ -37,7 +37,7 @@ Mantid::Kernel::Logger g_log("QENS Fitting");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 /**
  * @param functionName  The name of the function.
@@ -641,6 +641,6 @@ std::string Tab::getFitTypeString() const {
   return fitType;
 }
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

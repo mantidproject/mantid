@@ -17,7 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 struct ParameterValue {
@@ -63,6 +63,6 @@ public:
                                FitDomainIndex fitDomainIndex) = 0;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

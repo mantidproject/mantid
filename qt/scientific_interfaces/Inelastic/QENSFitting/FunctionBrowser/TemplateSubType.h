@@ -21,7 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 struct TemplateSubType {
   virtual std::string name() const = 0;
@@ -121,6 +121,6 @@ struct TemplateBrowserCustomizations {
   std::unique_ptr<TemplateSubTypes> templateSubTypes = nullptr;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -10,7 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class FqFunctionModel : public SingleFunctionTemplateModel {
 
@@ -18,6 +18,6 @@ public:
   FqFunctionModel();
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -18,7 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace Mantid::API;
 
@@ -68,6 +68,6 @@ private:
   std::string m_background;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

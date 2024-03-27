@@ -16,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 /*
@@ -51,6 +51,6 @@ private:
   std::unordered_map<size_t, ResultLocationNew> m_outputResultLocations;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

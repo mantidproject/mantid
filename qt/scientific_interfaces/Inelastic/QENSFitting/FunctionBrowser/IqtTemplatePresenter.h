@@ -18,7 +18,7 @@ namespace MantidWidgets {
 class EditLocalParameterDialog;
 }
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class IqtFunctionTemplateView;
 
@@ -50,6 +50,6 @@ private:
   void updateViewParameterNames();
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

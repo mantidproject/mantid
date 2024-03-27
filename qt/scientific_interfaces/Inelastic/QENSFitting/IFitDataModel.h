@@ -16,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 using FitDataCollectionType = IndexCollectionType<WorkspaceID, std::unique_ptr<FitData>>;
@@ -75,6 +75,6 @@ public:
   virtual void removeSpecialValues(const std::string &name) = 0;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

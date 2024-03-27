@@ -22,7 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 // Used for painting an Icon onto the handle of the splitter on workbench
 class SplitterHandle : public QSplitterHandle {
@@ -161,6 +161,6 @@ private:
   IFitPlotPresenter *m_presenter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

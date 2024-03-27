@@ -8,7 +8,7 @@
 #include "ConvFunctionTemplateModel.h"
 #include "MultiFunctionTemplateView.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 MultiFunctionTemplatePresenter::MultiFunctionTemplatePresenter(MultiFunctionTemplateView *view,
                                                                std::unique_ptr<MultiFunctionTemplateModel> model)
@@ -75,4 +75,4 @@ void MultiFunctionTemplatePresenter::estimateFunctionParameters() {
   updateViewParameters();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

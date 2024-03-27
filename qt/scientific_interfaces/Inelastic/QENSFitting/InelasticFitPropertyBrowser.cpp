@@ -37,7 +37,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 struct ScopedSignalBlocker {
   // block signals on construction
@@ -442,4 +442,4 @@ void InelasticFitPropertyBrowser::showFullFunctionBrowser(bool on) {
   m_functionWidget->setCurrentIndex(index);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

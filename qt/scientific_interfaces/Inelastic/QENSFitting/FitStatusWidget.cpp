@@ -33,7 +33,7 @@ QPalette getFitStatusColor(const std::string &status) {
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitStatusWidget::FitStatusWidget(QWidget *parent) : QWidget(parent) {
   auto fitInformationLayout = new QVBoxLayout();
@@ -71,4 +71,4 @@ void FitStatusWidget::setFitStatus(const std::string &status) {
 void FitStatusWidget::setFitChiSquared(const double chiSquared) {
   m_fitChiSquared->setText(QString::fromStdString(std::to_string(chiSquared)));
 }
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

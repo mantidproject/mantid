@@ -13,7 +13,7 @@
 
 using namespace MantidQt::Widgets::MplCpp;
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 struct HoldRedrawing {
   IFitPlotView *m_view;
@@ -298,4 +298,4 @@ void FitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
 
 void FitPlotPresenter::handleBackgroundChanged(double value) { m_tab->handleBackgroundChanged(value); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

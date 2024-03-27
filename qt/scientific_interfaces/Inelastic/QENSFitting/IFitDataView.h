@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class IFitDataPresenter;
 
@@ -52,6 +52,6 @@ public:
 
   virtual void displayWarning(std::string const &warning) = 0;
 };
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

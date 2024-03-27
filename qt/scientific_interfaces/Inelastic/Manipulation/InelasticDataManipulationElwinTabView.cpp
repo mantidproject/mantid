@@ -64,7 +64,7 @@ public:
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-using namespace IDA;
+using namespace Inelastic;
 InelasticDataManipulationElwinTabView::InelasticDataManipulationElwinTabView(QWidget *parent)
     : m_presenter(), m_elwTree(nullptr) {
 

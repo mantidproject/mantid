@@ -12,7 +12,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 class TabTest : public CxxTest::TestSuite {
 public:

@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class EditResultsDialog : public QDialog {
   Q_OBJECT
@@ -40,6 +40,6 @@ private:
   Ui::EditResultsDialog m_uiForm;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

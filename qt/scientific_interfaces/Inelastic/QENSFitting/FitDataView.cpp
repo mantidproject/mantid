@@ -90,7 +90,7 @@ QStringList defaultHeaders() {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 FitDataView::FitDataView(QWidget *parent) : FitDataView(defaultHeaders(), parent) {}
 
@@ -216,6 +216,6 @@ void FitDataView::notifyUnifyClicked() { m_presenter->handleUnifyClicked(); }
 
 void FitDataView::notifyCellChanged(int row, int column) { m_presenter->handleCellChanged(row, column); }
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

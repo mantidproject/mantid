@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="MantidQt::CustomInterfaces::IDA::DockWidgetArea" name="dockArea" native="true">
+    <widget class="MantidQt::CustomInterfaces::Inelastic::DockWidgetArea" name="dockArea" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -91,7 +91,7 @@
        </widget>
       </item>
       <item>
-       <widget class="MantidQt::CustomInterfaces::IDA::FitOutputOptionsView" name="ovOutputOptionsView" native="true"/>
+       <widget class="MantidQt::CustomInterfaces::Inelastic::FitOutputOptionsView" name="ovOutputOptionsView" native="true"/>
       </item>
      </layout>
     </widget>
@@ -100,13 +100,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::FitOutputOptionsView</class>
+   <class>MantidQt::CustomInterfaces::Inelastic::FitOutputOptionsView</class>
    <extends>QWidget</extends>
    <header>FitOutputOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::DockWidgetArea</class>
+   <class>MantidQt::CustomInterfaces::Inelastic::DockWidgetArea</class>
    <extends>QWidget</extends>
    <header>DockWidgetArea.h</header>
    <container>1</container>

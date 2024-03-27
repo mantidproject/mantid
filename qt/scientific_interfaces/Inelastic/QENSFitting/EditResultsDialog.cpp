@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EditResultsDialog.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 EditResultsDialog::EditResultsDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -43,4 +43,4 @@ void EditResultsDialog::setReplaceFitResultText(QString const &text) { m_uiForm.
 
 void EditResultsDialog::setReplaceFitResultEnabled(bool enable) { m_uiForm.pbReplaceFitResult->setEnabled(enable); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

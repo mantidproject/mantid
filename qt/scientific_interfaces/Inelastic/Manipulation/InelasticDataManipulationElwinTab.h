@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FitDataModel.h"
 #include "InelasticDataManipulation.h"
 #include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"
@@ -15,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "QENSFitting/FitDataModel.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
@@ -22,7 +22,7 @@ namespace CustomInterfaces {
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
-using namespace IDA;
+using namespace Inelastic;
 
 class IElwinPresenter {
 public:
