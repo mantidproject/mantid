@@ -139,16 +139,6 @@ public:
                                                          "Workspace_name_out_elwin_elf,Workspace_name_out_elwin_elt");
   }
 
-  void test_prepareOutputPrefix_calls_with_different_inputs() {
-    std::vector<std::string> workspaces_with_run_numbers{"irs123_test", "irs280_test", "irs60"};
-    std::vector<std::string> workspaces_without_run_numbers{"irs_test", "irs213_test"};
-    std::vector<std::string> individual_workspace{"irs123_test"};
-
-    TS_ASSERT_EQUALS(m_model->prepareOutputPrefix(workspaces_with_run_numbers), "irs60-280_test");
-    TS_ASSERT_EQUALS(m_model->prepareOutputPrefix(workspaces_without_run_numbers), "irs_test");
-    TS_ASSERT_EQUALS(m_model->prepareOutputPrefix(individual_workspace), "irs123_test");
-  }
-
   void test_LoadAlgorithm_set_up() {
     // The ElasticWindowMultiple algorithm is a python algorithm and so can not be called in c++ tests
 

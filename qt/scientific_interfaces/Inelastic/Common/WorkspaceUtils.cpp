@@ -13,6 +13,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/algorithm/string.hpp>
+#include <regex>
 
 using namespace Mantid::API;
 
@@ -26,6 +27,7 @@ QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, 
                                roundToPrecision(rangeEnd, precision) - precision);
 }
 
+auto const regDigits = std::regex("\\d+");
 } // namespace
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -190,6 +192,36 @@ bool doesExistInADS(std::string const &workspaceName) {
 
 std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, std::string const &prefix) {
   return transformElements(strings.begin(), strings.end(), [&prefix](std::string const &str) { return prefix + str; });
+}
+
+/**
+ * Checks the name of the input workspace against a regexp for prefixes in the form `instrName#runNumber_...`, where
+ * #runNumber is a number indicating the specific instrument run number that the workspace refers to.
+ * As output, it returns a single string with format 'instrName#firstRunNumber-#finalRunNumber_...', if run numbers are
+ * found.
+ *
+ * @param workspaceNames :: a vector of strings containing a series of workspace names
+ */
+
+std::string parseRunNumbers(std::vector<std::string> const &workspaceNames) {
+  auto names = WorkspaceUtils::transformElements(workspaceNames.begin(), workspaceNames.end(),
+                                                 [](auto &name) { return name.substr(0, name.find_first_of('_')); });
+  std::smatch match;
+  std::vector<int> runNumbers;
+  std::string prefix;
+  std::string suffix = workspaceNames[0].substr(workspaceNames[0].find_first_of('_'));
+  for (auto const &name : names)
+    if (std::regex_search(name, match, regDigits)) {
+      runNumbers.push_back(std::stoi(match.str(0)));
+      if (prefix.empty())
+        prefix = match.prefix().str();
+    }
+  if (runNumbers.empty() || runNumbers.size() == 1)
+    return workspaceNames[0];
+  else {
+    auto [min, max] = std::minmax_element(runNumbers.cbegin(), runNumbers.cend());
+    return prefix + std::to_string(*min) + "-" + std::to_string(*max) + suffix;
+  }
 }
 
 } // namespace WorkspaceUtils

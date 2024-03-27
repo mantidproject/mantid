@@ -65,6 +65,7 @@ template <typename T, typename Predicate> void removeElementsIf(std::vector<T> &
 MANTIDQT_INELASTIC_DLL std::vector<std::string> attachPrefix(std::vector<std::string> const &strings,
                                                              std::string const &prefix);
 
+MANTIDQT_INELASTIC_DLL std::string parseRunNumbers(std::vector<std::string> const &workspaceNames);
 } // namespace WorkspaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt
