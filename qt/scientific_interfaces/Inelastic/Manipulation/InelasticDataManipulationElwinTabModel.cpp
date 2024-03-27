@@ -135,10 +135,10 @@ void InelasticDataManipulationElwinTabModel::setOutputWorkspaceNames(std::string
 }
 
 std::string InelasticDataManipulationElwinTabModel::getOutputWorkspaceNames() const {
+  std::vector<std::string> keys = {"qWorkspace", "qSquaredWorkspace", "elfWorkspace", "eltWorkspace"};
   std::ostringstream oss;
-  std::transform(m_outputWorkspaceNames.cbegin(), m_outputWorkspaceNames.cend(),
-                 std::ostream_iterator<std::string>(oss, ","),
-                 [](const auto &element) { return static_cast<std::string>(element.second); });
+  std::transform(keys.cbegin(), keys.cend(), std::ostream_iterator<std::string>(oss, ","),
+                 [&outNames = m_outputWorkspaceNames](const auto &key) { return outNames.at(key); });
   std::string outputWorkspaceNames = oss.str();
   outputWorkspaceNames.resize(outputWorkspaceNames.size() - 1);
   return outputWorkspaceNames;
