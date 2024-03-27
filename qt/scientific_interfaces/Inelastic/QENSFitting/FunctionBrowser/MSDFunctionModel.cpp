@@ -12,7 +12,7 @@
 #include <memory>
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 auto const msd = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   double Msd = 6 * log(y[0] / y[1]) / (x[1] * x[1]);
@@ -22,16 +22,16 @@ auto const msd = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   return std::unordered_map<std::string, double>{{"Msd", Msd}, {"Height", y[0]}};
 };
 
-auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+auto const estimators = std::unordered_map<std::string, FunctionParameterEstimation::ParameterEstimator>{
     {"MsdGauss", msd}, {"MsdPeters", msd}, {"MsdYi", msd}};
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 MSDFunctionModel::MSDFunctionModel()
-    : SingleFunctionTemplateModel(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {
+    : SingleFunctionTemplateModel(std::make_unique<FunctionParameterEstimation>(estimators)) {
   updateAvailableFunctions(MSDFit::ALL_FITS);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

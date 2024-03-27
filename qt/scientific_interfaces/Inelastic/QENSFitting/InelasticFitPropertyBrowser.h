@@ -34,7 +34,7 @@ class FunctionBrowser;
 class FitOptionsBrowser;
 } // namespace MantidWidgets
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
@@ -133,6 +133,6 @@ private:
   std::vector<double> m_fitChiSquared;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

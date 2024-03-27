@@ -14,7 +14,7 @@
 #include <map>
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 double constexpr DEFAULT_TEMPERATURE_CORRECTION = 100.0;
 
@@ -27,19 +27,19 @@ auto const sqeFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const 
   return std::unordered_map<std::string, double>{{"Height", y[1]}};
 };
 
-auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+auto const estimators = std::unordered_map<std::string, FunctionParameterEstimation::ParameterEstimator>{
     {"Lorentzian", lorentzian},        {"LorentzianN", lorentzian},       {"TeixeiraWaterSQE", sqeFunction},
     {"FickDiffusionSQE", sqeFunction}, {"ChudleyElliotSQE", sqeFunction}, {"HallRossSQE", sqeFunction}};
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
 ConvFunctionTemplateModel::ConvFunctionTemplateModel()
     : MultiFunctionTemplateModel(std::make_unique<ConvolutionFunctionModel>(),
-                                 std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
+                                 std::make_unique<FunctionParameterEstimation>(estimators)) {}
 
 ConvolutionFunctionModel *ConvFunctionTemplateModel::model() const {
   return dynamic_cast<ConvolutionFunctionModel *>(m_model.get());
@@ -534,4 +534,4 @@ std::optional<std::string> ConvFunctionTemplateModel::getBackgroundPrefix() cons
   return model()->backgroundPrefix();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

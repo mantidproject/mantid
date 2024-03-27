@@ -10,7 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL FqFitModel : public FittingModel {
 public:
@@ -21,6 +21,6 @@ private:
   std::string getResultLogName() const override;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

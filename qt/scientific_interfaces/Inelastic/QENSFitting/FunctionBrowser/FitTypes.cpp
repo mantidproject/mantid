@@ -8,7 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 template <>
 std::map<IqtTypes::ExponentialType, TemplateSubTypeDescriptor>
@@ -140,4 +140,4 @@ std::map<ConvTypes::TempCorrectionType, TemplateSubTypeDescriptor>
         {ConvTypes::TempCorrectionType::Exponential,
          {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
     };
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

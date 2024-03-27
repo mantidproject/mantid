@@ -20,9 +20,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
-class IDAFunctionParameterEstimation;
+class FunctionParameterEstimation;
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
@@ -30,7 +30,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateModel : public FunctionModel {
 public:
   SingleFunctionTemplateModel();
-  SingleFunctionTemplateModel(std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
+  SingleFunctionTemplateModel(std::unique_ptr<FunctionParameterEstimation> parameterEstimation);
   void setFunction(IFunction_sptr fun) override;
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
@@ -53,9 +53,9 @@ private:
   std::vector<std::string> m_fitTypeList;
   boost::optional<std::string> findFitTypeForFunctionName(const std::string &name) const;
   // Parameter estimation
-  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
+  std::unique_ptr<FunctionParameterEstimation> m_parameterEstimation;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

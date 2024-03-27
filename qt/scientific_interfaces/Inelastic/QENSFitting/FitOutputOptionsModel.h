@@ -17,7 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL FitOutputOptionsModel : public IFitOutputOptionsModel {
 public:
@@ -72,6 +72,6 @@ private:
   std::vector<SpectrumToPlot> m_spectraToPlot;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

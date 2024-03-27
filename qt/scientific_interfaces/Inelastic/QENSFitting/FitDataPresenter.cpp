@@ -12,7 +12,7 @@
 
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitDataPresenter::FitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
@@ -250,4 +250,4 @@ std::vector<std::string> FitDataPresenter::createDisplayNames() const {
   return displayNames;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

@@ -12,7 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 // The assumption is made elsewhere that the ordering of these enums matches the
 // ordering of the
 // tabs as they appear in the interface itself.
@@ -60,6 +60,6 @@ private:
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, Tab *> m_tabs;
 };
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

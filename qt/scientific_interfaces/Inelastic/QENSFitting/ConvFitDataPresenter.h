@@ -12,7 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class ConvFitAddWorkspaceDialog;
 class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public FitDataPresenter {
@@ -25,6 +25,6 @@ protected:
   void addTableEntry(FitDomainIndex row) override;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

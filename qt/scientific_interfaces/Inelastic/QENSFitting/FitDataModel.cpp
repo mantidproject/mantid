@@ -17,7 +17,7 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 std::string getFitDataName(const std::string &baseWorkspaceName, const FunctionModelSpectra &workspaceIndexes) {
   return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
@@ -34,7 +34,7 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitDataModel::FitDataModel()
     : m_fittingData(std::make_unique<std::vector<FitData>>()),
@@ -354,4 +354,4 @@ std::pair<WorkspaceID, WorkspaceIndex> FitDataModel::getSubIndices(FitDomainInde
   throw std::runtime_error("Failed to find workspace and spectrum index for fit domain.");
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

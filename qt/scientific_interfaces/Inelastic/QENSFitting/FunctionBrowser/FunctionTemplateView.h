@@ -36,7 +36,7 @@ namespace MantidWidgets {
 class EditLocalParameterDialog;
 }
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
@@ -131,6 +131,6 @@ protected:
   ITemplatePresenter *m_presenter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

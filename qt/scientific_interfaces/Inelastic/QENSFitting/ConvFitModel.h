@@ -10,7 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using ResolutionCollectionType = IndexCollectionType<WorkspaceID, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
@@ -41,6 +41,6 @@ private:
   boost::optional<double> m_temperature;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

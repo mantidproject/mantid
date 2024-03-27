@@ -25,7 +25,7 @@ auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 }
 
 using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 using namespace MantidQt::MantidWidgets;
 
 class FitDataModelTest : public CxxTest::TestSuite {

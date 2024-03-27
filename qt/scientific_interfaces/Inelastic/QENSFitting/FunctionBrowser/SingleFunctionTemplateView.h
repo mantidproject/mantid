@@ -17,9 +17,9 @@ class QtProperty;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
-class IDAFunctionParameterEstimation;
+class FunctionParameterEstimation;
 /**
  * Class FunctionTemplateView implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
@@ -55,6 +55,6 @@ private:
   friend class SingleFunctionTemplatePresenter;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

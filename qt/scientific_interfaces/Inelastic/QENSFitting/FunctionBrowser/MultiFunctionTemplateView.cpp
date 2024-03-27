@@ -14,7 +14,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 MultiFunctionTemplateView::MultiFunctionTemplateView(TemplateBrowserCustomizations customizations)
     : FunctionTemplateView(), m_templateSubTypes(std::move(*customizations.templateSubTypes)) {
@@ -179,4 +179,4 @@ std::optional<std::size_t> MultiFunctionTemplateView::propertySubTypeIndex(QtPro
   return std::nullopt;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

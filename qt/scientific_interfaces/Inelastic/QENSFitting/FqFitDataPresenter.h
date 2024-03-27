@@ -23,7 +23,7 @@ struct FqFitParameters {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL IFqFitDataPresenter {
 public:
@@ -65,6 +65,6 @@ private:
   IInelasticFitPropertyBrowser *m_fitPropertyBrowser;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

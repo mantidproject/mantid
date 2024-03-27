@@ -8,10 +8,10 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 MSDFitModel::MSDFitModel() { m_fitType = MSDFIT_STRING; }
 
 std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

@@ -13,7 +13,7 @@
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 class ConvFunctionTemplateModelTest : public CxxTest::TestSuite {
 public:
@@ -21,7 +21,9 @@ public:
 
   static void destroySuite(ConvFunctionTemplateModelTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionTemplateModel>(); }
+  void setUp() override {
+    m_model = std::make_unique<MantidQt::CustomInterfaces::Inelastic::ConvFunctionTemplateModel>();
+  }
 
   void tearDown() override { m_model.reset(); }
 
@@ -172,5 +174,5 @@ public:
   }
 
 private:
-  std::unique_ptr<MantidQt::CustomInterfaces::IDA::ConvFunctionTemplateModel> m_model;
+  std::unique_ptr<MantidQt::CustomInterfaces::Inelastic::ConvFunctionTemplateModel> m_model;
 };

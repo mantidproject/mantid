@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using SpectrumToPlot = std::pair<std::string, std::size_t>;
 
@@ -48,6 +48,6 @@ public:
                                 std::string const &outputName) = 0;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

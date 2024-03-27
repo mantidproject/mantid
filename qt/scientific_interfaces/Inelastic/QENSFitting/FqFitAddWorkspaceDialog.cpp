@@ -10,7 +10,7 @@
 
 #include <QSignalBlocker>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -73,4 +73,4 @@ void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
 
 void FqFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

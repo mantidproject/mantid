@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 class FqFitAddWorkspaceDialog;
 
 /**
@@ -38,6 +38,6 @@ private slots:
   void notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

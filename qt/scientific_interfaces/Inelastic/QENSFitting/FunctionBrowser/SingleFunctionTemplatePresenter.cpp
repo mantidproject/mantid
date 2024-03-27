@@ -9,7 +9,7 @@
 #include "SingleFunctionTemplateView.h"
 #include <math.h>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace MantidWidgets;
 
@@ -86,4 +86,4 @@ void SingleFunctionTemplatePresenter::updateView() {
   }
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

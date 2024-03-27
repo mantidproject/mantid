@@ -9,7 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 FunctionTemplatePresenter::FunctionTemplatePresenter(FunctionTemplateView *view,
                                                      std::unique_ptr<MantidWidgets::IFunctionModel> model)
@@ -199,6 +199,6 @@ void FunctionTemplatePresenter::setResolution(const std::vector<std::pair<std::s
 
 void FunctionTemplatePresenter::setQValues(const std::vector<double> &qValues) { m_model->setQValues(qValues); }
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

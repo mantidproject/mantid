@@ -13,7 +13,7 @@
 #include <memory>
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 constexpr double HBAR = Mantid::PhysicalConstants::h_bar / Mantid::PhysicalConstants::meV * 1e12;
 
@@ -38,19 +38,19 @@ auto const fickDiffusion = [](Mantid::MantidVec const &x, Mantid::MantidVec cons
   return std::unordered_map<std::string, double>{{"D", y[1] / (x[1] * x[1])}};
 };
 
-auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
-    {"ChudleyElliot", chudleyElliot},
-    {"HallRoss", hallRoss},
-    {"TeixeiraWater", teixeiraWater},
-    {"FickDiffusion", fickDiffusion}};
+auto const estimators =
+    std::unordered_map<std::string, FunctionParameterEstimation::ParameterEstimator>{{"ChudleyElliot", chudleyElliot},
+                                                                                     {"HallRoss", hallRoss},
+                                                                                     {"TeixeiraWater", teixeiraWater},
+                                                                                     {"FickDiffusion", fickDiffusion}};
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFunctionModel::FqFunctionModel()
-    : SingleFunctionTemplateModel(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {
+    : SingleFunctionTemplateModel(std::make_unique<FunctionParameterEstimation>(estimators)) {
   updateAvailableFunctions(FqFit::ALL_FITS);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

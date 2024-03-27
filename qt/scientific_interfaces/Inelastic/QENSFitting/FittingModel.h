@@ -21,7 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 using namespace MantidWidgets;
 
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
@@ -132,6 +132,6 @@ private:
   DefaultParametersType m_defaultParameters;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

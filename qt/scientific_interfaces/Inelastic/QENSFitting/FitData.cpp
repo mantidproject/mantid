@@ -22,7 +22,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 using namespace Mantid::Kernel::Strings;
 
 /**
@@ -169,7 +169,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
     : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
@@ -343,4 +343,4 @@ FitData &FitData::combine(FitData const &fitData) {
   return *this;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

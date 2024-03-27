@@ -21,7 +21,7 @@ namespace MantidWidgets {
 class IAddWorkspaceDialog;
 }
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class IFitDataPresenter;
 
@@ -81,6 +81,6 @@ private:
   void setHorizontalHeaders(const QStringList &headers);
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

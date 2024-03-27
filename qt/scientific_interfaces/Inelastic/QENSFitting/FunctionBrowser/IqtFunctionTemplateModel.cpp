@@ -14,7 +14,7 @@
 #include <tuple>
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 double constexpr EPSILON = std::numeric_limits<double>::epsilon();
 
@@ -41,19 +41,19 @@ auto const expDecayN = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y
   return std::unordered_map<std::string, double>{{"Height", 0.1 * height}, {"Lifetime", 2.0 * lifetime}};
 };
 
-auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+auto const estimators = std::unordered_map<std::string, FunctionParameterEstimation::ParameterEstimator>{
     {"ExpDecay", expDecay}, {"ExpDecayN", expDecayN}, {"StretchExp", expDecay}};
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
 IqtFunctionTemplateModel::IqtFunctionTemplateModel()
     : MultiFunctionTemplateModel(std::make_unique<FunctionModel>(),
-                                 std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
+                                 std::make_unique<FunctionParameterEstimation>(estimators)) {}
 
 void IqtFunctionTemplateModel::clearData() {
   m_exponentialType = ExponentialType::None;
@@ -384,4 +384,4 @@ std::optional<std::string> IqtFunctionTemplateModel::getBackgroundPrefix() const
   return "f" + std::to_string(numberOfExponentials() + (hasStretchExponential() ? 1 : 0)) + ".";
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

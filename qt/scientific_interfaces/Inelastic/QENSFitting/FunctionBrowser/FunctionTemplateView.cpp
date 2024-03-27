@@ -30,7 +30,7 @@
 #include <QVBoxLayout>
 #include <limits>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FunctionTemplateView::FunctionTemplateView() : QWidget(), m_parameterNames(), m_decimals(6) {}
 
@@ -195,4 +195,4 @@ void FunctionTemplateView::updateParameterEstimationData(DataForParameterEstimat
 
 void FunctionTemplateView::estimateFunctionParameters() { m_presenter->estimateFunctionParameters(); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 static const auto FUNCTION_STRINGS =
     std::unordered_map<std::string, std::string>({{"ExpDecay", "E"},
@@ -134,4 +134,4 @@ static const std::unordered_map<DataType, std::map<std::string, std::string>> av
 
 } // namespace FqFit
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

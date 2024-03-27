@@ -27,7 +27,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 std::string cutLastOf(std::string const &str, std::string const &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
@@ -280,7 +280,7 @@ void setFirstBackground(IFunction_sptr function, double value) {
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<FittingMode, std::string>(
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
@@ -575,4 +575,4 @@ void FittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAlgorithm,
 
 IFitDataModel *FittingModel::getFitDataModel() { return m_fitDataModel.get(); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

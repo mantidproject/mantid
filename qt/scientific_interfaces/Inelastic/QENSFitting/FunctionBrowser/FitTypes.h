@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 namespace IqtTypes {
 
 enum class ExponentialType {
@@ -124,6 +124,6 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
 };
 
 } // namespace ConvTypes
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -14,7 +14,7 @@
 #include "MantidAPI/IFunction.h"
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 namespace {
 DataForParameterEstimationCollection createEstimationData(int const nDomains, int const nDataPoints) {
@@ -52,18 +52,18 @@ Mantid::API::IFunction_sptr createMultiDomainFunction(std::string const &functio
 class ParameterEstimationTest : public CxxTest::TestSuite {
 public:
   ParameterEstimationTest() {
-    IDAFunctionParameterEstimation::ParameterEstimator linearBackground = [](Mantid::MantidVec const &x,
-                                                                             Mantid::MantidVec const &y) {
+    FunctionParameterEstimation::ParameterEstimator linearBackground = [](Mantid::MantidVec const &x,
+                                                                          Mantid::MantidVec const &y) {
       return std::unordered_map<std::string, double>{{"A0", x[0]}, {"A1", y[0]}};
     };
-    IDAFunctionParameterEstimation::ParameterEstimator expDecay = [](Mantid::MantidVec const &x,
-                                                                     Mantid::MantidVec const &y) {
+    FunctionParameterEstimation::ParameterEstimator expDecay = [](Mantid::MantidVec const &x,
+                                                                  Mantid::MantidVec const &y) {
       return std::unordered_map<std::string, double>{{"Height", 2.0 * x[0]}, {"Lifetime", 2.0 * y[0]}};
     };
 
-    auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+    auto const estimators = std::unordered_map<std::string, FunctionParameterEstimation::ParameterEstimator>{
         {"LinearBackground", linearBackground}, {"ExpDecay", expDecay}};
-    m_parameterEstimators = std::make_unique<IDAFunctionParameterEstimation>(estimators);
+    m_parameterEstimators = std::make_unique<FunctionParameterEstimation>(estimators);
   }
 
   static ParameterEstimationTest *createSuite() { return new ParameterEstimationTest(); }
@@ -112,5 +112,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimators;
+  std::unique_ptr<FunctionParameterEstimation> m_parameterEstimators;
 };

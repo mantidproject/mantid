@@ -19,7 +19,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace IqtTypes;
 using namespace Mantid::API;
@@ -72,6 +72,6 @@ private:
   IqtTypes::TieIntensitiesType m_tieIntensitiesType = IqtTypes::TieIntensitiesType::False;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

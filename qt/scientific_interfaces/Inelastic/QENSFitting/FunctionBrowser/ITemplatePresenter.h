@@ -22,7 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class FunctionTemplateView;
 
@@ -83,6 +83,6 @@ public:
                                                 QStringList const &constraints) = 0;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

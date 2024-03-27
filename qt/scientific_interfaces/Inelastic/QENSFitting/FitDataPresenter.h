@@ -18,7 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class ITab;
 
@@ -100,6 +100,6 @@ private:
   std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

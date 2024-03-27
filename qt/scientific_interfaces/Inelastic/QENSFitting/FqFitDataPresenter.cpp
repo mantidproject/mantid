@@ -12,7 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 
 namespace {
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
 Mantid::Kernel::Logger logger("FqFitDataPresenter");
 
@@ -20,11 +20,8 @@ struct ContainsOneOrMore {
   explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
 
   bool operator()(const std::string &str) const {
-    for (const auto &substring : m_substrings) {
-      if (str.rfind(substring) != std::string::npos)
-        return true;
-    }
-    return false;
+    return std::any_of(m_substrings.cbegin(), m_substrings.cend(),
+                       [&str](std::string const &substring) { return str.rfind(substring) != std::string::npos; });
   }
 
 private:
@@ -196,7 +193,7 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFitDataPresenter::FqFitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view)
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
@@ -397,4 +394,4 @@ void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   newRow.exclude = exclude;
   m_view->addTableEntry(row.value, newRow);
 }
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

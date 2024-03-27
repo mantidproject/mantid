@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class FitDataView;
 class FitPlotView;
@@ -30,6 +30,6 @@ public:
   FitPlotView *m_fitPlotView;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

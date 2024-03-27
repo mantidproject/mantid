@@ -10,7 +10,7 @@
 #include "Tab.h"
 #include "TabFactory.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 DECLARE_SUBWINDOW(QENSFitting)
 
 QENSFitting::QENSFitting(QWidget *parent)
@@ -59,4 +59,4 @@ void QENSFitting::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

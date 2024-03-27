@@ -25,7 +25,7 @@ QStringList FqFitHeaders() {
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
@@ -80,4 +80,4 @@ void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   setCell(std::move(cell), row, 1);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

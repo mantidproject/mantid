@@ -10,7 +10,7 @@
 
 #include <QMessageBox>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitOutputOptionsView::FitOutputOptionsView(QWidget *parent)
     : API::MantidWidget(parent), m_editResultsDialog(), m_outputOptions(std::make_unique<Ui::FitOutputOptions>()),
@@ -120,4 +120,4 @@ void FitOutputOptionsView::displayWarning(std::string const &message) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(message));
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

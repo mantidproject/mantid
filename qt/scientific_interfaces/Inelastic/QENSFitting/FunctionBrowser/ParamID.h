@@ -12,7 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 enum class ParamID {
   NONE,
@@ -173,6 +173,6 @@ inline void applyToParamIDRange(ParamID from, ParamID to, const std::function<vo
     fun(i);
 }
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

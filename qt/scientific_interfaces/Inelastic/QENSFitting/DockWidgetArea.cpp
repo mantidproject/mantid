@@ -8,7 +8,7 @@
 #include "FitDataView.h"
 #include "FitPlotView.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 DockWidgetArea::DockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
@@ -44,4 +44,4 @@ void DockWidgetArea::setFitDataView(FitDataView *fitDataView) {
   addDockWidget(Qt::TopDockWidgetArea, dataViewArea);
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

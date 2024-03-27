@@ -79,7 +79,7 @@ inline void adjustRange(std::pair<double, double> &range) {
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
@@ -363,4 +363,4 @@ void FitPlotModel::deleteWorkspace(const std::string &name) const {
   deleteWorkspaceAlg->execute();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

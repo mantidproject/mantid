@@ -22,7 +22,7 @@ namespace MantidWidgets {
 class ConvolutionFunctionModel;
 }
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 using namespace ConvTypes;
 using namespace Mantid::API;
@@ -100,6 +100,6 @@ private:
   bool m_isQDependentFunction = false;
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -30,7 +30,7 @@
 
 #include <limits>
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 SingleFunctionTemplateView::SingleFunctionTemplateView(TemplateBrowserCustomizations customizations)
     : FunctionTemplateView() {
@@ -120,4 +120,4 @@ void SingleFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::strin
   }
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

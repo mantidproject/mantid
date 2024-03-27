@@ -188,7 +188,7 @@ private:
   WorkspaceGroup_sptr m_resultGroup;
 };
 
-std::vector<std::string> getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType &workspaces) {
+std::vector<std::string> getNames(const MantidQt::CustomInterfaces::Inelastic::ResolutionCollectionType &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size().value);
   std::transform(
@@ -207,7 +207,7 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 }
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt::CustomInterfaces::Inelastic {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
@@ -289,4 +289,4 @@ void ConvFitModel::setParameterNameChanges(const IFunction &model, boost::option
       constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace MantidQt::CustomInterfaces::Inelastic

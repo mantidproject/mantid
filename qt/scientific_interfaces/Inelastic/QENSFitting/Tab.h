@@ -32,7 +32,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+namespace Inelastic {
 
 class MANTIDQT_INELASTIC_DLL ITab {
 public:
@@ -189,6 +189,6 @@ protected slots:
   void respondToFunctionChanged();
 };
 
-} // namespace IDA
+} // namespace Inelastic
 } // namespace CustomInterfaces
 } // namespace MantidQt
