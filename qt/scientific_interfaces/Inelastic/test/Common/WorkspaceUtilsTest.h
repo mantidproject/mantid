@@ -109,4 +109,14 @@ public:
 
     TS_ASSERT_EQUALS(extractAxisLabels(testWorkspace, 1).size(), 0);
   }
+
+  void test_parseRunNumber_calls_with_different_inputs() {
+    std::vector<std::string> workspaces_with_run_numbers{"irs123_test", "irs280_test", "irs60"};
+    std::vector<std::string> workspaces_without_run_numbers{"irs_test", "irs213_test"};
+    std::vector<std::string> individual_workspace{"irs123_test"};
+
+    TS_ASSERT_EQUALS(parseRunNumbers(workspaces_with_run_numbers), "irs60-280_test");
+    TS_ASSERT_EQUALS(parseRunNumbers(workspaces_without_run_numbers), "irs_test");
+    TS_ASSERT_EQUALS(parseRunNumbers(individual_workspace), "irs123_test");
+  }
 };

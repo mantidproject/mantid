@@ -1553,5 +1553,4 @@ constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/C
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FitDataView.h:42
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:23
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Manipulation/InelasticDataManipulationElwinTabModel.cpp:98
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:51
