@@ -198,7 +198,13 @@ class AbstractInst(object):
         :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
         :return: A workspace containing the corrections
         """
-        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
+        if self._sample_details is None:
+            raise ValueError(
+                "Absorption corrections cannot be run without sample details."
+                " Please set sample details using set_sample before running absorption corrections."
+            )
+
+        self._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
 
     def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details, paalman_pings_events_per_point=None):
         """
