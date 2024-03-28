@@ -21,6 +21,9 @@ python:
 boost:
   - 1.78
 
+hdf5:
+  - 1.14.3
+
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
   - 1.23.*

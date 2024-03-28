@@ -39,7 +39,7 @@ requirements:
     - eigen
     - gsl {{ gsl }}
     - h5py
-    - hdf5>1.14.0,<1.15 # 1.14.0 causes CMake error
+    - hdf5 {{ hdf5 }}
     - jemalloc  # [unix]
     - jsoncpp
     - libopenblas {{ libopenblas }}  # [osx or linux]
