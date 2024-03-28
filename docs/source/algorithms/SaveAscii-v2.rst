@@ -16,6 +16,11 @@ the X-values, followed by pairs of Y and E values. Columns are separated by
 commas. The resulting file can normally be loaded into a workspace by the
 :ref:`algm-LoadAscii` algorithm.
 
+There is limited support for MDHistoWorkspaces, and the algorithm only allows for the saving of 1D MDHisto Workspaces.
+This functionality is specifically used to save cuts made using sliceviewr.
+The saved format consists of a header comment that contains all of the workspace properties,
+followed by three separate columns corresponding to X, Y, and E, respectively.
+
 It is possible to create a header for the ASCII file containing selected sample log entries and its unit,
 specified through `LogList` property. In case the requested log does not exist, it will be printed as
 `Not defined`. This feature is not enabled for :ref:`TableWorkspace <Table Workspaces>`.
