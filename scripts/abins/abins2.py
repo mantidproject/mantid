@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,7 +12,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -22,8 +22,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._sample_form = None
-
         self._experimental_file = None
         self._scale = None
         self._setting = None
@@ -31,37 +29,27 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # Save a copy of bin_width for cleanup after it is mutated
         self._initial_parameters_bin_width = abins.parameters.sampling["bin_width"]
 
-    @staticmethod
-    def category() -> str:
+    @classmethod
+    def subscribe(cls) -> None:
+        AlgorithmFactory.subscribe(cls)
+
+    def category(self) -> str:
         return "Simulation"
 
-    @staticmethod
-    def summary() -> str:
-        return "Calculates inelastic neutron scattering against 1-D ω axis."
+    def version(self) -> int:
+        return 2
 
-    @staticmethod
-    def version() -> int:
-        return 1
+    def summary(self) -> str:
+        return "Calculates inelastic neutron scattering against 1-D ω axis."
 
     def seeAlso(self):
         return ["Abins2D"]
 
     def PyInit(self) -> None:
-        from abins.constants import ALL_SAMPLE_FORMS, ONE_DIMENSIONAL_INSTRUMENTS
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
         # Declare properties for all Abins Algorithms
-        self.declare_common_properties()
-
-        # Soon-to-be-deprecated properties (i.e. already removed from 2D)
-        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0, doc="Width of bins used during rebinning.")
-
-        self.declareProperty(
-            name="SampleForm",
-            direction=Direction.Input,
-            defaultValue="Powder",
-            validator=StringListValidator(ALL_SAMPLE_FORMS),
-            doc="Form of the sample: Powder.",
-        )
+        self.declare_common_properties(version=2)
 
         # Declare properties specific to 1D
         self.declareProperty(
@@ -87,10 +75,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        bin_width = self.getProperty("BinWidthInWavenumber").value
-        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
-
         self._check_advanced_parameter()
 
         return issues
@@ -114,25 +98,40 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # so insert placeholder "1" for now.
         prog_reporter.resetNumSteps(1, 0.1, 0.8)
 
-        if self._autoconvolution:
-            autoconvolution_max = self._max_event_order
-        else:
-            autoconvolution_max = 0
+        # Usually order 2 is enumerated over mode pairs, but if autoconvolution min_order is set to 2
+        # then this is skipped and we obtain any orders above 1 by convolution
+        if abins.parameters.autoconvolution["min_order"] not in (2, 3):
+            raise ValueError("abins.parameters.autoconvolution['min_order'] must be 2 or 3")
+        convolve_order_2 = abins.parameters.autoconvolution["min_order"] == 2
+
+        match self._num_quantum_order_events, convolve_order_2:
+            case 1, _:
+                autoconvolution_max = 0
+                quantum_order_num = 1
+            case 2, True:
+                autoconvolution_max = 2
+                quantum_order_num = 1
+            case 2, False:
+                autoconvolution_max = 0
+                quantum_order_num = 2
+            case max_order, True:
+                autoconvolution_max = max_order
+                quantum_order_num = 1
+            case max_order, False:
+                autoconvolution_max = max_order
+                quantum_order_num = 2
 
         s_calculator = abins.SCalculatorFactory.init(
             filename=self._vibrational_or_phonon_data_file,
             temperature=self._temperature,
-            sample_form=self._sample_form,
+            sample_form="Powder",
             abins_data=ab_initio_data,
             instrument=self._instrument,
-            quantum_order_num=self._num_quantum_order_events,
+            quantum_order_num=quantum_order_num,
             autoconvolution_max=autoconvolution_max,
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
-
-        # Clean up parameter modified by _get_properties()
-        abins.parameters.sampling["bin_width"] = self._initial_parameters_bin_width
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
@@ -177,7 +176,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
-            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
+            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._instrument.get_energy_bin_width()))
             prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -276,60 +275,18 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         self._check_common_advanced_parameters(message)
 
-        self._check_tosca_parameters(message)
-
-    def _check_tosca_parameters(self, message_end=""):
-        """
-        Checks TOSCA parameters.
-        :param message_end: closing part of the error message.
-        """
-
-        # TOSCA final energy in cm^-1
-        tosca_parameters = abins.parameters.instruments["TOSCA"]
-        final_energy = tosca_parameters["final_neutron_energy"]
-        if not (isinstance(final_energy, float) and final_energy > 0.0):
-            raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
-
-        angle = tosca_parameters["cos_scattering_angle"]
-        if not isinstance(angle, float):
-            raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
-
-        resolution_const_a = tosca_parameters["a"]
-        if not isinstance(resolution_const_a, float):
-            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" + message_end)
-
-        resolution_const_b = tosca_parameters["b"]
-        if not isinstance(resolution_const_b, float):
-            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" + message_end)
-
-        resolution_const_c = tosca_parameters["c"]
-        if not isinstance(resolution_const_c, float):
-            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" + message_end)
-
     def _get_properties(self):
         """
         Loads all properties to object's attributes.
         """
         self.get_common_properties()
 
-        self._bin_width = self.getProperty("BinWidthInWavenumber").value
-        self._sample_form = self.getProperty("SampleForm").value
-
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
-        self._autoconvolution = self.getProperty("Autoconvolution").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
 
-        abins.parameters.sampling["bin_width"] = self._bin_width
         self._bins = self.get_instrument().get_energy_bins()
 
-        # Increase max event order if using autoconvolution
-        if self._autoconvolution:
-            self._max_event_order = abins.parameters.autoconvolution["max_order"]
-        else:
-            self._max_event_order = self._num_quantum_order_events
-
-
-AlgorithmFactory.subscribe(Abins)
+        self._max_event_order = self._num_quantum_order_events

@@ -87,7 +87,7 @@ class AbinsAlgorithm:
     def get_instrument(self) -> Union[Instrument, None]:
         return self._instrument
 
-    def declare_common_properties(self) -> None:
+    def declare_common_properties(self, version: int = 1) -> None:
         """Declare properties common to Abins 1D and 2D versions"""
         self.declareProperty(
             FileProperty(
@@ -123,7 +123,9 @@ class AbinsAlgorithm:
         )
 
         self.declareProperty(
-            name="SumContributions", defaultValue=False, doc="Sum the partial dynamical structure factors into a single workspace."
+            name="SumContributions",
+            defaultValue=(False if version == 1 else True),
+            doc="Sum the partial dynamical structure factors into a single workspace.",
         )
 
         self.declareProperty(name="SaveAscii", defaultValue=False, doc="Write workspaces to .ascii files after computing them.")
@@ -135,19 +137,28 @@ class AbinsAlgorithm:
             doc="Scale the partial dynamical structure factors by the scattering cross section.",
         )
 
-        # Abins is supposed to support excitations up to fourth-order. Order 3 and 4 are currently disabled while the
-        # weighting is being investigated; these intensities were unreasonably large in hydrogenous test cases
-        self.declareProperty(
-            name="QuantumOrderEventsNumber",
-            defaultValue="1",
-            validator=StringListValidator(["1", "2"]),
-            doc="Number of quantum order effects included in the calculation "
-            "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations",
-        )
+        if version == 1:
+            self.declareProperty(
+                name="QuantumOrderEventsNumber",
+                defaultValue="1",
+                validator=StringListValidator(["1", "2"]),
+                doc="Number of quantum order effects included in the calculation "
+                "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations",
+            )
 
-        self.declareProperty(
-            name="Autoconvolution", defaultValue=False, doc="Estimate higher quantum orders by convolution with fundamental spectrum."
-        )
+            self.declareProperty(
+                name="Autoconvolution", defaultValue=False, doc="Estimate higher quantum orders by convolution with fundamental spectrum."
+            )
+
+        else:
+            autoconvolution_max = str(abins.parameters.autoconvolution["max_order"])
+            self.declareProperty(
+                name="QuantumOrderEventsNumber",
+                defaultValue=autoconvolution_max,
+                validator=StringListValidator(["1", "2", autoconvolution_max]),
+                doc="Number of quantum order effects included in the calculation "
+                "(1 -> Fundamentals, 2-> add first overtone and 2nd order combinations, 10-> add 8 orders by self-convolution",
+            )
 
         self.declareProperty(
             name="EnergyUnits",

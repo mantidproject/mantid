@@ -4,6 +4,7 @@ add_subdirectory(WorkflowAlgorithms)
 
 set(TEST_PY_FILES
     AbinsBasicTest.py
+    Abins2BasicTest.py
     AbinsAdvancedParametersTest.py
     AlignComponentsTest.py
     AngularAutoCorrelationsSingleAxisTest.py

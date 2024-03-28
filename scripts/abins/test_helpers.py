@@ -14,6 +14,7 @@ from numpy.testing import assert_allclose
 
 from abins.atomsdata import _AtomData
 from abins.kpointsdata import KpointData
+import abins.io
 
 
 # Module with helper functions used to create tests.
@@ -61,7 +62,7 @@ def remove_output_files(list_of_names=None):
     for filename in all_files:
         for name in list_of_names:
             if name in filename:
-                full_path = os.path.join(save_dir_path, filename)
+                full_path = os.path.join(abins.io.IO.get_save_dir_path(), filename)
                 if os.path.isfile(full_path):
                     os.remove(full_path)
                 break
