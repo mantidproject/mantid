@@ -1,11 +1,11 @@
 
-#include "MantidDataHandling/ISISInstrDataCache.h"
+#include "MantidAPI/ISISInstrDataCache.h"
 #include <fstream>
 #include <json/reader.h>
 #include <json/value.h>
 #include <string>
 
-std::string Mantid::DataHandling::ISISInstrDataCache::getInstrFilePath(std::string fileName) {
+std::string Mantid::API::ISISInstrDataCache::getInstrFilePath(std::string fileName) {
 
   // Split into instrument name and run number
   char const *digits = "0123456789";

@@ -6,9 +6,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "MantidDataHandling/ISISInstrDataCache.h"
+#include "MantidAPI/ISISInstrDataCache.h"
 
-using namespace Mantid::DataHandling;
+using namespace Mantid::API;
 
 std::string marJson = R"({
 "1234": "some/1234/path",

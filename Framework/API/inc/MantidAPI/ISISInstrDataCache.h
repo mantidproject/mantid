@@ -9,16 +9,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
-#include "MantidDataHandling/DllConfig.h"
 
 #include <sstream>
 #include <string>
 
 namespace Mantid {
-namespace DataHandling {
+namespace API {
 
-class MANTID_DATAHANDLING_DLL ISISInstrDataCache {
+class MANTID_API_DLL ISISInstrDataCache {
 public:
   ISISInstrDataCache(std::string path) : m_dataCachePath(path){};
   std::string getInstrFilePath(std::string filename);
@@ -26,5 +26,5 @@ public:
 private:
   std::string m_dataCachePath;
 };
-} // namespace DataHandling
+} // namespace API
 } // namespace Mantid
