@@ -11,6 +11,7 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidAPI/ISISInstrDataCache.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -29,6 +30,8 @@
 #include <cctype>
 
 #include <boost/algorithm/string.hpp>
+
+#include <filesystem>
 
 namespace {
 /// static logger object
@@ -758,6 +761,18 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
       errors += archivePath.errors();
 
   } // archs
+
+  std::string dataCachePath{"~/testDataCache"};
+  if (std::filesystem::exists(dataCachePath)) {
+    auto dataCache = API::ISISInstrDataCache(dataCachePath);
+    for (const auto &filename : filenames) {
+      API::Result<std::string> fullPath = dataCache.getInstrFilePath(dataCachePath);
+      if (fullPath) {
+        return (fullPath);
+      } else {
+      }
+    }
+  }
 
   return API::Result<std::string>("", errors);
 }
