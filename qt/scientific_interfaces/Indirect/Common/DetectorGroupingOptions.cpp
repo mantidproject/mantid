@@ -32,7 +32,11 @@ DetectorGroupingOptions::DetectorGroupingOptions(QWidget *parent) : QWidget(pare
   handleGroupingMethodChanged(QString::fromStdString(groupingMethod()));
 }
 
-void DetectorGroupingOptions::setGroupingMethod(QString const &option) {
+void DetectorGroupingOptions::removeGroupingMethod(std::string const &option) {
+  m_uiForm.cbGroupingOptions->removeItem(optionIndex(option));
+}
+
+void DetectorGroupingOptions::setGroupingMethod(std::string const &option) {
   m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
 }
 
@@ -84,8 +88,8 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
 
 void DetectorGroupingOptions::emitSaveCustomGrouping() { emit saveCustomGrouping(customGrouping()); }
 
-int DetectorGroupingOptions::optionIndex(QString const &option) const {
-  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+int DetectorGroupingOptions::optionIndex(std::string const &option) const {
+  auto const index = m_uiForm.cbGroupingOptions->findText(QString::fromStdString(option));
   return index >= 0 ? index : 0;
 }
 

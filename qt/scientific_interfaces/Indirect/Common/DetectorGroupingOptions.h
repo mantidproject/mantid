@@ -28,7 +28,9 @@ class DetectorGroupingOptions : public QWidget {
 public:
   DetectorGroupingOptions(QWidget *parent);
 
-  void setGroupingMethod(QString const &option);
+  void removeGroupingMethod(std::string const &option);
+  void setGroupingMethod(std::string const &option);
+
   void setSaveCustomVisible(bool const visible);
 
   std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
@@ -48,7 +50,7 @@ private:
   std::string customGrouping() const;
   int nGroups() const;
 
-  int optionIndex(QString const &option) const;
+  int optionIndex(std::string const &option) const;
 
   Ui::DetectorGroupingWidget m_uiForm;
 };
