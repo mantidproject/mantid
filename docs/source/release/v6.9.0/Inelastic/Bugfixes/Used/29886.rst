@@ -1,1 +1,0 @@
-- The WorkspaceIndex attribute for a Q dependent function in the :ref:`Inelastic Data Analysis interface <interface-inelastic-data-analysis>` is now disabled when it is unused.

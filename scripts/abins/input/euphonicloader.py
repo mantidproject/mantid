@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from pathlib import Path
 from typing import Any, Dict
 
 from euphonic import QpointPhononModes
@@ -19,18 +18,9 @@ from dos.load_euphonic import euphonic_calculate_modes
 class EuphonicLoader(AbInitioLoader):
     """Get frequencies/eigenvalues from force constants using Euphonic"""
 
-    def __init__(self, input_ab_initio_filename):
-        """
-
-        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
-        """
-        if not isinstance(input_ab_initio_filename, str):
-            raise TypeError("Filename must be a string")
-        elif not Path(input_ab_initio_filename).is_file():
-            raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
-
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "FORCECONSTANTS"
+    @property
+    def _ab_initio_program(self) -> str:
+        return "FORCECONSTANTS"
 
     @staticmethod
     def data_dict_from_modes(modes: QpointPhononModes) -> Dict[str, Any]:
@@ -72,10 +62,6 @@ class EuphonicLoader(AbInitioLoader):
         cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
         modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
         file_data = self.data_dict_from_modes(modes)
-
-        # save stuff to hdf file
-        save_keys = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
-        data_to_save = {key: file_data[key] for key in save_keys}
-        self.save_ab_initio_data(data=data_to_save)
+        self.save_ab_initio_data(data=file_data)
 
         return self._rearrange_data(data=file_data)

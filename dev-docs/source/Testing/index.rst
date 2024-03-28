@@ -36,3 +36,5 @@ creation is outlined in :ref:`issue_tracking`.
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/ISISSANSGUITests
    General/SampleTransmissionCalculatorTestGuide
+   Utility/FilterEventsInterfaceTest
+   Documentation/DocumentationTest

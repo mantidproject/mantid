@@ -28,7 +28,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
 
-ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
+ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -48,7 +48,7 @@ void ConvFitDataView::showAddWorkspaceDialog() {
 }
 
 void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
-  IndirectFitDataView::addTableEntry(row, newRow);
+  FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.resolution));
   auto flags = cell->flags();

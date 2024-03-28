@@ -6,11 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
 
-from mantid.kernel import Direction
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
+from mantid.kernel import Direction, config
+from mantid.api import (
+    AlgorithmFactory,
+    MatrixWorkspaceProperty,
+    FileProperty,
+    FileAction,
+    PythonAlgorithm,
+    PropertyMode,
+    AnalysisDataService,
+)
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
+import re
+from collections import OrderedDict
 
 
 class Prop:
@@ -27,11 +37,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _FACILITY = "ISIS"
     _ISIS_DOI_PREFIX = "10.5286/ISIS.E.RB"
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
+    _RUN_NUM_LOG = "run_number"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     _STITCH_ALG = "Stitch1DMany"
     _REBIN_ALG = "Rebin"
+    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _Q_UNIT = "MomentumTransfer"
 
     def category(self):
@@ -100,7 +112,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         reduction_history = self._get_reduction_alg_history(ws)
         data_columns = self._create_data_columns(ws, reduction_history)
         dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_history, data_columns)
-        self._add_optional_header_info(dataset, ws)
+        self._add_optional_header_info(dataset, ws, reduction_history)
         return dataset
 
     def _create_data_columns(self, ws, reduction_history) -> MantidORSODataColumns:
@@ -137,7 +149,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, ws) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, ws, reduction_history) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -146,6 +158,32 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
+        dataset.set_reduction_call(self._get_reduction_script(ws))
+
+        reduction_workflow_histories = self._get_reduction_workflow_alg_histories(ws)
+        if not reduction_workflow_histories:
+            self.log().warning(f"Unable to find history for {self._REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file.")
+            return
+
+        instrument_name = ws.getInstrument().getName()
+
+        for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
+            dataset.add_measurement_data_file(file, comment=f"Incident angle {theta}")
+
+        first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
+        for file in first_trans_files:
+            dataset.add_measurement_additional_file(file, comment="First transmission run")
+
+        for file in second_trans_files:
+            dataset.add_measurement_additional_file(file, comment="Second transmission run")
+
+        flood_entry = self._get_flood_correction_entry(reduction_workflow_histories, reduction_history)
+        if flood_entry:
+            dataset.add_measurement_additional_file(flood_entry[0], comment=flood_entry[1])
+
+        calib_file_entry = self._get_calibration_file_entry(reduction_workflow_histories)
+        if calib_file_entry:
+            dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
 
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
@@ -198,6 +236,138 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
             return None
 
+    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
+        """
+        Find the names of the individual angle files that were used in the reduction
+        """
+        angle_files = []
+
+        for history in reduction_workflow_histories:
+            input_runs = history.getPropertyValue("InputRunList")
+            theta = history.getPropertyValue("ThetaIn")
+            try:
+                angle_files.extend([(file, theta) for file in self._get_file_names_from_history_run_list(input_runs, instrument_name)])
+            except RuntimeError as ex:
+                self.log().warning(f"{ex}. Angle file information will be excluded from the file.")
+                return []
+        return angle_files
+
+    def _get_transmission_files(self, instrument_name, reduction_workflow_histories) -> Tuple[List[str], List[str]]:
+        """
+        Find the names of the transmission files that were used in the reduction
+        """
+        # We use an ordered dictionary to ensure that duplicates are excluded and that the files always appear in the
+        # same order in the .ort file. Fixing the order makes it easier for us to write automated tests.
+        first_trans_files = OrderedDict()
+        second_trans_files = OrderedDict()
+
+        def add_run_file_names(run_list, trans_files):
+            if not run_list:
+                return
+            for file_name in self._get_file_names_from_history_run_list(run_list, instrument_name):
+                trans_files[file_name] = None
+
+        for history in reduction_workflow_histories:
+            try:
+                add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
+                add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
+            except RuntimeError as ex:
+                self.log().warning(f"{ex}. Transmission file information will be excluded from the file.")
+                return [], []
+
+        return list(first_trans_files.keys()), list(second_trans_files.keys())
+
+    def _get_file_names_from_history_run_list(self, run_list: str, instrument_name: str) -> List[str]:
+        """
+        Construct the run file names from the comma-separated run list values from the history
+        of ReflectometryISISLoadAndProcess.
+        """
+        # We do this manually because using the FileFinder to look up the file is too slow for this algorithm, and we
+        # can't guarantee that the file name will be available from the history of ReflectometryISISLoadAndProcess.
+        file_names = []
+
+        for entry in run_list.split(","):
+            # The ISIS Reflectometry GUI is fairly flexible about what can be entered, so this could be a run number
+            # or file name, with or without padding, or a workspace name.
+            if AnalysisDataService.doesExist(entry):
+                # If we can find a matching workspace in the ADS then get the run number from that
+                run = AnalysisDataService.retrieve(entry).getRun()
+                if not run.hasProperty(self._RUN_NUM_LOG):
+                    raise RuntimeError(f"Cannot convert {entry} to a full run file name for instrument {instrument_name}")
+                run_string = str(run.getProperty(self._RUN_NUM_LOG).value)
+            else:
+                run_string = entry
+            file_names.append(self._construct_run_file_name_for_string(instrument_name, run_string))
+
+        return file_names
+
+    @staticmethod
+    def _construct_run_file_name_for_string(instrument_name: str, run_string: str) -> str:
+        def raise_error():
+            raise RuntimeError(f"Cannot convert {run_string} to a file name for instrument {instrument_name}")
+
+        # Check that the string is in a format that can potentially be converted to a run file name.
+        # It should optionally start with any number of letters and end with any number of digits.
+        # We ignore any file extensions.
+        match = re.fullmatch(r"(?P<prefix>[a-zA-Z]*)(?P<padding>0*)(?P<run>[0-9]+)", run_string.split(".")[0])
+        if not match:
+            raise_error()
+        match_prefix = match.group("prefix")
+        run_num = match.group("run")
+
+        instrument = config.getInstrument(instrument_name)
+        try:
+            inst_prefix = instrument.filePrefix(int(run_num))
+            # Check if there's a prefix that isn't valid for the instrument
+            if match_prefix and not match_prefix.lower() == inst_prefix.lower():
+                raise_error()
+
+            run_num_width = instrument.zeroPadding(int(run_num))
+            if len(run_num) > run_num_width:
+                raise_error()
+
+            return f"{inst_prefix}{run_num.rjust(run_num_width, '0')}"
+        except OverflowError:
+            raise_error()
+
+    def _get_flood_correction_entry(self, reduction_workflow_histories, reduction_history) -> Optional[tuple[str, str]]:
+        """
+        Get the flood correction file or workspace name from the reduction history.
+        """
+        # The flood correction may have been passed either as a full filepath or workspace name
+        # The FloodCorrection parameter says Workspace in both cases, so we don't know which we have
+        flood_name = reduction_workflow_histories[0].getPropertyValue("FloodWorkspace")
+        if flood_name:
+            return Path(flood_name).name, "Flood correction workspace or file"
+
+        # It's possible that a flood workspace was created as the first step in the reduction
+        if reduction_history:
+            flood_history = reduction_history.getChildHistories()[0]
+            if flood_history.name() == self._CREATE_FLOOD_ALG:
+                return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
+
+        return None
+
+    @staticmethod
+    def _get_calibration_file_entry(reduction_workflow_histories) -> Optional[str]:
+        """
+        Get the calibration file name from the reduction history.
+        """
+        calibration_file = reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
+        return Path(calibration_file).name if calibration_file else None
+
+    def _get_reduction_script(self, ws) -> Optional[str]:
+        """
+        Get the workspace reduction history as a script.
+        """
+        if ws.getHistory().empty():
+            return None
+
+        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=ws, ExcludeHeader=True)
+        alg.execute()
+        script = alg.getPropertyValue("ScriptText")
+        return "\n".join(script.split("\n")[2:])  # trim the import statement
+
     def _get_reduction_alg_history(self, ws):
         """
         Find the first occurrence of the reduction algorithm in the workspace history, otherwise return None
@@ -216,6 +386,16 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                         return child_history
 
         return None
+
+    def _get_reduction_workflow_alg_histories(self, ws):
+        """
+        Return a list containing all the occurrences of the reduction workflow algorithm in the workspace history
+        """
+        ws_history = ws.getHistory()
+        if ws_history.empty():
+            return []
+
+        return [history for history in ws_history.getAlgorithmHistories() if history.name() == self._REDUCTION_WORKFLOW_ALG]
 
 
 # Register algorithm with Mantid

@@ -103,8 +103,7 @@ class BasicFittingContext(FittingContext):
     @current_dataset_index.setter
     def current_dataset_index(self, index: int) -> None:
         """Sets the index of the currently selected dataset."""
-        if index is not None and index >= self.number_of_datasets:
-            raise RuntimeError(f"The provided dataset index ({index}) is too large.")
+        assert index is None or index < self.number_of_datasets, f"The dataset index ({index}) is too large."
 
         self._current_dataset_index = index
 
@@ -141,8 +140,7 @@ class BasicFittingContext(FittingContext):
     @single_fit_functions.setter
     def single_fit_functions(self, fit_functions: list) -> None:
         """Sets all of the single fit functions stored in the model."""
-        if len(fit_functions) != self.number_of_datasets:
-            raise RuntimeError("The provided number of functions is not equal to the number of datasets.")
+        assert len(fit_functions) == self.number_of_datasets, "The number of functions is not equal to the number of datasets."
 
         self._single_fit_functions = fit_functions
 
@@ -164,8 +162,7 @@ class BasicFittingContext(FittingContext):
     @fit_statuses.setter
     def fit_statuses(self, fit_statuses: list) -> None:
         """Sets the value of all fit statuses."""
-        if len(fit_statuses) != self.number_of_datasets:
-            raise RuntimeError("The provided number of fit statuses is not equal to the number of datasets.")
+        assert len(fit_statuses) == self.number_of_datasets, "The number of fit statuses is not equal to the number of datasets."
 
         self._fit_statuses = fit_statuses
 
@@ -187,8 +184,7 @@ class BasicFittingContext(FittingContext):
     @chi_squared.setter
     def chi_squared(self, chi_squared: list) -> None:
         """Sets all of the chi squared values."""
-        if len(chi_squared) != self.number_of_datasets:
-            raise RuntimeError("The provided number of chi squared is not equal to the number of datasets.")
+        assert len(chi_squared) == self.number_of_datasets, "The number of chi squared is not equal to the number of datasets."
 
         self._chi_squared = chi_squared
 
@@ -295,8 +291,7 @@ class BasicFittingContext(FittingContext):
     @start_xs.setter
     def start_xs(self, start_xs: list) -> None:
         """Sets all of the start Xs in the model."""
-        if len(start_xs) != self.number_of_datasets:
-            raise RuntimeError("The provided number of start Xs is not equal to the number of datasets.")
+        assert len(start_xs) == self.number_of_datasets, "The number of start Xs is not equal to the number of datasets."
 
         self._start_xs = start_xs
 
@@ -308,8 +303,7 @@ class BasicFittingContext(FittingContext):
     @end_xs.setter
     def end_xs(self, end_xs: list) -> None:
         """Sets all of the end Xs in the model."""
-        if len(end_xs) != self.number_of_datasets:
-            raise RuntimeError("The provided number of end Xs is not equal to the number of datasets.")
+        assert len(end_xs) == self.number_of_datasets, "The number of end Xs is not equal to the number of datasets."
 
         self._end_xs = end_xs
 
@@ -331,8 +325,7 @@ class BasicFittingContext(FittingContext):
     @exclude_start_xs.setter
     def exclude_start_xs(self, start_xs: list) -> None:
         """Sets the exclude start Xs stored by the context."""
-        if len(start_xs) != self.number_of_datasets:
-            raise RuntimeError("The provided number of exclude start Xs is not equal to the number of datasets.")
+        assert len(start_xs) == self.number_of_datasets, "The number of exclude start Xs is not equal to the number of datasets."
 
         self._exclude_start_xs = start_xs
 
@@ -344,8 +337,7 @@ class BasicFittingContext(FittingContext):
     @exclude_end_xs.setter
     def exclude_end_xs(self, end_xs: list) -> None:
         """Sets the exclude end Xs stored by the context."""
-        if len(end_xs) != self.number_of_datasets:
-            raise RuntimeError("The provided number of exclude end Xs is not equal to the number of datasets.")
+        assert len(end_xs) == self.number_of_datasets, "The number of exclude end Xs is not equal to the number of datasets."
 
         self._exclude_end_xs = end_xs
 

@@ -1,0 +1,1 @@
+- Fixed a bug that crashed Mantid when calling Open Slice Viewer from Indirect/Inelastic interfaces when there are less than two histograms in the workspace.

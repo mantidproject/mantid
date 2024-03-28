@@ -30,7 +30,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent)
+ILLEnergyTransfer::ILLEnergyTransfer(IIndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 

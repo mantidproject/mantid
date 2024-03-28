@@ -1,1 +1,0 @@
-- Fixed bug in the cut viewer where the plot would not update after changing plot settings until the window had been resized.

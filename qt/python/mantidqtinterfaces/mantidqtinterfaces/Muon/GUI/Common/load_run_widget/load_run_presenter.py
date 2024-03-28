@@ -216,7 +216,7 @@ class LoadRunWidgetPresenter(object):
         try:
             self._model.execute()
         except ValueError as error:
-            self._view.warning_popup(error.args[0])
+            self._view.warning_popup(str(error))
             self.run_list = flatten_run_list(self._model.current_runs)
         finished_callback()
 
@@ -232,10 +232,10 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
-    def error_callback(self, error_message):
+    def error_callback(self, async_failure):
         self.thread_success = False
         self.enable_notifier.notify_subscribers()
-        self._view.warning_popup(error_message)
+        self._view.warning_popup(async_failure.exception_msg())
 
     def handle_load_thread_finished(self):
         if self._load_thread is not None:

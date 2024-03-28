@@ -64,7 +64,7 @@ requirements:
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - lib3mf  # [win]
     - nexus
-    - {{ pin_compatible("numpy", upper_bound="1.25") }}
+    - {{ pin_compatible("numpy", upper_bound="1.26") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}
     - pycifrw {{ pycifrw }}
     - python
@@ -76,7 +76,7 @@ requirements:
     - toml
     - libglu  # [linux]
     - joblib
-    - orsopy
+    - orsopy {{ orsopy }}
 
 about:
   home: https://github.com/mantidproject/mantid

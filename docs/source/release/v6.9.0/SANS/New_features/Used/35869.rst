@@ -1,3 +1,0 @@
-- Switching between a custom output file and an automatically-generated one can now be performed using the
-  ``Enter Custom Filename`` checkbox on the :ref:`Sum Runs tab <ISIS_SANS_Sum_Runs_Tab-ref>` in the
-  :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>`

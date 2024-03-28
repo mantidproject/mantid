@@ -1,1 +1,0 @@
-- Fixed the :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` algorithm when loading a Nexus file with no grouping info so that it loads the grouping from the IDF.

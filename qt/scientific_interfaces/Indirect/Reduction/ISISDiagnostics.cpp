@@ -24,7 +24,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
+ISISDiagnostics::ISISDiagnostics(IIndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(

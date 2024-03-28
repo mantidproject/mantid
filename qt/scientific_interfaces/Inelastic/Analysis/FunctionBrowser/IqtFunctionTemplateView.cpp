@@ -30,11 +30,11 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
-IqtFunctionTemplateView::IqtFunctionTemplateView(QWidget *parent) : FunctionTemplateView(parent) { init(); }
+IqtFunctionTemplateView::IqtFunctionTemplateView(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateView() {
+  (void)customizations;
+  init();
+}
 
 void IqtFunctionTemplateView::createProperties() {
   m_parameterManager->blockSignals(true);
@@ -210,15 +210,18 @@ void IqtFunctionTemplateView::parameterChanged(QtProperty *prop) {
   }
 }
 
-void IqtFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &parameterNames) {
+void IqtFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &parameterNames) {
   MantidQt::MantidWidgets::ScopedFalse _parameterBlock(m_emitParameterValueChange);
   m_parameterNames.clear();
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
-    auto const name = parameterNames[i];
-    m_parameterNames[prop] = name;
-    if (!name.empty()) {
-      prop->setPropertyName(QString::fromStdString(name));
+    auto const it = parameterNames.find(i);
+    if (it != parameterNames.cend()) {
+      auto const name = it->second;
+      m_parameterNames[prop] = name;
+      if (!name.empty()) {
+        prop->setPropertyName(QString::fromStdString(name));
+      }
     }
   }
 }
@@ -229,8 +232,6 @@ void IqtFunctionTemplateView::clear() {
   removeExponentialTwo();
   removeExponentialOne();
 }
-
-void IqtFunctionTemplateView::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 
 void IqtFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);

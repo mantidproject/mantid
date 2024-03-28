@@ -1,1 +1,0 @@
-- A bug in PyChop where opening the "Ascii Data Window" resets the internal state so that subsequent calculations become incorrect has been fixed.

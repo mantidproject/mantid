@@ -109,12 +109,12 @@ MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength) 
   return inputWS;
 }
 
-MatrixWorkspace_sptr createWorkspaceWithIndirectInstrumentAndParameters() {
+MatrixWorkspace_sptr createWorkspaceWithIndirectInstrumentAndParameters(std::string const &analyser) {
 
   auto testWorkspace = createWorkspace(1, 5);
   std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   // IRIS instrument with graphite detector.
-  auto const ipfFilename = idfdirectory + "IRIS" + "_" + "graphite" + "_" + "002" + "_Parameters.xml";
+  auto const ipfFilename = idfdirectory + "IRIS" + "_" + analyser + "_" + "002" + "_Parameters.xml";
 
   auto loadInst = AlgorithmManager::Instance().create("LoadInstrument");
   loadInst->setLogging(true);

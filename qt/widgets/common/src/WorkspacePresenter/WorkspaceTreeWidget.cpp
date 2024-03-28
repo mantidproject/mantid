@@ -65,7 +65,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, 
   setupLoadButtonMenu();
 
   // Dialog box used for user to specify folder to save multiple workspaces into
-  m_saveFolderDialog = new QFileDialog;
+  m_saveFolderDialog = new QFileDialog(this);
   m_saveFolderDialog->setFileMode(QFileDialog::Directory);
   m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
 

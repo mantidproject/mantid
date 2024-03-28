@@ -10,15 +10,15 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-class IndirectDataAnalysisTab;
+class DataAnalysisTab;
 
 class DataAnalysisTabFactory {
 public:
   explicit DataAnalysisTabFactory(QTabWidget *tabWidget);
-  IndirectDataAnalysisTab *makeMSDFitTab(int const index) const;
-  IndirectDataAnalysisTab *makeIqtFitTab(int const index) const;
-  IndirectDataAnalysisTab *makeConvFitTab(int const index) const;
-  IndirectDataAnalysisTab *makeFqFitTab(int const index) const;
+  DataAnalysisTab *makeMSDFitTab(int const index) const;
+  DataAnalysisTab *makeIqtFitTab(int const index) const;
+  DataAnalysisTab *makeConvFitTab(int const index) const;
+  DataAnalysisTab *makeFqFitTab(int const index) const;
 
 private:
   QTabWidget *m_tabWidget;

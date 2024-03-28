@@ -40,7 +40,8 @@ parameterEstimateSetter(IDAFunctionParameterEstimation::ParameterEstimator estim
     auto const parameterValues = estimator(x, y);
 
     for (auto it = parameterValues.cbegin(); it != parameterValues.cend(); ++it) {
-      function->setParameter(it->first, it->second);
+      if (!std::isinf(it->second))
+        function->setParameter(it->first, it->second);
     }
   };
 }

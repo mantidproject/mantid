@@ -1,1 +1,0 @@
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` has new keyword argument to apply or not apply goniometer tilts

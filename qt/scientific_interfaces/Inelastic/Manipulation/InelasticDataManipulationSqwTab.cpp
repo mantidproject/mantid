@@ -36,7 +36,7 @@ InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent
       m_view(view) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
 
 void InelasticDataManipulationSqwTab::setup() {}
@@ -48,13 +48,14 @@ void InelasticDataManipulationSqwTab::setup() {}
 void InelasticDataManipulationSqwTab::handleDataReady(std::string const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName);
-    try {
-      double eFixed = WorkspaceUtils::getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName));
-      m_model->setEFixed(eFixed);
-    } catch (std::runtime_error const &ex) {
-      m_view->showMessageBox(ex.what());
+    auto &ads = AnalysisDataService::Instance();
+    if (auto const eFixed = WorkspaceUtils::getEFixed(ads.retrieveWS<MatrixWorkspace>(dataName))) {
+      m_model->setEFixed(*eFixed);
+    } else {
+      m_view->showMessageBox("An 'Efixed' value could not be found in the provided workspace.");
       return;
     }
+
     plotRqwContour();
     m_view->setDefaultQAndEnergy();
   }

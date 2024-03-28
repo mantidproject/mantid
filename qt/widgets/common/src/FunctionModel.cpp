@@ -650,4 +650,10 @@ std::string FunctionModel::setBackgroundA0(double value) {
   return foundName;
 }
 
+void FunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  (void)fitResolutions;
+}
+
+void FunctionModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+
 } // namespace MantidQt::MantidWidgets

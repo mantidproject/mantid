@@ -33,13 +33,9 @@ class VASPLoader(AbInitioLoader):
 
     """
 
-    def __init__(self, input_ab_initio_filename: str = None) -> None:
-        """
-
-        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "VASP"
+    @property
+    def _ab_initio_program(self) -> str:
+        return "VASP"
 
     def read_vibrational_or_phonon_data(self, logger: Logger = None) -> AbinsData:
         input_filename = self._clerk.get_input_filename()

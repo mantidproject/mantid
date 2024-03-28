@@ -61,7 +61,7 @@ digraph ISISIndirectEnergyTransfer {
     scale_monitor                 [label="scale_monitor\nApplies monitor scaling\nas per the IPF."]
     scale_detectors               [label="scale_detectors\nScales detectors by the\nmonitor intensity."]
     rebin_reduction               [label="rebin_reduction\nRebins the reduction based\non the RebinParam option."]
-    group_spectra                 [label="group_spectra\nGroups spectra based\non the GroupingPolicy."]
+    group_spectra                 [label="group_spectra\nGroups spectra based\non the GroupingMethod."]
     fold_chopped                  [label="fold_chopped\nFolds multiple frames into\na single reduction."]
     rename_reduction              [label="rename_reduction\nRenames reduced workspaces\nas per the IPF options."]
     save_reduction                [label="save_reduction\nSaves reduced files in formats\ngiven by SaveFormats."]

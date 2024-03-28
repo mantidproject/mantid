@@ -107,6 +107,12 @@ bool Stretch::validate() {
     return false;
   }
 
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
+    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
+    return false;
+  }
+
   return true;
 }
 
@@ -141,20 +147,28 @@ void Stretch::run() {
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto stretch = AlgorithmManager::Instance().create("BayesStretch");
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  std::string const algorithmName = useQuickBayes ? "BayesStretch2" : "BayesStretch";
+  auto stretch = AlgorithmManager::Instance().create(algorithmName);
   stretch->initialize();
   stretch->setProperty("SampleWorkspace", sampleName);
   stretch->setProperty("ResolutionWorkspace", resName);
   stretch->setProperty("EMin", eMin);
   stretch->setProperty("EMax", eMax);
-  stretch->setProperty("SampleBins", nBins);
-  stretch->setProperty("Elastic", elasticPeak);
-  stretch->setProperty("Background", background);
-  stretch->setProperty("NumberSigma", sigma);
   stretch->setProperty("NumberBeta", beta);
-  stretch->setProperty("Loop", sequence);
+  stretch->setProperty("Elastic", elasticPeak);
   stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
   stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
+  if (useQuickBayes) {
+    stretch->setProperty("Background", background == "Flat" ? background : "None");
+  } else {
+    stretch->setProperty("Background", background);
+    stretch->setProperty("SampleBins", nBins);
+    stretch->setProperty("NumberSigma", sigma);
+    stretch->setProperty("Loop", sequence);
+  }
 
   m_batchAlgoRunner->addAlgorithm(stretch);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -247,20 +261,20 @@ int Stretch::displaySaveDirectoryMessage() {
  */
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
 
-  auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
-  auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
-  // Check Sigma and Beta workspaces exist
-  if (sigma.right(5).compare("Sigma") == 0 && beta.right(4).compare("Beta") == 0) {
+  std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
+  auto const plotErrors = SettingsHelper::externalPlotErrorBars();
+  auto const plotSigma = (plotType == "All" || plotType == "Sigma");
+  auto const plotBeta = (plotType == "All" || plotType == "Beta");
 
-    std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
-    if (plotType == "All" || plotType == "Beta")
-      m_plotter->plotSpectra(beta.toStdString(), "0", SettingsHelper::externalPlotErrorBars());
-    if (plotType == "All" || plotType == "Sigma")
-      m_plotter->plotSpectra(sigma.toStdString(), "0", SettingsHelper::externalPlotErrorBars());
-  } else {
-    g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
+  auto const fitWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
+  for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
+    auto const name = (*it)->getName();
+    if (plotSigma && name.substr(name.length() - 5) == "Sigma") {
+      m_plotter->plotSpectra(name, "0", plotErrors);
+    } else if (plotBeta && name.substr(name.length() - 4) == "Beta") {
+      m_plotter->plotSpectra(name, "0", plotErrors);
+    }
   }
   setPlotResultIsPlotting(false);
 }

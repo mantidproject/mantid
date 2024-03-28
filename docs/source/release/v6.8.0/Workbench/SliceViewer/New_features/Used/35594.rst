@@ -1,1 +1,0 @@
-- Integer ticks/grid lines are now used if possible for hkl-axes.

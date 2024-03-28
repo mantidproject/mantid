@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 from mantid.simpleapi import (
     IntegratePeaksShoeboxTOF,
     CreatePeaksWorkspace,
@@ -186,6 +187,22 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         )
         # check output file saved
         self.assertTrue(path.exists(out_file))
+
+    @mock.patch("IntegratePeaksShoeboxTOF.find_nearest_peak_in_data_window")
+    def test_exec_no_peak(self, mock_find_ipos):
+        mock_find_ipos.return_value = None
+        out = IntegratePeaksShoeboxTOF(
+            InputWorkspace=self.ws,
+            PeaksWorkspace=self.peaks,
+            OutputWorkspace="peaks6",
+            GetNBinsFromBackToBackParams=True,
+            NRows=3,
+            NCols=3,
+            WeakPeakThreshold=0.0,
+            OptimiseShoebox=False,
+            IntegrateIfOnEdge=True,
+        )
+        self._assert_found_correct_peaks(out, i_over_sigs=2 * [0.0])
 
 
 if __name__ == "__main__":

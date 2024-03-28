@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "QPair"
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -23,7 +24,7 @@ MANTIDQT_INELASTIC_DLL std::unordered_map<std::string, size_t>
 extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace, const size_t &axisIndex);
 
 MANTIDQT_INELASTIC_DLL std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
-MANTIDQT_INELASTIC_DLL double getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
+MANTIDQT_INELASTIC_DLL std::optional<double> getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
 MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res);
 MANTIDQT_INELASTIC_DLL bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
@@ -47,6 +48,24 @@ getADSWorkspace(std::string const &workspaceName);
 template MANTIDQT_INELASTIC_DLL std::shared_ptr<Mantid::API::ITableWorkspace_sptr>
 getADSWorkspace(std::string const &workspaceName);
 
+template <typename Iterator, typename Functor>
+std::vector<std::string> transformElements(Iterator const fromIter, Iterator const toIter, Functor const &functor) {
+  std::vector<std::string> newVector;
+  newVector.reserve(toIter - fromIter);
+  std::transform(fromIter, toIter, std::back_inserter(newVector), functor);
+  return newVector;
+}
+
+template <typename T, typename Predicate> void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
+  auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
+  if (iter != vector.end())
+    vector.erase(iter, vector.end());
+}
+
+MANTIDQT_INELASTIC_DLL std::vector<std::string> attachPrefix(std::vector<std::string> const &strings,
+                                                             std::string const &prefix);
+
+MANTIDQT_INELASTIC_DLL std::string parseRunNumbers(std::vector<std::string> const &workspaceNames);
 } // namespace WorkspaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -127,6 +127,16 @@ public:
 
     m_model->ungroupAlgorithm("groupedWS");
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("groupedWS"));
+
+    m_model->groupAlgorithm(workspaceInputString, "groupedWS");
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("groupedWS"));
+  }
+
+  void test_getOutputWorkspaceNames_retrieves_correct_output_string() {
+    m_model->setOutputWorkspaceNames("Workspace_name_out");
+
+    TS_ASSERT_EQUALS(m_model->getOutputWorkspaceNames(), "Workspace_name_out_elwin_eq,Workspace_name_out_elwin_eq2,"
+                                                         "Workspace_name_out_elwin_elf,Workspace_name_out_elwin_elt");
   }
 
   void test_LoadAlgorithm_set_up() {

@@ -1,1 +1,0 @@
-- Only crop in time-of-flight if a finite range is supplied in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`. The time difference is minimal, but users will no longer see a log for a function that isn't being run.

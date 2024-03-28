@@ -15,17 +15,25 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, public IETViewSubscriber {
+
+class MANTIDQT_INDIRECT_DLL IIETPresenter {
+public:
+  virtual void notifySaveClicked() = 0;
+  virtual void notifyRunClicked() = 0;
+  virtual void notifyPlotRawClicked() = 0;
+  virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
+  virtual void notifyRunFinished() = 0;
+};
+
+class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, public IIETPresenter {
   Q_OBJECT
 
 public:
-  IETPresenter(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
-  ~IETPresenter() override;
+  IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model);
 
   void setup() override;
   void run() override;
 
-  void notifyNewMessage(const QString &message) override;
   void notifySaveClicked() override;
   void notifyRunClicked() override;
   void notifyPlotRawClicked() override;
@@ -38,9 +46,6 @@ public slots:
 private slots:
   void algorithmComplete(bool error);
   void plotRawComplete(bool error);
-
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
   void setInstrumentDefault();
 
 private:
@@ -51,10 +56,9 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   std::string m_outputGroupName;
-  std::vector<std::string> m_outputWorkspaces;
 
-  std::unique_ptr<IETModel> m_model;
-  std::unique_ptr<IETView> m_view;
+  IIETView *m_view;
+  std::unique_ptr<IIETModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

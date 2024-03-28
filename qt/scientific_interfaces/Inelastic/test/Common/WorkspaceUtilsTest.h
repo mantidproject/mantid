@@ -69,9 +69,32 @@ public:
     TS_ASSERT_EQUALS(getEMode(testWorkspace), "Indirect");
   }
 
-  void test_getEFixed_throws_for_no_instrument() {
+  void test_getEFixed_returns_std_nullopt_for_no_instrument() {
     auto const testWorkspace = createWorkspace(5);
-    TS_ASSERT_THROWS(getEFixed(testWorkspace), const std::runtime_error &);
+    TS_ASSERT(!getEFixed(testWorkspace));
+  }
+
+  void test_getEFixed_returns_std_nullopt_for_instrument_but_no_efixed_parameter() {
+    auto const testWorkspace = createWorkspaceWithInelasticInstrument(2);
+    TS_ASSERT(!getEFixed(testWorkspace));
+  }
+
+  void test_getEFixed_returns_an_efixed_for_a_workspace_with_parameters() {
+    auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters();
+
+    auto const efixed = getEFixed(testWorkspace);
+
+    TS_ASSERT(efixed);
+    TS_ASSERT_EQUALS(1.845, *efixed);
+  }
+
+  void test_getEFixed_returns_an_efixed_for_fmica_analyser() {
+    auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters("fmica");
+
+    auto const efixed = getEFixed(testWorkspace);
+
+    TS_ASSERT(efixed);
+    TS_ASSERT_DELTA(0.2067, *efixed, 0.00001);
   }
 
   void test_extractAxisLabels_gives_labels() {
@@ -85,5 +108,15 @@ public:
     auto const testWorkspace = createWorkspace(3);
 
     TS_ASSERT_EQUALS(extractAxisLabels(testWorkspace, 1).size(), 0);
+  }
+
+  void test_parseRunNumber_calls_with_different_inputs() {
+    std::vector<std::string> workspaces_with_run_numbers{"irs123_test", "irs280_test", "irs60"};
+    std::vector<std::string> workspaces_without_run_numbers{"irs_test", "irs213_test"};
+    std::vector<std::string> individual_workspace{"irs123_test"};
+
+    TS_ASSERT_EQUALS(parseRunNumbers(workspaces_with_run_numbers), "irs60-280_test");
+    TS_ASSERT_EQUALS(parseRunNumbers(workspaces_without_run_numbers), "irs_test");
+    TS_ASSERT_EQUALS(parseRunNumbers(individual_workspace), "irs123_test");
   }
 };

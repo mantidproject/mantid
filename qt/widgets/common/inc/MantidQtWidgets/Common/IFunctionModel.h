@@ -73,6 +73,8 @@ public:
   virtual void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) = 0;
   virtual void setGlobalParameterValue(std::string const &parameterName, double value) = 0;
   virtual std::string setBackgroundA0(double value) = 0;
+  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
+  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 protected:
   static void copyParametersAndErrors(const IFunction &funFrom, IFunction &funTo);

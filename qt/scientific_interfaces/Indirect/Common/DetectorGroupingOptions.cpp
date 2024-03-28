@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorGroupingOptions.h"
+#include "Common/ValidationUtils.h"
 #include "MantidAPI/AlgorithmProperties.h"
 
 #include <unordered_map>
@@ -35,6 +36,10 @@ void DetectorGroupingOptions::setGroupingMethod(QString const &option) {
   m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
 }
 
+void DetectorGroupingOptions::setSaveCustomVisible(bool const visible) {
+  m_uiForm.pbSaveCustomGrouping->setVisible(visible);
+}
+
 void DetectorGroupingOptions::handleGroupingMethodChanged(QString const &method) {
   m_uiForm.swGrouping->setCurrentIndex(static_cast<int>(GROUPING_METHODS[method.toStdString()]));
 }
@@ -43,11 +48,18 @@ std::string DetectorGroupingOptions::groupingMethod() const {
   return m_uiForm.cbGroupingOptions->currentText().toStdString();
 }
 
-std::string DetectorGroupingOptions::mapFile() const { return m_uiForm.dsMapFile->getFirstFilename().toStdString(); }
+std::string DetectorGroupingOptions::groupingFile() const {
+  return m_uiForm.dsMapFile->getFirstFilename().toStdString();
+}
 
 std::string DetectorGroupingOptions::customGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
 int DetectorGroupingOptions::nGroups() const { return m_uiForm.spNumberGroups->value(); }
+
+std::optional<std::string> DetectorGroupingOptions::validateGroupingProperties(std::size_t const &spectraMin,
+                                                                               std::size_t const &spectraMax) const {
+  return ValidationUtils::validateGroupingProperties(groupingProperties(), spectraMin, spectraMax);
+}
 
 std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::groupingProperties() const {
   auto const method = groupingMethod();
@@ -55,7 +67,7 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
   Mantid::API::AlgorithmProperties::update("GroupingMethod", method, *properties);
   switch (GROUPING_METHODS[method]) {
   case GroupingMethod::File:
-    Mantid::API::AlgorithmProperties::update("MapFile", mapFile(), *properties);
+    Mantid::API::AlgorithmProperties::update("GroupingFile", groupingFile(), *properties);
     break;
   case GroupingMethod::Groups:
     Mantid::API::AlgorithmProperties::update("NGroups", std::to_string(nGroups()), *properties);

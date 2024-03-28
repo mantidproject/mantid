@@ -1,0 +1,1 @@
+- Add method ``plot_integrated_peaks_MD`` to ``BaseSX`` to plot result of IntegratePeaksMD and save in pdf

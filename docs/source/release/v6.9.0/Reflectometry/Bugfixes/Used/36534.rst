@@ -1,1 +1,0 @@
-- Fixes a bug with live data on OFFSPEC where the alternative method for looking up the vertical gap for slit 2 in :ref:`algm-ReflectometryReductionOneLiveData` was incorrectly returning the vertical gap for slit 1.

@@ -770,7 +770,7 @@ public:
     void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-    void removeAllRows();
+    void removeAllRows() throw(std::exception);
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,

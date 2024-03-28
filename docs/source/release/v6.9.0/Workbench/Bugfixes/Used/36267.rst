@@ -1,1 +1,0 @@
-- Fixed bug where, in certain cases, dragging a plot's legend could cause the plot to resize.

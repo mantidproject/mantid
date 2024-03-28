@@ -1,1 +1,0 @@
-- Fixed layout bug when toggling the peaks overlays interface on/off.

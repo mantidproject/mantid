@@ -1,1 +1,0 @@
-- Fixed a bug where double clicking a 3D plot to edit an axis label would grab hold of the plot for rotation and not release when the dialog was closed.

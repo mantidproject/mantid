@@ -26,6 +26,7 @@ class Tester(object):
         "DMOL3Loader": "outmol",
         "EuphonicLoader": "castep_bin",
         "GAUSSIANLoader": "log",
+        "JSONLoader": "json",
         "VASPLoader": "xml",
         "VASPOUTCARLoader": "OUTCAR",
     }

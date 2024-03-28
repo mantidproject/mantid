@@ -1,1 +1,0 @@
-- Corrects the Q resolution calculation for the custom and TXT file formats output by :ref:`algm-SaveReflectometryAscii` so that it matches the calculation described in the documentation.

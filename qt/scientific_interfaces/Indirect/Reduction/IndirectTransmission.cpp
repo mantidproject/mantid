@@ -28,7 +28,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI, QWidget *parent)
+IndirectTransmission::IndirectTransmission(IIndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(

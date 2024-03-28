@@ -31,7 +31,7 @@ FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), pa
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
 }
 
-FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
+FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -71,7 +71,7 @@ void FqFitDataView::notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, 
 }
 
 void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
-  IndirectFitDataView::addTableEntry(row, newRow);
+  FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.parameter));
   auto flags = cell->flags();

@@ -34,6 +34,12 @@ class FittingPresenter(object):
         self.fit_complete_observer = GenericObserverWithArgPassing(self.fit_done)
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.fit_complete_observer)
 
+        self.find_peaks_convolve_started_observer = GenericObserver(self.find_peaks_convolve_started)
+        self.plot_widget.find_peaks_convolve_started_notifier.add_subscriber(self.find_peaks_convolve_started_observer)
+
+        self.find_peaks_convolve_completed_observer = GenericObserverWithArgPassing(self.find_peaks_convolve_completed)
+        self.plot_widget.find_peaks_convolve_done_notifier.add_subscriber(self.find_peaks_convolve_completed_observer)
+
         self.connect_view_signals()
 
     def fit_all_started(self, do_sequential):
@@ -76,6 +82,17 @@ class FittingPresenter(object):
             )
         else:
             self.plot_widget.set_final_state_progress_bar(None, status="Failed, invalid fit.")
+
+    def find_peaks_convolve_started(self):
+        self.plot_widget.set_progress_bar_to_in_progress()
+        self.disable_view()
+
+    def find_peaks_convolve_completed(self, is_success):
+        if is_success:
+            self.plot_widget.set_progress_bar_success(status="success")
+        else:
+            self.plot_widget.set_progress_bar_failed(status="failed")
+        self.enable_view()
 
     def disable_view(self, _=None, fit_all=False):
         self.data_widget.view.setEnabled(False)

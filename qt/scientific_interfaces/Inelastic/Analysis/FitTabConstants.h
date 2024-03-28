@@ -6,9 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FunctionBrowser/FitTypes.h"
+#include "FunctionBrowser/TemplateSubType.h"
+
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -70,6 +75,13 @@ static const auto TAB_NAME = "ConvFit";
 static const auto HAS_RESOLUTION = true;
 static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+
+inline auto templateSubTypes() {
+  return packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(),
+                              std::make_unique<ConvTypes::FitSubType>(), std::make_unique<ConvTypes::DeltaSubType>(),
+                              std::make_unique<ConvTypes::TempSubType>(),
+                              std::make_unique<ConvTypes::BackgroundSubType>());
+}
 
 } // namespace ConvFit
 

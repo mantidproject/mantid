@@ -35,6 +35,8 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
+  if (actions.find("Plot 3D Surface") == actions.end())
+    actions["Plot 3D Surface"] = "Plot 3D Surface";
   return actions;
 }
 
@@ -190,6 +192,14 @@ public:
     setExpectationsForWidgetEnabling(true);
 
     m_presenter->handlePlotTiledClicked();
+  }
+
+  void test_that_the_plot3DdClicked_signal_will_attempt_to_plot_3D_Surface() {
+    setExpectationsForWidgetEnabling(false);
+    EXPECT_CALL(*m_model, plot3DSurface()).Times(1);
+    setExpectationsForWidgetEnabling(true);
+
+    m_presenter->handlePlot3DClicked();
   }
 
   ///----------------------------------------------------------------------

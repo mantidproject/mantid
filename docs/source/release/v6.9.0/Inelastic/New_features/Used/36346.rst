@@ -1,1 +1,0 @@
-- When loading data into the ``ConvFit`` tab of the :ref:`Inelastic Data Analysis interface <interface-inelastic-data-analysis>`, an estimate is provided for the ``Amplitude``, ``Height`` and ``FWHM`` parameter values. They are estimated to be the maximum value in the corresponding spectrum.

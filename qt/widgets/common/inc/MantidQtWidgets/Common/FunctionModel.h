@@ -76,6 +76,8 @@ public:
   void updateMultiDatasetAttributes(const IFunction &fun);
   void updateParameters(const IFunction &fun) override;
   std::string setBackgroundA0(double value) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
+  void setQValues(const std::vector<double> &qValues) override;
 
 protected:
   size_t m_numberDomains = 0;

@@ -9,7 +9,7 @@
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "FunctionTemplatePresenter.h"
-#include "IqtFunctionModel.h"
+#include "IqtFunctionTemplateModel.h"
 
 class QtProperty;
 
@@ -24,10 +24,10 @@ class IqtFunctionTemplateView;
 
 class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public FunctionTemplatePresenter {
 public:
-  explicit IqtTemplatePresenter(IqtFunctionTemplateView *view, std::unique_ptr<IqtFunctionModel> model);
+  explicit IqtTemplatePresenter(IqtFunctionTemplateView *view, std::unique_ptr<IqtFunctionTemplateModel> model);
 
   IqtFunctionTemplateView *view() const;
-  IqtFunctionModel *model() const;
+  IqtFunctionTemplateModel *model() const;
 
   void setNumberOfExponentials(int) override;
   void setStretchExponential(bool) override;
@@ -41,8 +41,6 @@ public:
   EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
-
-  void setBackgroundA0(double value) override;
 
 protected:
   void updateView() override;

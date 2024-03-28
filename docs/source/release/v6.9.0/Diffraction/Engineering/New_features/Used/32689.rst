@@ -1,1 +1,0 @@
-- A new toolbar button named "Hide Legend" is introduced to toggle the visibility of the legend box of the :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` :ref:`Fitting tab <ui engineering fitting>`. By Default the button is unchecked.

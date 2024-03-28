@@ -98,9 +98,9 @@ std::map<ConvTypes::BackgroundType, TemplateSubTypeDescriptor>
     };
 
 template <>
-std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
-    {false, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {true, {"DeltaFunction", "DeltaFunction", {ParamID::DELTA_HEIGHT, ParamID::DELTA_CENTER}}},
+std::map<ConvTypes::DeltaType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<ConvTypes::DeltaType>::g_typeMap{
+    {ConvTypes::DeltaType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {ConvTypes::DeltaType::Delta, {"DeltaFunction", "DeltaFunction", {ParamID::DELTA_HEIGHT, ParamID::DELTA_CENTER}}},
 };
 
 template <>

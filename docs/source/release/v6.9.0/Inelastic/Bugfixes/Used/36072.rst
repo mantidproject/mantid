@@ -1,1 +1,0 @@
-- Buttons and edits in the elwin tab for external plotting the current preview, or for naming the Sample Environment in the elwin tab of the :ref:`Inelastic Data Manipulation Interface <interface-inelastic-data-manipulation>` have been relocated to be under the preview plot.

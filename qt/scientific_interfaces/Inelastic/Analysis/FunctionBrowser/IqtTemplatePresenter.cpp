@@ -14,14 +14,17 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
-IqtTemplatePresenter::IqtTemplatePresenter(IqtFunctionTemplateView *browser, std::unique_ptr<IqtFunctionModel> model)
+IqtTemplatePresenter::IqtTemplatePresenter(IqtFunctionTemplateView *browser,
+                                           std::unique_ptr<IqtFunctionTemplateModel> model)
     : FunctionTemplatePresenter(browser, std::move(model)) {
   view()->updateState();
 }
 
 IqtFunctionTemplateView *IqtTemplatePresenter::view() const { return dynamic_cast<IqtFunctionTemplateView *>(m_view); }
 
-IqtFunctionModel *IqtTemplatePresenter::model() const { return dynamic_cast<IqtFunctionModel *>(m_model.get()); }
+IqtFunctionTemplateModel *IqtTemplatePresenter::model() const {
+  return dynamic_cast<IqtFunctionTemplateModel *>(m_model.get());
+}
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   if (n < 0) {
@@ -139,25 +142,20 @@ void IqtTemplatePresenter::estimateFunctionParameters() {
   updateView();
 }
 
-void IqtTemplatePresenter::setBackgroundA0(double value) {
-  m_model->setBackgroundA0(value);
-  view()->setA0(value, 0.0);
-}
-
 void IqtTemplatePresenter::updateViewParameters() {
-  static std::map<IqtFunctionModel::ParamID, void (IqtFunctionTemplateView::*)(double, double)> setters{
-      {IqtFunctionModel::ParamID::EXP1_HEIGHT, &IqtFunctionTemplateView::setExp1Height},
-      {IqtFunctionModel::ParamID::EXP1_LIFETIME, &IqtFunctionTemplateView::setExp1Lifetime},
-      {IqtFunctionModel::ParamID::EXP2_HEIGHT, &IqtFunctionTemplateView::setExp2Height},
-      {IqtFunctionModel::ParamID::EXP2_LIFETIME, &IqtFunctionTemplateView::setExp2Lifetime},
-      {IqtFunctionModel::ParamID::STRETCH_HEIGHT, &IqtFunctionTemplateView::setStretchHeight},
-      {IqtFunctionModel::ParamID::STRETCH_LIFETIME, &IqtFunctionTemplateView::setStretchLifetime},
-      {IqtFunctionModel::ParamID::STRETCH_STRETCHING, &IqtFunctionTemplateView::setStretchStretching},
-      {IqtFunctionModel::ParamID::BG_A0, &IqtFunctionTemplateView::setA0}};
+  static std::map<ParamID, void (IqtFunctionTemplateView::*)(double, double)> setters{
+      {ParamID::EXP1_HEIGHT, &IqtFunctionTemplateView::setExp1Height},
+      {ParamID::EXP1_LIFETIME, &IqtFunctionTemplateView::setExp1Lifetime},
+      {ParamID::EXP2_HEIGHT, &IqtFunctionTemplateView::setExp2Height},
+      {ParamID::EXP2_LIFETIME, &IqtFunctionTemplateView::setExp2Lifetime},
+      {ParamID::STRETCH_HEIGHT, &IqtFunctionTemplateView::setStretchHeight},
+      {ParamID::STRETCH_LIFETIME, &IqtFunctionTemplateView::setStretchLifetime},
+      {ParamID::STRETCH_STRETCHING, &IqtFunctionTemplateView::setStretchStretching},
+      {ParamID::FLAT_BG_A0, &IqtFunctionTemplateView::setA0}};
   auto values = model()->getCurrentValues();
   auto errors = model()->getCurrentErrors();
-  for (auto const name : values.keys()) {
-    (view()->*setters.at(name))(values[name], errors[name]);
+  for (auto const &value : values) {
+    (view()->*setters.at(value.first))(value.second, errors[value.first]);
   }
 }
 

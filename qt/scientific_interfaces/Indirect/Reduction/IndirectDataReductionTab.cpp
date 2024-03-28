@@ -24,7 +24,7 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent)
+IndirectDataReductionTab::IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
@@ -127,8 +127,8 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const 
  *
  * @return Instrument config widget
  */
-MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
-  return m_idrUI->m_uiForm.iicInstrumentConfiguration;
+MantidWidgets::IInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
+  return m_idrUI->getInstrumentConfiguration();
 }
 
 QString IndirectDataReductionTab::getInstrumentName() const {
@@ -234,7 +234,6 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   loadParamAlg->execute();
   energyWs = loadParamAlg->getProperty("Workspace");
 
-  double efixed = WorkspaceUtils::getEFixed(energyWs);
   auto spectraMinDbl = energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
   Mantid::specnum_t spectraMin = boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 
@@ -250,7 +249,9 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->setProperty("OutputWorkspace", "__tof");
   convUnitsAlg->setProperty("Target", "TOF");
   convUnitsAlg->setProperty("EMode", "Indirect");
-  convUnitsAlg->setProperty("EFixed", efixed);
+  if (auto const efixed = WorkspaceUtils::getEFixed(energyWs)) {
+    convUnitsAlg->setProperty("EFixed", *efixed);
+  }
   convUnitsAlg->execute();
   MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 

@@ -218,6 +218,9 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _add_global_ties_to_simultaneous_function(self) -> None:
         """Creates and adds ties to the simultaneous function to represent the global parameters."""
+        assert self.simultaneous_fit_function is not None, "This method assumes the simultaneous fit function is not None."
+        self._remove_non_existing_global_parameters()
+
         current_dataset_index = self.fitting_context.current_dataset_index
 
         for global_parameter in self.fitting_context.global_parameters:
@@ -226,11 +229,17 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _create_global_tie_string(self, index: int, global_parameter: str) -> str:
         """Create a string to represent the tying of a global parameter."""
-        ties = [
-            "f" + str(i) + "." + global_parameter for i in range(self.fitting_context.simultaneous_fit_function.nFunctions()) if i != index
-        ]
+        ties = ["f" + str(i) + "." + global_parameter for i in range(self.simultaneous_fit_function.nFunctions()) if i != index]
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
+
+    def _remove_non_existing_global_parameters(self) -> None:
+        """Removes non-existing parameters from the global parameters list."""
+        self.global_parameters = [
+            global_parameter
+            for global_parameter in self.global_parameters
+            if self.simultaneous_fit_function.hasParameter(f"f0.{global_parameter}")
+        ]
 
     def _get_plot_guess_fit_function(self) -> IFunction:
         """Returns the fit function to evaluate when plotting a guess."""

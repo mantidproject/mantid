@@ -36,6 +36,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.fit_started_notifier = GenericObservable()
         self.algorithmStarted.connect(self.fitting_started_slot)
         self.algorithmFailed.connect(self.fitting_failed_slot)
+        self.function_changed_notifier = GenericObservable()
 
     def set_output_window_names(self):
         """
@@ -171,6 +172,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         super(EngDiffFitPropertyBrowser, self).function_changed_slot()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+        self.function_changed_notifier.notify_subscribers()
 
     @Slot()
     def fitting_started_slot(self):

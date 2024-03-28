@@ -32,11 +32,11 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
-SingleFunctionTemplateView::SingleFunctionTemplateView(QWidget *parent) : FunctionTemplateView(parent) { init(); }
+SingleFunctionTemplateView::SingleFunctionTemplateView(TemplateBrowserCustomizations customizations)
+    : FunctionTemplateView() {
+  (void)customizations;
+  init();
+}
 
 void SingleFunctionTemplateView::createProperties() {
   m_parameterManager->blockSignals(true);
@@ -99,7 +99,7 @@ void SingleFunctionTemplateView::setParameterValueQuietly(std::string const &par
   setParameterSilent(m_parameterMap[parameterName], parameterValue, parameterError);
 }
 
-void SingleFunctionTemplateView::updateParameterNames(const QMap<int, std::string> &) {}
+void SingleFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &) {}
 
 void SingleFunctionTemplateView::updateAvailableFunctions(
     const std::map<std::string, std::string> &functionInitialisationStrings) {
@@ -119,9 +119,5 @@ void SingleFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::strin
     m_parameterManager->setGlobal(m_parameterMap[parameterName], findIter != globals.cend());
   }
 }
-
-void SingleFunctionTemplateView::setBackgroundA0(double) {}
-void SingleFunctionTemplateView::setResolution(const std::vector<std::pair<std::string, size_t>> &) {}
-void SingleFunctionTemplateView::setQValues(const std::vector<double> &) {}
 
 } // namespace MantidQt::CustomInterfaces::IDA

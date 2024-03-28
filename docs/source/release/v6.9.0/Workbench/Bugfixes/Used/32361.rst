@@ -1,1 +1,0 @@
-- Fix for crash which could happen if workspaces are deleted while the project saves. Save now fails in a controlled way.

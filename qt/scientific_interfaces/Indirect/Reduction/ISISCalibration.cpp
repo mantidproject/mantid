@@ -41,7 +41,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
+ISISCalibration::ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
