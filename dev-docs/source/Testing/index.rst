@@ -27,8 +27,8 @@ creation is outlined in :ref:`issue_tracking`.
    MuonAnalysis_test_guides/index
    ElementalAnalysis/ElementalAnalysisTests
    Indirect/DataReductionTests
-   Inelastic/DataAnalysisTests
    Inelastic/DataManipulationTests
+   Inelastic/QENSFittingTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting

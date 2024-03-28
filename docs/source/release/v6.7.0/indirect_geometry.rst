@@ -17,7 +17,7 @@ Bugfixes
 - A bug has been fixed that caused the :ref:`Elwin <elwin>` tab to not run specific spectra when using the workspace input method.
 - Fixed a hard crash caused by attempting to load an empty list of enabled SD detectors of IN16B data in :ref:`LoadILLIndirect <algm-LoadILLIndirect>`.
 - Fixed a bug that caused the function to not be updated when the workspace attribute was changed (e.g. resolution or tabulated function). This would lead to a crash as Mantid believed that the option was invalid.
-- Fixed a hard crash caused by highlighting and removing more cells than rows in the data input table from the :ref:`ConvFit tab <convfit>` of the :ref:`Inelastic Data Analysis Interface <interface-inelastic-data-analysis>`.
+- Fixed a hard crash caused by highlighting and removing more cells than rows in the data input table from the :ref:`ConvFit tab <convfit>` of the :ref:`Inelastic Data Analysis Interface <interface-inelastic-qens-fitting>`.
 
 
 Algorithms
