@@ -33,6 +33,10 @@ public:
   MOCK_METHOD1(showInfo, void(const ImageInfoModel::ImageInfo &info));
   MOCK_METHOD1(setWorkspace, void(const Mantid::API::Workspace_sptr &ws));
   MOCK_METHOD1(setRowCount, void(const int count));
+  MOCK_METHOD1(setColumnCount, void(const int count));
+  MOCK_METHOD3(setItem, void(const int rowIndex, const int columnIndex, QTableWidgetItem *item));
+  MOCK_METHOD1(hideColumn, void(const int index));
+  MOCK_METHOD1(showColumn, void(const int index));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

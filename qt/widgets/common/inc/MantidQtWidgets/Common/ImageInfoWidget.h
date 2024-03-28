@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
 #include <QMap>
-#include <QTableWidget>
 
 namespace MantidQt::MantidWidgets {
 
@@ -32,6 +31,11 @@ public:
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
   void showInfo(const ImageInfoModel::ImageInfo &info) override;
   void setRowCount(const int count) override;
+  void setColumnCount(const int count) override;
+  void setItem(const int rowIndex, const int columnIndex, QTableWidgetItem *item) override;
+  void hideColumn(const int index) override;
+  void showColumn(const int index) override;
+  void setShowSignal(const bool showSignal);
 
 private:
   std::unique_ptr<ImageInfoPresenter> m_presenter;
