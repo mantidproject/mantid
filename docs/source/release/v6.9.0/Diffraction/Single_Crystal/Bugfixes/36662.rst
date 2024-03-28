@@ -1,0 +1,1 @@
+- :ref:`LoadWANDSCD <LoadWANDSCD>` goniometer log kept as an alias to `s1` so that it is consistent with the daslog.
