@@ -137,27 +137,27 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider_2.valueChanged.connect(self.move_lowerSlider)
 
         # Set up validators for numeric edits
-        self.ui.labelFeedback.setStyleSheet("color:green;")
         self.dvalidator = QDoubleValidator()
         locale = QLocale.c()
         locale.setNumberOptions(QLocale.RejectGroupSeparator)
         self.dvalidator.setLocale(locale)
         self.dvalidator.setDecimals(6)
         self.populate_line_edits_default()
-        self.doubleLineEdits = {
-            "leStartTime": (self.ui.leStartTime, self.set_startTime),
-            "leStopTime": (self.ui.leStopTime, self.set_stopTime),
-            "leMinimumValue": (self.ui.leMinimumValue, self.set_minLogValue),
-            "leMaximumValue": (self.ui.leMaximumValue, self.set_maxLogValue),
-            "leStepSize": (self.ui.leStepSize, None),
-            "leValueTolerance": (self.ui.leValueTolerance, None),
-            "leTimeTolerance": (self.ui.leTimeTolerance, None),
-            "leIncidentEnergy": (self.ui.leIncidentEnergy, None),
-        }
-        for edit in self.doubleLineEdits.values():
+        self.doubleLineEdits = [
+            (self.ui.leStartTime, self.set_startTime),
+            (self.ui.leStopTime, self.set_stopTime),
+            (self.ui.leMinimumValue, self.set_minLogValue),
+            (self.ui.leMaximumValue, self.set_maxLogValue),
+            (self.ui.leStepSize, None),
+            (self.ui.leValueTolerance, None),
+            (self.ui.leTimeTolerance, None),
+            (self.ui.leIncidentEnergy, None),
+        ]
+
+        for edit in self.doubleLineEdits:
             edit[0].setValidator(self.dvalidator)
-            edit[0].textChanged.connect(self.validation_feedback)
-            edit[0].editingFinished.connect(self.reformat_and_callback)
+            edit[0].callback = edit[1]
+        self.connect_signals()
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
@@ -207,21 +207,13 @@ class MainWindow(QMainWindow):
             msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
             QMessageBox.information(self, "Click!", msg)
 
-    def validation_feedback(self):
-        input_txt = self.sender().text()
-        if self.dvalidator.validate(input_txt, 0)[0] != QDoubleValidator.Acceptable:
-            self.ui.labelFeedback.setText(f"Input value {input_txt} is not a valid number")
-            self.ui.labelFeedback.setStyleSheet("color:red")
-        else:
-            self.ui.labelFeedback.setText(f"Input value {input_txt} is valid")
-            self.ui.labelFeedback.setStyleSheet("color:green")
-
-    def reformat_and_callback(self):
+    def reformat(self):
         self.sender().setText(f"{float(self.sender().text()):.6f}")
-        self.ui.labelFeedback.setText("")
-        callback = self.doubleLineEdits[self.sender().objectName()][1]
-        if callback is not None:
-            callback()
+
+    def callback(self):
+        sender_edit = getattr(self.ui, self.sender().objectName())
+        if sender_edit.callback is not None:
+            sender_edit.callback()
 
     def populate_line_edits_default(self):
         ylim = self.ui.mainplot.get_ylim()
@@ -1040,14 +1032,14 @@ class MainWindow(QMainWindow):
             QDesktopServices.openUrl(QUrl(url))
 
     def connect_signals(self):
-        for edit in self.doubleLineEdits.values():
-            edit[0].textChanged.connect(self.validation_feedback)
-            edit[0].editingFinished.connect(self.reformat_and_callback)
+        for edit in self.doubleLineEdits:
+            edit[0].editingFinished.connect(self.reformat)
+            edit[0].editingFinished.connect(self.callback)
 
     def disconnect_signals(self):
-        for edit in self.doubleLineEdits.values():
-            edit[0].textChanged.disconnect(self.validation_feedback)
-            edit[0].editingFinished.disconnect(self.reformat_and_callback)
+        for edit in self.doubleLineEdits:
+            edit[0].editingFinished.disconnect(self.reformat)
+            edit[0].editingFinished.disconnect(self.callback)
 
     def _resetGUI(self, resetfilerun=False):
         """Reset GUI including all text edits and etc."""

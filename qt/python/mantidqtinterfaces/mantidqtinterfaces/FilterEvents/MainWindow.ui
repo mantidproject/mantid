@@ -199,25 +199,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QLabel" name="labelFeedback">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>250</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -959,8 +940,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>674</width>
-               <height>288</height>
+               <width>360</width>
+               <height>222</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_6">
