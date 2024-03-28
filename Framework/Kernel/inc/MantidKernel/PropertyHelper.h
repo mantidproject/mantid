@@ -178,7 +178,7 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
   auto stop = boost::lexical_cast<T>(strvalue.substr(pos + 1, numChar));
   if (start > stop) {
     std::swap(start, stop);
-    std::abs(std::make_signed_t<T>(step));
+    step = std::abs(std::make_signed_t<T>(step));
   }
 
   if (start + step < start)
