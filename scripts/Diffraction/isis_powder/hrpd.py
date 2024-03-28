@@ -73,6 +73,9 @@ class HRPD(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
+    def should_subtract_empty_inst_from_vanadium(self):
+        return self.should_subtract_empty_inst()  # HRPD want to treat vanadium same as sample
+
     def create_solid_angle_corrections(self, vanadium, run_details):
         """
         Creates the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
