@@ -28,6 +28,7 @@ set(SRC_FILES
     src/GroupDetectors2.cpp
     src/H5Util.cpp
     src/ISISDataArchive.cpp
+    src/ISISInstrDataCache.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
@@ -249,6 +250,7 @@ set(INC_FILES
     inc/MantidDataHandling/GroupDetectors2.h
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
+    inc/MantidDataHandling/ISISInstrDataCache.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
@@ -470,6 +472,7 @@ set(TEST_FILES
     GroupDetectorsTest.h
     H5UtilTest.h
     ISISDataArchiveTest.h
+    ISISInstrDataCacheTest.h
     ISISJournalGetExperimentRunsTest.h
     ISISJournalTest.h
     InstrumentRayTracerTest.h
