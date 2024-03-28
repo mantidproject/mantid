@@ -31,10 +31,6 @@ numpy:
 matplotlib:
   - 3.7.*
 
-# mantidqt host environment cannot resolve with openssl 3.2.0, there appears to be a conflict with qt-main 5.15.8
-openssl:
-  - 3.1.4
-
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
   - 1.2.0
