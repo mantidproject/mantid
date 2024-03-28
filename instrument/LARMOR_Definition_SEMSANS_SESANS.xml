@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="LARMOR" valid-from   ="2018-11-15 00:00:00"
-                          valid-to     ="2024-02-21 19:59:59"
-		          last-modified="2024-03-28 13:19:00">
+ name="LARMOR" valid-from   ="2024-02-21 20:00:00"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2024-03-28 13:22:00">
 
   <defaults>
     <length unit="meter"/>
@@ -251,6 +251,26 @@
      <location z="29.65" x="-0.5"/> 
  </component>   
 
+  <type name="SESANSSlab-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-6.25e-3" y="-0.025" z="0.0"  />
+      <left-front-top-point  x="-6.25e-3" y="0.025" z="0.0"  />
+      <left-back-bottom-point  x="-6.25e-4" y="-0.025" z="0.01"  />
+      <right-front-bottom-point  x="6.25e-4" y="-0.025" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+ <type name="SESANSSlab-panel">
+   <component type="SESANSSlab-pixel">
+     <locations x="-0.01875" x-end="0.01875" n-elements="4" />
+   </component>
+ </type>
+
+ <component type="SESANSSlabDetector" idlist="SESANSSlabDetector">
+     <location z="29.65" x="-0.6"/> 
+ </component>   
+
   <type name="WLSF-pixel" is="detector">
     <cuboid id="shape">
       <left-front-bottom-point x="-0.001046875" y="-0.0955" z="0.0"  />
@@ -307,6 +327,12 @@
  <type name="SEMSANSWLSFDetector">
 	<component type="SEMSANSWLSF-panel">
 		<location  x="0.0" z="0.0" name="SEMSANSWLSF-Panel1"> </location>
+	</component>
+ </type>
+
+ <type name="SESANSSlabDetector">
+	<component type="SESANSSlab-panel">
+		<location  x="0.0" z="0.0" name="SESANSSlab-Panel1"> </location>
 	</component>
  </type>
 
@@ -422,6 +448,10 @@
   
   <idlist idname="SEMSANSWLSFDetector">
    <id start="3000000" end="3000063" />
+  </idlist>
+
+  <idlist idname="SESANSSlabDetector">
+   <id start="4000000" end="4000003" />
   </idlist>
 
 </instrument>
