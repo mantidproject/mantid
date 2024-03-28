@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -221,7 +222,7 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
   }
 }
 
-/// Called from constructor to fill live listener name
+/// Called from constructor to fill techniques list
 void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
   Poco::AutoPtr<Poco::XML::NodeList> pNL_technique = elem->getElementsByTagName("technique");
   unsigned long n = pNL_technique->length();

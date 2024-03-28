@@ -662,21 +662,15 @@
   </instrument>
 
   <instrument name="IN4">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
+    <technique>Spectroscopy</technique>
   </instrument>
 
   <instrument name="IN5">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Spectroscopy</technique>
   </instrument>
 
   <instrument name="IN6">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+    <technique>Spectroscopy</technique>
   </instrument>
 
   <instrument name="IN10">
@@ -695,8 +689,7 @@
   </instrument>
 
   <instrument name="IN16B">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+    <technique>Backscattering</technique>
   </instrument>
 
   <instrument name="D11">
@@ -720,19 +713,19 @@
   </instrument>
 
   <instrument name="D2B">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
   </instrument>
 
   <instrument name="D20">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
   </instrument>
 
   <instrument name="D1B">
-    <technique>Powder diffraction</technique>
+    <technique>PowderDiffraction</technique>
   </instrument>
 
   <instrument name="D4C">
-    <technique>Liquid diffraction</technique>
+    <technique>LiquidDiffraction</technique>
   </instrument>
 
   <instrument name="D17">
@@ -744,19 +737,15 @@
   </instrument>
 
   <instrument name="PANTHER">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
+    <technique>Spectroscopy</technique>
   </instrument>
 
   <instrument name="SHARP">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer</technique>
+    <technique>Spectroscopy</technique>
   </instrument>
 
   <instrument name="D7">
-    <technique>Polarized diffraction</technique>
+    <technique>PolarizedDiffraction</technique>
     <technique>Polarized spectroscopy</technique>
     <technique>Diffuse Scattering</technique>
   </instrument>

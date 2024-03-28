@@ -27,9 +27,9 @@ void loadEmptyInstrument(std::string const &instrumentName, std::string const &o
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentWidget::ALFInstrumentWidget(QString workspaceName)
-    : MantidWidgets::InstrumentWidget(std::move(workspaceName), nullptr, true, true, 0.0, 0.0, true,
-                                      MantidWidgets::InstrumentWidget::Dependencies(), false,
-                                      "ALFView/InstrumentWidget", getTabCustomizations()) {
+    : MantidWidgets::InstrumentWidget(std::move(workspaceName), nullptr, true, true, 0.0, 0.0, true, false,
+                                      MantidWidgets::InstrumentWidget::Dependencies(), "ALFView/InstrumentWidget",
+                                      getTabCustomizations()) {
   removeTab("Instrument");
   removeTab("Draw");
   hideHelp();

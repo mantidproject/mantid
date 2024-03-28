@@ -1,0 +1,1 @@
+- Added new widget to the workbench: :ref:`Raw data explorer <rawdataexplorer-ref>`. It allows for quick exploration of raw data in the file tree using the most adapted visualization, one from :ref:`Instrument view <instrumentviewer-ref>`, 1D plot, 2D plot, and :ref:`Slice viewer <sliceviewer-ref>`.

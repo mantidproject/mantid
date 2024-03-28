@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
         self.plot_selector = None
         self.interface_manager = None
         self.script_repository = None
+        self.raw_data_explorer = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -158,6 +159,13 @@ class MainWindow(QMainWindow):
         self.plot_selector = PlotSelector(self)
         self.plot_selector.register_plugin()
         self.widgets.append(self.plot_selector)
+
+        self.set_splash("Loading Raw Data Explorer")
+        from workbench.plugins.rawdataexplorerwidget import RawDataExplorer
+
+        self.raw_data_explorer = RawDataExplorer(self)
+        self.raw_data_explorer.register_plugin()
+        self.widgets.append(self.raw_data_explorer)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -460,6 +468,8 @@ class MainWindow(QMainWindow):
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
         workspacecalculator = self.workspacecalculator
+        raw_data_explorer = self.raw_data_explorer
+
         # If more than two rows are needed in a column,
         # arrange_layout function needs to be revisited.
         # In the first column, there are three widgets in two rows
@@ -467,7 +477,7 @@ class MainWindow(QMainWindow):
         default_layout = {
             "widgets": [
                 # column 0
-                [[workspacewidget], [algorithm_selector, plot_selector]],
+                [[workspacewidget, raw_data_explorer], [algorithm_selector, plot_selector]],
                 # column 1
                 [[editor, ipython], [workspacecalculator]],
                 # column 2
@@ -554,6 +564,9 @@ class MainWindow(QMainWindow):
             # Cancel memory widget thread
             if self.memorywidget is not None:
                 self.memorywidget.presenter.cancel_memory_update()
+
+            if self.raw_data_explorer is not None:
+                self.raw_data_explorer.raw_data_explorer_presenter.cancel_memory_update()
 
             if self.interface_manager is not None:
                 self.interface_manager.closeHelpWindow()
