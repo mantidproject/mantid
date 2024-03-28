@@ -485,7 +485,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="All",
-            validator=StringListValidator(["Individual", "All", "File", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(["All", "File", "Custom", "Groups"]),
             doc="The method used to group detectors.",
         )
         self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
