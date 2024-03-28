@@ -14,7 +14,7 @@ std::string Mantid::DataHandling::ISISInstrDataCache::getInstrFilePath(std::stri
   std::string runNumber = fileName.substr(n);
 
   // Build path to index file
-  std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + "index.json";
+  std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
 
   std::ifstream ifstrm{jsonPath};
   Json::Value json;
