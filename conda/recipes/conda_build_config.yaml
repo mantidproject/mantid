@@ -21,8 +21,8 @@ python:
 boost:
   - 1.78
 
-hdf5:
-  - 1.14.3
+hdf5: # this is to move to libcurl>=8.4
+  - '>1.14.0,<1.15'
 
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
