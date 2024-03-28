@@ -113,7 +113,8 @@ void LoadErrorEventsNexus::exec() {
   auto min_tof = std::numeric_limits<double>::max();
   auto max_tof = std::numeric_limits<double>::lowest();
 
-  const PulseIndexer pulseIndexer(event_index, event_index->at(0), numEvents, "bank_error_events");
+  const PulseIndexer pulseIndexer(event_index, event_index->at(0), numEvents, "bank_error_events",
+                                  std::vector<size_t>());
   const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex();
   const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();
 

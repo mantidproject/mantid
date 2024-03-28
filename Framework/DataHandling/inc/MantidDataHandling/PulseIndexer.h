@@ -33,7 +33,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL PulseIndexer {
 public:
   PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
-               const std::size_t numEvents, const std::string &entry_name);
+               const std::size_t numEvents, const std::string &entry_name, const std::vector<size_t> &pulse_roi);
 
   /// Which element in the event_index array is the first one to use
   size_t getFirstPulseIndex() const;
@@ -47,8 +47,9 @@ public:
    */
   size_t getStartEventIndex(const size_t pulseIndex) const;
   /**
-   * The one past the last event(tof,detid) index to read for this pulse. When this is before the event indices to use,
-   * it returns the value of getStartEventIndex. This is only public for testing.
+   * The one past the last event(tof,detid) index to read for this pulse. When this is not a pulse index to use,
+   * it returns the value of getStartEventIndex. When the pulseIndex is past the end of the use regions, it returns the
+   * m_numEvents. This is only public for testing.
    */
   size_t getStopEventIndex(const size_t pulseIndex) const;
 
@@ -57,6 +58,8 @@ private:
 
   size_t determineFirstPulseIndex() const;
   size_t determineLastPulseIndex() const;
+  /// returns true when the roi says the pulse should be used
+  bool includedPulse(const size_t pulseIndex) const;
 
   /// vector of indices (length of # of pulses) into the event arrays
   const std::shared_ptr<std::vector<uint64_t>> m_event_index;
@@ -83,6 +86,8 @@ private:
    * neighboring values.
    */
   std::vector<std::size_t> m_roi;
+  /// true when there is more to check than the pulse being between the ends
+  bool m_roi_complex;
 
   /// Total number of pulsetime/pulseindex
   std::size_t m_numPulses;
