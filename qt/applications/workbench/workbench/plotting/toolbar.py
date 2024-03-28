@@ -212,11 +212,10 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 break
 
     def set_buttons_visibility(self, fig):
+        #  check if fitting and superplot should be enabled
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
             self.set_superplot_enabled(False)
-
-        # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
             for artist in ax.get_lines():
                 try:
@@ -226,11 +225,18 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 except Exception:
                     # The artist is not tracked - ignore this one and check the rest
                     continue
+            if isinstance(ax, MantidAxes):
+                for artists in ax.tracked_workspaces.values():
+                    if any([artist.workspace_index is None for artist in artists]):
+                        self.set_fit_enabled(False)
+                        self.set_superplot_enabled(False)
 
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         # There must be at least one MantidAxis plot with data for to generate a script, others will be skipped
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
+            self.set_fit_enabled(False)
+            self.set_superplot_enabled(False)
 
         # reenable script generation for colormaps
         if self.is_colormap(fig):
