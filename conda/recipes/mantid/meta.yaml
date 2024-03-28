@@ -33,8 +33,6 @@ requirements:
     - libcxx                                 # [osx]
 
   host:
-    - icu=72.1
-    - libxml2=2.10.4
     - boost {{ boost }}
     - eigen
     - gsl {{ gsl }}
