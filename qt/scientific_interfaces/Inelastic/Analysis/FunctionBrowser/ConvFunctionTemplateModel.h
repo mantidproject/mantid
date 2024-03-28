@@ -88,11 +88,11 @@ private:
   void checkConvolution(const IFunction_sptr &fun);
   void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet, bool &isFiTypeSet);
 
-  FitType m_fitType = FitType::None;
-  LorentzianType m_lorentzianType = LorentzianType::None;
-  DeltaType m_deltaType = DeltaType::None;
-  TempCorrectionType m_tempCorrectionType = TempCorrectionType::None;
-  BackgroundType m_backgroundType = BackgroundType::None;
+  ConvTypes::FitType m_fitType = ConvTypes::FitType::None;
+  ConvTypes::LorentzianType m_lorentzianType = ConvTypes::LorentzianType::None;
+  ConvTypes::DeltaType m_deltaType = ConvTypes::DeltaType::None;
+  ConvTypes::TempCorrectionType m_tempCorrectionType = ConvTypes::TempCorrectionType::None;
+  ConvTypes::BackgroundType m_backgroundType = ConvTypes::BackgroundType::None;
 
   BackgroundSubType m_backgroundSubtype;
 

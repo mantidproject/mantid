@@ -68,6 +68,13 @@ static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+
+inline auto templateSubTypes() {
+  return packTemplateSubTypes(
+      std::make_unique<IqtTypes::ExponentialSubType>(), std::make_unique<IqtTypes::StretchExpSubType>(),
+      std::make_unique<IqtTypes::BackgroundSubType>(), std::make_unique<IqtTypes::TieIntensitiesSubType>());
+}
+
 } // namespace IqtFit
 
 namespace ConvFit {

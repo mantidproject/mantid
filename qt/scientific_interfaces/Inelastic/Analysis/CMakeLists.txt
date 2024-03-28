@@ -33,8 +33,6 @@ set(SRC_FILES
     FunctionBrowser/FunctionTemplatePresenter.cpp
     FunctionBrowser/FqFunctionModel.cpp
     FunctionBrowser/IqtFunctionTemplateModel.cpp
-    FunctionBrowser/IqtFunctionTemplateView.cpp
-    FunctionBrowser/IqtTemplatePresenter.cpp
     FunctionBrowser/MSDFunctionModel.cpp
     FunctionBrowser/SingleFunctionTemplateModel.cpp
     FunctionBrowser/SingleFunctionTemplateView.cpp
@@ -70,7 +68,6 @@ set(INC_FILES
     FunctionBrowser/FqFunctionModel.h
     FunctionBrowser/ITemplatePresenter.h
     FunctionBrowser/IqtFunctionTemplateModel.h
-    FunctionBrowser/IqtTemplatePresenter.h
     FunctionBrowser/MSDFunctionModel.h
     FunctionBrowser/ParamID.h
     FunctionBrowser/SingleFunctionTemplatePresenter.h
@@ -104,7 +101,6 @@ set(MOC_FILES
     FitOutputOptionsView.h
     FitPlotView.h
     FunctionBrowser/FunctionTemplateView.h
-    FunctionBrowser/IqtFunctionTemplateView.h
     FunctionBrowser/SingleFunctionTemplateView.h
     FunctionBrowser/MultiFunctionTemplateView.h
     InelasticFitPropertyBrowser.h

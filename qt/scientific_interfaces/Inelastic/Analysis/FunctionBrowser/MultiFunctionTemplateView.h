@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <QList>
 #include <QMap>
 
 class QtProperty;
@@ -48,8 +47,8 @@ private:
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
   // Map fit type to a list of function parameters (QtProperties for those parameters)
-  std::vector<QMap<int, QList<QtProperty *>>> m_subTypeParameters;
-  std::vector<QList<QtProperty *>> m_currentSubTypeParameters;
+  std::vector<QMap<int, std::vector<QtProperty *>>> m_subTypeParameters;
+  std::vector<std::vector<QtProperty *>> m_currentSubTypeParameters;
   std::vector<QtProperty *> m_subTypeProperties;
 
   QMap<QtProperty *, ParamID> m_parameterMap;
