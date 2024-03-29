@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
@@ -72,7 +73,8 @@ void makeGroup(std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true), m_alwaysLoadAsGroup(false) {
+    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_autoLoad(true), m_showLoad(true),
+      m_alwaysLoadAsGroup(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
@@ -229,8 +231,19 @@ void DataSelector::autoLoadFile(const QString &filepath) {
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath.toStdString());
   loadAlg->setProperty("OutputWorkspace", baseName);
+  loadAlg->updatePropertyValues(m_loadProperties);
 
   m_algRunner.startAlgorithm(loadAlg);
+}
+
+/**
+ * Set an extra property on the load algorithm before execution
+ *
+ * @param propertyName :: The name of the Load algorithm property to be set
+ * @param value :: The value of the Load algorithm property to be set
+ */
+void DataSelector::setLoadProperty(std::string const &propertyName, bool const value) {
+  Mantid::API::AlgorithmProperties::update(propertyName, value, m_loadProperties);
 }
 
 /**
