@@ -49,14 +49,6 @@ std::string loadAlgName(const std::string &filePath) {
   return suffix == "dave" ? "LoadDaveGrp" : "Load";
 }
 
-void loadFile(std::string const &filename, std::string const &workspaceName) {
-  auto const loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setProperty("OutputWorkspace", workspaceName);
-  loadAlg->execute();
-}
-
 void makeGroup(std::string const &workspaceName) {
   auto const &ads = AnalysisDataService::Instance();
   if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
@@ -179,7 +171,7 @@ bool DataSelector::isValid() {
         // don't use algorithm runner because we need to know instantly.
         auto const filepath = m_uiForm.rfFileInput->getUserInput().toString().toStdString();
         if (!filepath.empty())
-          loadFile(filepath, wsName);
+          executeLoadAlgorithm(filepath, wsName);
 
         isValid = doesExistInADS(wsName);
 
@@ -225,12 +217,20 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
+  executeLoadAlgorithm(filepath.toStdString(), baseName);
+}
 
-  // create instance of load algorithm
-  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filepath.toStdString()));
+/**
+ * Executes the load algorithm in a background thread using the Algorithm runner
+ *
+ * @param filename :: The filename of the file to be loaded.
+ * @param outputWorkspace :: The name to give the output workspace.
+ */
+void DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filepath.toStdString());
-  loadAlg->setProperty("OutputWorkspace", baseName);
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setProperty("OutputWorkspace", outputWorkspace);
   loadAlg->updatePropertyValues(m_loadProperties);
 
   m_algRunner.startAlgorithm(loadAlg);
@@ -461,7 +461,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
     auto const file = extractLastOf(filepath, "/");
     if (fileFound(file)) {
       auto const workspaceName = cutLastOf(file, ".");
-      loadFile(filepath, workspaceName);
+      executeLoadAlgorithm(filepath, workspaceName);
 
       setWorkspaceSelectorIndex(QString::fromStdString(workspaceName));
       m_uiForm.cbInputType->setCurrentIndex(1);
