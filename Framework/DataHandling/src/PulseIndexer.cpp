@@ -29,7 +29,7 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
     if (pulse_roi.size() % 2 != 0)
       throw std::runtime_error("Invalid size for pulsetime roi, must be even or empty");
 
-    auto roi_combined = Mantid::Kernel::calculate_intersection(m_roi, pulse_roi);
+    auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, pulse_roi);
     m_roi.clear();
     m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
     m_roi_complex = bool(m_roi.size() > 2);
