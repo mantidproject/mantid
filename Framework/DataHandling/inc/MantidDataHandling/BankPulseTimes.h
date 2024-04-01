@@ -66,7 +66,7 @@ private:
   template <typename ValueType>
   void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
 
-  /// This is not needed
+  /// This determines the start time by finding the minimum value in the array
   void updateStartTime();
 
   /// Ensure that we always have a consistency between nPulses and periodNumbers containers
