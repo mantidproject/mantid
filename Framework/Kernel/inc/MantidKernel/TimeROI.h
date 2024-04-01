@@ -76,6 +76,7 @@ private:
   std::vector<Types::Core::DateAndTime> m_roi;
 };
 
+namespace ROI {
 /**
  * This calculates the intersection of two sorted vectors that represent regions of interest (ROI).
  * The ROI are pairs of [[include, exclude), [include,exclude), ...] where an empty vector is interpreted to mean "use
@@ -83,6 +84,7 @@ private:
  */
 template <typename TYPE>
 std::vector<TYPE> calculate_intersection(const std::vector<TYPE> &left, const std::vector<TYPE> &right);
+} // namespace ROI
 
 } // namespace Kernel
 } // namespace Mantid
