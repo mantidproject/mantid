@@ -189,7 +189,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   auto pCalcWorkspace = createEfficiencyWorkspace(pxd, pHe, pHeError, tCrit, wavelengthValues, pCalc);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, pCalcWorkspace);
 
-  if (propertyHasValue(PropertyNames::P_HE)) {
+  if (!getPropertyValue(PropertyNames::P_HE).empty()) {
     auto createSingleValuedWorkspace = createChildAlgorithm("CreateSingleValuedWorkspace");
     createSingleValuedWorkspace->initialize();
     createSingleValuedWorkspace->setProperty("DataValue", pHe);
@@ -204,9 +204,9 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // analyser for an incident unpolarised beam. T_para and T_anti are also calculated, the
   // transmission of the wanted and unwanted spin state. T = (T_para + T_anti) / 2
 
-  if (!(propertyHasValue(PropertyNames::OUTPUT_T_WORKSPACE) ||
-        propertyHasValue(PropertyNames::OUTPUT_T_PARA_WORKSPACE) ||
-        propertyHasValue(PropertyNames::OUTPUT_T_ANTI_WORKSPACE))) {
+  if (getPropertyValue(PropertyNames::OUTPUT_T_WORKSPACE).empty() &&
+      getPropertyValue(PropertyNames::OUTPUT_T_PARA_WORKSPACE).empty() &&
+      getPropertyValue(PropertyNames::OUTPUT_T_ANTI_WORKSPACE).empty()) {
     return;
   }
 
@@ -215,17 +215,17 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
 
   MatrixWorkspace_sptr tParaWorkspace =
       createWorkspace("tPara", "Helium Analyser Transmission T_para", wavelengthValues, tPara, tParaErrors);
-  if (propertyHasValue(PropertyNames::OUTPUT_T_PARA_WORKSPACE)) {
+  if (!getPropertyValue(PropertyNames::OUTPUT_T_PARA_WORKSPACE).empty()) {
     setProperty(PropertyNames::OUTPUT_T_PARA_WORKSPACE, tParaWorkspace);
   }
 
   MatrixWorkspace_sptr tAntiWorkspace =
       createWorkspace("tAnti", "Helium Analyser Transmission T_anti", wavelengthValues, tAnti, tAntiErrors);
-  if (propertyHasValue(PropertyNames::OUTPUT_T_ANTI_WORKSPACE)) {
+  if (!getPropertyValue(PropertyNames::OUTPUT_T_ANTI_WORKSPACE).empty()) {
     setProperty(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, tAntiWorkspace);
   }
 
-  if (!propertyHasValue(PropertyNames::OUTPUT_T_WORKSPACE)) {
+  if (getPropertyValue(PropertyNames::OUTPUT_T_WORKSPACE).empty()) {
     return;
   }
 
@@ -405,14 +405,5 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::divideWorkspace(MatrixWorkspace_s
   divide->setProperty("OutputWorkspace", "p");
   divide->execute();
   return divide->getProperty("OutputWorkspace");
-}
-
-bool HeliumAnalyserEfficiency::propertyHasValue(const std::string &property) {
-  std::string p = getPropertyValue(property);
-  if (p.empty()) {
-    setPropertyValue(property, "");
-    return false;
-  }
-  return true;
 }
 } // namespace Mantid::Algorithms

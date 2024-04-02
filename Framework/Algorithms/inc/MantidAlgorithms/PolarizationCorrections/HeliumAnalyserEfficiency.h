@@ -57,7 +57,6 @@ private:
                              const double mu, const double tCrit, MantidVec &tPara, MantidVec &tAnti,
                              MantidVec &tParaErrors, MantidVec &tAntiErrors);
   double calculateTCrit(const size_t numberOfBins);
-  bool propertyHasValue(const std::string &property);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
 };
