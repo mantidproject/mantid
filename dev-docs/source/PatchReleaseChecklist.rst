@@ -13,7 +13,7 @@ perform a full release look see :ref:`ReleaseChecklist`.
 Request
 #######
 
-*  Anyone may request a patch release, but that request must be intially
+*  Anyone may request a patch release, but that request must be initially
    approved by one of the local PMs.
 
 Authorisation
@@ -59,7 +59,7 @@ Cherry Picking & Code Review
 ----------------------------
 
 It is the job of the main reviewer of the release to review each
-issue/pull request marked ``PatchCandiate`` and decide if the risks of
+issue/pull request marked ``PatchCandidate`` and decide if the risks of
 the changes are low enough to include in a release that will not
 undergo full beta testing by scientists. If it is acceptable then on the release branch for each pull request:
 
