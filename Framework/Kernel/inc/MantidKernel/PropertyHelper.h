@@ -154,8 +154,11 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
   std::size_t pos = strvalue.find(':');
   std::size_t numChar = std::string::npos; // go to the end of the string
   T step{1};
+  bool dashSeparator = false;
   if (pos == std::string::npos) {
     pos = strvalue.find('-', 1);
+    if (pos != std::string::npos)
+      dashSeparator = true;
   } else {
     const auto posStep = strvalue.find(':', pos + 1);
     if (posStep != std::string::npos) {
@@ -176,19 +179,29 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
   // convert the input string into boundaries and run through a list
   auto start = boost::lexical_cast<T>(strvalue.substr(0, pos));
   auto stop = boost::lexical_cast<T>(strvalue.substr(pos + 1, numChar));
-  if (start > stop) {
+
+  if ((start > stop) && (dashSeparator)) {
     std::swap(start, stop);
-    step = std::abs(std::make_signed_t<T>(step));
   }
 
-  if (start + step < start)
-    throw std::logic_error("Step size is negative with increasing limits");
-
-  for (auto i = start; i <= stop;) {
-    value.emplace_back(i);
-    // done inside the loop because gcc7 doesn't like i+=step for short
-    // unsigned int
-    i = static_cast<T>(i + step);
+  if (start <= stop) {
+    if (start + step < start)
+      throw std::logic_error("Step size is negative with increasing limits");
+    for (auto i = start; i <= stop;) {
+      value.emplace_back(i);
+      // done inside the loop because gcc7 doesn't like i+=step for short
+      // unsigned int
+      i = static_cast<T>(i + step);
+    }
+  } else {
+    if (start + step >= start)
+      throw std::logic_error("Step size is positive with decreasing limits");
+    for (auto i = start; i >= stop;) {
+      value.emplace_back(i);
+      // done inside the loop because gcc7 doesn't like i+=step for short
+      // unsigned int
+      i = static_cast<T>(i + step);
+    }
   }
 }
 
