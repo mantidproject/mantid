@@ -48,27 +48,36 @@ void HeliumAnalyserEfficiency::init() {
   validator->add<WorkspaceUnitValidator>("Wavelength");
   validator->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator));
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "PA", Direction::Output));
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
+      "Input group workspace to use for polarization calculation");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "PA", Direction::Output),
+                  "Helium analyzer polarization as a function of wavelength");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "", Direction::Output, PropertyMode::Optional));
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "", Direction::Output, PropertyMode::Optional),
+      "Helium atoms polarization, a single value");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_WORKSPACE, "", Direction::Output,
-                                                        PropertyMode::Optional));
+                                                        PropertyMode::Optional),
+                  "Incident neutron transmission through the analyser as a function of wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_PARA_WORKSPACE, "", Direction::Output,
-                                                        PropertyMode::Optional));
+                                                        PropertyMode::Optional),
+                  "Parallel neutron transmission through the analyser as a function of wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, "", Direction::Output,
-                                                        PropertyMode::Optional));
+                                                        PropertyMode::Optional),
+                  "Antiparallel neutron transmission through the analyser as a function of wavelength");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   std::string initialSpinConfig = "11,10,01,00";
-  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator);
+  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator,
+                  "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::T_E, 0.9, mustBePositive, "Transmission of the empty cell");
   declareProperty(PropertyNames::PXD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::COVARIANCE, "", Direction::Input,
-                                                                       PropertyMode::Optional));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::COVARIANCE, "", Direction::Input,
+                                                           PropertyMode::Optional),
+      "Covariance matrix for the transmission of the empty cell and the gas pressure multiplied by cell length");
   declareProperty(PropertyNames::START_LAMBDA, 1.75, mustBePositive,
                   "Lower boundary of wavelength range to use for fitting");
   declareProperty(PropertyNames::END_LAMBDA, 8.0, mustBePositive,
