@@ -189,6 +189,11 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   auto pCalcWorkspace = createEfficiencyWorkspace(pxd, pHe, pHeError, tCrit, wavelengthValues, pCalc);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, pCalcWorkspace);
 
+  setOptionalOutputProperties(wavelengthValues, pHe, pHeError, mu, tCrit);
+}
+
+void HeliumAnalyserEfficiency::setOptionalOutputProperties(const MantidVec &wavelengthValues, const double pHe,
+                                                           const double pHeError, const double mu, const double tCrit) {
   if (!getPropertyValue(PropertyNames::P_HE).empty()) {
     auto createSingleValuedWorkspace = createChildAlgorithm("CreateSingleValuedWorkspace");
     createSingleValuedWorkspace->initialize();

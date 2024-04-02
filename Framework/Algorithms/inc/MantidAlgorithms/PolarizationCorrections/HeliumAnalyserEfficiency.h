@@ -57,6 +57,8 @@ private:
                              const double mu, const double tCrit, MantidVec &tPara, MantidVec &tAnti,
                              MantidVec &tParaErrors, MantidVec &tAntiErrors);
   double calculateTCrit(const size_t numberOfBins);
+  void setOptionalOutputProperties(const MantidVec &wavelengthValues, const double pHe, const double pHeError,
+                                   const double mu, const double tCrit);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
 };
