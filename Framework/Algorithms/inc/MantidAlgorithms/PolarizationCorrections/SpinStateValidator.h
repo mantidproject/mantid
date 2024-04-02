@@ -26,8 +26,7 @@ class MANTID_ALGORITHMS_DLL SpinStateValidator : public Kernel::TypedValidator<s
 public:
   SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins);
   Kernel::IValidator_sptr clone() const override;
-  static API::MatrixWorkspace_sptr WorkspaceForSpinState(API::WorkspaceGroup_sptr group, std::string spinStateOrder,
-                                                         std::string targetSpinState);
+
   static const std::string ZERO_ONE;
   static const std::string ONE_ZERO;
   static const std::string ZERO_ZERO;

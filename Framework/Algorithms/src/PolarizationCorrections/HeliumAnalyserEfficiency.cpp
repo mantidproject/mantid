@@ -10,6 +10,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -152,14 +153,14 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
   std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
-  const auto t11Ws =
-      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ONE_ONE);
-  const auto t10Ws =
-      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ONE_ZERO);
-  const auto t01Ws =
-      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ZERO_ONE);
-  const auto t00Ws =
-      SpinStateValidator::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput, SpinStateValidator::ZERO_ZERO);
+  const auto t11Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ONE_ONE);
+  const auto t10Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ONE_ZERO);
+  const auto t01Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ZERO_ONE);
+  const auto t00Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ZERO_ZERO);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)
   MatrixWorkspace_sptr tnsfWs = addTwoWorkspaces(t11Ws, t00Ws);

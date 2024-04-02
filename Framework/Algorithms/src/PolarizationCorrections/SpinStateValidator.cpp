@@ -54,15 +54,4 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
 
   return "";
 }
-
-API::MatrixWorkspace_sptr SpinStateValidator::WorkspaceForSpinState(API::WorkspaceGroup_sptr group,
-                                                                    std::string spinStateOrder,
-                                                                    std::string targetSpinState) {
-  std::vector<std::string> spinStateVector;
-  boost::split(spinStateVector, spinStateOrder, boost::is_any_of(","));
-  const auto wsIndex =
-      std::find(spinStateVector.cbegin(), spinStateVector.cend(), targetSpinState) - spinStateVector.cbegin();
-  return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
-}
-
 } // namespace Mantid::Algorithms
