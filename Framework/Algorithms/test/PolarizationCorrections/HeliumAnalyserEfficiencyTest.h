@@ -86,7 +86,7 @@ public:
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
     heliumAnalyserEfficiency->setProperty("OutputTransmissionWorkspace", t);
-    heliumAnalyserEfficiency->setProperty("HeliumPolarisation", pHe);
+    heliumAnalyserEfficiency->setProperty("HeliumAtomsPolarization", pHe);
     heliumAnalyserEfficiency->setProperty("OutputTransmissionParaWorkspace", tPara);
     heliumAnalyserEfficiency->setProperty("OutputTransmissionAntiWorkspace", tAnti);
     heliumAnalyserEfficiency->execute();
@@ -152,7 +152,7 @@ public:
     heliumAnalyserEfficiency->setProperty("SpinStates", "11,10,00,01");
     heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
     heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
-    heliumAnalyserEfficiency->setProperty("HeliumPolarisation", "p_He");
+    heliumAnalyserEfficiency->setProperty("HeliumAtomsPolarization", "p_He");
     heliumAnalyserEfficiency->execute();
 
     MatrixWorkspace_sptr pHeWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("p_He");

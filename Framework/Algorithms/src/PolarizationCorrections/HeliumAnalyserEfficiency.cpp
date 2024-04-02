@@ -29,7 +29,7 @@ using namespace API;
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
-static const std::string P_HE = "HeliumPolarisation";
+static const std::string P_HE = "HeliumAtomsPolarization";
 static const std::string OUTPUT_T_WORKSPACE = "OutputTransmissionWorkspace";
 static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
 static const std::string OUTPUT_T_ANTI_WORKSPACE = "OutputTransmissionAntiWorkspace";
