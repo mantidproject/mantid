@@ -596,7 +596,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMin", -1));
     // then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "5"));
-    // the problem is that this'll throw regardless as no numbers below zero can
+    // the problem is that this will throw regardless as no numbers below zero can
     // get in so i have to go over the bounds
     // so i have to either force Max higher or overlap, and both are tested
     // separatly
@@ -1185,6 +1185,44 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_1DHistoCuts() {
+    write1MDHistoWS(m_name);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+
+    // Check the first four lines
+    std::vector<std::string> lines(4, "");
+    for (int i = 0; i < 4; i++) {
+      std::getline(in, lines[i]);
+    }
+    TS_ASSERT_EQUALS(
+        lines[0],
+        "# {InputWorkspace: SaveAscii2WS, AxisAligned: 0, AlignedDim0: , AlignedDim1: , AlignedDim2: , AlignedDim3: , "
+        "AlignedDim4: , AlignedDim5: , BasisVector0: (0.0+1.0x 0.0 0.0), in 7.26 Ang^-1, 1.0,0.0,0.0, BasisVector1: "
+        "u2, in 7.26 Ang^-1, 0.0,1.0,0.0, BasisVector2: u3, in 3.14 Ang^-1,0.0,0.0,1.0, BasisVector3: , BasisVector4: "
+        ", BasisVector5: , Translation: , OutputExtents: -2.5,2.5,-0.16,0.16,-0.05,0.05, OutputBins: 1,50,1, "
+        "NormalizeBasisVectors: 1, ForceOrthogonal: 0, ImplicitFunctionXML: , IterateEvents: 1, Parallel: 0, "
+        "TemporaryDataWorkspace: , OutputWorkspace: " +
+            m_name + " }");
+    TS_ASSERT_EQUALS(lines[1], "# u2 in 7.26 Ang^-1, Signal, Error");
+    TS_ASSERT_EQUALS(lines[2], "-0.1568,3,1.73205");
+    TS_ASSERT_EQUALS(lines[3], "-0.1504,0,0");
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
   // public as it is used in LoadAsciiTest as well.
   static ITableWorkspace_sptr writeTableWS(const std::string &name) {
     auto table = WorkspaceFactory::Instance().createTable();
@@ -1247,6 +1285,21 @@ private:
 
     wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(l2, polar, azimutal, nBins);
     AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
+
+  void write1MDHistoWS(const std::string name) {
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16, "Dimensions", "3", "Extents", "-5,5,-4,4,-3,3", "Names",
+                                      "H,K,L", "Units", "r.l.u., r.l.u., r.l.u.", "Frames", "HKL,HKL,HKL", "SplitInto",
+                                      "2", "SplitThreshold", "50", "OutputWorkspace", name.c_str());
+
+    FrameworkManager::Instance().exec("FakeMDEventData", 8, "InputWorkspace", name.c_str(), "UniformParams", "100000",
+                                      "PeakParams", "100000,0,0,1,0.3", "RandomSeed", "3873875");
+
+    FrameworkManager::Instance().exec(
+        "BinMD", 18, "InputWorkspace", name.c_str(), "AxisAligned", "0", "BasisVector0",
+        "(0.0+1.0x 0.0 0.0), in 7.26 Ang^-1, 1.0,0.0,0.0", "BasisVector1", "u2, in 7.26 Ang^-1, 0.0,1.0,0.0",
+        "BasisVector2", "u3, in 3.14 Ang^-1,0.0,0.0,1.0", "OutputExtents", "-2.5,2.5,-0.16,0.16,-0.05,0.05",
+        "OutputBins", "1,50,1", "NormalizeBasisVectors", "1", "OutputWorkspace", name.c_str());
   }
 
   std::string initSaveAscii2(SaveAscii2 &save, std::vector<std::string> logList = {}) {

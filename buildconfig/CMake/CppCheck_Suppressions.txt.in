@@ -771,7 +771,7 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDiffCal.cpp:1
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDiffCal.cpp:164
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:67
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:68
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveAscii2.cpp:416
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveAscii2.cpp:420
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTOFRawNexus.cpp:285
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTOFRawNexus.cpp:357
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFocusedXYE.cpp:73
