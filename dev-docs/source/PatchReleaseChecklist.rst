@@ -19,8 +19,7 @@ Request
 Authorisation
 #############
 
-*  The Project Management Team must meet to authorise the patch
-   release.
+*  The Technical Working Group must meet to authorise the patch release.
 *  During the meeting other high value, low impact changes may be
    considered for inclusion for the release. Any that are to be included
    must be added to the patch release notes.
