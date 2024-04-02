@@ -44,24 +44,28 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
 
     MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
     WorkspaceGroup_sptr groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2});
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", groupWs->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
 
     MatrixWorkspace_sptr ws3 = generateWorkspace("ws3", x, y);
     groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2, ws3});
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", groupWs->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
 
     MatrixWorkspace_sptr ws4 = generateWorkspace("ws4", x, y);
     groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2, ws3, ws4});
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", groupWs->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     TS_ASSERT_THROWS_NOTHING(heliumAnalyserEfficiency->execute());
   }
 
@@ -71,6 +75,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->execute();
 
     const std::string t = "T";
@@ -85,6 +90,7 @@ public:
 
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->setProperty("OutputTransmissionWorkspace", t);
     heliumAnalyserEfficiency->setProperty("HeliumAtomsPolarization", pHe);
     heliumAnalyserEfficiency->setProperty("OutputTransmissionParaWorkspace", tPara);
@@ -149,6 +155,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", grpWs->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->setProperty("SpinStates", "11,10,00,01");
     heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
     heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
@@ -168,6 +175,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error &);
   }
@@ -186,6 +194,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
@@ -217,6 +226,7 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());

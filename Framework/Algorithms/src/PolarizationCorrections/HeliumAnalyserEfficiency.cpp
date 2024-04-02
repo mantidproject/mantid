@@ -52,7 +52,7 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "PA", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "Helium analyzer polarization as a function of wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "", Direction::Output, PropertyMode::Optional),
