@@ -24,7 +24,7 @@ public:
 
   void testSingleIncorrectInputs() {
     auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1});
-    auto incorrectInputs = std::vector<std::string>{"0 1", "2", "01,10", "!", "001"};
+    auto incorrectInputs = std::vector<std::string>{"0 1", "2", "01,10", "!", "001", "", " "};
     checkAllInputs(validator, incorrectInputs, false);
   }
 
