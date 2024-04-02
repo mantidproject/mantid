@@ -42,7 +42,7 @@ static const std::string PXD = "GasPressureTimesCellLength";
 static const std::string COVARIANCE = "Covariance";
 static const std::string START_LAMBDA = "StartLambda";
 static const std::string END_LAMBDA = "EndLambda";
-static const std::string STOP_ON_FIT_ERROR = "StopOnFitError";
+static const std::string IGNORE_FIT_QUALITY_ERROR = "IgnoreFitQualityError";
 } // namespace PropertyNames
 
 void HeliumAnalyserEfficiency::init() {
@@ -85,7 +85,9 @@ void HeliumAnalyserEfficiency::init() {
                   "Lower boundary of wavelength range to use for fitting");
   declareProperty(PropertyNames::END_LAMBDA, 8.0, mustBePositive,
                   "Upper boundary of wavelength range to use for fitting");
-  declareProperty(PropertyNames::STOP_ON_FIT_ERROR, true, "If the fit fails, then stop the algorithm",
+  declareProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR, false,
+                  "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
+                  "therefore not throw an error",
                   Direction::Input);
 }
 
@@ -261,7 +263,7 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   fit->setProperty("CreateOutput", true);
   fit->execute();
 
-  const bool stopOnFitError = getProperty(PropertyNames::STOP_ON_FIT_ERROR);
+  const bool stopOnFitError = getProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR);
   const std::string &status = fit->getProperty("OutputStatus");
   if (stopOnFitError && (!fit->isExecuted() || status != "success")) {
     auto const &errMsg{"Failed to fit to data in the calculation of p_He: " + status};
