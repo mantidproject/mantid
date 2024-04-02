@@ -11,7 +11,7 @@ Description
 -----------
 
 This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` with x-units
-of Time-of-Flight (TOF). It is adpated and extended form an algorithm in SXD2001 [1]_.
+of Time-of-Flight (TOF). It is adapted and extended from an algorithm in SXD2001 [1]_.
 
 The algorithm proceeds by fitting a ``PEakFunction`` and ``BackgroundFunction`` to the TOF spectrum of individual
 pixels. If the fit is successful (fit converged and the ratio of intensity/sigma > ``IoverSigmaThreshold``), then the
@@ -46,7 +46,7 @@ Usage
 
 **Example - IntegratePeaks1DProfile**
 
-.. testcode:: exampleIntegratePeaksShoeboxTOF
+.. testcode:: exampleIntegratePeaks1DProfile
 
     from mantid.simpleapi import *
 
@@ -63,7 +63,7 @@ Usage
 
 **Output:**
 
-.. testoutput:: exampleIntegratePeaksShoeboxTOF
+.. testoutput:: exampleIntegratePeaks1DProfile
 
     I/sigma = 49.64
 
