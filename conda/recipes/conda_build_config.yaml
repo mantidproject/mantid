@@ -21,16 +21,19 @@ python:
 boost:
   - 1.78
 
+hdf5: # this is to move to libcurl>=8.4
+  - '>1.14.0,<1.15'
+
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.22.*
+  - 1.24.*
 
 matplotlib:
   - 3.7.*
 
-# mantidqt host environment cannot resolve with openssl 3.2.0, there appears to be a conflict with qt-main 5.15.8
-openssl:
-  - 3.1.4
+# Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+orsopy:
+  - 1.2.0
 
 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
 # It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
@@ -44,9 +47,8 @@ pycifrw:
 sphinx_bootstrap_theme:
   - 0.8.1
 
-# Some unit test failures present in 1.12.0 from tanh not being found.
 scipy:
-  - '>=1.10.0,!=1.12.0'
+  - '>=1.10.0'
 
 pyqt:
   - 5.15
@@ -65,15 +67,12 @@ qscintilla2:
 tbb:
   - 2021
 
-hdf5:
-  - 1.12.*
-
 gsl:
   - 2.7
 
-# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25/26 causes a system test failure on linux
+# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
 libopenblas:
-  - '!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.26'
+  - '!=0.3.23,!=0.3.24,!=0.3.25'
 
 euphonic:
   - '>=1.2.1,<2.0'
