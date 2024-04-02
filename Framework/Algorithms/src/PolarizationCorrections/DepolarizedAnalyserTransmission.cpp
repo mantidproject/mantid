@@ -49,8 +49,8 @@ std::shared_ptr<IFunction> createFunction(std::string const &mtTransStart, std::
   std::ostringstream funcSS;
   funcSS << "name=UserFunction, Formula=" << EMPTY_CELL_TRANS_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*"
          << DEPOL_OPACITY_NAME << "*x)";
-  funcSS << "," << FitValues::EMPTY_CELL_TRANS_NAME << "=" << mtTransStart;
-  funcSS << "," << FitValues::DEPOL_OPACITY_NAME << "=" << depolOpacStart;
+  funcSS << "," << EMPTY_CELL_TRANS_NAME << "=" << mtTransStart;
+  funcSS << "," << DEPOL_OPACITY_NAME << "=" << depolOpacStart;
   return FunctionFactory::Instance().createInitialized(funcSS.str());
 }
 } // namespace FitValues
@@ -184,11 +184,10 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
   double const &fitQuality = fitAlg->getProperty("OutputChi2overDoF");
   bool const &qualityOverride = getProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE));
   if (fitQuality == 0 || (fitQuality > 1 && !qualityOverride)) {
-    throw std::runtime_error(
-        "Failed to fit to transmission workspace, " + inputWs->getName() + ": Fit quality (chi-squared) is too poor (" +
-        std::to_string(fitQuality) +
-        ". Should be 0 < x < 1). You may want to check that the correct monitor spectrum and starting "
-        "fitting values were provided.");
+    throw std::runtime_error("Failed to fit to transmission workspace, " + inputWs->getName() +
+                             ": Fit quality (chi-squared) is too poor (" + std::to_string(fitQuality) +
+                             ". Should be 0 < x < 1). You may want to check that the correct spectrum and starting "
+                             "fitting values were provided.");
   }
   ITableWorkspace_sptr const &paramWs = fitAlg->getProperty("OutputParameters");
   setProperty(std::string(PropNames::OUTPUT_WORKSPACE), paramWs);

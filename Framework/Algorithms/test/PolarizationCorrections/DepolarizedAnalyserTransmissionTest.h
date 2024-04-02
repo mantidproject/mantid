@@ -142,7 +142,7 @@ public:
     // THEN
     TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Failed to fit to transmission workspace, : Fit quality (chi-squared) is too poor "
-                            "(0.000000. Should be 0 < x < 1). You may want to check that the correct monitor spectrum "
+                            "(0.000000. Should be 0 < x < 1). You may want to check that the corrects spectrum "
                             "and starting fitting values were provided.");
     TS_ASSERT(!alg->isExecuted());
   }
