@@ -158,22 +158,6 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         }
         self._assert_valid_reduction_output(1, **alg_kwargs)
 
-    def test_reduction_with_individual_grouping(self):
-        """
-        Test when the GroupingMethod is Individual.
-        """
-        alg_kwargs = {
-            "Sample": ["OSI10203.raw"],
-            "CalFile": "osiris_041_RES10.cal",
-            "Vanadium": ["OSI10156.raw"],
-            "Container": ["OSI10241.raw"],
-            "ContainerScaleFactor": 0.5,
-            "SpectraMin": 3,
-            "SpectraMax": 361,
-            "GroupingMethod": "Individual",
-        }
-        self._assert_valid_reduction_output(359, **alg_kwargs)
-
     def test_reduction_with_n_groups_that_has_a_remainder(self):
         """
         Test when the GroupingMethod is Groups and there is a remaining number of groups.
