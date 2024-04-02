@@ -7,24 +7,26 @@
 #include <unordered_map>
 
 #include "MantidAPI/ISISInstrDataCache.h"
+#include "MantidKernel/Strings.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 
 std::string marJson = R"({
-"1234": "some/1234/path",
-"2342": "some/2342/path",
-"6789": "some/6789/path"
+"1234": "2023/MR1234",
+"2342": "2023/MR2342",
+"6789": "2023/MR6789"
 }
 )";
 
-std::string wishJson = R"({
-"1111": "some/111/path",
-"22222": "some/22222/path",
-"66666": "some/66666/path"
+std::string alfJson = R"({
+"89123": "2024/RB2220540-3",
+"89124": "2024/RB2220540-3",
+"89125": "2024/RB2220540-3"
 }
 )";
 
-std::unordered_map<std::string, std::string> instrFiles = {{"MAR", marJson}, {"WISH", wishJson}};
+std::unordered_map<std::string, std::string> instrFiles = {{"MAR", marJson}, {"ALF", alfJson}};
 
 class ISISInstrDataCacheTest : public CxxTest::TestSuite {
 public:
@@ -52,9 +54,9 @@ public:
   void testGetCorrectFilePath() {
     ISISInstrDataCache dc(m_dataCacheDir);
     std::string actualPath = dc.getInstrFilePath("MAR1234");
-    TS_ASSERT_EQUALS(actualPath, "some/1234/path");
-    actualPath = dc.getInstrFilePath("WISH22222");
-    TS_ASSERT_EQUALS(actualPath, "some/22222/path");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MAR/2023/MR1234");
+    actualPath = dc.getInstrFilePath("ALF89123");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/ALF/2024/RB2220540-3");
   }
 
 private:

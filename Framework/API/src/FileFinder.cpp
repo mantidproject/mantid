@@ -708,6 +708,35 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
 
   const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
 
+  // Implementation to search data cache
+  // Currently hard coded to ~/data/instrument for testing on Linux
+  std::string dataCachePath = Poco::Path::home() + "data/instrument";
+  g_log.notice() << "Looking for data cache in" << dataCachePath << "\n";
+  if (std::filesystem::exists(dataCachePath)) {
+    g_log.notice() << "Data cache found!\n";
+
+    auto dataCache = API::ISISInstrDataCache(dataCachePath);
+
+    for (const auto &filename : filenames) {
+      g_log.notice() << "Looking for filename " << filename << "\n";
+      std::string dirPath = dataCache.getInstrFilePath(filename);
+      if (!dirPath.empty()) {
+
+        for (const auto &ext : extensions) {
+          const Poco::Path filePath(dirPath, filename + ext);
+          const Poco::File file(filePath);
+
+          g_log.notice() << "Looking for file" << filePath.toString() << "\n";
+
+          if (file.exists()) {
+            return API::Result<std::string>(filePath.toString());
+          }
+        }
+      }
+      g_log.notice() << "Could not find filename " << filename << "\n";
+    }
+  }
+
   // Before we try any globbing, make sure we exhaust all reasonable attempts at
   // constructing the possible filename.
   // Avoiding the globbing of getFullPath() for as long as possible will help
@@ -761,18 +790,6 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
       errors += archivePath.errors();
 
   } // archs
-
-  std::string dataCachePath{"~/testDataCache"};
-  if (std::filesystem::exists(dataCachePath)) {
-    auto dataCache = API::ISISInstrDataCache(dataCachePath);
-    for (const auto &filename : filenames) {
-      API::Result<std::string> fullPath = dataCache.getInstrFilePath(dataCachePath);
-      if (fullPath) {
-        return (fullPath);
-      } else {
-      }
-    }
-  }
 
   return API::Result<std::string>("", errors);
 }
