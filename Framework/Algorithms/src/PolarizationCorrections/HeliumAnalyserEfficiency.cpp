@@ -26,6 +26,8 @@ DECLARE_ALGORITHM(HeliumAnalyserEfficiency)
 using namespace Kernel;
 using namespace API;
 
+const double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
+
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
@@ -413,6 +415,4 @@ bool HeliumAnalyserEfficiency::propertyHasValue(const std::string &property) {
   }
   return true;
 }
-
-const double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
 } // namespace Mantid::Algorithms
