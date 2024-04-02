@@ -160,16 +160,9 @@ public:
     TS_ASSERT_DELTA(pFromFit, p, 1e-5);
   }
 
-  void testCovarianceMatrix() {
-    // Should accept a 2x2 covariance matrix for the two input parameters
+  void testIncorrectCovarianceMatrix() {
     auto wsGrp = createExampleGroupWorkspace("wsGrp");
-
-    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
-
-    covariance->addColumn("str", "Name");
-    covariance->addColumn("double", "a");
-    covariance->addColumn("double", "b");
-    covariance->appendRow();
+    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
 
     // Test covariance matrix with incorrect size
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
@@ -177,6 +170,11 @@ public:
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error &);
+  }
+
+  void testCorrectCovarianceMatrix() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
 
     // Test with correctly sized covariance matrix
     covariance->appendRow();
@@ -185,11 +183,22 @@ public:
         covariance->cell<double>(i, j) = 5;
       }
 
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+  }
+
+  ITableWorkspace_sptr createBlankCovarianceMatrix() {
+    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
+
+    covariance->addColumn("str", "Name");
+    covariance->addColumn("double", "a");
+    covariance->addColumn("double", "b");
+    covariance->appendRow();
+    return covariance;
   }
 
   void testSmallNumberOfBins() {
