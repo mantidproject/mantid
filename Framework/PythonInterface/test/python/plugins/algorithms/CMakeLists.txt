@@ -68,6 +68,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaks1DProfileTest.py
     IntegratePeaksShoeboxTOFTest.py
     IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
