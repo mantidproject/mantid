@@ -102,13 +102,13 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::Inelastic::FitOutputOptionsView</class>
    <extends>QWidget</extends>
-   <header>FitOutputOptionsView.h</header>
+   <header>QENSFitting/FitOutputOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::Inelastic::DockWidgetArea</class>
    <extends>QWidget</extends>
-   <header>DockWidgetArea.h</header>
+   <header>QENSFitting/DockWidgetArea.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
