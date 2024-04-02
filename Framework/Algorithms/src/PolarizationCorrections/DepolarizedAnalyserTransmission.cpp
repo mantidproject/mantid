@@ -23,7 +23,7 @@ std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr START_X = "StartX";
 std::string_view constexpr END_X = "EndX";
-std::string_view constexpr FIT_QUALITY_OVERRIDE{"OverrideFitQualityError"};
+std::string_view constexpr IGNORE_FIT_QUALITY{"IgnoreFitQualityError"};
 std::string_view constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 std::string_view constexpr OUTPUT_FIT{"OutputFitCurves"};
 std::string_view constexpr OUTPUT_COV_MATRIX{"OutputCovarianceMatrix"};
@@ -96,9 +96,9 @@ void DepolarizedAnalyserTransmission::init() {
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
   declareProperty(std::string(PropNames::START_X), FitValues::START_X_START, "StartX value for the fit.");
   declareProperty(std::string(PropNames::END_X), FitValues::END_X_START, "EndX value for the fit.");
-  declareProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE), false,
-                  "Whether the algorithm should ignore a chi-squared (fit cost value) greater than 1 and therefore not "
-                  "throw an error.");
+  declareProperty(std::string(PropNames::IGNORE_FIT_QUALITY), false,
+                  "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
+                  "therefore not throw an error.");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropNames::OUTPUT_WORKSPACE), "",
                                                                        Kernel::Direction::Output),
                   "The name of the table workspace containing the fit parameter results.");
@@ -182,7 +182,7 @@ void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(Matrix
     throw std::runtime_error(errMsg);
   }
   double const &fitQuality = fitAlg->getProperty("OutputChi2overDoF");
-  bool const &qualityOverride = getProperty(std::string(PropNames::FIT_QUALITY_OVERRIDE));
+  bool const &qualityOverride = getProperty(std::string(PropNames::IGNORE_FIT_QUALITY));
   if (fitQuality == 0 || (fitQuality > 1 && !qualityOverride)) {
     throw std::runtime_error("Failed to fit to transmission workspace, " + inputWs->getName() +
                              ": Fit quality (chi-squared) is too poor (" + std::to_string(fitQuality) +
