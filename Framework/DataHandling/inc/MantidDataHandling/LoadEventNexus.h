@@ -159,6 +159,8 @@ public:
   Mantid::Types::Core::DateAndTime filter_time_start;
   /// Filter by stop time
   Mantid::Types::Core::DateAndTime filter_time_stop;
+  /// if wall-clock filtering was requested
+  bool m_is_time_filtered{false};
 
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;

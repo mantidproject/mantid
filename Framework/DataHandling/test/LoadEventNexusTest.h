@@ -442,6 +442,51 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  // FilteredLoadvsLoadThenFilter system test and algorithm usage example
+  void test_CNCS_7860_filtering() {
+    const std::string filename("CNCS_7860_event.nxs");
+    const std::string wsName("CNCS_7860");
+    constexpr double filterStart{60};
+    constexpr double filterEnd{120};
+    constexpr size_t NUM_HIST{8 * 128 * 50};
+    constexpr size_t NUM_EVENTS{29753};
+
+    LoadEventNexus alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", filename);
+    alg.setPropertyValue("OutputWorkspace", wsName);
+    alg.setProperty("FilterByTimeStart", filterStart);
+    alg.setProperty("FilterByTimeStop", filterEnd);
+    alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+    TS_ASSERT(alg.execute());
+
+    // get the workspace
+    auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    TS_ASSERT(outWS);
+
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS);
+
+    // number of empty spectra should match
+    size_t numEmpty{0};
+    for (std::size_t wi = 0; wi < outWS->getNumberHistograms(); ++wi)
+      if (outWS->getSpectrum(wi).empty())
+        numEmpty++;
+    TS_ASSERT_EQUALS(numEmpty, 31411); // observed from running LoadEventNexus + FilterByTime
+
+    // these are pixels that were showing the wrong behavior during testing
+    // should have one event [4325, 20673, 27475, 30675, 46869]
+    // near the magic pulse-time of missing events is 2010-Mar-25 16:10:36.997398376 when stoptime is 16:10:37
+    TS_ASSERT_EQUALS(outWS->getSpectrum(4325).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(20673).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(27475).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(30675).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(46869).getNumberEvents(), 1);
+
+    // cleanup assumes this worked
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -539,10 +584,10 @@ public:
         it2++;
       }
 
-      int pixelID = 2000;
+      constexpr std::size_t pixelID = 2000;
 
-      std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
-      std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
+      const std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
+      const std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
 
       // std::cout << events1.size() << '\n';
       TS_ASSERT_EQUALS(events1.size(), events2.size());
