@@ -29,7 +29,7 @@ endif()
 find_program(CPPCHECK_EXECUTABLE NAMES cppcheck)
 
 if(MSVC)
-  set(CPPCHECK_TEMPLATE_ARG --template="{file}({line}): warning : ({severity}-{id}) {message}")
+  set(CPPCHECK_TEMPLATE_ARG --template= "{file}({line}): warning : ({severity}-{id}) {message}")
   set(CPPCHECK_FAIL_REGULAR_EXPRESSION "[(]error[)]")
   set(CPPCHECK_WARN_REGULAR_EXPRESSION "[(]style[)]")
 elseif(CMAKE_COMPILER_IS_GNUCXX)
