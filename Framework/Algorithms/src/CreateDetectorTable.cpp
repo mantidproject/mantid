@@ -117,7 +117,7 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
     try {
       std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
       ws->getEFixed(detector);
-    } catch (std::runtime_error &) {
+    } catch (std::invalid_argument &) {
       calcQ = false;
     }
   } else {
