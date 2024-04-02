@@ -18,12 +18,14 @@ using namespace Mantid::Kernel;
 namespace {
 // these values are simliar to those in EventList::EventSortType
 enum PulseSorting { UNKNOWN, UNSORTED, PULSETIME_SORT };
+
 } // namespace
 
 namespace Mantid::DataHandling {
 
-/// The first period
-const unsigned int BankPulseTimes::FirstPeriod = 1;
+const std::string BankPulseTimes::DEFAULT_START_TIME("1970-01-01T00:00:00Z");
+
+const int BankPulseTimes::FIRST_PERIOD(1);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
@@ -31,13 +33,16 @@ const unsigned int BankPulseTimes::FirstPeriod = 1;
  *  @param times
  */
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times)
-    : pulseTimes(times), have_period_info(false), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), pulseTimes(times), have_period_info(false), m_sorting_info(PulseSorting::UNKNOWN) {
+  this->updateStartTime();
   this->finalizePeriodNumbers();
 }
 
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times,
                                const std::vector<int> &periodNumbers)
-    : periodNumbers(periodNumbers), pulseTimes(times), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), pulseTimes(times), have_period_info(true),
+      m_sorting_info(PulseSorting::UNKNOWN) {
+  this->updateStartTime();
   this->finalizePeriodNumbers();
 }
 
@@ -47,14 +52,15 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
  * @param periodNumbers :: Period numbers to index into. Index via frame/pulse
  */
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
-    : periodNumbers(periodNumbers), have_period_info(true), m_sorting_info(PulseSorting::UNKNOWN) {
+    : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), have_period_info(true),
+      m_sorting_info(PulseSorting::UNKNOWN) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
-  // If the offset is not present, use Unix epoch
-  if (!file.hasAttr("offset"))
-    startTime = "1970-01-01T00:00:00Z";
-  else
+
+  // Use the offset if it is present
+  if (file.hasAttr("offset"))
     file.getAttr("offset", startTime);
+
   Mantid::Types::Core::DateAndTime start(startTime);
 
   // number of pulse times
@@ -104,6 +110,14 @@ void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Ty
   }
 }
 
+void BankPulseTimes::updateStartTime() {
+  if (!pulseTimes.empty()) {
+    const auto minimum = std::min_element(pulseTimes.cbegin(), pulseTimes.cend());
+    startTime = minimum->toISO8601String();
+  }
+  // otherwise the existing startTime stays
+}
+
 void BankPulseTimes::finalizePeriodNumbers() {
   if (pulseTimes.empty()) {
     // set periods to empty vector
@@ -136,11 +150,104 @@ int BankPulseTimes::periodNumber(const size_t index) const {
   if (have_period_info)
     return this->periodNumbers[index];
   else
-    return FirstPeriod;
+    return FIRST_PERIOD;
 }
 
 const Mantid::Types::Core::DateAndTime &BankPulseTimes::pulseTime(const size_t index) const {
   return this->pulseTimes[index];
+}
+
+//----------------------------------------------------------------------------------------------
+
+namespace {
+std::size_t getFirstIncludedIndex(const std::vector<Mantid::Types::Core::DateAndTime> &pulseTimes,
+                                  const std::size_t startIndex, const Mantid::Types::Core::DateAndTime &start,
+                                  const Mantid::Types::Core::DateAndTime &stop) {
+  const auto NUM_PULSES{pulseTimes.size()};
+  if (startIndex >= NUM_PULSES)
+    return NUM_PULSES;
+
+  for (size_t i = startIndex; i < NUM_PULSES; ++i) {
+    const auto pulseTime = pulseTimes[i];
+    if (pulseTime >= start && pulseTime < stop)
+      return i;
+  }
+  return NUM_PULSES; // default is the number of pulses
+}
+
+std::size_t getFirstExcludedIndex(const std::vector<Mantid::Types::Core::DateAndTime> &pulseTimes,
+                                  const std::size_t startIndex, const Mantid::Types::Core::DateAndTime &start,
+                                  const Mantid::Types::Core::DateAndTime &stop) {
+  const auto NUM_PULSES{pulseTimes.size()};
+  if (startIndex >= NUM_PULSES)
+    return NUM_PULSES;
+
+  for (size_t i = startIndex; i < NUM_PULSES; ++i) {
+    const auto pulseTime = pulseTimes[i];
+    if (pulseTime < start || pulseTime > stop)
+      return i;
+  }
+  return NUM_PULSES; // default is the number of pulses
+}
+} // namespace
+
+std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
+                                                    const Mantid::Types::Core::DateAndTime &stop) const {
+  std::vector<size_t> roi;
+  if (this->arePulseTimesIncreasing()) {
+    // sorted pulse times don't have to go through the whole vector, just look at the ends
+    const bool includeStart = start <= this->pulseTimes.front();
+    const bool includeStop = stop >= this->pulseTimes.back();
+    if (!(includeStart && includeStop)) {
+      // get start index
+      if (includeStart) {
+        roi.push_back(0);
+      } else {
+        // do a linear search with the assumption that the index will be near the beginning
+        roi.push_back(getFirstIncludedIndex(this->pulseTimes, 0, start, stop));
+      }
+      // get stop index
+      if (includeStop) {
+        roi.push_back(this->pulseTimes.size());
+      } else {
+        const auto start_index = roi.front();
+        // do a linear search with the assumption that the index will be near the beginning
+        for (size_t index = this->pulseTimes.size() - 1; index > start_index; --index) {
+          if (this->pulseTime(index) <= stop) {
+            roi.push_back(index + 1); // include this pulse
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    // loop through the entire vector of pulse times
+    const auto [min_ele, max_ele] = std::minmax_element(this->pulseTimes.cbegin(), this->pulseTimes.cend());
+    const bool includeStart = (start <= *min_ele);
+    const bool includeStop = (stop >= *max_ele);
+
+    // only put together range if one is needed
+    if (!(includeStart && includeStop)) {
+      const auto NUM_PULSES = this->pulseTimes.size();
+      std::size_t firstInclude = getFirstIncludedIndex(this->pulseTimes, 0, start, stop);
+      while (firstInclude < NUM_PULSES) {
+        auto firstExclude = getFirstExcludedIndex(this->pulseTimes, firstInclude + 1, start, stop);
+        if (firstInclude != firstExclude) {
+          roi.push_back(firstInclude);
+          roi.push_back(firstExclude);
+          firstInclude = getFirstIncludedIndex(this->pulseTimes, firstExclude + 1, start, stop);
+        }
+      }
+    }
+  }
+
+  if ((!roi.empty()) && (roi.size() % 2 != 0)) {
+    std::stringstream msg;
+    msg << "Invalid state for ROI. Has odd number of values: " << roi.size();
+    throw std::runtime_error(msg.str());
+  }
+
+  return roi;
 }
 
 //----------------------------------------------------------------------------------------------

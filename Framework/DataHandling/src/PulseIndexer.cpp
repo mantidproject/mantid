@@ -6,14 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/PulseIndexer.h"
+#include "MantidKernel/TimeROI.h"
 #include <sstream>
 #include <utility>
 
 namespace Mantid::DataHandling {
 PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
-                           const std::size_t numEvents, const std::string &entry_name)
+                           const std::size_t numEvents, const std::string &entry_name,
+                           const std::vector<size_t> &pulse_roi)
     : m_event_index(std::move(event_index)), m_firstEventIndex(firstEventIndex), m_numEvents(numEvents),
-      m_entry_name(entry_name) {
+      m_roi_complex(false), m_entry_name(entry_name) {
   // cache the number of pulses
   m_numPulses = m_event_index->size();
 
@@ -21,6 +23,17 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   m_roi.push_back(this->determineFirstPulseIndex());
   // for now, use all pulses up to the end
   m_roi.push_back(this->determineLastPulseIndex());
+
+  // update based on the information in the pulse_roi
+  if (!pulse_roi.empty()) {
+    if (pulse_roi.size() % 2 != 0)
+      throw std::runtime_error("Invalid size for pulsetime roi, must be even or empty");
+
+    auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, pulse_roi);
+    m_roi.clear();
+    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+    m_roi_complex = bool(m_roi.size() > 2);
+  }
 }
 
 /**
@@ -101,8 +114,8 @@ std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseInd
   const auto stop = this->getStopEventIndex(pulseIndex);
   if (start > stop) {
     std::stringstream msg;
-    msg << "Something went really wrong: " << start << " > " << stop << "| " << m_entry_name
-        << " startAt=" << m_firstEventIndex << " numEvents=" << m_event_index->size() << " RAWINDICES=["
+    msg << "Something went really wrong with pulseIndex=" << pulseIndex << ": " << start << " > " << stop << "| "
+        << m_entry_name << " startAt=" << m_firstEventIndex << " numEvents=" << m_event_index->size() << " RAWINDICES=["
         << start + m_firstEventIndex << ",?)"
         << " pulseIndex=" << pulseIndex << " of " << m_event_index->size();
     throw std::runtime_error(msg.str());
@@ -132,19 +145,42 @@ size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
   }
 }
 
+bool PulseIndexer::includedPulse(const size_t pulseIndex) const {
+  if (pulseIndex >= m_roi.back()) {
+    return false; // case is already handled in getStopEventIndex and shouldn't be called
+  } else if (pulseIndex < m_roi.front()) {
+    return false;
+  } else {
+    if (m_roi_complex) {
+      // get the first ROI time boundary greater than the input time. Note that an ROI is a series of alternating
+      // ROI_USE and ROI_IGNORE values.
+      const auto iterUpper = std::upper_bound(m_roi.cbegin(), m_roi.cend(), pulseIndex);
+
+      return (std::distance(m_roi.cbegin(), iterUpper) % 2 != 0);
+    } else {
+      return true; // value is past m_roi.front()
+    }
+  }
+}
+
 size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
+  if (pulseIndex >= m_roi.back()) // indicates everything has already been read
+    return m_numEvents;
+
   // return the start index to signify not using
-  if (pulseIndex < m_roi.front())
+  if (!includedPulse(pulseIndex))
     return this->getStartEventIndex(pulseIndex);
 
   const auto pulseIndexEnd = pulseIndex + 1;
 
   // check if the requests have gone past the end - order of if/else matters
+  // const size_t eventIndex = (pulseIndexEnd >= m_roi.back()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
   size_t eventIndex = m_event_index->operator[](pulseIndexEnd);
-  if (pulseIndexEnd >= m_numPulses) // last pulse should read to the last event
-    eventIndex = m_numEvents;
-  else if (pulseIndexEnd >= m_roi.back()) // this can be equal to the number of pulses
-    eventIndex = m_numEvents;
+  if (pulseIndexEnd == m_roi.back()) {
+    eventIndex = std::min(m_numEvents, eventIndex);
+    if (pulseIndexEnd == m_event_index->size())
+      eventIndex = m_numEvents;
+  }
 
   if (eventIndex > m_firstEventIndex)
     return eventIndex - m_firstEventIndex;

@@ -685,8 +685,6 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:230
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:231
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:232
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexus.cpp:1357
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexus.cpp:576
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:906
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:485
