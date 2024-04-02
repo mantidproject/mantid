@@ -14,7 +14,7 @@ dependencies:
   - graphviz>=2.47.0
   - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
   - h5py
-  - hdf5>=1.12,<1.13
+  - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
   - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
@@ -23,7 +23,7 @@ dependencies:
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.23,<1.26
+  - numpy>=1.24,<1.27
   - occt
   - pip>=21.0.1
   - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
