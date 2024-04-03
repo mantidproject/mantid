@@ -261,14 +261,14 @@ PulseIndexer::Iterator &PulseIndexer::Iterator::operator++() {
   return *this;
 }
 
-bool PulseIndexer::Iterator::operator==(const PulseIndexer::Iterator &other) {
+bool PulseIndexer::Iterator::operator==(const PulseIndexer::Iterator &other) const {
   if (this->m_indexer != other.m_indexer)
     return false;
   else
     return this->m_value.pulseIndex == other.m_value.pulseIndex;
 }
 
-bool PulseIndexer::Iterator::operator!=(const PulseIndexer::Iterator &other) {
+bool PulseIndexer::Iterator::operator!=(const PulseIndexer::Iterator &other) const {
   if (this->m_indexer != other.m_indexer)
     return true;
   else

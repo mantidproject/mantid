@@ -57,8 +57,8 @@ public:
     // postfix increment iter++
     Iterator operator++(int);
 
-    bool operator==(const Iterator &other);
-    bool operator!=(const Iterator &other);
+    bool operator==(const PulseIndexer::Iterator &other) const;
+    bool operator!=(const PulseIndexer::Iterator &other) const;
 
   private:
     const PulseIndexer *m_indexer;

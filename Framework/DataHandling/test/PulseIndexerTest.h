@@ -77,6 +77,7 @@ private:
       size_t count{0};
 
       for (const auto &iter : indexer) { // requires begin() and end()
+        (void)iter;                      // to quiet unused arg warning
         count++;
       }
       TS_ASSERT_EQUALS(count, indexer.getLastPulseIndex() - indexer.getFirstPulseIndex());
@@ -273,8 +274,8 @@ public:
         num_events += (iter.eventIndexStop - iter.eventIndexStart);
         num_steps++;
       }
-      TS_ASSERT_EQUALS(num_events, 35);
-      TS_ASSERT_EQUALS(num_steps, 2);
+      TS_ASSERT_EQUALS(num_events, exp_total_event);
+      TS_ASSERT_EQUALS(num_steps, 2); // calculated by hand
     }
   }
 };
