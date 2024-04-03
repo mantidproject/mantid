@@ -65,6 +65,10 @@ Spectra Min & Spectra Max
   options will be disabled when using OSIRIS in diffonly mode, in which case the
   entire spectra range will be used.
 
+Detector Grouping
+  Specify the method to be used for grouping the detectors when performing the reduction.
+  The options include 'All', 'File', 'Groups' and 'Custom'.
+
 Run
   Runs the processing configured on the current tab.
 

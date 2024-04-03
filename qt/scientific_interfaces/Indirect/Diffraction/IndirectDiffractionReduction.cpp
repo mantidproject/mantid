@@ -535,6 +535,8 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   m_uiForm.ckUseCalib->setVisible(calibrationOptional);
   m_uiForm.rfCalFile->setVisible(calibrationOptional);
   m_uiForm.rfCalFile->isOptional(!calibrationMandatory);
+  m_uiForm.rfCalFile->setToolTip("Note: The calibration file will not be used for detector grouping unless explicitly "
+                                 "selected in the 'File' grouping option below.");
   m_uiForm.ckUseCalib->setChecked(calibrationMandatory);
   m_uiForm.ckUseCalib->setDisabled(calibrationMandatory);
 
