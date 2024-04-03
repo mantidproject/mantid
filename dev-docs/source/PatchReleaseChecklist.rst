@@ -47,9 +47,21 @@ Issues and pull requests should then have the ``PatchCandidate`` label applied t
 Release Notes
 -------------
 
-Once the patch version has been unfixed the main reviewer should
-create a skeleton set of patch release notes on the release branch
+The main reviewer should create a skeleton set of patch release notes on the release branch
 using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/main/tools/release_generator/patch.py>`__.
+For example:
+
+.. code-block:: bash
+
+python release_generator/patch.py --release 6.9.1 -p 37033 37047 37014 37016 36935
+
+where the numbers after the ``-p`` argument are a list of existing pull requests to be included in the patch release.
+Any future pull requests will need to be manually added to the release notes.
+You will need to move the generated file to a `new vX.Y.Z directory <https://github.com/mantidproject/mantid/tree/main/docs/source/release>`__
+and add it to the `release notes index <https://github.com/mantidproject/mantid/blob/main/docs/source/release/index.rst>`__.
+Note that the `automerge <https://github.com/mantidproject/mantid/blob/main/.github/workflows/automerge.yml>`__ GitHub
+action will probably fail with a conflict in the main index file. This will need to be resolved manually.
+
 
 .. _cherry_picking:
 
