@@ -85,7 +85,7 @@ class ISISDisk:
             self.instname = "MERLIN"
             self.variant = "G"
             self.ph_ind = 0
-            self.Chop2Phase = 1500  # Phased to not let neutrons with Ei>200meV through
+            self.Chop2Phase = 17000  # Phased to not let neutrons with Ei>200meV through
         elif "MARI" in instname:
             self.dist = [7.85, 10.1]
             self.nslot = [4, 2]

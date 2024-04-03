@@ -310,6 +310,9 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     ph_ind = np.array([False] * len(dist))
     if not len(ph_ind_v) == len(dist) and ph_ind_v:
         ph_ind[ph_ind_v] = True
+        # For Merlin, subtract the experimental offset of 4500
+        print(instrumentpars)
+        chop2Phase[0] -= 4500
         chop2Phase = phase = chop2Phase if hasattr(chop2Phase, "__len__") else [chop2Phase]
         if len(chop2Phase) != len(dist):
             if len(chop2Phase) == len(ph_ind_v):
