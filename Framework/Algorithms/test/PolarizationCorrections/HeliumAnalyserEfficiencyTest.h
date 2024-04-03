@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 #include <boost/format.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -200,6 +201,61 @@ public:
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
   }
 
+  void testZeroCovarianceMatrix() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
+    covariance->appendRow();
+    for (size_t i = 0; i < 2; ++i)
+      for (size_t j = 1; j < 3; ++j) {
+        covariance->cell<double>(i, j) = 0;
+      }
+
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
+    heliumAnalyserEfficiency->execute();
+    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+
+    MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+    const auto pErrors = p->dataE(0);
+    const MantidVec expectedPErrors = {0.67084648224713839, 0.77009548972929842, 0.69973631914219236,
+                                       0.55523214443723223};
+    TS_ASSERT_EQUALS(expectedPErrors.size(), pErrors.size());
+    for (size_t i = 0; i < pErrors.size(); ++i) {
+      TS_ASSERT_DELTA(expectedPErrors[i], pErrors[i], 1e-8);
+    }
+  }
+
+  void testNonZeroCovarianceMatrix() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
+    covariance->appendRow();
+    for (size_t i = 0; i < 2; ++i)
+      for (size_t j = 1; j < 3; ++j) {
+        covariance->cell<double>(i, j) = 1000;
+      }
+
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
+    heliumAnalyserEfficiency->execute();
+    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+
+    MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+    const auto pErrors = p->dataE(0);
+    const MantidVec expectedPErrors = {1.5147094711224480, 1.7388045742661027, 1.5799400577352583, 1.2536629618054320};
+    TS_ASSERT_EQUALS(expectedPErrors.size(), pErrors.size());
+    for (size_t i = 0; i < pErrors.size(); ++i) {
+      TS_ASSERT_DELTA(expectedPErrors[i], pErrors[i], 1e-8);
+    }
+  }
+
   ITableWorkspace_sptr createBlankCovarianceMatrix() {
     ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
 
@@ -233,17 +289,20 @@ public:
   }
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
-                                                  const size_t numBins = 5) {
+                                                  const size_t numBins = 5, const double examplePHe = 0.2) {
     std::vector<double> x(numBins);
-    std::vector<double> y(numBins);
+    std::vector<double> yNsf(numBins);
+    std::vector<double> ySf(numBins);
     for (size_t i = 0; i < numBins; ++i) {
-      x[i] = static_cast<double>(i) + 1.0;
-      y[i] = x[i] * x[i];
+      x[i] = 2.0 + i * 8.0 / numBins;
+      yNsf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 - examplePHe));
+      ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
-    for (size_t i = 0; i < 4; ++i) {
-      wsVec[i] = generateWorkspace("ws" + std::to_string(i), x, y, xUnit);
-    }
+    wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit);
+    wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit);
+    wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit);
+    wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit);
     return groupWorkspaces(name, wsVec);
   }
 
