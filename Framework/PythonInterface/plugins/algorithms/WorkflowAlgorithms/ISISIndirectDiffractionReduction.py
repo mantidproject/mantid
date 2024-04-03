@@ -135,13 +135,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingPolicy",
             defaultValue="",
-            validator=StringListValidator(["", "Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(["", "All", "File", "Workspace", "Custom", "Groups"]),
             doc="This property is deprecated (since v6.10), please use the 'GroupingMethod' property instead.",
         )
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="All",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(["All", "File", "Workspace", "Custom", "Groups"]),
             doc="The method used to group detectors.",
         )
         self.declareProperty(

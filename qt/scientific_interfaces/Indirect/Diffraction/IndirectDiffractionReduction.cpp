@@ -54,6 +54,8 @@ void IndirectDiffractionReduction::initLayout() {
   m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
   m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
   m_groupingWidget->setSaveCustomVisible(false);
+  m_groupingWidget->removeGroupingMethod("Individual");
+  m_groupingWidget->removeGroupingMethod("IPF");
   m_groupingWidget->setGroupingMethod("All");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
