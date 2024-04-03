@@ -161,6 +161,33 @@ class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
         self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
 
 
+class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        runno = 23767
+        _load_data_and_add_peaks(sxd, runno)
+
+        # integrate
+        sxd.integrate_data(
+            INTEGRATION_TYPE.PROFILE,
+            PEAK_TYPE.FOUND,
+            GetNBinsFromBackToBackParams=True,
+            NFWHM=6,
+            CostFunction="RSq",
+            FixPeakParameters="A",
+            FractionalChangeDSpacing=0.025,
+            IntegrateIfOnEdge=False,
+        )
+        self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.PROFILE)
+
+    def validate(self):
+        intens_over_sigma = [0.0, 18.45, 17.11, 134.29, 0.0]
+        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+
+
 def _load_data_and_add_peaks(sxd, runno):
     ws = LoadNexus(Filename="SXD23767_processed.nxs", OutputWorkspace="SXD23767_processed")
     sxd.set_ws(runno, ws)
