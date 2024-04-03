@@ -107,13 +107,9 @@ updated to the patch milestone.
 Nightly Builds
 ##############
 
-The `release pipeline <release-pipeline>`_ contains jobs
-that check for changes on the current release branch each night (00:00 GMT).
-Any detected changes will cause a clean build of the code followed by a run
-of the system tests. The Linux clean builds should have the `PACKAGE_SUFFIX` set
-to `nightly` while testing the patch.
-
-These jobs should be checked each morning to confirm that everything is green.
+The `release-next nightly pipeline <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment>`__
+job checks for changes on the current release branch each night (00:00 GMT) and should
+be monitored during the patch release period to check for any failures.
 
 Release Day
 ###########
@@ -164,6 +160,3 @@ Once the testing has passed:
 * Close the release milestone in github
 * Remove the patch candidate tag from pull requests (if not already done)
 
-.. Link definitions
-
-.. _release-pipeline: http://builds.mantidproject.org/view/Release%20Pipeline/
