@@ -71,7 +71,14 @@ Cherry Picking & Code Review
 It is the job of the main reviewer of the release to review each
 issue/pull request marked ``PatchCandidate`` and decide if the risks of
 the changes are low enough to include in a release that will not
-undergo full beta testing by scientists. If it is acceptable then on the release branch for each pull request:
+undergo full beta testing by scientists. New pull requests that target
+``release-next`` can simply be merged provided that they add the appropriate
+release notes. Existing pull requests that have already been merged into ``main``
+should have their commits cherry-picked into the ``release-next`` branch,
+either directly or via a new pull request branch. One advantage of creating
+a new pull request branch is that you can ask the commit authors to verify
+that all of the relevant commits have been added. For each of the``PatchCandidate``
+pull requests that were not merged directly into ``release-next``:
 
 *  find the list of commit ``SHA1`` values in that pull request
 *  check if any of these commits has altered the release notes for the
@@ -92,7 +99,7 @@ undergo full beta testing by scientists. If it is acceptable then on the release
       ``git cherry-pick -x`` as before.
 
 *  finally add a commit that updates the patch release notes with this
-   pull request link and description in the table.
+   pull request link and summary description.
 
 Once cherry picked the milestone of the original pull request should be
 updated to the patch milestone.
