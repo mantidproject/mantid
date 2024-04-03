@@ -13,20 +13,16 @@
 using namespace Mantid::API;
 
 std::string marJson = R"({
-"1234": "2023/MR1234",
-"2342": "2023/MR2342",
-"6789": "2023/MR6789"
+"25054": "2019/RB1868000-1",
 }
 )";
 
-std::string alfJson = R"({
-"89123": "2024/RB2220540-3",
-"89124": "2024/RB2220540-3",
-"89125": "2024/RB2220540-3"
+std::string sansJson = R"({
+"101115": "2018/RB1800009-2",
 }
 )";
 
-std::unordered_map<std::string, std::string> instrFiles = {{"MAR", marJson}, {"ALF", alfJson}};
+std::unordered_map<std::string, std::string> instrFiles = {{"MARI", marJson}, {"SANS2D", sansJson}};
 
 class ISISInstrDataCacheTest : public CxxTest::TestSuite {
 public:
@@ -51,12 +47,16 @@ public:
 
   void tearDown() override { std::filesystem::remove_all(m_dataCacheDir); };
 
-  void testGetCorrectFilePath() {
+  void testInstrNameExpanded() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("MAR1234");
-    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MAR/2023/MR1234");
-    actualPath = dc.getInstrFilePath("ALF89123");
-    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/ALF/2024/RB2220540-3");
+    std::string actualPath = dc.getInstrFilePath("MAR25054");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MARI/2019/RB1868000-1");
+  }
+
+  void testCorrectInstrRunSplit() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getInstrFilePath("SANS2D101115");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/SANS2D/2018/RB1800009-2");
   }
 
 private:
