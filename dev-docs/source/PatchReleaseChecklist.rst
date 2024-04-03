@@ -33,19 +33,16 @@ Development
 
 The patch release will be prepared based off the tag used to mark
 the last minor release. A branch called ``release-next`` will be created from this tag.
-Changes for the patch should be made using the standard GitHub
-workflow for merging code with ``main``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
-commits will then be cherry picked from ``main`` on to the release branch.
+Normally, the ``release-next`` branch will already be pointing to the correct commit.
+Verify that this is the case, and if not, update the branch so that it is.
+Changes for the patch should be incorporated into the release branch by either of the following methods:
 
-Release Branch
-##############
+*  If changes have already been merged into ``main``, the commits should be cherry-picked into the release
+   branch (see :ref:`Cherry Picking <cherry_picking>`)
+*  Any changes that have not yet been merged into ``main`` can be rebased so that the pull request targets
+   ``release-next``. When they are merged, the changes will be automatically merged into ``main``.
 
-The release branch will currently have its version fixed to exact
-version of the last major/patch release. It is not a requirement but
-advised to unfix the patch number while the patch is being compiled.
-This prevents the nightly builds from generating a collection of packages that have
-exactly the same version. The patch number can be unfixed by commenting the line in
-https://www.github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake#L9.
+Issues and pull requests should then have the ``PatchCandidate`` label applied to them.
 
 Release Notes
 -------------
@@ -53,6 +50,8 @@ Release Notes
 Once the patch version has been unfixed the main reviewer should
 create a skeleton set of patch release notes on the release branch
 using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/main/tools/release_generator/patch.py>`__.
+
+.. _cherry_picking:
 
 Cherry Picking & Code Review
 ----------------------------
