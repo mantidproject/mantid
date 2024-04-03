@@ -32,6 +32,7 @@ const double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.073
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
+static const std::string P_CELL = "AnalyserPolarization";
 static const std::string P_HE = "HeliumAtomsPolarization";
 static const std::string OUTPUT_T_WORKSPACE = "OutputTransmissionWorkspace";
 static const std::string OUTPUT_T_PARA_WORKSPACE = "OutputTransmissionParaWorkspace";
@@ -53,8 +54,12 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "Helium analyzer polarization as a function of wavelength");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
+      "Helium analyzer efficiency as a function of wavelength");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>(PropertyNames::P_CELL, "", Direction::Output, PropertyMode::Optional),
+      "Helium analyser polarization as a function of wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::P_HE, "", Direction::Output, PropertyMode::Optional),
       "Helium atoms polarization, a single value");
@@ -153,7 +158,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
   const auto groupWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
-  std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
+  const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
   const auto t11Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                            SpinStateValidator::ONE_ONE);
@@ -187,12 +192,77 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   MantidVec wavelengthValues, pCalc;
   fitAnalyserEfficiency(mu, p, pHe, pHeError, wavelengthValues, pCalc);
 
+  // This value is used to give us the correct error bounds
   const double tCrit = calculateTCrit(wavelengthValues.size());
 
-  auto pCalcWorkspace = createEfficiencyWorkspace(pxd, pHe, pHeError, tCrit, wavelengthValues, pCalc);
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, pCalcWorkspace);
+  // Analyser cell polarization
+  auto pCalcWorkspace = createPolarizationWorkspace(pxd, pHe, pHeError, tCrit, wavelengthValues, pCalc);
+  if (!getPropertyValue(PropertyNames::P_CELL).empty()) {
+    setProperty(PropertyNames::P_CELL, pCalcWorkspace);
+  }
+
+  // Now we can finally calculate the efficiencies
+  auto efficiencies = calculateEfficiencies(pCalcWorkspace, groupWorkspace, spinConfigurationInput);
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, efficiencies);
 
   setOptionalOutputProperties(wavelengthValues, pHe, pHeError, mu, tCrit);
+}
+
+WorkspaceGroup_sptr HeliumAnalyserEfficiency::calculateEfficiencies(MatrixWorkspace_sptr pCell,
+                                                                    WorkspaceGroup_sptr inputGroup,
+                                                                    const std::string &spinStateOrder) {
+  // Need the parallel and antiparallel efficiencies, then put them in the same order
+  // as the specified spin state order of the input group workspace
+  const auto numPoints = pCell->dataY(0).size();
+  auto eParallel = std::vector<double>(numPoints);
+  auto eAnti = std::vector<double>(numPoints);
+  auto eError = std::vector<double>(numPoints);
+  const auto pCellY = pCell->dataY(0);
+  const auto pCellError = pCell->dataE(0);
+  for (size_t i = 0; i < numPoints; ++i) {
+    eParallel[i] = (1 + pCellY[i]) / 2.0;
+    eAnti[i] = (1 - pCellY[i]) / 2.0;
+    eError[i] = pCellError[i] / 2.0;
+  }
+
+  const std::string outputWorkspaceName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+
+  auto ws00 = createWorkspace(outputWorkspaceName + "00", "Analyser efficiency parallel", pCell->dataX(0), eParallel,
+                              eError, true);
+  auto ws01 = createWorkspace(outputWorkspaceName + "01", "Analyser efficiency antiparallel", pCell->dataX(0), eAnti,
+                              eError, true);
+  auto ws10 = createWorkspace(outputWorkspaceName + "10", "Analyser efficiency antiparallel", pCell->dataX(0), eAnti,
+                              eError, true);
+  auto ws11 = createWorkspace(outputWorkspaceName + "11", "Analyser efficiency parallel", pCell->dataX(0), eParallel,
+                              eError, true);
+
+  const auto ws00Index = PolarizationCorrectionsHelpers::IndexOfWorkspaceForSpinState(inputGroup, spinStateOrder,
+                                                                                      SpinStateValidator::ZERO_ZERO);
+  const auto ws01Index = PolarizationCorrectionsHelpers::IndexOfWorkspaceForSpinState(inputGroup, spinStateOrder,
+                                                                                      SpinStateValidator::ZERO_ONE);
+  const auto ws10Index = PolarizationCorrectionsHelpers::IndexOfWorkspaceForSpinState(inputGroup, spinStateOrder,
+                                                                                      SpinStateValidator::ONE_ZERO);
+  const auto ws11Index = PolarizationCorrectionsHelpers::IndexOfWorkspaceForSpinState(inputGroup, spinStateOrder,
+                                                                                      SpinStateValidator::ONE_ONE);
+
+  auto wsVector = std::vector<MatrixWorkspace_sptr>(4);
+  wsVector[ws00Index] = ws00;
+  wsVector[ws01Index] = ws01;
+  wsVector[ws10Index] = ws10;
+  wsVector[ws11Index] = ws11;
+
+  auto groupWorkspace = createChildAlgorithm("GroupWorkspaces");
+  groupWorkspace->initialize();
+  std::vector<std::string> wsToGroupNames(4);
+  std::transform(wsVector.cbegin(), wsVector.cend(), wsToGroupNames.begin(),
+                 [](MatrixWorkspace_sptr w) { return w->getName(); });
+  groupWorkspace->setProperty("InputWorkspaces", wsToGroupNames);
+  groupWorkspace->setProperty("OutputWorkspace", outputWorkspaceName);
+  groupWorkspace->execute();
+
+  WorkspaceGroup_sptr wsGrp = groupWorkspace->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(outputWorkspaceName, wsGrp);
+  return wsGrp;
 }
 
 void HeliumAnalyserEfficiency::setOptionalOutputProperties(const MantidVec &wavelengthValues, const double pHe,
@@ -281,10 +351,10 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   pCalc = MantidVec(fitWorkspace->y(0).cbegin(), fitWorkspace->y(0).cend());
 }
 
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::createEfficiencyWorkspace(const double pd, const double pHe,
-                                                                         const double pHeError, const double tCrit,
-                                                                         const MantidVec &wavelengthValues,
-                                                                         const MantidVec &pCalc) {
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::createPolarizationWorkspace(const double pd, const double pHe,
+                                                                           const double pHeError, const double tCrit,
+                                                                           const MantidVec &wavelengthValues,
+                                                                           const MantidVec &pCalc) {
   // Calculate errors on the p curve from the pHe fit. We can't use the fit errors
   // directly because we also have an error on the pd term (which the fit doesn't
   // know about).
@@ -304,8 +374,10 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::createEfficiencyWorkspace(const d
                     std::pow(std::cosh(absorptionFactor * pd * pHe), 2.0);
   }
 
-  return createWorkspace(getProperty(PropertyNames::OUTPUT_WORKSPACE), "Helium Analyser Efficiency", wavelengthValues,
-                         pCalc, pCalcError);
+  auto pCellInput = getPropertyValue(PropertyNames::P_CELL);
+  const std::string pName = pCellInput.empty() ? "P_Cell" : pCellInput;
+
+  return createWorkspace(pName, "Helium Analyser Efficiency", wavelengthValues, pCalc, pCalcError);
 }
 
 void HeliumAnalyserEfficiency::calculateTransmission(const MantidVec &wavelengthValues, const double pHe,
@@ -380,17 +452,21 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::addTwoWorkspaces(MatrixWorkspace_
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiency::createWorkspace(const std::string &name, const std::string &title,
                                                                const MantidVec &xData, const MantidVec &yData,
-                                                               const MantidVec &eData, const std::string &xUnit) {
+                                                               const MantidVec &eData, const bool addToAds) {
   auto createWorkspace = createChildAlgorithm("CreateWorkspace");
   createWorkspace->initialize();
   createWorkspace->setProperty("OutputWorkspace", name);
   createWorkspace->setProperty("DataX", xData);
   createWorkspace->setProperty("DataY", yData);
   createWorkspace->setProperty("DataE", eData);
-  createWorkspace->setProperty("UnitX", xUnit);
+  createWorkspace->setProperty("UnitX", "Wavelength");
   createWorkspace->setProperty("WorkspaceTitle", title);
   createWorkspace->execute();
-  return createWorkspace->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr ws = createWorkspace->getProperty("OutputWorkspace");
+  if (addToAds) {
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+  }
+  return ws;
 }
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiency::subtractWorkspaces(MatrixWorkspace_sptr ws,

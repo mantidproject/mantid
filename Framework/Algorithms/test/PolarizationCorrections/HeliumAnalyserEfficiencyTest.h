@@ -203,13 +203,14 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "e");
+    heliumAnalyserEfficiency->setProperty("AnalyserPolarization", "P");
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
 
     MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+        heliumAnalyserEfficiency->getProperty("AnalyserPolarization"));
     const auto pErrors = p->dataE(0);
     const MantidVec expectedPErrors = {0.67084648224713839, 0.77009548972929842, 0.69973631914219236,
                                        0.55523214443723223};
@@ -231,13 +232,14 @@ public:
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "e");
+    heliumAnalyserEfficiency->setProperty("AnalyserPolarization", "P");
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
 
     MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+        heliumAnalyserEfficiency->getProperty("AnalyserPolarization"));
     const auto pErrors = p->dataE(0);
     const MantidVec expectedPErrors = {1.5147094711224480, 1.7388045742661027, 1.5799400577352583, 1.2536629618054320};
     TS_ASSERT_EQUALS(expectedPErrors.size(), pErrors.size());
@@ -276,6 +278,70 @@ public:
     heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+  }
+
+  void testEfficiencyOrder() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "efficiencies");
+    heliumAnalyserEfficiency->setProperty("SpinStates", "00,01,10,11");
+    heliumAnalyserEfficiency->execute();
+    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+    TS_ASSERT_EQUALS("efficiencies00", efficiencies->getItem(0)->getName());
+    TS_ASSERT_EQUALS("efficiencies01", efficiencies->getItem(1)->getName());
+    TS_ASSERT_EQUALS("efficiencies10", efficiencies->getItem(2)->getName());
+    TS_ASSERT_EQUALS("efficiencies11", efficiencies->getItem(3)->getName());
+  }
+
+  void testParallelAndAntiEfficienciesAreSame() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "efficiencies");
+    heliumAnalyserEfficiency->execute();
+    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+    // Default spin state order is 11,10,01,00
+    auto ws11 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(0));
+    auto ws10 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(1));
+    auto ws01 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(2));
+    auto ws00 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(3));
+
+    TS_ASSERT_EQUALS(ws11->dataX(0).size(), ws00->dataX(0).size());
+    TS_ASSERT_EQUALS(ws10->dataX(0).size(), ws01->dataX(0).size());
+
+    for (size_t i = 0; i < ws11->dataY(0).size(); ++i) {
+      TS_ASSERT_DELTA(ws11->dataY(0)[i], ws00->dataY(0)[i], 1e-8);
+      TS_ASSERT_DELTA(ws10->dataY(0)[i], ws01->dataY(0)[i], 1e-8);
+    }
+  }
+
+  void testEfficiencyNumbers() {
+    auto wsGrp = createExampleGroupWorkspace("wsGrp");
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName());
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "efficiencies");
+    heliumAnalyserEfficiency->execute();
+    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
+    // Default spin state order is 11,10,01,00
+    auto ws11 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(0));
+    auto ws10 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(1));
+    const auto yPara = ws11->dataY(0);
+    const auto yAnti = ws10->dataY(0);
+    const auto expectedYPara =
+        std::vector<double>{0.78016428467325061, 0.86171025529258294, 0.91625452097905313, 0.95052072166210300};
+    const auto expectedYAnti =
+        std::vector<double>{0.21983571532674945, 0.13828974470741706, 0.083745479020946867, 0.049479278337896948};
+    for (size_t i = 0; i < 5; ++i) {
+      TS_ASSERT_DELTA(expectedYPara[i], yPara[i], 1e-8);
+      TS_ASSERT_DELTA(expectedYAnti[i], yAnti[i], 1e-8);
+    }
   }
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",

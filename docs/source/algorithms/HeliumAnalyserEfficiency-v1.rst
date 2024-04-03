@@ -11,24 +11,34 @@ Description
 
 Takes a normalised group workspace with four periods representing a run, combines this with the transmission of the empty
 cell (``TransmissionEmptyCell``) and the cell path length multiplied by the gas pressure (``GasPressureTimesCellLength``) to calculate the efficiency of the analyser.
-It will output the calculated efficiency curve in ``OutputWorkspace``, the value of :math:`p_{He}` in ``HeliumPolarisation``, as well as the transmission curves for
-the parallel (``T_para``), and anti-parallel (``T_anti``) cases.
+Optionally it will also output the value of :math:`p_{He}` in ``HeliumPolarization``, the transmission curves for
+the parallel (``T_para``) or anti-parallel (``T_anti``) cases, or the analyser polarization (``AnalyserPolarization``).
 
 The parameters ``TransmissionEmptyCell`` and ``GasPressureTimesCellLength`` are going to be calculated by fitting to data, and the covariance matrix of these
 two parameters can be provided in order to calculate the errors on the transmission curves.
 
 If the transmission of the wanted spin state is :math:`T_{para}`, and the transmission of the unwanted spin state is :math:`T_{anti}`,
-then the polarisation of of an unpolarised incoming beam after the analyser cell is given by
+then the polarization of of an unpolarised incoming beam after the analyser cell is given by
 
 .. math::
-    P_A = \frac{T_{para} - T_{anti}}{T_{para} + T_{anti}} = \tanh(-0.0733 p d \lambda p_{He})
+    P_{cell} = \frac{T_{para} - T_{anti}}{T_{para} + T_{anti}} = \tanh(0.0733 p d \lambda p_{He})
 
 If our four periods are :math:`T_{00}, T_{01}, T_{10}, T_{11}`, with the subscript denoting the spin configuration, then
-:math:`T_{para} = T_{00} + T_{11}` and :math:`T_{anti} = T_{01} + T_{10}`, and we can calculate :math:`P_A` from the above equation.
+:math:`T_{para} = T_{00} + T_{11}` and :math:`T_{anti} = T_{01} + T_{10}`, and we can calculate :math:`P_{cell}` from the above equation.
 The value of :math:`pd` is given by the input ``pxd``, and :math:`\lambda` is the wavelength of each bin, so we fit
-:math:`\tanh(-0.0733 p d \lambda p_{He})` to our calculated :math:`P_A` to give us :math:`p_{He}`.
+:math:`\tanh(0.0733 p d \lambda p_{He})` to our calculated :math:`P_{cell}` to give us :math:`p_{He}`.
 
-We can then calculate the theoretical transmission curves :math:`T_{para}` and :math:`T_{anti}` from the equations
+The efficiencies of the analyser for parallel and antiparallel neutrons are then given by
+
+.. math::
+    \epsilon_{para} = \frac{1 + P_{cell}}{2}
+
+    \epsilon_{anti} = \frac{1 - P_{cell}}{2}
+
+Since the polarization of the analyser is the same for up and down neutrons, these two efficiencies define all four combinations of
+spin states, i.e. :math:`\epsilon_{00} = \epsilon_{11}` and :math:`\epsilon_{10} = \epsilon_{01}` [#KRYCKA]_.
+
+We can then also calculate the theoretical transmission curves :math:`T_{para}` and :math:`T_{anti}` from the equations
 
 .. math::
     T_{para} = \frac{T_E}{2}\exp(-0.0733 p d \lambda (1 - p_{He}))
@@ -65,11 +75,12 @@ Usage
     wsAnti1 = CloneWorkspace(wsAnti)
 
     grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
-    HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10', HeliumPolarisation='p_He')
+    efficiencies = HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10', HeliumAtomsPolarization='p_He', AnalyserPolarization='P')
 
-    print('PA at ' + str(mtd['PA'].dataX(0)[0]) + 'A = ' + str(mtd['PA'].dataY(0)[0]))
-    print('Error in PA at ' + str(mtd['PA'].dataX(0)[0]) + 'A = ' + str(mtd['PA'].dataE(0)[0]))
-    print("p_He Value = " + str(mtd["p_He"].dataY(0)[0]))
+    print('P at ' + str(mtd['P'].dataX(0)[0]) + 'A = ' + str(mtd['P'].dataY(0)[0]))
+    print('Error in PA at ' + str(mtd['P'].dataX(0)[0]) + 'A = ' + str(mtd['P'].dataE(0)[0]))
+    print('p_He Value = ' + str(mtd['p_He'].dataY(0)[0]))
+    print('Parallel efficiency at ' + str(mtd['efficiencies11'].dataX(0)[0]) + 'A = ' + str(mtd['efficiencies11'].dataY(0)[0]))
 
 Output:
 
@@ -78,6 +89,14 @@ Output:
     PA at 2.0A = 0.962520839134
     Error in PA at 2.0A = 2.84935838704
     p_He Value = 0.900000000409
+    Parallel efficiency at 2.0A = 0.981260419567
+
+References
+----------
+
+.. [#KRYCKA] Polarization-analyzed small-angle neutron scattering. I. Polarized data reduction using Pol-Corr, Kathryn Krycka et al, *Journal of Applied Crystallography*, **45** (2012), 546-553
+             `doi: 10.1107/S0021889812003445 <https://doi.org/10.1107/S0021889812003445>`_
+
 
 .. categories::
 
