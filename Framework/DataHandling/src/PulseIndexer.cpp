@@ -235,6 +235,7 @@ bool PulseIndexer::Iterator::calculateEventRange() {
   const auto eventRange = m_indexer->getEventIndexRange(m_value.pulseIndex);
   m_value.eventIndexStart = eventRange.first;
   m_value.eventIndexStop = eventRange.second;
+
   return m_value.eventIndexStart == m_value.eventIndexStop;
 }
 
@@ -242,7 +243,17 @@ const PulseIndexer::IteratorValue &PulseIndexer::Iterator::operator*() const { r
 
 PulseIndexer::Iterator &PulseIndexer::Iterator::operator++() {
   ++m_value.pulseIndex;
+  // cache the final pulse index to use
   const auto lastPulseIndex = m_indexer->m_roi.back();
+
+  // advance to the next included pulse
+  while ((m_value.pulseIndex < lastPulseIndex) && (!m_indexer->includedPulse(m_value.pulseIndex)))
+    ++m_value.pulseIndex;
+
+  // return early if this has advanced to the end
+  if (m_value.pulseIndex >= lastPulseIndex)
+    return *this;
+
   while (this->calculateEventRange() && (m_value.pulseIndex < lastPulseIndex)) {
     ++m_value.pulseIndex; // move forward a pulse while there is
   }
