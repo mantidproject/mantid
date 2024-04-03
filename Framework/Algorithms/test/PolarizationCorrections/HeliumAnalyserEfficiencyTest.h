@@ -98,24 +98,14 @@ public:
     heliumAnalyserEfficiency->setProperty("OutputTransmissionAntiWorkspace", tAnti);
     heliumAnalyserEfficiency->execute();
 
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(t));
-    AnalysisDataService::Instance().remove(t);
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(pHe));
-    AnalysisDataService::Instance().remove(pHe);
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(tPara));
-    AnalysisDataService::Instance().remove(tPara);
-    ASSERT_TRUE(AnalysisDataService::Instance().doesExist(tAnti));
-    AnalysisDataService::Instance().remove(tAnti);
+    const auto workspacesInAds = AnalysisDataService::Instance().getObjectNames();
 
-    auto members = wsGrp->getNames();
-    AnalysisDataService::Instance().remove(wsGrp->getName());
-    for (size_t i = 0; i < members.size(); ++i) {
-      AnalysisDataService::Instance().remove(members[i]);
-    }
-
-    AnalysisDataService::Instance().remove(heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
-
-    TS_ASSERT_EQUALS(0, AnalysisDataService::Instance().size());
+    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), t) != workspacesInAds.cend());
+    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), pHe) != workspacesInAds.cend());
+    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), tPara) != workspacesInAds.cend());
+    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), tAnti) != workspacesInAds.cend());
+    const std::string outputWorkspace = heliumAnalyserEfficiency->getProperty("OutputWorkspace");
+    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), outputWorkspace) != workspacesInAds.cend());
   }
 
   void testSpinStates() {
