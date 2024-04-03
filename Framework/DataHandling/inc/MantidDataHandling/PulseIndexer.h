@@ -32,6 +32,45 @@ namespace DataHandling {
  */
 class MANTID_DATAHANDLING_DLL PulseIndexer {
 public:
+  // ----------------------------------------- input iterator allows for read-only access
+  struct IteratorValue {
+    std::size_t pulseIndex;
+    std::size_t eventIndexStart;
+    std::size_t eventIndexStop;
+  };
+
+  struct Iterator {
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = IteratorValue;
+
+    Iterator(const PulseIndexer *indexer, const size_t pulseIndex)
+        : m_indexer(indexer), m_lastPulseIndex(m_indexer->getLastPulseIndex()) {
+      m_value.pulseIndex = pulseIndex;
+      calculateEventRange();
+    }
+
+    const IteratorValue &operator*() const;
+
+    // prefix increment ++iter
+    Iterator &operator++();
+    // postfix increment iter++
+    Iterator operator++(int);
+
+    bool operator==(const Iterator &other);
+    bool operator!=(const Iterator &other);
+
+  private:
+    const PulseIndexer *m_indexer;
+    const size_t m_lastPulseIndex;
+
+    bool calculateEventRange();
+
+    // public:
+    IteratorValue m_value;
+  };
+
+  // ----------------------------------------- pulse indexer class start
   PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
                const std::size_t numEvents, const std::string &entry_name, const std::vector<size_t> &pulse_roi);
 
@@ -52,6 +91,11 @@ public:
    * m_numEvents. This is only public for testing.
    */
   size_t getStopEventIndex(const size_t pulseIndex) const;
+
+  const Iterator cbegin() const;
+  const Iterator cend() const;
+  Iterator begin() const;
+  Iterator end() const;
 
 private:
   PulseIndexer(); // do not allow empty constructor
