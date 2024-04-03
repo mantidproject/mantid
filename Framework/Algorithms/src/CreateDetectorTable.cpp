@@ -119,6 +119,8 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
       ws->getEFixed(detector);
     } catch (std::invalid_argument &) {
       calcQ = false;
+    } catch (std::runtime_error &) {
+      calcQ = false;
     }
   } else {
     // No detectors available
