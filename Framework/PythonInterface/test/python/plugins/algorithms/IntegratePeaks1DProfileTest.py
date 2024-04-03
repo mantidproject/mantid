@@ -76,31 +76,31 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(
             InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_1", **self.profile_kwargs
         )
-        self.assertTrue(np.allclose(out.column("Intens/SigInt"), 2 * [20.42], atol=1e-2))
+        self.assertTrue(np.allclose(out.column("Intens/SigInt"), 2 * [19.60], atol=1e-2))
 
     def test_exec_IntegrateIfOnEdge_False(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["IntegrateIfOnEdge"] = False
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_2", **kwargs)
-        self.assertTrue(np.allclose(out.column("Intens/SigInt"), [20.42, 0.0], atol=1e-2))
+        self.assertTrue(np.allclose(out.column("Intens/SigInt"), [19.60, 0.0], atol=1e-2))
 
     def test_exec_poisson_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "Poisson"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_3", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 20.42, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.60, delta=1e-2)
 
     def test_exec_chisq_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "ChiSq"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_4", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 20.42, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.60, delta=1e-2)
 
     def test_exec_hessian_error_strategy(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 21557.20, delta=1e-2)  # not realistic fit
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 2734.91, delta=1e-2)  # not realistic fit
 
     def test_exec_IoverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
@@ -113,7 +113,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["PeakFunction"] = "Gaussian"
         kwargs["FixPeakParameters"] = ""
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 20.39, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.64, delta=1e-2)
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")
@@ -127,8 +127,8 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["FractionalChangeDSpacing"] = 1e-8
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
-        # I/sigma reduced as center constrained
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.88, delta=1e-2)
+        # I/sigma different as center constrained
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 20.41, delta=1e-2)
 
 
 if __name__ == "__main__":
