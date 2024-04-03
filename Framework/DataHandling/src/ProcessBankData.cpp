@@ -121,12 +121,6 @@ void ProcessBankData::run() {
 
   // loop over all pulses
   for (const auto &pulseIter : pulseIndexer) {
-    // determine range of events for the pulse
-    if (pulseIter.eventIndexStart >= numEvents) // already process all the events that were requested
-      break;
-    else if (pulseIter.eventIndexStart == pulseIter.eventIndexStop) // empty range
-      continue;
-
     // Save the pulse time at this index for creating those events
     const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIter.pulseIndex);
     const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIter.pulseIndex);
