@@ -118,25 +118,22 @@ void ProcessBankData::run() {
   }
 
   const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name, pulseROI);
-  const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex(); // for whole file reading is 0
-  const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();   // for whole file reading is event_index->size()
 
   // loop over all pulses
-  for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
+  for (const auto &pulseIter : pulseIndexer) {
     // determine range of events for the pulse
-    const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
-    if (eventIndexRange.first >= numEvents) // already process all the events that were requested
+    if (pulseIter.eventIndexStart >= numEvents) // already process all the events that were requested
       break;
-    else if (eventIndexRange.first == eventIndexRange.second) // empty range
+    else if (pulseIter.eventIndexStart == pulseIter.eventIndexStop) // empty range
       continue;
 
     // Save the pulse time at this index for creating those events
-    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIndex);
-    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIndex);
+    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIter.pulseIndex);
+    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIter.pulseIndex);
     const int periodIndex = logPeriodNumber - 1;
 
     // loop through events associated with a single pulse
-    for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
+    for (std::size_t eventIndex = pulseIter.eventIndexStart; eventIndex < pulseIter.eventIndexStop; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
       const detid_t &detId = static_cast<detid_t>((*event_detid)[eventIndex]);
@@ -189,7 +186,7 @@ void ProcessBankData::run() {
       } // valid detector IDs
     }   // for events in pulse
     // check if cancelled after each 100s of pulses (assumes 60Hz)
-    if ((pulseIndex % 6000 == 0) && alg->getCancel())
+    if ((pulseIter.pulseIndex % 6000 == 0) && alg->getCancel())
       return;
   } // for pulses
 
