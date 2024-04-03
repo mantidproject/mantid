@@ -8,7 +8,7 @@ Patch Release Checklist
   :local:
 
 These are the steps involved in performing a Mantid patch release. To
-perform a full release look see :ref:`ReleaseChecklist`.
+perform a full release see :ref:`ReleaseChecklist`.
 
 Request
 #######
@@ -53,7 +53,7 @@ For example:
 
 .. code-block:: bash
 
-python release_generator/patch.py --release 6.9.1 -p 37033 37047 37014 37016 36935
+    python release_generator/patch.py --release 6.9.1 -p 37033 37047 37014 37016 36935
 
 where the numbers after the ``-p`` argument are a list of existing pull requests to be included in the patch release.
 Any future pull requests will need to be manually added to the release notes.
@@ -77,7 +77,7 @@ release notes. Existing pull requests that have already been merged into ``main`
 should have their commits cherry-picked into the ``release-next`` branch,
 either directly or via a new pull request branch. One advantage of creating
 a new pull request branch is that you can ask the commit authors to verify
-that all of the relevant commits have been added. For each of the``PatchCandidate``
+that all of the relevant commits have been added. For each of the ``PatchCandidate``
 pull requests that were not merged directly into ``release-next``:
 
 *  find the list of commit ``SHA1`` values in that pull request
