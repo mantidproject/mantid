@@ -21,7 +21,7 @@ BUILD_THREADS=$6
 XVFB_SERVER_NUM=101
 
 # If this isn't specified for a Jenkins agent, revert to default value
-if [[ -z "BUILD_THREADS_SYSTEM_TESTS" ]]; then
+if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
     # Default to 3 system tests running in parallel, assuming builders have >= 32GB RAM
     BUILD_THREADS_SYSTEM_TESTS=3
 fi
