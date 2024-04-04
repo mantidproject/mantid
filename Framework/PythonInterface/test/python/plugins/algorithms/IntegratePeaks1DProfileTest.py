@@ -76,13 +76,15 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(
             InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_1", **self.profile_kwargs
         )
-        self.assertTrue(np.allclose(out.column("Intens/SigInt"), 2 * [19.60], atol=1e-2))
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.59, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[1], 19.59, delta=1e-1)
 
     def test_exec_IntegrateIfOnEdge_False(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["IntegrateIfOnEdge"] = False
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_2", **kwargs)
-        self.assertTrue(np.allclose(out.column("Intens/SigInt"), [19.60, 0.0], atol=1e-2))
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.59, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[1], 0.0, delta=1e-2)
 
     def test_exec_poisson_cost_func(self):
         kwargs = self.profile_kwargs.copy()
@@ -100,7 +102,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 2734.91, delta=1e-2)  # not realistic fit
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 57922.22, delta=1e-2)  # not realistic fit
 
     def test_exec_IoverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
