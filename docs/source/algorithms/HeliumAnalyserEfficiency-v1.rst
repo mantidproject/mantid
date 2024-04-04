@@ -78,7 +78,7 @@ Usage
     efficiencies = HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10', HeliumAtomsPolarization='p_He', AnalyserPolarization='P')
 
     print('P at ' + str(mtd['P'].dataX(0)[0]) + 'A = ' + str(mtd['P'].dataY(0)[0]))
-    print('Error in PA at ' + str(mtd['P'].dataX(0)[0]) + 'A = ' + str(mtd['P'].dataE(0)[0]))
+    print('Error in P at ' + str(mtd['P'].dataX(0)[0]) + 'A = ' + str(mtd['P'].dataE(0)[0]))
     print('p_He Value = ' + str(mtd['p_He'].dataY(0)[0]))
     print('Parallel efficiency at ' + str(mtd['efficiencies11'].dataX(0)[0]) + 'A = ' + str(mtd['efficiencies11'].dataY(0)[0]))
 
@@ -86,8 +86,8 @@ Output:
 
 .. testoutput:: ExHeliumAnalyserEfficiencyCalc
 
-    PA at 2.0A = 0.962520839134
-    Error in PA at 2.0A = 2.84935838704
+    P at 2.0A = 0.962520839134
+    Error in P at 2.0A = 2.84935838704
     p_He Value = 0.900000000409
     Parallel efficiency at 2.0A = 0.981260419567
 
