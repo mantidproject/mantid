@@ -39,7 +39,7 @@ public:
     std::size_t eventIndexStop;
   };
 
-  struct Iterator {
+  struct MANTID_DATAHANDLING_DLL Iterator {
     using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = IteratorValue;
