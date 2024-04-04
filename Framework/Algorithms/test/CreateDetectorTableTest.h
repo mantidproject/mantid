@@ -11,11 +11,13 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class CreateDetectorTableTest : public CxxTest::TestSuite {
 public:
