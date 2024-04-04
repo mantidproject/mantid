@@ -98,6 +98,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
+    // Check that a missing efixed value throws
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
+    TS_ASSERT_THROWS_ANYTHING(inputWS->getEFixed(detector));
+
     TableWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
     TS_ASSERT(ws);
