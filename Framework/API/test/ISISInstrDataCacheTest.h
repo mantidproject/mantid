@@ -22,7 +22,10 @@ std::string sansJson = R"({
 }
 )";
 
-std::unordered_map<std::string, std::string> instrFiles = {{"MARI", marJson}, {"SANS2D", sansJson}};
+std::string pg3Json = R"({
+"11111": "mock/path",
+}
+)";
 
 class ISISInstrDataCacheTest : public CxxTest::TestSuite {
 public:
@@ -31,6 +34,8 @@ public:
     // Create test JSON file
     std::filesystem::create_directory(m_dataCacheDir);
 
+    std::unordered_map<std::string, std::string> instrFiles = {
+        {"MARI", marJson}, {"SANS2D", sansJson}, {"POWGEN", pg3Json}};
     for (const auto &[instrName, instrIndex] : instrFiles) {
 
       std::filesystem::create_directory(m_dataCacheDir + "/" + instrName);
@@ -57,6 +62,13 @@ public:
     ISISInstrDataCache dc(m_dataCacheDir);
     std::string actualPath = dc.getInstrFilePath("SANS2D101115");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/SANS2D/2018/RB1800009-2");
+  }
+
+  void testInstrWithDelimiter() {
+    // Checks short name + delimiter gets correctly identified
+    ISISInstrDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getInstrFilePath("PG3_11111");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/POWGEN/mock/path");
   }
 
 private:
