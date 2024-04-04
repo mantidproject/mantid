@@ -16,6 +16,7 @@
 #   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
 #
 # Possible flags:
+#   --disable-unittests: Disable the unit tests. Otherwise they're run by default.
 #   --enable-systemtests: Build and run the system tests
 #   --enable-docs: Build the docs
 #   --enable-dev-docs: Build the developer docs
@@ -68,6 +69,7 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 while [ ! $# -eq 0 ]
 do
     case "$1" in
+        --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)
