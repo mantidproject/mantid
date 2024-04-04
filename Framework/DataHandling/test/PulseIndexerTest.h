@@ -248,7 +248,7 @@ public:
       };
 
       const auto exp_start_event = eventIndices->operator[](indexer.getFirstPulseIndex()) - start_event_index;
-      const auto exp_total_event = total_events - start_event_index;
+      const auto exp_total_event = toEventIndex(4) - toEventIndex(2);
 
       // check the individual event indices
       assert_indices_equal(indexer, 0, exp_start_event, exp_start_event); // exclude before
