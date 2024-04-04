@@ -272,7 +272,7 @@ PeakFindingStrategy::PeakFindingStrategy(const BackgroundStrategy *backgroundStr
       m_spectrumInfo(spectrumInfo), m_units(units) {}
 
 PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                          const int workspaceIndex) const {
+                                          const HistogramData::HistogramE &e, const int workspaceIndex) const {
   // ---------------------------------------
   // Get the lower and upper bound iterators
   // ---------------------------------------
@@ -291,7 +291,7 @@ PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x, co
   // ---------------------------------------
   // Perform the search of the peaks
   // ---------------------------------------
-  return dofindSXPeaks(x, y, lowit, highit, workspaceIndex);
+  return dofindSXPeaks(x, y, e, lowit, highit, workspaceIndex);
 }
 
 BoundsIterator PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
@@ -358,13 +358,41 @@ double PeakFindingStrategy::convertToTOF(const double xValue, const size_t works
   }
 }
 
+PeakList PeakFindingStrategy::convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                               const std::vector<std::unique_ptr<PeakContainer>> &foundPeaks,
+                                               const int workspaceIndex) const {
+  PeakList peaks;
+
+  if (foundPeaks.empty()) {
+    return peaks;
+  }
+
+  // Add a vector to the boost optional
+  peaks = std::vector<FindSXPeaksHelper::SXPeak>();
+
+  for (const auto &peak : foundPeaks) {
+    // Get the index of the bin
+    auto maxY = peak->getMaxIterator();
+    const auto distance = std::distance(y.begin(), maxY);
+    const auto xValue = getXValue(x, distance);
+    const auto tof = convertToTOF(xValue, workspaceIndex);
+    const double phi = calculatePhi(workspaceIndex);
+
+    std::vector<int> specs(1, workspaceIndex);
+    (*peaks).emplace_back(tof, phi, *maxY, specs, workspaceIndex, m_spectrumInfo);
+  }
+
+  return peaks;
+}
+
 StrongestPeaksStrategy::StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                                                const API::SpectrumInfo &spectrumInfo, const double minValue,
                                                const double maxValue, const XAxisUnit units)
     : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue, units) {}
 
 PeakList StrongestPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                               Bound low, Bound high, const int workspaceIndex) const {
+                                               const HistogramData::HistogramE &e, Bound low, Bound high,
+                                               const int workspaceIndex) const {
   auto distmin = std::distance(x.begin(), low);
   auto distmax = std::distance(x.begin(), high);
 
@@ -400,7 +428,8 @@ AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
 }
 
 PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                         Bound low, Bound high, const int workspaceIndex) const {
+                                         const HistogramData::HistogramE &e, Bound low, Bound high,
+                                         const int workspaceIndex) const {
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
 
@@ -475,33 +504,85 @@ AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const Histogra
   return peaks;
 }
 
-PeakList AllPeaksStrategy::convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                            const std::vector<std::unique_ptr<PeakContainer>> &foundPeaks,
-                                            const int workspaceIndex) const {
-  PeakList peaks;
+NSigmaPeaksStrategy::NSigmaPeaksStrategy(const API::SpectrumInfo &spectrumInfo, const double nsigma,
+                                         const double minValue, const double maxValue, const XAxisUnit units)
+    : PeakFindingStrategy(nullptr, spectrumInfo, minValue, maxValue, units), m_nsigma(nsigma) {}
 
-  if (foundPeaks.empty()) {
-    return peaks;
+PeakList NSigmaPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                            const HistogramData::HistogramE &e, Bound low, Bound high,
+                                            const int workspaceIndex) const {
+  auto nsigmaPeaks = getAllNSigmaPeaks(x, y, e, low, high);
+  auto sxPeaks = convertToSXPeaks(x, y, nsigmaPeaks, workspaceIndex);
+  return sxPeaks;
+}
+
+std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPeaks(const HistogramData::HistogramX &x,
+                                                                                   const HistogramData::HistogramY &y,
+                                                                                   const HistogramData::HistogramE &e,
+                                                                                   Bound low, Bound high) const {
+
+  bool isRecording = false;
+  std::unique_ptr<PeakContainer> currentPeak = nullptr;
+  std::vector<std::unique_ptr<PeakContainer>> peaks;
+
+  // We want to the upper boundary to be inclusive hence we need to increment by one
+  if (high != x.end()) {
+    ++high;
+  }
+  auto distanceMin = std::distance(x.begin(), low);
+  auto distanceMax = std::distance(x.begin(), high);
+
+  const auto lowY = y.begin() + distanceMin;
+  auto highY = distanceMax < static_cast<int>(y.size()) ? y.begin() + distanceMax : y.end();
+
+  const auto lowE = e.begin() + distanceMin;
+  const auto highE = distanceMax < static_cast<int>(e.size()) ? e.begin() + distanceMax : e.begin();
+
+  // std::vector<double> yDifferences(distanceMax-distanceMin);
+  // std::transform(lowY+1, highY, lowY, yDifferences.begin(), std::minus<double>());
+
+  auto yIt = lowY + 1;
+  auto eIt = lowE + 1;
+
+  for (; yIt != highY && eIt != highE; ++yIt, ++eIt) {
+    const auto signalDiff = *yIt - *(yIt - 1);
+    const auto isStartPeak = signalDiff > m_nsigma * (*eIt);
+    const auto isEndPeak = signalDiff * (-1.) > m_nsigma * (*eIt);
+
+    /*Possible scenarios
+    1. isRecording is False and isStartPeak True(== isEndPeak is False) => start recording
+    2. isRecording is True and isEndPeak False - continue recording
+    3. isRecording is True and isEndpeak is True(== isStartpeak is False) - end peak
+    4. isRecording is False and isStartPeak is False or isEndPeak is False - continue
+    */
+    if (!isRecording && isStartPeak) {
+      currentPeak = std::make_unique<PeakContainer>(y);
+      currentPeak->startRecord(yIt);
+      isRecording = true;
+    } else if (isRecording && !isEndPeak) {
+      currentPeak->record(yIt);
+    } else if (isRecording && isEndPeak) {
+      currentPeak->stopRecord(yIt);
+      peaks.emplace_back(std::move(currentPeak));
+      currentPeak = nullptr;
+      isRecording = false;
+    } else {
+      continue;
+    }
   }
 
-  // Add a vector to the boost optional
-  peaks = std::vector<FindSXPeaksHelper::SXPeak>();
-
-  for (const auto &peak : foundPeaks) {
-    // Get the index of the bin
-    auto maxY = peak->getMaxIterator();
-    const auto distance = std::distance(y.begin(), maxY);
-    const auto xValue = getXValue(x, distance);
-    const auto tof = convertToTOF(xValue, workspaceIndex);
-    const double phi = calculatePhi(workspaceIndex);
-
-    std::vector<int> specs(1, workspaceIndex);
-    (*peaks).emplace_back(tof, phi, *maxY, specs, workspaceIndex, m_spectrumInfo);
+  // Handle a peak on the edge if it exists
+  if (isRecording) {
+    if (highY == y.end()) {
+      --highY;
+    }
+    currentPeak->stopRecord(highY);
+    peaks.emplace_back(std::move(currentPeak));
+    currentPeak = nullptr;
   }
 
   return peaks;
 }
-
 /* ------------------------------------------------------------------------------------------
  * PeakList Reduction Strategy
  * ------------------------------------------------------------------------------------------
