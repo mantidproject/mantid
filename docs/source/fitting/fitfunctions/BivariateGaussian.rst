@@ -86,16 +86,12 @@ Here is an example of fitting a 2D histogram:
     ZFit = bvg.function2D(pos)
 
     #Plot the results
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(1,2,1)
-    plt.imshow(Z, origin='lower')
-    plt.title('Data')
-    plt.subplot(1,2,2)
-    plt.imshow(ZFit, origin='lower')
-    plt.title('Fit')
-    plt.show()
-
+    fig, axes = plt.subplots(nrows=1, ncols=2, subplot_kw={'projection': 'mantid'})
+    axes[0].imshow(Z, origin='lower')
+    axes[0].set_title('Data')
+    axes[1].imshow(ZFit, origin='lower')
+    axes[1].set_title('Fit')
+    fig.show()
 
 
 .. categories::
