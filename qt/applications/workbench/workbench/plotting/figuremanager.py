@@ -24,7 +24,7 @@ from qtpy.QtGui import QImage
 from qtpy.QtWidgets import QApplication, QLabel, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
-from mantid.kernel import logger
+from mantid.kernel import logger, ConfigService
 from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
@@ -465,7 +465,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def set_axes_title(self, title):
         plot_axes = self._axes_that_are_not_colour_bars()
-        if len(plot_axes) == 1:
+        show_title = "on" == ConfigService.getString("plots.ShowTitle").lower()
+        if len(plot_axes) == 1 and show_title:
             plot_axes[0].set_title(title)
             self.canvas.draw_idle()
 
