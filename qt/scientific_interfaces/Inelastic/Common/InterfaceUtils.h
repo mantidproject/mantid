@@ -8,8 +8,18 @@
 #include "../DllConfig.h"
 #include "QString"
 #include "QStringList"
+#include <qstyleditemdelegate.h>
 #include <string>
 
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+} // namespace Regexes
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {
@@ -41,6 +51,17 @@ MANTIDQT_INELASTIC_DLL QStringList getCorrectionsWSSuffixes(std::string const &i
 MANTIDQT_INELASTIC_DLL QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL QString makeQStringNumber(double value, int precision);
+
+class MANTIDQT_INELASTIC_DLL ExcludeRegionDelegate : public QStyledItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
+};
+
+class MANTIDQT_INELASTIC_DLL NumericInputDelegate : public QStyledItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+};
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt

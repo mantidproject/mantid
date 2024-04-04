@@ -15,7 +15,18 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
-}
+
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+
+constexpr auto NUMERICAL_PRECISION = 6;
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {
@@ -142,6 +153,30 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &d
 }
 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
+
+QWidget *ExcludeRegionDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                                             const QModelIndex & /*index*/) const {
+  auto lineEdit = new QLineEdit(parent);
+  auto validator = new QRegExpValidator(QRegExp(Regexes::MASK_LIST), parent);
+  lineEdit->setValidator(validator);
+  return lineEdit;
+}
+
+QWidget *NumericInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
+
+  auto lineEdit = new QLineEdit(parent);
+  auto validator = new QDoubleValidator(parent);
+
+  validator->setDecimals(NUMERICAL_PRECISION);
+  validator->setNotation(QDoubleValidator::StandardNotation);
+  lineEdit->setValidator(validator);
+  return lineEdit;
+}
+
+void NumericInputDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
+  const auto value = index.model()->data(index, Qt::EditRole).toDouble();
+  static_cast<QLineEdit *>(editor)->setText(makeQStringNumber(value, NUMERICAL_PRECISION));
+}
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
