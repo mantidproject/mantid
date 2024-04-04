@@ -11,8 +11,9 @@
 #   5. ENABLE_BUILD_CODE: whether or not to build the main code target
 #   6. ENABLE_UNIT_TESTS: whether or not to build the unit tests target
 #   7. ENABLE_SYSTEM_TESTS: whether or not to build the system test data
-#   8. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
-#   9. BUILD_THREADS: Pass the number of threads that can be used to build with
+#   8. ENABLE_COVERITY: enables the coverity scan static analysis
+#   9. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
+#   10. BUILD_THREADS: Pass the number of threads that can be used to build with
 
 WORKSPACE=$1
 CMAKE_PRESET=$2
@@ -80,7 +81,7 @@ if [[ $ENABLE_DOCS == true ]]; then
     cmake --build . --target docs-html $BUILD_OPTIONS
 fi
 
-# Build dev-docs turned off until dev docs run without error
+# Build dev-docs
 if [[ $ENABLE_DEV_DOCS == true ]]; then
     rm -fr $BUILD_DIR/dev-docs/doctree/*
     rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
