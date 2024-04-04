@@ -188,7 +188,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
  * @return A pair of instrument name and run number
  */
 std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
-  // g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
+  g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
   std::string instrPart;
   std::string runPart;
 
@@ -257,8 +257,7 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * too long
  */
 std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const {
-  // g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName()
-  // << ")\n";
+  g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName() << ")\n";
   if (hint.empty())
     return "";
 
@@ -288,6 +287,7 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename += suffix;
   }
 
+  g_log.notice() << "makeFileName(" << hint << ", " << instrument.shortName() << ") = " << filename;
   return filename;
 }
 

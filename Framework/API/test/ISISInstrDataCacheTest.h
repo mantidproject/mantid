@@ -71,6 +71,24 @@ public:
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/POWGEN/mock/path");
   }
 
+  void testInstrWithSuffix() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getInstrFilePath("LOQ11111-add");
+    TS_ASSERT_EQUALS(actualPath, "");
+  }
+
+  void testBadInput() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getInstrFilePath("s0me_us$r_dEfined_n4me");
+    TS_ASSERT_EQUALS(actualPath, "");
+  }
+
+  void testBadInstrument() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getInstrFilePath("MARO111111");
+    TS_ASSERT_EQUALS(actualPath, "");
+  }
+
 private:
   std::string m_dataCacheDir;
 };
