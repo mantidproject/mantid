@@ -76,8 +76,8 @@ do
             ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
-	    ENABLE_COVERITY=true
-	    ENABLE_UNIT_TESTS=false
+            ENABLE_COVERITY=true
+            ENABLE_UNIT_TESTS=false
 	    ;;
         --clean-build) CLEAN_BUILD=true ;;
         --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
