@@ -20,7 +20,6 @@ PUBLISH_TO_GITHUB_DEFAULT = PUBLISH_PACKAGES_DEFAULT
 // If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
 BUILD_MANTIDDOCS_PACKAGE = true
-WORKBENCH_INCLUDE_DOCS = true
 
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
@@ -36,7 +35,6 @@ switch(GIT_BRANCH) {
     PUBLISH_TO_ANACONDA_DEFAULT = true
     ANACONDA_CHANNEL_DEFAULT = 'mantid-ornl'
     BUILD_MANTIDDOCS_PACKAGE = false
-    WORKBENCH_INCLUDE_DOCS = false
     break
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
@@ -504,10 +502,10 @@ def package_conda_options(platform, base_or_workbench) {
     package_flags = "--build-mantid --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
-    if(WORKBENCH_INCLUDE_DOCS) {
+    if(BUILD_MANTIDDOCS_PACKAGE) {
       package_flags = "--build-workbench"
     } else {
-      package_flags = "--build-workbench --build-workbench-without-docs"
+      package_flags = "--build-workbench-without-docs"
     }
   }
 
