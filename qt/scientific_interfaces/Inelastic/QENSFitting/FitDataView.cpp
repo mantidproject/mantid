@@ -10,73 +10,11 @@
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
-#include <QItemDelegate>
-#include <QRegExpValidator>
-#include <QStyledItemDelegate>
 
 using namespace Mantid::API;
 constexpr auto NUMERICAL_PRECISION = 6;
 
 namespace {
-using namespace MantidQt::CustomInterfaces;
-
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
-const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
-const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
-const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
-} // namespace Regexes
-
-class ExcludeRegionDelegate : public QItemDelegate {
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
-                        const QModelIndex & /*index*/) const override {
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
-    lineEdit->setValidator(validator.release());
-    return lineEdit.release();
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toString();
-    static_cast<QLineEdit *>(editor)->setText(value);
-  }
-
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-    auto *lineEdit = static_cast<QLineEdit *>(editor);
-    model->setData(index, lineEdit->text(), Qt::EditRole);
-  }
-
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                            const QModelIndex & /*index*/) const override {
-    editor->setGeometry(option.rect);
-  }
-};
-
-class NumericInputDelegate : public QStyledItemDelegate {
-
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override {
-
-    auto lineEdit = new QLineEdit(parent);
-    auto validator = new QDoubleValidator(parent);
-
-    validator->setDecimals(NUMERICAL_PRECISION);
-    validator->setNotation(QDoubleValidator::StandardNotation);
-    lineEdit->setValidator(validator);
-
-    return lineEdit;
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toDouble();
-    static_cast<QLineEdit *>(editor)->setText(InterfaceUtils::makeQStringNumber(value, NUMERICAL_PRECISION));
-  }
-};
-
 QStringList defaultHeaders() {
   QStringList headers;
   headers << "Workspace"
@@ -118,9 +56,12 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"), new NumericInputDelegate);
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"), new NumericInputDelegate);
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"), new ExcludeRegionDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"),
+                                                new InterfaceUtils::NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"),
+                                                new InterfaceUtils::NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"),
+                                                new InterfaceUtils::ExcludeRegionDelegate);
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
