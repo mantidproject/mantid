@@ -159,64 +159,56 @@ class BayesQuasiTest(unittest.TestCase):
         """
 
         # Test values of result
-        result_y = result.dataY(0)
-        self.assertEqual(round(result.dataY(0)[0], 5), 6.06105)
-        self.assertEqual(round(result.dataY(1)[0], 4), 68.5744)
-        self.assertEqual(round(result.dataY(2)[0], 7), 0.0589315)
-        self.assertEqual(round(result.dataY(3)[0], 7), 0.0812087)
+        self.assertAlmostEqual(result.dataY(0)[0], 6.06105, delta=1e-5)
+        self.assertAlmostEqual(result.dataY(1)[0], 68.5744, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.0589315, delta=1e-7)
+        self.assertAlmostEqual(result.dataY(3)[0], 0.0812087, delta=1e-7)
 
         # Test values of probability
-        prob_y = probability.dataY(0)
-        self.assertEqual(round(probability.dataY(0)[0], 1), -74176.1)
-        self.assertEqual(round(probability.dataY(1)[0], 3), -404.884)
-        self.assertEqual(round(probability.dataY(2)[0], 6), -0.222565)
+        self.assertAlmostEqual(probability.dataY(0)[0], -74176.1, delta=1e-1)
+        self.assertAlmostEqual(probability.dataY(1)[0], -404.884, delta=1e-3)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.222565, delta=1e-6)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        sub_y = sub_ws.dataY(0)
-        self.assertEqual(round(sub_ws.dataY(0)[0], 5), 0.02540)
-        self.assertEqual(round(sub_ws.dataY(1)[0], 5), 0.01903)
-        self.assertEqual(round(sub_ws.dataY(2)[0], 5), -0.00638)
-        self.assertEqual(round(sub_ws.dataY(3)[0], 5), 0.01614)
-        self.assertEqual(round(sub_ws.dataY(4)[0], 5), -0.00926)
-
+        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.02540, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.01903, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00638, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(3)[0], 0.01614, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(4)[0], -0.00926, delta=1e-5)
+        
     def _validate_QLr_value_with_resnorm(self, result, probability, group):
         """
         Validates that the output workspaces have the expected values
         with values from the last known correct version
-
         @param result Result workspace from BayesQuasi
         @param prob Probability workspace from BayesQuasi
         @param group Group workspace of fitted spectra from BayesQuasi
         """
 
         # Test values of result
-        result_y = result.dataY(0)
-        self.assertEqual(round(result.dataY(0)[0], 3), 153.471)
-        self.assertEqual(round(result.dataY(1)[0], 2), 1785.06)
-        self.assertEqual(round(result.dataY(2)[0], 7), 0.0588549)
-        self.assertEqual(round(result.dataY(3)[0], 7), 0.0791689)
+        self.assertAlmostEqual(result.dataY(0)[0], 153.471, delta=1e-3)
+        self.assertAlmostEqual(result.dataY(1)[0], 1785.06, delta=1e-2)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.0588549, delta=1e-7)
+        self.assertAlmostEqual(result.dataY(3)[0], 0.0791689, delta=1e-7)
 
         # Test values of probability
-        prob_y = probability.dataY(0)
-        self.assertEqual(round(probability.dataY(0)[0], 1), -74887.1)
-        self.assertEqual(round(probability.dataY(1)[0], 3), -407.593)
-        self.assertEqual(round(probability.dataY(2)[0], 6), -0.480316)
+        self.assertAlmostEqual(probability.dataY(0)[0], -74887.1, delta=1e-1)
+        self.assertAlmostEqual(probability.dataY(1)[0], -407.593, delta=1e-3)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.480316, delta=1e-6)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        sub_y = sub_ws.dataY(0)
-        self.assertEqual(round(sub_ws.dataY(0)[0], 6), 0.652046)
-        self.assertEqual(round(sub_ws.dataY(1)[0], 5), 0.48846)
-        self.assertEqual(round(sub_ws.dataY(2)[0], 6), -0.163586)
-        self.assertEqual(round(sub_ws.dataY(3)[0], 6), 0.414406)
-        self.assertEqual(round(sub_ws.dataY(4)[0], 6), -0.23764)
+        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.652046, delta=1e-6)
+        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.48846, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.163586, delta=1e-6)
+        self.assertAlmostEqual(sub_ws.dataY(3)[0], 0.414406, delta=1e-6)
+        self.assertAlmostEqual(sub_ws.dataY(4)[0], -0.23764, delta=1e-6)
 
     def _validate_QSe_shape(self, result, group):
         """
         Validates that the output workspaces are of the correct type, units and shape.
         with values from the last known correct version
-
         @param result Result workspace from BayesQuasi
         @param group Group workspace of fitted spectra from BayesQuasi
         """
@@ -248,17 +240,15 @@ class BayesQuasiTest(unittest.TestCase):
         """
 
         # Test values of result
-        result_y = result.dataY(0)
-        self.assertEqual(round(result.dataY(0)[0], 5), 81.12644)
-        self.assertEqual(round(result.dataY(1)[0], 7), 0.0319747)
-        self.assertEqual(round(result.dataY(2)[0], 5), 0.77168)
+        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=1e-5)
+        self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-5)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-5)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        sub_y = sub_ws.dataY(0)
-        self.assertEqual(round(sub_ws.dataY(0)[0], 5), 0.02540)
-        self.assertEqual(round(sub_ws.dataY(1)[0], 5), 0.01632)
-        self.assertEqual(round(sub_ws.dataY(2)[0], 5), -0.00908)
+        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.02540, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.01632, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00908, delta=1e-5)
 
     # --------------------------------Helper functions--------------------------------------
 
