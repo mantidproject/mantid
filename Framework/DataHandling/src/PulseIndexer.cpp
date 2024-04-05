@@ -268,11 +268,6 @@ bool PulseIndexer::Iterator::operator==(const PulseIndexer::Iterator &other) con
     return this->m_value.pulseIndex == other.m_value.pulseIndex;
 }
 
-bool PulseIndexer::Iterator::operator!=(const PulseIndexer::Iterator &other) const {
-  if (this->m_indexer != other.m_indexer)
-    return true;
-  else
-    return this->m_value.pulseIndex != other.m_value.pulseIndex;
-}
+bool PulseIndexer::Iterator::operator!=(const PulseIndexer::Iterator &other) const { return !(*this == other); }
 
 } // namespace Mantid::DataHandling
