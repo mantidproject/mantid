@@ -54,8 +54,7 @@ public:
 
     // prefix increment ++iter
     Iterator &operator++();
-    // postfix increment iter++
-    Iterator operator++(int);
+    // postfix increment iter++ is not needed
 
     bool operator==(const PulseIndexer::Iterator &other) const;
     bool operator!=(const PulseIndexer::Iterator &other) const;
@@ -66,7 +65,6 @@ public:
 
     bool calculateEventRange();
 
-    // public:
     IteratorValue m_value;
   };
 
