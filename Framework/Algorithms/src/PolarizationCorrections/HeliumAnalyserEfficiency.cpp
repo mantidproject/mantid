@@ -44,6 +44,9 @@ static const std::string COVARIANCE = "Covariance";
 static const std::string START_LAMBDA = "StartLambda";
 static const std::string END_LAMBDA = "EndLambda";
 static const std::string IGNORE_FIT_QUALITY_ERROR = "IgnoreFitQualityError";
+static const std::string GROUP_INPUTS = "Inputs";
+static const std::string GROUP_OPTIONAL_OUTPUTS = "Optional Outputs";
+static const std::string GROUP_FIT_OPTIONS = "Fit Options";
 } // namespace PropertyNames
 
 void HeliumAnalyserEfficiency::init() {
@@ -94,6 +97,21 @@ void HeliumAnalyserEfficiency::init() {
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
                   "therefore not throw an error",
                   Direction::Input);
+
+  setPropertyGroup(PropertyNames::SPIN_STATES, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::T_E, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::PXD, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::COVARIANCE, PropertyNames::GROUP_INPUTS);
+
+  setPropertyGroup(PropertyNames::START_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::END_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
+
+  setPropertyGroup(PropertyNames::P_CELL, PropertyNames::GROUP_OPTIONAL_OUTPUTS);
+  setPropertyGroup(PropertyNames::P_HE, PropertyNames::GROUP_OPTIONAL_OUTPUTS);
+  setPropertyGroup(PropertyNames::OUTPUT_T_WORKSPACE, PropertyNames::GROUP_OPTIONAL_OUTPUTS);
+  setPropertyGroup(PropertyNames::OUTPUT_T_PARA_WORKSPACE, PropertyNames::GROUP_OPTIONAL_OUTPUTS);
+  setPropertyGroup(PropertyNames::OUTPUT_T_ANTI_WORKSPACE, PropertyNames::GROUP_OPTIONAL_OUTPUTS);
 }
 
 /**
