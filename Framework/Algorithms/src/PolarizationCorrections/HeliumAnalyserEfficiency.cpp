@@ -245,18 +245,15 @@ WorkspaceGroup_sptr HeliumAnalyserEfficiency::calculateEfficiencies(MatrixWorksp
   const auto ws11Index = PolarizationCorrectionsHelpers::IndexOfWorkspaceForSpinState(inputGroup, spinStateOrder,
                                                                                       SpinStateValidator::ONE_ONE);
 
-  auto wsVector = std::vector<MatrixWorkspace_sptr>(4);
-  wsVector[ws00Index] = ws00;
-  wsVector[ws01Index] = ws01;
-  wsVector[ws10Index] = ws10;
-  wsVector[ws11Index] = ws11;
+  auto wsVector = std::vector<std::string>(4);
+  wsVector[ws00Index] = ws00->getName();
+  wsVector[ws01Index] = ws01->getName();
+  wsVector[ws10Index] = ws10->getName();
+  wsVector[ws11Index] = ws11->getName();
 
   auto groupWorkspace = createChildAlgorithm("GroupWorkspaces");
   groupWorkspace->initialize();
-  std::vector<std::string> wsToGroupNames(4);
-  std::transform(wsVector.cbegin(), wsVector.cend(), wsToGroupNames.begin(),
-                 [](MatrixWorkspace_sptr w) { return w->getName(); });
-  groupWorkspace->setProperty("InputWorkspaces", wsToGroupNames);
+  groupWorkspace->setProperty("InputWorkspaces", wsVector);
   groupWorkspace->setProperty("OutputWorkspace", outputWorkspaceName);
   groupWorkspace->execute();
 
