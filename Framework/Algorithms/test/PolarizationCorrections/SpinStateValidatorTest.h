@@ -52,6 +52,7 @@ public:
     checkAllInputs(validator, correctInputs, true);
   }
 
+private:
   void checkAllInputs(const std::shared_ptr<SpinStateValidator> validator, const std::vector<std::string> &inputsToTest,
                       const bool shouldBeValid) {
     std::string result = "";
