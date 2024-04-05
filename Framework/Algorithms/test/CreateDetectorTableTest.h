@@ -106,7 +106,9 @@ public:
     TS_ASSERT_THROWS(inputWS->getEFixed(detector), const std::runtime_error &);
     // Check that an invalid efixed value throws an invalid argument error
     auto &run = inputWS->mutableRun();
+    run.addProperty("deltaE-mode", std::string("Direct"), true);
     run.addProperty("Ei", std::string("23423f42"));
+
     TS_ASSERT_THROWS(inputWS->getEFixed(detector), const std::invalid_argument &);
 
     TableWorkspace_sptr ws;
