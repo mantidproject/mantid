@@ -39,9 +39,10 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())
     return "The number of spin states specified is not an allowed value";
 
-  for (const auto &spinState : spinStates) {
-    if (SpinStateStrings::ALLOWED_SPIN_STATES.find(spinState) == SpinStateStrings::ALLOWED_SPIN_STATES.cend())
-      return "The spin states must consist of two digits, either a zero or a one.";
+  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [](std::string s) {
+        return SpinStateStrings::ALLOWED_SPIN_STATES.find(s) == SpinStateStrings::ALLOWED_SPIN_STATES.cend();
+      })) {
+    return "The spin states must consist of two digits, either a zero or a one.";
   }
 
   // Check that each spin state only appears once
