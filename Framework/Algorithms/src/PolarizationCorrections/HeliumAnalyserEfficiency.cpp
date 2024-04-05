@@ -330,9 +330,9 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   fit->setProperty("CreateOutput", true);
   fit->execute();
 
-  const bool stopOnFitError = getProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR);
+  const bool ignoreFitQualityError = getProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR);
   const std::string &status = fit->getProperty("OutputStatus");
-  if (stopOnFitError && (!fit->isExecuted() || status != "success")) {
+  if (!ignoreFitQualityError && (!fit->isExecuted() || status != "success")) {
     auto const &errMsg{"Failed to fit to data in the calculation of p_He: " + status};
     g_log.error(errMsg);
     throw std::runtime_error(errMsg);
