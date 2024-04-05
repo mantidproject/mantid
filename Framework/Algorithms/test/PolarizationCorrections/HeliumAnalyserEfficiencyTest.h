@@ -248,16 +248,6 @@ public:
     }
   }
 
-  ITableWorkspace_sptr createBlankCovarianceMatrix() {
-    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
-
-    covariance->addColumn("str", "Name");
-    covariance->addColumn("double", "a");
-    covariance->addColumn("double", "b");
-    covariance->appendRow();
-    return covariance;
-  }
-
   void testSmallNumberOfBins() {
     // With less than 4 bins it's not possible to perform the error calculation correctly, because the
     // number of parameters exceeds the number of data points.
@@ -342,6 +332,17 @@ public:
       TS_ASSERT_DELTA(expectedYPara[i], yPara[i], 1e-8);
       TS_ASSERT_DELTA(expectedYAnti[i], yAnti[i], 1e-8);
     }
+  }
+
+private:
+  ITableWorkspace_sptr createBlankCovarianceMatrix() {
+    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
+
+    covariance->addColumn("str", "Name");
+    covariance->addColumn("double", "a");
+    covariance->addColumn("double", "b");
+    covariance->appendRow();
+    return covariance;
   }
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
