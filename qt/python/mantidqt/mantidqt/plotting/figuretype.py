@@ -98,8 +98,8 @@ def figure_type(fig, ax=None):
 
     if ax:
         # ax could be a colorbar, if so then find a non-colorbar axes on the figure so the plot type can be determined.
-        if type(ax) == Axes:
-            other_axes = [axes for axes in fig.get_axes() if not type(axes) == Axes]
+        if isinstance(ax, Axes):
+            other_axes = [axes for axes in fig.get_axes() if not isinstance(axes, Axes)]
             if other_axes:
                 ax = other_axes[0]
 
