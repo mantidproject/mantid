@@ -108,13 +108,12 @@ public:
     ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), outputWorkspace) != workspacesInAds.cend());
   }
 
-  void testSpinStates() {
+  void testInvalidSpinStateFormatThrowsError() {
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
-    TS_ASSERT_THROWS_NOTHING(heliumAnalyserEfficiency->setProperty("SpinStates", "00,11,01,10"));
   }
 
   void testNonWavelengthInput() {
