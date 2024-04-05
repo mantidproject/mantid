@@ -104,30 +104,31 @@ void ProcessBankCompressed::collectEvents() {
   Kernel::Timer timer;
   const auto NUM_EVENTS = m_event_detid->size();
 
+  auto *alg = m_loader.alg;
+
   // iterate through all events in a single pulse
-  if (m_event_index || m_loader.m_ws.nPeriods() > 1) {
-    const auto NUM_PULSES = m_event_index->size();
-    const PulseIndexer pulseIndexer(m_event_index, m_firstEventIndex, NUM_EVENTS, m_entry_name);
-    for (std::size_t pulseIndex = pulseIndexer.getFirstPulseIndex(); pulseIndex < NUM_PULSES; pulseIndex++) {
-      const int logPeriodNumber = m_bankPulseTimes->periodNumber(pulseIndex);
+  if (m_event_index || m_loader.m_ws.nPeriods() > 1 || alg->m_is_time_filtered) {
+    // set up wall-clock filtering if it was requested
+    std::vector<size_t> pulseROI;
+    if (alg->m_is_time_filtered) {
+      pulseROI = m_bankPulseTimes->getPulseIndices(alg->filter_time_start, alg->filter_time_stop);
+    }
+
+    const PulseIndexer pulseIndexer(m_event_index, m_firstEventIndex, NUM_EVENTS, m_entry_name, pulseROI);
+    for (const auto &pulseIter : pulseIndexer) {
+      const int logPeriodNumber = m_bankPulseTimes->periodNumber(pulseIter.pulseIndex);
       const auto periodIndex = static_cast<size_t>(logPeriodNumber - 1);
 
-      // determine range of events for the pulse
-      const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
-      if (eventIndexRange.first > NUM_EVENTS)
-        break;
-      else if (eventIndexRange.first == eventIndexRange.second)
-        continue;
-
       // add all events in this pulse
-      for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
+      for (std::size_t eventIndex = pulseIter.eventIndexStart; eventIndex < pulseIter.eventIndexStop; ++eventIndex) {
         this->addEvent(periodIndex, eventIndex);
       }
     }
   } else {
     // add all events in the list which are all in the first period
+    constexpr size_t periodIndex{0};
     for (std::size_t eventIndex = 0; eventIndex < NUM_EVENTS; ++eventIndex) {
-      this->addEvent(0, eventIndex);
+      this->addEvent(periodIndex, eventIndex);
     }
   }
 
