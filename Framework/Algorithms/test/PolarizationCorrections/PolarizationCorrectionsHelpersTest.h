@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -31,11 +32,15 @@ public:
 
   void testWorkspaceForOneSpinState() { runTest({"01"}); }
 
+  void testSurplusWhitespace() { runTest({"01 ", "11", " 10", " 00 "}); }
+
 private:
   WorkspaceGroup_sptr createGroupWorkspaceWithFourSpinStates(const std::vector<std::string> &spinStateOrder) {
     WorkspaceGroup_sptr grp = std::make_shared<WorkspaceGroup>();
     for (size_t i = 0; i < spinStateOrder.size(); ++i) {
-      grp->addWorkspace(createWorkspace(spinStateOrder[i]));
+      auto trimmedSpinState = trimString(spinStateOrder[i]);
+      // The workspace name will be trimmed on creation
+      grp->addWorkspace(createWorkspace(trimmedSpinState));
     }
     return grp;
   }
@@ -56,7 +61,17 @@ private:
     auto grp = createGroupWorkspaceWithFourSpinStates(spinStates);
     for (const auto &spinState : spinStates) {
       auto ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(grp, spinStateOrder, spinState);
-      TS_ASSERT_EQUALS(spinState, ws->getName());
+      // The workspace name is not going to have any spaces in, regardless of the input. This is not
+      // related to the actual WorkspaceForSpinState algorithm, it's just how the test is checking the
+      // order
+      auto trimmedSpinState = trimString(spinState);
+      TS_ASSERT_EQUALS(trimmedSpinState, ws->getName());
     }
+  }
+
+  std::string trimString(const std::string &input) {
+    auto trimmedInput = input;
+    boost::trim(trimmedInput);
+    return trimmedInput;
   }
 };

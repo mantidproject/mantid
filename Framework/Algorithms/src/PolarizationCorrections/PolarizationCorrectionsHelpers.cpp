@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <vector>
 
 namespace Mantid::Algorithms::PolarizationCorrectionsHelpers {
@@ -29,8 +30,23 @@ state in the spin state order.
 */
 size_t IndexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                     const std::string &targetSpinState) {
+  std::vector<std::string> spinStateVector = SplitSpinStateString(spinStateOrder);
+  auto trimmedTargetSpinState = targetSpinState;
+  boost::trim(trimmedTargetSpinState);
+  return std::find(spinStateVector.cbegin(), spinStateVector.cend(), trimmedTargetSpinState) - spinStateVector.cbegin();
+}
+
+/*
+For a given spin state input string of the form e.g. "01,11,00,10", split the string
+into a vector of individual spin states. This will also trim any leading/trailing
+whitespace in the individual spin states.
+*/
+std::vector<std::string> SplitSpinStateString(const std::string &spinStates) {
   std::vector<std::string> spinStateVector;
-  boost::split(spinStateVector, spinStateOrder, boost::is_any_of(","));
-  return std::find(spinStateVector.cbegin(), spinStateVector.cend(), targetSpinState) - spinStateVector.cbegin();
+  boost::split(spinStateVector, spinStates, boost::is_any_of(","));
+  for (auto &spinState : spinStateVector) {
+    boost::trim(spinState);
+  }
+  return spinStateVector;
 }
 } // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers

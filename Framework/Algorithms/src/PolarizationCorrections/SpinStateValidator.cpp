@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Mantid::Algorithms {
@@ -32,15 +33,13 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   if (input.empty())
     return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 01";
 
-  std::vector<std::string> spinStates;
-  boost::split(spinStates, input, boost::is_any_of(","));
+  std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::SplitSpinStateString(input);
 
   int numberSpinStates = static_cast<int>(spinStates.size());
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())
     return "The number of spin states specified is not an allowed value";
 
-  for (auto &spinState : spinStates) {
-    boost::trim(spinState);
+  for (const auto &spinState : spinStates) {
     if (SpinStateStrings::ALLOWED_SPIN_STATES.find(spinState) == SpinStateStrings::ALLOWED_SPIN_STATES.cend())
       return "The spin states must consist of two digits, either a zero or a one.";
   }

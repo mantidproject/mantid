@@ -19,5 +19,6 @@ MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr WorkspaceForSpinState(API::Works
 MANTID_ALGORITHMS_DLL size_t IndexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group,
                                                           const std::string &spinStateOrder,
                                                           const std::string &targetSpinState);
+MANTID_ALGORITHMS_DLL std::vector<std::string> SplitSpinStateString(const std::string &spinStates);
 } // namespace PolarizationCorrectionsHelpers
 } // namespace Mantid::Algorithms
