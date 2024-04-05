@@ -209,9 +209,9 @@ void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
   } else {
     // Use the first file property as the main Filename
     const auto &props = loader->getProperties();
-    for (auto prop : props) {
-      auto *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
-      auto *singleprop = dynamic_cast<API::FileProperty *>(prop);
+    for (auto const &prop : props) {
+      auto const *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+      auto const *singleprop = dynamic_cast<API::FileProperty *>(prop);
       if (multiprop) {
         m_filenamePropName = multiprop->name();
         break;
@@ -256,7 +256,7 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   const std::vector<Property *> &loaderProps = loader->getProperties();
   size_t numProps(loaderProps.size());
   for (size_t i = 0; i < numProps; ++i) {
-    Property *loadProp = loaderProps[i];
+    Property const *loadProp = loaderProps[i];
     if (loadProp->name() == m_filenamePropName)
       continue;
     try {

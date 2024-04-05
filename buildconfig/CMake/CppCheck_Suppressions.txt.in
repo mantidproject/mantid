@@ -605,9 +605,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHa
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:118
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FindDetectorsPar.cpp:484
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FindDetectorsPar.cpp:632
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:212
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:213
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:258
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:148
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
