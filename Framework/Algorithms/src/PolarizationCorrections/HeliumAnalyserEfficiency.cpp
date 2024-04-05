@@ -323,9 +323,9 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=tanh(" + std::to_string(mu) + "*phe*x),phe=0.1");
   fit->setProperty("InputWorkspace", p);
-  const double startLambda = getProperty("StartLambda");
+  const double startLambda = getProperty(PropertyNames::START_LAMBDA);
   fit->setProperty("StartX", startLambda);
-  const double endLambda = getProperty("EndLambda");
+  const double endLambda = getProperty(PropertyNames::END_LAMBDA);
   fit->setProperty("EndX", endLambda);
   fit->setProperty("CreateOutput", true);
   fit->execute();
