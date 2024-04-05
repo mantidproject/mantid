@@ -216,8 +216,7 @@ public:
     // add events
     const auto &bin_optional = this->findBin(tof);
     if (bin_optional) {
-      auto bin = static_cast<uint32_t>(bin_optional.get());
-      m_tof_bin.push_back(std::move(bin));
+      m_tof_bin.push_back(static_cast<uint32_t>(bin_optional.get()));
     }
   }
 
@@ -248,10 +247,10 @@ public:
       m_is_sorted = true;
       // don't bother with temporary objects and such if there is only one event
       const auto tof = this->getBinCenter(m_tof_bin.front());
-      raw_events->emplace_back(std::move(tof), 1., 1.);
-    } else if (m_tof_bin.size() < (MAX_EVENTS_FOR_SPARSE_INT / 2)) {
-      // this branch removes events as it accumulates them. It does not assume that the time-of-flight is sorted before
-      // starting so the output will not be sorted either
+      raw_events->emplace_back(tof, 1., 1.);
+    } else if (m_tof_bin.size() < (MAX_EVENTS_FOR_SPARSE_INT / 10)) { // 10 was found to give good performance
+      // this branch removes events as it accumulates them. It does not assume that the time-of-flight is sorted
+      // before starting so the output will not be sorted either
       auto last_end = m_tof_bin.end();
       while (std::distance(m_tof_bin.begin(), last_end) > 0) {
         // start with the last value so there is less movement since remove moves everything to the end of the range
@@ -269,7 +268,7 @@ public:
 
         // add the event
         const auto tof = this->getBinCenter(bin);
-        raw_events->emplace_back(std::move(tof), counts, counts);
+        raw_events->emplace_back(tof, counts, counts);
       }
     } else {
       // blindly assume 10 raw events are compressed to a single weighed event on average
@@ -288,7 +287,7 @@ public:
         const auto counts = static_cast<float>(std::distance(range.first, range.second));
         if (counts > 0.) {
           const auto tof = this->getBinCenter(*iter);
-          raw_events->emplace_back(std::move(tof), counts, counts);
+          raw_events->emplace_back(tof, counts, counts);
         }
         iter = range.second;
       }
@@ -347,7 +346,7 @@ public:
       const auto counts = static_cast<float>(m_count[i]);
       if (counts > 0.) {
         const auto tof = this->getBinCenter(i);
-        raw_events->emplace_back(std::move(tof), counts, counts);
+        raw_events->emplace_back(tof, counts, counts);
       }
     }
   }
