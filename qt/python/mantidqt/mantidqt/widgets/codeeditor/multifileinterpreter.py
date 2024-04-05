@@ -19,6 +19,7 @@ from qtpy.QtWidgets import QVBoxLayout, QWidget, QMessageBox
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
+from mantid.kernel import logger
 
 
 NEW_TAB_TITLE = "New"
@@ -338,8 +339,12 @@ class MultiPythonFileInterpreter(QWidget):
         :param filepath: A path to an existing file
         :param startup: Flag for if function is being called on startup
         """
-        with open(filepath, "r", encoding="utf_8") as code_file:
-            content = code_file.read()
+        try:
+            with open(filepath, "r", encoding="utf_8") as code_file:
+                content = code_file.read()
+        except FileNotFoundError:
+            logger.warning(f"Failed to find {filepath}, path does not exist.")
+            return
 
         matching_index = self.find_matching_tab(filepath)
 
