@@ -92,7 +92,7 @@ template <class T> void DefaultEventLoader::makeMapToEventLists(std::vector<std:
   vectors.resize(m_ws.nPeriods());
   if (event_id_is_spec) {
     // Find max spectrum no
-    auto *ax1 = m_ws.getAxis(1);
+    const auto *ax1 = m_ws.getAxis(1);
     specnum_t maxSpecNo = -std::numeric_limits<specnum_t>::max(); // So that any number will be
                                                                   // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {

@@ -104,7 +104,7 @@ void ProcessBankCompressed::collectEvents() {
   Kernel::Timer timer;
   const auto NUM_EVENTS = m_event_detid->size();
 
-  auto *alg = m_loader.alg;
+  const auto *alg = m_loader.alg;
 
   // iterate through all events in a single pulse
   if (m_event_index || m_loader.m_ws.nPeriods() > 1 || alg->m_is_time_filtered) {
@@ -234,9 +234,10 @@ void ProcessBankCompressed::run() {
   const auto pixelID_to_wi_offset = m_loader.pixelID_to_wi_offset;
   auto &outputWS = m_loader.m_ws;
   const size_t numEventLists = m_loader.m_ws.getNumberHistograms();
+  const detid_t pixelIDtoWSVec_size = static_cast<detid_t>(m_loader.pixelID_to_wi_vector.size());
   for (detid_t detid = m_detid_min; detid <= m_detid_max; ++detid) {
     const detid_t detid_offset = detid + pixelID_to_wi_offset;
-    if (!(detid_offset < 0 || detid_offset > static_cast<detid_t>(m_loader.pixelID_to_wi_vector.size()))) {
+    if (!(detid_offset < 0 || detid_offset >= pixelIDtoWSVec_size)) {
       const auto wi = m_loader.pixelID_to_wi_vector[detid_offset];
       if (wi < numEventLists) {
         const auto sortOrder = m_sorting[static_cast<size_t>(detid - m_detid_min)];

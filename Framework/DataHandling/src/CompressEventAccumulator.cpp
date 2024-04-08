@@ -117,17 +117,11 @@ public:
       m_is_sorted = true;
       return;
     } else if (m_tof.size() == 1) {
+      // don't bother with temporary objects and such if there is only one event
       m_is_sorted = true;
       raw_events->emplace_back(m_tof.front(), 1., 1.);
       return;
     } else {
-
-      // don't bother with temporary objects and such if there is only one event
-      if (m_tof.size() == 1) {
-        raw_events->emplace_back(m_tof.front(), 1., 1.);
-        return;
-      }
-
       // code below assumes the tofs are sorted
       this->sort();
 
@@ -135,8 +129,8 @@ public:
 
       // this finds the bin for the current event, then moves the iterator until an event that is out of range is
       // encountered at that point, an event is added to the output and the iterators are moved
-      const auto optional_bin = this->findBin(m_tof.front());
-      size_t lastBin = optional_bin.get();
+      const auto optional_bin_first = this->findBin(m_tof.front());
+      size_t lastBin = optional_bin_first.get();
       double nextTof = m_histogram_edges->at(lastBin + 1);
       uint32_t counts = 0;
       for (const auto &tof : m_tof) {
