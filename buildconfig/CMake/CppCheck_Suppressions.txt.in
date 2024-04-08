@@ -1546,4 +1546,5 @@ returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSF
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/Settings.cpp:29
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FitDataView.h:42
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:51
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:52
+
