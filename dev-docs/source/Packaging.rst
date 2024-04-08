@@ -63,6 +63,13 @@ directory relative to the current working directory
    # wait quite a while ...
    # packages will appear in a conda-bld directory
 
+You can build the workbench without the documentation by:
+
+.. code:: sh
+
+   mantid-conda-build/buildconfig/Jenkins/Conda/package-conda $PWD \
+     --build-mantid --build-qt --build-workbench-without-docs 2>&1 | tee package.log
+
 To create a new test environment with packages from the local build:
 
 .. code:: sh

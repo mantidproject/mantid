@@ -23,7 +23,7 @@ shift 4
 
 # Setup Mamba
 setup_mamba $WORKSPACE/mambaforge "publish-anaconda"
-mamba install --yes anaconda-client "python<3.12"
+mamba install --yes anaconda-client
 
 for package in "$@"
 do

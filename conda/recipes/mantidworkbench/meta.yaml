@@ -44,7 +44,9 @@ requirements:
     - python.app  # [osx]
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
+    {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
     - mantiddocs {{ version }}
+    {% endif %}
 
 test:
   imports:
