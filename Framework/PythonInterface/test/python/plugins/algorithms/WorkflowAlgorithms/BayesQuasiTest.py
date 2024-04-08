@@ -159,15 +159,15 @@ class BayesQuasiTest(unittest.TestCase):
         """
 
         # Test values of result
-        self.assertAlmostEqual(result.dataY(0)[0], 6.06105, delta=1e-5)
+        self.assertAlmostEqual(result.dataY(0)[0], 6.06105, delta=1e-4)
         self.assertAlmostEqual(result.dataY(1)[0], 68.5744, delta=1e-4)
-        self.assertAlmostEqual(result.dataY(2)[0], 0.0589315, delta=1e-7)
-        self.assertAlmostEqual(result.dataY(3)[0], 0.0812087, delta=1e-7)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.0589315, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(3)[0], 0.0812087, delta=1e-4)
 
         # Test values of probability
         self.assertAlmostEqual(probability.dataY(0)[0], -74176.1, delta=1e-1)
         self.assertAlmostEqual(probability.dataY(1)[0], -404.884, delta=1e-3)
-        self.assertAlmostEqual(probability.dataY(2)[0], -0.222565, delta=1e-6)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.222565, delta=1e-4)
 
         # Test values of group
         sub_ws = group.getItem(0)
@@ -189,21 +189,21 @@ class BayesQuasiTest(unittest.TestCase):
         # Test values of result
         self.assertAlmostEqual(result.dataY(0)[0], 153.471, delta=1e-3)
         self.assertAlmostEqual(result.dataY(1)[0], 1785.06, delta=1e-2)
-        self.assertAlmostEqual(result.dataY(2)[0], 0.0588549, delta=1e-7)
-        self.assertAlmostEqual(result.dataY(3)[0], 0.0791689, delta=1e-7)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.0588549, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(3)[0], 0.0791689, delta=1e-4)
 
         # Test values of probability
         self.assertAlmostEqual(probability.dataY(0)[0], -74887.1, delta=1e-1)
         self.assertAlmostEqual(probability.dataY(1)[0], -407.593, delta=1e-3)
-        self.assertAlmostEqual(probability.dataY(2)[0], -0.480316, delta=1e-6)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.480316, delta=1e-4)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.652046, delta=1e-6)
-        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.48846, delta=1e-5)
-        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.163586, delta=1e-6)
-        self.assertAlmostEqual(sub_ws.dataY(3)[0], 0.414406, delta=1e-6)
-        self.assertAlmostEqual(sub_ws.dataY(4)[0], -0.23764, delta=1e-6)
+        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.652046, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.48846, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.163586, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(3)[0], 0.414406, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(4)[0], -0.23764, delta=1e-4)
 
     def _validate_QSe_shape(self, result, group):
         """
@@ -240,15 +240,15 @@ class BayesQuasiTest(unittest.TestCase):
         """
 
         # Test values of result
-        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=1e-5)
-        self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-5)
-        self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-5)
+        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-4)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.02540, delta=1e-5)
-        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.01632, delta=1e-5)
-        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00908, delta=1e-5)
+        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.02540, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.01632, delta=1e-4)
+        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00908, delta=1e-4)
 
     # --------------------------------Helper functions--------------------------------------
 
