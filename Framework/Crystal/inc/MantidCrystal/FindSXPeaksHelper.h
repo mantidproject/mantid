@@ -157,8 +157,11 @@ public:
   virtual ~PeakFindingStrategy() = default;
   PeakList findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
                        const HistogramData::HistogramE &e, const int workspaceIndex) const;
+  void setMinBinsForAPeak(int minBinsForAPeak);
 
 protected:
+  void filterPeaksForMinBins(std::vector<std::unique_ptr<PeakContainer>> &inputPeakList) const;
+
   BoundsIterator getBounds(const HistogramData::HistogramX &x) const;
   double calculatePhi(size_t workspaceIndex) const;
   double getXValue(const HistogramData::HistogramX &x, const size_t peakLocation) const;
@@ -174,6 +177,7 @@ protected:
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
   const XAxisUnit m_units;
+  int m_minBinsForPeak = EMPTY_INT();
 };
 
 class MANTID_CRYSTAL_DLL StrongestPeaksStrategy : public PeakFindingStrategy {

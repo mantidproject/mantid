@@ -233,8 +233,10 @@ size_t PeakContainer::getNumberOfPointsInPeak() const {
   if (m_startIndex >= m_y.size()) {
     return 0;
   }
-
-  return m_stopIndex - m_startIndex;
+  if (m_stopIndex >= m_startIndex) {
+    return m_stopIndex - m_startIndex;
+  }
+  return 0;
 }
 
 yIt PeakContainer::getMaxIterator() const { return m_y.begin() + m_maxIndex; }
@@ -294,6 +296,22 @@ PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x, co
   // Perform the search of the peaks
   // ---------------------------------------
   return dofindSXPeaks(x, y, e, lowit, highit, workspaceIndex);
+}
+
+void PeakFindingStrategy::setMinBinsForAPeak(int minBinsForAPeak) { m_minBinsForPeak = minBinsForAPeak; }
+
+void PeakFindingStrategy::filterPeaksForMinBins(std::vector<std::unique_ptr<PeakContainer>> &inputPeakList) const {
+  if (inputPeakList.empty()) {
+    return;
+  }
+
+  for (auto inputIt = inputPeakList.begin(); inputIt != inputPeakList.end();) {
+    if ((*inputIt)->getNumberOfPointsInPeak() < m_minBinsForPeak) {
+      inputIt = inputPeakList.erase(inputIt);
+    } else {
+      ++inputIt;
+    }
+  }
 }
 
 BoundsIterator PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
@@ -435,6 +453,10 @@ PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, con
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
 
+  if (m_minBinsForPeak != EMPTY_INT()) {
+    filterPeaksForMinBins(foundPeaks);
+  }
+
   // Convert the found peaks to SXPeaks
   auto peaks = convertToSXPeaks(x, y, foundPeaks, workspaceIndex);
 
@@ -514,6 +536,11 @@ PeakList NSigmaPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, 
                                             const HistogramData::HistogramE &e, Bound low, Bound high,
                                             const int workspaceIndex) const {
   auto nsigmaPeaks = getAllNSigmaPeaks(x, y, e, low, high);
+
+  if (m_minBinsForPeak != EMPTY_INT()) {
+    filterPeaksForMinBins(nsigmaPeaks);
+  }
+
   auto sxPeaks = convertToSXPeaks(x, y, nsigmaPeaks, workspaceIndex);
   return sxPeaks;
 }
