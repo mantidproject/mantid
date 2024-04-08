@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
+#include "FitTypes.h"
 #include "MultiFunctionTemplateModel.h"
 
 #include "DllConfig.h"
@@ -20,6 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+using namespace IqtTypes;
 using namespace Mantid::API;
 
 class MANTIDQT_INELASTIC_DLL IqtFunctionTemplateModel : public MultiFunctionTemplateModel {
@@ -30,17 +32,15 @@ public:
   void removeFunction(std::string const &prefix) override;
   void addFunction(std::string const &prefix, std::string const &funStr) override;
 
-  void setSubType(std::size_t, int) override{};
-  std::map<std::size_t, int> getSubTypes() const override { throw std::logic_error("Not implemented yet"); };
+  void setSubType(std::size_t, int) override;
+  std::map<std::size_t, int> getSubTypes() const override;
   std::string setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void setQValues(const std::vector<double> &qValues) override;
 
-  void setNumberOfExponentials(int);
-  int getNumberOfExponentials() const;
-  void setStretchExponential(bool);
+  int numberOfExponentials() const;
+  bool hasExponential() const;
   bool hasStretchExponential() const;
-  void setBackground(std::string const &name);
   void removeBackground();
   bool hasBackground() const;
   void tieIntensities(bool on);
@@ -52,6 +52,9 @@ private:
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
 
   void clearData();
+  void setModel();
+
+  void tieIntensities();
 
   std::optional<std::string> getExp1Prefix() const;
   std::optional<std::string> getExp2Prefix() const;
@@ -63,9 +66,10 @@ private:
   std::string buildStretchExpFunctionString() const;
   std::string buildBackgroundFunctionString() const;
 
-  int m_numberOfExponentials = 0;
-  bool m_hasStretchExponential = false;
-  std::string m_background;
+  IqtTypes::ExponentialType m_exponentialType = IqtTypes::ExponentialType::None;
+  IqtTypes::StretchExpType m_stretchExpType = IqtTypes::StretchExpType::None;
+  IqtTypes::BackgroundType m_backgroundType = IqtTypes::BackgroundType::None;
+  IqtTypes::TieIntensitiesType m_tieIntensitiesType = IqtTypes::TieIntensitiesType::False;
 };
 
 } // namespace IDA
