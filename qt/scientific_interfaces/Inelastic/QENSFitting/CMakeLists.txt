@@ -19,6 +19,7 @@ set(SRC_FILES
     FitPlotModel.cpp
     FitPlotPresenter.cpp
     FitPlotView.cpp
+    FitTab.cpp
     FittingModel.cpp
     FqFitAddWorkspaceDialog.cpp
     FqFitDataPresenter.cpp
@@ -41,7 +42,6 @@ set(SRC_FILES
     IqtFitModel.cpp
     MSDFitModel.cpp
     ParameterEstimation.cpp
-    Tab.cpp
     TabFactory.cpp
     QENSFitting.cpp
 )
@@ -91,6 +91,7 @@ set(MOC_FILES
     ConvFitDataView.h
     DockWidgetArea.h
     EditResultsDialog.h
+    FitTab.h
     FqFitAddWorkspaceDialog.h
     FqFitDataView.h
     FitStatusWidget.h
@@ -101,7 +102,6 @@ set(MOC_FILES
     FunctionBrowser/SingleFunctionTemplateView.h
     FunctionBrowser/MultiFunctionTemplateView.h
     InelasticFitPropertyBrowser.h
-    Tab.h
     QENSFitting.h
 )
 

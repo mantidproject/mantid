@@ -34,7 +34,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class MANTIDQT_INELASTIC_DLL ITab {
+class MANTIDQT_INELASTIC_DLL IFitTab {
 public:
   // Used by FitDataPresenter
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
@@ -55,12 +55,12 @@ public:
   virtual void handlePlotSelectedSpectra() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL Tab : public IndirectTab, public ITab {
+class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
   Q_OBJECT
 
 public:
-  Tab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
-  virtual ~Tab() override = default;
+  FitTab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
+  virtual ~FitTab() override = default;
 
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
 

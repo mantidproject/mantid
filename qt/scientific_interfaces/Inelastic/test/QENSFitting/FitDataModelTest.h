@@ -7,7 +7,7 @@
 #pragma once
 
 #include "QENSFitting/FitDataModel.h"
-#include "QENSFitting/Tab.h"
+#include "QENSFitting/FitTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

@@ -11,7 +11,7 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitDataPresenter::ConvFitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view)
+ConvFitDataPresenter::ConvFitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view)
     : FitDataPresenter(tab, model, view) {}
 
 bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {

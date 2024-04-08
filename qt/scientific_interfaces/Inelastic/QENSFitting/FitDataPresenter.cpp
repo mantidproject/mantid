@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataPresenter.h"
-#include "Tab.h"
+#include "FitTab.h"
 
 #include <map>
 #include <utility>
@@ -14,7 +14,7 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitDataPresenter::FitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view)
+FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);

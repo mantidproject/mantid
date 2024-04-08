@@ -7,7 +7,7 @@
 #include "FitPlotPresenter.h"
 #include "Common/SettingsHelper.h"
 #include "FitPlotView.h"
-#include "Tab.h"
+#include "FitTab.h"
 
 #include <utility>
 
@@ -27,7 +27,7 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-FitPlotPresenter::FitPlotPresenter(ITab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model)
+FitPlotPresenter::FitPlotPresenter(IFitTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model)
     : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
 }

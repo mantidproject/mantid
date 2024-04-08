@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "QENSFitting/Tab.h"
+#include "QENSFitting/FitTab.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -14,24 +14,24 @@
 
 using namespace MantidQt::CustomInterfaces::Inelastic;
 
-class TabTest : public CxxTest::TestSuite {
+class FitTabTest : public CxxTest::TestSuite {
 public:
-  static TabTest *createSuite() { return new TabTest(); }
+  static FitTabTest *createSuite() { return new FitTabTest(); }
 
-  static void destroySuite(TabTest *suite) { delete suite; }
+  static void destroySuite(FitTabTest *suite) { delete suite; }
 
   void test_that_single_function_correctly_identified() {
     std::string functionName = "ExpDecay";
     auto fitFunction = Mantid::API::FunctionFactory::Instance().createFunction(functionName);
-    auto occurances = Tab::getNumberOfSpecificFunctionContained(functionName, fitFunction.get());
+    auto occurances = FitTab::getNumberOfSpecificFunctionContained(functionName, fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 1);
   }
 
   void test_that_single_layer_composite_function_handled_correctly() {
     std::string functionName = "name=ExpDecay;name=StretchExp";
     auto fitFunction = Mantid::API::FunctionFactory::Instance().createInitialized(functionName);
-    auto occurances = Tab::getNumberOfSpecificFunctionContained("ExpDecay", fitFunction.get());
-    auto stretchOccurances = Tab::getNumberOfSpecificFunctionContained("StretchExp", fitFunction.get());
+    auto occurances = FitTab::getNumberOfSpecificFunctionContained("ExpDecay", fitFunction.get());
+    auto stretchOccurances = FitTab::getNumberOfSpecificFunctionContained("StretchExp", fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 1);
     TS_ASSERT_EQUALS(stretchOccurances, 1);
   }
@@ -39,7 +39,7 @@ public:
   void test_that_no_matched_name_is_correct() {
     std::string functionName = "name=ExpDecay;name=StretchExp";
     auto fitFunction = Mantid::API::FunctionFactory::Instance().createInitialized(functionName);
-    auto occurances = Tab::getNumberOfSpecificFunctionContained("NotHere", fitFunction.get());
+    auto occurances = FitTab::getNumberOfSpecificFunctionContained("NotHere", fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 0);
   }
 
@@ -48,7 +48,7 @@ public:
                                "ProductFunction,NumDeriv=false;name=ExpDecay;"
                                "name=ExpDecay)";
     auto fitFunction = Mantid::API::FunctionFactory::Instance().createInitialized(functionName);
-    auto occurances = Tab::getNumberOfSpecificFunctionContained("ExpDecay", fitFunction.get());
+    auto occurances = FitTab::getNumberOfSpecificFunctionContained("ExpDecay", fitFunction.get());
     TS_ASSERT_EQUALS(occurances, 4);
   }
 };

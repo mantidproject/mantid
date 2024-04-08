@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class ITab;
+class IFitTab;
 
 class MANTIDQT_INELASTIC_DLL IFitDataPresenter {
 public:
@@ -32,7 +32,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
-  FitDataPresenter(ITab *tab, IFitDataModel *model, IFitDataView *view);
+  FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view);
   ~FitDataPresenter();
   std::vector<FitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
@@ -87,7 +87,7 @@ protected:
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
 
-  ITab *m_tab;
+  IFitTab *m_tab;
   IFitDataModel *m_model;
   IFitDataView *m_view;
 

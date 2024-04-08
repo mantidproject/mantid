@@ -12,9 +12,9 @@
 #include "MockObjects.h"
 #include "QENSFitting/FitOutputOptionsPresenter.h"
 #include "QENSFitting/FitOutputOptionsView.h"
+#include "QENSFitting/FitTab.h"
 #include "QENSFitting/IFitOutputOptionsModel.h"
 #include "QENSFitting/IFitOutputOptionsView.h"
-#include "QENSFitting/Tab.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -36,7 +36,7 @@ public:
   static void destroySuite(FitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_tab = std::make_unique<NiceMock<MockTab>>();
+    m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockFitOutputOptionsModel>>();
     m_model = model.get();
@@ -312,7 +312,7 @@ public:
   }
 
 private:
-  std::unique_ptr<NiceMock<MockTab>> m_tab;
+  std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitOutputOptionsView>> m_view;
   NiceMock<MockFitOutputOptionsModel> *m_model;
   std::unique_ptr<FitOutputOptionsPresenter> m_presenter;

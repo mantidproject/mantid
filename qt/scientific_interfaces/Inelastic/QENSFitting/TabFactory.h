@@ -10,15 +10,15 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-class Tab;
+class FitTab;
 
 class TabFactory {
 public:
   explicit TabFactory(QTabWidget *tabWidget);
-  Tab *makeMSDFitTab(int const index) const;
-  Tab *makeIqtFitTab(int const index) const;
-  Tab *makeConvFitTab(int const index) const;
-  Tab *makeFqFitTab(int const index) const;
+  FitTab *makeMSDFitTab(int const index) const;
+  FitTab *makeIqtFitTab(int const index) const;
+  FitTab *makeConvFitTab(int const index) const;
+  FitTab *makeFqFitTab(int const index) const;
 
 private:
   QTabWidget *m_tabWidget;

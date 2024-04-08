@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "QENSFitting/FitTab.h"
 #include "QENSFitting/FunctionBrowser/FunctionTemplateView.h"
 #include "QENSFitting/FunctionBrowser/ITemplatePresenter.h"
 #include "QENSFitting/IFitDataView.h"
@@ -16,7 +17,6 @@
 #include "QENSFitting/IFitOutputOptionsView.h"
 #include "QENSFitting/IFitPlotView.h"
 #include "QENSFitting/InelasticFitPropertyBrowser.h"
-#include "QENSFitting/Tab.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
@@ -31,9 +31,9 @@ using namespace MantidQt::CustomInterfaces::Inelastic;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockTab : public ITab {
+class MockFitTab : public IFitTab {
 public:
-  virtual ~MockTab() = default;
+  virtual ~MockFitTab() = default;
 
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());

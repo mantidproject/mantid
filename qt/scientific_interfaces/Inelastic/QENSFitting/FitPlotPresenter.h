@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class ITab;
+class IFitTab;
 class IFitPlotView;
 
 class MANTIDQT_INELASTIC_DLL IFitPlotPresenter {
@@ -39,7 +39,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FitPlotPresenter final : public IFitPlotPresenter {
 
 public:
-  FitPlotPresenter(ITab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model);
+  FitPlotPresenter(IFitTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model);
 
   void watchADS(bool watch);
 
@@ -104,7 +104,7 @@ private:
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
-  ITab *m_tab;
+  IFitTab *m_tab;
   IFitPlotView *m_view;
   std::unique_ptr<FitPlotModel> m_model;
 

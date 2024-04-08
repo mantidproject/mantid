@@ -7,7 +7,7 @@
 #include "QENSFitting.h"
 #include "Common/Settings.h"
 
-#include "Tab.h"
+#include "FitTab.h"
 #include "TabFactory.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {

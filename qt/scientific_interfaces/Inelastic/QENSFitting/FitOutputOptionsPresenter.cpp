@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitOutputOptionsPresenter.h"
-#include "Tab.h"
+#include "FitTab.h"
 
 #include <utility>
 
@@ -13,7 +13,7 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitOutputOptionsPresenter::FitOutputOptionsPresenter(ITab *tab, IFitOutputOptionsView *view,
+FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view,
                                                      std::unique_ptr<IFitOutputOptionsModel> model)
     : m_tab(tab), m_view(view), m_model(std::move(model)) {
   setMultiWorkspaceOptionsVisible(false);
