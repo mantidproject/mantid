@@ -1,10 +1,6 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
-set(TEST_FILES
-    InelasticDataManipulationElwinTabModelTest.h InelasticDataManipulationIqtTabModelTest.h
-    InelasticDataManipulationMomentsTabModelTest.h InelasticDataManipulationSqwTabModelTest.h
-    InelasticDataManipulationSymmetriseTabModelTest.h
-)
+set(TEST_FILES ElwinTabModelTest.h IqtTabModelTest.h MomentsTabModelTest.h SqwTabModelTest.h SymmetriseTabModelTest.h)
 
 list(TRANSFORM TEST_FILES PREPEND ${SUB_DIRECTORY}/)
 
