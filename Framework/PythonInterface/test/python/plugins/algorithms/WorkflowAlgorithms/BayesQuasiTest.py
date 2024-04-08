@@ -176,7 +176,7 @@ class BayesQuasiTest(unittest.TestCase):
         self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00638, delta=1e-5)
         self.assertAlmostEqual(sub_ws.dataY(3)[0], 0.01614, delta=1e-5)
         self.assertAlmostEqual(sub_ws.dataY(4)[0], -0.00926, delta=1e-5)
-        
+
     def _validate_QLr_value_with_resnorm(self, result, probability, group):
         """
         Validates that the output workspaces have the expected values
