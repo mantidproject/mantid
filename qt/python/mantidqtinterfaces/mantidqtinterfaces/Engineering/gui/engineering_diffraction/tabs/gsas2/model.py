@@ -590,7 +590,7 @@ class GSAS2Model(object):
             )
             if os.path.exists(result_reflections_txt):
                 # omit first 2 lines in file (which are histogram and phase name)
-                loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+                loaded_reflections.append(np.genfromtxt(result_reflections_txt, skip_header=2))
             else:
                 logger.warning(f"No reflections found for phase {phase_name} within x-limits of the fit.")
         return loaded_reflections
@@ -599,7 +599,8 @@ class GSAS2Model(object):
         result_reflections_rows = []
         output_reflections_files = self.get_txt_files_that_include("_reflections_")
         for file in output_reflections_files:
-            loop_file_text = np.genfromtxt(file, dtype="str")
+            # note delimiter="," specified so as to accept whitespace in phase name (2nd header row)
+            loop_file_text = np.genfromtxt(file, delimiter=",", dtype="str")
             loop_histogram_name = loop_file_text[0]
             loop_phase_name = loop_file_text[1]
             loop_reflections_text = ",    ".join(str(num) for num in loop_file_text[2:])
