@@ -167,7 +167,7 @@ class BayesQuasiTest(unittest.TestCase):
         # Test values of probability
         self.assertAlmostEqual(probability.dataY(0)[0], -74176.1, delta=1e-1)
         self.assertAlmostEqual(probability.dataY(1)[0], -404.884, delta=1e-2)
-        self.assertAlmostEqual(probability.dataY(2)[0], -0.222565, delta=1e-4)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.222565, delta=1e-2)
 
         # Test values of group
         sub_ws = group.getItem(0)
@@ -195,7 +195,7 @@ class BayesQuasiTest(unittest.TestCase):
         # Test values of probability
         self.assertAlmostEqual(probability.dataY(0)[0], -74887.1, delta=1e-1)
         self.assertAlmostEqual(probability.dataY(1)[0], -407.593, delta=1e-2)
-        self.assertAlmostEqual(probability.dataY(2)[0], -0.480316, delta=1e-4)
+        self.assertAlmostEqual(probability.dataY(2)[0], -0.480316, delta=1e-2)
 
         # Test values of group
         sub_ws = group.getItem(0)

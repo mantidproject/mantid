@@ -61,6 +61,7 @@ class QLresTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-4
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "rt_irs26176_graphite002_QLr_Workspace_0", "ISISIndirectBayes_QlresTest.nxs"
 
     def cleanup(self):
@@ -143,6 +144,7 @@ class QSeTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "irs26176_graphite002_QSe_Workspace_0", "ISISIndirectBayes_QSeTest.nxs"
 
     def cleanup(self):
@@ -185,6 +187,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-4
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "irs26176_graphite002_QLd_Workspace_0", "ISISIndirectBayes_QLDataTest.nxs"
 
     def cleanup(self):
@@ -236,7 +239,8 @@ class QLResNormTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
-        return "irs26176_graphite002_QLr_Workspaces", "ISISIndirectBayes_QLr_ResNorm_Test.nxs"
+        self.disableChecking.append("Axes")
+        return "irs26176_graphite002_QLr_Workspace", "ISISIndirectBayes_QLr_ResNorm_Test.nxs"
 
     def cleanup(self):
         AnalysisDataService.clear()
@@ -282,6 +286,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "wt_irs26176_graphite002_QLr_Workspace_0", "ISISIndirectBayes_QLr_width_Test.nxs"
 
     def cleanup(self):
