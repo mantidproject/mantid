@@ -1,14 +1,7 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
-set(TEST_FILES
-    IndirectDataValidationHelperTest.h
-    OutputPlotOptionsModelTest.h
-    OutputPlotOptionsPresenterTest.h
-    SettingsModelTest.h
-    SettingsPresenterTest.h
-    WorkspaceUtilsTest.h
-    InterfaceUtilsTest.h
-    ValidationUtilsTest.h
+set(TEST_FILES IndirectDataValidationHelperTest.h OutputPlotOptionsModelTest.h OutputPlotOptionsPresenterTest.h
+               SettingsModelTest.h SettingsPresenterTest.h ValidationUtilsTest.h
 )
 
 set(TEST_HELPERS MockObjects.h)

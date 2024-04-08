@@ -12,8 +12,6 @@ set(SRC_FILES
     SettingsPresenter.cpp
     SettingsView.cpp
     IndirectTab.cpp
-    InterfaceUtils.cpp
-    WorkspaceUtils.cpp
     ValidationUtils.cpp
 )
 
@@ -24,8 +22,6 @@ set(INC_FILES
     OutputPlotOptionsPresenter.h
     SettingsHelper.h
     SettingsPresenter.h
-    InterfaceUtils.h
-    WorkspaceUtils.h
     ValidationUtils.h
 )
 

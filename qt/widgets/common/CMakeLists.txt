@@ -54,6 +54,7 @@ set(SRC_FILES
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
+    src/InterfaceUtils.cpp
     src/LineEditWithClear.cpp
     src/ListPropertyWidget.cpp
     src/LocalParameterEditor.cpp
@@ -113,6 +114,7 @@ set(SRC_FILES
     src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
     src/WorkspaceSelector.cpp
     src/WorkspaceMultiSelector.cpp
+    src/WorkspaceUtils.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
     src/AlgorithmProgress/AlgorithmProgressModel.cpp
@@ -296,6 +298,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
+    inc/MantidQtWidgets/Common/InterfaceUtils.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
@@ -312,6 +315,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
+    inc/MantidQtWidgets/Common/WorkspaceUtils.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -630,7 +634,7 @@ endif()
 # Target Additional components for this module
 find_package(
   Qt5 ${QT_MIN_VERSION}
-  COMPONENTS Concurrent Help Network PrintSupport
+  COMPONENTS Concurrent Help Network PrintSupport Xml
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
@@ -682,7 +686,14 @@ mtd_add_qt_library(
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
   LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS Qt5::Concurrent Qt5::Help Qt5::Network Qt5::PrintSupport ${_webwidgets_tgt} Qt5::Qscintilla
+  QT5_LINK_LIBS
+    Qt5::Concurrent
+    Qt5::Help
+    Qt5::Network
+    Qt5::PrintSupport
+    ${_webwidgets_tgt}
+    Qt5::Qscintilla
+    Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -705,6 +716,7 @@ set(TEST_FILES
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
+    test/InterfaceUtilsTest.h
     test/MuonPeriodInfoTest.h
     test/NonOrthogonalTest.h
     test/ParseKeyValueStringTest.h
@@ -715,6 +727,7 @@ set(TEST_FILES
     test/SelectionNotificationServiceTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
+    test/WorkspaceUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -744,12 +757,14 @@ set(QT5_TEST_FILES
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
+    test/InterfaceUtilsTest.h
     test/ManageUserDirectoriesTest.h
     # test/MantidHelpWindowTest.h - disabled while the failure is investigated
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
