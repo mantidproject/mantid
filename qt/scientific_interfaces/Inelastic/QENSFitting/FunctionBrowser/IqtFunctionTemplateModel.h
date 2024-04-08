@@ -67,7 +67,7 @@ private:
   std::string buildBackgroundFunctionString() const;
 
   IqtTypes::ExponentialType m_exponentialType = IqtTypes::ExponentialType::None;
-  IqtTypes::StretchExpType m_stretchExpType = IqtTypes::StretchExpType::None;
+  IqtTypes::FitType m_fitType = IqtTypes::FitType::None;
   IqtTypes::BackgroundType m_backgroundType = IqtTypes::BackgroundType::None;
   IqtTypes::TieIntensitiesType m_tieIntensitiesType = IqtTypes::TieIntensitiesType::False;
 };

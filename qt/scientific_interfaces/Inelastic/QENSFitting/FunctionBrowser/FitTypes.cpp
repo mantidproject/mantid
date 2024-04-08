@@ -21,9 +21,9 @@ std::map<IqtTypes::ExponentialType, TemplateSubTypeDescriptor>
     };
 
 template <>
-std::map<IqtTypes::StretchExpType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<IqtTypes::StretchExpType>::g_typeMap{
-    {IqtTypes::StretchExpType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {IqtTypes::StretchExpType::StretchExponential,
+std::map<IqtTypes::FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<IqtTypes::FitType>::g_typeMap{
+    {IqtTypes::FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {IqtTypes::FitType::StretchExponential,
      {"Stretch Exponential", "StretchExp", {ParamID::STRETCH_HEIGHT, ParamID::STRETCH_STRETCHING}}},
 };
 
