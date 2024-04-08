@@ -38,7 +38,7 @@ dependencies:
   - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
-  - scipy>=1.10.0,!=1.13.0 # 1.13.0 causing unit test failures due to gaussian not being found.
+  - scipy>=1.10.0
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme=>0.8.1
