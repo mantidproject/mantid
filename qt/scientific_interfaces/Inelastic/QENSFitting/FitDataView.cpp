@@ -5,15 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataView.h"
-#include "Common/InterfaceUtils.h"
 #include "FitDataPresenter.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include <QDoubleValidator>
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
 
 using namespace Mantid::API;
-constexpr auto NUMERICAL_PRECISION = 6;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
 
+constexpr auto NUMERICAL_PRECISION = 6;
+const std::string MASK_LIST = getRegexValidatorString(regexValidatorStrings::MaskValidator);
 namespace {
 QStringList defaultHeaders() {
   QStringList headers;
@@ -57,11 +58,11 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
   m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"),
-                                                new InterfaceUtils::NumericInputDelegate);
+                                                new NumericInputDelegate(m_uiForm->tbFitData, NUMERICAL_PRECISION));
   m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"),
-                                                new InterfaceUtils::NumericInputDelegate);
+                                                new NumericInputDelegate(m_uiForm->tbFitData, NUMERICAL_PRECISION));
   m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"),
-                                                new InterfaceUtils::ExcludeRegionDelegate);
+                                                new RegexInputDelegate(m_uiForm->tbFitData, MASK_LIST));
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
@@ -89,10 +90,10 @@ void FitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   cell->setFlags(flags);
   setCell(std::move(cell), row, getColumnIndexFromName("WS Index"));
 
-  cell = std::make_unique<QTableWidgetItem>(InterfaceUtils::makeQStringNumber(newRow.startX, NUMERICAL_PRECISION));
+  cell = std::make_unique<QTableWidgetItem>(makeQStringNumber(newRow.startX, NUMERICAL_PRECISION));
   setCell(std::move(cell), row, getColumnIndexFromName("StartX"));
 
-  cell = std::make_unique<QTableWidgetItem>(InterfaceUtils::makeQStringNumber(newRow.endX, NUMERICAL_PRECISION));
+  cell = std::make_unique<QTableWidgetItem>(makeQStringNumber(newRow.endX, NUMERICAL_PRECISION));
   setCell(std::move(cell), row, getColumnIndexFromName("EndX"));
 
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
@@ -102,7 +103,7 @@ void FitDataView::addTableEntry(size_t row, FitDataRow newRow) {
 void FitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
   QTableWidgetItem *selectedItem;
   selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
-  selectedItem->setText(InterfaceUtils::makeQStringNumber(numEntry, NUMERICAL_PRECISION));
+  selectedItem->setText(makeQStringNumber(numEntry, NUMERICAL_PRECISION));
 }
 
 bool FitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }

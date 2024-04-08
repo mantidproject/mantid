@@ -8,6 +8,8 @@
 // Includes
 //------------------------------------------------------
 #include "MantidQtWidgets/Common/WorkspaceMultiSelector.h"
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -26,80 +28,14 @@
 
 constexpr short namesCol = 0;
 constexpr short indexCol = 1;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
-using namespace Mantid::API;
 
 QStringList headerLabels = {"Workspace Name", "Ws Index"};
 
-MatrixWorkspace_sptr getWorkspace(const std::string &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-std::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
-  if (workspace) {
-    const auto numberOfHistograms = workspace->getNumberHistograms();
-    if (numberOfHistograms > 0)
-      return numberOfHistograms - 1;
-  }
-  return std::nullopt;
-}
-
-QString getIndexString(const MatrixWorkspace_sptr &workspace) {
-  const auto maximum = maximumIndex(workspace);
-  if (maximum) {
-    if (*maximum > 0)
-      return QString("0-%1").arg(*maximum);
-    return "0";
-  }
-  return "";
-}
-
-QString getIndexString(const std::string &workspaceName) { return getIndexString(getWorkspace(workspaceName)); }
-
-std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
-  return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
-}
-
-QString OR(const QString &lhs, const QString &rhs) { return "(" + lhs + "|" + rhs + ")"; }
-
-QString NATURAL_NUMBER(std::size_t digits) { return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}"); }
-
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString MINUS = "\\-";
-
-const QString NUMBER = NATURAL_NUMBER(4);
-const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
-const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
-const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
-
-class SpectraListDelegate : public QStyledItemDelegate {
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
-                        const QModelIndex & /*index*/) const override {
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = createValidator(SPECTRA_LIST, parent);
-    lineEdit->setValidator(validator.release());
-    return lineEdit.release();
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toString();
-    static_cast<QLineEdit *>(editor)->setText(value);
-  }
-
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-    auto *lineEdit = static_cast<QLineEdit *>(editor);
-    model->setData(index, lineEdit->text(), Qt::EditRole);
-  }
-
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                            const QModelIndex & /*index*/) const override {
-    editor->setGeometry(option.rect);
-  }
-};
+const auto SPECTRA_LIST = getRegexValidatorString(SpectraValidator);
 } // namespace
 
 /**
@@ -139,7 +75,7 @@ void WorkspaceMultiSelector::setupTable() {
   this->verticalHeader()->setVisible(false);
   this->horizontalHeader()->setVisible(true);
   this->setHorizontalHeaderLabels(headerLabels);
-  this->setItemDelegateForColumn(1, new SpectraListDelegate);
+  this->setItemDelegateForColumn(1, new RegexInputDelegate(this, SPECTRA_LIST));
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setSortingEnabled(true);
   this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -213,7 +149,7 @@ void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
 void WorkspaceMultiSelector::addItem(const std::string &name) {
   insertRow(rowCount());
   auto nameItem = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
-  auto indexItem = std::make_unique<QTableWidgetItem>(getIndexString(name));
+  auto indexItem = std::make_unique<QTableWidgetItem>(QString::fromStdString(getIndexString(name)));
 
   nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
 
@@ -224,7 +160,7 @@ void WorkspaceMultiSelector::addItem(const std::string &name) {
 void WorkspaceMultiSelector::renameItem(const std::string &newName, int row) {
   // here is assuming item has already been deemed eligible
   this->item(row, namesCol)->setText(QString::fromStdString(newName));
-  this->item(row, indexCol)->setText(getIndexString(newName));
+  this->item(row, indexCol)->setText(QString::fromStdString(getIndexString(newName)));
 }
 
 void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
@@ -256,7 +192,7 @@ void WorkspaceMultiSelector::resetIndexRangeToDefault() {
   if (!selIndex.isEmpty()) {
     for (auto &index : selIndex) {
       std::string selName = this->item(index.row(), namesCol)->text().toStdString();
-      this->item(index.row(), indexCol)->setText(getIndexString(selName));
+      this->item(index.row(), indexCol)->setText(QString::fromStdString(getIndexString(selName)));
     }
   }
 }
