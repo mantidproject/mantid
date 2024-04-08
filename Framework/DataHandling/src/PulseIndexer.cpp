@@ -29,11 +29,38 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
     if (pulse_roi.size() % 2 != 0)
       throw std::runtime_error("Invalid size for pulsetime roi, must be even or empty");
 
+    // new roi is the intersection of these two
     auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, pulse_roi);
     m_roi.clear();
     m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
     m_roi_complex = bool(m_roi.size() > 2);
   }
+
+  // determine if should trim the front end to remove empty pulses
+  auto firstPulseIndex = m_roi.front();
+  auto eventRange = this->getEventIndexRange(firstPulseIndex);
+  while (eventRange.first == eventRange.second) {
+    ++firstPulseIndex;
+    eventRange = this->getEventIndexRange(firstPulseIndex);
+  }
+
+  // determine if should trim the back end to remove empty pulses
+  auto lastPulseIndex = m_roi.back();
+  eventRange = this->getEventIndexRange(lastPulseIndex - 1);
+  while (eventRange.first == eventRange.second) {
+    --lastPulseIndex;
+    eventRange = this->getEventIndexRange(lastPulseIndex - 1);
+  }
+
+  // update the value if it has changed
+  if ((firstPulseIndex != m_roi.front()) || (lastPulseIndex != m_roi.back())) {
+    auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, {firstPulseIndex, lastPulseIndex});
+    m_roi.clear();
+    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+  }
+
+  // after the updates, recalculate if the roi is more than a single region
+  m_roi_complex = bool(m_roi.size() > 2);
 }
 
 /**
@@ -98,7 +125,7 @@ size_t PulseIndexer::determineLastPulseIndex() const {
       break;
   }
 
-  return static_cast<size_t>(m_event_index->size() - std::distance(m_event_index->crbegin(), event_index_iter));
+  return m_event_index->size() - static_cast<size_t>(std::distance(m_event_index->crbegin(), event_index_iter));
 }
 
 size_t PulseIndexer::getFirstPulseIndex() const { return m_roi.front(); }
@@ -187,5 +214,60 @@ size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
   else
     return m_numEvents;
 }
+
+// ----------------------------------------- range for iteration
+const PulseIndexer::Iterator PulseIndexer::cbegin() const {
+  return PulseIndexer::Iterator(this, this->getFirstPulseIndex());
+}
+
+const PulseIndexer::Iterator PulseIndexer::cend() const {
+  return PulseIndexer::Iterator(this, this->getLastPulseIndex());
+}
+
+PulseIndexer::Iterator PulseIndexer::begin() const { return PulseIndexer::Iterator(this, this->getFirstPulseIndex()); }
+
+PulseIndexer::Iterator PulseIndexer::end() const { return PulseIndexer::Iterator(this, this->getLastPulseIndex()); }
+
+// ----------------------------------------- input iterator implementation
+
+/// returns true if the range is empty
+bool PulseIndexer::Iterator::calculateEventRange() {
+  const auto eventRange = m_indexer->getEventIndexRange(m_value.pulseIndex);
+  m_value.eventIndexStart = eventRange.first;
+  m_value.eventIndexStop = eventRange.second;
+
+  return m_value.eventIndexStart == m_value.eventIndexStop;
+}
+
+const PulseIndexer::IteratorValue &PulseIndexer::Iterator::operator*() const { return m_value; }
+
+PulseIndexer::Iterator &PulseIndexer::Iterator::operator++() {
+  ++m_value.pulseIndex;
+  // cache the final pulse index to use
+  const auto lastPulseIndex = m_indexer->m_roi.back();
+
+  // advance to the next included pulse
+  while ((m_value.pulseIndex < lastPulseIndex) && (!m_indexer->includedPulse(m_value.pulseIndex)))
+    ++m_value.pulseIndex;
+
+  // return early if this has advanced to the end
+  if (m_value.pulseIndex >= lastPulseIndex)
+    return *this;
+
+  while (this->calculateEventRange() && (m_value.pulseIndex < lastPulseIndex)) {
+    ++m_value.pulseIndex; // move forward a pulse while there is
+  }
+
+  return *this;
+}
+
+bool PulseIndexer::Iterator::operator==(const PulseIndexer::Iterator &other) const {
+  if (this->m_indexer != other.m_indexer)
+    return false;
+  else
+    return this->m_value.pulseIndex == other.m_value.pulseIndex;
+}
+
+bool PulseIndexer::Iterator::operator!=(const PulseIndexer::Iterator &other) const { return !(*this == other); }
 
 } // namespace Mantid::DataHandling

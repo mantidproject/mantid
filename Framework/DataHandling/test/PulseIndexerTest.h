@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/PulseIndexer.h"
+#include <cxxtest/TestSuite.h>
+#include <iostream>
 
 using Mantid::DataHandling::PulseIndexer;
 
@@ -61,6 +61,26 @@ private:
     for (size_t i = myLastPulseIndex; i < eventIndices->size() + 2; ++i) {
       TS_ASSERT_EQUALS(indexer.getStartEventIndex(i), indexer.getStopEventIndex(i));
       TS_ASSERT_EQUALS(indexer.getStopEventIndex(i), total_events);
+    }
+
+    // check the iterator
+    TS_ASSERT_DIFFERS(indexer.cbegin(), indexer.cend());
+
+    { // explicit for loop
+      size_t count{0};
+      for (auto iter = indexer.cbegin(); iter != indexer.cend(); ++iter)
+        count++;
+      TS_ASSERT_EQUALS(count, indexer.getLastPulseIndex() - indexer.getFirstPulseIndex());
+    }
+
+    { // range based for loop
+      size_t count{0};
+
+      for (const auto &iter : indexer) { // requires begin() and end()
+        (void)iter;                      // to quiet unused arg warning
+        count++;
+      }
+      TS_ASSERT_EQUALS(count, indexer.getLastPulseIndex() - indexer.getFirstPulseIndex());
     }
   }
 
@@ -167,7 +187,7 @@ public:
       eventIndices->push_back(i);
 
     constexpr size_t first_pulse_index{1};
-    const size_t last_pulse_index{eventIndices->size() - 1};
+    const size_t last_pulse_index{eventIndices->size() - 2};
     const auto start_event_index = eventIndices->operator[](1);
     const size_t total_events{eventIndices->back() - eventIndices->operator[](first_pulse_index) - 1};
     std::vector<size_t> roi;
@@ -221,27 +241,41 @@ public:
       PulseIndexer indexer(eventIndices, start_event_index, total_events, entry_name, roi);
 
       TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(), roi.front());
-      TS_ASSERT_EQUALS(indexer.getLastPulseIndex(), last_pulse_index);
+      TS_ASSERT_EQUALS(indexer.getLastPulseIndex(), last_pulse_index - 2); // roi gets rid of more
 
       auto toEventIndex = [eventIndices, start_event_index](const size_t pulseIndex) {
         return eventIndices->operator[](pulseIndex) - start_event_index;
       };
 
       const auto exp_start_event = eventIndices->operator[](indexer.getFirstPulseIndex()) - start_event_index;
-      const auto exp_total_event = total_events - start_event_index;
+      const auto exp_total_event = toEventIndex(4) - toEventIndex(2);
 
       // check the individual event indices
       assert_indices_equal(indexer, 0, exp_start_event, exp_start_event); // exclude before
       assert_indices_equal(indexer, 1, exp_start_event, exp_start_event); // exclude before
       assert_indices_equal(indexer, 2, toEventIndex(2), toEventIndex(3)); // include
       assert_indices_equal(indexer, 3, toEventIndex(3), toEventIndex(4)); // include
-      assert_indices_equal(indexer, 4, toEventIndex(4), toEventIndex(4)); // exclude
-      assert_indices_equal(indexer, 5, toEventIndex(5), toEventIndex(5)); // exclude
-      assert_indices_equal(indexer, 6, toEventIndex(6), exp_total_event); // include
+      assert_indices_equal(indexer, 4, total_events, total_events);       // exclude
+      assert_indices_equal(indexer, 5, total_events, total_events);       // exclude
+      assert_indices_equal(indexer, 6, total_events, total_events);       // exclude
       assert_indices_equal(indexer, 7, total_events, total_events);       // exclude due to number of events
       assert_indices_equal(indexer, 8, total_events, total_events);       // exclude after
       assert_indices_equal(indexer, 9, total_events, total_events);       // exclude after
       assert_indices_equal(indexer, 10, total_events, total_events);      // exclude out of range
+
+      // check the iterator
+      TS_ASSERT_DIFFERS(indexer.begin(), indexer.end());
+      TS_ASSERT_DIFFERS(indexer.cbegin(), indexer.cend());
+
+      // range based for loop
+      size_t num_steps{0};
+      size_t num_events{0};
+      for (const auto &iter : indexer) { // requires begin() and end()
+        num_events += (iter.eventIndexStop - iter.eventIndexStart);
+        num_steps++;
+      }
+      TS_ASSERT_EQUALS(num_events, exp_total_event);
+      TS_ASSERT_EQUALS(num_steps, 2); // calculated by hand
     }
   }
 };
