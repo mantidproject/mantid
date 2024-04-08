@@ -47,8 +47,9 @@ pycifrw:
 sphinx_bootstrap_theme:
   - 0.8.1
 
+#Some unit tests failures present in 1.13.0 from gaussian not being found
 scipy:
-  - '>=1.10.0'
+  - '>=1.10.0, !=1.13.0'
 
 pyqt:
   - 5.15
