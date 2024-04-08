@@ -6,62 +6,21 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitAddWorkspaceDialog.h"
 
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include <boost/optional.hpp>
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include <utility>
 
-namespace {
-using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
-
-boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
-  if (workspace) {
-    const auto numberOfHistograms = workspace->getNumberHistograms();
-    if (numberOfHistograms > 0)
-      return numberOfHistograms - 1;
-  }
-  return boost::none;
-}
-
-QString getIndexString(const MatrixWorkspace_sptr &workspace) {
-  const auto maximum = maximumIndex(workspace);
-  if (maximum)
-    return QString("0-%1").arg(*maximum);
-  return "";
-}
-
-QString getIndexString(const std::string &workspaceName) {
-  return getIndexString(WorkspaceUtils::getADSWorkspace(workspaceName));
-}
-
-std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
-  return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
-}
-
-QString OR(const QString &lhs, const QString &rhs) { return "(" + lhs + "|" + rhs + ")"; }
-
-QString NATURAL_NUMBER(std::size_t digits) { return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}"); }
-
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString MINUS = "\\-";
-
-const QString NUMBER = NATURAL_NUMBER(4);
-const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
-const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
-const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
-} // namespace Regexes
-} // namespace
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.leWorkspaceIndices->setValidator(createValidator(Regexes::SPECTRA_LIST, this).release());
+  const auto validatorString = QString::fromStdString(getRegexValidatorString(regexValidatorStrings::SpectraValidator));
+  m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
   setAllSpectraSelectionEnabled(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
@@ -105,8 +64,8 @@ void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
 
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
-  if (WorkspaceUtils::doesExistInADS(name) && state == Qt::Checked) {
-    m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
+  if (doesExistInADS(name) && state == Qt::Checked) {
+    m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(getIndexString(name)));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   } else
     m_uiForm.leWorkspaceIndices->setEnabled(true);
@@ -114,7 +73,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
 
 void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
-  const auto workspace = WorkspaceUtils::getADSWorkspace(name);
+  const auto workspace = getADSWorkspace(name);
   if (workspace)
     setWorkspace(name);
   else
@@ -126,7 +85,7 @@ void ConvFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
 void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
   if (m_uiForm.ckAllSpectra->isChecked()) {
-    m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
+    m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(getIndexString(workspace)));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   }
 }

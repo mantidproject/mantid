@@ -5,15 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferModel.h"
-#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferModelUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "ReductionAlgorithmUtils.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 IETModel::IETModel() : m_outputWorkspaces() {}
@@ -276,8 +277,8 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
                                                    std::string const &groupOption, bool const shouldGroup) {
   m_outputWorkspaces.clear();
 
-  if (WorkspaceUtils::doesExistInADS(groupName)) {
-    if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
+  if (doesExistInADS(groupName)) {
+    if (auto const outputGroup = getADSWorkspace<WorkspaceGroup>(groupName)) {
       m_outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {

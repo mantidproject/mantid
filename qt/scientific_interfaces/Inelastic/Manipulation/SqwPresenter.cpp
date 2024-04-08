@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwPresenter.h"
 #include "Common/IndirectDataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 
 #include "MantidGeometry/IComponent.h"
@@ -21,6 +21,8 @@
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("S(Q,w)");
@@ -48,7 +50,7 @@ void SqwPresenter::handleDataReady(std::string const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName);
     auto &ads = AnalysisDataService::Instance();
-    if (auto const eFixed = WorkspaceUtils::getEFixed(ads.retrieveWS<MatrixWorkspace>(dataName))) {
+    if (auto const eFixed = getEFixed(ads.retrieveWS<MatrixWorkspace>(dataName))) {
       m_model->setEFixed(*eFixed);
     } else {
       m_view->showMessageBox("An 'Efixed' value could not be found in the provided workspace.");
@@ -112,8 +114,8 @@ void SqwPresenter::plotRqwContour() {
 void SqwPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Sqw");
-  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void SqwPresenter::handleRunClicked() { runTab(); }

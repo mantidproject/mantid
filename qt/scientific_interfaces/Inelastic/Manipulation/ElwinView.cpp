@@ -4,16 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "ElwinView.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include <QFileInfo>
 
 #include <algorithm>
 
@@ -185,8 +186,6 @@ void ElwinView::setHorizontalHeaders() {
   m_uiForm.tbElwinData->setHorizontalHeaderLabels(headers);
   auto header = m_uiForm.tbElwinData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-  m_uiForm.tbElwinData->setItemDelegateForColumn(headers.size() - 1,
-                                                 std::make_unique<InterfaceUtils::ExcludeRegionDelegate>().release());
   m_uiForm.tbElwinData->verticalHeader()->setVisible(false);
 }
 

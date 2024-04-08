@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferModelUtils.h"
 #include <boost/algorithm/string.hpp>
 #include <chrono>

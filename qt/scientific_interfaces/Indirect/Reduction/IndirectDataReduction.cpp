@@ -10,7 +10,6 @@
 #include "IndirectDataReduction.h"
 #include "Common/Settings.h"
 
-#include "Common/WorkspaceUtils.h"
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
@@ -22,6 +21,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 
 #include <QDir>
@@ -30,6 +30,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
@@ -255,7 +256,7 @@ void IndirectDataReduction::loadInstrumentDetails() {
   if (!instWorkspace) {
     return;
   }
-  if (auto const eFixed = WorkspaceUtils::getEFixed(instWorkspace)) {
+  if (auto const eFixed = getEFixed(instWorkspace)) {
     m_instDetails["Efixed"] = QString::number(*eFixed);
   } else {
     m_instDetails["Efixed"] = "";

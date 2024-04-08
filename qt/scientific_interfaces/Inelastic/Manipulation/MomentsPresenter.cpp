@@ -6,17 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsPresenter.h"
 #include "Common/IndirectDataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 
@@ -64,7 +66,7 @@ bool MomentsPresenter::validate() { return true; }
 void MomentsPresenter::plotNewData(std::string const &filename) {
 
   m_view->plotNewData(filename);
-  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename);
+  auto const range = getXRangeFromWorkspace(filename);
   m_view->setPlotPropertyRange(range);
   m_view->setRangeSelector(range);
   m_view->replot();
@@ -110,8 +112,8 @@ void MomentsPresenter::runComplete(bool error) {
 void MomentsPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Moments");
-  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

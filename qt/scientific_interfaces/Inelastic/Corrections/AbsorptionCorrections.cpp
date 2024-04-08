@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/InterfaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QRegExpValidator>
 #include <QSignalBlocker>
@@ -18,6 +18,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DeltaEMode;
+using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 /**
  * Determines whether an input has a value of zero
@@ -67,7 +69,7 @@ MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace, std::st
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
   convertAlg->setProperty("EMode", DeltaEMode::asString(workspace->getEMode()));
-  if (auto const eFixed = MantidQt::CustomInterfaces::WorkspaceUtils::getEFixed(workspace)) {
+  if (auto const eFixed = getEFixed(workspace)) {
     convertAlg->setProperty("EFixed", *eFixed);
   }
   convertAlg->setProperty("Target", target);
@@ -152,7 +154,7 @@ AbsorptionCorrections::~AbsorptionCorrections() = default;
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return WorkspaceUtils::doesExistInADS(name) ? WorkspaceUtils::getADSWorkspace(name) : nullptr;
+  return doesExistInADS(name) ? getADSWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -485,13 +487,12 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("CalculateMonteCarlo");
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                               : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto correctionsWs = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
+  auto correctionsWs = getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
   if (correctionsWs) {
     correctionsWs = convertUnits(correctionsWs, "Wavelength");
     addWorkspaceToADS(m_pythonExportWsName, correctionsWs);
@@ -502,7 +503,7 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
 
 void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &correctionsWs) {
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  convertSpectrumAxes(correctionsWs, WorkspaceUtils::getADSWorkspace(sampleWsName));
+  convertSpectrumAxes(correctionsWs, getADSWorkspace(sampleWsName));
   setYAxisLabels(correctionsWs, "", "Attenuation Factor");
 }
 
@@ -517,7 +518,7 @@ void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &corre
 void AbsorptionCorrections::convertSpectrumAxes(const MatrixWorkspace_sptr &correction,
                                                 const MatrixWorkspace_sptr &sample) {
   if (correction && sample && sample->getEMode() == DeltaEMode::Type::Indirect) {
-    if (auto const eFixed = WorkspaceUtils::getEFixed(correction)) {
+    if (auto const eFixed = getEFixed(correction)) {
       convertSpectrumAxis(correction, *eFixed);
     } else {
       convertSpectrumAxis(correction);
@@ -548,7 +549,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
+  auto const sampleWs = getADSWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else
