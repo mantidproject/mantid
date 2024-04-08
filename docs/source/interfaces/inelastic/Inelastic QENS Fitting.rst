@@ -8,7 +8,8 @@ Overview
 
 The Inelastic QENS Fitting interface is a collection of tools within Mantid
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
-OSIRIS and data from direct geometry spectrometer LET.
+OSIRIS and data from direct geometry spectrometer LET. Note that this interface
+used to be called the Inelastic Data Analysis interface, but has been renamed.
 
 The majority of the functions used within this interface can be used with both
 reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
