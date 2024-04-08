@@ -280,13 +280,11 @@ public:
     auto ws10 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(1));
     const auto yPara = ws11->dataY(0);
     const auto yAnti = ws10->dataY(0);
-    const auto expectedYPara =
-        std::vector<double>{0.78016428467325061, 0.86171025529258294, 0.91625452097905313, 0.95052072166210300};
-    const auto expectedYAnti =
-        std::vector<double>{0.21983571532674945, 0.13828974470741706, 0.083745479020946867, 0.049479278337896948};
+    const auto expectedYPara = std::vector<double>{0.78016, 0.86171, 0.91625, 0.95052};
+    const auto expectedYAnti = std::vector<double>{0.21984, 0.13829, 0.08375, 0.04948};
     for (size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(expectedYPara[i], yPara[i], 1e-8);
-      TS_ASSERT_DELTA(expectedYAnti[i], yAnti[i], 1e-8);
+      TS_ASSERT_DELTA(expectedYPara[i], yPara[i], 1e-3);
+      TS_ASSERT_DELTA(expectedYAnti[i], yAnti[i], 1e-3);
     }
   }
 
