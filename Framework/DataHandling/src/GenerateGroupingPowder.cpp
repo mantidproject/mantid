@@ -214,9 +214,9 @@ void GenerateGroupingPowder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                                         std::make_shared<InstrumentValidator>()),
                   "A workspace from which to generate the grouping.");
-  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output,
+                                                                         PropertyMode::Optional),
                   "The grouping workspace created");
-
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble, "The polar angle step for grouping, in degrees.");

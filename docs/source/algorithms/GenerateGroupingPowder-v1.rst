@@ -94,6 +94,52 @@ Output:
     Found file powder.par
     The grouped workspace has 14 histograms
 
+-------------------------------------------------------------------------------------
+
+Similarly, without specifying the optional *GroupingWorkspace* property:
+
+
+.. testcode:: GenerateGroupingPowder
+
+   # create some grouping file
+    import mantid
+    outputFilename=mantid.config.getString("defaultsave.directory")+"powder.xml"
+
+    #load some file
+    ws=Load("CNCS_7860")
+
+    print("test")
+
+    #generate the files
+    GenerateGroupingPowder(ws,10,outputFilename)
+
+    #check that it works
+    import os.path
+    if(os.path.isfile(outputFilename)):
+        print("Found file powder.xml")
+    if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
+        print("Found file powder.par")
+    wsg=GroupDetectors(ws,outputFilename)
+    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
+
+.. testcleanup:: GenerateGroupingPowder
+
+   DeleteWorkspace(ws)
+   DeleteWorkspace(wsg)
+   import os,mantid
+   filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
+   os.remove(filename)
+   filename=mantid.config.getString("defaultsave.directory")+"powder.par"
+   os.remove(filename)
+
+Output:
+
+.. testoutput:: GenerateGroupingPowder
+
+    Found file powder.xml
+    Found file powder.par
+    The grouped workspace has 14 histograms
+
 If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspace that looks like
 
 .. figure:: /images/GenerateGroupingPowder.png
