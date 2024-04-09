@@ -286,7 +286,5 @@ class OSIRISDiffractionFocusingWithMultipleScattering(_OSIRISDiffractionFocusing
             neutron_paths_multiple=5,
         )
 
-        mantid.SaveNexus(InputWorkspace=self.results, Filename=r"C:\Users\joy22959\Documents\test\multiscatt")
-
     def skipTests(self):
         return False
