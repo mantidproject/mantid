@@ -4,7 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-<<<<<<< HEAD:qt/scientific_interfaces/Inelastic/QENSFitting/FitTab.cpp
 #include "FitTab.h"
 #include "Common/SettingsHelper.h"
 #include "MantidQtWidgets/Common/InterfaceUtils.h"
