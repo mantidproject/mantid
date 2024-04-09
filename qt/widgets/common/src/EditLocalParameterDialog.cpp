@@ -34,7 +34,7 @@ namespace MantidQt::MantidWidgets {
  * @param ties :: [input] Parameter ties.
  * @param constraints :: [input] Parameter constraints.
  */
-EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const QString &parName,
+EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::string &parName,
                                                    const QStringList &datasetNames,
                                                    const QStringList &datasetDomainNames, const QList<double> &values,
                                                    const QList<bool> &fixes, const QStringList &ties,
@@ -58,7 +58,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const QStrin
  * @param datasetNames :: [input] Names of workspaces being fitted.
  * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  */
-void EditLocalParameterDialog::doSetup(const QString &parName, const QStringList &datasetNames,
+void EditLocalParameterDialog::doSetup(const std::string &parName, const QStringList &datasetNames,
                                        const QStringList &datasetDomainNames) {
   m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
@@ -72,7 +72,7 @@ void EditLocalParameterDialog::doSetup(const QString &parName, const QStringList
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setSectionResizeMode(QHeaderView::Stretch);
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this, SLOT(valueChanged(int, int)));
-  m_uiForm.lblParameterName->setText("Parameter: " + parName);
+  m_uiForm.lblParameterName->setText("Parameter: " + QString::fromStdString(parName));
 
   for (int i = 0; i < datasetDomainNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
@@ -102,7 +102,11 @@ void EditLocalParameterDialog::doSetup(const QString &parName, const QStringList
   connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
+
+  connect(this, SIGNAL(finished(int)), this, SLOT(emitDialogFinished(int)));
 }
+
+void EditLocalParameterDialog::emitDialogFinished(int result) { emit dialogFinished(result, this); }
 
 /// Slot. Called when a value changes.
 /// @param row :: Row index of the changed cell.

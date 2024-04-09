@@ -19,7 +19,7 @@ shown, this page describes all the tabs which can possibly be shown.
 
 .. interface:: Data Reduction
   :align: right
-  :width: 350
+  :width: 750
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
@@ -41,7 +41,7 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Indirect interfaces.
 
 ?
@@ -100,9 +100,9 @@ Spectra Min/Spectra Max
   Used to specify a range of spectra.
 
 Detector Grouping
-  Used to specify a method for grouping spectra. Possible grouping options include Individual, All,
-  File, Groups and Custom. The TOSCA instrument also has the Default grouping option which will use the grouping
-  specified in the IPF.
+  Used to specify a method for grouping detectors. Possible grouping options include 'Individual', 'All', 'IPF',
+  'File', 'Groups' and 'Custom'. The TOSCA instrument will default to grouping using 'IPF', and the other instruments
+  will default to 'Individual' grouping.
 
 Background Removal
   Allows removal of a background given a time-of-flight range.

@@ -26,7 +26,9 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace {
-bool hasSingleValue(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
+bool hasSingleValue(const MatrixWorkspace &ws) {
+  return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1 && ws.getNumDims() == 0);
+}
 bool hasMultipleBins(const MatrixWorkspace &ws) {
   try {
     return (ws.blocksize() > 1);

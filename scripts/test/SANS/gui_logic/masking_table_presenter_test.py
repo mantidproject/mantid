@@ -51,7 +51,7 @@ class MaskingTablePresenterTest(unittest.TestCase):
         presenter._view.set_display_mask_button_to_processing = mock.MagicMock()
         presenter._view.get_current_row.side_effect = RuntimeError("Mock get_current_row failure")
 
-        self.assertRaises(Exception, presenter.on_display)
+        presenter.on_display()
 
         # Confirm that on_processing_error_masking_display was called
         self.assertEqual(

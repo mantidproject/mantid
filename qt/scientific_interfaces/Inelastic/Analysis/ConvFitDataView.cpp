@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataView.h"
+#include "ConvFitAddWorkspaceDialog.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -27,13 +28,27 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
 
-ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
+ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
+void ConvFitDataView::showAddWorkspaceDialog() {
+  auto dialog = new ConvFitAddWorkspaceDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(m_wsSampleSuffixes);
+  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
+  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  dialog->updateSelectedSpectra();
+  dialog->show();
+}
+
 void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
-  IndirectFitDataView::addTableEntry(row, newRow);
+  FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.resolution));
   auto flags = cell->flags();

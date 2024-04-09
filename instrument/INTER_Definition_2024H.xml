@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="INTER"
+            valid-from="2024-02-23 10:00:00"
+            valid-to=  "2100-01-31 23:59:59"
+			last-modified="2018-02-16 00:00:00">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+    <default-view axis-view="z+"/>
+  </defaults>
+
+<!-- source and sample-position components START============================= -->
+
+  <component type="source">
+    <location z="-17.037" />
+  </component>
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
+
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
+
+<!-- source and sample-position components END=============================== -->
+
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
+
+<!-- ================MONITOR 1 START========================================= -->
+  <component type="monitor1" idlist="monitor1">
+    <location z="-10.077" />
+  </component>
+
+  <type name="monitor1" is="monitor">
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base z="0.0" x="-0.02" y="0.0" />
+      <axis z="0.0" x="1.0" y="0.0" />
+      <radius val="0.01" />
+      <height val="0.04" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+<!-- ================MONITOR 1 END=========================================== -->
+
+<!-- ================MONITOR 2 START========================================= -->
+  <component type="monitor2" idlist="monitor2">
+    <location z="-3.246" />
+  </component>
+
+  <type name="monitor2" is="monitor">
+    <percent-transparency val="95" />
+    <cuboid id="base">
+      <left-front-bottom-point z="0.04" x="-0.02" y="-0.01"  />
+      <left-front-top-point  z="0.04" x="-0.02" y="0.01"  />
+      <left-back-bottom-point  z="-0.04" x="-0.02" y="-0.01"  />
+      <right-front-bottom-point  z="0.04" x="0.02" y="-0.01"  />
+    </cuboid>
+
+    <cylinder id="top">
+      <centre-of-bottom-base z="0.0" x="0.0" y="0.01" />
+      <axis z="0.0" x="0.0" y="1.0" />
+      <radius val="0.02" />
+      <height val="0.04" />
+    </cylinder>
+    <algebra val="base : top" />
+  </type>
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================MONITOR 3 START========================================= -->
+  <component type="monitor3" idlist="monitor3">
+    <location z="-0.252" />
+  </component>
+
+  <type name="monitor3" is="monitor">
+    <percent-transparency val="95" />
+    <cuboid id="base">
+      <left-front-bottom-point z="0.04" x="-0.02" y="-0.01"  />
+      <left-front-top-point  z="0.04" x="-0.02" y="0.01"  />
+      <left-back-bottom-point  z="-0.04" x="-0.02" y="-0.01"  />
+      <right-front-bottom-point  z="0.04" x="0.02" y="-0.01"  />
+    </cuboid>
+
+    <cylinder id="top">
+      <centre-of-bottom-base z="0.0" x="0.0" y="0.01" />
+      <axis z="0.0" x="0.0" y="1.0" />
+      <radius val="0.02" />
+      <height val="0.04" />
+    </cylinder>
+
+    <algebra val="base : top" />
+  </type>
+<!-- ================MONITOR 3 END=========================================== -->
+
+<!-- ================LINEAR DETECTOR START=================================== -->
+  <component type="panel" idstart="3001" idfillbyfirst="y" idstep="1" idstepbyrow="1000">
+    <location z="3.03616"  name="linear-detector"/> <!--3.0867 -->
+    <parameter name="y">
+      <logfile id="Theta" eq="3.03616*tan(2*value*0.0174533)" extract-single-value-as="last_value"/>
+      <!-- <logfile id="Theta" eq="2*value" extract-single-value-as="last_value"/>-->
+    </parameter>
+
+  </component>
+
+  <type name="panel" is="RectangularDetector" type="linear-detector-pixel"
+    xpixels="8" xstart="-0.000004" xstep="0.00000035"
+    ypixels="256" ystart="-0.048705" ystep="+0.000606" > <!-- -0.07884 -->
+    <properties/>
+  </type>
+  <!--"-0.0576"-->
+  <type name="linear-detector-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point z="0.01" x="0.00000015" y="-0.0005"  />
+      <left-front-top-point  z="0.01" x="0.00000015" y="0.0005"  />
+      <left-back-bottom-point  z="-0.01" x="0.00000015" y="-0.0005"  />
+      <right-front-bottom-point  z="0.01" x="-0.00000015" y="-0.0005"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+<!-- ================LINEAR DETECTOR END-==================================== -->
+
+<!-- other components -->
+
+  <component type="slit" name="slit1">
+    <location z="-2.236"/>
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap">
+      <logfile id="S1VG" extract-single-value-as="last_value" />
+    </parameter>
+    <parameter name="y">
+      <logfile id="S1VG" eq="-value*0.001/2.0" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit2">
+    <location z="-0.313"/>
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap">
+      <logfile id="S2VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit3">
+    <location z="1.163"/> <!-- x=23.0+0.960   -->
+    <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap">
+      <logfile id="S3VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit4">
+    <location z="2.663"/>     <!-- x=23.0+2.445   -->
+    <!-- This log file stores the vertical opening of slit. Note this slit
+     is fixed to the point detector. -->
+    <parameter name="vertical gap">
+      <logfile id="S4VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+  <component type="supermirror">
+    <location z="28.52"/>  <!-- x=32.0-3.480   -->
+  </component>
+  <type name="supermirror" />
+
+
+
+<!-- DETECTOR and MONITOR ID LISTS -->
+  <idlist idname="monitor1">
+    <id val="1" />
+  </idlist>
+
+  <idlist idname="monitor2">
+    <id val="2" />
+  </idlist>
+
+  <idlist idname="monitor3">
+    <id val="3" />
+  </idlist>
+
+</instrument>

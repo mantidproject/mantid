@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
-
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
@@ -27,18 +28,6 @@ static bool isValueZero(double value) { return value == 0; }
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
 
 template <typename T> void addWorkspaceToADS(std::string const &workspaceName, T const &workspace) {
   AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
@@ -77,10 +66,9 @@ MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace, std::st
   convertAlg->setChild(true);
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
-  auto eMode = workspace->getEMode();
-  convertAlg->setProperty("EMode", DeltaEMode::asString(eMode));
-  if ((eMode == DeltaEMode::Type::Direct) || (eMode == DeltaEMode::Type::Indirect)) {
-    convertAlg->setProperty("EFixed", workspace->getEFixed(workspace->getDetector(0)));
+  convertAlg->setProperty("EMode", DeltaEMode::asString(workspace->getEMode()));
+  if (auto const eFixed = MantidQt::CustomInterfaces::WorkspaceUtils::getEFixed(workspace)) {
+    convertAlg->setProperty("EFixed", *eFixed);
   }
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
@@ -164,7 +152,7 @@ AbsorptionCorrections::~AbsorptionCorrections() = default;
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return doesExistInADS(name) ? getADSMatrixWorkspace(name) : nullptr;
+  return WorkspaceUtils::doesExistInADS(name) ? WorkspaceUtils::getADSWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -497,12 +485,13 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("CalculateMonteCarlo");
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                               : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
+  auto correctionsWs = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
   if (correctionsWs) {
     correctionsWs = convertUnits(correctionsWs, "Wavelength");
     addWorkspaceToADS(m_pythonExportWsName, correctionsWs);
@@ -513,7 +502,7 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
 
 void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &correctionsWs) {
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  convertSpectrumAxes(correctionsWs, getADSMatrixWorkspace(sampleWsName));
+  convertSpectrumAxes(correctionsWs, WorkspaceUtils::getADSWorkspace(sampleWsName));
   setYAxisLabels(correctionsWs, "", "Attenuation Factor");
 }
 
@@ -528,9 +517,9 @@ void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &corre
 void AbsorptionCorrections::convertSpectrumAxes(const MatrixWorkspace_sptr &correction,
                                                 const MatrixWorkspace_sptr &sample) {
   if (correction && sample && sample->getEMode() == DeltaEMode::Type::Indirect) {
-    try {
-      convertSpectrumAxis(correction, getEFixed(correction));
-    } catch (std::runtime_error const &) {
+    if (auto const eFixed = WorkspaceUtils::getEFixed(correction)) {
+      convertSpectrumAxis(correction, *eFixed);
+    } else {
       convertSpectrumAxis(correction);
     }
   }
@@ -559,7 +548,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs = getADSMatrixWorkspace(dataName.toStdString());
+  auto const sampleWs = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else

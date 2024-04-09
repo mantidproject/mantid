@@ -226,7 +226,7 @@ boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID worksp
 }
 
 MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
-  auto function = IndirectFittingModel::getMultiDomainFunction();
+  auto function = FittingModel::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
 
   for (auto i = 0u; i < function->nFunctions(); ++i)
@@ -257,7 +257,7 @@ std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParam
 }
 
 std::unordered_map<std::string, std::string> ConvFitModel::mapDefaultParameterNames() const {
-  const auto initialMapping = IndirectFittingModel::mapDefaultParameterNames();
+  const auto initialMapping = FittingModel::mapDefaultParameterNames();
   std::unordered_map<std::string, std::string> mapping;
   for (const auto &map : initialMapping) {
     auto mapped = m_parameterNameChanges.find(map.second);
@@ -280,7 +280,7 @@ void ConvFitModel::addSampleLogs() {
 }
 
 void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  IndirectFittingModel::addOutput(fitAlgorithm);
+  FittingModel::addOutput(fitAlgorithm);
   addSampleLogs();
 }
 

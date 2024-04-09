@@ -1,1 +1,0 @@
-- Add a new property ``MinimumPeakTotalCount`` to :ref:`PDCalibration <algm-PDCalibration>` and :ref:`FitPeaks <algm-FitPeaks>`. This relieves ``MinimumPeakHeight`` property from checking the total count and limits it to just checking the peak height.

@@ -325,12 +325,11 @@ void LogManager::removeDataOutsideTimeROI() {
 /**
  * Filter the run by the given boolean log. It replaces all time
  * series properties with filtered time series properties
- * @param filter :: A boolean time series to filter each log on
+ * @param filter :: A LogFilter instance to filter each log on
  * @param excludedFromFiltering :: A string list of logs that
  * will be excluded from filtering
  */
-void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
-                             const std::vector<std::string> &excludedFromFiltering) {
+void LogManager::filterByLog(Mantid::Kernel::LogFilter *filter, const std::vector<std::string> &excludedFromFiltering) {
   // This will invalidate the cache
   this->clearSingleValueCache();
   m_manager->filterByProperty(filter, excludedFromFiltering);
@@ -653,8 +652,7 @@ void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5D
   // Only load from NXlog entries
   const auto &allEntries = fileInfo.getAllEntries();
   auto itNxLogEntries = allEntries.find("NXlog");
-  const std::set<std::string> &nxLogEntries =
-      (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
+  const auto nxLogEntries = (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
 
   const auto levels = std::count(prefix.begin(), prefix.end(), '/');
 

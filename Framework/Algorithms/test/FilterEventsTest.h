@@ -189,7 +189,12 @@ public:
    *  4: 20300000000, 20365000000, 2
    *  5: 20400000000, 20465000000, 2
    */
-  void test_FilterNoCorrection() {
+
+  void test_FilterNoCorrection() { run_FilterNoCorrection(TOF); }
+
+  void test_FilterNoCorrection_weighted() { run_FilterNoCorrection(WEIGHTED); }
+
+  void run_FilterNoCorrection(EventType eventType) {
     g_log.notice("\ntest_FilterNoCorrection...");
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
     int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
@@ -197,7 +202,7 @@ public:
     size_t numpulses = 5;
 
     // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
-    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses, eventType);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     // Create SplittersWorkspace
@@ -1434,7 +1439,8 @@ public:
    * @param todft : time interval between 2 adjacent events in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
-  EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt, size_t numpulses) {
+  EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt, size_t numpulses,
+                                           EventType eventType = TOF) {
 
     constexpr int64_t N_EVENTS_IN_PULSE{10};
     constexpr double nanosecToMilisec{0.001};
@@ -1472,8 +1478,22 @@ public:
     // Populate its event list using the previous vector of events
     for (size_t histIndex = 0; histIndex < eventWS->getNumberHistograms(); histIndex++) {
       auto &elist = eventWS->getSpectrum(histIndex); // event list
-      for (const auto &event : events)
-        elist.addEventQuickly(event);
+      elist.switchTo(eventType);
+
+      switch (eventType) {
+      case TOF:
+        for (const auto &event : events)
+          elist.addEventQuickly(event);
+        break;
+      case WEIGHTED:
+        for (const auto &event : events)
+          elist.addEventQuickly(WeightedEvent(event));
+        break;
+      case WEIGHTED_NOTIME:
+        for (const auto &event : events)
+          elist.addEventQuickly(WeightedEventNoTime(event));
+        break;
+      }
     }
 
     // Insert a sample log for the start and end of the run, with one charge count per pulse

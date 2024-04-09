@@ -169,6 +169,17 @@ public:
     TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(), eventList.getWeightedEventsNoTime());
   }
 
+  void test_EventTypeConstructor() {
+    EventList tof;
+    TS_ASSERT_EQUALS(tof.getEventType(), TOF);
+
+    EventList weighted(WEIGHTED);
+    TS_ASSERT_EQUALS(weighted.getEventType(), WEIGHTED);
+
+    EventList weightedNoTime(WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(weightedNoTime.getEventType(), WEIGHTED_NOTIME);
+  }
+
   //==================================================================================
   //--- Basics  ----
   //==================================================================================

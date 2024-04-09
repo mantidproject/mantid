@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` will no longer sort events prior to doing :ref:`RebinRagged <algm-RebinRagged>` when ``PreserveEvents=False`` enabling it to ultilize performace improvement to :ref:`Rebin <algm-Rebin>`.

@@ -665,10 +665,10 @@
     <location x="0.0" y="0.0" z="0">
       <rot val="2.48" axis-x="0" axis-y="1" axis-z="0"/>
       <parameter name="t-position">
-        <logfile id="md_rot_Readback" eq="2.48+value"/>
+        <logfile id="mr_rot_Readback" eq="2.48-value"/>
       </parameter>
       <parameter name="roty">
-        <logfile id="md_rot_Readback" eq="2.48+value"/>
+        <logfile id="mr_rot_Readback" eq="2.48-value"/>
       </parameter>
     </location>
     <side-by-side-view-location x="-0.71" y="0.0"/>

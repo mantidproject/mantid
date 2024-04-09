@@ -77,10 +77,10 @@ void OptimizeLatticeForCellType::exec() {
   std::string cell_type = getProperty("CellType");
   IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
-  std::vector<int> badPeaks;
   std::vector<IPeaksWorkspace_sptr> runWS;
   if (edge > 0)
     if (auto pw = std::dynamic_pointer_cast<PeaksWorkspace>(ws)) {
+      std::vector<int> badPeaks;
       Geometry::Instrument_const_sptr inst = ws->getInstrument();
       for (int i = int(pw->getNumberPeaks()) - 1; i >= 0; --i) {
         const std::vector<Peak> &peaks = pw->getPeaks();

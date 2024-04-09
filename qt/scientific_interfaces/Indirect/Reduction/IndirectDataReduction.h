@@ -22,6 +22,18 @@ namespace CustomInterfaces {
 
 class IndirectDataReductionTab;
 
+class IIndirectDataReduction {
+public:
+  virtual ~IIndirectDataReduction() = default;
+
+  virtual Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() = 0;
+
+  virtual MantidWidgets::IInstrumentConfig *getInstrumentConfiguration() const = 0;
+  virtual QMap<QString, QString> getInstrumentDetails() = 0;
+
+  virtual void showAnalyserAndReflectionOptions(bool visible) = 0;
+};
+
 /**
 This class defines the IndirectDataReduction interface. It handles the overall
 instrument settings
@@ -33,7 +45,7 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 @author Michael Whitty
 */
 
-class IndirectDataReduction : public IndirectInterface {
+class IndirectDataReduction : public IndirectInterface, public IIndirectDataReduction {
   Q_OBJECT
 
 public:
@@ -54,15 +66,15 @@ public:
   /// Handled configuration changes
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace();
+  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() override;
 
   void loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser = "",
                                 const std::string &reflection = "");
 
-  std::vector<std::pair<std::string, std::vector<std::string>>> getInstrumentModes();
-  QMap<QString, QString> getInstrumentDetails();
+  MantidWidgets::IInstrumentConfig *getInstrumentConfiguration() const override;
+  QMap<QString, QString> getInstrumentDetails() override;
 
-  void showAnalyserAndReflectionOptions(bool visible);
+  void showAnalyserAndReflectionOptions(bool visible) override;
 
 signals:
   /// Emitted when the instrument setup is changed
@@ -119,6 +131,44 @@ private:
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     IndirectDataReductionTab *tabIDRContent = new T(this, tabContent);
+    tabIDRContent->setupTab();
+    tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+
+    // Add to the cache
+    m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
+
+    // Add all tabs to UI initially
+    m_uiForm.twIDRTabs->addTab(tabWidget, name);
+  }
+
+  /**
+   * Adds an MVP tab to the cache of tabs that can be shown.
+   *
+   * This method is used to ensure that the tabs are always loaded and their
+   * layouts setup for the sake of screenshoting them for documentation.
+   *
+   * @param name Name to be displayed on tab
+   */
+
+  template <typename TabPresenter, typename TabView, typename TabModel> void addMVPTab(const QString &name) {
+    QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
+    QVBoxLayout *tabLayout = new QVBoxLayout(tabWidget);
+    tabWidget->setLayout(tabLayout);
+
+    QScrollArea *tabScrollArea = new QScrollArea(tabWidget);
+    tabLayout->addWidget(tabScrollArea);
+    tabScrollArea->setWidgetResizable(true);
+
+    QWidget *tabContent = new QWidget(tabScrollArea);
+    tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
+    tabScrollArea->setWidget(tabContent);
+    tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    IndirectDataReductionTab *tabIDRContent =
+        new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>());
+
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 

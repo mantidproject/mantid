@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
+    src/AddWorkspaceMultiDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
@@ -111,6 +112,7 @@ set(SRC_FILES
     src/WorkspacePresenter/WorkspaceTreeWidget.cpp
     src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
     src/WorkspaceSelector.cpp
+    src/WorkspaceMultiSelector.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
     src/AlgorithmProgress/AlgorithmProgressModel.cpp
@@ -156,6 +158,7 @@ set(SRC_FILES
 
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -229,6 +232,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
     inc/MantidQtWidgets/Common/WorkspaceSelector.h
+    inc/MantidQtWidgets/Common/WorkspaceMultiSelector.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
@@ -278,6 +282,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
+    inc/MantidQtWidgets/Common/IAddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -338,6 +343,7 @@ set(QT5_INC_FILES
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui
@@ -357,7 +363,6 @@ set(QT5_UI_FILES
 )
 
 set(MOC_FILES
-    inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -437,6 +442,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/TrackedAction.h
     inc/MantidQtWidgets/Common/UserFunctionDialog.h
     inc/MantidQtWidgets/Common/WorkspaceSelector.h
+    inc/MantidQtWidgets/Common/WorkspaceMultiSelector.h
     inc/MantidQtWidgets/Common/LineEditWithClear.h
     inc/MantidQtWidgets/Common/LogValueSelector.h
     inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
@@ -592,6 +598,7 @@ set(INC_FILES
 
 set(UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/CatalogSearch.ui
     inc/MantidQtWidgets/Common/CatalogSelector.ui
@@ -720,7 +727,6 @@ set(TEST_FILES
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES
-    test/AddWorkspaceDialogTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h

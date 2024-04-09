@@ -30,6 +30,7 @@ public:
   void setEnergyMax(double energyMax);
   void setNumBins(double numBins);
   void setCalculateErrors(bool calculateErrors);
+  void setEnforceNormalization(bool enforceNormalization);
 
 private:
   std::string m_sampleWorkspace;
@@ -39,6 +40,7 @@ private:
   double m_energyMax;
   double m_numBins;
   bool m_calculateErrors;
+  bool m_enforceNormalization;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

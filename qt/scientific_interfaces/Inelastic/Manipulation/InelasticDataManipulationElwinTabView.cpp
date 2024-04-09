@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationElwinTabView.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidGeometry/Instrument.h"
-
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -15,32 +17,13 @@
 
 #include <algorithm>
 
-#include "Common/IndirectAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
-  auto const xValues = workspace->x(0);
-  return QPair<double, double>(xValues.front(), xValues.back());
-}
-
-QStringList getSampleWSSuffices() {
-  QStringList const wsSampleSuffixes{"red", "sqw"};
-  return wsSampleSuffixes;
-}
-
-QStringList getSampleFBSuffices() {
-  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
-  return fbSampleSuffixes;
-}
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -83,7 +66,7 @@ public:
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTabView::InelasticDataManipulationElwinTabView(QWidget *parent)
-    : m_presenter(), m_elwTree(nullptr), m_addWorkspaceDialog(nullptr) {
+    : m_presenter(), m_elwTree(nullptr) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -161,10 +144,10 @@ void InelasticDataManipulationElwinTabView::setup() {
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(notifyAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveDataClicked()));
 
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(notifyFilesFound()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
   connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
+  connect(m_uiForm.ckCollapse, SIGNAL(stateChanged(int)), this, SLOT(notifyRowModeChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
@@ -189,8 +172,6 @@ void InelasticDataManipulationElwinTabView::notifySaveClicked() { m_presenter->h
 
 void InelasticDataManipulationElwinTabView::notifyPlotPreviewClicked() { m_presenter->handlePlotPreviewClicked(); }
 
-void InelasticDataManipulationElwinTabView::notifyFilesFound() { m_presenter->handleFilesFound(); }
-
 void InelasticDataManipulationElwinTabView::notifySelectedSpectrumChanged(int index) {
   m_presenter->handlePreviewSpectrumChanged(index);
 }
@@ -199,52 +180,40 @@ void InelasticDataManipulationElwinTabView::notifyPreviewIndexChanged(int index)
   m_presenter->handlePreviewIndexChanged(index);
 }
 
+void InelasticDataManipulationElwinTabView::notifyRowModeChanged() { m_presenter->handleRowModeChanged(); }
+
 void InelasticDataManipulationElwinTabView::notifyRemoveDataClicked() { m_presenter->handleRemoveSelectedData(); }
 
 void InelasticDataManipulationElwinTabView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
-std::unique_ptr<IAddWorkspaceDialog>
-InelasticDataManipulationElwinTabView::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
 void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(this->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->setAttribute(Qt::WA_DeleteOnClose);
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
+  auto dialog = new MantidWidgets::AddWorkspaceMultiDialog(parentWidget());
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+  auto const tabName("Elwin");
+  dialog->setup();
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->show();
 }
 
-void InelasticDataManipulationElwinTabView::notifyCloseDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(notifyAddData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(notifyCloseDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
+void InelasticDataManipulationElwinTabView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  addData(dialog);
 }
-
-void InelasticDataManipulationElwinTabView::notifyAddData() { addDataWksOrFile(m_addWorkspaceDialog.get()); }
 
 /** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
- * A File requires additional checks to ensure a file of the correct type is being loaded. The Workspace list is
- * already filtered.
+ *
  */
-void InelasticDataManipulationElwinTabView::addDataWksOrFile(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
-    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceMultiDialog const *>(dialog);
     if (indirectDialog) {
-      // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
-      if (indirectDialog->getFileName().empty()) {
+      if (!indirectDialog->isEmpty())
         m_presenter->handleAddData(dialog);
-      } else
-        m_presenter->handleAddDataFromFile(dialog);
-    } else
-      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
-
+      else
+        (throw std::runtime_error("Unable to access data: No available workspaces or not selected"));
+    }
   } catch (const std::runtime_error &ex) {
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
   }
@@ -267,7 +236,8 @@ void InelasticDataManipulationElwinTabView::setHorizontalHeaders() {
 
 void InelasticDataManipulationElwinTabView::clearDataTable() { m_uiForm.tbElwinData->setRowCount(0); }
 
-void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string const &name, int spectrum) {
+void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string const &name,
+                                                          std::string const &wsIndexes) {
   m_uiForm.tbElwinData->insertRow(static_cast<int>(row));
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
@@ -275,7 +245,7 @@ void InelasticDataManipulationElwinTabView::addTableEntry(int row, std::string c
   cell->setFlags(flags);
   setCell(std::move(cell), row, 0);
 
-  cell = std::make_unique<QTableWidgetItem>(QString::number(spectrum));
+  cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(wsIndexes));
   cell->setFlags(flags);
   setCell(std::move(cell), row, 1);
 }
@@ -286,14 +256,6 @@ void InelasticDataManipulationElwinTabView::setCell(std::unique_ptr<QTableWidget
 
 QModelIndexList InelasticDataManipulationElwinTabView::getSelectedData() {
   return m_uiForm.tbElwinData->selectionModel()->selectedIndexes();
-}
-
-MantidQt::API::FileFinderWidget *InelasticDataManipulationElwinTabView::getFileFinderWidget() {
-  return m_uiForm.dsInputFiles;
-}
-
-void InelasticDataManipulationElwinTabView::setFBSuffixes(QStringList const &suffix) {
-  m_uiForm.dsInputFiles->setFileExtensions(suffix);
 }
 
 void InelasticDataManipulationElwinTabView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
@@ -321,38 +283,11 @@ void InelasticDataManipulationElwinTabView::setDefaultSampleLog(const Mantid::AP
  *
  * Updates preview selection combo box.
  */
-void InelasticDataManipulationElwinTabView::newInputFiles() {
-  // Clear the existing list of files
-  m_uiForm.cbPreviewFile->clear();
-
-  // Populate the combo box with the filenames
-  QStringList filenames = getInputFilenames();
-  for (auto rawFilename : filenames) {
-    QFileInfo inputFileInfo(rawFilename);
-    QString sampleName = inputFileInfo.baseName();
-    // Add the item using the base filename as the display string and the raw
-    // filename as the data value
-    m_uiForm.cbPreviewFile->addItem(sampleName, rawFilename);
-  }
-
-  // Default to the first file
-  setPreviewToDefault();
-}
-
-/**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void InelasticDataManipulationElwinTabView::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTabView::newInputDataFromDialog(std::vector<std::string> const &names) {
   // Populate the combo box with the filenames
   QString workspaceNames;
   QString filename;
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
-    workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
-    filename = QString::fromStdString(indirectDialog->getFileName());
-  }
-  m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
+  m_uiForm.cbPreviewFile->addItems(MantidWidgets::stdVectorToQStringList(names));
 
   // Default to the first file
   setPreviewToDefault();
@@ -363,21 +298,13 @@ void InelasticDataManipulationElwinTabView::clearPreviewFile() { m_uiForm.cbPrev
 void InelasticDataManipulationElwinTabView::setPreviewToDefault() {
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
   QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
-  const auto range = getXRangeFromWorkspace(inputWs);
+  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname.toStdString());
+  const auto range = WorkspaceUtils::getXRangeFromWorkspace(inputWs);
 
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
                    m_properties["IntegrationEnd"], range);
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
                    m_properties["BackgroundEnd"], range);
-}
-
-void InelasticDataManipulationElwinTabView::newPreviewFileSelected(const MatrixWorkspace_sptr &workspace) {
-  if (m_uiForm.inputChoice->currentIndex() == 0) {
-    int const numHist = static_cast<int>(workspace->getNumberHistograms()) - 1;
-    m_uiForm.spPlotSpectrum->setMaximum(numHist);
-    m_uiForm.spPlotSpectrum->setValue(0);
-  }
 }
 
 /**
@@ -417,51 +344,25 @@ void InelasticDataManipulationElwinTabView::notifyCheckboxValueChanged(QtPropert
 }
 
 void InelasticDataManipulationElwinTabView::notifyMinChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationStart"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundStart"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  auto prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")) ? m_properties["IntegrationStart"]
+                                                                                   : m_properties["BackgroundStart"];
+  m_dblManager->setValue(prop, val);
 }
 
 void InelasticDataManipulationElwinTabView::notifyMaxChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationEnd"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundEnd"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  auto prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")) ? m_properties["IntegrationEnd"]
+                                                                                   : m_properties["BackgroundEnd"];
+  m_dblManager->setValue(prop, val);
 }
 
 void InelasticDataManipulationElwinTabView::notifyDoubleValueChanged(QtProperty *prop, double val) {
   auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
   auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), val);
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-
+  disconnectSignals();
   if (prop == m_properties["IntegrationStart"])
     setRangeSelectorMin(m_properties["IntegrationStart"], m_properties["IntegrationEnd"], integrationRangeSelector,
                         val);
@@ -472,9 +373,33 @@ void InelasticDataManipulationElwinTabView::notifyDoubleValueChanged(QtProperty 
     setRangeSelectorMin(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
   else if (prop == m_properties["BackgroundEnd"])
     setRangeSelectorMax(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
+  connectSignals();
+}
 
+void InelasticDataManipulationElwinTabView::disconnectSignals() {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(notifyMaxChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
+             SLOT(notifyMinChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(notifyMaxChanged(double)));
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
+             SLOT(notifyMinChanged(double)));
+}
+
+void InelasticDataManipulationElwinTabView::connectSignals() {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(notifyMaxChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
+          SLOT(notifyMinChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(notifyMaxChanged(double)));
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
+          SLOT(notifyMinChanged(double)));
 }
 
 void InelasticDataManipulationElwinTabView::setIntegrationStart(double value) {
@@ -581,8 +506,6 @@ void InelasticDataManipulationElwinTabView::setSaveResultEnabled(const bool enab
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void InelasticDataManipulationElwinTabView::clearInputFiles() { m_uiForm.dsInputFiles->clear(); }
-
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
   m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
@@ -591,17 +514,14 @@ void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex m
 
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                                                 const std::vector<WorkspaceIndex>::const_iterator &to) {
-  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this,
-             SIGNAL(notifySelectedSpectrumChanged(int)));
+  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
     m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SIGNAL(notifySelectedSpectrumChanged(int)));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
 }
-
-int InelasticDataManipulationElwinTabView::getCurrentInputIndex() { return m_uiForm.inputChoice->currentIndex(); }
 
 std::string InelasticDataManipulationElwinTabView::getPreviewWorkspaceName(int index) const {
   return m_uiForm.cbPreviewFile->itemText(index).toStdString();
@@ -611,18 +531,18 @@ std::string InelasticDataManipulationElwinTabView::getPreviewFilename(int index)
   return m_uiForm.cbPreviewFile->itemData(index).toString().toStdString();
 }
 
-int InelasticDataManipulationElwinTabView::getPreviewSpec() { return m_uiForm.spPlotSpectrum->value(); }
+int InelasticDataManipulationElwinTabView::getPreviewSpec() const {
+  int tabIndex = m_uiForm.elwinPreviewSpec->currentIndex();
+  return tabIndex == 0 ? m_uiForm.spPlotSpectrum->value() : m_uiForm.cbPlotSpectrum->currentText().toInt();
+}
 
 std::string InelasticDataManipulationElwinTabView::getCurrentPreview() const {
   return m_uiForm.cbPreviewFile->currentText().toStdString();
 }
 
-QStringList InelasticDataManipulationElwinTabView::getInputFilenames() { return m_uiForm.dsInputFiles->getFilenames(); }
-
-bool InelasticDataManipulationElwinTabView::isLoadHistory() { return m_uiForm.ckLoadHistory->isChecked(); }
-
-bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupInput->isChecked(); }
-
+bool InelasticDataManipulationElwinTabView::isGroupInput() const { return m_uiForm.ckGroupOutput->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isRowCollapsed() const { return m_uiForm.ckCollapse->isChecked(); }
+bool InelasticDataManipulationElwinTabView::isTableEmpty() const { return m_uiForm.tbElwinData->rowCount() == 0; }
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {

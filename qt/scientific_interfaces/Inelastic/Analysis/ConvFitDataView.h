@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitDataView.h"
+#include "FitDataView.h"
 
 #include "DllConfig.h"
 
@@ -15,10 +15,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 /**
 Presenter for a table of convolution fitting data.
 */
-class MANTIDQT_INELASTIC_DLL ConvFitDataView : public IndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL ConvFitDataView : public FitDataView {
   Q_OBJECT
 public:
   ConvFitDataView(QWidget *parent = nullptr);
@@ -26,6 +27,9 @@ public:
 
 protected:
   ConvFitDataView(const QStringList &headers, QWidget *parent = nullptr);
+
+protected slots:
+  void showAddWorkspaceDialog() override;
 };
 
 } // namespace IDA

@@ -43,7 +43,6 @@ set(PYTHON_PLUGINS
     algorithms/DNSFlippingRatioCorr.py
     algorithms/DNSMergeRuns.py
     algorithms/DPDFreduction.py
-    algorithms/DSFinterp.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
     algorithms/LoadElementalAnalysisData.py
@@ -93,6 +92,7 @@ set(PYTHON_PLUGINS
     algorithms/InelasticEMUauReduction.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
+    algorithms/IntegratePeaksShoeboxTOF.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
@@ -346,7 +346,6 @@ set(PYTHON_PLUGINS
     functions/ChudleyElliot.py
     functions/CombGaussLorentzKT.py
     functions/CompositePCRmagnet.py
-    functions/DSFinterp1DFit.py
     functions/DampedBessel.py
     functions/EISFDiffCylinder.py
     functions/EISFDiffSphere.py
@@ -387,6 +386,7 @@ set(PYTHON_PLUGINS
     functions/StretchedKT.py
     functions/TFMuonium.py
     functions/TeixeiraWater.py
+    functions/TeixeiraWaterIqt.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py

@@ -36,15 +36,16 @@ number
 class MANTID_API_DLL FileFinderImpl {
 public:
   std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
-  std::string getPath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                      const std::vector<std::string> &exts) const;
+  const API::Result<std::string> getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                         const std::set<std::string> &filenames,
+                                         const std::vector<std::string> &exts) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
-  std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility) const;
-  std::string findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                      const bool useExtsOnly = false) const;
+  static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
+  const API::Result<std::string> findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
+                                         const bool useExtsOnly = false) const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -68,8 +69,9 @@ private:
   std::string validateRuns(const std::string &searchText) const;
   std::string extractAllowedSuffix(std::string &userString) const;
   std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
-  std::string getArchivePath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                             const std::vector<std::string> &exts) const;
+  const API::Result<std::string> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                const std::set<std::string> &filenames,
+                                                const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;

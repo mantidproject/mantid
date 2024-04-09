@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CalculatePaalmanPings.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -339,7 +341,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
       if (!factorWs || !sampleWs)
         continue;
 
-      if (getEMode(sampleWs) == "Indirect") {
+      if (WorkspaceUtils::getEMode(sampleWs) == "Indirect") {
         auto convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
         convertSpecAlgo->initialize();
         convertSpecAlgo->setProperty("InputWorkspace", factorWs);
@@ -347,10 +349,10 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
         convertSpecAlgo->setProperty("Target", "ElasticQ");
         convertSpecAlgo->setProperty("EMode", "Indirect");
 
-        try {
-          convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
-        } catch (std::runtime_error &) {
+        if (auto const eFixed = WorkspaceUtils::getEFixed(factorWs)) {
+          convertSpecAlgo->setProperty("EFixed", *eFixed);
         }
+
         m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
       }
     }
@@ -397,10 +399,12 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
 void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("CalculatePaalmanPings");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                          : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? InterfaceUtils::getContainerFBSuffixes(tabName)
+                                             : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? InterfaceUtils::getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -416,13 +420,11 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
     return;
   }
 
-  try {
-    m_uiForm.doubleEfixed->setValue(getEFixed(ws));
-  } catch (std::runtime_error &) {
-    // do nothing if there is no efixed
+  if (auto const eFixed = WorkspaceUtils::getEFixed(ws)) {
+    m_uiForm.doubleEfixed->setValue(*eFixed);
   }
 
-  auto emode = QString::fromStdString(getEMode(ws));
+  auto emode = QString::fromStdString(WorkspaceUtils::getEMode(ws));
   int index = m_uiForm.cbEmode->findText(emode);
   if (index != -1) {
     m_uiForm.cbEmode->setCurrentIndex(index);

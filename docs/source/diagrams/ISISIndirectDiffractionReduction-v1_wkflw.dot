@@ -17,7 +17,7 @@ digraph ISISIndirectDiffractionReduction {
     Mode
     SpectraRange
     RebinParam
-    GroupingPolicy
+    GroupingMethod
     OutputWorkspace
   }
 
@@ -38,7 +38,7 @@ digraph ISISIndirectDiffractionReduction {
     scale_monitor                 [label="scale_monitor\nApplies monitor scaling\nas per the IPF."]
     scale_detectors               [label="scale_detectors\nScales detectors by the\nmonitor intensity."]
     rebin_reduction               [label="rebin_reduction\nRebins the reduction based\non the RebinParam option."]
-    group_spectra                 [label="group_spectra\nGroups spectra based\non the GroupingPolicy."]
+    group_spectra                 [label="group_spectra\nGroups spectra based\non the GroupingMethod."]
     fold_chopped                  [label="fold_chopped\nFolds multiple frames into\na single reduction."]
     rename_reduction              [label="rename_reduction\nRenames reduced workspaces\nas per the IPF options."]
   }
@@ -93,7 +93,7 @@ digraph ISISIndirectDiffractionReduction {
   multi_frame_rebin_string    -> rebin_reduction
   multi_frame_num_bins        -> rebin_reduction
   rebin_reduction             -> group_spectra
-  GroupingPolicy              -> group_spectra
+  GroupingMethod              -> group_spectra
   masked_detectors            -> group_spectra
   group_spectra               -> is_multi_frame
   is_multi_frame              -> fold_chopped                   [label="Yes"]

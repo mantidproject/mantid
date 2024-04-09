@@ -1,1 +1,0 @@
-- Mantid no longer crashes when reducing a run on the :ref:`Preview tab <refl_preview>` that matches multiple rows in the :ref:`Experiment tab<refl_exp_instrument_settings>` lookup table. An error message is displayed instead.

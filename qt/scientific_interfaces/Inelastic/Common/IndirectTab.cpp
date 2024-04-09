@@ -36,13 +36,6 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
 
-double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
-
-QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, double precision) {
-  return QPair<double, double>(roundToPrecision(rangeStart, precision) + precision,
-                               roundToPrecision(rangeEnd, precision) - precision);
-}
-
 std::string castToString(int value) { return boost::lexical_cast<std::string>(value); }
 
 template <typename Predicate>
@@ -50,60 +43,6 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
                    Predicate const &condition) {
   if (condition)
     algorithm->setPropertyValue(propName, value);
-}
-
-std::string getAttributeFromTag(QDomElement const &tag, QString const &attribute, QString const &defaultValue) {
-  if (tag.hasAttribute(attribute))
-    return tag.attribute(attribute, defaultValue).toStdString();
-  return defaultValue.toStdString();
-}
-
-bool hasCorrectAttribute(QDomElement const &child, std::string const &attributeName, std::string const &searchValue) {
-  auto const name = QString::fromStdString(attributeName);
-  return child.hasAttribute(name) && child.attribute(name).toStdString() == searchValue;
-}
-
-std::string getInterfaceAttribute(QDomElement const &root, std::string const &interfaceName,
-                                  std::string const &propertyName, std::string const &attribute) {
-  // Loop through interfaces
-  auto interfaceChild = root.firstChild().toElement();
-  while (!interfaceChild.isNull()) {
-    if (hasCorrectAttribute(interfaceChild, "id", interfaceName)) {
-
-      // Loop through interface properties
-      auto propertyChild = interfaceChild.firstChild().toElement();
-      while (!propertyChild.isNull()) {
-
-        // Return value of an attribute of the property if it is found
-        if (propertyChild.tagName().toStdString() == propertyName)
-          return getAttributeFromTag(propertyChild, QString::fromStdString(attribute), "");
-
-        propertyChild = propertyChild.nextSibling().toElement();
-      }
-    }
-    interfaceChild = interfaceChild.nextSibling().toElement();
-  }
-  return "";
-}
-
-std::string getInterfaceAttribute(QFile &file, std::string const &interfaceName, std::string const &propertyName,
-                                  std::string const &attribute) {
-  QDomDocument xmlBOM;
-  xmlBOM.setContent(&file);
-  return getInterfaceAttribute(xmlBOM.documentElement(), interfaceName, propertyName, attribute);
-}
-
-QStringList convertToQStringList(std::vector<std::string> const &strings) {
-  QStringList list;
-  for (auto const &str : strings)
-    list << QString::fromStdString(str);
-  return list;
-}
-
-QStringList convertToQStringList(std::string const &str, std::string const &delimiter) {
-  std::vector<std::string> subStrings;
-  boost::split(subStrings, str, boost::is_any_of(delimiter));
-  return convertToQStringList(subStrings);
 }
 } // namespace
 
@@ -213,72 +152,6 @@ bool IndirectTab::loadFile(const std::string &filename, const std::string &outpu
   return loader->isExecuted();
 }
 
-std::string IndirectTab::getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,
-                                              std::string const &attribute) const {
-  QFile file(":/interface-properties.xml");
-  if (file.open(QIODevice::ReadOnly))
-    return getInterfaceAttribute(file, interfaceName, propertyName, attribute);
-
-  g_log.warning("There was an error while loading interface-properties.xml.");
-  return "";
-}
-
-QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "EXTENSIONS", "all"), ",");
-}
-
-QStringList IndirectTab::getCalibrationExtensions(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "EXTENSIONS", "calibration"), ",");
-}
-
-QStringList IndirectTab::getSampleFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "sample"), ",");
-}
-
-QStringList IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "sample"), ",");
-}
-
-QStringList IndirectTab::getVanadiumFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "vanadium"), ",");
-}
-
-QStringList IndirectTab::getVanadiumWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "vanadium"), ",");
-}
-
-QStringList IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "resolution"), ",");
-}
-
-QStringList IndirectTab::getResolutionWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "resolution"), ",");
-}
-
-QStringList IndirectTab::getCalibrationFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "calibration"), ",");
-}
-
-QStringList IndirectTab::getCalibrationWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "calibration"), ",");
-}
-
-QStringList IndirectTab::getContainerFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "container"), ",");
-}
-
-QStringList IndirectTab::getContainerWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "container"), ",");
-}
-
-QStringList IndirectTab::getCorrectionsFBSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "corrections"), ",");
-}
-
-QStringList IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "corrections"), ",");
-}
-
 /**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
  * default save directory and adds the algorithm to the batch queue.
@@ -306,37 +179,6 @@ void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::
 
   // Add the save algorithm to the batch
   m_batchAlgoRunner->addAlgorithm(saveAlgo, std::move(saveProps));
-}
-
-/**
- * Gets the suffix of a workspace (i.e. part after last underscore (red, sqw)).
- *
- * @param wsName Name of workspace
- * @return Suffix, or empty string if no underscore
- */
-QString IndirectTab::getWorkspaceSuffix(const QString &wsName) {
-  int lastUnderscoreIndex = wsName.lastIndexOf("_");
-  if (lastUnderscoreIndex == -1)
-    return QString();
-
-  return wsName.right(lastUnderscoreIndex);
-}
-
-/**
- * Returns the basename of a workspace (i.e. the part before the last
- *underscore)
- *
- * e.g. basename of irs26176_graphite002_red is irs26176_graphite002
- *
- * @param wsName Name of workspace
- * @return Base name, or wsName if no underscore
- */
-QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
-  int lastUnderscoreIndex = wsName.lastIndexOf("_");
-  if (lastUnderscoreIndex == -1)
-    return QString(wsName);
-
-  return wsName.left(lastUnderscoreIndex);
 }
 
 /**
@@ -411,111 +253,6 @@ void IndirectTab::setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxPr
 }
 
 /**
- * Gets the energy mode from a workspace based on the X unit.
- *
- * Units of dSpacing typically denote diffraction, hence Elastic.
- * All other units default to spectroscopy, therefore Indirect.
- *
- * @param ws Pointer to the workspace
- * @return Energy mode
- */
-std::string IndirectTab::getEMode(const Mantid::API::MatrixWorkspace_sptr &ws) {
-  Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
-  std::string xUnitName = xUnit->caption();
-
-  g_log.debug() << "X unit name is: " << xUnitName << '\n';
-
-  if (boost::algorithm::find_first(xUnitName, "d-Spacing"))
-    return "Elastic";
-
-  return "Indirect";
-}
-
-/**
- * Gets the eFixed value from the workspace using the instrument parameters.
- *
- * @param ws Pointer to the workspace
- * @return eFixed value
- */
-double IndirectTab::getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
-  Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
-  if (!inst)
-    throw std::runtime_error("No instrument on workspace");
-
-  // Try to get the parameter form the base instrument
-  if (inst->hasParameter("Efixed"))
-    return inst->getNumberParameter("Efixed")[0];
-
-  // Try to get it form the analyser component
-  if (inst->hasParameter("analyser")) {
-    std::string analyserName = inst->getStringParameter("analyser")[0];
-    auto analyserComp = inst->getComponentByName(analyserName);
-
-    if (analyserComp && analyserComp->hasParameter("Efixed"))
-      return analyserComp->getNumberParameter("Efixed")[0];
-  }
-
-  throw std::runtime_error("Instrument has no efixed parameter");
-}
-
-/**
- * Checks the workspace's instrument for a resolution parameter to use as
- * a default for the energy range on the mini plot
- *
- * @param workspace :: Name of the workspace to use
- * @param res :: The retrieved values for the resolution parameter (if one was
- *found)
- */
-bool IndirectTab::getResolutionRangeFromWs(const QString &workspace, QPair<double, double> &res) {
-  auto ws = m_adsInstance.retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
-  return getResolutionRangeFromWs(ws, res);
-}
-
-/**
- * Checks the workspace's instrument for a resolution parameter to use as
- * a default for the energy range on the mini plot
- *
- * @param ws :: Pointer to the workspace to use
- * @param res :: The retrieved values for the resolution parameter (if one was
- *found)
- */
-bool IndirectTab::getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                                           QPair<double, double> &res) {
-  if (workspace) {
-    auto const instrument = workspace->getInstrument();
-    if (instrument && instrument->hasParameter("analyser")) {
-      auto const analyser = instrument->getStringParameter("analyser");
-      if (analyser.size() > 0) {
-        auto comp = instrument->getComponentByName(analyser[0]);
-        if (comp) {
-          auto params = comp->getNumberParameter("resolution", true);
-
-          // set the default instrument resolution
-          if (params.size() > 0) {
-            res = qMakePair(-params[0], params[0]);
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
-}
-
-QPair<double, double> IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName, double precision) const {
-  auto const &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName))
-    return getXRangeFromWorkspace(ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
-  return QPair<double, double>(0.0, 0.0);
-}
-
-QPair<double, double> IndirectTab::getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                                                          double precision) const {
-  auto const xValues = workspace->x(0);
-  return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
-}
-
-/**
  * Runs an algorithm async
  *
  * @param algorithm :: The algorithm to be run
@@ -568,36 +305,6 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
 
 void IndirectTab::displayWarning(std::string const &message) {
   QMessageBox::warning(nullptr, "Warning!", QString::fromStdString(message));
-}
-
-std::unordered_map<std::string, size_t>
-IndirectTab::extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                               const size_t &axisIndex) const {
-  Axis *axis = workspace->getAxis(axisIndex);
-  if (!axis->isText())
-    return std::unordered_map<std::string, size_t>();
-
-  auto *textAxis = static_cast<TextAxis *>(axis);
-  std::unordered_map<std::string, size_t> labels;
-
-  for (size_t i = 0; i < textAxis->length(); ++i)
-    labels[textAxis->label(i)] = i;
-  return labels;
-}
-
-/*
- * Converts a standard vector of standard strings to a QVector of QStrings.
- *
- * @param stringVec The standard vector of standard strings to convert.
- * @return          A QVector of QStrings.
- */
-QVector<QString> IndirectTab::convertStdStringVector(const std::vector<std::string> &stringVec) const {
-  QVector<QString> resultVec;
-  resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
-
-  std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
-                 [](const auto &str) { return QString::fromStdString(str); });
-  return resultVec;
 }
 
 } // namespace MantidQt::CustomInterfaces

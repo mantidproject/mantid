@@ -1,0 +1,1 @@
+- The :ref:`algm-SaveAscii-v1` algorithm can now be found in the algorithm list using the ``SaveAsciiTOSCA`` alias.

@@ -12,11 +12,17 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "Analysis/IIndirectFitDataView.h"
-#include "Analysis/IIndirectFitOutputOptionsModel.h"
-#include "Analysis/IIndirectFitOutputOptionsView.h"
-#include "Analysis/IndirectDataAnalysisTab.h"
+#include "Analysis/DataAnalysisTab.h"
+#include "Analysis/FunctionBrowser/FunctionTemplateView.h"
+#include "Analysis/FunctionBrowser/ITemplatePresenter.h"
+#include "Analysis/IFitDataView.h"
+#include "Analysis/IFitOutputOptionsModel.h"
+#include "Analysis/IFitOutputOptionsView.h"
+#include "Analysis/IFitPlotView.h"
+#include "Analysis/InelasticFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -25,9 +31,15 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
+class MockDataAnalysisTab : public IDataAnalysisTab {
 public:
-  virtual ~MockIndirectDataAnalysisTab() = default;
+  virtual ~MockDataAnalysisTab() = default;
+
+  MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
+  MOCK_METHOD0(handleDataChanged, void());
+  MOCK_METHOD0(handleDataRemoved, void());
+  MOCK_METHOD3(handleTableStartXChanged, void(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD3(handleTableEndXChanged, void(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
 
   MOCK_METHOD2(handleSingleFitClicked, void(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
   MOCK_METHOD1(handleStartXChanged, void(double startX));
@@ -39,11 +51,11 @@ public:
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
 };
 
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockFitPlotView : public IFitPlotView {
 public:
-  virtual ~MockIndirectFitPlotView() = default;
+  virtual ~MockFitPlotView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));
 
@@ -102,11 +114,11 @@ public:
   MOCK_METHOD0(clearPreviews, void());
 };
 
-class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
+class MockFitOutputOptionsView : public IFitOutputOptionsView {
 public:
-  virtual ~MockIndirectFitOutputOptionsView() = default;
+  virtual ~MockFitOutputOptionsView() = default;
 
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
+  MOCK_METHOD1(subscribePresenter, void(IFitOutputOptionsPresenter *presenter));
 
   MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
   MOCK_METHOD1(setWorkspaceComboBoxVisible, void(bool visible));
@@ -137,9 +149,9 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
-class MockIndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
+class MockFitOutputOptionsModel : public IFitOutputOptionsModel {
 public:
-  virtual ~MockIndirectFitOutputOptionsModel() = default;
+  virtual ~MockFitOutputOptionsModel() = default;
 
   MOCK_METHOD1(setResultWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
   MOCK_METHOD1(setPDFWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
@@ -169,12 +181,11 @@ public:
                void(std::string const &inputName, std::string const &singleBinName, std::string const &outputName));
 };
 
-class MockIndirectFitDataModel : public IIndirectFitDataModel {
+class MockFitDataModel : public IFitDataModel {
 public:
-  virtual ~MockIndirectFitDataModel() = default;
+  virtual ~MockFitDataModel() = default;
 
-  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
-  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
+  MOCK_METHOD0(getFittingData, std::vector<FitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
@@ -222,21 +233,128 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
-class MockFitDataView : public IIndirectFitDataView {
+class MockFitDataView : public IFitDataView {
 public:
   virtual ~MockFitDataView() = default;
 
+  MOCK_METHOD1(subscribePresenter, void(IFitDataPresenter *presenter));
+
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
+  MOCK_CONST_METHOD0(isTableEmpty, bool());
   MOCK_METHOD1(validate, MantidQt::CustomInterfaces::UserInputValidator &(
                              MantidQt::CustomInterfaces::UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
-  MOCK_METHOD1(getColumnIndexFromName, int(QString ColName));
+  MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
+  MOCK_CONST_METHOD1(dataColumnContainsText, bool(const std::string &columnText));
+
+  MOCK_METHOD1(setSampleWSSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setSampleFBSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setResolutionWSSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setResolutionFBSuffices, void(const QStringList &suffices));
 
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+};
+
+class MockFunctionTemplateView : public FunctionTemplateView {
+public:
+  virtual ~MockFunctionTemplateView() = default;
+
+  MOCK_METHOD1(setFunction, void(std::string const &funStr));
+  MOCK_CONST_METHOD0(getGlobalFunction, IFunction_sptr());
+  MOCK_CONST_METHOD0(getFunction, IFunction_sptr());
+  MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_METHOD1(setDatasets, void(const QList<FunctionModelDataset> &datasets));
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
+  MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const IFunction &fun));
+  MOCK_METHOD1(setCurrentDataset, void(int i));
+  MOCK_METHOD0(getCurrentDataset, int());
+  MOCK_METHOD1(updateParameterNames, void(const std::map<int, std::string> &parameterNames));
+  MOCK_METHOD1(setGlobalParametersQuiet, void(std::vector<std::string> const &globals));
+  MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
+  MOCK_METHOD1(setBackgroundA0, void(double value));
+  MOCK_METHOD2(setResolution, void(std::string const &name, WorkspaceID const &index));
+  MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
+  MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
+  // protected Slots
+  MOCK_METHOD1(parameterChanged, void(QtProperty *));
+  MOCK_METHOD1(parameterButtonClicked, void(QtProperty *));
+  // Private methods
+  MOCK_METHOD0(createProperties, void());
+};
+
+class MockFunctionTemplatePresenter : public ITemplatePresenter {
+public:
+  MockFunctionTemplatePresenter(MockFunctionTemplateView *view) : m_view(view) {}
+  virtual ~MockFunctionTemplatePresenter() = default;
+
+  FunctionTemplateView *browser() override { return m_view; }
+
+  MOCK_METHOD0(init, void());
+  MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
+
+  MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_METHOD0(getCurrentDataset, int());
+
+  MOCK_METHOD1(setFitType, void(std::string const &name));
+
+  MOCK_METHOD1(setFunction, void(std::string const &funStr));
+  MOCK_CONST_METHOD0(getGlobalFunction, Mantid::API::IFunction_sptr());
+  MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
+
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getLocalParameters, std::vector<std::string>());
+  MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &globals));
+  MOCK_METHOD2(setGlobal, void(std::string const &parameterName, bool on));
+
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::IFunction &fun));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::ITableWorkspace &table));
+  MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &fun));
+
+  MOCK_METHOD1(setCurrentDataset, void(int i));
+  MOCK_METHOD1(setDatasets, void(const QList<MantidQt::MantidWidgets::FunctionModelDataset> &datasets));
+
+  MOCK_CONST_METHOD0(getEstimationDataSelector, EstimationDataSelector());
+  MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
+  MOCK_METHOD0(estimateFunctionParameters, void());
+
+  MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
+
+  MOCK_METHOD1(setNumberOfExponentials, void(int nExponentials));
+  MOCK_METHOD1(setStretchExponential, void(bool on));
+  MOCK_METHOD1(setBackground, void(std::string const &name));
+  MOCK_METHOD1(tieIntensities, void(bool on));
+  MOCK_CONST_METHOD0(canTieIntensities, bool());
+
+  MOCK_METHOD2(setSubType, void(std::size_t subTypeIndex, int typeIndex));
+  MOCK_METHOD1(setDeltaFunction, void(bool on));
+  MOCK_METHOD1(setTempCorrection, void(bool on));
+  MOCK_METHOD1(setBackgroundA0, void(double value));
+  MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
+  MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
+
+  MOCK_METHOD1(handleEditLocalParameter, void(std::string const &parameterName));
+  MOCK_METHOD2(handleParameterValueChanged, void(std::string const &parameterName, double value));
+  MOCK_METHOD5(handleEditLocalParameterFinished,
+               void(std::string const &parameterName, QList<double> const &values, QList<bool> const &fixes,
+                    QStringList const &ties, QStringList const &constraints));
+
+private:
+  FunctionTemplateView *m_view;
+};
+
+class MockInelasticFitPropertyBrowser : public IInelasticFitPropertyBrowser {
+public:
+  virtual ~MockInelasticFitPropertyBrowser() = default;
+
+  MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

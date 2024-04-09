@@ -83,9 +83,11 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   void cleanup();
 
+  void getGroupingWorkspace();
   std::size_t setupGroupToWSIndices();
 
   // For events
@@ -94,23 +96,18 @@ private:
   /// Loop over the workspace and determine the rebin parameters
   /// (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
-  void determineRebinParameters();
-  int validateSpectrumInGroup(size_t wi);
+  void determineRebinParameters(const std::vector<int> &udet2group);
+  int validateSpectrumInGroup(const std::vector<int> &udet2group, size_t wi);
 
   /// Shared pointer to the input workspace
   API::MatrixWorkspace_const_sptr m_matrixInputW;
 
   /// Grouping workspace with groups to build
-  Mantid::DataObjects::GroupingWorkspace_sptr groupWS;
-
-  /// Shared pointer to the event workspace
-  DataObjects::EventWorkspace_const_sptr m_eventW;
+  Mantid::DataObjects::GroupingWorkspace_sptr m_groupWS;
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
   using group2vectormap = std::map<int, std::shared_ptr<MantidVec>>;
-  /// Map from udet to group
-  std::vector<int> udet2group;
   /// The list of group numbers
   std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector

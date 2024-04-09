@@ -270,7 +270,7 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
   } else {
     if (Fin) {
       // Workspace has fractional area information, need to take into account
-      sumF = std::accumulate(Fin->begin() + distmin, Fin->begin() + distmax, 0.0);
+      sumF = std::accumulate(Fin->cbegin() + distmin, Fin->cbegin() + distmax, 0.0);
       // Need to normalise by the number of non-NaN bins - see issue #33407 for details
       Fnor = static_cast<double>(
           std::count_if(Fin->begin() + distmin, Fin->begin() + distmax, [](double f) { return f != 0.; }));
@@ -281,8 +281,8 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
     if (!is_distrib) {
       // Sum the Y, and sum the E in quadrature
       {
-        sumY = std::accumulate(Y.begin() + distmin, Y.begin() + distmax, 0.0);
-        sumE = std::accumulate(E.begin() + distmin, E.begin() + distmax, 0.0, VectorHelper::SumSquares<double>());
+        sumY = std::accumulate(Y.cbegin() + distmin, Y.cbegin() + distmax, 0.0);
+        sumE = std::accumulate(E.cbegin() + distmin, E.cbegin() + distmax, 0.0, VectorHelper::SumSquares<double>());
       }
     } else {
       // Sum Y*binwidth and Sum the (E*binwidth)^2.
@@ -356,8 +356,11 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
 
   outSpec.mutableY()[0] = sumY;
   outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
+
   if (Fout) {
-    (*Fout)[0] = sumF / Fnor;
+    (*Fout)[0] = sumF;
+    if (Fnor != 0)
+      (*Fout)[0] /= Fnor;
   }
 }
 

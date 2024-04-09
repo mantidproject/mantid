@@ -28,6 +28,7 @@ if(CPPCHECK_EXECUTABLE)
       --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
       --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
       --project="${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json"
+      --checkers-report=${CMAKE_BINARY_DIR}/cppcheck_checkers_reports.txt
       -i"${CMAKE_BINARY_DIR}"
       # Force cppcheck to check when we use project-wide macros
       -DDLLExport=

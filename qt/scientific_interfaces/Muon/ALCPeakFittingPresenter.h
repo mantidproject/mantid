@@ -37,7 +37,7 @@ private slots:
   void onPeakPickerChanged();
 
   /// Executed when user changes parameter in Function Browser
-  void onParameterChanged(const QString &funcIndex);
+  void onParameterChanged(std::string const &funcIndex);
 
   void onFittedPeaksChanged();
   void onDataChanged();

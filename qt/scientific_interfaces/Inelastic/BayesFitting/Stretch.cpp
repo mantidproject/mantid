@@ -5,30 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -95,10 +81,12 @@ Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m
 void Stretch::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Stretch");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                          : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
+                                              : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Stretch::setup() {}
@@ -116,6 +104,12 @@ bool Stretch::validate() {
   QString errors = uiv.generateErrorMessage();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
+    return false;
+  }
+
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
+    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
     return false;
   }
 
@@ -153,20 +147,28 @@ void Stretch::run() {
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto stretch = AlgorithmManager::Instance().create("BayesStretch");
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  std::string const algorithmName = useQuickBayes ? "BayesStretch2" : "BayesStretch";
+  auto stretch = AlgorithmManager::Instance().create(algorithmName);
   stretch->initialize();
   stretch->setProperty("SampleWorkspace", sampleName);
   stretch->setProperty("ResolutionWorkspace", resName);
   stretch->setProperty("EMin", eMin);
   stretch->setProperty("EMax", eMax);
-  stretch->setProperty("SampleBins", nBins);
-  stretch->setProperty("Elastic", elasticPeak);
-  stretch->setProperty("Background", background);
-  stretch->setProperty("NumberSigma", sigma);
   stretch->setProperty("NumberBeta", beta);
-  stretch->setProperty("Loop", sequence);
+  stretch->setProperty("Elastic", elasticPeak);
   stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
   stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
+  if (useQuickBayes) {
+    stretch->setProperty("Background", background == "Flat" ? background : "None");
+  } else {
+    stretch->setProperty("Background", background);
+    stretch->setProperty("SampleBins", nBins);
+    stretch->setProperty("NumberSigma", sigma);
+    stretch->setProperty("Loop", sequence);
+  }
 
   m_batchAlgoRunner->addAlgorithm(stretch);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -185,7 +187,7 @@ void Stretch::algorithmComplete(const bool &error) {
     setPlotContourEnabled(false);
     setSaveResultEnabled(false);
   } else {
-    if (doesExistInADS(m_contourWorkspaceName))
+    if (WorkspaceUtils::doesExistInADS(m_contourWorkspaceName))
       populateContourWorkspaceComboBox();
     else
       setPlotContourEnabled(false);
@@ -196,7 +198,7 @@ void Stretch::algorithmComplete(const bool &error) {
 
 void Stretch::populateContourWorkspaceComboBox() {
   m_uiForm.cbPlotContour->clear();
-  auto const contourGroup = getADSWorkspaceGroup(m_contourWorkspaceName);
+  auto const contourGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_contourWorkspaceName);
   auto const contourNames = contourGroup->getNames();
   for (auto const &name : contourNames)
     m_uiForm.cbPlotContour->addItem(QString::fromStdString(name));
@@ -259,20 +261,20 @@ int Stretch::displaySaveDirectoryMessage() {
  */
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
 
-  auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
-  auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
-  // Check Sigma and Beta workspaces exist
-  if (sigma.right(5).compare("Sigma") == 0 && beta.right(4).compare("Beta") == 0) {
+  std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
+  auto const plotErrors = SettingsHelper::externalPlotErrorBars();
+  auto const plotSigma = (plotType == "All" || plotType == "Sigma");
+  auto const plotBeta = (plotType == "All" || plotType == "Beta");
 
-    std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
-    if (plotType == "All" || plotType == "Beta")
-      m_plotter->plotSpectra(beta.toStdString(), "0", SettingsHelper::externalPlotErrorBars());
-    if (plotType == "All" || plotType == "Sigma")
-      m_plotter->plotSpectra(sigma.toStdString(), "0", SettingsHelper::externalPlotErrorBars());
-  } else {
-    g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
+  auto const fitWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
+  for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
+    auto const name = (*it)->getName();
+    if (plotSigma && name.substr(name.length() - 5) == "Sigma") {
+      m_plotter->plotSpectra(name, "0", plotErrors);
+    } else if (plotBeta && name.substr(name.length() - 4) == "Beta") {
+      m_plotter->plotSpectra(name, "0", plotErrors);
+    }
   }
   setPlotResultIsPlotting(false);
 }
@@ -314,7 +316,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   }
 
   // update the maximum and minimum range bar positions
-  auto const range = getXRangeFromWorkspace(filename.toStdString());
+  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
@@ -323,7 +325,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   eRangeSelector->setMaximum(range.second);
 
   // set the max spectrum
-  MatrixWorkspace_const_sptr sampleWs = getADSMatrixWorkspace(filename.toStdString());
+  MatrixWorkspace_const_sptr sampleWs = WorkspaceUtils::getADSWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }

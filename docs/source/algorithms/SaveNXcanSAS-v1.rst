@@ -9,9 +9,15 @@
 Description
 -----------
 
-Saves a workspace with momentum transfer units into a file adhering to the NXcanSAS format specified by NXcanSAS Data Formats Working Group `schema <http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html>`__. If the input workspace is 2D then the vertical axis needs to be a numeric axis in momentum transfer units. The created file can be reloaded using the :ref:`algm-LoadNXcanSAS` algorithm.
+Saves a workspace with momentum transfer units into a file adhering to the NXcanSAS format specified by NXcanSAS Data
+Formats Working Group `schema <http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html>`__.
 
-In addition it is possible to save the transmission workspaces obtain from a reduction.
+1D or 2D workspaces may be saved.
+
+If the input workspace is 2D then the vertical axis needs to be a numeric axis in momentum transfer units. The created
+file can be reloaded using the :ref:`algm-LoadNXcanSAS` algorithm.
+
+In addition, it is possible to save the transmission workspaces obtained from a reduction.
 
 
 Usage

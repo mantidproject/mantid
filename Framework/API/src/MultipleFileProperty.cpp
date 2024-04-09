@@ -371,11 +371,20 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         fullyResolvedFile = slaveFileProp();
       } else {
         // If a default ext has been specified/found, then use it.
+        std::string errors = "";
         if (!defaultExt.empty()) {
-          fullyResolvedFile =
-              FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
+          if (run)
+            fullyResolvedFile = run.result();
+          else
+            errors += run.errors();
+
         } else {
-          fullyResolvedFile = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
+          if (run)
+            fullyResolvedFile = run.result();
+          else
+            errors += run.errors();
         }
         if (fullyResolvedFile.empty()) {
           bool doThrow = false;
@@ -392,8 +401,12 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
             doThrow = true;
           }
           if (doThrow) {
-            throw std::runtime_error("Unable to find file matching the string \"" + unresolvedFileName +
-                                     "\", please check the data search directories.");
+            auto errorMsg = "Unable to find file matching the string \"" + unresolvedFileName +
+                            "\", please check the data search directories.";
+            if (!errors.empty())
+              errorMsg += " " + errors;
+
+            throw std::runtime_error(errorMsg);
           } else {
             // if the fullyResolvedFile is empty, it means it failed to find the
             // file so keep the unresolvedFileName as a hint to be displayed

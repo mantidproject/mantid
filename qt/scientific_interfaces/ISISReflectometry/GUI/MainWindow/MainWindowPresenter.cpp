@@ -294,7 +294,19 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   if (filename == "")
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
-  m_fileHandler->saveJSONToFile(filename, map);
+  try {
+    m_fileHandler->saveJSONToFile(filename, map);
+  } catch (std::invalid_argument const &e) {
+    m_messageHandler->giveUserCritical(
+        "Invalid path provided. Check you have the correct permissions for this save location. \n" +
+            std::string(e.what()),
+        "Save Batch");
+    return;
+  } catch (std::runtime_error const &e) {
+    m_messageHandler->giveUserCritical("An error occurred while saving. Please try again. \n" + std::string(e.what()),
+                                       "Save Batch");
+    return;
+  }
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
@@ -352,13 +364,13 @@ void MainWindowPresenter::setDefaultInstrument(const std::string &requiredInstru
   auto requiredFacility = "ISIS";
   if (currentFacility != requiredFacility) {
     config.setString("default.facility", requiredFacility);
-    g_log.notice() << "Facility changed to " << requiredFacility;
+    g_log.notice() << "Facility changed to " << requiredFacility << "\n";
   }
 
   auto currentInstrument = config.getString("default.instrument");
   if (currentInstrument != requiredInstrument) {
     config.setString("default.instrument", requiredInstrument);
-    g_log.notice() << "Instrument changed to " << requiredInstrument;
+    g_log.notice() << "Instrument changed to " << requiredInstrument << "\n";
   }
 }
 

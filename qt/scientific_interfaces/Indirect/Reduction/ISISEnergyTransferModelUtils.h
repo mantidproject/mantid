@@ -6,31 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <boost/algorithm/string.hpp>
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include <boost/algorithm/string.hpp>
 
 #include <filesystem>
 
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-}
 
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
   auto loader = AlgorithmManager::Instance().create("Load");
@@ -59,40 +45,6 @@ std::vector<int> createDetectorList(int const spectraMin, int const spectraMax) 
   return detectorList;
 }
 
-std::string createRangeString(std::size_t const &from, std::size_t const &to) {
-  return std::to_string(from) + "-" + std::to_string(to);
-}
-
-std::string createGroupString(std::size_t const &start, std::size_t const &size) {
-  return createRangeString(start, start + size - 1);
-}
-
-std::string createGroupingString(std::size_t const &groupSize, std::size_t const &numberOfGroups,
-                                 std::size_t const &spectraMin) {
-  auto groupingString = createRangeString(spectraMin, spectraMin + groupSize - 1);
-  for (auto i = spectraMin + groupSize; i < spectraMin + groupSize * numberOfGroups; i += groupSize)
-    groupingString += "," + createGroupString(i, groupSize);
-  return groupingString;
-}
-
-std::string createDetectorGroupingString(std::size_t const &groupSize, std::size_t const &numberOfGroups,
-                                         std::size_t const &numberOfDetectors, std::size_t const &spectraMin) {
-  const auto groupingString = createGroupingString(groupSize, numberOfGroups, spectraMin);
-  const auto remainder = numberOfDetectors % numberOfGroups;
-  if (remainder == 0)
-    return groupingString;
-  return groupingString + "," +
-         createRangeString(spectraMin + numberOfDetectors - remainder, spectraMin + numberOfDetectors - 1);
-}
-
-std::string createDetectorGroupingString(std::size_t const &numberOfDetectors, std::size_t const &numberOfGroups,
-                                         std::size_t const &spectraMin) {
-  const auto groupSize = numberOfDetectors / numberOfGroups;
-  if (groupSize == 0)
-    return createRangeString(spectraMin, spectraMin + numberOfDetectors - 1);
-  return createDetectorGroupingString(groupSize, numberOfGroups, numberOfDetectors, spectraMin);
-}
-
 double getSampleLog(const MatrixWorkspace_const_sptr &workspace, std::vector<std::string> const &logNames,
                     double const &defaultValue) {
   for (auto const &logName : logNames) {
@@ -111,8 +63,8 @@ double loadSampleLog(std::string const &filename, std::vector<std::string> const
 
   double value(defaultValue);
 
-  if (doesExistInADS(temporaryWorkspace)) {
-    auto workspace = getADSMatrixWorkspace(temporaryWorkspace);
+  if (WorkspaceUtils::doesExistInADS(temporaryWorkspace)) {
+    auto workspace = WorkspaceUtils::getADSWorkspace(temporaryWorkspace);
     value = getSampleLog(workspace, logNames, defaultValue);
     deleteWorkspace(workspace->getName());
   }

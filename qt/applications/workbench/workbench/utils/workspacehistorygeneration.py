@@ -8,8 +8,76 @@
 
 
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
-from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE, ALG_PROPERTIES_TO_IGNORE
 from mantid import UsageService
+
+
+# To ignore an algorithm in project recovery please put it's name here, this is done to stop these algorithm
+# calls from being saved. e.g. MonitorLiveData is ignored because StartLiveData is the only one that is needed
+# to restart this workspace.
+ALGS_TO_IGNORE = [
+    "MonitorLiveData",
+    "EnggSaveGSASIIFitResultsToHDF5",
+    "EnggSaveSinglePeakFitResultsToHDF5",
+    "ExampleSaveAscii",
+    "SANSSave",
+    "SaveAscii",
+    "SaveBankScatteringAngles",
+    "SaveCSV",
+    "SaveCalFile",
+    "SaveCanSAS1D",
+    "SaveDaveGrp",
+    "SaveDetectorsGrouping",
+    "SaveDiffCal",
+    "SaveDiffFittingAscii",
+    "SaveDspacemap",
+    "SaveFITS",
+    "SaveFocusedXYE",
+    "SaveFullprofResolution",
+    "SaveGDA",
+    "SaveGEMMAUDParamFile",
+    "SaveGSASInstrumentFile",
+    "SaveGSS",
+    "SaveHKL",
+    "SaveISISNexus",
+    "SaveIsawDetCal",
+    "SaveIsawPeaks",
+    "SaveIsawQvector",
+    "SaveIsawUB",
+    "SaveLauenorm",
+    "SaveMD",
+    "SaveMask",
+    "SaveNISTDAT",
+    "SaveNXSPE",
+    "SaveNXTomo",
+    "SaveNXcanSAS",
+    "SaveNexus",
+    "SaveNexusPD",
+    "SaveNexusProcessed",
+    "SaveOpenGenieAscii",
+    "SavePAR",
+    "SavePDFGui",
+    "SavePHX",
+    "SaveParameterFile",
+    "SavePlot1D",
+    "SavePlot1DAsJson",
+    "SaveRKH",
+    "SaveReflections",
+    "SaveReflectometryAscii",
+    "SaveSESANS",
+    "SaveSPE",
+    "SaveTBL",
+    "SaveToSNSHistogramNexus",
+    "SaveVTK",
+    "SaveVulcanGSS",
+    "SaveYDA",
+    "SaveZODS",
+]
+
+# If you want to ignore an algorithms' property, then add to the string below in the format:
+# "AlgorithmName + PropertyName". The final string should look like "a + b , c + d, ...".
+# This uses string representation to pass to the C++ algorithm. The outer delimiter is `,`
+# and the inner delimiter is `+` for the list of lists. e.g. [[a, b],[c, d]] = "a + b , c + d".
+ALG_PROPERTIES_TO_IGNORE = "StartLiveData + MonitorLiveData"
 
 
 def get_workspace_history_list(workspace):
@@ -48,6 +116,8 @@ def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):
 
 
 def guarantee_unique_lines(script):
+    if not script:
+        return script
     alg_name = "OrderWorkspaceHistory"
     alg = AlgorithmManager.createUnmanaged(alg_name, 1)
     alg.setChild(True)

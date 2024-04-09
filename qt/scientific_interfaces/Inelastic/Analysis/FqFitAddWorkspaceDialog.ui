@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>F(Q) Fit Data Selection</string>
+   <string>Data Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -146,42 +146,8 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>pbAdd</sender>
-   <signal>clicked()</signal>
-   <receiver>FqFitAddWorkspaceDialog</receiver>
-   <slot>addData()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>273</x>
-     <y>166</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>270</x>
-     <y>221</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pbClose</sender>
-   <signal>clicked()</signal>
-   <receiver>FqFitAddWorkspaceDialog</receiver>
-   <slot>closeDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>369</x>
-     <y>164</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>361</x>
-     <y>212</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>addData()</slot>
-  <slot>closeDialog()</slot>
  </slots>
 </ui>

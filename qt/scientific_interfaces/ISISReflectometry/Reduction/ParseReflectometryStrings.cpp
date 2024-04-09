@@ -146,7 +146,7 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
   }
 
   if (!isEntirelyWhitespace(step)) {
-    stepValue = parseNonNegativeDouble(step);
+    stepValue = parseDouble(step);
     if (!stepValue.is_initialized())
       invalidParams.emplace_back(2);
   }

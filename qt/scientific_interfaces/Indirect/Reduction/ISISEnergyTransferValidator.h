@@ -19,15 +19,6 @@ public:
   std::vector<std::string> validateBackgroundData(IETBackgroundData backgroundData, IETConversionData conversionData,
                                                   std::string firstFileName, bool isRunFileValid);
   std::string validateAnalysisData(IETAnalysisData analysisData);
-  std::string validateDetectorGrouping(IETGroupingData groupingData, std::size_t const &defaultSepctraMin,
-                                       std::size_t const &defaultSpectraMax);
-
-private:
-  std::vector<std::size_t> getCustomGroupingNumbers(std::string const &customString);
-  std::string checkCustomGroupingNumbersInRange(std::vector<std::size_t> const &customGroupingNumbers,
-                                                std::size_t const &spectraMin, std::size_t const &spectraMax) const;
-  bool numberInCorrectRange(std::size_t const &spectraNumber, std::size_t const &spectraMin,
-                            std::size_t const &spectraMax) const;
 };
 
 } // namespace CustomInterfaces

@@ -1,0 +1,12 @@
+- Abins and Abins2D now support JSON file import. Supported formats are:
+
+  - AbinsData (dump of internal object, intended for development and testing)
+  - euphonic.QpointPhononModes (an equivalent set of data dumped from
+    the Euphonic library)
+  - euphonic.ForceConstants (force constants which may be manipulated
+    in Euphonic, and will be converted to phonon modes on a q-point
+    mesh when Abins(2D) is run)
+
+  The Euphonic JSON formats are convenient to create with Python
+  scripts, and recommended for users who wish to somehow customise or
+  manipulate their data before using it with Abins(2D).

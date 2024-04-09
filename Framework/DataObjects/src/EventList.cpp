@@ -137,9 +137,9 @@ struct comparePulseTimeTOFDelta {
 
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
-EventList::EventList()
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
-      order(UNSORTED), mru(nullptr) {}
+EventList::EventList(const EventType event_type)
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts),
+      eventType(event_type), order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
@@ -1897,16 +1897,18 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
   const auto xmax = X.back();
 
   double divisor, offset;
-  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double,
+                                     const bool); // function pointer
 
+  // store 1/divisor because multiplication is less flops than division
   if (step < 0) {
     findBin = findLogBin;
-    divisor = log1p(abs(step)); // use this to do change of base
-    offset = log(xmin) / divisor;
+    divisor = 1. / log1p(abs(step)); // use this to do change of base
+    offset = log(xmin) * divisor;
   } else {
     findBin = findLinearBin;
-    divisor = step;
-    offset = xmin / divisor;
+    divisor = 1. / step;
+    offset = xmin * divisor;
   }
 
   for (const T &ev : events) {
@@ -1914,7 +1916,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
     if (tof < xmin || tof >= xmax)
       continue;
 
-    boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset);
+    boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset, true);
 
     if (n_bin) {
       Y[n_bin.get()] += ev.weight();
@@ -2285,10 +2287,17 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
  * @param tof :: TOF of the event we are trying to bin
  * @param divisor :: pre-calculated divisor
  * @param offset :: pre-calculated offset
+ * @param findExact :: do extra check of supplied time-of-flight compared to bin boundaries and move the bin if needed
  */
 boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double tof, const double divisor,
-                                                 const double offset) {
-  return findExactBin(X, tof, static_cast<size_t>(tof / divisor - offset));
+                                                 const double offset, const bool findExact) {
+  const auto bin = static_cast<size_t>(tof * divisor - offset);
+  if (bin >= X.size())
+    return boost::none;
+  else if (findExact)
+    return findExactBin(X, tof, bin);
+  else
+    return bin;
 }
 
 /** Find the bin which this TOF value falls in with log binning, assumes TOF is in range of X
@@ -2307,10 +2316,17 @@ boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const doubl
  * @param tof :: TOF of the event we are trying to bin
  * @param divisor :: pre-calculated divisor
  * @param offset :: pre-calculated offset
+ * @param findExact :: do extra check of supplied time-of-flight compared to bin boundaries and move the bin if needed
  */
 boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof, const double divisor,
-                                              const double offset) {
-  return findExactBin(X, tof, static_cast<size_t>(log(tof) / divisor - offset));
+                                              const double offset, const bool findExact) {
+  const auto bin = static_cast<size_t>(log(tof) * divisor - offset);
+  if (bin >= X.size())
+    return boost::none;
+  else if (findExact)
+    return findExactBin(X, tof, bin);
+  else
+    return bin;
 }
 
 /** Find the exact bin which a TOF falls in starting from the provided estimated one. Estimated bin is expected to be
@@ -2321,9 +2337,6 @@ boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double t
  * @param n_bin :: starting estiamted bin number
  */
 boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
-  if (n_bin >= X.size())
-    return boost::none;
-
   if (tof < X[n_bin])
     n_bin--;
   else if (tof >= X[n_bin + 1])
@@ -2364,16 +2377,18 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
   const auto xmax = X.back();
 
   double divisor, offset;
-  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double,
+                                     const bool); // function pointer
 
+  // store 1/divisor because multiplication is less flops than division
   if (step < 0) {
     findBin = findLogBin;
-    divisor = log1p(abs(step)); // use this to do change of base
-    offset = log(xmin) / divisor;
+    divisor = 1. / log1p(abs(step)); // use this to do change of base
+    offset = log(xmin) * divisor;
   } else {
     findBin = findLinearBin;
-    divisor = step;
-    offset = xmin / divisor;
+    divisor = 1. / step;
+    offset = xmin * divisor;
   }
 
   for (const TofEvent &ev : this->events) {
@@ -2381,7 +2396,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
     if (tof < xmin || tof >= xmax)
       continue;
 
-    const boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset);
+    const boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset, true);
 
     if (n_bin)
       Y[n_bin.get()]++;

@@ -1,0 +1,1 @@
+- Added Garnet to the menu items in the Diffraction interfaces list.

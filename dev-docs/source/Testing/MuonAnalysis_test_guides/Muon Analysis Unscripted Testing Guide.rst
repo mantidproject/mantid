@@ -73,8 +73,8 @@ You will need the following runs:
 - ARGUS 71799-800
 - ARGUS 71796-7
 
-Group 6: Frequequency Domain Analysis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Group 6: Frequency Domain Analysis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This group tests the Frequency domain analysis GUI.
 Test instructions for group 6 can be found at :ref:`Muon_Analysis_FDA-ref`.

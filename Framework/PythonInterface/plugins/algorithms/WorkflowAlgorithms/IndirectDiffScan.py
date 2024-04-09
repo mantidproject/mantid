@@ -94,7 +94,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         scan_alg.setProperty("Mode", self._mode)
         scan_alg.setProperty("SpectraRange", self._spectra_range)
         scan_alg.setProperty("RebinParam", self._rebin_paras)
-        scan_alg.setProperty("GroupingPolicy", self._grouping_method)
+        scan_alg.setProperty("GroupingMethod", self._grouping_method)
         scan_alg.setProperty("OutputWorkspace", self._output_ws)
         scan_alg.execute()
         logger.information("OutputWorkspace : %s" % self._output_ws)

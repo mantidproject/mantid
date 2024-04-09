@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
+#include "Common/DetectorGroupingOptions.h"
 #include "Common/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -36,7 +37,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
     : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_groupingComponent() {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); }
 
@@ -49,6 +50,13 @@ void IndirectDiffractionReduction::initLayout() {
 
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
+
+  m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
+  m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+  m_groupingWidget->setSaveCustomVisible(false);
+  m_groupingWidget->removeGroupingMethod("Individual");
+  m_groupingWidget->removeGroupingMethod("IPF");
+  m_groupingWidget->setGroupingMethod("All");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -66,21 +74,15 @@ void IndirectDiffractionReduction::initLayout() {
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
   connectRunButtonValidation(m_uiForm.rfCanFiles);
   connectRunButtonValidation(m_uiForm.rfCalFile);
-  connectRunButtonValidation(m_uiForm.rfCalFile_only);
-  connectRunButtonValidation(m_uiForm.rfVanadiumFile);
-  connectRunButtonValidation(m_uiForm.rfVanFile_only);
+
+  connect(m_uiForm.ckUseVanadium, SIGNAL(stateChanged(int)), this, SLOT(useVanadiumStateChanged(int)));
+  connect(m_uiForm.ckUseCalib, SIGNAL(stateChanged(int)), this, SLOT(useCalibStateChanged(int)));
 
   m_valDbl = new QDoubleValidator(this);
 
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
-  m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
-
-  // Update the list of plot options when manual grouping is toggled
-  connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this, SLOT(manualGroupingToggled(int)));
 
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
@@ -89,9 +91,6 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Update invalid rebinning markers
   validateRebin();
-
-  // Update invalid markers
-  validateCalOnly();
 
   // Update instrument dependant widgets
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
@@ -113,35 +112,36 @@ void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::AP
 void IndirectDiffractionReduction::run() {
   m_plotOptionsPresenter->clearWorkspaces();
 
-  setRunIsRunning(true);
-
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-  if (!m_uiForm.rfSampleFiles->isValid()) {
-    showInformationBox("Sample files input is invalid.");
+
+  auto const sampleProblem = validateFileFinder(m_uiForm.rfSampleFiles);
+  if (!sampleProblem.isEmpty()) {
+    showInformationBox("Sample: " + sampleProblem);
     return;
   }
 
-  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() && m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
-    showInformationBox("Use Vanadium File checked but no vanadium files "
-                       "have been supplied.");
+  auto const vanadiumProblem = validateFileFinder(m_uiForm.rfVanFile, m_uiForm.ckUseVanadium->isChecked());
+  if (!vanadiumProblem.isEmpty()) {
+    showInformationBox("Vanadium: " + vanadiumProblem);
     return;
   }
 
-  if (instName == "OSIRIS") {
-    if (mode == "diffonly") {
-      if (!validateVanCal()) {
-        showInformationBox("Vanadium and Calibration input is invalid.");
-        return;
-      }
-      runOSIRISdiffonlyReduction();
-    } else {
-      if (!validateCalOnly()) {
-        showInformationBox("Calibration and rebinning parameters are incorrect.");
-        return;
-      }
-      runGenericReduction(instName, mode);
-    }
+  auto const calibrationProblem = validateFileFinder(m_uiForm.rfCalFile, m_uiForm.ckUseCalib->isChecked());
+  if (!calibrationProblem.isEmpty()) {
+    showInformationBox("Calibration: " + calibrationProblem);
+    return;
+  }
+
+  auto const spectraMin = static_cast<std::size_t>(m_uiForm.spSpecMin->value());
+  auto const spectraMax = static_cast<std::size_t>(m_uiForm.spSpecMax->value());
+  if (auto const message = m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax)) {
+    showInformationBox(QString::fromStdString(*message));
+    return;
+  }
+
+  if (instName == "OSIRIS" && mode == "diffonly") {
+    runOSIRISdiffonlyReduction();
   } else {
     if (!validateRebin()) {
       showInformationBox("Rebinning parameters are incorrect.");
@@ -159,11 +159,6 @@ void IndirectDiffractionReduction::run() {
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
-
-  // Delete grouping workspace, if created.
-  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
-    deleteGroupingWorkspace();
-  }
 
   setRunIsRunning(false);
 
@@ -321,22 +316,11 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::s
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
 void IndirectDiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
+  setRunIsRunning(true);
 
-  QString rebinStart = "";
-  QString rebinWidth = "";
-  QString rebinEnd = "";
-  bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
-
-  // Get rebin string
-  if (mode == "diffspec") {
-    rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
-    rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
-    rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
-  } else if (mode == "diffonly") {
-    rebinStart = m_uiForm.leRebinStart->text();
-    rebinWidth = m_uiForm.leRebinWidth->text();
-    rebinEnd = m_uiForm.leRebinEnd->text();
-  }
+  QString rebinStart = m_uiForm.leRebinStart->text();
+  QString rebinWidth = m_uiForm.leRebinWidth->text();
+  QString rebinEnd = m_uiForm.leRebinEnd->text();
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
@@ -358,14 +342,13 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
   // Check if Cal file is used
   if (instName == "OSIRIS" && mode == "diffspec") {
     if (m_uiForm.ckUseCalib->isChecked()) {
-      const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
+      const auto calFile = m_uiForm.rfCalFile->getText().toStdString();
       msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
   if (mode == "diffspec") {
-
     if (m_uiForm.ckUseVanadium->isChecked()) {
-      const auto vanFile = m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+      const auto vanFile = m_uiForm.rfVanFile->getFilenames().join(",").toStdString();
       msgDiffReduction->setProperty("VanadiumFiles", vanFile);
     }
   }
@@ -382,15 +365,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
       msgDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
   }
 
-  auto diffRuntimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  m_groupingWsName = "__Grouping";
-  // Add the property for grouping policy if needed
-  if (useManualGrouping) {
-    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-    createGroupingWorkspace(m_groupingWsName);
-    diffRuntimeProps->setPropertyValue("GroupingWorkspace", m_groupingWsName);
-  }
-  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(diffRuntimeProps));
+  auto groupingProps = m_groupingWidget->groupingProperties();
+  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(groupingProps));
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -403,6 +379,8 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
  * OSIRISDiffractionReduction algorithm.
  */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
+  setRunIsRunning(true);
+
   // Get the files names from FileFinderWidget widget, and convert them from Qt
   // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
@@ -428,7 +406,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
   osirisDiffReduction->initialize();
   osirisDiffReduction->setProperty("Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
-  osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanadiumFile->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
   osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
@@ -472,29 +450,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void IndirectDiffractionReduction::createGroupingWorkspace(const std::string &outputWsName) {
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
-  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
-
-  auto groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-  groupingAlg->initialize();
-  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
-  groupingAlg->setProperty("InstrumentName", instrument);
-  groupingAlg->setProperty("ComponentName", m_groupingComponent);
-  groupingAlg->setProperty("OutputWorkspace", outputWsName);
-
-  m_batchAlgoRunner->addAlgorithm(groupingAlg);
-}
-
-void IndirectDiffractionReduction::deleteGroupingWorkspace() {
-  IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", m_groupingWsName);
-  deleteAlg->executeAsync();
-  m_groupingWsName = "";
 }
 
 /**
@@ -550,15 +505,10 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
-  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
-
-  auto const bankComponent = instrument->getComponentByName("bank");
-  m_groupingComponent = bankComponent ? "bank" : "diffraction";
 
   // Get default spectra range
   double specMin = instrument->getNumberParameter("spectra-min")[0];
@@ -572,43 +522,30 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
-  // Determine whether we need vanadium input
-  std::vector<std::string> correctionVector = instrument->getStringParameter("Workflow.Diffraction.Correction");
-  bool vanadiumNeeded = false;
-  bool calibNeeded = false;
-  if (correctionVector.size() > 0) {
-    vanadiumNeeded = (correctionVector[0] == "Vanadium");
-    calibNeeded = (correctionVector[0] == "Calibration");
-  }
+  // Require vanadium for OSIRIS diffonly
+  auto vanadiumMandatory = instrumentName == "OSIRIS" && reflectionName == "diffonly";
+  m_uiForm.rfVanFile->isOptional(!vanadiumMandatory);
+  m_uiForm.ckUseVanadium->setChecked(vanadiumMandatory);
+  m_uiForm.ckUseVanadium->setDisabled(vanadiumMandatory);
 
-  if (vanadiumNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(0);
-  else if (calibNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(1);
-  else if (reflectionName != "diffspec")
-    m_uiForm.swVanadium->setCurrentIndex(2);
-  else
-    m_uiForm.swVanadium->setCurrentIndex(1);
+  // Hide calibration for non-OSIRIS instruments
+  auto calibrationOptional = instrumentName == "OSIRIS";
+  auto calibrationMandatory = calibrationOptional && reflectionName == "diffonly";
+  m_uiForm.ckUseCalib->setVisible(calibrationOptional);
+  m_uiForm.rfCalFile->setVisible(calibrationOptional);
+  m_uiForm.rfCalFile->isOptional(!calibrationMandatory);
+  m_uiForm.ckUseCalib->setChecked(calibrationMandatory);
+  m_uiForm.ckUseCalib->setDisabled(calibrationMandatory);
 
-  // Hide options that the current instrument config cannot process
+  // Hide rebin options for OSIRIS diffonly
+  m_uiForm.gbDspaceRebinCalibOnly->setVisible(!(instrumentName == "OSIRIS" && reflectionName == "diffonly"));
 
-  // Disable calibration for IRIS
-  if (instrumentName == "IRIS") {
-    m_uiForm.ckUseCalib->setEnabled(false);
-    m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
-    m_uiForm.ckUseCalib->setChecked(false);
-  } else {
-    m_uiForm.ckUseCalib->setEnabled(true);
-    m_uiForm.ckUseCalib->setToolTip("");
-    m_uiForm.ckUseCalib->setChecked(true);
-  }
+  auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
+  m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
+  m_uiForm.fDetectorGrouping->setToolTip(!allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
+                                                                : "");
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
-    // Disable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckManualGrouping->setEnabled(false);
-    m_uiForm.ckManualGrouping->setChecked(false);
-
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.ckSumFiles->setEnabled(false);
@@ -619,10 +556,6 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
     m_uiForm.ckSumFiles->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
-
-    // Re-enable individual grouping
-    m_uiForm.ckManualGrouping->setToolTip("");
-    m_uiForm.ckManualGrouping->setEnabled(true);
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);
@@ -659,9 +592,8 @@ void IndirectDiffractionReduction::loadSettings() {
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
   m_uiForm.rfSampleFiles->readSettings(settings.group());
-  m_uiForm.rfCalFile->readSettings(settings.group());
   m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.rfVanadiumFile->setUserInput(settings.value("last_van_files").toString());
+  m_uiForm.rfVanFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();
 }
 
@@ -670,7 +602,7 @@ void IndirectDiffractionReduction::saveSettings() {
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_cal_file", m_uiForm.rfCalFile->getText());
-  settings.setValue("last_van_files", m_uiForm.rfVanadiumFile->getText());
+  settings.setValue("last_van_files", m_uiForm.rfVanFile->getText());
   settings.endGroup();
 }
 
@@ -715,57 +647,21 @@ bool IndirectDiffractionReduction::validateRebin() {
 }
 
 /**
- * Checks to see if the vanadium and cal file fields are valid.
+ * Checks to see if the file finder fields are valid.
  *
- * @returns True fo vanadium and calibration files are valid, false otherwise
+ * @returns A message if the file finder has a problem.
  */
-bool IndirectDiffractionReduction::validateVanCal() {
-  if (!m_uiForm.rfCalFile->isValid())
-    return false;
-
-  if (!m_uiForm.rfVanadiumFile->isValid())
-    return false;
-
-  return true;
-}
-
-/**
- * Checks to see if the cal file and optional rebin fields are valid.
- *
- * @returns True if calibration file and rebin values are valid, false otherwise
- */
-bool IndirectDiffractionReduction::validateCalOnly() {
-  // Check Calib file valid
-  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
-    return false;
-
-  // Check rebin values valid
-  QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
-  QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
-  QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
-
-  bool rebinValid = true;
-  // Need all or none
-  if (rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty()) {
-    rebinValid = true;
-    m_uiForm.valRebinStart_CalibOnly->setText("");
-    m_uiForm.valRebinWidth_CalibOnly->setText("");
-    m_uiForm.valRebinEnd_CalibOnly->setText("");
-  } else {
-
-    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
-    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
-    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd_CalibOnly);
-
-    if (rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble()) {
-      rebinValid = false;
-      m_uiForm.valRebinStart_CalibOnly->setText("*");
-      m_uiForm.valRebinEnd_CalibOnly->setText("*");
-    }
+QString IndirectDiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
+                                                         bool const isChecked) const {
+  if (!fileFinder->isOptional() || isChecked) {
+    return fileFinder->getFileProblem();
   }
-
-  return rebinValid;
+  return "";
 }
+
+void IndirectDiffractionReduction::useVanadiumStateChanged(int state) { m_uiForm.rfVanFile->setEnabled(state != 0); }
+
+void IndirectDiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile->setEnabled(state != 0); }
 
 /**
  * Disables and shows message on run button indicating that run files have been
@@ -801,24 +697,6 @@ void IndirectDiffractionReduction::runFilesFound() {
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
-}
-
-/**
- * Handles the user toggling the manual grouping check box.
- *
- * @param state The selection state of the check box
- */
-void IndirectDiffractionReduction::manualGroupingToggled(int state) {
-  switch (state) {
-  case Qt::Unchecked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
-    break;
-  case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceUnit);
-    break;
-  default:
-    return;
-  }
 }
 
 void IndirectDiffractionReduction::setRunIsRunning(bool running) {

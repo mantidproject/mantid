@@ -17,13 +17,13 @@ processes in, for example, the :ref:`Inelastic Data Analysis <interface-inelasti
 
 .. interface:: Data Manipulation
   :align: right
-  :width: 350
+  :width: 750
 
 Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Inelastic interfaces.
 
 ?
@@ -417,6 +417,11 @@ Resolution
 
 ELow, EHigh
   The rebinning range.
+
+Enforce Normalization
+  The LHSWorkspace from the output from :ref:`algm-ExtractFFTSpectrum` is used in both branches
+  to perform the final workspace division and the two intermediate workspace divisions are skipped by unchecking
+  this option.
 
 SampleBinning
   The number of neighbouring bins are summed.

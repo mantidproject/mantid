@@ -56,9 +56,9 @@ public:
 
   int interceptSurface(Geometry::Track &t) const override { return m_shape->interceptSurface(t); }
   double distance(const Geometry::Track &t) const override { return m_shape->distance(t); }
-  double solidAngle(const Kernel::V3D &observer) const override { return m_shape->solidAngle(observer); }
-  double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const override {
-    return m_shape->solidAngle(observer, scaleFactor);
+  double solidAngle(const SolidAngleParams &params) const override { return m_shape->solidAngle(params); }
+  double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const override {
+    return m_shape->solidAngle(params, scaleFactor);
   }
   double volume() const override { return m_shape->volume(); }
   const BoundingBox &getBoundingBox() const override { return m_shape->getBoundingBox(); }

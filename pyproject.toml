@@ -4,12 +4,12 @@ line-length = 140
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-select = ["C90", "E", "F", "RUF100", "W"]
-ignore = ["E402", # module level import not at top of file
-          "E722", # bare except
-	  "E741", "E743", # ambiguous function name, generally 'l'
-          "F403", # wild imports
-          "F405", "F821", # unknown names from probably from wild imports
+lint.select = ["C90", "E", "F", "RUF100", "W"]
+lint.ignore = ["E402", # module level import not at top of file
+               "E722", # bare except
+               "E741", "E743", # ambiguous function name, generally 'l'
+               "F403", # wild imports
+               "F405", "F821", # unknown names from probably from wild imports
 ]
 exclude = [
    "Framework/PythonInterface/test",
@@ -23,7 +23,7 @@ exclude = [
    "scripts/ErrorReporter/ui_errorreport.py"
    ]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 20
 
 

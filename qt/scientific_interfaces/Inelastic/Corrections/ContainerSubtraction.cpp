@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-
 #include <utility>
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -26,7 +26,7 @@ namespace MantidQt::CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
@@ -203,10 +203,12 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ContainerSubtraction");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                          : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? InterfaceUtils::getContainerFBSuffixes(tabName)
+                                             : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? InterfaceUtils::getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

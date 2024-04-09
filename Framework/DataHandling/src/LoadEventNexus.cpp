@@ -359,7 +359,6 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
 template <typename T>
 T LoadEventNexus::filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
                                      Mantid::Types::Core::DateAndTime &stopTime) {
-
   auto filterByTime = createChildAlgorithm("FilterByTime");
   g_log.information("Filtering events by time...");
   filterByTime->setProperty("InputWorkspace", workspace);
@@ -445,7 +444,6 @@ void LoadEventNexus::execLoader() {
 
 std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
-  std::string isooffset; // ISO8601 offset
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
   // the offset is and absolute timestamp, which is relative to the start of
@@ -455,6 +453,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
     logger.warning("In firstLastPulseTimes: no ISO8601 offset attribute "
                    "provided for event_time_zero, using UNIX epoch instead");
   } else {
+    std::string isooffset; // ISO8601 offset
     file.getAttr("offset", isooffset);
     offset = DateAndTime(isooffset);
   }
@@ -573,7 +572,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     }
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
-      auto *temp = run.getProperty("period_log");
+      const auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
       std::string status = "";
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
@@ -969,7 +968,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
@@ -1039,21 +1037,20 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_stop_sec = getProperty("FilterByTimeStop");
 
   // Default to ALL pulse times
-  bool is_time_filtered = false;
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
+  if (m_allBanksPulseTimes->numberOfPulses() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {
       filter_time_start = run_start + filter_time_start_sec;
-      is_time_filtered = true;
+      m_is_time_filtered = true;
     }
 
     if (filter_time_stop_sec != EMPTY_DBL()) {
       filter_time_stop = run_start + filter_time_stop_sec;
-      is_time_filtered = true;
+      m_is_time_filtered = true;
     }
 
     // Silly values?
@@ -1162,6 +1159,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     safeOpenFile(m_filename);
   }
   if (!loaded) {
+    loaderType = LoaderType::DEFAULT; // to be used later
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
@@ -1224,10 +1222,18 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
 
-  if (is_time_filtered) {
-    // Now filter out the run and events, using the DateAndTime type.
-    // This will sort both by pulse time
-    filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+  if (m_is_time_filtered) {
+    if (loaderType == LoaderType::MULTIPROCESS) {
+      // Now filter out the run and events, using the DateAndTime type.
+      // This will sort both by pulse time
+      filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+    } else {
+      // events were filtered during read
+      // filter the logs the same way FilterByTime does
+      TimeROI timeroi(filter_time_start, filter_time_stop);
+      m_ws->mutableRun().setTimeROI(timeroi);
+      m_ws->mutableRun().removeDataOutsideTimeROI();
+    }
   }
 }
 
@@ -1355,7 +1361,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   for (auto &det : detList) {
     bool keep = false;
     std::string det_name = det->getName();
-    for (auto &bankName : bankNames) {
+    for (const auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
       if (det_name == bankName.substr(0, pos))
         keep = true;

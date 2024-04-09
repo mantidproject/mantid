@@ -12,14 +12,14 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
+FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
   connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
+  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
+  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 std::string FqFitAddWorkspaceDialog::workspaceName() const {
@@ -70,5 +70,7 @@ void FqFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
 void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
 }
+
+void FqFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

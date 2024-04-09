@@ -21,7 +21,7 @@ layout. These tabs are documented in :ref:`QENS Fitting <QENS-fitting-ref>`.
 
 These interfaces do not support GroupWorkspaces as input.
 
-.. image:: ../../images/Inelastic_Data_Analysis_GUI.png
+.. interface:: Data Analysis
   :width: 750
   :align: center
 
@@ -31,7 +31,7 @@ Action Buttons
 There are several buttons on the bottom left of every tab in the interface. These are:
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Indirect interfaces.
 
 ?

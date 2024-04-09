@@ -65,7 +65,7 @@ class ProjectRecoveryLoader(object):
         Open the passed checkpoint in the script editor
         :param checkpoint: String; path to the checkpoint file
         """
-        self._compile_recovery_script(directory=checkpoint)
+        self._copy_in_recovery_script(directory=checkpoint)
         self._open_script_in_editor(self.pr.recovery_order_workspace_history_file)
 
     def _load_project_interfaces(self, directory):
@@ -87,26 +87,36 @@ class ProjectRecoveryLoader(object):
         Make all the calls that are required to start the regeneration of the workspaces from the stored scripts
         :param directory: String; Path to the directory in which resides the workspace.py files
         """
-        self._compile_recovery_script(directory)
+        self._copy_in_recovery_script(directory)
 
         # Open it in the editor and run it
         self._open_script_in_editor(self.pr.recovery_order_workspace_history_file)
         self._run_script_in_open_editor()
 
-    def _compile_recovery_script(self, directory):
+    def _copy_in_recovery_script(self, directory):
         """
-        Compile the recovery script in the ~./mantid or %APPDATA%/mantidproject/mantid folder based on your OS
-        :param directory: String; The directory in which the Workspace.py files exists
+        Move the saved recovery script to the ~./mantid or %APPDATA%/mantidproject/mantid folder based on your OS
+        :param directory: String; The directory in which the load_workspaces.py files exists
         """
-        alg_name = "OrderWorkspaceHistory"
-        alg = AlgorithmManager.createUnmanaged(alg_name, 1)
-        alg.initialize()
-        alg.setChild(True)
-        alg.setLogging(False)
-        alg.setRethrows(False)
-        alg.setProperty("RecoveryCheckpointFolder", directory)
-        alg.setProperty("OutputFilePath", self.pr.recovery_order_workspace_history_file)
-        alg.execute()
+        saved_recovery_script = os.path.join(directory, "load_workspaces.py")
+
+        if os.path.exists(saved_recovery_script):
+            with open(saved_recovery_script, "r") as reader, open(self.pr.recovery_order_workspace_history_file, "w") as writer:
+                writer.write(reader.read())
+        elif os.path.exists(directory):
+            # This is to ensure compatibility with backups from version 6.8 and earlier.
+            # Prior to 6.9, one python file would be saved for each workspace in the ADS.
+            alg_name = "OrderWorkspaceHistory"
+            alg = AlgorithmManager.createUnmanaged(alg_name, 1)
+            alg.initialize()
+            alg.setChild(True)
+            alg.setLogging(False)
+            alg.setRethrows(False)
+            alg.setProperty("RecoveryCheckpointFolder", directory)
+            alg.setProperty("OutputFilePath", self.pr.recovery_order_workspace_history_file)
+            alg.execute()
+
+        self.multi_file_interpreter.mark_file_change_as_ours(self.pr.recovery_order_workspace_history_file)
 
     def _open_script_in_editor(self, script):
         """
@@ -132,6 +142,7 @@ class ProjectRecoveryLoader(object):
         :return:
         """
         self.multi_file_interpreter.open_file_in_new_tab(script)
+        self.multi_file_interpreter.reload_file(script)
 
     def _run_script_in_open_editor(self):
         """

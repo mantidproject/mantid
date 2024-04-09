@@ -223,6 +223,10 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
     // reductions.
     row.setSkipped(true);
     return;
+  } catch (std::invalid_argument const &e) {
+    row.setError("Error while setting algorithm properties: " + std::string(e.what()));
+    row.setSkipped(true);
+    return;
   }
   algorithms.emplace_back(std::move(algorithm));
 }
@@ -298,7 +302,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   // workspaces for the row if the group does not have postprocessing, because
   // in that case users just want to see the postprocessed output instead.
   auto workspaces = std::vector<std::string>();
-  auto *const group = row.getParent();
+  auto const *group = row.getParent();
   if (group && group->hasPostprocessing())
     return workspaces;
 

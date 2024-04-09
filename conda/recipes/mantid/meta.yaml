@@ -52,7 +52,6 @@ requirements:
     - setuptools
     - tbb-devel {{ tbb }}
     - pip
-    - openssl {{ openssl }}
     - versioningit
     - libglu  # [linux]
   run:
@@ -62,19 +61,18 @@ requirements:
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - lib3mf  # [win]
     - nexus
-    - {{ pin_compatible("numpy", upper_bound="1.25") }}
+    - {{ pin_compatible("numpy", upper_bound="1.27") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}
     - pycifrw {{ pycifrw }}
     - python
     - python-dateutil
     - pyyaml
     - scipy {{ scipy }}
-    - openssl
     - euphonic {{ euphonic }}
     - toml
     - libglu  # [linux]
     - joblib
-    - orsopy
+    - orsopy {{ orsopy }}
 
 about:
   home: https://github.com/mantidproject/mantid

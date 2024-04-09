@@ -50,7 +50,7 @@ class RectangleSelection(RectangleSelector):
 
         # check if drawn distance (if it exists) is not too small in
         # either x or y-direction
-        if self._drawtype != "none" and (
+        if self.get_visible() and (
             self.minspanx is not None and spanx < self.minspanx or self.minspany is not None and spany < self.minspany
         ):
             for artist in self.artists:

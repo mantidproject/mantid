@@ -53,7 +53,7 @@ void ALCBaselineModellingPresenter::fit() {
     parsedSections.emplace_back(parsedSection);
   }
 
-  std::string funcStr = m_view->function().toStdString();
+  std::string funcStr = m_view->function();
 
   if (funcStr.empty()) {
     m_view->displayError("Couldn't fit an empty function");

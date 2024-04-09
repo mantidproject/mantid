@@ -21,16 +21,19 @@ python:
 boost:
   - 1.78
 
+hdf5: # this is to move to libcurl>=8.4
+  - '>1.14.0,<1.15'
+
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.22.*
+  - 1.24.*
 
 matplotlib:
   - 3.7.*
 
-# mantidqt host environment cannot resolve with openssl 3.2.0, there appears to be a conflict with qt-main 5.15.8
-openssl:
-  - 3.1.4
+# Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+orsopy:
+  - 1.2.0
 
 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
 # It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
@@ -63,9 +66,6 @@ qscintilla2:
 
 tbb:
   - 2021
-
-hdf5:
-  - 1.12.*
 
 gsl:
   - 2.7

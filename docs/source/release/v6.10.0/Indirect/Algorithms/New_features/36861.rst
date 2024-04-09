@@ -1,0 +1,1 @@
+- Added the ability to specify a 'NGroups' property to the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm to be used for grouping detectors into a specified number of groups.

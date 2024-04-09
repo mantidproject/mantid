@@ -63,7 +63,7 @@ void InelasticDataManipulation::initLayout() {
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
   addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
   addMVPTab<InelasticDataManipulationElwinTab, InelasticDataManipulationElwinTabView>("Elwin");
-  addTab<InelasticDataManipulationIqtTab>("Iqt");
+  addMVPTab<InelasticDataManipulationIqtTab, InelasticDataManipulationIqtTabView>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button

@@ -21,6 +21,7 @@ public:
   ~AlgorithmRuntimeProps() = default;
 
   bool operator==(const Mantid::Kernel::IPropertyManager &other) override = delete;
+  using Mantid::Kernel::PropertyManager::existsProperty;
   using Mantid::Kernel::PropertyManager::getDeclaredPropertyNames;
   using Mantid::Kernel::PropertyManager::getPropertyValue;
 

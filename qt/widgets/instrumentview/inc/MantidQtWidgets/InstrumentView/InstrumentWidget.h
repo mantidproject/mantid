@@ -218,6 +218,7 @@ signals:
   void createDetectorTable(const QString & /*_t1*/, const std::vector<int> & /*_t2*/, bool /*_t3*/);
   void needSetIntegrationRange(double /*_t1*/, double /*_t2*/);
   void surfaceTypeChanged(int /*_t1*/);
+  void maintainAspectRatioChanged(bool /*on*/);
   void colorMapChanged();
   void colorMapMinValueChanged(double /*_t1*/);
   void colorMapMaxValueChanged(double /*_t1*/);

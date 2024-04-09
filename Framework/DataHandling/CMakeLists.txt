@@ -40,18 +40,20 @@ set(SRC_FILES
     src/LoadBBY.cpp
     src/LoadBankFromDiskTask.cpp
     src/LoadBinaryStl.cpp
+    src/LoadCSNSNexus.cpp
     src/LoadCalFile.cpp
     src/LoadCanSAS1D.cpp
     src/LoadCanSAS1D2.cpp
-    src/LoadCSNSNexus.cpp
+    src/LoadDNSEvent.cpp
     src/LoadDaveGrp.cpp
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
-    src/LoadDNSEvent.cpp
     src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
+    src/LoadErrorEventsNexus.cpp
+    src/LoadEventAsWorkspace2D.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
     src/LoadEventPreNexus2.cpp
@@ -93,8 +95,7 @@ set(SRC_FILES
     src/LoadMuonNexusV2.cpp
     src/LoadMuonNexusV2NexusHelper.cpp
     src/LoadMuonStrategy.cpp
-    src/SinglePeriodLoadMuonStrategy.cpp
-    src/MultiPeriodLoadMuonStrategy.cpp
+    src/LoadNGEM.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
@@ -104,7 +105,6 @@ set(SRC_FILES
     src/LoadNexusProcessed.cpp
     src/LoadNexusProcessed2.cpp
     src/LoadOff.cpp
-    src/LoadNGEM.cpp
     src/LoadPDFgetNFile.cpp
     src/LoadPLN.cpp
     src/LoadPSIMuonBin.cpp
@@ -145,18 +145,21 @@ set(SRC_FILES
     src/MeshFileIO.cpp
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
+    src/MultiPeriodLoadMuonStrategy.cpp
     src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
     src/PatchBBY.cpp
     src/ProcessBankData.cpp
+    src/PulseIndexer.cpp
     src/RawFileInfo.cpp
     src/ReadMaterial.cpp
     src/RemoveLogs.cpp
     src/RenameLog.cpp
     src/RotateInstrumentComponent.cpp
     src/RotateSource.cpp
+    src/SNSAppendGeometryToNexus.cpp
     src/SampleEnvironmentFactory.cpp
     src/SampleEnvironmentSpec.cpp
     src/SampleEnvironmentSpecParser.cpp
@@ -195,8 +198,8 @@ set(SRC_FILES
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
     src/SaveRKH.cpp
-    src/SaveReflectometryAscii.cpp
     src/SaveRMCProfile.cpp
+    src/SaveReflectometryAscii.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
     src/SaveSampleEnvironmentAndShape.cpp
@@ -208,7 +211,7 @@ set(SRC_FILES
     src/SetSample.cpp
     src/SetSampleMaterial.cpp
     src/SetScalingPSD.cpp
-    src/SNSAppendGeometryToNexus.cpp
+    src/SinglePeriodLoadMuonStrategy.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
@@ -259,18 +262,20 @@ set(INC_FILES
     inc/MantidDataHandling/LoadBBY.h
     inc/MantidDataHandling/LoadBankFromDiskTask.h
     inc/MantidDataHandling/LoadBinaryStl.h
+    inc/MantidDataHandling/LoadCSNSNexus.h
     inc/MantidDataHandling/LoadCalFile.h
     inc/MantidDataHandling/LoadCanSAS1D.h
     inc/MantidDataHandling/LoadCanSAS1D2.h
-    inc/MantidDataHandling/LoadCSNSNexus.h
+    inc/MantidDataHandling/LoadDNSEvent.h
     inc/MantidDataHandling/LoadDaveGrp.h
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
-    inc/MantidDataHandling/LoadDNSEvent.h
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
+    inc/MantidDataHandling/LoadErrorEventsNexus.h
+    inc/MantidDataHandling/LoadEventAsWorkspace2D.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
     inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -312,8 +317,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMuonNexusV2.h
     inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
     inc/MantidDataHandling/LoadMuonStrategy.h
-    inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
-    inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
+    inc/MantidDataHandling/LoadNGEM.h
     inc/MantidDataHandling/LoadNXSPE.h
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
@@ -323,7 +327,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNexusProcessed.h
     inc/MantidDataHandling/LoadNexusProcessed2.h
     inc/MantidDataHandling/LoadOff.h
-    inc/MantidDataHandling/LoadNGEM.h
     inc/MantidDataHandling/LoadPDFgetNFile.h
     inc/MantidDataHandling/LoadPLN.h
     inc/MantidDataHandling/LoadPSIMuonBin.h
@@ -360,6 +363,7 @@ set(INC_FILES
     inc/MantidDataHandling/MeshFileIO.h
     inc/MantidDataHandling/ModifyDetectorDotDatFile.h
     inc/MantidDataHandling/MoveInstrumentComponent.h
+    inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
     inc/MantidDataHandling/NexusTester.h
     inc/MantidDataHandling/ORNLDataArchive.h
@@ -367,12 +371,14 @@ set(INC_FILES
     inc/MantidDataHandling/ParallelEventLoader.h
     inc/MantidDataHandling/PatchBBY.h
     inc/MantidDataHandling/ProcessBankData.h
+    inc/MantidDataHandling/PulseIndexer.h
     inc/MantidDataHandling/RawFileInfo.h
     inc/MantidDataHandling/ReadMaterial.h
     inc/MantidDataHandling/RemoveLogs.h
     inc/MantidDataHandling/RenameLog.h
     inc/MantidDataHandling/RotateInstrumentComponent.h
     inc/MantidDataHandling/RotateSource.h
+    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SampleEnvironmentFactory.h
     inc/MantidDataHandling/SampleEnvironmentSpec.h
     inc/MantidDataHandling/SampleEnvironmentSpecParser.h
@@ -411,8 +417,8 @@ set(INC_FILES
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
     inc/MantidDataHandling/SaveRKH.h
-    inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveRMCProfile.h
+    inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
     inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
@@ -424,7 +430,7 @@ set(INC_FILES
     inc/MantidDataHandling/SetSample.h
     inc/MantidDataHandling/SetSampleMaterial.h
     inc/MantidDataHandling/SetScalingPSD.h
-    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
+    inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -438,6 +444,7 @@ set(INC_FILES
 
 set(TEST_FILES
     ApplyDiffCalTest.h
+    BankPulseTimesTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
@@ -463,8 +470,8 @@ set(TEST_FILES
     GroupDetectorsTest.h
     H5UtilTest.h
     ISISDataArchiveTest.h
-    ISISJournalTest.h
     ISISJournalGetExperimentRunsTest.h
+    ISISJournalTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
@@ -472,17 +479,19 @@ set(TEST_FILES
     LoadAsciiTest.h
     LoadBBYTest.h
     LoadBinaryStlTest.h
+    LoadCSNSNexusTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
-    LoadCSNSNexusTest.h
+    LoadDNSEventTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
-    LoadDNSEventTest.h
     LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
+    LoadErrorEventsNexusTest.h
+    LoadEventAsWorkspace2DTest.h
     LoadEventNexusIndexSetupTest.h
     LoadEventNexusTest.h
     LoadEventPreNexus2Test.h
@@ -566,12 +575,14 @@ set(TEST_FILES
     NexusTesterTest.h
     ORNLDataArchiveTest.h
     PDLoadCharacterizationsTest.h
+    PulseIndexerTest.h
     RawFileInfoTest.h
     ReadMaterialTest.h
     RemoveLogsTest.h
     RenameLogTest.h
     RotateInstrumentComponentTest.h
     RotateSourceTest.h
+    SNSAppendGeometryToNexusTest.h
     SampleEnvironmentFactoryTest.h
     SampleEnvironmentSpecFileFinderTest.h
     SampleEnvironmentSpecParserTest.h
@@ -609,8 +620,8 @@ set(TEST_FILES
     SavePHXTest.h
     SaveParameterFileTest.h
     SaveRKHTest.h
-    SaveReflectometryAsciiTest.h
     SaveRMCProfileTest.h
+    SaveReflectometryAsciiTest.h
     SaveSESANSTest.h
     SaveSPETest.h
     SaveSampleEnvironmentAndShapeTest.h
@@ -621,7 +632,6 @@ set(TEST_FILES
     SetSampleMaterialTest.h
     SetSampleTest.h
     SetScalingPSDTest.h
-    SNSAppendGeometryToNexusTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h

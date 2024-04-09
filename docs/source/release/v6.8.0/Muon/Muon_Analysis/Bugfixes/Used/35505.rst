@@ -1,1 +1,0 @@
-- Fixed crash in the muon analysis GUI fitting interface when plotting a guess with multiple fitting functions.

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferModel.h"
+#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferModelUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
@@ -15,22 +16,15 @@
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-IETModel::IETModel() {}
+IETModel::IETModel() : m_outputWorkspaces() {}
 
-std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, std::size_t const &defaultSpectraMin,
-                                                   std::size_t const &defaultSpectraMax) {
+std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
   std::vector<std::string> errors;
   IETDataValidator validator;
 
   auto inputFiles = runData.getInputData().getInputFiles();
   bool isRunFileValid = !inputFiles.empty();
   std::string firstFileName = inputFiles.substr(0, inputFiles.find(','));
-
-  std::string detectorError =
-      validator.validateDetectorGrouping(runData.getGroupingData(), defaultSpectraMin, defaultSpectraMax);
-  if (!detectorError.empty()) {
-    errors.push_back(detectorError);
-  }
 
   std::string analysisError = validator.validateAnalysisData(runData.getAnalysisData());
   if (!analysisError.empty()) {
@@ -51,43 +45,43 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, st
   return errors;
 }
 
-void IETModel::setInstrumentProperties(IAlgorithm_sptr const &reductionAlg, InstrumentData const &instData) {
-  reductionAlg->setProperty("Instrument", instData.getInstrument());
-  reductionAlg->setProperty("Analyser", instData.getAnalyser());
-  reductionAlg->setProperty("Reflection", instData.getReflection());
+void IETModel::setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData) {
+  Mantid::API::AlgorithmProperties::update("Instrument", instData.getInstrument(), properties);
+  Mantid::API::AlgorithmProperties::update("Analyser", instData.getAnalyser(), properties);
+  Mantid::API::AlgorithmProperties::update("Reflection", instData.getReflection(), properties);
 }
 
-void IETModel::setInputProperties(IAlgorithm_sptr const &reductionAlg, IETInputData const &inputData) {
-  reductionAlg->setProperty("InputFiles", inputData.getInputFiles());
-  reductionAlg->setProperty("SumFiles", inputData.getSumFiles());
-  reductionAlg->setProperty("LoadLogFiles", inputData.getLoadLogFiles());
+void IETModel::setInputProperties(IAlgorithmRuntimeProps &properties, IETInputData const &inputData) {
+  Mantid::API::AlgorithmProperties::update("InputFiles", inputData.getInputFiles(), properties);
+  Mantid::API::AlgorithmProperties::update("SumFiles", inputData.getSumFiles(), properties);
+  Mantid::API::AlgorithmProperties::update("LoadLogFiles", inputData.getLoadLogFiles(), properties);
   if (inputData.getUseCalibration()) {
-    reductionAlg->setProperty("CalibrationWorkspace", inputData.getCalibrationWorkspace());
+    Mantid::API::AlgorithmProperties::update("CalibrationWorkspace", inputData.getCalibrationWorkspace(), properties);
   }
 }
 
-void IETModel::setConversionProperties(IAlgorithm_sptr const &reductionAlg, IETConversionData const &conversionData,
+void IETModel::setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                        std::string const &instrument) {
   std::vector<long> detectorRange;
 
   if (instrument == "IRIS" || instrument == "OSIRIS") {
-    reductionAlg->setProperty("Efixed", conversionData.getEfixed());
+    Mantid::API::AlgorithmProperties::update("Efixed", conversionData.getEfixed(), properties);
   }
   detectorRange.emplace_back(conversionData.getSpectraMin());
   detectorRange.emplace_back(conversionData.getSpectraMax());
-  reductionAlg->setProperty("SpectraRange", detectorRange);
+  Mantid::API::AlgorithmProperties::update("SpectraRange", detectorRange, properties);
 }
 
-void IETModel::setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETBackgroundData const &backgroundData) {
+void IETModel::setBackgroundProperties(IAlgorithmRuntimeProps &properties, IETBackgroundData const &backgroundData) {
   if (backgroundData.getRemoveBackground()) {
     std::vector<double> backgroundRange;
     backgroundRange.emplace_back(backgroundData.getBackgroundStart());
     backgroundRange.emplace_back(backgroundData.getBackgroundEnd());
-    reductionAlg->setProperty("BackgroundRange", backgroundRange);
+    Mantid::API::AlgorithmProperties::update("BackgroundRange", backgroundRange, properties);
   }
 }
 
-void IETModel::setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData) {
+void IETModel::setRebinProperties(IAlgorithmRuntimeProps &properties, IETRebinData const &rebinData) {
   if (rebinData.getShouldRebin()) {
     std::string rebin;
 
@@ -97,40 +91,26 @@ void IETModel::setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinD
     } else {
       rebin = rebinData.getRebinString();
     }
-
-    reductionAlg->setProperty("RebinString", rebin);
+    Mantid::API::AlgorithmProperties::update("RebinString", rebin, properties);
   }
 }
 
-void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAnalysisData const &analysisData) {
+void IETModel::setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData) {
   if (analysisData.getUseDetailedBalance()) {
-    reductionAlg->setProperty("DetailedBalance", analysisData.getDetailedBalance());
+    Mantid::API::AlgorithmProperties::update("DetailedBalance", analysisData.getDetailedBalance(), properties);
   }
 }
 
-void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,
-                                     IETConversionData const &conversionData) {
-  std::pair<std::string, std::string> grouping = createGrouping(groupingData, conversionData);
-
-  reductionAlg->setProperty("GroupingMethod", grouping.first);
-
-  if (grouping.first == "File")
-    reductionAlg->setProperty("MapFile", grouping.second);
-  else if (grouping.first == "Custom")
-    reductionAlg->setProperty("GroupingString", grouping.second);
-}
-
-void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutputData const &outputData,
+void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                                    std::string const &outputGroupName) {
   if (outputData.getUseDeltaEInWavenumber()) {
-    reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
+    Mantid::API::AlgorithmProperties::update("UnitX", std::string("DeltaE_inWavenumber"), properties);
   }
-  reductionAlg->setProperty("FoldMultipleFrames", outputData.getFoldMultipleFrames());
-
-  reductionAlg->setProperty("OutputWorkspace", outputGroupName);
+  Mantid::API::AlgorithmProperties::update("FoldMultipleFrames", outputData.getFoldMultipleFrames(), properties);
+  Mantid::API::AlgorithmProperties::update("OutputWorkspace", outputGroupName, properties);
 }
 
-std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
+std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
@@ -139,51 +119,27 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
 }
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                      InstrumentData const &instData, IETRunData const &runData) {
+                                      InstrumentData const &instData, IETRunData &runData) {
+  auto properties = runData.groupingProperties();
+
+  setInstrumentProperties(*properties, instData);
+  setInputProperties(*properties, runData.getInputData());
+  setConversionProperties(*properties, runData.getConversionData(), instData.getInstrument());
+  setBackgroundProperties(*properties, runData.getBackgroundData());
+  setRebinProperties(*properties, runData.getRebinData());
+  setAnalysisProperties(*properties, runData.getAnalysisData());
+
+  std::string outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
+  setOutputProperties(*properties, runData.getOutputData(), outputGroupName);
+
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
+  API::IConfiguredAlgorithm_sptr configuredAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
 
-  setInstrumentProperties(reductionAlg, instData);
-  setInputProperties(reductionAlg, runData.getInputData());
-  setConversionProperties(reductionAlg, runData.getConversionData(), instData.getInstrument());
-  setBackgroundProperties(reductionAlg, runData.getBackgroundData());
-  setRebinProperties(reductionAlg, runData.getRebinData());
-  setAnalysisProperties(reductionAlg, runData.getAnalysisData());
-  setGroupingProperties(reductionAlg, runData.getGroupingData(), runData.getConversionData());
-
-  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
-  setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
-
-  batchAlgoRunner->addAlgorithm(reductionAlg);
-  batchAlgoRunner->executeBatchAsync();
+  batchAlgoRunner->executeAlgorithmAsync(std::move(configuredAlg));
 
   return outputGroupName;
-}
-
-std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingData &groupingData,
-                                                             const IETConversionData &conversionData) {
-  auto groupType = groupingData.getGroupingType();
-
-  if (groupType == IETGroupingType::FILE) {
-    return std::make_pair(IETGroupingType::FILE, groupingData.getGroupingMapFile());
-  } else if (groupType == IETGroupingType::GROUPS) {
-    std::string groupingString = getDetectorGroupingString(conversionData.getSpectraMin(),
-                                                           conversionData.getSpectraMax(), groupingData.getNGroups());
-    return std::make_pair(IETGroupingType::CUSTOM, groupingString);
-  } else if (groupType == IETGroupingType::DEFAULT) {
-    return std::make_pair(IETGroupingType::IPF, "");
-  } else if (groupType == IETGroupingType::CUSTOM)
-    return std::make_pair(IETGroupingType::CUSTOM, groupingData.getCustomGroups());
-  else {
-    // Catch All and Individual
-    return std::make_pair(groupType, "");
-  }
-}
-
-std::string IETModel::getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups) {
-  const unsigned int nSpectra = 1 + spectraMax - spectraMin;
-  return createDetectorGroupingString(static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups),
-                                      static_cast<std::size_t>(spectraMin));
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {
@@ -318,11 +274,11 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
 
 std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                                    std::string const &groupOption, bool const shouldGroup) {
-  std::vector<std::string> outputWorkspaces;
+  m_outputWorkspaces.clear();
 
-  if (doesExistInADS(groupName)) {
-    if (auto const outputGroup = getADSWorkspaceGroup(groupName)) {
-      outputWorkspaces = outputGroup->getNames();
+  if (WorkspaceUtils::doesExistInADS(groupName)) {
+    if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
+      m_outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {
         if (!shouldGroup) {
@@ -340,7 +296,7 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
     }
   }
 
-  return outputWorkspaces;
+  return m_outputWorkspaces;
 }
 
 void IETModel::ungroupWorkspace(std::string const &workspaceName) {

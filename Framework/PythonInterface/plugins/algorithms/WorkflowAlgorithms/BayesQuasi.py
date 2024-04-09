@@ -132,6 +132,7 @@ class BayesQuasi(PythonAlgorithm):
         self._res_norm = self.getProperty("UseResNorm").value
         self._wfile = self.getPropertyValue("WidthFile")
         self._loop = self.getProperty("Loop").value
+        self._output_fit_name = self.getPropertyValue("OutputWorkspaceFit")
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
@@ -297,7 +298,7 @@ class BayesQuasi(PythonAlgorithm):
             datY = np.append(datY, res1)
             datE = np.append(datE, dataG)
             nsp = 3
-            names = "data,fit.1,diff.1"
+            names = "data,fit 1,diff 1"
             res_plot = [0, 1, 2]
             if self._program == "QL":
                 workflow_prog.report("Processing Lorentzian result data")
@@ -310,7 +311,7 @@ class BayesQuasi(PythonAlgorithm):
                 datY = np.append(datY, res2)
                 datE = np.append(datE, dataG)
                 nsp += 2
-                names += ",fit.2,diff.2"
+                names += ",fit 2,diff 2"
 
                 dataF3 = yfit_list[3]
                 datX = np.append(datX, dataX)
@@ -321,7 +322,7 @@ class BayesQuasi(PythonAlgorithm):
                 datY = np.append(datY, res3)
                 datE = np.append(datE, dataG)
                 nsp += 2
-                names += ",fit.3,diff.3"
+                names += ",fit 3,diff 3"
 
                 res_plot.append(4)
                 prob0.append(yprob[0])
@@ -330,7 +331,7 @@ class BayesQuasi(PythonAlgorithm):
                 prob3.append(yprob[3])
 
             # create result workspace
-            fitWS = fname + "_Workspaces"
+            fitWS = self._output_fit_name
             fout = fname + "_Workspace_" + str(spectrum)
 
             workflow_prog.report("Creating OutputWorkspace")

@@ -257,6 +257,20 @@ The Command Line Interface
    :align: center
    :width: 80%
 
+4. Run Another Example Script in the Mantid Editor
+##################################################
+
+#. Select the ``MAR21335_Ei60meV`` workspace in the ``Workspace Manager``, click ``Compose`` and then ``Scale``
+#. Enter a scale factor of 1.0 and click ``Ok``
+#. Select the ``MAR21335_Ei60meV`` workspace again and click ``Subtract``
+#. Select the ``MAR21335_Ei60meV_scaled`` workspace and leave the self-shielding factor as 1.0, then click ``Ok``
+#. Select the ``MAR21335_Ei60meV_subtracted`` workspace and click ``Display`` in the ``Slice`` tab
+#. Verify that all values are zeros
+#. Navigate to the ``File`` menu on the slice plot, select ``Generate Script to Clipboard`` and paste the script into the Mantid editor
+#. Close the slice plot with all zeros
+#. Run the script in the Mantid editor and verify that a slice plot with all zeros is reproduced
+
+
 The Workspace Manager
 ---------------------
 

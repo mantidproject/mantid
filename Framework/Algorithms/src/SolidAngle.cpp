@@ -104,7 +104,16 @@ protected:
 
 struct GenericShape : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
-  double solidAngle(size_t index) const override { return m_detectorInfo.detector(index).solidAngle(m_samplePos); }
+  GenericShape(const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo, const std::string &method,
+               const double pixelArea, const int numberOfCylinderSlices)
+      : SolidAngleCalculator(componentInfo, detectorInfo, method, pixelArea),
+        m_numberOfCylinderSlices(numberOfCylinderSlices) {}
+  double solidAngle(size_t index) const override {
+    return m_detectorInfo.detector(index).solidAngle(Geometry::SolidAngleParams(m_samplePos, m_numberOfCylinderSlices));
+  }
+
+private:
+  int m_numberOfCylinderSlices;
 };
 
 struct Rectangle : public SolidAngleCalculator {
@@ -176,6 +185,12 @@ void SolidAngle::init() {
                                          HORIZONTAL_TUBE, VERTICAL_WING, HORIZONTAL_WING};
   declareProperty("Method", GENERIC_SHAPE, std::make_shared<StringListValidator>(methods),
                   "Select the method to calculate the Solid Angle.");
+
+  auto greaterThanTwo = std::make_shared<BoundedValidator<int>>();
+  greaterThanTwo->setLower(3);
+  declareProperty("NumberOfCylinderSlices", 10, greaterThanTwo,
+                  "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
+                  "angle of a tube detector.");
 }
 
 /** Executes the algorithm
@@ -230,9 +245,11 @@ void SolidAngle::exec() {
     }
   }
 
+  int numberOfCylinderSlices = getProperty("NumberOfCylinderSlices");
   std::unique_ptr<SolidAngleCalculator> solidAngleCalculator;
   if (method == GENERIC_SHAPE) {
-    solidAngleCalculator = std::make_unique<GenericShape>(componentInfo, detectorInfo, method, pixelArea);
+    solidAngleCalculator =
+        std::make_unique<GenericShape>(componentInfo, detectorInfo, method, pixelArea, numberOfCylinderSlices);
   } else if (method == RECTANGLE) {
     solidAngleCalculator = std::make_unique<Rectangle>(componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_TUBE || method == HORIZONTAL_TUBE) {

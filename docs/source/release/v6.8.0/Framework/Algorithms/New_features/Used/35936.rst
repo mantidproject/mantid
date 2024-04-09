@@ -1,1 +1,0 @@
-- New ouput property "OutputScalingWorkspace" in algorithm :ref:`Stitch1D <algm-Stitch1D>` generates a WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.

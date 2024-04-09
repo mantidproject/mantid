@@ -1,4 +1,4 @@
-﻿.. _interface-indirect-settings:
+﻿.. _inelastic-interface-settings:
 
 Indirect Settings
 =================
@@ -11,9 +11,6 @@ Overview
 
 Provides options which allow you to customise and save the behaviour of features on the
 Indirect interfaces.
-
-.. interface:: Settings
-  :width: 450
 
 Action Buttons
 --------------

@@ -16,13 +16,13 @@ These interfaces do not support GroupWorkspace's as input.
 
 .. interface:: Corrections
   :align: right
-  :width: 350
+  :width: 750
 
 Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for this interface.
 
 ?

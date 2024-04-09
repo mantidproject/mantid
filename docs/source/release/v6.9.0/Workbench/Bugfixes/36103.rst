@@ -1,1 +1,0 @@
-- Fixed bug where the y axis in the superplot window did not scale immediately when selecting the "Normalise by max" option.

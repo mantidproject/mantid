@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DetectorGroupingWidget</class>
+ <widget class="QWidget" name="DetectorGroupingWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>451</width>
+    <height>90</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="gbGrouping">
+     <property name="title">
+      <string>Detector Grouping</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="lbGroupingMode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Grouping:</string>
+        </property>
+        <property name="buddy">
+         <cstring>cbGroupingOptions</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbGroupingOptions">
+        <property name="toolTip">
+         <string>Select type of detector grouping to apply.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Individual</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>IPF</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>File</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Groups</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="swGrouping">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="pgMappingBlank"/>
+        <widget class="QWidget" name="pgMapFile">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="MantidQt::API::FileFinderWidget" name="dsMapFile" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>41</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="findRunFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="multipleFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="algorithmAndProperty" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.map</string>
+              <string>.xml</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingGroups">
+         <layout class="QHBoxLayout" name="horizontalLayout_26">
+          <item>
+           <widget class="QLabel" name="lbNoGroups">
+            <property name="text">
+             <string>Number of Groups: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spNumberGroups">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingCustom">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLineEdit" name="leCustomGroups">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>, allows you to specify additional indices. 1,2,4 will keep indices 1, 2 and 4 only.
+: indicates a continuous range of indices. For example, 1:5 is the same as 1,2,3,4,5.
++ sums two spectra together. 7+9 will produce a single spectra listing the sum of 7 and 9, ignoring any others.
+- sums a range of spectra together. For example, 3-8 is the same as 3+4+5+6+7+8.
+              </string>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="maxLength">
+             <number>6000</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbSaveCustomGrouping">
+            <property name="text">
+             <string>Save Grouping</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::API::FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -40,10 +40,10 @@ public:
   std::string getOutputWorkspace();
   MatrixWorkspace_sptr getRqwWorkspace();
   UserInputValidator validate(std::tuple<double, double> const qRange, std::tuple<double, double> const eRange);
-
-private:
   MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
                                                const std::string &reflection);
+
+private:
   std::string m_inputWorkspace;
   std::string m_baseName;
   double m_eFixed;

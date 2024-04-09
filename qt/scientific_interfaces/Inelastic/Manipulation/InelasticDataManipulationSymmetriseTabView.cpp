@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSymmetriseTabView.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/WorkspaceUtils.h"
 #include "InelasticDataManipulationSymmetriseTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -22,21 +24,6 @@ using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 constexpr auto NUMERICAL_PRECISION = 2;
-
-namespace {
-
-QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_PRECISION); }
-
-QPair<double, double> makeQPair(std::tuple<double, double> &axisRange) {
-  return QPair<double, double>(std::get<0>(axisRange), std::get<1>(axisRange));
-}
-
-QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
-  auto const xValues = workspace->x(0);
-  return QPair<double, double>(xValues.front(), xValues.back());
-}
-
-} // namespace
 
 using MantidQt::MantidWidgets::AxisID;
 namespace MantidQt::CustomInterfaces {
@@ -232,7 +219,7 @@ void InelasticDataManipulationSymmetriseTabView::notifyReflectTypeChanged(QtProp
 
       MatrixWorkspace_sptr sampleWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-      auto const axisRange = getXRangeFromWorkspace(sampleWS);
+      auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
 
       resetEDefaults(value == 0, axisRange);
     }
@@ -272,17 +259,17 @@ void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive,
  */
 bool InelasticDataManipulationSymmetriseTabView::verifyERange(std::string const &workspaceName) {
   MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-  auto axisRange = getXRangeFromWorkspace(sampleWS);
+  auto axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
   auto Erange = QPair(getElow(), getEhigh());
 
   bool const reflectType = m_enumManager->value(m_properties["ReflectType"]);
   if ((reflectType == 0) && (Erange.first > abs(axisRange.first))) {
     showMessageBox("Invalid Data Range: Elow is larger than the lower limit of spectrum.\nReduce Elow to " +
-                   makeNumber(abs(axisRange.first)).toStdString());
+                   InterfaceUtils::makeQStringNumber(abs(axisRange.first), NUMERICAL_PRECISION).toStdString());
     return false;
   } else if ((reflectType == 1) && (abs(Erange.second) > axisRange.second)) {
     showMessageBox("Invalid Data Range: Ehigh is larger than the upper limit of spectrum.\nIncrease Ehigh to " +
-                   makeNumber(axisRange.second).toStdString());
+                   InterfaceUtils::makeQStringNumber(axisRange.second, NUMERICAL_PRECISION).toStdString());
     return false;
   }
   return true;
@@ -325,7 +312,7 @@ void InelasticDataManipulationSymmetriseTabView::plotNewData(std::string const &
   m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
   // Set the preview range to the maximum absolute X value
-  auto const axisRange = getXRangeFromWorkspace(sampleWS);
+  auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
 
   // Set some default (and valid) values for E range
   resetEDefaults(m_enumManager->value(m_properties["ReflectType"]) == 0, axisRange);
@@ -353,13 +340,13 @@ void InelasticDataManipulationSymmetriseTabView::updateMiniPlots() {
   m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
   // Match X axis range on preview plot
-  auto const axisRange = getXRangeFromWorkspace(input);
+  auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(input);
   m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 
   // Update bounds for horizontal markers
   auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-  updateHorizontalMarkers(makeQPair(verticalRange));
+  updateHorizontalMarkers(InterfaceUtils::convertTupleToQPair(verticalRange));
 }
 
 /**

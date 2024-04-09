@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidHistogramData/BinEdges.h"
-
 #include <string>
 
 #include <boost/variant.hpp>
@@ -54,6 +54,8 @@ Mantid::API::MatrixWorkspace_sptr setWorkspaceProperties(Mantid::API::MatrixWork
                                                          int const &xLength, int const &yLength);
 Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength, int const &yLength);
 Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithIndirectInstrumentAndParameters(std::string const &analyser = "graphite");
 
 /// Simple struct used to access features of the ADS
 /// No destructor so ensure you tearDown the ADS

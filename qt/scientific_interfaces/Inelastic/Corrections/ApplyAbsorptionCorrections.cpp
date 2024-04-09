@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-
+#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -25,10 +26,6 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 
-template <typename T = MatrixWorkspace> std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -36,7 +33,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSlice));
+      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
@@ -79,7 +76,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // Get workspace
-  m_ppSampleWS = getADSWorkspace(dataName.toStdString());
+  m_ppSampleWS = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppSampleWS) {
@@ -104,7 +101,7 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // get Workspace
-  m_ppContainerWS = getADSWorkspace(dataName.toStdString());
+  m_ppContainerWS = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppContainerWS) {
@@ -186,7 +183,7 @@ void ApplyAbsorptionCorrections::run() {
   applyCorrAlg->initialize();
 
   // get Sample Workspace
-  auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
+  auto const sampleWs = WorkspaceUtils::getADSWorkspace(m_sampleWorkspaceName);
   absCorProps->setProperty("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -201,7 +198,7 @@ void ApplyAbsorptionCorrections::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    canClone = getADSWorkspace(cloneName);
+    canClone = WorkspaceUtils::getADSWorkspace(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
       const char *text = "Binning on sample and container does not match."
@@ -306,7 +303,7 @@ void ApplyAbsorptionCorrections::run() {
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
     auto const canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
-    auto const containerWs = getADSWorkspace(canName);
+    auto const containerWs = WorkspaceUtils::getADSWorkspace(canName);
     auto logs = containerWs->run();
     if (logs.hasProperty("run_number")) {
       outputWsName += "_" + QString::fromStdString(logs.getProperty("run_number")->value());
@@ -440,7 +437,7 @@ bool ApplyAbsorptionCorrections::validate() {
     // Check sample has the same number of Histograms as each of the workspaces in the corrections group
     m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
     if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {
-      m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+      m_ppCorrectionsGp = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
       for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
         MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
 
@@ -472,12 +469,15 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ApplyCorrections");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsCorrections->setFBSuffixes(filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsCorrections->setWSSuffixes(filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
+                                          : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? InterfaceUtils::getContainerFBSuffixes(tabName)
+                                             : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? InterfaceUtils::getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsCorrections->setFBSuffixes(filter ? InterfaceUtils::getCorrectionsFBSuffixes(tabName)
+                                               : InterfaceUtils::getExtensions(tabName));
+  m_uiForm.dsCorrections->setWSSuffixes(filter ? InterfaceUtils::getCorrectionsWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

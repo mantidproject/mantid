@@ -299,6 +299,14 @@ To select the projection type (surface type), use:
                               # 4: SPHERICAL_X,   5: SPHERICAL_Y,   6: SPHERICAL_Z,
                               # 7: SideBySide
 
+To change the option to maintain aspect ratio, use:
+
+.. code-block:: python
+
+   myiv.set_maintain_aspect_ratio(False)
+
+Please note that this command is ignored when the surface type is set to 0 (Full 3D).
+
 To switch to a different viewing axis, use:
 
 .. code-block:: python

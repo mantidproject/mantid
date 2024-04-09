@@ -58,6 +58,8 @@ QIcon showSliceViewerIcon() { return MantidQt::Icons::getIcon("mdi.chart-scatter
 
 QIcon plotTiledIcon() { return MantidQt::Icons::getIcon("mdi.chart-line-stacked"); }
 
+QIcon plot3DIcon() { return MantidQt::Icons::getIcon("mdi.panorama"); }
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -128,6 +130,11 @@ void OutputPlotOptionsView::notifyShowSliceViewerClicked() {
   m_presenter->handleShowSliceViewerClicked();
 }
 
+void OutputPlotOptionsView::notifyPlot3DClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->handlePlot3DClicked();
+}
+
 void OutputPlotOptionsView::notifyPlotTiledClicked() {
   notifySelectedIndicesChanged();
   m_presenter->handlePlotTiledClicked();
@@ -145,11 +152,14 @@ void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
   showSliceViewerAction->setIcon(showSliceViewerIcon());
   auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
+  auto plot3DAction = new QAction(getAction(availableActions, "Plot 3D Surface"), this);
+  plot3DAction->setIcon(plot3DIcon());
 
   connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
   connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
   connect(showSliceViewerAction, SIGNAL(triggered()), this, SLOT(notifyShowSliceViewerClicked()));
   connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(notifyPlotTiledClicked()));
+  connect(plot3DAction, SIGNAL(triggered()), this, SLOT(notifyPlot3DClicked()));
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
@@ -165,10 +175,11 @@ void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotBinAction);
     break;
-  case PlotWidget::SpectraSlice:
+  case PlotWidget::SpectraSliceSurface:
     m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(showSliceViewerAction);
+    plotMenu->addAction(plot3DAction);
     break;
   case PlotWidget::SpectraTiled:
     m_plotOptions->pbPlotSpectra->setVisible(false);
@@ -179,15 +190,16 @@ void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
     m_plotOptions->tbPlot->setVisible(false);
     m_plotOptions->cbPlotUnit->setVisible(true);
     break;
-  case PlotWidget::SpectraSliceUnit:
+  case PlotWidget::SpectraSliceSurfaceUnit:
     m_plotOptions->pbPlotSpectra->setVisible(false);
     m_plotOptions->cbPlotUnit->setVisible(true);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(showSliceViewerAction);
+    plotMenu->addAction(plot3DAction);
     break;
   default:
     throw std::runtime_error("Plot option not found. Plot types are Spectra, "
-                             "SpectraSliced or SpectraTiled.");
+                             "SpectraBin, SpectraSliceSurface or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);

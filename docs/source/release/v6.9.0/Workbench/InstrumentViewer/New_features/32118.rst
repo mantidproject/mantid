@@ -1,1 +1,0 @@
-- Widgets in the collapsible stack in the pick tab are now resizable so users can change the height of the plot relative to the height of the info box.

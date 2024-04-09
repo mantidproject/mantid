@@ -9,7 +9,6 @@ set(TEST_PY_FILES
     CombGaussLorentzKTTest.py
     DampedBesselTest.py
     CompositePCRmagnetTest.py
-    DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
@@ -41,6 +40,7 @@ set(TEST_PY_FILES
     StretchedExpFTTest.py
     StretchedKTTest.py
     TeixeiraWaterTest.py
+    TeixeiraWaterIqtTest.py
     TFMuoniumTest.py
     ZFprotonDipoleTest.py
     ZFdipoleTest.py

@@ -159,6 +159,13 @@ class MantidAxes(Axes):
         ax.remove()
         return mantid_axes
 
+    def set_title(self, label, fontdict=None, *args, **kwargs):
+        if not fontdict:
+            font_props = self.title.get_fontproperties()
+            fontdict = {"fontsize": font_props.get_size(), "fontweight": font_props.get_weight(), "color": self.title.get_color()}
+
+        super().set_title(label, fontdict=fontdict, *args, **kwargs)
+
     @staticmethod
     def is_axis_of_type(axis_type, kwargs):
         if kwargs.get("axis", None) is not None:

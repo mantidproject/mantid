@@ -78,6 +78,7 @@ public:
   MOCK_METHOD1(plotBins, void(std::string const &binIndices));
   MOCK_METHOD0(showSliceViewer, void());
   MOCK_METHOD0(plotTiled, void());
+  MOCK_METHOD0(plot3DSurface, void());
 };
 
 class MockSettingsView : public ISettingsView {

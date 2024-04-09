@@ -11,7 +11,7 @@ import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso
-from orsopy.fileio.base import Column, ErrorColumn
+from orsopy.fileio.base import Column, ErrorColumn, File
 
 from mantid.kernel import version
 from enum import Enum
@@ -69,6 +69,21 @@ class MantidORSODataset:
 
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
+
+    def set_reduction_call(self, call: str) -> None:
+        self._header.reduction.call = call
+
+    def add_measurement_data_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        self._header.data_source.measurement.data_files.append(self._create_file(filename, timestamp, comment))
+
+    def add_measurement_additional_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        if self._header.data_source.measurement.additional_files is None:
+            self._header.data_source.measurement.additional_files = []
+        self._header.data_source.measurement.additional_files.append(self._create_file(filename, timestamp, comment))
+
+    @staticmethod
+    def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
+        return File(filename, timestamp, comment)
 
     def _create_mandatory_header(
         self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str
@@ -155,8 +170,8 @@ class MantidORSODataColumns:
         reflectivity_error: Optional[np.ndarray] = None,
         q_resolution: Optional[np.ndarray] = None,
         q_unit: Unit = Unit.Angstrom,
-        r_error_value_is: ErrorValue = ErrorValue.Sigma,
-        q_error_value_is: ErrorValue = ErrorValue.Sigma,
+        r_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
+        q_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
     ):
         self._header_info = []
         self._data = []
@@ -197,8 +212,10 @@ class MantidORSODataColumns:
         self._header_info.append(Column(name=name, unit=unit, physical_quantity=physical_quantity))
         self._data.append(data)
 
-    def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray) -> None:
-        self._header_info.append(ErrorColumn(error_of=error_of, error_type=error_type.value, value_is=value_is.value))
+    def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: Optional[ErrorValue], data: np.ndarray) -> None:
+        self._header_info.append(
+            ErrorColumn(error_of=error_of, error_type=error_type.value, value_is=None if value_is is None else value_is.value)
+        )
         self._data.append(data)
 
     def _ensure_recommended_columns_are_present(self, data: np.ndarray) -> None:

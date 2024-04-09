@@ -186,8 +186,8 @@ void UnwrapSNS::execEvent() {
     if (spectrumInfo.hasDetectors(workspaceIndex))
       Ld = L1 + spectrumInfo.l2(workspaceIndex);
 
-    std::vector<double> time_bins;
     if (outW->x(0).size() > 2) {
+      std::vector<double> time_bins;
       this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
       outW->setBinEdges(workspaceIndex, std::move(time_bins));
     } else {
