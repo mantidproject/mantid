@@ -474,8 +474,18 @@ void LoadBankFromDiskTask::run() {
         std::minmax_element(event_time_of_flight_shrd->cbegin(), event_time_of_flight_shrd->cend());
 
     const bool log_compression = (m_loader.alg->compressTolerance < 0);
-    // fixup the minimum tof for log binning since it cannot be <= 0
+
+    // reduce tof range if filtering was requested
     auto tof_min_fixed = *tof_min;
+    auto tof_max_fixed = *tof_max;
+    if (m_loader.alg->filter_tof_range) {
+      if (m_loader.alg->filter_tof_max != EMPTY_DBL())
+        tof_max_fixed = std::min<float>(tof_max_fixed, static_cast<float>(m_loader.alg->filter_tof_max));
+      if (m_loader.alg->filter_tof_min != EMPTY_DBL())
+        tof_min_fixed = std::max<float>(tof_min_fixed, static_cast<float>(m_loader.alg->filter_tof_min));
+    }
+
+    // fixup the minimum tof for log binning since it cannot be <= 0
     if (log_compression && tof_min_fixed <= 0.) {
       tof_min_fixed = std::abs(static_cast<float>(m_loader.alg->compressTolerance));
     }
@@ -487,8 +497,8 @@ void LoadBankFromDiskTask::run() {
       if (tof_min_fixed < m_loader.alg->shortest_tof) {
         m_loader.alg->shortest_tof = tof_min_fixed;
       }
-      if (*tof_max > m_loader.alg->longest_tof) {
-        m_loader.alg->longest_tof = *tof_max;
+      if (tof_max_fixed > m_loader.alg->longest_tof) {
+        m_loader.alg->longest_tof = tof_max_fixed;
       }
       // TODO
       // m_loader.alg->bad_tofs += badTofs;
@@ -500,7 +510,7 @@ void LoadBankFromDiskTask::run() {
 
     // make a vector of logorithmic bins
     auto histogram_bin_edges = std::make_shared<std::vector<double>>();
-    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({tof_min_fixed, delta, (*tof_max + std::abs(delta))},
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({tof_min_fixed, delta, (tof_max_fixed + std::abs(delta))},
                                                             *histogram_bin_edges);
 
     // create the tasks
