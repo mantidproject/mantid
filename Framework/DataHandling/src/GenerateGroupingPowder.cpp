@@ -285,8 +285,14 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 
-  auto groupWS = std::make_shared<GroupingWorkspace>(inst);
-  this->setProperty("GroupingWorkspace", groupWS);
+  GroupingWorkspace_sptr groupWS;
+  if (isDefault("GroupingWorkspace")) {
+    groupWS = std::make_shared<GroupingWorkspace>(inst);
+    this->setProperty("GroupingWorkspace", groupWS);
+  } else {
+    groupWS = getProperty("GroupingWorkspace");
+    this->setProperty("GroupingWorkspace", groupWS);
+  }
 
   const double step = getProperty("AngleStep");
 
