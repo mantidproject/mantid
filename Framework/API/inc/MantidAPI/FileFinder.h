@@ -36,6 +36,7 @@ number
 class MANTID_API_DLL FileFinderImpl {
 public:
   std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
+  std::string extractAllowedSuffix(std::string &userString) const;
   const API::Result<std::string> getPath(const std::vector<IArchiveSearch_sptr> &archs,
                                          const std::set<std::string> &filenames,
                                          const std::vector<std::string> &exts) const;
@@ -53,7 +54,7 @@ public:
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename, const std::vector<std::string> &exts) const;
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
-  std::string extractAllowedSuffix(std::string &userString) const;
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
@@ -68,7 +69,9 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
-  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
+  const API::Result<std::string> getDataCachePath(const std::string &cachePathToSearch,
+                                                  const std::set<std::string> &filenames,
+                                                  const std::vector<std::string> &exts) const;
   const API::Result<std::string> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                                 const std::set<std::string> &filenames,
                                                 const std::vector<std::string> &exts) const;

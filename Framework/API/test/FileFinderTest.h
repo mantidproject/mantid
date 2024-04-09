@@ -16,6 +16,7 @@
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <stdio.h>
 
@@ -102,6 +103,7 @@ public:
     fil.close();
 
     ConfigService::Instance().updateFacilities(m_facFile.path());
+    ConfigService::Instance().setString("datacachesearch.directory", "");
   }
 
   ~FileFinderTest() override { m_facFile.remove(); }
@@ -465,6 +467,11 @@ private:
 
 class FileFinderTestPerformance : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    // TODO: temporary fix
+    Mantid::Kernel::ConfigService::Instance().setString("datacachesearch.directory", "");
+    Mantid::Kernel::ConfigService::Instance().setLogLevel("debug");
+  }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FileFinderTestPerformance *createSuite() { return new FileFinderTestPerformance(); }
@@ -500,6 +507,9 @@ public:
         }
       }
     }
+
+    // Set bad cache directory so it gets skipped
+    ConfigService::Instance().setString("datacachesearch.directory", "");
 
     // Set TOSCA as default instrument.
     Mantid::Kernel::ConfigService::Instance().setString("default.instrument", "TSC");
@@ -610,4 +620,102 @@ private:
   size_t m_filesInDir;
   // Number of files to find.
   size_t m_filesToFind;
+};
+
+class DataCacheTest : public CxxTest::TestSuite {
+private:
+  std::set<std::string> m_filesToCreate;
+  std::string m_dataCacheDir;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DataCacheTest *createSuite() { return new DataCacheTest(); }
+  static void destroySuite(DataCacheTest *suite) { delete suite; }
+
+  DataCacheTest()
+      : // The constructor will create a temporary directory that mimicks the data cache structure and
+        // populate it with the files defined here
+        m_filesToCreate(
+            {"MER40871.nxs", "MAR26045.raw", "WISH39495.s01", "LOQ106084.nxs", "LARMOR26462.nxs", "ZOOM4656.RAW"}),
+        m_dataCacheDir("_DataCacheTestDummyData") {
+    Mantid::Kernel::ConfigService::Instance().setString("datacachesearch.directory", m_dataCacheDir);
+    Mantid::Kernel::ConfigService::Instance().setLogLevel("debug");
+
+    for (auto filename : m_filesToCreate) {
+      // Extract extension
+      auto it = filename.find('.');
+      std::string ext = filename.substr(it);
+      filename = filename.substr(0, it);
+
+      // Extract instr and run number
+      auto instrRunPair = FileFinder::Instance().toInstrumentAndNumber(filename);
+
+      // Set up instrument directories and subdirectories
+      auto instr = FileFinder::Instance().getInstrument(instrRunPair.first);
+      std::string instrName = instr.name();
+      std::filesystem::path instrDir(m_dataCacheDir + '/' + instrName);
+      std::string subDir = "SUBDIR1/SUBDIR2";
+      std::filesystem::path instrSubDir(instrDir.string() + '/' + subDir);
+      std::filesystem::create_directories(instrSubDir);
+
+      // Create empty file with correct name
+      std::string fileToCreateName = FileFinder::Instance().makeFileName(filename, instr);
+      std::string fileToCreateStr = instrSubDir.string() + '/' + fileToCreateName + ext;
+      std::ofstream file{fileToCreateStr};
+      TS_ASSERT(file);
+      file.close();
+
+      std::string runNumber = instrRunPair.second;
+      runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
+
+      // Create index json file
+      std::string jsonStr = "{\"" + runNumber + "\": " + "\"" + subDir + "\"}";
+      std::string jsonFilePath = instrDir.string() + '/' + instrName + "_index.json";
+      std::ofstream jsonFile{jsonFilePath};
+      TS_ASSERT(jsonFile);
+      jsonFile << jsonStr;
+      jsonFile.close();
+    }
+  }
+
+  ~DataCacheTest() override {
+    // Destroy dummy folder and files.
+    std::filesystem::remove_all(m_dataCacheDir);
+  }
+
+public:
+  void testNormalInput() {
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
+  }
+
+  void testMissingInstr() {
+    ConfigService::Instance().setString("default.instrument", "MAR");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"26045"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
+
+    ConfigService::Instance().setString("default.instrument", "MER");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"40871"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
+  }
+
+  void testZeroPadding() {
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"WISH39495"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/WISH/SUBDIR1/SUBDIR2/WISH00039495.s01");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"LOQ106084"}, {".raw", ".nxs"}).result(),
+                     m_dataCacheDir + "/LOQ/SUBDIR1/SUBDIR2/LOQ00106084.nxs");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"ZOOM4656"}, {".RAW"}).result(),
+                     m_dataCacheDir + "/ZOOM/SUBDIR1/SUBDIR2/ZOOM00004656.RAW");
+  }
+
+  void testDataCacheSkipped() {
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result(), "");
+  }
 };

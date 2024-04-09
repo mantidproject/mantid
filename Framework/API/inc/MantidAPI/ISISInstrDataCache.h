@@ -21,7 +21,7 @@ namespace API {
 class MANTID_API_DLL ISISInstrDataCache {
 public:
   ISISInstrDataCache(std::string path) : m_dataCachePath(path){};
-  std::string getInstrFilePath(std::string filename);
+  std::string getFileParentDirPath(std::string filename);
 
 private:
   std::string m_dataCachePath;

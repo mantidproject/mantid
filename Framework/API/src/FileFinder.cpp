@@ -257,7 +257,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * too long
  */
 std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const {
-  g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName() << ")\n";
   if (hint.empty())
     return "";
 
@@ -287,7 +286,7 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename += suffix;
   }
 
-  g_log.notice() << "makeFileName(" << hint << ", " << instrument.shortName() << ") = " << filename;
+  g_log.notice() << "makeFileName(" << hint << ", " << instrument.shortName() << ") = " << filename << ")\n";
   return filename;
 }
 
@@ -648,6 +647,31 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   return res;
 }
 
+const API::Result<std::string> FileFinderImpl::getDataCachePath(const std::string &cachePathToSearch,
+                                                                const std::set<std::string> &filenames,
+                                                                const std::vector<std::string> &exts) const {
+  auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
+
+  for (const auto &filename : filenames) {
+    std::string parentDirPath = dataCache.getFileParentDirPath(filename);
+    g_log.notice() << "Looking for file in instrument directory " << parentDirPath << std::endl;
+
+    if (!parentDirPath.empty()) {
+
+      for (const auto &ext : exts) {
+        std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
+
+        if (std::filesystem::exists(filePath)) {
+          g_log.notice() << "Found file " << filePath << std::endl;
+          return API::Result<std::string>(filePath.string());
+        }
+      }
+      g_log.notice() << "Could not find matching extension for filename " << filename << std::endl;
+    }
+  }
+  return API::Result<std::string>("", "File not found in Data Cache.");
+}
+
 /**
  * Return the path to the file found in archive
  * @param archs :: A list of archives to search
@@ -708,35 +732,6 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
 
   const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
 
-  // Implementation to search data cache
-  // Currently hard coded to ~/data/instrument for testing on Linux
-  std::string dataCachePath = Poco::Path::home() + "data/instrument";
-  g_log.notice() << "Looking for data cache in" << dataCachePath << "\n";
-  if (std::filesystem::exists(dataCachePath)) {
-    g_log.notice() << "Data cache found!\n";
-
-    auto dataCache = API::ISISInstrDataCache(dataCachePath);
-
-    for (const auto &filename : filenames) {
-      g_log.notice() << "Looking for filename " << filename << "\n";
-      std::string dirPath = dataCache.getInstrFilePath(filename);
-      if (!dirPath.empty()) {
-
-        for (const auto &ext : extensions) {
-          const Poco::Path filePath(dirPath, filename + ext);
-          const Poco::File file(filePath);
-
-          g_log.notice() << "Looking for file" << filePath.toString() << "\n";
-
-          if (file.exists()) {
-            return API::Result<std::string>(filePath.toString());
-          }
-        }
-      }
-      g_log.notice() << "Could not find filename " << filename << "\n";
-    }
-  }
-
   // Before we try any globbing, make sure we exhaust all reasonable attempts at
   // constructing the possible filename.
   // Avoiding the globbing of getFullPath() for as long as possible will help
@@ -773,8 +768,24 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     }
   }
 
-  // Search the archive
+  // Implementation to search data cache
   string errors = "";
+  std::filesystem::path cachePathToSearch(
+      Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  if (std::filesystem::exists(cachePathToSearch)) {
+
+    API::Result<std::string> cacheFilePath = getDataCachePath(cachePathToSearch.string(), filenames, exts);
+
+    if (!cacheFilePath) {
+      errors += cacheFilePath.errors();
+    } else {
+      return cacheFilePath;
+    }
+  } else {
+    g_log.notice() << "Data cache directory " << cachePathToSearch << " was not found.\n";
+  }
+
+  // Search the archive
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
     const auto archivePath = getArchivePath(archs, filenames, exts);

@@ -17,11 +17,13 @@ namespace {
 Mantid::Kernel::Logger g_log("ISISInstrDataCache");
 } // namespace
 
-std::string Mantid::API::ISISInstrDataCache::getInstrFilePath(std::string fileName) {
+std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fileName) {
+  g_log.notice() << "ISISInstrDataCache::getFileParentDirPath(" << fileName << ")";
 
+  // Check if suffix eg. -add is present in filename
   std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
   if (!suffix.empty()) {
-    g_log.notice() << "Suffix detected, skipping data cache search ...";
+    g_log.debug() << "Suffix detected, skipping data cache search ...";
     return "";
   }
 
@@ -31,28 +33,30 @@ std::string Mantid::API::ISISInstrDataCache::getInstrFilePath(std::string fileNa
 
   // Check run number
   std::string runNumber = fileName.substr(nChars);
-  if (!std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check for wrong format
-    g_log.notice() << "Filename not in correct format, skipping data cache search ...";
+  if (runNumber.empty() || !std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check for wrong format
+    g_log.debug() << "Filename not in correct format, skipping data cache search ...";
     return "";
   };
   runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
 
   // Get instrument full name from short name
+  std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
   std::string instrName = fileName.substr(0, nChars);
   try {
     auto instrInfo = Kernel::ConfigService::Instance().getInstrument(instrName);
     instrName = instrInfo.name();
   } catch (const Kernel::Exception::NotFoundError &) {
-    g_log.notice() << "Instrument name not recognized, skipping data cache search ...";
+    g_log.debug() << "Instrument name not recognized, skipping data cache search ...";
     return "";
   }
 
   // Build path to index file
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
+  g_log.notice() << "Opening index file " << jsonPath;
   std::ifstream ifstrm{jsonPath};
   if (!ifstrm) {
+    g_log.notice() << "Error opennig index file at " << jsonPath << std::endl;
     return "";
-    g_log.notice() << "Error opennig file at " << jsonPath;
   }
 
   // Read directory path from json file

@@ -54,38 +54,38 @@ public:
 
   void testInstrNameExpanded() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("MAR25054");
+    std::string actualPath = dc.getFileParentDirPath("MAR25054");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MARI/2019/RB1868000-1");
   }
 
   void testCorrectInstrRunSplit() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("SANS2D101115");
+    std::string actualPath = dc.getFileParentDirPath("SANS2D101115");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/SANS2D/2018/RB1800009-2");
   }
 
   void testInstrWithDelimiter() {
     // Checks short name + delimiter gets correctly identified
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("PG3_11111");
+    std::string actualPath = dc.getFileParentDirPath("PG3_11111");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/POWGEN/mock/path");
   }
 
   void testInstrWithSuffix() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("LOQ11111-add");
+    std::string actualPath = dc.getFileParentDirPath("LOQ11111-add");
     TS_ASSERT_EQUALS(actualPath, "");
   }
 
   void testBadInput() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("s0me_us$r_dEfined_n4me");
+    std::string actualPath = dc.getFileParentDirPath("s0me_us$r_dEfined_n4me");
     TS_ASSERT_EQUALS(actualPath, "");
   }
 
   void testBadInstrument() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getInstrFilePath("MARO111111");
+    std::string actualPath = dc.getFileParentDirPath("MARO111111");
     TS_ASSERT_EQUALS(actualPath, "");
   }
 
