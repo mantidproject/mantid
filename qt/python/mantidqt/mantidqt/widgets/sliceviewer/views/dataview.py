@@ -19,6 +19,7 @@ from qtpy.QtWidgets import (
     QStatusBar,
     QToolButton,
     QSizePolicy,
+    QDoubleSpinBox,
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
@@ -153,6 +154,29 @@ class SliceViewerDataView(QWidget):
         self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
+        # min/max extents
+        self.extents = QHBoxLayout()
+        self.x_min = QDoubleSpinBox()
+        self.x_min.setRange(-DBLMAX, DBLMAX)
+        self.x_min.valueChanged.connect(self.update_xlim)
+        self.x_max = QDoubleSpinBox()
+        self.x_max.setRange(-DBLMAX, DBLMAX)
+        self.x_max.valueChanged.connect(self.update_xlim)
+        self.y_min = QDoubleSpinBox()
+        self.y_min.setRange(-DBLMAX, DBLMAX)
+        self.y_min.valueChanged.connect(self.update_ylim)
+        self.y_max = QDoubleSpinBox()
+        self.y_max.setRange(-DBLMAX, DBLMAX)
+        self.y_max.valueChanged.connect(self.update_ylim)
+        self.extents.addWidget(QLabel("X min:"))
+        self.extents.addWidget(self.x_min)
+        self.extents.addWidget(QLabel("X max:"))
+        self.extents.addWidget(self.x_max)
+        self.extents.addWidget(QLabel("Y min:"))
+        self.extents.addWidget(self.y_min)
+        self.extents.addWidget(QLabel("Y max:"))
+        self.extents.addWidget(self.y_max)
+
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
@@ -161,6 +185,7 @@ class SliceViewerDataView(QWidget):
         layout.addLayout(self.colorbar_layout, 1, 1, 3, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
+        layout.addLayout(self.extents, 5, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
     def create_dimensions(self, dims_info, custom_image_info=False):
@@ -199,6 +224,9 @@ class SliceViewerDataView(QWidget):
 
         self.plot_MDH = self.plot_MDH_orthogonal
         self.set_integer_axes_ticks()
+
+        self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+        self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
 
         self.canvas.draw_idle()
 
@@ -520,6 +548,32 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
+
+    def xlim_changed(self, ax):
+        x_min, x_max = ax.get_xlim()
+        self.x_min.blockSignals(True)
+        self.x_min.setValue(x_min)
+        self.x_min.blockSignals(False)
+        self.x_max.blockSignals(True)
+        self.x_max.setValue(x_max)
+        self.x_max.blockSignals(False)
+
+    def update_xlim(self, _):
+        self.ax.set_xlim(self.x_min.value(), self.x_max.value(), emit=False)
+        self.on_data_limits_changed()
+
+    def ylim_changed(self, ax):
+        y_min, y_max = ax.get_ylim()
+        self.y_min.blockSignals(True)
+        self.y_min.setValue(y_min)
+        self.y_min.blockSignals(False)
+        self.y_max.blockSignals(True)
+        self.y_max.setValue(y_max)
+        self.y_max.blockSignals(False)
+
+    def update_ylim(self, _):
+        self.ax.set_ylim(self.y_min.value(), self.y_max.value(), emit=False)
+        self.on_data_limits_changed()
 
     def set_integer_axes_ticks(self):
         """
