@@ -120,7 +120,7 @@ are complete, it is time to release the patch by performing the following tasks:
 *  Build the release candidates by following the instructions to :ref:`technical-release-manager-release-candidates`.
 *  After the release candidates have built successfully, ask the development team perform unscripted testing,
    with a focus on the areas that were modified for the patch release.
-*  When you are happy with the quality of the release candidates, follow the all of the
+*  When you are happy with the quality of the release candidates, follow all of the
    :ref:`technical-release-manager-release-day` instructions to publish the packages.
 *  Once packages are published, the Project Manager must announce the patch release by following the
    :ref:`release-manager-announcements` instructions.
