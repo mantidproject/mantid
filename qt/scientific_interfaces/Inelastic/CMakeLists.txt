@@ -4,11 +4,11 @@ set(ALL_INC_FILES DllConfig.h PrecompiledHeader.h)
 set(ALL_UI_FILES)
 set(ALL_RES_FILES Common/InterfaceResources.qrc)
 
-add_subdirectory(Analysis)
 add_subdirectory(BayesFitting)
 add_subdirectory(Common)
 add_subdirectory(Corrections)
 add_subdirectory(Manipulation)
+add_subdirectory(QENSFitting)
 
 # XML is required to parse the settings file
 find_package(

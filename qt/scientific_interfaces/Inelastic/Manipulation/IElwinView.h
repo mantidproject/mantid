@@ -7,9 +7,12 @@
 #pragma once
 
 #include "DllConfig.h"
+
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
+
 #include <QModelIndexList>
 #include <QStringList>
 

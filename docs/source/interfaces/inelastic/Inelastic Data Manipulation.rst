@@ -12,7 +12,7 @@ Overview
 The Inelastic Data Manipulation interface provides Processes for manipulating
 reduced data from, for example, :ref:`Indirect Data Reduction <interface-indirect-data-reduction>`
 and Direct Reduction routines or S(Q, w). The output data can then be used for analysis by
-processes in, for example, the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and
+processes in, for example, the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` and
 :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interfaces.
 
 .. interface:: Data Manipulation

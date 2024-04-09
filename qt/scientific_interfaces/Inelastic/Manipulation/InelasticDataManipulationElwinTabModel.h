@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FitDataModel.h"
 #include "Common/IndirectDataValidationHelper.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "QENSFitting/FitDataModel.h"
 #include <typeinfo>
 
 using namespace Mantid::API;
