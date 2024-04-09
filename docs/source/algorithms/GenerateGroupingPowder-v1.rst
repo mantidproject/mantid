@@ -108,8 +108,6 @@ Similarly, without specifying the optional *GroupingWorkspace* property:
     #load some file
     ws=Load("CNCS_7860")
 
-    print("test")
-
     #generate the files
     GenerateGroupingPowder(ws,10,outputFilename)
 
