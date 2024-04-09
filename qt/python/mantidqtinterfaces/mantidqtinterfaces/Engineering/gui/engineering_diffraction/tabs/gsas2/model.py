@@ -66,6 +66,7 @@ class GSAS2Model(object):
         self.limits = None
         self.override_cell_length_string = None
         self.mantid_pawley_reflections = None
+        self.crystal_structures = None
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
@@ -101,17 +102,20 @@ class GSAS2Model(object):
         self.limits = None
         self.override_cell_length_string = None
         self.mantid_pawley_reflections = None
+        self.crystal_structures = None
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
         self.phase_names_list = None
 
-    def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_limits):
+    def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_x_limits):
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
             return None
         self.set_components_from_inputs(load_parameters, refinement_parameters, project_name, rb_num)
-        self.evaluate_further_inputs(user_limits)
+        self.read_phase_files()
+        self.generate_reflections_from_space_group()
+        self.validate_x_limits(user_x_limits)
         if not self.further_validation():
             return None
 
@@ -155,21 +159,6 @@ class GSAS2Model(object):
         self.refine_background = True
         self.refine_unit_cell = True
         self.refine_histogram_scale_factor = True  # True by default
-
-    def evaluate_further_inputs(self, user_x_limits):
-        if not self.loop_phase_files() or not self.validate_x_limits(user_x_limits):
-            return None
-        return True
-
-    def loop_phase_files(self):
-        self.mantid_pawley_reflections = []
-        for loop_phase_filepath in self.phase_filepaths:
-            if self.refinement_method == "Pawley":
-                generated_reflections = self.generate_reflections_from_space_group(loop_phase_filepath)
-                if not generated_reflections:
-                    return None
-                self.mantid_pawley_reflections.extend(generated_reflections)
-        return True
 
     # ===========
     # Validation
@@ -226,7 +215,7 @@ class GSAS2Model(object):
             instrument_files=self.instrument_files,
             limits=self.limits,
             mantid_pawley_reflections=self.mantid_pawley_reflections,
-            override_cell_lengths=None,  # atm these cell lengths would be used for all phases
+            override_cell_lengths=self.get_override_lattice_parameters(),
             refine_unit_cell=self.refine_unit_cell,
             d_spacing_min=self.dSpacing_min,
             number_of_regions=self.number_of_regions,
@@ -372,6 +361,23 @@ class GSAS2Model(object):
         )
         return generated_reflections
 
+    def read_phase_files(self):
+        self.crystal_structures = []
+        for phase_filepath in self.phase_filepaths:
+            self.crystal_structures.append(self._read_cif_file(phase_filepath))
+        if self.override_cell_length_string:
+            # override lattice parameters of first file
+            self.crystal_structures[0] = self.set_lattice_params_from_user_input(self.crystal_structures[0])
+
+    def get_override_lattice_parameters(self):
+        if self.override_cell_length_string:
+            return [self._get_lattice_parameters_from_crystal_structure(xtal) for xtal in self.crystal_structures]
+        else:
+            None
+
+    def _get_lattice_parameters_from_crystal_structure(self, crystal_structure):
+        return [getattr(crystal_structure.getUnitCell(), method)() for method in ("a", "b", "c", "alpha", "beta", "gamma")]
+
     def _read_cif_file(self, phase_filepath):
         ws = CreateSampleWorkspace(StoreInADS=False)
         LoadCIF(ws, phase_filepath, StoreInADS=False)  # error if not StoreInADS=False even though no output
@@ -379,7 +385,7 @@ class GSAS2Model(object):
 
     def set_lattice_params_from_user_input(self, crystal_structure):
         # user can delimit with , or whitespace
-        user_alatt = [param for param in self.override_cell_length_strings.replace(",", " ").split()]
+        user_alatt = [param for param in self.override_cell_length_string.replace(",", " ").split()]
         if len(user_alatt) == 1:
             user_alatt = 3 * user_alatt  # assume cubic
         crystal_structure = CrystalStructure(
@@ -387,11 +393,11 @@ class GSAS2Model(object):
         )
         return crystal_structure
 
-    def generate_reflections_from_space_group(self, phase_filepath):
-        crystal_structure = self._read_cif_file(phase_filepath)
-        if self.override_cell_length_string:
-            self.set_lattice_params_from_user_input(crystal_structure)
-        return self.create_pawley_reflections(crystal_structure)
+    def generate_reflections_from_space_group(self):
+        self.mantid_pawley_reflections = []
+        for crystal_structure in self.crystal_structures:
+            self.mantid_pawley_reflections.append(self.create_pawley_reflections(crystal_structure))
+        return
 
     # =========
     # X Limits
