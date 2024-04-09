@@ -155,37 +155,17 @@ class SliceViewerDataView(QWidget):
         self.status_bar.addWidget(self.status_bar_label)
 
         # min/max extents
-        self.extents = QHBoxLayout()
-        self.x_min = QDoubleSpinBox()
-        self.x_min.setRange(-DBLMAX, DBLMAX)
-        self.x_min.valueChanged.connect(self.update_xlim)
-        self.x_max = QDoubleSpinBox()
-        self.x_max.setRange(-DBLMAX, DBLMAX)
-        self.x_max.valueChanged.connect(self.update_xlim)
-        self.y_min = QDoubleSpinBox()
-        self.y_min.setRange(-DBLMAX, DBLMAX)
-        self.y_min.valueChanged.connect(self.update_ylim)
-        self.y_max = QDoubleSpinBox()
-        self.y_max.setRange(-DBLMAX, DBLMAX)
-        self.y_max.valueChanged.connect(self.update_ylim)
-        self.extents.addWidget(QLabel("X min:"))
-        self.extents.addWidget(self.x_min)
-        self.extents.addWidget(QLabel("X max:"))
-        self.extents.addWidget(self.x_max)
-        self.extents.addWidget(QLabel("Y min:"))
-        self.extents.addWidget(self.y_min)
-        self.extents.addWidget(QLabel("Y max:"))
-        self.extents.addWidget(self.y_max)
+        self.extents = self.create_extents_layout()
 
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
         layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
         layout.addLayout(self.toolbar_layout, 1, 0, 1, 1)
-        layout.addLayout(self.colorbar_layout, 1, 1, 3, 1)
+        layout.addLayout(self.colorbar_layout, 1, 1, 4, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
-        layout.addWidget(self.status_bar, 3, 0, 1, 1)
-        layout.addLayout(self.extents, 5, 0, 1, 1)
+        layout.addLayout(self.extents, 3, 0, 1, 1)
+        layout.addWidget(self.status_bar, 4, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
     def create_dimensions(self, dims_info, custom_image_info=False):
@@ -574,6 +554,50 @@ class SliceViewerDataView(QWidget):
     def update_ylim(self, _):
         self.ax.set_ylim(self.y_min.value(), self.y_max.value(), emit=False)
         self.on_data_limits_changed()
+
+    def create_extents_layout(self):
+        self.x_min = QDoubleSpinBox()
+        self.x_min.setRange(-DBLMAX, DBLMAX)
+        self.x_min.setMaximumWidth(100)
+        self.x_min.valueChanged.connect(self.update_xlim)
+
+        self.x_max = QDoubleSpinBox()
+        self.x_max.setRange(-DBLMAX, DBLMAX)
+        self.x_max.setMaximumWidth(100)
+        self.x_max.valueChanged.connect(self.update_xlim)
+
+        self.y_min = QDoubleSpinBox()
+        self.y_min.setRange(-DBLMAX, DBLMAX)
+        self.y_min.setMaximumWidth(100)
+        self.y_min.valueChanged.connect(self.update_ylim)
+
+        self.y_max = QDoubleSpinBox()
+        self.y_max.setRange(-DBLMAX, DBLMAX)
+        self.y_max.setMaximumWidth(100)
+        self.y_max.valueChanged.connect(self.update_ylim)
+
+        extents = QHBoxLayout()
+        extents.addStretch(1)
+        extents.addWidget(QLabel("X min:"))
+        extents.addWidget(self.x_min)
+        extents.addSpacing(10)
+        extents.addWidget(QLabel("X max:"))
+        extents.addWidget(self.x_max)
+        extents.addSpacing(30)
+        extents.addWidget(QLabel("Y min:"))
+        extents.addWidget(self.y_min)
+        extents.addSpacing(10)
+        extents.addWidget(QLabel("Y max:"))
+        extents.addWidget(self.y_max)
+        extents.addStretch(1)
+
+        return extents
+
+    def extents_set_enabled(self, state):
+        self.x_min.setEnabled(state)
+        self.x_max.setEnabled(state)
+        self.y_min.setEnabled(state)
+        self.y_max.setEnabled(state)
 
     def set_integer_axes_ticks(self):
         """
