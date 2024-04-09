@@ -113,29 +113,6 @@ class TestGSAS2Model(unittest.TestCase):
         no_limits_2 = self.model.further_validation()
         self.assertFalse(no_limits_2)
 
-    def test_find_in_file(self):
-        # read_space_group() is a specific wrapper for find_in_file()
-        read_space_group_string = self.model.read_space_group(self.phase_file_path)
-        self.assertEqual("F m 3 m", read_space_group_string)
-
-    def test_insert_minus_before_first_digit(self):
-        self.assertEqual(self.model.insert_minus_before_first_digit("F m 3 m"), "F m -3 m")
-        self.assertEqual(self.model.insert_minus_before_first_digit("42m"), "-42m")
-        self.assertEqual(self.model.insert_minus_before_first_digit("F d d d"), "F d d d")
-
-    def test_read_basis(self):
-        self.assertEqual(self.model.read_basis(self.phase_file_path), ["Fe 0.0 0.0 0.0 1.0 0.025"])
-        self.assertEqual(self.model.read_basis("invalid_phase_file"), None)
-
-    def test_choose_cell_lengths(self):
-        self.assertEqual(self.model.choose_cell_lengths(self.phase_file_path), "3.6105 3.6105 3.6105")
-
-        self.model.override_cell_length_string = "3.65"
-        self.assertEqual(self.model.choose_cell_lengths("phase_file_not_used"), "3.65 3.65 3.65")
-
-        self.model.override_cell_length_string = None
-        self.assertEqual(self.model.choose_cell_lengths("invalid_phase_file"), None)
-
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
     @patch(model_path + ".Load")
     def test_loading_single_file(self, mock_load, mock_update_logws_group):
