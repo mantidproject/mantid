@@ -57,7 +57,7 @@ IqtFunctionTemplateModel::IqtFunctionTemplateModel()
 
 void IqtFunctionTemplateModel::clearData() {
   m_exponentialType = ExponentialType::None;
-  m_stretchExpType = StretchExpType::None;
+  m_fitType = FitType::None;
   m_backgroundType = BackgroundType::None;
 
   m_model->clear();
@@ -81,7 +81,7 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
     if (name == "ExpDecay") {
       m_exponentialType = ExponentialType::OneExponential;
     } else if (name == "StretchExp") {
-      m_stretchExpType = StretchExpType::StretchExponential;
+      m_fitType = FitType::StretchExponential;
     } else if (name == "FlatBackground") {
       m_backgroundType = BackgroundType::Flat;
     } else {
@@ -110,7 +110,7 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
       if (isStretchSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_stretchExpType = StretchExpType::StretchExponential;
+      m_fitType = FitType::StretchExponential;
       areExponentialsSet = true;
       isStretchSet = true;
     } else if (name == "FlatBackground") {
@@ -148,7 +148,7 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
   } else if (name == "StretchExp") {
     if (hasStretchExponential())
       throw std::runtime_error("Cannot add more stretched exponentials.");
-    m_stretchExpType = StretchExpType::StretchExponential;
+    m_fitType = FitType::StretchExponential;
     newPrefix = *getStretchPrefix();
   } else if (name == "FlatBackground") {
     if (hasBackground())
@@ -172,8 +172,8 @@ void IqtFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInde
   case IqtTypes::SubTypeIndex::Exponential:
     m_exponentialType = static_cast<IqtTypes::ExponentialType>(typeIndex);
     break;
-  case IqtTypes::SubTypeIndex::StretchExponential:
-    m_stretchExpType = static_cast<IqtTypes::StretchExpType>(typeIndex);
+  case IqtTypes::SubTypeIndex::Fit:
+    m_fitType = static_cast<IqtTypes::FitType>(typeIndex);
     break;
   case IqtTypes::SubTypeIndex::Background:
     m_backgroundType = static_cast<IqtTypes::BackgroundType>(typeIndex);
@@ -192,7 +192,7 @@ void IqtFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInde
 std::map<std::size_t, int> IqtFunctionTemplateModel::getSubTypes() const {
   std::map<std::size_t, int> subTypes;
   subTypes[IqtTypes::SubTypeIndex::Exponential] = static_cast<int>(m_exponentialType);
-  subTypes[IqtTypes::SubTypeIndex::StretchExponential] = static_cast<int>(m_stretchExpType);
+  subTypes[IqtTypes::SubTypeIndex::Fit] = static_cast<int>(m_fitType);
   subTypes[IqtTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
   subTypes[IqtTypes::SubTypeIndex::TieIntensities] = static_cast<int>(m_tieIntensitiesType);
   return subTypes;
@@ -215,7 +215,7 @@ void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
   }
   prefix1 = getStretchPrefix();
   if (prefix1 && *prefix1 == prefix) {
-    m_stretchExpType = StretchExpType::None;
+    m_fitType = FitType::None;
     return;
   }
   prefix1 = getBackgroundPrefix();
@@ -230,7 +230,7 @@ int IqtFunctionTemplateModel::numberOfExponentials() const { return static_cast<
 
 bool IqtFunctionTemplateModel::hasExponential() const { return m_exponentialType != ExponentialType::None; }
 
-bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_stretchExpType != StretchExpType::None; }
+bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_fitType == FitType::StretchExponential; }
 
 void IqtFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();

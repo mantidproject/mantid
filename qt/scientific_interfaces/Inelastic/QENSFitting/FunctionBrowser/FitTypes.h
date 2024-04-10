@@ -23,7 +23,7 @@ enum class ExponentialType {
   TwoExponentials,
 };
 
-enum class StretchExpType { None, StretchExponential };
+enum class FitType { None, StretchExponential };
 
 enum class BackgroundType { None, Flat };
 
@@ -31,7 +31,7 @@ enum class TieIntensitiesType { False, True };
 
 enum SubTypeIndex {
   Exponential = 0,
-  StretchExponential = 1,
+  Fit = 1,
   Background = 2,
   TieIntensities = 3,
 };
@@ -41,9 +41,8 @@ struct ExponentialSubType : public TemplateSubTypeImpl<ExponentialType> {
   bool isType(const std::type_info &type) const override { return type == typeid(int); }
 };
 
-struct StretchExpSubType : public TemplateSubTypeImpl<StretchExpType> {
-  std::string name() const override { return "Stretch Exponential"; }
-  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
+struct FitSubType : public TemplateSubTypeImpl<FitType> {
+  std::string name() const override { return "Fit Type"; }
 };
 
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {

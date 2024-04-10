@@ -70,9 +70,9 @@ static const auto HIDDEN_PROPS =
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 inline auto templateSubTypes() {
-  return packTemplateSubTypes(
-      std::make_unique<IqtTypes::ExponentialSubType>(), std::make_unique<IqtTypes::StretchExpSubType>(),
-      std::make_unique<IqtTypes::BackgroundSubType>(), std::make_unique<IqtTypes::TieIntensitiesSubType>());
+  return packTemplateSubTypes(std::make_unique<IqtTypes::ExponentialSubType>(),
+                              std::make_unique<IqtTypes::FitSubType>(), std::make_unique<IqtTypes::BackgroundSubType>(),
+                              std::make_unique<IqtTypes::TieIntensitiesSubType>());
 }
 
 } // namespace IqtFit
