@@ -40,7 +40,7 @@ public:
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-using namespace IDA;
+using namespace Inelastic;
 ElwinTab::ElwinTab(QWidget *parent, IElwinView *view)
     : DataManipulationTab(parent), m_view(view), m_model(std::make_unique<ElwinTabModel>()),
       m_dataModel(std::make_unique<FitDataModel>()), m_selectedSpectrum(0) {
