@@ -1,3 +1,3 @@
 - Input validation errors have been corrected for numerical line edits of the Filter Events interface.
-- Fix crash occurring when incorrect `TOF Correction To Sample` value is selected for the input workspace. Now error message is displayed instead of crash.
+- Fix crash occurring when an incorrect `TOF Correction To Sample` value is selected for the input workspace. Now error message is displayed instead of crash.
 - Fix bug that allowed the two sliders to cross each other for certain values of the line edits controlling the sliders.
