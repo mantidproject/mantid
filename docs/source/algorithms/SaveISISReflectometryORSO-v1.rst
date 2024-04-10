@@ -40,7 +40,7 @@ Header Metadata
 
 Some of the metadata for the ORSO file header is retrieved directly from the input workspace, as detailed below.
 For values retrieved from the workspace history, if any information cannot be extracted from the history then
-a warning is logged and the file is saved without this metadata included.
+the file is saved without this metadata included.
 
 +---------------------+-----------------------------------------------------------------------------------------------+
 | Header value        | Workspace location                                                                            |
@@ -64,6 +64,8 @@ a warning is logged and the file is saved without this metadata included.
 +---------------------+-----------------------------------------------------------------------------------------------+
 | measurement         | The individual file names for all of the run numbers passed to parameters                     |
 | additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              |
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          |
+|                     | correction workspace or file name and the calibration file name from                          |
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
 +---------------------+-----------------------------------------------------------------------------------------------+
 
