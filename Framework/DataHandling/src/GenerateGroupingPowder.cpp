@@ -217,6 +217,7 @@ void GenerateGroupingPowder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output,
                                                                          PropertyMode::Optional),
                   "The grouping workspace created");
+
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble, "The polar angle step for grouping, in degrees.");
@@ -285,15 +286,6 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 
-  GroupingWorkspace_sptr groupWS;
-  if (isDefault("GroupingWorkspace")) {
-    groupWS = std::make_shared<GroupingWorkspace>(inst);
-    this->setProperty("GroupingWorkspace", groupWS);
-  } else {
-    groupWS = getProperty("GroupingWorkspace");
-    this->setProperty("GroupingWorkspace", groupWS);
-  }
-
   const double step = getProperty("AngleStep");
 
   std::unique_ptr<Labelor> label;
@@ -312,21 +304,27 @@ void GenerateGroupingPowder::exec() {
       label = std::make_unique<SplitCircularOrderedLabelor>(step, spectrumInfo);
   }
 
-  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
-      continue;
-    }
+  if (!isDefault("GroupingWorkspace")) {
 
-    const auto &det = spectrumInfo.detector(i);
-    const double groupId = (double)(*label)(spectrumInfo, i);
+    auto groupWS = std::make_shared<GroupingWorkspace>(inst);
+    this->setProperty("GroupingWorkspace", groupWS);
 
-    if (spectrumInfo.hasUniqueDetector(i)) {
-      groupWS->setValue(det.getID(), groupId);
-    } else {
-      const auto &group = dynamic_cast<const DetectorGroup &>(det);
-      const auto idv = group.getDetectorIDs();
-      const auto ids = std::set<detid_t>(idv.begin(), idv.end());
-      groupWS->setValue(ids, groupId);
+    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+      if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+        continue;
+      }
+
+      const auto &det = spectrumInfo.detector(i);
+      const double groupId = (double)(*label)(spectrumInfo, i);
+
+      if (spectrumInfo.hasUniqueDetector(i)) {
+        groupWS->setValue(det.getID(), groupId);
+      } else {
+        const auto &group = dynamic_cast<const DetectorGroup &>(det);
+        const auto idv = group.getDetectorIDs();
+        const auto ids = std::set<detid_t>(idv.begin(), idv.end());
+        groupWS->setValue(ids, groupId);
+      }
     }
   }
 
