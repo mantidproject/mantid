@@ -70,6 +70,8 @@ public:
 
   detid_t getDetectorId() const;
 
+  const std::vector<int> &getPeakSpectras() const;
+
 private:
   /// TOF for the peak centre
   double m_tof;
@@ -267,14 +269,22 @@ public:
   virtual std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks,
                                      Mantid::Kernel::ProgressBase &progress) const = 0;
 
+  void setMinSpectrasForPeak(int minSpectrasForPeak);
+  void setMaxSpectrasForPeak(int maxSpectrasForPeak);
+
 protected:
   const CompareStrategy *m_compareStrategy;
+  int m_minSpectrasForPeak = EMPTY_INT();
+  int m_maxSpectrasForPeak = EMPTY_INT();
 };
 
 class MANTID_CRYSTAL_DLL SimpleReduceStrategy : public ReducePeakListStrategy {
 public:
   SimpleReduceStrategy(const CompareStrategy *compareStrategy);
   std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks, Mantid::Kernel::ProgressBase &progress) const override;
+
+private:
+  void reducePeaksFromNumberOfSpectras(std::vector<SXPeak> &inputPeaks) const;
 };
 
 class MANTID_CRYSTAL_DLL FindMaxReduceStrategy : public ReducePeakListStrategy {

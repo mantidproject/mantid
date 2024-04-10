@@ -69,6 +69,12 @@ void FindSXPeaks::init() {
   declareProperty("MinBinsForAPeak", EMPTY_INT(), mustBePositive,
                   "Minimum number of bins contributing to a peak in an individual spectrum");
 
+  declareProperty("MinSpectrumsForAPeak", EMPTY_INT(), mustBePositive,
+                  "Minimum number of spectra contributing to a peak after they are grouped");
+
+  declareProperty("MaxSpectrumsForAPeak", EMPTY_INT(), mustBePositive,
+                  "Maximum number of spectra contributing to a peak after they are grouped");
+
   // ---------------------------------------------------------------
   // Peak strategies + Threshold
   // ---------------------------------------------------------------
@@ -86,7 +92,8 @@ void FindSXPeaks::init() {
                   "spectrum. This is slower than StrongestPeakOnly. Note that the "
                   "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n"
                   "3. AllPeaksNSigma: This stratergy will look for peaks by bins that are"
-                  " more than nsigma different in intensity.");
+                  " more than nsigma different in intensity. Note that the "
+                  "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n");
 
   // Declare
   declareProperty("SignalBackground", 10.0, mustBePositiveDouble,
@@ -214,6 +221,15 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
     validationOutput["XResolution"] = "XResolution must be set to a value greater than 0";
   }
 
+  const int minSpectrasForAPeak = static_cast<int>(getProperty("MinSpectrumsForAPeak"));
+  const int maxSpectrasForAPeak = static_cast<int>(getProperty("MaxSpectrumsForAPeak"));
+
+  if (!isEmpty(minSpectrasForAPeak) && !isEmpty(maxSpectrasForAPeak)) {
+    if (maxSpectrasForAPeak < minSpectrasForAPeak) {
+      validationOutput["MaxSpectrumsForAPeak"] = "MaxSpectrumsForAPeak must be greater than MinSpectrumsForAPeak";
+      validationOutput["MinSpectrumsForAPeak"] = "MinSpectrumsForAPeak must be lower than MaxSpectrumsForAPeak";
+    }
+  }
   return validationOutput;
 }
 
@@ -327,6 +343,17 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   auto &goniometerMatrix = localworkspace->run().getGoniometer().getR();
   auto compareStrategy = getCompareStrategy();
   auto reductionStrategy = getReducePeakListStrategy(compareStrategy.get());
+
+  const int minSpectrasForAPeak = static_cast<int>(getProperty("MinSpectrumsForAPeak"));
+  if (!isEmpty(minSpectrasForAPeak)) {
+    reductionStrategy->setMinSpectrasForPeak(minSpectrasForAPeak);
+  }
+
+  const int maxSpectrasForAPeak = static_cast<int>(getProperty("MaxSpectrumsForAPeak"));
+  if (!isEmpty(maxSpectrasForAPeak)) {
+    reductionStrategy->setMaxSpectrasForPeak(maxSpectrasForAPeak);
+  }
+
   auto finalv = reductionStrategy->reduce(pcv, progress);
 
   for (auto &finalPeak : finalv) {
