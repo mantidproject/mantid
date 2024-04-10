@@ -50,7 +50,6 @@ Usage
 *Example: Using all defaults**
 
 .. testcode:: OnlyPeaktable
-    :skipif: ea_import is None
 
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
@@ -91,7 +90,6 @@ Usage
 Output:
 
 .. testoutput:: OnlyPeaktable
-    :skipif: ea_import is None
 
     --------------------------------------------------
     {'Peak centre': '3.00', 'Database Energy': '3.40', 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': '0.80', 'Difference': '0.40'}
@@ -107,7 +105,6 @@ Output:
 *Example: Renaming tables**
 
 .. testcode:: renametables
-    :skipif: ea_import is None
 
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
@@ -148,7 +145,6 @@ Output:
 Output:
 
 .. testoutput:: renametables
-    :skipif: ea_import is None
 
     --------------------------------------------------
     {'Peak centre': '900.00', 'Database Energy': '900.70', 'Element': 'Ag', 'Transition': 'L(3d3/2->2p3/2)', 'Error': '0.80', 'Difference': '0.70'}
@@ -165,7 +161,6 @@ Output:
 *Example: Using non default column names**
 
 .. testcode:: non-defaultcolumns
-    :skipif: ea_import is None
 
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
@@ -206,7 +201,6 @@ Output:
 Output:
 
 .. testoutput:: non-defaultcolumns
-    :skipif: ea_import is None
 
     --------------------------------------------------
     {'Peak centre': '900.00', 'Database Energy': '899.20', 'Element': 'Au', 'Transition': 'M(4f5/2->3d3/2)', 'Error': '0.80', 'Difference': '0.80'}
