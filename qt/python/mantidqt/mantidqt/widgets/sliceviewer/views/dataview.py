@@ -239,6 +239,9 @@ class SliceViewerDataView(QWidget):
         self.fig.add_subplot(self.ax)
         self.plot_MDH = self.plot_MDH_nonorthogonal
 
+        self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+        self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
+
         self.canvas.draw_idle()
 
     def enable_zoom_on_mouse_scroll(self, redraw):

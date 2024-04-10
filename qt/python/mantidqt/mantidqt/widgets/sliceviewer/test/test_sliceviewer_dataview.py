@@ -286,6 +286,68 @@ class SliceviewerDataViewTest(unittest.TestCase):
         scale = self.view.get_default_scale_norm()
         self.assertEqual(scale, "SymmetricLog10")
 
+    def test_extents_set_correctly_orthogonal(self):
+        self.view.set_integer_axes_ticks = mock.Mock()
+
+        self.view.create_axes_orthogonal()
+
+        self.assertEqual(self.view.x_min.value(), 0.0)
+        self.assertEqual(self.view.x_max.value(), 0.0)
+        self.assertEqual(self.view.y_min.value(), 0.0)
+        self.assertEqual(self.view.y_max.value(), 0.0)
+
+        self.view.ax.set_xlim(-1.0, 1.0)
+        self.view.ax.set_ylim(-2.0, 2.0)
+
+        self.assertEqual(self.view.x_min.value(), -1.0)
+        self.assertEqual(self.view.x_max.value(), 1.0)
+        self.assertEqual(self.view.y_min.value(), -2.0)
+        self.assertEqual(self.view.y_max.value(), 2.0)
+
+    def test_extents_set_correctly_nonorthogonal(self):
+        self.view.grid_helper = mock.Mock()
+        self.patched_objs["CurveLinearSubPlot"].return_value = self.view.fig.add_subplot(111)
+
+        self.view.create_axes_nonorthogonal(None)
+
+        self.assertEqual(self.view.x_min.value(), 0.0)
+        self.assertEqual(self.view.x_max.value(), 0.0)
+        self.assertEqual(self.view.y_min.value(), 0.0)
+        self.assertEqual(self.view.y_max.value(), 0.0)
+
+        self.view.ax.set_xlim(-1.0, 1.0)
+        self.view.ax.set_ylim(-2.0, 2.0)
+
+        self.assertEqual(self.view.x_min.value(), -1.0)
+        self.assertEqual(self.view.x_max.value(), 1.0)
+        self.assertEqual(self.view.y_min.value(), -2.0)
+        self.assertEqual(self.view.y_max.value(), 2.0)
+
+    def test_extents_update_from_spinbox(self):
+        self.view.set_integer_axes_ticks = mock.Mock()
+
+        self.view.create_axes_orthogonal()
+
+        x_min, x_max = self.view.ax.get_xlim()
+        y_min, y_max = self.view.ax.get_ylim()
+        self.assertEqual(x_min, 0.0)
+        self.assertEqual(x_max, 1.0)
+        self.assertEqual(y_min, 0.0)
+        self.assertEqual(y_max, 1.0)
+
+        self.view.x_min.setValue(-1.0)
+        self.view.x_max.setValue(2.0)
+        self.view.y_min.setValue(-3.0)
+        self.view.y_max.setValue(4.0)
+
+        x_min, x_max = self.view.ax.get_xlim()
+        y_min, y_max = self.view.ax.get_ylim()
+
+        self.assertEqual(x_min, -1.0)
+        self.assertEqual(x_max, 2.0)
+        self.assertEqual(y_min, -3.0)
+        self.assertEqual(y_max, 4.0)
+
 
 if __name__ == "__main__":
     unittest.main()
