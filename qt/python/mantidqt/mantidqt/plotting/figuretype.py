@@ -95,12 +95,14 @@ def figure_type(fig, ax=None):
     """
     if len(fig.get_axes()) == 0:
         return FigureType.Empty
-    else:
-        if ax:
-            # If ax is a colorbar then find a non-colorbar axes on the figure so the plot type can be determined.
-            if type(ax) == Axes:
-                ax = next(axes for axes in fig.get_axes() if not type(axes) == Axes)
 
-            return axes_type(ax)
-        else:
-            return axes_type(fig.axes[0])
+    if ax:
+        # ax could be a colorbar, if so then find a non-colorbar axes on the figure so the plot type can be determined.
+        if isinstance(ax, Axes):
+            other_axes = [axes for axes in fig.get_axes() if not isinstance(axes, Axes)]
+            if other_axes:
+                ax = other_axes[0]
+
+        return axes_type(ax)
+
+    return axes_type(fig.axes[0])
