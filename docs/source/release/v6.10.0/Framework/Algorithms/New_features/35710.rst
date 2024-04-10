@@ -1,1 +1,2 @@
-- Added a new peak finding strategy named AllPeaksNSigma to FindSXPeaks :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` algorithm.
+- Added a new peak finding strategy named AllPeaksNSigma to FindSXPeaks :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` algorithm. Credits to the author of SXD2001 for the idea of using NSigma as a threshold (albeit in SXD2001 the peak finding is done in 3D).
+  Gutmann, M. J. (2005). SXD2001. ISIS Facility, Rutherford Appleton Laboratory, Oxfordshire, England.

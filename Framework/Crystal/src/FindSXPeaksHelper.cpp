@@ -239,6 +239,8 @@ size_t PeakContainer::getNumberOfPointsInPeak() const {
 
 yIt PeakContainer::getMaxIterator() const { return m_y.begin() + m_maxIndex; }
 
+double PeakContainer::getStartingSignal() const { return m_y[m_startIndex]; }
+
 /* ------------------------------------------------------------------------------------------
  * Background
  * ------------------------------------------------------------------------------------------
@@ -520,6 +522,10 @@ std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPea
                                                                                    const HistogramData::HistogramY &y,
                                                                                    const HistogramData::HistogramE &e,
                                                                                    Bound low, Bound high) const {
+  /*
+  Credits to the author of SXD2001 for the idea of using NSigma as a threshold for peak finding:
+    Gutmann, M. J. (2005). SXD2001. ISIS Facility, Rutherford Appleton Laboratory, Oxfordshire, England.
+  */
 
   bool isRecording = false;
   std::unique_ptr<PeakContainer> currentPeak = nullptr;
@@ -538,16 +544,15 @@ std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPea
   const auto lowE = e.begin() + distanceMin;
   const auto highE = distanceMax < static_cast<int>(e.size()) ? e.begin() + distanceMax : e.begin();
 
-  // std::vector<double> yDifferences(distanceMax-distanceMin);
-  // std::transform(lowY+1, highY, lowY, yDifferences.begin(), std::minus<double>());
-
   auto yIt = lowY + 1;
   auto eIt = lowE + 1;
 
   for (; yIt != highY && eIt != highE; ++yIt, ++eIt) {
     const auto signalDiff = *yIt - *(yIt - 1);
     const auto isStartPeak = signalDiff > m_nsigma * (*eIt);
-    const auto isEndPeak = signalDiff * (-1.) > m_nsigma * (*eIt);
+    const auto isSigDropSignificant = signalDiff * (-1.) > m_nsigma * (*eIt);
+    const auto isEndPeak = (currentPeak != nullptr ? (isSigDropSignificant || currentPeak->getStartingSignal() > *yIt)
+                                                   : isSigDropSignificant);
 
     /*Possible scenarios
     1. isRecording is False and isStartPeak True(== isEndPeak is False) => start recording

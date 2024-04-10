@@ -110,6 +110,7 @@ public:
   void record(yIt item);
   size_t getNumberOfPointsInPeak() const;
   yIt getMaxIterator() const;
+  double getStartingSignal() const;
 
 private:
   const HistogramData::HistogramY &m_y;
