@@ -274,10 +274,12 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {
+
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
   const auto &spectrumInfo = input_ws->spectrumInfo();
   const auto &detectorInfo = input_ws->detectorInfo();
   const auto &detectorIDs = detectorInfo.detectorIDs();
+
   if (detectorIDs.empty())
     throw std::invalid_argument("Workspace contains no detectors.");
 
@@ -285,6 +287,9 @@ void GenerateGroupingPowder::exec() {
   if (!inst) { // validator should make this impossible
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
+
+  auto groupWS = std::make_shared<GroupingWorkspace>(inst);
+  this->setProperty("GroupingWorkspace", groupWS);
 
   const double step = getProperty("AngleStep");
 
@@ -304,27 +309,21 @@ void GenerateGroupingPowder::exec() {
       label = std::make_unique<SplitCircularOrderedLabelor>(step, spectrumInfo);
   }
 
-  if (!isDefault("GroupingWorkspace")) {
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
 
-    auto groupWS = std::make_shared<GroupingWorkspace>(inst);
-    this->setProperty("GroupingWorkspace", groupWS);
+    const auto &det = spectrumInfo.detector(i);
+    const double groupId = (double)(*label)(spectrumInfo, i);
 
-    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-      if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
-        continue;
-      }
-
-      const auto &det = spectrumInfo.detector(i);
-      const double groupId = (double)(*label)(spectrumInfo, i);
-
-      if (spectrumInfo.hasUniqueDetector(i)) {
-        groupWS->setValue(det.getID(), groupId);
-      } else {
-        const auto &group = dynamic_cast<const DetectorGroup &>(det);
-        const auto idv = group.getDetectorIDs();
-        const auto ids = std::set<detid_t>(idv.begin(), idv.end());
-        groupWS->setValue(ids, groupId);
-      }
+    if (spectrumInfo.hasUniqueDetector(i)) {
+      groupWS->setValue(det.getID(), groupId);
+    } else {
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto idv = group.getDetectorIDs();
+      const auto ids = std::set<detid_t>(idv.begin(), idv.end());
+      groupWS->setValue(ids, groupId);
     }
   }
 
