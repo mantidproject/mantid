@@ -28,6 +28,7 @@ namespace Mantid::Crystal {
 
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
+const std::string FindSXPeaks::allPeaksNSigmaStrategy = "AllPeaksNSigma";
 
 const std::string FindSXPeaks::relativeResolutionStrategy = "RelativeResolution";
 const std::string FindSXPeaks::absoluteResolutionPeaksStrategy = "AbsoluteResolution";
@@ -71,7 +72,7 @@ void FindSXPeaks::init() {
   auto mustBePositiveDouble = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0.0);
 
-  std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy, allPeaksStrategy};
+  std::vector<std::string> peakFindingStrategy = {strongestPeakStrategy, allPeaksStrategy, allPeaksNSigmaStrategy};
   declareProperty("PeakFindingStrategy", strongestPeakStrategy,
                   std::make_shared<StringListValidator>(peakFindingStrategy),
                   "Different options for peak finding."
@@ -80,7 +81,9 @@ void FindSXPeaks::init() {
                   "one). This options is more performant than the AllPeaks option.\n"
                   "2. AllPeaks: This strategy will find all peaks in each "
                   "spectrum. This is slower than StrongestPeakOnly. Note that the "
-                  "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n");
+                  "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n"
+                  "3. AllPeaksNSigma: This stratergy will look for peaks by bins that are"
+                  " more than nsigma different in intensity.");
 
   // Declare
   declareProperty("SignalBackground", 10.0, mustBePositiveDouble,
@@ -97,6 +100,10 @@ void FindSXPeaks::init() {
                   "threshold.\n"
                   "Background thresholds which are too low will mistake noise for peaks.");
 
+  declareProperty(
+      "NSigma", 5.0, mustBePositiveDouble,
+      "Multiplication factor on error used to compare the difference in intensity between consecutive bins.");
+
   // Enable
   setPropertySettings("SignalBackground", std::make_unique<EnabledWhenProperty>(
                                               "PeakFindingStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
@@ -106,11 +113,16 @@ void FindSXPeaks::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "PeakFindingStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO, allPeaksStrategy));
 
+  setPropertySettings("NSigma", std::make_unique<EnabledWhenProperty>("PeakFindingStrategy",
+                                                                      Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                                                                      allPeaksNSigmaStrategy));
+
   // Group
   const std::string peakGroup = "Peak Finding Settings";
   setPropertyGroup("PeakFindingStrategy", peakGroup);
   setPropertyGroup("SignalBackground", peakGroup);
   setPropertyGroup("AbsoluteBackground", peakGroup);
+  setPropertyGroup("NSigma", peakGroup);
 
   // ---------------------------------------------------------------
   // Resolution
@@ -260,6 +272,7 @@ void FindSXPeaks::exec() {
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
   // Count the peaks so that we can resize the peak vector at the end.
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
   for (auto wsIndex = static_cast<int>(m_MinWsIndex); wsIndex <= static_cast<int>(m_MaxWsIndex); ++wsIndex) {
     PARALLEL_START_INTERRUPT_REGION
@@ -273,9 +286,10 @@ void FindSXPeaks::exec() {
     // Retrieve the spectrum into a vector
     const auto &x = localworkspace->x(wsIndex);
     const auto &y = localworkspace->y(wsIndex);
+    const auto &e = localworkspace->e(wsIndex);
 
     // Run the peak finding strategy
-    auto foundPeaks = peakFindingStrategy->findSXPeaks(x, y, wsIndex);
+    auto foundPeaks = peakFindingStrategy->findSXPeaks(x, y, e, wsIndex);
     if (!foundPeaks) {
       continue;
     }
@@ -351,6 +365,8 @@ std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
   } else if (peakFindingStrategy == allPeaksStrategy) {
     const double background = getProperty("AbsoluteBackground");
     return std::make_unique<AbsoluteBackgroundStrategy>(background);
+  } else if (peakFindingStrategy == allPeaksNSigmaStrategy) {
+    return nullptr; // AllPeaksNSigma stratergy does not require a background stratergy
   } else {
     throw std::invalid_argument("The selected background strategy has not been implemented yet.");
   }
@@ -365,6 +381,9 @@ FindSXPeaks::getPeakFindingStrategy(const BackgroundStrategy *backgroundStrategy
     return std::make_unique<StrongestPeaksStrategy>(backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
   } else if (peakFindingStrategy == allPeaksStrategy) {
     return std::make_unique<AllPeaksStrategy>(backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
+  } else if (peakFindingStrategy == allPeaksNSigmaStrategy) {
+    const double nsigma = getProperty("NSigma");
+    return std::make_unique<NSigmaPeaksStrategy>(spectrumInfo, nsigma, minValue, maxValue, tofUnits);
   } else {
     throw std::invalid_argument("The selected peak finding strategy has not been implemented yet.");
   }

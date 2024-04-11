@@ -8,6 +8,7 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/EmptyValues.h"
@@ -109,6 +110,7 @@ public:
   void record(yIt item);
   size_t getNumberOfPointsInPeak() const;
   yIt getMaxIterator() const;
+  double getStartingSignal() const;
 
 private:
   const HistogramData::HistogramY &m_y;
@@ -154,15 +156,18 @@ public:
                       const XAxisUnit units = XAxisUnit::TOF);
   virtual ~PeakFindingStrategy() = default;
   PeakList findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                       const int workspaceIndex) const;
+                       const HistogramData::HistogramE &e, const int workspaceIndex) const;
 
 protected:
   BoundsIterator getBounds(const HistogramData::HistogramX &x) const;
   double calculatePhi(size_t workspaceIndex) const;
   double getXValue(const HistogramData::HistogramX &x, const size_t peakLocation) const;
   double convertToTOF(const double xValue, const size_t workspaceIndex) const;
-  virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low,
-                                 Bound high, const int workspaceIndex) const = 0;
+  virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                                 const HistogramData::HistogramE &e, Bound low, Bound high,
+                                 const int workspaceIndex) const = 0;
+  PeakList convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                            const std::vector<std::unique_ptr<PeakContainer>> &peaks, const int workspaceIndex) const;
 
   const BackgroundStrategy *m_backgroundStrategy;
   const double m_minValue = EMPTY_DBL();
@@ -176,7 +181,8 @@ public:
   StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
                          const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                          const XAxisUnit units = XAxisUnit::TOF);
-  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
+  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                         const HistogramData::HistogramE &e, Bound low, Bound high,
                          const int workspaceIndex) const override;
 };
 
@@ -185,15 +191,33 @@ public:
   AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
                    const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                    const XAxisUnit units = XAxisUnit::TOF);
-  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
+  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                         const HistogramData::HistogramE &e, Bound low, Bound high,
                          const int workspaceIndex) const override;
 
 private:
   std::vector<std::unique_ptr<PeakContainer>>
   getAllPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
               const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy) const;
-  PeakList convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                            const std::vector<std::unique_ptr<PeakContainer>> &peaks, const int workspaceIndex) const;
+};
+
+#define NSIGMA_COMPARISON_THRESHOLD 1e-10
+
+class MANTID_CRYSTAL_DLL NSigmaPeaksStrategy : public PeakFindingStrategy {
+public:
+  NSigmaPeaksStrategy(const API::SpectrumInfo &spectrumInfo, const double nsigma = EMPTY_DBL(),
+                      const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
+                      const XAxisUnit units = XAxisUnit::TOF);
+  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                         const HistogramData::HistogramE &e, Bound low, Bound high,
+                         const int workspaceIndex) const override;
+
+private:
+  std::vector<std::unique_ptr<PeakContainer>> getAllNSigmaPeaks(const HistogramData::HistogramX &x,
+                                                                const HistogramData::HistogramY &y,
+                                                                const HistogramData::HistogramE &e, Bound low,
+                                                                Bound high) const;
+  const double m_nsigma;
 };
 
 /* ------------------------------------------------------------------------------------------
