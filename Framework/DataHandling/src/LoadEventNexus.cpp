@@ -26,6 +26,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -60,9 +61,14 @@ namespace {
 // detnotes the end of iteration for NeXus::getNextEntry
 const std::string NULL_STR("NULL");
 
+const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
 namespace PropertyNames {
 const std::string COMPRESS_TOL("CompressTolerance");
-}
+const std::string COMPRESS_MODE("CompressBinningMode");
+} // namespace PropertyNames
 } // namespace
 
 /**
@@ -181,6 +187,13 @@ void LoadEventNexus::init() {
       "CompressEvents while loading (optional, leave blank to not do). "
       "This specified the tolerance to use (in microseconds) when compressing where positive is linear tolerance, "
       "negative is logorithmic tolerance, and zero is that time-of-flight must be identical to compress.");
+  declareProperty(
+      PropertyNames::COMPRESS_MODE, binningModeNames[size_t(BinningMode::DEFAULT)],
+      std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+      "Optional. "
+      "Binning behavior can be specified in the usual way through sign of binwidth and other properties ('Default'); "
+      "or can be set to one of the allowed binning modes. "
+      "This will override all other specification or default behavior.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
@@ -198,6 +211,7 @@ void LoadEventNexus::init() {
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
   setPropertyGroup(PropertyNames::COMPRESS_TOL, grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_MODE, grp3);
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
@@ -395,8 +409,15 @@ void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  compressTolerance = getProperty(PropertyNames::COMPRESS_TOL);
   compressEvents = !isDefault(PropertyNames::COMPRESS_TOL);
+  compressTolerance = getProperty(PropertyNames::COMPRESS_TOL);
+  if (compressEvents) {
+    BINMODE mode = getPropertyValue(PropertyNames::COMPRESS_MODE);
+    if (mode == BinningMode::LINEAR)
+      compressTolerance = std::fabs(compressTolerance);
+    else if (mode == BinningMode::LOGARITHMIC)
+      compressTolerance = -1. * std::fabs(compressTolerance);
+  }
 
   loadlogs = getProperty("LoadLogs");
 
