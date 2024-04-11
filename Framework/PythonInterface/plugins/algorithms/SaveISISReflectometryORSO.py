@@ -257,29 +257,38 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
             )
 
+    @staticmethod
+    def _get_all_workspace_groups():
+        ws_groups = []
+        for item_name in AnalysisDataService.getObjectNames():
+            ws = AnalysisDataService.retrieve(item_name)
+            if ws.isGroup():
+                ws_groups.append(ws)
+        return ws_groups
+
     def _create_and_sort_refl_datasets(self) -> List[ReflectometryDataset]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
-        final_list = []
-        stitched_workspaces = []
+        ws_groups_in_ADS = self._get_all_workspace_groups()
+
+        def is_workspace_group_member(workspace_name):
+            for ws_group in ws_groups_in_ADS:
+                if ws_group.contains(workspace_name):
+                    return True
+            return False
+
+        dataset_list = []
 
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
-            ws_list = AnalysisDataService.retrieve(ws_name)
-            if isinstance(ws_list, WorkspaceGroup):
-                is_ws_grp = True
+            ws = AnalysisDataService.retrieve(ws_name)
+            if isinstance(ws, WorkspaceGroup):
+                dataset_list.extend([ReflectometryDataset(child_ws, True) for child_ws in ws])
             else:
-                is_ws_grp = False
-                ws_list = [ws_list]
+                dataset_list.append(ReflectometryDataset(ws, is_workspace_group_member(ws_name)))
 
-            for ws in ws_list:
-                refl_dataset = ReflectometryDataset(ws, is_ws_grp)
-                if refl_dataset.is_stitched:
-                    stitched_workspaces.append(refl_dataset)
-                else:
-                    final_list.append(refl_dataset)
-
-        final_list.extend(stitched_workspaces)
-        return final_list
+        # Stitched datasets should be sorted to the end of the list
+        dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
+        return dataset_list
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)

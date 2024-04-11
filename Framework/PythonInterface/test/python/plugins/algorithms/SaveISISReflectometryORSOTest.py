@@ -376,6 +376,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
 
+    def test_file_excludes_reduction_call_for_ws_group_member(self):
+        ws_name = "ws_1"
+        self._create_sample_workspace_group([ws_name, "ws_2"], instrument_name="INTER")
+
+        self._run_save_alg(ws_name)
+
+        self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
+
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_flood_correction_ws_included_in_additional_files(self, mock_alg_histories):
         test_cases = [
