@@ -23,6 +23,7 @@ public:
   // TODO parameter for expected number of events
   CompressEventAccumulator(std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor,
                            CompressBinningMode bin_mode);
+  virtual ~CompressEventAccumulator() = default; // needed because this is an abstract base class
 
   virtual void addEvent(const float tof) = 0;
   virtual void createWeightedEvents(std::vector<Mantid::DataObjects::WeightedEventNoTime> *raw_events) const = 0;
