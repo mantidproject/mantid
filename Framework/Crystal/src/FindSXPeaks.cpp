@@ -101,7 +101,7 @@ void FindSXPeaks::init() {
                   "Background thresholds which are too low will mistake noise for peaks.");
 
   declareProperty(
-      "NSigma", 10.0, mustBePositiveDouble,
+      "NSigma", 5.0, mustBePositiveDouble,
       "Multiplication factor on error used to compare the difference in intensity between consecutive bins.");
 
   // Enable
