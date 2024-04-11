@@ -108,6 +108,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             # incompatible with drag zooming/panning as they both require drag selection
             data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+            data_view.extents_set_enabled(False)
             tool = RectangleSelectionLinePlot
             if data_view.line_plots_active:
                 data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
@@ -116,6 +117,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
+            data_view.extents_set_enabled(True)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
 
     @abc.abstractmethod
