@@ -246,7 +246,7 @@ Refine Sigma_1
 
 Refine Gamma
 
-.. image:: figure:: ../../images/6_5_release/Diffraction/GSASII_tab.png
+.. image:: figure:: ../../../../images/6_5_release/Diffraction/GSASII_tab.png
     :align: center
     :width: 600px
 
