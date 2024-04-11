@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include <utility>
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -17,7 +17,7 @@
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ContainerSubtraction");

@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtPresenter.h"
 
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 

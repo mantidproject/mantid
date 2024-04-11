@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataView.h"
+#include "Common/InterfaceUtils.h"
 #include "FitDataPresenter.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
+#include "MantidQtWidgets/Common/TableWidgetValidators.h"
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::MantidWidgets;
 
 constexpr auto NUMERICAL_PRECISION = 6;
 const std::string MASK_LIST = getRegexValidatorString(regexValidatorStrings::MaskValidator);

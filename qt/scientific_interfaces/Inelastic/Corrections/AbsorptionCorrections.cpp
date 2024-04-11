@@ -5,11 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
+#include "Common/InterfaceUtils.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QRegExpValidator>
@@ -18,8 +18,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DeltaEMode;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 /**
  * Determines whether an input has a value of zero

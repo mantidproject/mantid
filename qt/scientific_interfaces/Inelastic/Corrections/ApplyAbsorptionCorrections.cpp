@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -13,7 +14,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
@@ -22,8 +22,9 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");

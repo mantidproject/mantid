@@ -6,15 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetrisePresenter.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "Common/InterfaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("SymmetrisePresenter");

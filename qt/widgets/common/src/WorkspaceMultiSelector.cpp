@@ -8,7 +8,7 @@
 // Includes
 //------------------------------------------------------
 #include "MantidQtWidgets/Common/WorkspaceMultiSelector.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
+#include "MantidQtWidgets/Common/TableWidgetValidators.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <Poco/AutoPtr.h>
@@ -28,14 +28,11 @@
 
 constexpr short namesCol = 0;
 constexpr short indexCol = 1;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 
 QStringList headerLabels = {"Workspace Name", "Ws Index"};
-
-const auto SPECTRA_LIST = getRegexValidatorString(SpectraValidator);
 } // namespace
 
 /**
@@ -75,7 +72,7 @@ void WorkspaceMultiSelector::setupTable() {
   this->verticalHeader()->setVisible(false);
   this->horizontalHeader()->setVisible(true);
   this->setHorizontalHeaderLabels(headerLabels);
-  this->setItemDelegateForColumn(1, new RegexInputDelegate(this, SPECTRA_LIST));
+  this->setItemDelegateForColumn(1, new RegexInputDelegate(this, getRegexValidatorString(SpectraValidator)));
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setSortingEnabled(true);
   this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

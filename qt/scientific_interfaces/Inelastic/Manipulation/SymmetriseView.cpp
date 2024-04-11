@@ -18,8 +18,9 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
+
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 constexpr auto NUMERICAL_PRECISION = 2;
 

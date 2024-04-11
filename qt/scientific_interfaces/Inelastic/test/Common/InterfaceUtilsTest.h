@@ -6,17 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 
 #include <QPair>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::InterfaceUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 class InterfaceUtilsTest : public CxxTest::TestSuite {
 public:

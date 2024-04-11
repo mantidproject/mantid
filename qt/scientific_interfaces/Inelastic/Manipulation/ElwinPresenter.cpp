@@ -7,11 +7,11 @@
 #include "ElwinPresenter.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QFileInfo>

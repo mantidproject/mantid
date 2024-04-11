@@ -54,7 +54,7 @@ set(SRC_FILES
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
-    src/InterfaceUtils.cpp
+    src/TableWidgetValidators.cpp
     src/LineEditWithClear.cpp
     src/ListPropertyWidget.cpp
     src/LocalParameterEditor.cpp
@@ -298,7 +298,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
-    inc/MantidQtWidgets/Common/InterfaceUtils.h
+    inc/MantidQtWidgets/Common/TableWidgetValidators.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
@@ -625,8 +625,6 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
-set(RES_FILES ../../scientific_interfaces/Inelastic/Common/InterfaceResources.qrc)
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -636,7 +634,7 @@ endif()
 # Target Additional components for this module
 find_package(
   Qt5 ${QT_MIN_VERSION}
-  COMPONENTS Concurrent Help Network PrintSupport Xml
+  COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
 # Prefer WebEngineWidgets over WebkitWidgets
@@ -683,20 +681,12 @@ mtd_add_qt_library(
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
-  RES ${RES_FILES}
   DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS ${_webengine_def} PRECOMPILED
        inc/MantidQtWidgets/Common/PrecompiledHeader.h
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
   LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS
-    Qt5::Concurrent
-    Qt5::Help
-    Qt5::Network
-    Qt5::PrintSupport
-    ${_webwidgets_tgt}
-    Qt5::Qscintilla
-    Qt5::Xml
+  QT5_LINK_LIBS Qt5::Concurrent Qt5::Help Qt5::Network Qt5::PrintSupport ${_webwidgets_tgt} Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -719,7 +709,6 @@ set(TEST_FILES
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
-    test/InterfaceUtilsTest.h
     test/MuonPeriodInfoTest.h
     test/NonOrthogonalTest.h
     test/ParseKeyValueStringTest.h
@@ -760,7 +749,6 @@ set(QT5_TEST_FILES
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
-    test/InterfaceUtilsTest.h
     test/ManageUserDirectoriesTest.h
     # test/MantidHelpWindowTest.h - disabled while the failure is investigated
     test/MuonPeriodInfoTest.h
