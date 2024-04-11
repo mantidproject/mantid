@@ -297,9 +297,9 @@ void FindSXPeaks::exec() {
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
   // Count the peaks so that we can resize the peak vector at the end.
 
-  // PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
   for (auto wsIndex = static_cast<int>(m_MinWsIndex); wsIndex <= static_cast<int>(m_MaxWsIndex); ++wsIndex) {
-    // PARALLEL_START_INTERRUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // If no detector found / monitor, skip onto the next spectrum
     const auto wsIndexSize_t = static_cast<size_t>(wsIndex);
@@ -318,12 +318,11 @@ void FindSXPeaks::exec() {
       continue;
     }
 
-    // PARALLEL_CRITICAL(entries) { std::copy(foundPeaks->cbegin(), foundPeaks->cend(), std::back_inserter(entries)); }
-    { std::copy(foundPeaks->cbegin(), foundPeaks->cend(), std::back_inserter(entries)); }
+    PARALLEL_CRITICAL(entries) { std::copy(foundPeaks->cbegin(), foundPeaks->cend(), std::back_inserter(entries)); }
     progress.report();
-    // PARALLEL_END_INTERRUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  // PARALLEL_CHECK_INTERRUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Now reduce the list with duplicate entries
   reducePeakList(entries, progress);

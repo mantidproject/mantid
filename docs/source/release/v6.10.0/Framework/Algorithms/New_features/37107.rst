@@ -1,0 +1,3 @@
+- Validation rules added to FindSXPeaks :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` algorithm to remove spurious peaks due to noise by allowing user to provide additional arguements as below
+- `MinBinsForAPeak`, the Minimum number of bins contributing to a peak in an individual spectrum
+- `MinSpectrumsForAPeak`, `MaxSpectrumsForAPeak` Minimum & Maximum number of spectra contributing to a peak after they are grouped

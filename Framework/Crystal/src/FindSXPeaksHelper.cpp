@@ -239,7 +239,7 @@ size_t PeakContainer::getNumberOfPointsInPeak() const {
     return 0;
   }
   if (m_stopIndex >= m_startIndex) {
-    return m_stopIndex - m_startIndex;
+    return m_stopIndex - m_startIndex + 1;
   }
   return 0;
 }
