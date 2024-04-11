@@ -7,10 +7,12 @@
 import unittest
 from typing import Dict
 from unittest import mock
+import numpy as np
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 
 
 @start_qapplication
@@ -308,7 +310,9 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.grid_helper = mock.Mock()
         self.patched_objs["CurveLinearSubPlot"].return_value = self.view.fig.add_subplot(111)
 
-        self.view.create_axes_nonorthogonal(None)
+        transform = NonOrthogonalTransform(np.radians(30))
+
+        self.view.create_axes_nonorthogonal(transform)
 
         self.assertEqual(self.view.x_min.value(), 0.0)
         self.assertEqual(self.view.x_max.value(), 0.0)
@@ -320,10 +324,12 @@ class SliceviewerDataViewTest(unittest.TestCase):
 
         self.assertEqual(self.view.x_min.value(), -1.0)
         self.assertEqual(self.view.x_max.value(), 1.0)
-        self.assertEqual(self.view.y_min.value(), -2.0)
-        self.assertEqual(self.view.y_max.value(), 2.0)
 
-    def test_extents_update_from_spinbox(self):
+        # y should be double because y / sin(angle) = y/0.5 for 30 degrees
+        self.assertEqual(self.view.y_min.value(), -4.0)
+        self.assertEqual(self.view.y_max.value(), 4.0)
+
+    def test_extents_update_from_spinbox_orthogonal(self):
         self.view.set_integer_axes_ticks = mock.Mock()
 
         self.view.create_axes_orthogonal()
@@ -347,6 +353,36 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.assertEqual(x_max, 2.0)
         self.assertEqual(y_min, -3.0)
         self.assertEqual(y_max, 4.0)
+
+    def test_extents_update_from_spinbox_nonorthogonal(self):
+        self.view.grid_helper = mock.Mock()
+        self.patched_objs["CurveLinearSubPlot"].return_value = self.view.fig.add_subplot(111)
+
+        transform = NonOrthogonalTransform(np.radians(30))
+
+        self.view.create_axes_nonorthogonal(transform)
+
+        x_min, x_max = self.view.ax.get_xlim()
+        y_min, y_max = self.view.ax.get_ylim()
+        self.assertEqual(x_min, 0.0)
+        self.assertEqual(x_max, 1.0)
+        self.assertEqual(y_min, 0.0)
+        self.assertEqual(y_max, 1.0)
+
+        self.view.x_min.setValue(-1.0)
+        self.view.x_max.setValue(2.0)
+        self.view.y_min.setValue(-3.0)
+        self.view.y_max.setValue(4.0)
+
+        x_min, x_max = self.view.ax.get_xlim()
+        y_min, y_max = self.view.ax.get_ylim()
+
+        self.assertEqual(x_min, -1.0)
+        self.assertEqual(x_max, 2.0)
+
+        # y should be halved because y * sin(angle) = y * 0.5 for 30 degrees
+        self.assertAlmostEqual(y_min, -1.5, 9)
+        self.assertAlmostEqual(y_max, 2.0, 9)
 
 
 if __name__ == "__main__":

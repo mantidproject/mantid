@@ -547,6 +547,9 @@ class SliceViewerDataView(QWidget):
 
     def ylim_changed(self, ax):
         y_min, y_max = ax.get_ylim()
+        if self.nonorthogonal_mode:
+            y_min = self.nonortho_transform.inv_tr(0, y_min)[1]
+            y_max = self.nonortho_transform.inv_tr(0, y_max)[1]
         self.y_min.blockSignals(True)
         self.y_min.setValue(y_min)
         self.y_min.blockSignals(False)
@@ -555,7 +558,12 @@ class SliceViewerDataView(QWidget):
         self.y_max.blockSignals(False)
 
     def update_ylim(self, _):
-        self.ax.set_ylim(self.y_min.value(), self.y_max.value(), emit=False)
+        y_min = self.y_min.value()
+        y_max = self.y_max.value()
+        if self.nonorthogonal_mode:
+            y_min = self.nonortho_transform.tr(0, y_min)[1]
+            y_max = self.nonortho_transform.tr(0, y_max)[1]
+        self.ax.set_ylim(y_min, y_max, emit=False)
         self.on_data_limits_changed()
 
     def create_extents_layout(self):
