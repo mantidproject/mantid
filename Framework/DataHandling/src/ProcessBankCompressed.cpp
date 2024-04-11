@@ -136,7 +136,11 @@ void ProcessBankCompressed::collectEvents() {
   m_event_tof.reset();
   m_event_index.reset();
   m_bankPulseTimes.reset();
-  std::cout << "Time to collectEvents:          " << m_entry_name << " " << timer << "\n";
+
+#ifndef _WIN32
+  if (m_loader.alg->getLogger().isDebug())
+    m_loader.alg->getLogger().debug() << "Time to collectEvents: " << m_entry_name << " " << timer << "\n";
+#endif
 }
 
 /*
@@ -210,7 +214,10 @@ void ProcessBankCompressed::addToEventLists() {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, num_dets, grainsize), create_task);
   }
 
-  std::cout << "Time to addToEventLists.append: " << m_entry_name << " " << timer << "\n";
+#ifndef _WIN32
+  if (m_loader.alg->getLogger().isDebug())
+    m_loader.alg->getLogger().debug() << "Time to addToEventLists.append: " << m_entry_name << " " << timer << "\n";
+#endif
 }
 
 void ProcessBankCompressed::run() {
@@ -246,8 +253,6 @@ void ProcessBankCompressed::run() {
     }
   }
 
-  std::cout << "Time to ProcessBankCompressed   " << m_entry_name << " " << timer << "\n";
-  // log performance in debug mode
 #ifndef _WIN32
   if (alg->getLogger().isDebug())
     alg->getLogger().debug() << "Time to ProcessBankCompressed " << m_entry_name << " " << timer << "\n";

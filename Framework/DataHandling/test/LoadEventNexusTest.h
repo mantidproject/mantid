@@ -192,8 +192,8 @@ private:
         TS_ASSERT_EQUALS(ws_compressed->getSpectrum(wi).getEventType(), EventType::WEIGHTED_NOTIME);
     }
 
-    std::cout << "Uncompressed " << ws_uncompressed->getMemorySizeAsStr() << " vs Compressed "
-              << ws_compressed->getMemorySizeAsStr() << "\n";
+    // std::cout << "Uncompressed " << ws_uncompressed->getMemorySizeAsStr() << " vs Compressed "
+    //           << ws_compressed->getMemorySizeAsStr() << "\n";
   }
 
 public:

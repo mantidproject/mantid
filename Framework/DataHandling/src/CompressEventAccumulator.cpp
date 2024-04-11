@@ -204,9 +204,6 @@ public:
    * This assumes that the event is within range of the fine histogram
    */
   void addEvent(const float tof) override {
-    // if (tof < m_histogram_edges->front() || tof >= m_histogram_edges->back())
-    //  std::cout << "THIS SHOULD NOT GET PRINTED " << tof << "\n";
-
     // add events
     const auto &bin_optional = this->findBin(tof);
     if (bin_optional) {
