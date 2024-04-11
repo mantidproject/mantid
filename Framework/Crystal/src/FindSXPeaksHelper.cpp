@@ -549,8 +549,8 @@ std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPea
 
   for (; yIt != highY && eIt != highE; ++yIt, ++eIt) {
     const auto signalDiff = *yIt - *(yIt - 1);
-    const auto isStartPeak = signalDiff > m_nsigma * (*eIt);
-    const auto isSigDropSignificant = signalDiff * (-1.) > m_nsigma * (*eIt);
+    const auto isStartPeak = signalDiff > (m_nsigma * (*eIt)) + NSIGMA_COMPARISON_THRESHOLD;
+    const auto isSigDropSignificant = (signalDiff * (-1.)) > (m_nsigma * (*eIt)) + NSIGMA_COMPARISON_THRESHOLD;
     const auto isEndPeak = (currentPeak != nullptr ? (isSigDropSignificant || currentPeak->getStartingSignal() > *yIt)
                                                    : isSigDropSignificant);
 
@@ -558,7 +558,7 @@ std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPea
     1. isRecording is False and isStartPeak True(== isEndPeak is False) => start recording
     2. isRecording is True and isEndPeak False - continue recording
     3. isRecording is True and isEndpeak is True(== isStartpeak is False) - end peak
-    4. isRecording is False and isStartPeak is False or isEndPeak is False - continue
+    4. else - continue
     */
     if (!isRecording && isStartPeak) {
       currentPeak = std::make_unique<PeakContainer>(y);

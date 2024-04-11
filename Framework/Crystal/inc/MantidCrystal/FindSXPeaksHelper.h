@@ -201,6 +201,8 @@ private:
               const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy) const;
 };
 
+#define NSIGMA_COMPARISON_THRESHOLD 1e-10
+
 class MANTID_CRYSTAL_DLL NSigmaPeaksStrategy : public PeakFindingStrategy {
 public:
   NSigmaPeaksStrategy(const API::SpectrumInfo &spectrumInfo, const double nsigma = EMPTY_DBL(),
