@@ -277,6 +277,9 @@ private:
   /// Name of the instrument
   std::string m_instName;
 
+  /// Store if xml text contains side-by-side-view-location string
+  bool m_sideBySideViewLocation_exists;
+
   /// XML document is lazy loaded
   Poco::AutoPtr<Poco::XML::Document> m_pDoc;
 
