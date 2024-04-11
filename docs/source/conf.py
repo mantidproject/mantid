@@ -114,15 +114,6 @@ try:
 except NameError:
     pass
 
-# In the PeakMatching algoithm, there is a local import from mantidqtinterfaces
-# that will cause doctests to fail in PeakMatching-v1.rst if the mantidqt package
-# isn't built. This is a workaround for that, and should be removed once it's no
-# longer needed.
-try:
-    import mantidqtinterfaces.Muon.GUI.ElementalAnalysis as ea_import
-except:
-    ea_import = None
-
 # Use legacy numpy printing. This fix is made to keep doctests functional.
 # TODO: remove this workaround once minimal required numpy is set to 1.14.0
 import numpy as np
