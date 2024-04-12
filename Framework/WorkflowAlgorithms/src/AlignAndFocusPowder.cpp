@@ -501,7 +501,7 @@ void AlignAndFocusPowder::exec() {
   double tofmax = EMPTY_DBL();
 
   // crop the workspace in time-of-flight
-  if (xmin >= 0. || xmax > 0.) {
+  if (((!isEmpty(xmin)) && (xmin >= 0.)) || ((!isEmpty(xmax)) && (xmax > 0.))) {
     getTofRange(m_outputW, tofmin, tofmax);
 
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
