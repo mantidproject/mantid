@@ -288,8 +288,10 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 
-  auto groupWS = std::make_shared<GroupingWorkspace>(inst);
-  this->setProperty("GroupingWorkspace", groupWS);
+  this->groupWS = std::make_shared<GroupingWorkspace>(inst);
+  if (!isDefault("GroupingWorkspace")) {
+    this->setProperty("GroupingWorkspace", groupWS);
+  }
 
   const double step = getProperty("AngleStep");
 
@@ -343,19 +345,18 @@ void GenerateGroupingPowder::exec() {
 
 // XML file
 void GenerateGroupingPowder::saveAsXML() {
-  GroupingWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   const std::string XMLfilename = this->getProperty("GroupingFilename");
   // XML
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", groupWS->getInstrument()->getName());
+  pRoot->setAttribute("instrument", this->groupWS->getInstrument()->getName());
 
   const double step = getProperty("AngleStep");
   const auto numSteps = int(180. / step + 1);
 
   for (int i = 0; i < numSteps; ++i) {
-    std::vector<detid_t> group = groupWS->getDetectorIDsOfGroup(i);
+    std::vector<detid_t> group = this->groupWS->getDetectorIDsOfGroup(i);
     size_t gSize = group.size();
     if (gSize > 0) {
       std::stringstream spID, textvalue;
@@ -401,10 +402,9 @@ void GenerateGroupingPowder::saveAsXML() {
 
 // HDF5 file
 void GenerateGroupingPowder::saveAsNexus() {
-  GroupingWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   const std::string filename = this->getProperty("GroupingFilename");
   auto saveNexus = createChildAlgorithm("SaveNexusProcessed");
-  saveNexus->setProperty("InputWorkspace", groupWS);
+  saveNexus->setProperty("InputWorkspace", this->groupWS);
   saveNexus->setProperty("Filename", filename);
   saveNexus->executeAsChildAlg();
 }

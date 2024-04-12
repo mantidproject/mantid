@@ -8,6 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,6 +39,9 @@ private:
 
   void init() override;
   void exec() override;
+
+  GroupingWorkspace_sptr groupWS;
+
   std::map<std::string, std::string> validateInputs() override;
 };
 
