@@ -431,6 +431,21 @@ public:
     verifyAndClear();
   }
 
+  void testOutputWorkspacesNotSavedWithAutosaveIfNoWorkspacesToSave() {
+    auto presenter = makePresenter(makeModel());
+    IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(true));
+    const std::vector<std::string> workspaces;
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
+    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(0);
+    presenter->notifyAlgorithmComplete(algorithm);
+    verifyAndClear();
+  }
+
   void testNotifyAlgorithmError() {
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
