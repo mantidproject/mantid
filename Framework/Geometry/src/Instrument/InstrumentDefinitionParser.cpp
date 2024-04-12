@@ -120,6 +120,10 @@ void InstrumentDefinitionParser::initialise(const std::string &filename, const s
   m_instName = instName;
   m_xmlFile = xmlFile;
 
+  // do quick check for side-by-side-view-location string, if it doesn't exist we can skip checking every element,
+  // thereby speeding up processing
+  m_sideBySideViewLocation_exists = xmlText.find("side-by-side-view-location") != std::string::npos;
+
   // Create our new instrument
   // We don't want the instrument name taken out of the XML file itself, it
   // should come from the filename (or the property)
@@ -721,6 +725,10 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp, const P
 
 void InstrumentDefinitionParser::setSideBySideViewLocation(Geometry::IComponent *comp,
                                                            const Poco::XML::Element *pCompElem) {
+  // return if no elements contain side-by-side-view-location parameter
+  if (!m_sideBySideViewLocation_exists)
+    return;
+
   auto pViewLocElem = pCompElem->getChildElement("side-by-side-view-location");
   if (pViewLocElem) {
     double x = attrToDouble(pViewLocElem, "x");
