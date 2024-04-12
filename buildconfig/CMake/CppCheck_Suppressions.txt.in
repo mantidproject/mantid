@@ -442,7 +442,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CentroidPeaks.c
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/GoniometerAnglesFromPhiRotation.cpp:306
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:190
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:191
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindSXPeaks.cpp:206
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindSXPeaks.cpp:216
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2ObjFunc.cpp:286
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:95
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:331
