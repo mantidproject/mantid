@@ -53,8 +53,12 @@ public:
   bool getHeaderCheck() const override;
   /// Returns the Q resolution check
   bool getQResolutionCheck() const override;
+  /// Returns the include additional columns check
+  bool getAdditionalColumnsCheck() const override;
   /// Returns the separator type
   std::string getSeparator() const override;
+  /// Returns the save multiple datasets to single file check
+  bool getSaveToSingleFileCheck() const override;
 
   /// Clears the 'List of Workspaces' widget
   void clearWorkspaceList() const override;
@@ -81,8 +85,12 @@ public:
   void disableHeaderCheckBox() override;
   void enableQResolutionCheckBox() override;
   void disableQResolutionCheckBox() override;
+  void enableAdditionalColumnsCheckBox() override;
+  void disableAdditionalColumnsCheckBox() override;
   void enableSeparatorButtonGroup() override;
   void disableSeparatorButtonGroup() override;
+  void enableSaveToSingleFileCheckBox() override;
+  void disableSaveToSingleFileCheckBox() override;
   void enableSaveIndividualRowsCheckbox() override;
   void disableSaveIndividualRowsCheckbox() override;
 
