@@ -50,9 +50,24 @@ public:
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii);
   }
 
-  void test_saving_multiple_workspaces_calls_algorithm_once_for_each() {
+  void test_saving_multiple_workspaces_to_separate_files_with_save_ascii_algorithm() {
     std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
     runTestSaveAsciiAlgorithmCalledForFileFormat(NamedFormat::ANSTO, workspacesToSave);
+  }
+
+  void test_saving_to_single_file_is_ignored_for_save_ascii_algorithm() {
+    std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
+    runTestSaveAsciiAlgorithmCalledForFileFormat(NamedFormat::ANSTO, workspacesToSave, true);
+  }
+
+  void test_saving_multiple_workspaces_to_separate_files_for_ORSOAscii_format() {
+    std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii, workspacesToSave);
+  }
+
+  void test_saving_multiple_workspaces_to_single_file_for_ORSOAscii_format() {
+    std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii, workspacesToSave, true);
   }
 
   void test_invalid_save_path_throws_exception() {
@@ -71,6 +86,7 @@ public:
 private:
   const bool m_includeHeader = true;
   const bool m_includeQResolution = false;
+  const bool m_includeAdditionalColumns = false;
   const std::string m_separator = ",";
   const std::string m_prefix = "test_";
   const std::string m_saveDirectory = "Test";
@@ -92,8 +108,9 @@ private:
     return workspaceNames;
   }
 
-  const FileFormatOptions createFileFormatOptions(NamedFormat format) {
-    return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution);
+  const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false) {
+    return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
+                             m_includeAdditionalColumns, saveAsSingleFile);
   }
 
   const std::string expectedExtension(NamedFormat format) {
@@ -137,7 +154,9 @@ private:
                                      const NamedFormat format) {
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
-    EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, m_includeQResolution)).Times(1);
+    EXPECT_CALL(mockSaveAlgorithmRunner,
+                runSaveORSOAlgorithm(_, savePath, m_includeQResolution, m_includeAdditionalColumns))
+        .Times(1);
   }
 
   void expectIsValidSaveDirectory(MockFileHandler &mockFileHandler, bool isValid = true) {
@@ -145,12 +164,13 @@ private:
   }
 
   void runTestSaveAsciiAlgorithmCalledForFileFormat(NamedFormat format,
-                                                    std::vector<std::string> const &workspacesToSave = {"ws_1"}) {
+                                                    std::vector<std::string> const &workspacesToSave = {"ws_1"},
+                                                    const bool saveAsSingleFile = false) {
     auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
     auto mockFileHandler = MockFileHandler();
     auto wsNames = createWorkspaces(workspacesToSave);
     std::vector<std::string> logParams;
-    auto formatOptions = createFileFormatOptions(format);
+    auto formatOptions = createFileFormatOptions(format, saveAsSingleFile);
 
     expectIsValidSaveDirectory(mockFileHandler);
     for (auto const &name : wsNames) {
@@ -162,16 +182,22 @@ private:
   }
 
   void runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat format,
-                                                   std::vector<std::string> const &workspacesToSave = {"ws_1"}) {
+                                                   std::vector<std::string> const &workspacesToSave = {"ws_1"},
+                                                   const bool saveAsSingleFile = false) {
     auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
     auto mockFileHandler = MockFileHandler();
     auto wsNames = createWorkspaces(workspacesToSave);
     std::vector<std::string> logParams;
-    auto formatOptions = createFileFormatOptions(format);
+    auto formatOptions = createFileFormatOptions(format, saveAsSingleFile);
 
     expectIsValidSaveDirectory(mockFileHandler);
-    for (auto const &name : wsNames) {
-      expectSaveOrsoAlgorithmCalled(*mockSaveAlgorithmRunner, name, formatOptions.format());
+
+    if (saveAsSingleFile) {
+      expectSaveOrsoAlgorithmCalled(*mockSaveAlgorithmRunner, workspacesToSave.front(), formatOptions.format());
+    } else {
+      for (auto const &name : wsNames) {
+        expectSaveOrsoAlgorithmCalled(*mockSaveAlgorithmRunner, name, formatOptions.format());
+      }
     }
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);

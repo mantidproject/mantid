@@ -82,6 +82,18 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   else
     m_view->disableQResolutionCheckBox();
 
+  // Enable/disable the additional columns checkbox for formats that can optionally include these
+  if (fileFormat == NamedFormat::ORSOAscii)
+    m_view->enableAdditionalColumnsCheckBox();
+  else
+    m_view->disableAdditionalColumnsCheckBox();
+
+  // Enable/disable the save to single file checkbox for formats that support this
+  if (fileFormat == NamedFormat::ORSOAscii)
+    m_view->enableSaveToSingleFileCheckBox();
+  else
+    m_view->disableSaveToSingleFileCheckBox();
+
   // Everything else is enabled for Custom and disabled otherwise
   if (fileFormat == NamedFormat::Custom) {
     m_view->enableHeaderCheckBox();
@@ -240,7 +252,9 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
       /*prefix=*/m_view->getPrefix(),
       /*includeHeader=*/m_view->getHeaderCheck(),
       /*separator=*/m_view->getSeparator(),
-      /*includeQResolution=*/m_view->getQResolutionCheck());
+      /*includeQResolution=*/m_view->getQResolutionCheck(),
+      /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
+      /*shouldSaveToSingleFile=*/m_view->getSaveToSingleFileCheck());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,

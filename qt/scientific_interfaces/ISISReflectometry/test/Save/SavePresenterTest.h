@@ -38,7 +38,8 @@ public:
 
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
-        m_includeHeader(true), m_separator(","), m_includeQResolution(true) {}
+        m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false),
+        m_saveToSingleFile(false) {}
 
   void tearDown() override {
     // Verifying and clearing of expectations happens when mock variables are destroyed.
@@ -336,6 +337,8 @@ public:
     presenter.notifySettingsChanged();
   }
 
+  // Custom format option settings
+
   void testLogListEnabledForCustomFormatIfHeaderEnabled() {
     auto presenter = makePresenter();
     expectFileFormat(NamedFormat::Custom);
@@ -356,9 +359,13 @@ public:
     auto presenter = makePresenter();
     expectFileFormat(NamedFormat::Custom);
     expectQResolutionEnabled();
+    expectAdditionalColumnsDisabled();
+    expectSaveToSingleFileDisabled();
     expectCustomOptionsEnabled();
     presenter.notifySettingsChanged();
   }
+
+  // ILL Cosmos format option settings
 
   void testLogListEnabledForILLCosmosFormat() { checkLogListStateForFileFormat(NamedFormat::ILLCosmos, true); }
 
@@ -370,11 +377,31 @@ public:
     checkQResolutionStateForFileFormat(NamedFormat::ILLCosmos, false);
   }
 
+  void testAdditionalColumnsDisabledForILLCosmosFormat() {
+    checkAdditionalColumnsStateForFileFormat(NamedFormat::ILLCosmos, false);
+  }
+
+  void testSaveToSingleFileDisabledForILLCosmosFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ILLCosmos, false);
+  }
+
+  // ANSTO format option settings
+
   void testLogListDisabledForANSTOFormat() { checkLogListStateForFileFormat(NamedFormat::ANSTO, false); }
 
   void testCustomOptionsDisabledForANSTOFormat() { checkCustomOptionsStateForFileFormat(NamedFormat::ANSTO, false); }
 
   void testQResolutionDisabledForANSTOFormat() { checkQResolutionStateForFileFormat(NamedFormat::ANSTO, false); }
+
+  void testAdditionalColumnsDisabledForANSTOFormat() {
+    checkAdditionalColumnsStateForFileFormat(NamedFormat::ANSTO, false);
+  }
+
+  void testSaveToSingleFileDisabledForANSTOFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ANSTO, false);
+  }
+
+  // Three Column format option settings
 
   void testLogListDisabledForThreeColumnFormat() { checkLogListStateForFileFormat(NamedFormat::ThreeColumn, false); }
 
@@ -386,6 +413,16 @@ public:
     checkQResolutionStateForFileFormat(NamedFormat::ThreeColumn, false);
   }
 
+  void testAdditionalColumnsDisabledForThreeColumnFormat() {
+    checkAdditionalColumnsStateForFileFormat(NamedFormat::ThreeColumn, false);
+  }
+
+  void testSaveToSingleFileDisabledForThreeColumnFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ThreeColumn, false);
+  }
+
+  // ORSO Ascii format option settings
+
   void testLogListDisabledForORSOAsciiFormat() { checkLogListStateForFileFormat(NamedFormat::ORSOAscii, false); }
 
   void testCustomOptionsDisabledForORSOAsciiFormat() {
@@ -393,6 +430,14 @@ public:
   }
 
   void testQResolutionEnabledForORSOAsciiFormat() { checkQResolutionStateForFileFormat(NamedFormat::ORSOAscii, true); }
+
+  void testAdditionalColumnsEnabledForORSOAsciiFormat() {
+    checkAdditionalColumnsStateForFileFormat(NamedFormat::ORSOAscii, true);
+  }
+
+  void testSaveToSingleFileEnabledForORSOAsciiFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ORSOAscii, true);
+  }
 
 private:
   SavePresenter makePresenter() {
@@ -476,6 +521,8 @@ private:
     EXPECT_CALL(m_view, getHeaderCheck()).Times(1).WillOnce(Return(m_includeHeader));
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
     EXPECT_CALL(m_view, getQResolutionCheck()).Times(1).WillOnce(Return(m_includeQResolution));
+    EXPECT_CALL(m_view, getAdditionalColumnsCheck()).Times(1).WillOnce(Return(m_includeAdditionalColumns));
+    EXPECT_CALL(m_view, getSaveToSingleFileCheck()).Times(1).WillOnce(Return(m_saveToSingleFile));
   }
 
   void expectSaveWorkspaces(const std::vector<std::string> &workspaceNames,
@@ -483,8 +530,8 @@ private:
     EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(logs));
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView();
-    auto fileFormatOptions =
-        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution);
+    auto fileFormatOptions = FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
+                                               m_includeQResolution, m_includeAdditionalColumns, m_saveToSingleFile);
     EXPECT_CALL(*m_asciiSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
@@ -533,33 +580,66 @@ private:
     EXPECT_CALL(m_view, disableSeparatorButtonGroup()).Times(1);
   }
 
+  void expectAdditionalColumnsEnabled() { EXPECT_CALL(m_view, enableAdditionalColumnsCheckBox()).Times(1); }
+
+  void expectAdditionalColumnsDisabled() { EXPECT_CALL(m_view, disableAdditionalColumnsCheckBox()).Times(1); }
+
+  void expectSaveToSingleFileEnabled() { EXPECT_CALL(m_view, enableSaveToSingleFileCheckBox()).Times(1); }
+
+  void expectSaveToSingleFileDisabled() { EXPECT_CALL(m_view, disableSaveToSingleFileCheckBox()).Times(1); }
+
   void checkQResolutionStateForFileFormat(NamedFormat format, bool isEnabled) {
     auto presenter = makePresenter();
     expectFileFormat(format);
-    if (isEnabled)
+    if (isEnabled) {
       expectQResolutionEnabled();
-    else
+    } else {
       expectQResolutionDisabled();
+    }
     presenter.notifySettingsChanged();
   }
 
   void checkLogListStateForFileFormat(NamedFormat format, bool isEnabled) {
     auto presenter = makePresenter();
     expectFileFormat(format);
-    if (isEnabled)
+    if (isEnabled) {
       expectLogListEnabled();
-    else
+    } else {
       expectLogListDisabled();
+    }
     presenter.notifySettingsChanged();
   }
 
   void checkCustomOptionsStateForFileFormat(NamedFormat format, bool isEnabled) {
     auto presenter = makePresenter();
     expectFileFormat(format);
-    if (isEnabled)
+    if (isEnabled) {
       expectCustomOptionsEnabled();
-    else
+    } else {
       expectCustomOptionsDisabled();
+    }
+    presenter.notifySettingsChanged();
+  }
+
+  void checkAdditionalColumnsStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled) {
+      expectAdditionalColumnsEnabled();
+    } else {
+      expectAdditionalColumnsDisabled();
+    }
+    presenter.notifySettingsChanged();
+  }
+
+  void checkSaveToSingleFileStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled) {
+      expectSaveToSingleFileEnabled();
+    } else {
+      expectSaveToSingleFileDisabled();
+    }
     presenter.notifySettingsChanged();
   }
 
@@ -573,4 +653,6 @@ private:
   bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
+  bool m_includeAdditionalColumns;
+  bool m_saveToSingleFile;
 };

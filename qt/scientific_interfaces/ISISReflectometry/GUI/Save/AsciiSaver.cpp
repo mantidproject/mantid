@@ -15,6 +15,12 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+namespace {
+bool shouldSaveToSingleFile(FileFormatOptions const &fileFormat) {
+  return fileFormat.shouldSaveToSingleFile() && fileFormat.isORSOFormat();
+}
+} // unnamed namespace
+
 AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
     : m_saveAlgRunner(std::move(saveAlgRunner)), m_fileHandler(fileHandler) {}
 
@@ -68,9 +74,10 @@ void AsciiSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string 
                                          fileFormat.separator());
 }
 
-void AsciiSaver::runSaveORSOAlgorithm(std::string const &savePath, const Mantid::API::Workspace_sptr &workspace,
+void AsciiSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
                                       FileFormatOptions const &fileFormat) const {
-  m_saveAlgRunner->runSaveORSOAlgorithm(workspace, savePath, fileFormat.shouldIncludeQResolution());
+  m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
+                                        fileFormat.shouldIncludeAdditionalColumns());
 }
 
 void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
@@ -78,23 +85,42 @@ void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string 
   auto const extension = extensionForFormat(fileFormat.format());
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
-  if (fileFormat.format() == NamedFormat::ORSOAscii) {
-    runSaveORSOAlgorithm(savePath, workspace, fileFormat);
+  if (fileFormat.isORSOFormat()) {
+    const std::vector<std::string> workspaceNames{workspace->getName()};
+    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
   } else {
     runSaveAsciiAlgorithm(savePath, extension, workspace, logParameters, fileFormat);
   }
 }
 
+void AsciiSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
+                                  std::vector<std::string> const &logParameters,
+                                  FileFormatOptions const &fileFormat) const {
+  auto const extension = extensionForFormat(fileFormat.format());
+  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspaceNames.front(), extension);
+
+  if (fileFormat.isORSOFormat()) {
+    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
+  } else {
+    throw std::invalid_argument(
+        "Saving multiple workspaces to a single file is not supported for the selected file format.");
+  }
+}
+
 void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
                       std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+  if (!isValidSaveDirectory(saveDirectory)) {
+    throw InvalidSavePath(saveDirectory);
+  }
+
   // Setup the appropriate save algorithm
-  if (isValidSaveDirectory(saveDirectory)) {
+  if (shouldSaveToSingleFile(fileFormat)) {
+    saveToSingleFile(workspaceNames, saveDirectory, logParameters, fileFormat);
+  } else {
     for (auto const &name : workspaceNames) {
       auto ws = workspace(name);
       if (ws->isGroup()) {
-        // Save child workspaces separately because the current algorithms
-        // don't handle groups. When we switch to SaveReflectometryAscii we can
-        // probably remove this
+        // Save child workspaces into separate files
         Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
         for (auto child : group->getAllItems())
           save(child, saveDirectory, logParameters, fileFormat);
@@ -103,8 +129,6 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
 
       save(ws, saveDirectory, logParameters, fileFormat);
     }
-  } else {
-    throw InvalidSavePath(saveDirectory);
   }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
