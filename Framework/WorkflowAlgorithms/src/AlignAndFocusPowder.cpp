@@ -1226,14 +1226,7 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
   if (compressTolerance <= 0)
     return false;
 
-  // only bother calculating for EventWorkspaces
   if (const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_outputW)) {
-    const auto eventType = eventWS->getEventType();
-
-    // assumes that weighted events are already compressed and will not benefit
-    if (eventType != API::EventType::TOF)
-      return false;
-
     // estimate the time-of-flight range for the data
     // if the parameters aren't supplied, get them from the workspace
     double tofmin_wksp = tofmin;
@@ -1244,20 +1237,33 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
 
     // constants estimating size difference of various events
     constexpr double TOF_EVENT_FIELDS{2.};
+    constexpr double WEIGHTED_EVENT_FIELDS{4.};
     constexpr double WEIGHTED_NOTIME_EVENT_FIELDS{3.};
 
-    // assume one frame and events are evenly spread - this is generically wrong
+    // assume one frame although this is generically wrong
+    // there are 3 fields in weighted events no time
     const double sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_FIELDS * tofRange / compressTolerance;
 
-    // there are two fields in tof
     double numEvents = static_cast<double>(eventWS->getNumberEvents());
-    numEvents *= TOF_EVENT_FIELDS;
+    const auto eventType = eventWS->getEventType();
+    if (eventType == API::EventType::TOF) {
+      // there are two fields in tof
+      numEvents *= TOF_EVENT_FIELDS;
+    } else if (eventType == API::EventType::WEIGHTED) {
+      // there are four fields in weighted w/ time
+      numEvents *= WEIGHTED_EVENT_FIELDS;
+    } else if (eventType == API::EventType::WEIGHTED_NOTIME) {
+      // it looks like things are already compressed
+      return false;
+    } else {
+      return false; // not coded for something else
+    }
 
     // there is an error as this doesn't account for the number of spectra, but this is meant to be
     // a rough calculation
     g_log.information() << "Calculation for compressing events early with size of events currently " << numEvents
                         << " and comparing to " << sizeWeightedEventsEstimate << "\n";
-    return sizeWeightedEventsEstimate < 0.75 * numEvents; // must be significantly less weighted events
+    return sizeWeightedEventsEstimate < numEvents;
   } else {
     // fall-through is to not compress
     return false;
