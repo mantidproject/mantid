@@ -158,15 +158,17 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   const double pd = getProperty(PropertyNames::PD);
   const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pd;
 
+  const MantidVec wavelengthValues = e->dataX(0);
   double pHe, pHeError;
-  MantidVec wavelengthValues, eCalc;
-  fitAnalyserEfficiency(mu, e, pHe, pHeError, wavelengthValues, eCalc);
+  MantidVec eCalc;
+  fitAnalyserEfficiency(mu, e, wavelengthValues, pHe, pHeError, eCalc);
   auto efficiency = calculateEfficiencyWorkspace(wavelengthValues, eCalc, pHe, pHeError, mu, pd);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, efficiency);
 }
 
-void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, double &pHe,
-                                                     double &pHeError, MantidVec &wavelengthValues, MantidVec &eCalc) {
+void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e,
+                                                     const MantidVec &wavelengthValues, double &pHe, double &pHeError,
+                                                     MantidVec &eCalc) {
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=(1 + tanh(" + std::to_string(mu) + "*phe*x))/2,phe=0.1");
@@ -191,9 +193,10 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
 
   pHe = fitParameters->getRef<double>("Value", 0);
   pHeError = fitParameters->getRef<double>("Error", 0);
-  const auto wavelengthValuesHist = fitWorkspace->x(0);
-  wavelengthValues = MantidVec(wavelengthValuesHist.cbegin(), wavelengthValuesHist.cend());
-  eCalc = MantidVec(fitWorkspace->y(0).cbegin(), fitWorkspace->y(0).cend());
+  eCalc = MantidVec(wavelengthValues.size());
+  for (size_t i = 0; i < eCalc.size(); ++i) {
+    eCalc[i] = (1 + std::tanh(mu * pHe * wavelengthValues[i])) / 2.0;
+  }
 }
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiency::calculateEfficiencyWorkspace(const MantidVec &wavelengthValues,

@@ -46,8 +46,8 @@ private:
   MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
                                        const MantidVec &yData, const MantidVec &eData, const bool addToAds = false);
   MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
-  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, double &pHe, double &pHeError,
-                             MantidVec &wavelengthValues, MantidVec &eCalc);
+  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, const MantidVec &wavelengthValues, double &pHe,
+                             double &pHeError, MantidVec &eCalc);
   MatrixWorkspace_sptr calculateEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &eValues,
                                                     const double pHe, const double pHeError, const double mu,
                                                     const double pd);

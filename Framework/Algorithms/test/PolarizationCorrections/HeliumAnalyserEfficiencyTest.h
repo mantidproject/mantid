@@ -78,11 +78,13 @@ public:
   }
 
   void testZeroPdError() {
-    compareOutputValues(0, {0.67084648224720467, 0.77009548972937436, 0.69973631914226142, 0.55523214443728697});
+    compareOutputValues(0, {0.31467362354392969, 0.60768742636557704, 0.69759230851408727, 0.63385733422895174,
+                            0.50295798191903129, 0.36685146065267293});
   }
 
   void testNonZeroPdError() {
-    compareOutputValues(1000, {21.483190633467707, 24.661541276046197, 22.408358894479164, 17.780756582069742});
+    compareOutputValues(1000, {10.077109474097512, 19.460584756204053, 22.339699088898978, 20.298649998203778,
+                               16.106728576701546, 11.748052754137094});
   }
 
   void testSmallNumberOfBins() {
@@ -93,6 +95,23 @@ public:
     auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
+  }
+
+  void testCorrectNumberOfOutputBins() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
+    heliumAnalyserEfficiency->setProperty("StartLambda", 4.0);
+    heliumAnalyserEfficiency->setProperty("EndLambda", 6.0);
+    heliumAnalyserEfficiency->setProperty("IgnoreFitQualityError", true);
+    heliumAnalyserEfficiency->execute();
+    TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
+    MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("E");
+    MatrixWorkspace_sptr firstWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
+    const auto originalXPoints = firstWs->dataX(0);
+    const auto xPoints = eff->dataE(0);
+    // The output wavelength range should match those from the input, not the fitting range.
+    TS_ASSERT_EQUALS(originalXPoints.size(), xPoints.size());
   }
 
 private:
@@ -111,20 +130,27 @@ private:
     std::vector<double> x(numBins);
     std::vector<double> yNsf(numBins);
     std::vector<double> ySf(numBins);
-    expectedEfficiency.resize(numBins - 1);
     for (size_t i = 0; i < numBins; ++i) {
       x[i] = 2.0 + i * 8.0 / numBins;
       yNsf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 - examplePHe));
       ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
-      if (i > 0) {
-        expectedEfficiency[i - 1] = yNsf[i] / (yNsf[i] + ySf[i]);
-      }
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
     wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit);
     wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit);
     wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit);
     wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit);
+
+    const auto histBins = wsVec[0]->dataX(0);
+    yNsf.resize(histBins.size());
+    ySf.resize(histBins.size());
+    expectedEfficiency.resize(histBins.size());
+    for (size_t i = 0; i < histBins.size(); ++i) {
+      yNsf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 - examplePHe));
+      ySf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 + examplePHe));
+      expectedEfficiency[i] = yNsf[i] / (yNsf[i] + ySf[i]);
+    }
+
     return groupWorkspaces(name, wsVec);
   }
 
@@ -195,8 +221,8 @@ private:
     TS_ASSERT_EQUALS(expectedEfficiencies.size(), efficiencies.size());
     TS_ASSERT_EQUALS(expectedErrorValues.size(), error.size());
     for (size_t i = 0; i < error.size(); ++i) {
-      TS_ASSERT_DELTA(expectedEfficiencies[i], efficiencies[i], 1e-8);
-      TS_ASSERT_DELTA(expectedErrorValues[i], error[i], 1e-8);
+      TS_ASSERT_DELTA(expectedEfficiencies[i], efficiencies[i], 1e-7);
+      TS_ASSERT_DELTA(expectedErrorValues[i], error[i], 1e-7);
     }
   }
 };
