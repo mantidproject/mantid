@@ -48,7 +48,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::NeXus;
 using namespace DataObjects;
@@ -190,8 +190,8 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathExists("/mantid_workspace_1"))
+int LoadNexusProcessed::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else
     return 0;
@@ -370,7 +370,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void LoadNexusProcessed::exec() {
+void LoadNexusProcessed::execLoader() {
 
   API::Workspace_sptr tempWS;
   int nWorkspaceEntries = 0;

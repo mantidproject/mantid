@@ -24,7 +24,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 //----------------------------------------------------------------------------------------------
 
 namespace {
@@ -215,8 +215,8 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, const int nWorks
   return false;
 }
 
-int LoadNexusProcessed2::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathExists("/mantid_workspace_1"))
+int LoadNexusProcessed2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  if (descriptor.isEntry("/mantid_workspace_1"))
     return LoadNexusProcessed::confidence(descriptor) + 1; // incrementally better than v1.
   else
     return 0;
