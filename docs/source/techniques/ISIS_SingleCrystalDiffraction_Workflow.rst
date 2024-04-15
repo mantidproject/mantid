@@ -37,7 +37,7 @@ Here is an example using the ``SXD`` class that finds peaks and then removes dup
 
   # find peaks using SXD static method - determines peak threshold from
   # the standard deviation of the intensity distribution
-  peaks_ws = SXD.find_sx_peaks(ws, nstd=6)
+  peaks_ws = SXD.find_sx_peaks(ws, ThresholdVarianceOverMean=2.0)
   SXD.remove_duplicate_peaks_by_qlab(peaks_ws, q_tol=0.05)
 
   # find a UB
