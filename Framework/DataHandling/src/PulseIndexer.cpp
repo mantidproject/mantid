@@ -201,8 +201,7 @@ size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
   const auto pulseIndexEnd = pulseIndex + 1;
 
   // check if the requests have gone past the end - order of if/else matters
-  // const size_t eventIndex = (pulseIndexEnd >= m_roi.back()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
-  size_t eventIndex = m_event_index->operator[](pulseIndexEnd);
+  size_t eventIndex = (pulseIndexEnd >= m_event_index->size()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
   if (pulseIndexEnd == m_roi.back()) {
     eventIndex = std::min(m_numEvents, eventIndex);
     if (pulseIndexEnd == m_event_index->size())
