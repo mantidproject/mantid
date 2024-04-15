@@ -115,15 +115,21 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             defaultValue="IOverSigma",
             direction=Direction.Input,
             validator=StringListValidator(["VarianceOverMean", "IOverSigma"]),
-            doc="To-Do.",
+            doc="PeakFindingStrategy=IOverSigma will find peaks by integrating data using a shoebox kernel and looking"
+            " for peaks with I/sigma > ThresholdIoverSigma. PeakFindingStrategy=VarianceOverMean will look for "
+            "peaks with local variance/mean > ThresholdVarianceOverMean.",
         )
         self.declareProperty(
             name="ThresholdVarianceOverMean",
             defaultValue=3.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=1.0),
-            doc="To-Do",
+            doc="Threshold value for variance/mean used to identify peaks.",
         )
+        use_variance_over_mean = EnabledWhenProperty("PeakFindingStrategy", PropertyCriterion.IsNotDefault)
+        self.setPropertySettings("ThresholdVarianceOverMean", use_variance_over_mean)
+        use_intens_over_sigma = EnabledWhenProperty("PeakFindingStrategy", PropertyCriterion.IsDefault)
+        self.setPropertySettings("ThresholdIoverSigma", use_intens_over_sigma)
 
     def PyExec(self):
         # get input
@@ -164,29 +170,11 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
             _, y, esq, _ = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
             if peak_finding_strategy == "IOverSigma":
-                kernel = make_kernel(nrows, ncols, nbins)  # integration shoebox kernel
-                yconv = convolve(y, kernel, mode="valid")
-                econv = np.sqrt(convolve(esq, kernel**2, mode="valid"))
-                with np.errstate(divide="ignore", invalid="ignore"):
-                    ratio = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
                 threshold = self.getProperty("ThresholdIoverSigma").value
+                ratio, yconv, econv, kernel_shape = calculate_intens_over_sigma(y, esq, nrows, ncols, nbins)
             else:
-                # Variance = (E[X^2] - E[X]^2)
-                # Evaluate ratio of Variance/mean (should be 1 for Poisson distribution if constant bg)
-                kernel = np.ones((nrows, ncols, nbins)) / (nrows * ncols * nbins)
-                # scale to raw counts
-                with np.errstate(divide="ignore", invalid="ignore"):
-                    scale = y / esq
-                    scale[~np.isfinite(scale)] = 0
-                    ycnts = y * scale
-                    avg_y = uniform_filter(ycnts, size=(nrows, ncols, nbins), mode="nearest")
-                    avg_ysq = uniform_filter(ycnts**2, size=(nrows, ncols, nbins), mode="nearest")
-                    ratio = (avg_ysq - avg_y**2) / avg_y
-                # crop to valid region
-                ratio = ratio[
-                    (nrows - 1) // 2 : -(nrows - 1) // 2, (ncols - 1) // 2 : -(ncols - 1) // 2, (nbins - 1) // 2 : -(nbins - 1) // 2
-                ]
                 threshold = self.getProperty("ThresholdVarianceOverMean").value
+                ratio, ycnts, avg_y, kernel_shape = calculate_variance_over_mean(y, esq, nrows, ncols, nbins)
             # perform final smoothing
             ratio[~np.isfinite(ratio)] = 0
             ratio = uniform_filter1d(ratio, size=3, axis=2, mode="nearest")
@@ -195,7 +183,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             pk_mask = binary_closing(pk_mask)  # removes holes - helps merge close peaks
             labels, nlabels = label(pk_mask)  # identify contiguous nearest-neighbour connected regions
             # identify labels of peaks above min size
-            min_size = int(min_frac_size * kernel.size)
+            min_size = int(min_frac_size * np.prod(kernel_shape))
             npixels = sum_labels(pk_mask, labels, range(1, nlabels + 1))
             ilabels = np.flatnonzero(npixels > min_size) + 1
 
@@ -207,18 +195,18 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 irow, icol, itof = imaxs[ipk]
 
                 # map convolution output to the input
-                irow += (kernel.shape[0] - 1) // 2
-                icol += (kernel.shape[1] - 1) // 2
-                itof += (kernel.shape[2] - 1) // 2
+                irow += (kernel_shape[0] - 1) // 2
+                icol += (kernel_shape[1] - 1) // 2
+                itof += (kernel_shape[2] - 1) // 2
 
                 # find peak position
                 # get data in kernel window around index with max I/sigma
-                irow_lo = np.clip(irow - kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
-                irow_hi = np.clip(irow + kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
-                icol_lo = np.clip(icol - kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
-                icol_hi = np.clip(icol + kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
-                itof_lo = np.clip(itof - kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
-                itof_hi = np.clip(itof + kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
+                irow_lo = np.clip(irow - kernel_shape[0] // 2, a_min=0, a_max=y.shape[0])
+                irow_hi = np.clip(irow + kernel_shape[0] // 2, a_min=0, a_max=y.shape[0])
+                icol_lo = np.clip(icol - kernel_shape[1] // 2, a_min=0, a_max=y.shape[1])
+                icol_hi = np.clip(icol + kernel_shape[1] // 2, a_min=0, a_max=y.shape[1])
+                itof_lo = np.clip(itof - kernel_shape[2] // 2, a_min=0, a_max=y.shape[2])
+                itof_hi = np.clip(itof + kernel_shape[2] // 2, a_min=0, a_max=y.shape[2])
                 ypk = y[irow_lo:irow_hi, icol_lo:icol_hi, itof_lo:itof_hi]
                 if peak_finding_strategy == "VarianceOverMean":
                     # perform additional check as in Winter (2018) https://doi.org/10.1107/S2059798317017235
@@ -269,6 +257,34 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             return alg.getProperty("OutputWorkspace").value
         else:
             return None
+
+
+def calculate_intens_over_sigma(y, esq, nrows, ncols, nbins):
+    kernel = make_kernel(nrows, ncols, nbins)  # integration shoebox kernel
+    yconv = convolve(y, kernel, mode="valid")
+    econv = np.sqrt(convolve(esq, kernel**2, mode="valid"))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        intens_over_sigma = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
+    return intens_over_sigma, yconv, econv, kernel.shape
+
+
+def calculate_variance_over_mean(y, esq, nrows, ncols, nbins):
+    # Evaluate ratio of Variance/mean (should be 1 for Poisson distribution if constant bg)
+    # Peak finding criterion used in DIALS, Winter (2018) https://doi.org/10.1107/S2059798317017235
+    with np.errstate(divide="ignore", invalid="ignore"):
+        # scale to raw counts
+        scale = y / esq
+        scale[~np.isfinite(scale)] = 0
+        ycnts = y * scale
+        # calculate variance = (E[X^2] - E[X]^2)
+        avg_y = uniform_filter(ycnts, size=(nrows, ncols, nbins), mode="nearest")
+        avg_ysq = uniform_filter(ycnts**2, size=(nrows, ncols, nbins), mode="nearest")
+        var_over_mean = (avg_ysq - avg_y**2) / avg_y
+    # crop to valid region
+    var_over_mean = var_over_mean[
+        (nrows - 1) // 2 : -(nrows - 1) // 2, (ncols - 1) // 2 : -(ncols - 1) // 2, (nbins - 1) // 2 : -(nbins - 1) // 2
+    ]
+    return var_over_mean, ycnts, avg_y, (nrows, ncols, nbins)
 
 
 def make_kernel(nrows, ncols, nbins):
