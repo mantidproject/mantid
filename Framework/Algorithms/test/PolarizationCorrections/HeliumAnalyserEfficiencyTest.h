@@ -59,39 +59,6 @@ public:
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testOutputs() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
-    heliumAnalyserEfficiency->execute();
-
-    const std::string t = "T";
-    const std::string pHe = "p_He";
-    const std::string tPara = "T_para";
-    const std::string tAnti = "T_anti";
-
-    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(t));
-    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(pHe));
-    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(tPara));
-    ASSERT_FALSE(AnalysisDataService::Instance().doesExist(tAnti));
-
-    heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
-    heliumAnalyserEfficiency->setProperty("OutputTransmissionWorkspace", t);
-    heliumAnalyserEfficiency->setProperty("HeliumAtomsPolarization", pHe);
-    heliumAnalyserEfficiency->setProperty("OutputTransmissionParaWorkspace", tPara);
-    heliumAnalyserEfficiency->setProperty("OutputTransmissionAntiWorkspace", tAnti);
-    heliumAnalyserEfficiency->execute();
-
-    const auto workspacesInAds = AnalysisDataService::Instance().getObjectNames();
-
-    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), t) != workspacesInAds.cend());
-    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), pHe) != workspacesInAds.cend());
-    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), tPara) != workspacesInAds.cend());
-    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), tAnti) != workspacesInAds.cend());
-    const std::string outputWorkspace = heliumAnalyserEfficiency->getProperty("OutputWorkspace");
-    ASSERT_TRUE(std::find(workspacesInAds.cbegin(), workspacesInAds.cend(), outputWorkspace) != workspacesInAds.cend());
-  }
-
   void testInvalidSpinStateFormatThrowsError() {
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
@@ -102,190 +69,30 @@ public:
 
   void testNonWavelengthInput() {
     // The units of the input workspace should be wavelength
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "TOF");
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName()),
                      std::invalid_argument &);
   }
 
-  void testSampleFit() {
-    // For a p of e.g. p=0.1, we're going to generate some spin flipped and non-spin flippped
-    // data and fit to it. We should recover the original p.
-    const double p = 0.1;
-    const double pxd = 12;
-    const double mu = pxd * 0.0733;
-    const double te = 1;
-
-    const boost::format nsfFunc = boost::format("0.5*%1%*exp(-x*%2%*(1-%3%))") % te % mu % p;
-    const boost::format sfFunc = boost::format("0.5*%1%*exp(-x*%2%*(1+%3%))") % te % mu % p;
-
-    auto nsfWs1 = generateFunctionDefinedWorkspace("nsfWs1", nsfFunc.str());
-    auto nsfWs2 = generateFunctionDefinedWorkspace("nsfWs2", nsfFunc.str());
-    auto sfWs1 = generateFunctionDefinedWorkspace("sfWs1", sfFunc.str());
-    auto sfWs2 = generateFunctionDefinedWorkspace("sfWs2", sfFunc.str());
-    auto grpWs = groupWorkspaces("grpWs", {nsfWs1, sfWs1, nsfWs2, sfWs2});
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(grpWs, "P");
-    heliumAnalyserEfficiency->setProperty("SpinStates", "11,10,00,01");
-    heliumAnalyserEfficiency->setProperty("TransmissionEmptyCell", te);
-    heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLength", pxd);
-    heliumAnalyserEfficiency->setProperty("HeliumAtomsPolarization", "p_He");
-    heliumAnalyserEfficiency->execute();
-
-    MatrixWorkspace_sptr pHeWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("p_He");
-    auto pFromFit = pHeWs->y(0)[0];
-    TS_ASSERT_DELTA(pFromFit, p, 1e-5);
+  void testZeroPdError() {
+    compareOutputValues(0, {0.67084648224720467, 0.77009548972937436, 0.69973631914226142, 0.55523214443728697});
   }
 
-  void testIncorrectCovarianceMatrix() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
-
-    // Test covariance matrix with incorrect size
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
-    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error &);
-  }
-
-  void testCorrectCovarianceMatrix() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
-
-    // Test with correctly sized covariance matrix
-    covariance->appendRow();
-    for (size_t i = 0; i < 2; ++i)
-      for (size_t j = 1; j < 3; ++j) {
-        covariance->cell<double>(i, j) = 5;
-      }
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
-    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
-    heliumAnalyserEfficiency->execute();
-    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
-  }
-
-  void testZeroCovarianceMatrix() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
-    covariance->appendRow();
-    for (size_t i = 0; i < 2; ++i)
-      for (size_t j = 1; j < 3; ++j) {
-        covariance->cell<double>(i, j) = 0;
-      }
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "e");
-    heliumAnalyserEfficiency->setProperty("AnalyserPolarization", "P");
-    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
-    heliumAnalyserEfficiency->execute();
-    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
-
-    MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        heliumAnalyserEfficiency->getProperty("AnalyserPolarization"));
-    const auto pErrors = p->dataE(0);
-    const MantidVec expectedPErrors = {0.67084648224713839, 0.77009548972929842, 0.69973631914219236,
-                                       0.55523214443723223};
-    TS_ASSERT_EQUALS(expectedPErrors.size(), pErrors.size());
-    for (size_t i = 0; i < pErrors.size(); ++i) {
-      TS_ASSERT_DELTA(expectedPErrors[i], pErrors[i], 1e-8);
-    }
-  }
-
-  void testNonZeroCovarianceMatrix() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    ITableWorkspace_sptr covariance = createBlankCovarianceMatrix();
-    covariance->appendRow();
-    for (size_t i = 0; i < 2; ++i)
-      for (size_t j = 1; j < 3; ++j) {
-        covariance->cell<double>(i, j) = 1000;
-      }
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "e");
-    heliumAnalyserEfficiency->setProperty("AnalyserPolarization", "P");
-    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
-    heliumAnalyserEfficiency->execute();
-    TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
-
-    MatrixWorkspace_sptr p = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        heliumAnalyserEfficiency->getProperty("AnalyserPolarization"));
-    const auto pErrors = p->dataE(0);
-    const MantidVec expectedPErrors = {1.5147094711224480, 1.7388045742661027, 1.5799400577352583, 1.2536629618054320};
-    TS_ASSERT_EQUALS(expectedPErrors.size(), pErrors.size());
-    for (size_t i = 0; i < pErrors.size(); ++i) {
-      TS_ASSERT_DELTA(expectedPErrors[i], pErrors[i], 1e-8);
-    }
+  void testNonZeroPdError() {
+    compareOutputValues(1000, {21.483190633467707, 24.661541276046197, 22.408358894479164, 17.780756582069742});
   }
 
   void testSmallNumberOfBins() {
     // With less than 4 bins it's not possible to perform the error calculation correctly, because the
     // number of parameters exceeds the number of data points.
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", "Wavelength", 3);
-
-    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
-
-    covariance->addColumn("str", "Name");
-    covariance->addColumn("double", "a");
-    covariance->addColumn("double", "b");
-    covariance->appendRow();
-    covariance->appendRow();
-
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 3);
     auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
-    heliumAnalyserEfficiency->setProperty("Covariance", covariance);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
-  }
-
-  void testEfficiencyOrder() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "efficiencies");
-    heliumAnalyserEfficiency->setProperty("SpinStates", "00,01,10,11");
-    heliumAnalyserEfficiency->execute();
-    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
-    TS_ASSERT_EQUALS("efficiencies00", efficiencies->getItem(0)->getName());
-    TS_ASSERT_EQUALS("efficiencies01", efficiencies->getItem(1)->getName());
-    TS_ASSERT_EQUALS("efficiencies10", efficiencies->getItem(2)->getName());
-    TS_ASSERT_EQUALS("efficiencies11", efficiencies->getItem(3)->getName());
-  }
-
-  void testParallelAndAntiEfficienciesAreSame() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "efficiencies");
-    heliumAnalyserEfficiency->execute();
-    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
-    // Default spin state order is 11,10,01,00
-    auto ws11 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(0));
-    auto ws10 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(1));
-    auto ws01 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(2));
-    auto ws00 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(3));
-
-    TS_ASSERT_EQUALS(ws11->dataX(0).size(), ws00->dataX(0).size());
-    TS_ASSERT_EQUALS(ws10->dataX(0).size(), ws01->dataX(0).size());
-
-    for (size_t i = 0; i < ws11->dataY(0).size(); ++i) {
-      TS_ASSERT_DELTA(ws11->dataY(0)[i], ws00->dataY(0)[i], 1e-8);
-      TS_ASSERT_DELTA(ws10->dataY(0)[i], ws01->dataY(0)[i], 1e-8);
-    }
-  }
-
-  void testEfficiencyNumbers() {
-    auto wsGrp = createExampleGroupWorkspace("wsGrp");
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "efficiencies");
-    heliumAnalyserEfficiency->execute();
-    WorkspaceGroup_sptr efficiencies = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        heliumAnalyserEfficiency->getProperty("OutputWorkspace"));
-    // Default spin state order is 11,10,01,00
-    auto ws11 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(0));
-    auto ws10 = std::dynamic_pointer_cast<MatrixWorkspace>(efficiencies->getItem(1));
-    const auto yPara = ws11->dataY(0);
-    const auto yAnti = ws10->dataY(0);
-    const auto expectedYPara = std::vector<double>{0.78016, 0.86171, 0.91625, 0.95052};
-    const auto expectedYAnti = std::vector<double>{0.21984, 0.13829, 0.08375, 0.04948};
-    for (size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(expectedYPara[i], yPara[i], 1e-3);
-      TS_ASSERT_DELTA(expectedYAnti[i], yAnti[i], 1e-3);
-    }
   }
 
 private:
@@ -298,25 +105,20 @@ private:
     return heliumAnalyserEfficiency;
   }
 
-  ITableWorkspace_sptr createBlankCovarianceMatrix() {
-    ITableWorkspace_sptr covariance = WorkspaceFactory::Instance().createTable();
-
-    covariance->addColumn("str", "Name");
-    covariance->addColumn("double", "a");
-    covariance->addColumn("double", "b");
-    covariance->appendRow();
-    return covariance;
-  }
-
-  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
-                                                  const size_t numBins = 5, const double examplePHe = 0.2) {
+  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, MantidVec &expectedEfficiency,
+                                                  const std::string &xUnit = "Wavelength", const size_t numBins = 5,
+                                                  const double examplePHe = 0.2) {
     std::vector<double> x(numBins);
     std::vector<double> yNsf(numBins);
     std::vector<double> ySf(numBins);
+    expectedEfficiency.resize(numBins - 1);
     for (size_t i = 0; i < numBins; ++i) {
       x[i] = 2.0 + i * 8.0 / numBins;
       yNsf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 - examplePHe));
       ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
+      if (i > 0) {
+        expectedEfficiency[i - 1] = yNsf[i] / (yNsf[i] + ySf[i]);
+      }
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
     wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit);
@@ -374,5 +176,27 @@ private:
 
     MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
     return result;
+  }
+
+  void compareOutputValues(const double pdError, const MantidVec &expectedErrorValues) {
+    MantidVec expectedEfficiencies;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", expectedEfficiencies);
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
+    heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLengthError", pdError);
+    heliumAnalyserEfficiency->execute();
+
+    TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
+
+    MatrixWorkspace_sptr efficiency = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        heliumAnalyserEfficiency->getPropertyValue("OutputWorkspace"));
+    const auto efficiencies = efficiency->dataY(0);
+    const auto error = efficiency->dataE(0);
+
+    TS_ASSERT_EQUALS(expectedEfficiencies.size(), efficiencies.size());
+    TS_ASSERT_EQUALS(expectedErrorValues.size(), error.size());
+    for (size_t i = 0; i < error.size(); ++i) {
+      TS_ASSERT_DELTA(expectedEfficiencies[i], efficiencies[i], 1e-8);
+      TS_ASSERT_DELTA(expectedErrorValues[i], error[i], 1e-8);
+    }
   }
 };

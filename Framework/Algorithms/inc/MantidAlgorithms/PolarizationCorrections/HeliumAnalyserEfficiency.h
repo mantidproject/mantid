@@ -45,21 +45,13 @@ private:
   MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);
   MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
                                        const MantidVec &yData, const MantidVec &eData, const bool addToAds = false);
-  MatrixWorkspace_sptr subtractWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsToSubtract);
   MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
-  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr p, double &pHe, double &pHeError,
-                             MantidVec &wavelengthValues, MantidVec &pCalc);
-  MatrixWorkspace_sptr createPolarizationWorkspace(const double pd, const double pHe, const double pHeError,
-                                                   const double tCrit, const MantidVec &wavelengthValues,
-                                                   const MantidVec &pCalc);
-  void calculateTransmission(const MantidVec &wavelengthValues, const double pHe, const double pHeError,
-                             const double mu, const double tCrit, MantidVec &tPara, MantidVec &tAnti,
-                             MantidVec &tParaErrors, MantidVec &tAntiErrors);
-  WorkspaceGroup_sptr calculateEfficiencies(MatrixWorkspace_sptr pCell, WorkspaceGroup_sptr inputGroup,
-                                            const std::string &spinStateOrder);
+  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, double &pHe, double &pHeError,
+                             MantidVec &wavelengthValues, MantidVec &eCalc);
+  MatrixWorkspace_sptr calculateEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &eValues,
+                                                    const double pHe, const double pHeError, const double mu,
+                                                    const double pd);
   double calculateTCrit(const size_t numberOfBins);
-  void setOptionalOutputProperties(const MantidVec &wavelengthValues, const double pHe, const double pHeError,
-                                   const double mu, const double tCrit);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
 };
