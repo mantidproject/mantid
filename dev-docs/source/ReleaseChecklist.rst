@@ -339,6 +339,8 @@ Smoke Testing
 
 * This is the final day for code changes to the build for blocker issues.
 
+.. _release-manager-announcements:
+
 Release Day
 ###########
 
@@ -479,7 +481,11 @@ We are now ready to create the release candidates for Smoke testing.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
 
-**Create the Release Candidates For Release**
+
+.. _technical-release-manager-release-candidates:
+
+Create Final Release Candidates
+###############################
 
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
 have been fixed. The release candidates must now be recreated with their final version numbers. To do this, build the
@@ -497,6 +503,7 @@ with the following parameters (most are already defaulted to the correct values)
 * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
 * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z``, where ``X.Y.Z`` is the release number.
 
+.. _technical-release-manager-release-day:
 
 Release Day
 ###########
