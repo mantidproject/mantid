@@ -42,7 +42,11 @@ using namespace Mantid::API;
 
 namespace {
 
-const double SEC_TO_NANO = 1.e9;
+constexpr double SEC_TO_NANO{1.e9};
+
+// minimum event vector length to use tbb::parallel_sort
+// this is 4x what parallel_sort uses in the indidividual blocks
+constexpr size_t MIN_VEC_LENGTH_PARALLEL_SORT{2000};
 
 /**
  * Calculate the corrected full time in nanoseconds
@@ -959,6 +963,29 @@ void EventList::sort(const EventSortType order) const {
  */
 void EventList::setSortOrder(const EventSortType order) const { this->order = order; }
 
+namespace {
+// these are abstractions
+template <class RandomIt> void switchable_sort(RandomIt first, RandomIt last) {
+  const auto vec_size = static_cast<size_t>(std::distance(first, last));
+  if (vec_size < 2)
+    return;
+  else if (vec_size < MIN_VEC_LENGTH_PARALLEL_SORT)
+    std::sort(first, last);
+  else
+    tbb::parallel_sort(first, last);
+}
+
+template <class RandomIt, class Compare> void switchable_sort(RandomIt first, RandomIt last, Compare comp) {
+  const auto vec_size = static_cast<size_t>(std::distance(first, last));
+  if (vec_size < 2)
+    return;
+  else if (vec_size < MIN_VEC_LENGTH_PARALLEL_SORT)
+    std::sort(first, last, comp);
+  else
+    tbb::parallel_sort(first, last, comp);
+}
+} // anonymous namespace
+
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
@@ -974,13 +1001,13 @@ void EventList::sortTof() const {
 
   switch (eventType) {
   case TOF:
-    tbb::parallel_sort(events.begin(), events.end());
+    switchable_sort(events.begin(), events.end());
     break;
   case WEIGHTED:
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end());
+    switchable_sort(weightedEvents.begin(), weightedEvents.end());
     break;
   case WEIGHTED_NOTIME:
-    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end());
+    switchable_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end());
     break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1011,15 +1038,15 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
   switch (eventType) {
   case TOF: {
     CompareTimeAtSample<TofEvent> comparitor(tofFactor, tofShift);
-    tbb::parallel_sort(events.begin(), events.end(), comparitor);
+    switchable_sort(events.begin(), events.end(), comparitor);
   } break;
   case WEIGHTED: {
     CompareTimeAtSample<WeightedEvent> comparitor(tofFactor, tofShift);
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(), comparitor);
+    switchable_sort(weightedEvents.begin(), weightedEvents.end(), comparitor);
   } break;
   case WEIGHTED_NOTIME: {
     CompareTimeAtSample<WeightedEventNoTime> comparitor(tofFactor, tofShift);
-    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), comparitor);
+    switchable_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), comparitor);
   } break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1041,10 +1068,10 @@ void EventList::sortPulseTime() const {
   // Perform sort.
   switch (eventType) {
   case TOF:
-    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTime);
+    switchable_sort(events.begin(), events.end(), compareEventPulseTime);
     break;
   case WEIGHTED:
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
+    switchable_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1070,10 +1097,10 @@ void EventList::sortPulseTimeTOF() const {
 
   switch (eventType) {
   case TOF:
-    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+    switchable_sort(events.begin(), events.end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED:
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTimeTOF);
+    switchable_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1099,10 +1126,10 @@ void EventList::sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start, con
 
   switch (eventType) {
   case TOF:
-    tbb::parallel_sort(events.begin(), events.end(), comparator);
+    switchable_sort(events.begin(), events.end(), comparator);
     break;
   case WEIGHTED:
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(), comparator);
+    switchable_sort(weightedEvents.begin(), weightedEvents.end(), comparator);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
