@@ -12,7 +12,7 @@ Description
 This is an algorithm to find single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` with detector
 banks of type :ref:`RectangularDetector <RectangularDetector>` (e.g. SXD, TOPAZ).
 
-There are two peak finding stratgeyies set by ``PeakFindingStrategy``:
+There are two peak finding strategies set by ``PeakFindingStrategy``:
 
 a. ``PeakFindingStrategy="IOverSigma"`` - by integrating the data by convolution with a shoebox kernel and looking for
    regions with statistically significant I/sigma (larger than ``ThresholdIoverSigma``). Note a valid peak would be
