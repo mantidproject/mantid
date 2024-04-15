@@ -41,7 +41,8 @@ void MultiFunctionTemplateView::createProperties() {
 void MultiFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  for (auto const prop : m_parameterMap.keys()) {
+  for (auto const propParam : m_parameterMap) {
+    auto &prop = propParam.first;
     auto const it = parameterNames.find(static_cast<int>(m_parameterMap[prop]));
     if (it != parameterNames.cend()) {
       auto const name = it->second;
@@ -55,7 +56,8 @@ void MultiFunctionTemplateView::updateParameterNames(const std::map<int, std::st
 
 void MultiFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  for (auto const prop : m_parameterMap.keys()) {
+  for (auto const propParam : m_parameterMap) {
+    auto &prop = propParam.first;
     auto const parameterName = m_parameterNames[prop];
     auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
     m_parameterManager->setGlobal(prop, findIter != globals.cend());
