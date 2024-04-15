@@ -1,0 +1,2 @@
+- Add option to find peaks using the ratio of variance/ mean in :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` - this is a peak finding criterion used in DIALS software Winter, G., et al.  Acta Crystallographica Section D: Structural Biology 74.2 (2018): 85-97.
+- :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` is the default peak finding algorithm in the SXD reduction class.
