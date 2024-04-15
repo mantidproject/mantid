@@ -83,7 +83,8 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
-FitPlotModel::FitPlotModel() : m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0} {}
+FitPlotModel::FitPlotModel()
+    : m_fittingData(), m_fitOutput(), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0}, m_activeFunction() {}
 
 FitPlotModel::~FitPlotModel() {}
 
@@ -120,12 +121,12 @@ std::pair<double, double> FitPlotModel::getRange() const {
 }
 
 std::pair<double, double> FitPlotModel::getWorkspaceRange() const {
-  const auto xValues = getWorkspace()->x(0);
+  const auto &xValues = getWorkspace()->x(0);
   return {xValues.front(), xValues.back()};
 }
 
 std::pair<double, double> FitPlotModel::getResultRange() const {
-  const auto xValues = getResultWorkspace()->x(0);
+  const auto &xValues = getResultWorkspace()->x(0);
   return {xValues.front(), xValues.back()};
 }
 

@@ -26,7 +26,7 @@ bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dia
 void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
   auto resolutionVector = m_model->getResolutionsForFit();
-  const auto resolution = resolutionVector.at(row.value).first;
+  const auto &resolution = resolutionVector.at(row.value).first;
   const auto workspaceIndex = m_model->getSpectrum(row);
   const auto range = m_model->getFittingRange(row);
   const auto exclude = m_model->getExcludeRegion(row);

@@ -255,7 +255,7 @@ std::optional<ParamID> MultiFunctionTemplateModel::getParameterId(std::string co
     if (paramNameFromID && parameterName == *paramNameFromID)
       result = pid;
   };
-  applyParameterFunction(getter);
+  applyParameterFunction(std::move(getter));
   return result;
 }
 

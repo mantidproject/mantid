@@ -588,16 +588,14 @@ void FitTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
     m_fittingModel->addDefaultParameters();
   }
   updateDataReferences();
-  auto displayNames = m_dataPresenter->createDisplayNames();
-  m_plotPresenter->appendLastDataToSelection(displayNames);
+  m_plotPresenter->appendLastDataToSelection(m_dataPresenter->createDisplayNames());
   updateParameterEstimationData();
 }
 
 void FitTab::handleDataRemoved() {
   m_fittingModel->removeDefaultParameters();
   updateDataReferences();
-  auto displayNames = m_dataPresenter->createDisplayNames();
-  m_plotPresenter->updateDataSelection(displayNames);
+  m_plotPresenter->updateDataSelection(m_dataPresenter->createDisplayNames());
   updateParameterEstimationData();
 }
 
@@ -634,7 +632,7 @@ std::string FitTab::getFitTypeString() const {
   }
 
   std::string fitType{""};
-  for (auto fitFunctionName : FUNCTION_STRINGS) {
+  for (auto const &fitFunctionName : FUNCTION_STRINGS) {
     auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
     if (occurances > 0) {
       fitType += std::to_string(occurances) + fitFunctionName.second;

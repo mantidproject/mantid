@@ -32,7 +32,9 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FunctionTemplateView::FunctionTemplateView() : QWidget(), m_parameterNames(), m_decimals(6) {}
+FunctionTemplateView::FunctionTemplateView()
+    : QWidget(), m_boolManager(), m_intManager(), m_doubleManager(), m_stringManager(), m_enumManager(),
+      m_groupManager(), m_parameterManager(), m_parameterNames(), m_browser(), m_presenter() {}
 
 FunctionTemplateView::~FunctionTemplateView() {
   m_browser->unsetFactoryForManager(m_stringManager);

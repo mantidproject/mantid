@@ -61,8 +61,8 @@ public:
 
   void setStartX(double value);
   void setEndX(double value);
-  void appendLastDataToSelection(std::vector<std::string> displayNames);
-  void updateDataSelection(std::vector<std::string> displayNames);
+  void appendLastDataToSelection(std::vector<std::string> const &displayNames);
+  void updateDataSelection(std::vector<std::string> const &displayNames);
   void updateAvailableSpectra();
   void updatePlots();
   void updateFit();
