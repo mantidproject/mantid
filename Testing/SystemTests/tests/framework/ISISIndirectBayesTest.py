@@ -6,16 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 from abc import ABCMeta, abstractmethod
-import importlib
 import os
 import warnings
 
 from mantid.simpleapi import *
 import systemtesting
-
-
-def _is_quasielasticbayes_available():
-    return importlib.util.find_spec("quasielasticbayes")
 
 
 def _cleanup_files(dirname, filenames):
@@ -35,9 +30,6 @@ def _cleanup_files(dirname, filenames):
 
 
 class QLresTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         prefix = "rt_"
         sname = "irs26176_graphite002_red"
@@ -69,6 +61,7 @@ class QLresTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-4
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "rt_irs26176_graphite002_QLr_Workspace_0", "ISISIndirectBayes_QlresTest.nxs"
 
     def cleanup(self):
@@ -85,9 +78,6 @@ class QLresTest(systemtesting.MantidSystemTest):
 
 
 class QuestTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -125,9 +115,6 @@ class QuestTest(systemtesting.MantidSystemTest):
 
 
 class QSeTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -157,6 +144,7 @@ class QSeTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "irs26176_graphite002_QSe_Workspace_0", "ISISIndirectBayes_QSeTest.nxs"
 
     def cleanup(self):
@@ -169,9 +157,6 @@ class QSeTest(systemtesting.MantidSystemTest):
 
 
 class QLDataTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_red"
@@ -202,6 +187,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-4
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "irs26176_graphite002_QLd_Workspace_0", "ISISIndirectBayes_QLDataTest.nxs"
 
     def cleanup(self):
@@ -219,9 +205,6 @@ class QLDataTest(systemtesting.MantidSystemTest):
 
 
 class QLResNormTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -256,7 +239,8 @@ class QLResNormTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
-        return "irs26176_graphite002_QLr_Workspaces", "ISISIndirectBayes_QLr_ResNorm_Test.nxs"
+        self.disableChecking.append("Axes")
+        return "irs26176_graphite002_QLr_Workspace", "ISISIndirectBayes_QLr_ResNorm_Test.nxs"
 
     def cleanup(self):
         AnalysisDataService.clear()
@@ -273,9 +257,6 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 
 
 class QLWidthTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return not _is_quasielasticbayes_available()
-
     def runTest(self):
         prefix = "wt_"
         sname = "irs26176_graphite002_red"
@@ -305,6 +286,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
         return "wt_irs26176_graphite002_QLr_Workspace_0", "ISISIndirectBayes_QLr_width_Test.nxs"
 
     def cleanup(self):

@@ -37,18 +37,15 @@ Usage
 
 .. testcode:: BayesQuasiExample
 
-    # Check OS support for F2Py
-    from mantid.utils.pip import package_installed
-    if package_installed("quasielasticbayes"):
-        # Load in test data
-        sampleWs = Load('irs26176_graphite002_red.nxs')
-        resWs = Load('irs26173_graphite002_red.nxs')
+    # Load in test data
+    sampleWs = Load('irs26176_graphite002_red.nxs')
+    resWs = Load('irs26173_graphite002_red.nxs')
 
-        # Run BayesQuasi algorithm
-        fit_ws, result_ws, prob_ws = BayesQuasi(Program='QL', SampleWorkspace=sampleWs, ResolutionWorkspace=resWs,
-                                            MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1,
-                                            Elastic=False, Background='Sloping', FixedWidth=False, UseResNorm=False,
-                                            WidthFile='', Loop=True)
+    # Run BayesQuasi algorithm
+    fit_ws, result_ws, prob_ws = BayesQuasi(Program='QL', SampleWorkspace=sampleWs, ResolutionWorkspace=resWs,
+                                        MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1,
+                                        Elastic=False, Background='Sloping', FixedWidth=False, UseResNorm=False,
+                                        WidthFile='', Loop=True)
 
 .. categories::
 
