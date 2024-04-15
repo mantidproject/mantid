@@ -22,7 +22,7 @@ from mantid.kernel import (
     StringListValidator,
 )
 import numpy as np
-from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d
+from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d, uniform_filter
 from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 
@@ -179,9 +179,13 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                     scale = y / esq
                     scale[~np.isfinite(scale)] = 0
                     ycnts = y * scale
-                    avg_y = convolve(ycnts, kernel, mode="valid")
-                    avg_ysq = convolve(ycnts**2, kernel, mode="valid")
+                    avg_y = uniform_filter(ycnts, size=(nrows, ncols, nbins), mode="nearest")
+                    avg_ysq = uniform_filter(ycnts**2, size=(nrows, ncols, nbins), mode="nearest")
                     ratio = (avg_ysq - avg_y**2) / avg_y
+                # crop to valid region
+                ratio = ratio[
+                    (nrows - 1) // 2 : -(nrows - 1) // 2, (ncols - 1) // 2 : -(ncols - 1) // 2, (nbins - 1) // 2 : -(nbins - 1) // 2
+                ]
                 threshold = self.getProperty("ThresholdVarianceOverMean").value
             # perform final smoothing
             ratio[~np.isfinite(ratio)] = 0
