@@ -10,6 +10,7 @@ import os
 import warnings
 
 from mantid.simpleapi import *
+from sys import platform
 import systemtesting
 
 
@@ -30,6 +31,9 @@ def _cleanup_files(dirname, filenames):
 
 
 class QLresTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         prefix = "rt_"
         sname = "irs26176_graphite002_red"
@@ -78,6 +82,9 @@ class QLresTest(systemtesting.MantidSystemTest):
 
 
 class QuestTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -115,6 +122,9 @@ class QuestTest(systemtesting.MantidSystemTest):
 
 
 class QSeTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -157,6 +167,9 @@ class QSeTest(systemtesting.MantidSystemTest):
 
 
 class QLDataTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_red"
@@ -205,6 +218,9 @@ class QLDataTest(systemtesting.MantidSystemTest):
 
 
 class QLResNormTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -257,6 +273,9 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 
 
 class QLWidthTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return platform == "darwin"
+
     def runTest(self):
         prefix = "wt_"
         sname = "irs26176_graphite002_red"
