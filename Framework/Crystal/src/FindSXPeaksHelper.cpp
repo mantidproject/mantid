@@ -665,6 +665,10 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peak
 }
 
 void SimpleReduceStrategy::reducePeaksFromNumberOfSpectras(std::vector<SXPeak> &inputPeaks) const {
+  if (m_minNSpectraPerPeak == EMPTY_INT() && m_maxNSpectraPerPeak == EMPTY_INT()) {
+    return;
+  }
+
   for (auto peakIt = inputPeaks.begin(); peakIt != inputPeaks.end();) {
     if (((m_minNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() < m_minNSpectraPerPeak)) ||
         ((m_maxNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() > m_maxNSpectraPerPeak))) {
