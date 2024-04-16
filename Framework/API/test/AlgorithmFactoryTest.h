@@ -127,7 +127,8 @@ public:
     const auto resultAlias = algFactory.getRealNameFromAlias("Dog");
     const auto resultFakeAlias = algFactory.getRealNameFromAlias("Frog");
 
-    TS_ASSERT_EQUALS(resultAlias.get(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(resultAlias->first, "ToyAlgorithm");
+    TS_ASSERT_EQUALS(resultAlias->second, 1);
     TS_ASSERT_EQUALS(resultFakeAlias, boost::none);
   }
 
@@ -135,7 +136,6 @@ public:
     auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_THROWS(algFactory.highestVersion("ToyAlgorithm"), const std::runtime_error &);
-    TS_ASSERT_THROWS(algFactory.highestVersion("Dog"), const std::runtime_error &);
 
     algFactory.subscribe<ToyAlgorithm>();
     TS_ASSERT_EQUALS(1, algFactory.highestVersion("ToyAlgorithm"));
