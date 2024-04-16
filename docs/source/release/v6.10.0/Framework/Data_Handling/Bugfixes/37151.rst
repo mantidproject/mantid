@@ -1,1 +1,1 @@
-- GenerateGroupingPowder now accepts `GroupingWorkspace` as an optional argument instead of required
+- :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` now accepts ``GroupingWorkspace`` as an optional argument instead of required

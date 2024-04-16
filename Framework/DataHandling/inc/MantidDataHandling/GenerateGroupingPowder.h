@@ -38,7 +38,7 @@ private:
   void init() override;
   void exec() override;
 
-  Mantid::DataObjects::GroupingWorkspace_sptr m_groupWS;
+  DataObjects::GroupingWorkspace_sptr m_groupWS;
 
   std::map<std::string, std::string> validateInputs() override;
 };
