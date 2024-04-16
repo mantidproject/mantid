@@ -159,7 +159,7 @@ public:
   virtual ~PeakFindingStrategy() = default;
   PeakList findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
                        const HistogramData::HistogramE &e, const int workspaceIndex) const;
-  void setMinBinsForAPeak(int minBinsForAPeak);
+  void setMinNBinsPerPeak(int minBinsPerPeak);
 
 protected:
   void filterPeaksForMinBins(std::vector<std::unique_ptr<PeakContainer>> &inputPeakList) const;
@@ -179,7 +179,7 @@ protected:
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
   const XAxisUnit m_units;
-  int m_minBinsForPeak = EMPTY_INT();
+  int m_minNBinsPerPeak = EMPTY_INT();
 };
 
 class MANTID_CRYSTAL_DLL StrongestPeaksStrategy : public PeakFindingStrategy {
@@ -269,13 +269,13 @@ public:
   virtual std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks,
                                      Mantid::Kernel::ProgressBase &progress) const = 0;
 
-  void setMinSpectrasForPeak(int minSpectrasForPeak);
-  void setMaxSpectrasForPeak(int maxSpectrasForPeak);
+  void setMinNSpectraPerPeak(int minSpectrasForPeak);
+  void setMaxNSpectraPerPeak(int maxSpectrasForPeak);
 
 protected:
   const CompareStrategy *m_compareStrategy;
-  int m_minSpectrasForPeak = EMPTY_INT();
-  int m_maxSpectrasForPeak = EMPTY_INT();
+  int m_minNSpectraPerPeak = EMPTY_INT();
+  int m_maxNSpectraPerPeak = EMPTY_INT();
 };
 
 class MANTID_CRYSTAL_DLL SimpleReduceStrategy : public ReducePeakListStrategy {

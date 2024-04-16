@@ -160,7 +160,7 @@ public:
     // WHEN
     auto peakFindingStrategy = std::make_unique<AllPeaksStrategy>(backgroundStrategy.get(), spectrumInfo);
     if (minBinWidth != Mantid::EMPTY_INT())
-      peakFindingStrategy->setMinBinsForAPeak(minBinWidth);
+      peakFindingStrategy->setMinNBinsPerPeak(minBinWidth);
     return peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
   }
 
@@ -239,7 +239,7 @@ public:
     // WHEN
     auto peakFindingStrategy = std::make_unique<NSigmaPeaksStrategy>(spectrumInfo, nsigma);
     if (minBinWidth != Mantid::EMPTY_INT()) {
-      peakFindingStrategy->setMinBinsForAPeak(minBinWidth);
+      peakFindingStrategy->setMinNBinsPerPeak(minBinWidth);
     }
 
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);

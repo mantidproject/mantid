@@ -181,7 +181,7 @@ public:
     makeOnePeak(3, 45, 2, workspace);
 
     auto alg = createFindSXPeaks(workspace);
-    alg->setProperty("MinSpectrumsForAPeak", 2);
+    alg->setProperty("MinNSpectraPerPeak", 2);
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
@@ -199,7 +199,7 @@ public:
     makeOnePeak(3, 45, 2, workspace);
 
     auto alg = createFindSXPeaks(workspace);
-    alg->setProperty("MaxSpectrumsForAPeak", 3);
+    alg->setProperty("maxNSpectraPerPeak", 3);
     alg->execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
