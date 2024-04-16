@@ -329,4 +329,15 @@ public:
     mangledName = "Cat 1";
     TS_ASSERT_THROWS_ANYTHING(outPair = algFactory.decodeName(mangledName));
   }
+
+  void testAliasPointsToCorrectVersion() {
+    auto &algFactory = AlgorithmFactory::Instance();
+    algFactory.subscribe<CoolAlgorithm1>();
+    algFactory.subscribe<CoolAlgorithm2>();
+
+    const auto nameAndVersion = algFactory.getRealNameFromAlias("TheCoolestAlgorithm");
+
+    TS_ASSERT_EQUALS(nameAndVersion->first, "CoolAlgorithm");
+    TS_ASSERT_EQUALS(nameAndVersion->second, 1);
+  }
 };
