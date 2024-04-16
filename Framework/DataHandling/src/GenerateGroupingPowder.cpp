@@ -288,9 +288,9 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 
-  this->groupWS = std::make_shared<GroupingWorkspace>(inst);
+  this->m_groupWS = std::make_shared<GroupingWorkspace>(inst);
   if (!isDefault("GroupingWorkspace")) {
-    this->setProperty("GroupingWorkspace", groupWS);
+    this->setProperty("GroupingWorkspace", this->m_groupWS);
   }
 
   const double step = getProperty("AngleStep");
@@ -320,12 +320,12 @@ void GenerateGroupingPowder::exec() {
     const double groupId = (double)(*label)(spectrumInfo, i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      groupWS->setValue(det.getID(), groupId);
+      this->m_groupWS->setValue(det.getID(), groupId);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();
       const auto ids = std::set<detid_t>(idv.begin(), idv.end());
-      groupWS->setValue(ids, groupId);
+      this->m_groupWS->setValue(ids, groupId);
     }
   }
 
@@ -350,13 +350,13 @@ void GenerateGroupingPowder::saveAsXML() {
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", this->groupWS->getInstrument()->getName());
+  pRoot->setAttribute("instrument", this->m_groupWS->getInstrument()->getName());
 
   const double step = getProperty("AngleStep");
   const auto numSteps = int(180. / step + 1);
 
   for (int i = 0; i < numSteps; ++i) {
-    std::vector<detid_t> group = this->groupWS->getDetectorIDsOfGroup(i);
+    std::vector<detid_t> group = this->m_groupWS->getDetectorIDsOfGroup(i);
     size_t gSize = group.size();
     if (gSize > 0) {
       std::stringstream spID, textvalue;
@@ -404,7 +404,7 @@ void GenerateGroupingPowder::saveAsXML() {
 void GenerateGroupingPowder::saveAsNexus() {
   const std::string filename = this->getProperty("GroupingFilename");
   auto saveNexus = createChildAlgorithm("SaveNexusProcessed");
-  saveNexus->setProperty("InputWorkspace", this->groupWS);
+  saveNexus->setProperty("InputWorkspace", this->m_groupWS);
   saveNexus->setProperty("Filename", filename);
   saveNexus->executeAsChildAlg();
 }
