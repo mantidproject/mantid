@@ -19,7 +19,7 @@ using namespace Kernel;
 // Register the algorithm in the AlgorithmFactory
 DECLARE_ALGORITHM(FlipperEfficiency)
 
-std::string const FlipperEfficiency::summary() const {}
+std::string const FlipperEfficiency::summary() const { return "Calculate the efficiency of the polarization flipper."; }
 
 void FlipperEfficiency::init() {}
 

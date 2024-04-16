@@ -948,6 +948,7 @@ set(TEST_FILES
     PolarizationCorrections/HeliumAnalyserEfficiencyTest.h
     PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
     PolarizationCorrections/SpinStateValidatorTest.h
+    PolarizationCorrections/FlipperEfficiencyTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
     PolarizationEfficiencyCorTest.h
