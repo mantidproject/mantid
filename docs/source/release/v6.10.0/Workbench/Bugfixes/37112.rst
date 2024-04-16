@@ -1,0 +1,1 @@
+- Fixed a bug where an algorithm alias would always get the highest version of the parent algorithm instead of the specific version it was assigned to.
