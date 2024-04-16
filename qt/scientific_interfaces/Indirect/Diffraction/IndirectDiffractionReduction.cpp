@@ -421,7 +421,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
       osirisDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
   }
 
-  m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
+  auto groupingProps = m_groupingWidget->groupingProperties();
+  m_batchAlgoRunner->addAlgorithm(osirisDiffReduction, std::move(groupingProps));
 
   auto inputFromReductionProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromReductionProps->setPropertyValue("InputWorkspace", drangeWsName.toStdString());
@@ -534,16 +535,13 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   m_uiForm.ckUseCalib->setVisible(calibrationOptional);
   m_uiForm.rfCalFile->setVisible(calibrationOptional);
   m_uiForm.rfCalFile->isOptional(!calibrationMandatory);
+  m_uiForm.rfCalFile->setToolTip("Note: The calibration file will not be used for detector grouping unless explicitly "
+                                 "selected in the 'File' grouping option below.");
   m_uiForm.ckUseCalib->setChecked(calibrationMandatory);
   m_uiForm.ckUseCalib->setDisabled(calibrationMandatory);
 
   // Hide rebin options for OSIRIS diffonly
   m_uiForm.gbDspaceRebinCalibOnly->setVisible(!(instrumentName == "OSIRIS" && reflectionName == "diffonly"));
-
-  auto allowDetectorGrouping = !(instrumentName == "OSIRIS" && reflectionName == "diffonly");
-  m_uiForm.fDetectorGrouping->setEnabled(allowDetectorGrouping);
-  m_uiForm.fDetectorGrouping->setToolTip(!allowDetectorGrouping ? "OSIRIS cannot group detectors in diffonly mode."
-                                                                : "");
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable sum files

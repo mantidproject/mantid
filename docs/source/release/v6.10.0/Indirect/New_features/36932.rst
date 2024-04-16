@@ -1,3 +1,3 @@
-- Added the ability to use `File` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments, except for OSIRIS in diffonly mode.
-- Added the ability to use `Custom` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments, except for OSIRIS in diffonly mode.
-- Added the ability to use `Groups` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments, except for OSIRIS in diffonly mode.
+- Added the ability to use `File` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments.
+- Added the ability to use `Custom` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments.
+- Added the ability to use `Groups` detector grouping from the :ref:`Indirect Diffraction interface <interface-indirect-diffraction>` for all instruments.
