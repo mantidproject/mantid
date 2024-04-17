@@ -257,10 +257,7 @@ void PropertyHandler::initParameters() {
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
     if (m_fun->isFixed(i)) {
-      QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
-      m_browser->m_stringManager->setValue(tieProp, QString::number(m_fun->getParameter(i)));
-      prop->addSubProperty(tieProp);
-      m_ties[parName] = tieProp;
+      fix(parName);
     }
     // add constraint properties
     Mantid::API::IConstraint *c = m_fun->getConstraint(i);
