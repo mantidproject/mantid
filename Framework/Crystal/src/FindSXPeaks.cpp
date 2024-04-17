@@ -239,18 +239,24 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   if (inputWorkspace) {
-    size_t numberOfSpectra = inputWorkspace->getNumberHistograms();
+    int minWsIndex = static_cast<int>(getProperty("StartWorkspaceIndex"));
+    int maxWsIndex = static_cast<int>(getProperty("EndWorkspaceIndex"));
+    size_t numberOfSpectraToConsider =
+        !isEmpty(minWsIndex) ? (!isEmpty(maxWsIndex) ? (maxWsIndex - minWsIndex + 1)
+                                                     : (inputWorkspace->getNumberHistograms() - minWsIndex))
+                             : (!isEmpty(maxWsIndex) ? (maxWsIndex + 1) : (inputWorkspace->getNumberHistograms()));
+
     if (!isEmpty(minNSpectraPerPeak)) {
-      if (numberOfSpectra < minNSpectraPerPeak) {
+      if (numberOfSpectraToConsider < minNSpectraPerPeak) {
         validationOutput["MinNSpectraPerPeak"] =
-            "MinNSpectraPerPeak must be less than the number of spectrums in InputWorkspace";
+            "MinNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
       }
     }
 
     if (!isEmpty(maxNSpectraPerPeak)) {
-      if (numberOfSpectra < maxNSpectraPerPeak) {
+      if (numberOfSpectraToConsider < maxNSpectraPerPeak) {
         validationOutput["MaxNSpectraPerPeak"] =
-            "MaxNSpectraPerPeak must be less than the number of spectrums in InputWorkspace";
+            "MaxNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
       }
     }
 
@@ -300,7 +306,7 @@ void FindSXPeaks::exec() {
     m_MaxWsIndex = numberOfSpectra - 1;
   if (m_MaxWsIndex > numberOfSpectra - 1 || m_MaxWsIndex < m_MinWsIndex) {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
-    m_MaxWsIndex = numberOfSpectra;
+    m_MaxWsIndex = numberOfSpectra - 1;
   }
   if (m_MinRange > m_MaxRange) {
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to "
