@@ -472,16 +472,23 @@ void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
     QString parName = it.key();
     QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = cf.getTie(cf.parameterIndex(fullName.toStdString()));
+    const auto paramIndex = cf.parameterIndex(fullName.toStdString());
+    const auto status = cf.getParameterStatus(paramIndex);
+    Mantid::API::ParameterTie *tie = cf.getTie(paramIndex);
     if (!tie) {
-      // In this case the tie has been removed from the composite function since it contained a reference to
-      // the function which was removed
-      QtProperty *parProp = getParameterProperty(parName);
-      if (parProp != nullptr) {
-        parProp->removeSubProperty(prop);
-        // Don't increment the iterator if we delete the current tie.
-        it = m_ties.erase(it);
-        parProp->setEnabled(true);
+      if (status != Mantid::API::IFunction::ParameterStatus::Fixed &&
+          status != Mantid::API::IFunction::ParameterStatus::FixedByDefault) {
+        // In this case the tie has been removed from the composite function since it contained a reference to
+        // the function which was removed
+        QtProperty *parProp = getParameterProperty(parName);
+        if (parProp != nullptr) {
+          parProp->removeSubProperty(prop);
+          // Don't increment the iterator if we delete the current tie.
+          it = m_ties.erase(it);
+          parProp->setEnabled(true);
+        }
+      } else {
+        ++it;
       }
       continue;
     } else {
