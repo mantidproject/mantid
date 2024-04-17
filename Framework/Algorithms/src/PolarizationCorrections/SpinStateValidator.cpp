@@ -31,7 +31,7 @@ Kernel::IValidator_sptr SpinStateValidator::clone() const {
 
 std::string SpinStateValidator::checkValidity(const std::string &input) const {
   if (input.empty())
-    return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 01";
+    return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 11";
 
   std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::SplitSpinStateString(input);
 
