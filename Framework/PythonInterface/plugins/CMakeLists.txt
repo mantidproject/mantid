@@ -379,6 +379,7 @@ set(PYTHON_PLUGINS
     functions/RFresonance.py
     functions/Redfield.py
     functions/SCgapSwave.py
+    functions/SpinDiffusion.py
     functions/SpinGlass.py
     functions/StandardSC.py
     functions/StaticLorentzianKT.py
