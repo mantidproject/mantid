@@ -11,9 +11,12 @@ from numpy import float64
 from numpy.typing import NDArray
 from mantid.api import IFunction1D, FunctionFactory
 from mantid.kernel import IntBoundedValidator
+from scipy.constants import elementary_charge, physical_constants
 from scipy.integrate import quad
 from scipy.special import i0e
 from typing import Tuple
+
+MAGNETOGYRIC_RATIO = physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6)  # MHz / T
 
 
 @cache
@@ -89,10 +92,11 @@ class SpinDiffusion(IFunction1D):
         n_dimensions = self.getAttributeValue("NDimensions")
 
         d_i_terms = d_rates(n_dimensions, d_par, d_perp)
+        w_values = MAGNETOGYRIC_RATIO * np.array(xvals)
         if n_dimensions == 1:
-            spectral_density_results = spectral_density_approximation_1d(*d_i_terms, np.array(xvals))
+            spectral_density_results = spectral_density_approximation_1d(*d_i_terms, w_values)
         else:
-            spectral_density_results = np.array([spectral_density(*d_i_terms, w, len(xvals) / 4) for w in xvals])
+            spectral_density_results = np.array([spectral_density(*d_i_terms, w, len(w_values) / 4) for w in w_values])
 
         return np.square(A) / 4 * spectral_density_results
 
