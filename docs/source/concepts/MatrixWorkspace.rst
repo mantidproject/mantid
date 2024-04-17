@@ -11,7 +11,7 @@ Matrix Workspace
 A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the measurement was made. The Matrix Workspace forms a 2D structure, more details on this will be provided below. This is the most common structure for storing data in  Mantid. This covers several more detailed workspace types including:
 
 -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, accumulated data in memory, this is the most commonly used to store histograms.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.
+-  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data..
 
 What information is in a Matrix Workspace
 ------------------------------------------
