@@ -36,12 +36,12 @@ def integrand(t: Tuple[float], d_1: float, d_2: float, d_3: float, w: float) -> 
     return autocorrelation_st(d_1, d_2, d_3, t) * np.cos(w * t)
 
 
-def spectral_density(d_1: float, d_2: float, d_3: float, w: float) -> float:
+def spectral_density(d_1: float, d_2: float, d_3: float, w: float, n_points: int) -> float:
     """Calculate J(w) for 2D and 3D systems."""
     integral, _ = quad(
         integrand,
         0,
-        300,
+        n_points / 4,
         args=(
             d_1,
             d_2,
@@ -64,7 +64,7 @@ class SpinDiffusion(IFunction1D):
         self.declareParameter("D2", 1e-2, "Dipolar term 2 (MHz)")
         self.declareParameter("D3", 1e-2, "Dipolar term 3 (MHz)")
         # Non-fitting parameters
-        self.declareAttribute("NDimensions", 1, "The number of dimensions (1, 2 or 3)")
+        self.declareAttribute("NDimensions", 1)
 
     def function1D(self, xvals):
         A = self.getParameterValue("A")
@@ -73,17 +73,17 @@ class SpinDiffusion(IFunction1D):
         d_3 = self.getParameterValue("D3")
 
         n_dimensions = int(self.getAttributeValue("NDimensions"))
-        if n_dimensions == 1:
-            d_3 = d_2
-            spectral_density_results = spectral_density_approximation_1d(d_1 / d_1, d_2 / d_1, np.array(xvals))
-        elif n_dimensions == 2:
-            d_2 = d_1
-            spectral_density_results = np.array([spectral_density(d_1 / d_1, d_2 / d_1, d_3 / d_1, w) for w in xvals])
-        elif n_dimensions == 3:
-            d_3 = d_2 = d_1
-            spectral_density_results = np.array([spectral_density(d_1 / d_1, d_2 / d_1, d_3 / d_1, w) for w in xvals])
-        else:
-            raise NotImplementedError("Not implemented for more than 3 dimensions")
+        n_points = len(xvals)
+        match n_dimensions:
+            case 1:
+                d_3 = d_2
+                spectral_density_results = spectral_density_approximation_1d(d_1 / d_1, d_2 / d_1, np.array(xvals))
+            case 2:
+                d_2 = d_1
+                spectral_density_results = np.array([spectral_density(d_1 / d_1, d_2 / d_1, d_3 / d_1, w, n_points) for w in xvals])
+            case 3:
+                d_3 = d_2 = d_1
+                spectral_density_results = np.array([spectral_density(d_1 / d_1, d_2 / d_1, d_3 / d_1, w, n_points) for w in xvals])
 
         return np.square(A) / 4 * spectral_density_results
 
