@@ -244,11 +244,11 @@ void GenerateGroupingPowder::init() {
   fileExtensionXMLorHDF5->addAllowedValue(std::string("nxs"));
   fileExtensionXMLorHDF5->addAllowedValue(std::string("nx5"));
   declareProperty("FileFormat", std::string("xml"), fileExtensionXMLorHDF5,
-                  "File extension/format for saving output: either xml (default) or nxs/nx5.");
-  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
+                  "File extension/format for saving output: either xml (default) or nxs/nx5.", PropertyMode::Optional);
+  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::OptionalSave,
                                                  std::vector<std::string>{"xml", "nxs", "nx5"}),
                   "A grouping file that will be created.");
-  declareProperty("GenerateParFile", true,
+  declareProperty("GenerateParFile", false,
                   "If true, a par file with a corresponding name to the "
                   "grouping file will be generated.");
 }
@@ -261,6 +261,7 @@ void GenerateGroupingPowder::init() {
  */
 std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
   std::map<std::string, std::string> issues;
+
   const bool useAzimuthal = (double(getProperty("AzimuthalStep")) < 360.0);
   const bool generateParFile = getProperty("GenerateParFile");
   if (useAzimuthal && generateParFile) {
@@ -268,6 +269,19 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
     issues["AzimuthalStep"] = noAzimuthInPar;
     issues["GenerateParFile"] = noAzimuthInPar;
   }
+
+  if (isDefault("GroupingWorkspace") && isDefault("GroupingFilename")) {
+    std::string err = "At least one of {'GroupingWorkspace', 'GroupingFilename'} must be passed.";
+    issues["GroupingWorkspace"] = err;
+    issues["GroupingFilename"] = err;
+  }
+
+  if (getProperty("GenerateParFile") && isDefault("GroupingFilename")) {
+    std::string err = "'GenerateParFile' requires 'GroupingFilename' be passed.";
+    issues["GenerateParFile"] = err;
+    issues["GroupingFilename"] = err;
+  }
+
   return issues;
 }
 
@@ -329,17 +343,21 @@ void GenerateGroupingPowder::exec() {
     }
   }
 
-  std::string ext = this->getProperty("FileFormat");
-  if (ext == "xml") {
-    this->saveAsXML();
-  } else if (ext == "nxs" || ext == "nx5") {
-    this->saveAsNexus();
-  } else {
-    throw std::invalid_argument("that file format doesn't exist: must be xml, nxs, nx5\n");
-  }
+  // save if a filename was specified
+  if (!isDefault("GroupingFilename")) {
 
-  if (getProperty("GenerateParFile")) {
-    this->saveAsPAR();
+    std::string ext = this->getProperty("FileFormat");
+    if (ext == "xml") {
+      this->saveAsXML();
+    } else if (ext == "nxs" || ext == "nx5") {
+      this->saveAsNexus();
+    } else {
+      throw std::invalid_argument("that file format doesn't exist: must be xml, nxs, nx5\n");
+    }
+
+    if (getProperty("GenerateParFile")) {
+      this->saveAsPAR();
+    }
   }
 }
 
