@@ -10,6 +10,7 @@ from functools import cache
 from numpy import float64
 from numpy.typing import NDArray
 from mantid.api import IFunction1D, FunctionFactory
+from mantid.kernel import IntBoundedValidator
 from scipy.integrate import quad
 from scipy.special import i0e
 from typing import Tuple
@@ -64,7 +65,7 @@ class SpinDiffusion(IFunction1D):
         self.declareParameter("D2", 1e-2, "Dipolar term 2 (MHz)")
         self.declareParameter("D3", 1e-2, "Dipolar term 3 (MHz)")
         # Non-fitting parameters
-        self.declareAttribute("NDimensions", 1)
+        self.declareAttribute("NDimensions", 1, IntBoundedValidator(lower=1, upper=3))
 
     def function1D(self, xvals):
         A = self.getParameterValue("A")
