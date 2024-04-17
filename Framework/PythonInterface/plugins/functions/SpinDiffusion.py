@@ -10,7 +10,7 @@ from functools import cache
 from numpy import float64
 from numpy.typing import NDArray
 from mantid.api import IFunction1D, FunctionFactory
-from mantid.kernel import IntBoundedValidator
+from mantid.kernel import FloatBoundedValidator, IntBoundedValidator
 from scipy.constants import elementary_charge, physical_constants
 from scipy.integrate import quad
 from scipy.special import i0e
@@ -83,6 +83,7 @@ class SpinDiffusion(IFunction1D):
         self.declareParameter("DPerpendicular", 1e-2, "Dipolar perpendicular, the slow rate dipolar term (MHz)")
         # Non-fitting parameters
         self.declareAttribute("NDimensions", 1, IntBoundedValidator(lower=1, upper=3))
+        self.declareAttribute("IntegrationUpperLimit", 1.0, FloatBoundedValidator(lower=0.0))
 
     def function1D(self, xvals):
         A = self.getParameterValue("A")
@@ -90,13 +91,14 @@ class SpinDiffusion(IFunction1D):
         d_perp = self.getParameterValue("DPerpendicular")
 
         n_dimensions = self.getAttributeValue("NDimensions")
+        integration_upper_limit = self.getAttributeValue("IntegrationUpperLimit")
 
         d_i_terms = d_rates(n_dimensions, d_par, d_perp)
         w_values = MAGNETOGYRIC_RATIO * np.array(xvals)
         if n_dimensions == 1:
             spectral_density_results = spectral_density_approximation_1d(*d_i_terms, w_values)
         else:
-            spectral_density_results = np.array([spectral_density(*d_i_terms, w, len(w_values) / 4) for w in w_values])
+            spectral_density_results = np.array([spectral_density(*d_i_terms, w, integration_upper_limit) for w in w_values])
 
         return np.square(A) / 4 * spectral_density_results
 
