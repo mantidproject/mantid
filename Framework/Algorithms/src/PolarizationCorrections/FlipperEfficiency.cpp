@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace {
 /// Property Names
@@ -26,11 +28,12 @@ DECLARE_ALGORITHM(FlipperEfficiency)
 std::string const FlipperEfficiency::summary() const { return "Calculate the efficiency of the polarization flipper."; }
 
 void FlipperEfficiency::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::INPUT_WS, "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input),
                   "Group workspace containing the 4 polarisation periods.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_WS, "", Direction::Output),
                   "Workspace containing the wavelength-dependent efficiency for the flipper.");
-  declareProperty(PropNames::OUTPUT_FILE, "", "File name or path for the output to be saved to.");
+  declareProperty(std::make_unique<FileProperty>(PropNames::OUTPUT_FILE, "", FileProperty::OptionalSave, ".nxs"),
+                  "File name or path for the output to be saved to.");
 }
 
 void FlipperEfficiency::exec() {}
