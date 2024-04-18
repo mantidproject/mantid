@@ -14,6 +14,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
+  m_uiForm.dsWorkspace->setLoadProperty("LoadHistory", false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
   connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
