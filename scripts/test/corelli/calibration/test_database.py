@@ -441,12 +441,12 @@ class TestCorelliDatabase(unittest.TestCase):
             assert list(load_calibration_set(workspace, database_path)) == [None, None]
 
             set_daystamp(workspace, 20200601)
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)  # should pick calibration 20200601
             self.assertEqual("20200601" in str(ar.exception), True)
 
             set_daystamp(workspace, 20201201)
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)
             self.assertEqual("calibration_corelli_20200601.nxs.h5" in str(ar.exception), True)
 
@@ -456,22 +456,22 @@ class TestCorelliDatabase(unittest.TestCase):
             assert list(load_calibration_set(workspace, database_path)) == [None, None]
 
             set_daystamp(workspace, "20200401")
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)
             self.assertEqual("calibration_corelli_20200401.nxs.h5" in str(ar.exception), True)
 
             set_daystamp(workspace, "20200601")
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)
             self.assertEqual("calibration_corelli_20200401.nxs.h5" in str(ar.exception), True)
 
             set_daystamp(workspace, "20200801")
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)
             self.assertEqual("calibration_corelli_20200801.nxs.h5" in str(ar.exception), True)
 
             set_daystamp(workspace, "20201201")
-            with self.assertRaises(RuntimeError) as ar:
+            with self.assertRaises(ValueError) as ar:
                 load_calibration_set(workspace, database_path)
             self.assertEqual("calibration_corelli_20200801.nxs.h5" in str(ar.exception), True)
         workspace.delete()
