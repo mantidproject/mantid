@@ -1141,26 +1141,32 @@ void PropertyHandler::addTie(const QString &tieStr) {
     auto &cfunction = *m_browser->compositeFunction();
     cfunction.tie(name, expr);
     cfunction.applyTies();
+    const auto paramIndex = cfunction.parameterIndex(name);
+    const auto paramStatus = cfunction.getParameterStatus(paramIndex);
+    const bool fixed = paramStatus == Mantid::API::IFunction::ParameterStatus::Fixed;
     const bool recursive = true;
-    QString parName = QString::fromStdString(cfunction.parameterLocalName(cfunction.parameterIndex(name), recursive));
-    foreach (QtProperty *parProp, m_parameters) {
-      if (parProp->propertyName() == parName) {
-        m_browser->m_changeSlotsEnabled = false;
-        QtProperty *tieProp = m_ties[parName];
-        if (!tieProp) {
-          tieProp = m_browser->m_stringManager->addProperty("Tie");
-          m_ties[parName] = tieProp;
-        }
-        m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
-        m_browser->m_changeSlotsEnabled = true;
-        parProp->addSubProperty(tieProp);
-        updateParameters();
-        return;
-      }
+    QString parName = QString::fromStdString(cfunction.parameterLocalName(paramIndex, recursive));
+    QtProperty *parProp = getParameterProperty(parName);
+    if (!parProp)
+      return;
+    m_browser->m_changeSlotsEnabled = false;
+    QtProperty *tieProp = m_ties[parName];
+    if (!tieProp) {
+      const auto tiePropName = fixed ? "Fix" : "Tie";
+      tieProp = m_browser->m_stringManager->addProperty(tiePropName);
+      m_ties[parName] = tieProp;
     }
-  } catch (...) {
+    m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
+    m_browser->m_changeSlotsEnabled = true;
+    parProp->addSubProperty(tieProp);
+    if (fixed) {
+      tieProp->setEnabled(false);
+    }
+    updateParameters();
+  } catch (const std::exception &exc) {
+    std::cerr << exc.what();
+    QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
   }
-  QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
 }
 
 void PropertyHandler::fix(const QString &parName) {
@@ -1168,20 +1174,7 @@ void PropertyHandler::fix(const QString &parName) {
   if (!parProp)
     return;
   QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
-  try {
-    m_fun->tie(parName.toStdString(), parValue.toStdString());
-    m_browser->m_changeSlotsEnabled = false;
-    QtProperty *tieProp = m_ties[parName];
-    if (!tieProp) {
-      tieProp = m_browser->m_stringManager->addProperty("Fix");
-      m_ties[parName] = tieProp;
-    }
-    m_browser->m_stringManager->setValue(tieProp, parValue);
-    m_browser->m_changeSlotsEnabled = true;
-    parProp->addSubProperty(tieProp);
-    tieProp->setEnabled(false);
-  } catch (...) {
-  }
+  addTie(functionPrefix() + "." + parName + "=" + parValue);
 }
 
 /**
