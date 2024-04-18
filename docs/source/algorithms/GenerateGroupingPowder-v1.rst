@@ -53,7 +53,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: GenerateGroupingPowder
+.. testcode:: GenerateGroupingPowder_default
 
     # create some grouping file
     import mantid
@@ -74,7 +74,7 @@ Usage
     wsg=GroupDetectors(ws,outputFilename)
     print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
-.. testcleanup:: GenerateGroupingPowder
+.. testcleanup:: GenerateGroupingPowder_default
 
    DeleteWorkspace(ws)
    DeleteWorkspace(wsg)
@@ -86,7 +86,7 @@ Usage
 
 Output:
 
-.. testoutput:: GenerateGroupingPowder
+.. testoutput:: GenerateGroupingPowder_default
 
     Found file powder.xml
     Found file powder.par
@@ -96,7 +96,7 @@ Output:
 
 Similarly, one could specify the grouping workspace:
 
-.. testcode:: GenerateGroupingPowder
+.. testcode:: GenerateGroupingPowder_GroupingWorkspace
 
     # create some grouping file
     import mantid
@@ -118,7 +118,7 @@ Similarly, one could specify the grouping workspace:
     wsg=GroupDetectors(ws,outputFilename)
     print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
-.. testcleanup:: GenerateGroupingPowder
+.. testcleanup:: GenerateGroupingPowder_GroupingWorkspace
 
    DeleteWorkspace(ws)
    DeleteWorkspace(gws)
@@ -131,7 +131,7 @@ Similarly, one could specify the grouping workspace:
 
 Output:
 
-.. testoutput:: GenerateGroupingPowder
+.. testoutput:: GenerateGroupingPowder_GroupingWorkspace
 
     Found file powder.xml
     Found file powder.par
