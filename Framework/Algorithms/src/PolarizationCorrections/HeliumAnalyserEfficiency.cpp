@@ -228,17 +228,17 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::calculateEfficiencyWorkspace(cons
 
 double HeliumAnalyserEfficiency::calculateTCrit(const size_t numberOfBins) {
   // Create a t distribution with dof given by the number of data points minus
-  // the number of params (3)
+  // the number of params (2)
   double tPpf = 1;
-  if (numberOfBins > 3) {
-    const boost::math::students_t dist(static_cast<double>(numberOfBins) - 3.0);
+  if (numberOfBins > 2) {
+    const boost::math::students_t dist(static_cast<double>(numberOfBins) - 2.0);
     // Critical value corresponding to 1-sigma
     const double alpha = (1 + std::erf(1.0 / sqrt(2))) / 2;
     // Scale factor for the error calculations
     tPpf = boost::math::quantile(dist, alpha);
   } else {
     g_log.warning(
-        "The number of histogram bins must be greater than 3 in order to provide an accurate error calculation");
+        "The number of histogram bins must be greater than 2 in order to provide an accurate error calculation");
   }
   return tPpf;
 }

@@ -36,7 +36,7 @@ is assumed to be zero. Then the error :math:`\Delta \epsilon_{cell}` is given by
 .. math::
     \frac{\Delta \epsilon_{cell}}{t_{crit}} = \sqrt{\left(\frac{\partial \epsilon_{cell}}{\partial p_{He}} \Delta p_{He}\right)^2 + \left(\frac{\partial \epsilon_{cell}}{\partial pd}\Delta pd \right)^2}
 
-If :math:`n_b` is the number of histogram bins used in the fit, then define :math:`n := n_b-3`, since we are fitting three parameters. Then the
+If :math:`n_b` is the number of histogram bins used in the fit, then define :math:`n := n_b-2`, since we are fitting two parameters (:math:`pd` and :math:`p_{He}`). Then the
 factor :math:`t_{crit}` follows a :math:`t` distribution with :math:`n` degrees of freedom, and probability density function :math:`f_t(x,n)`.
 For a standard 68.3% (1-sigma) error the factor :math:`t_{crit}` is given by the solution to
 

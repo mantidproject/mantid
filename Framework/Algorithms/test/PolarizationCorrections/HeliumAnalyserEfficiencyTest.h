@@ -78,20 +78,20 @@ public:
   }
 
   void testZeroPdError() {
-    compareOutputValues(0, {0.31467362354392969, 0.60768742636557704, 0.69759230851408727, 0.63385733422895174,
-                            0.50295798191903129, 0.36685146065267293});
+    compareOutputValues(0, {0.30014653230974014, 0.57963318214497705, 0.66538755300925145, 0.60459494095906063,
+                            0.47973863354145241, 0.34991554915720857});
   }
 
   void testNonZeroPdError() {
-    compareOutputValues(1000, {10.077109474097512, 19.460584756204053, 22.339699088898978, 20.298649998203778,
-                               16.106728576701546, 11.748052754137094});
+    compareOutputValues(1000, {9.6118938419182438, 18.562175518594128, 21.308373860067174, 19.361550990241895,
+                               15.363152064368265, 11.205697051548009});
   }
 
   void testSmallNumberOfBins() {
-    // With less than 4 bins it's not possible to perform the error calculation correctly, because the
+    // With less than 3 bins it's not possible to perform the error calculation correctly, because the
     // number of parameters exceeds the number of data points.
     MantidVec e;
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 3);
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 2);
     auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "P");
     heliumAnalyserEfficiency->execute();
     TS_ASSERT_EQUALS(true, heliumAnalyserEfficiency->isExecuted());
