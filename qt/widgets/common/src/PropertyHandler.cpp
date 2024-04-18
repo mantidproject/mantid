@@ -469,7 +469,7 @@ void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
     QString parName = it.key();
     QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    const auto paramIndex = cf.parameterIndex(fullName.toStdString());
+    const auto paramIndex = m_browser->compositeFunction()->parameterIndex(fullName.toStdString());
     const auto status = cf.getParameterStatus(paramIndex);
     Mantid::API::ParameterTie *tie = cf.getTie(paramIndex);
     if (!tie) {
