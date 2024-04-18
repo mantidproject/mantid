@@ -258,6 +258,7 @@ void PropertyHandler::initParameters() {
     m_parameters << prop;
     if (m_fun->isFixed(i)) {
       fix(parName);
+      m_browser->m_changeSlotsEnabled = false;
     }
     // add constraint properties
     const Mantid::API::IConstraint *c = m_fun->getConstraint(i);
@@ -1157,12 +1158,14 @@ void PropertyHandler::addTie(const QString &tieStr) {
       m_ties[parName] = tieProp;
     }
     m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
-    m_browser->m_changeSlotsEnabled = true;
     parProp->addSubProperty(tieProp);
     if (fixed) {
       tieProp->setEnabled(false);
     }
-    updateParameters();
+    m_browser->m_changeSlotsEnabled = true;
+    if (!fixed) {
+      updateParameters();
+    }
   } catch (const std::exception &exc) {
     std::cerr << exc.what();
     QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
