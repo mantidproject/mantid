@@ -206,7 +206,7 @@ private:
  */
 void PropertyHandler::initTies() {
   for (size_t iparam = 0; iparam < m_cf->nParams(); iparam++) {
-    Mantid::API::ParameterTie *tie = m_cf->getTie(iparam);
+    const auto *tie = m_cf->getTie(iparam);
     if (tie) {
       // get function index from prefix (second element of pair below)
       const auto nameIndex_pair = m_cf->parseName(m_cf->parameterName(iparam));
@@ -260,7 +260,7 @@ void PropertyHandler::initParameters() {
       fix(parName);
     }
     // add constraint properties
-    Mantid::API::IConstraint *c = m_fun->getConstraint(i);
+    const Mantid::API::IConstraint *c = m_fun->getConstraint(i);
     if (c) {
       QStringList qc = QString::fromStdString(c->asString()).split("<");
       bool lo = false;
@@ -471,7 +471,7 @@ void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
     QtProperty *prop = it.value();
     const auto paramIndex = m_browser->compositeFunction()->parameterIndex(fullName.toStdString());
     const auto status = cf.getParameterStatus(paramIndex);
-    Mantid::API::ParameterTie *tie = cf.getTie(paramIndex);
+    const auto *tie = cf.getTie(paramIndex);
     if (!tie) {
       if (status != Mantid::API::IFunction::ParameterStatus::Fixed &&
           status != Mantid::API::IFunction::ParameterStatus::FixedByDefault) {
@@ -524,7 +524,7 @@ QString PropertyHandler::functionName() const {
 }
 
 QString PropertyHandler::functionPrefix() const {
-  PropertyHandler *ph = parentHandler();
+  const PropertyHandler *ph = parentHandler();
   if (ph) {
     int iFun = -1;
     Mantid::API::CompositeFunction_sptr cf = ph->cfun();
@@ -665,7 +665,7 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
 
     // If the parameter is fixed, re-fix to update the subproperty.
     if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
-      foreach (QtProperty *subProp, prop->subProperties()) {
+      foreach (const QtProperty *subProp, prop->subProperties()) {
         if (subProp->propertyName() == "Fix") {
           fix(prop->propertyName());
           break;
@@ -890,7 +890,7 @@ void PropertyHandler::setAttribute(QString const &attName, AttributeType const &
     try {
       m_fun->setAttribute(attName.toStdString(), Mantid::API::IFunction::Attribute(attValue));
       m_browser->compositeFunction()->checkFunction();
-      foreach (QtProperty *prop, m_attributes) {
+      foreach (const QtProperty *prop, m_attributes) {
         if (prop->propertyName() == attName) {
           // re-insert the attribute and parameter properties as they may
           // depend on the value of the attribute being set
@@ -1170,7 +1170,7 @@ void PropertyHandler::addTie(const QString &tieStr) {
 }
 
 void PropertyHandler::fix(const QString &parName) {
-  QtProperty *parProp = getParameterProperty(parName);
+  const QtProperty *parProp = getParameterProperty(parName);
   if (!parProp)
     return;
   QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
@@ -1604,7 +1604,7 @@ void PropertyHandler::fit() {
   }
 }
 
-void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces) {
+void PropertyHandler::updateWorkspaces(const QStringList &oldWorkspaces) {
   if (m_workspace) {
     int index = m_browser->m_enumManager->value(m_workspace) - 1;
     QString wsName;
@@ -1612,7 +1612,7 @@ void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces) {
       wsName = oldWorkspaces[index];
     }
     QStringList names("All");
-    foreach (QString name, m_browser->m_workspaceNames) { names.append(name); }
+    foreach (const QString &name, m_browser->m_workspaceNames) { names.append(name); }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);
     if (m_browser->m_workspaceNames.contains(wsName)) {
       m_browser->m_enumManager->setValue(m_workspace, m_browser->m_workspaceNames.indexOf(wsName) + 1);
