@@ -20,8 +20,9 @@ chopper_system:
       radius: 250               # Disk radius
       isDouble: False           # Is this a double disk system?
       isPhaseIndependent: True  # Is this disk to be phased independently?
-      defaultPhase: 1500        # What is the default phase for this disk (either a time in microseconds
+      defaultPhase: 17000        # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)
+      phaseOffset:              # Offset introduced after disk chopper controller update
       phaseName: 'Disk chopper phase delay time'
     -
       name: MERLIN Fermi

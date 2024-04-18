@@ -241,7 +241,7 @@ class PyChopGui(QMainWindow):
                 self.widgets["MultiRepCheck"].setEnabled(True)
                 self.tabs.setTabEnabled(self.tdtabID, True)
                 if self.instSciAct.isChecked():
-                    self.widgets["Chopper0Phase"]["Edit"].setText("1500")
+                    self.widgets["Chopper0Phase"]["Edit"].setText("17000")
                     self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
                     self.widgets["Chopper0Phase"]["Edit"].show()
                     self.widgets["Chopper0Phase"]["Label"].show()

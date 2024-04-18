@@ -280,7 +280,7 @@ def calcFlux(Ei, freq1, percent, slot):
     return flux
 
 
-def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
+def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5, phaseOffset=0):
     """
     A method to calculate the various possible incident energies with a given chopper setup on LET.
     The window of energy transfers plotted is 85% by default.
@@ -307,12 +307,16 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     # figures out phase information
     if not hasattr(ph_ind_v, "__len__"):
         ph_ind_v = [ph_ind_v]
+    print("1")
     ph_ind = np.array([False] * len(dist))
+    print("2")
     if not len(ph_ind_v) == len(dist) and ph_ind_v:
         ph_ind[ph_ind_v] = True
         # For Merlin, subtract the experimental offset of 4500
+        # This value can be set as phaseOffset in the input file for Merlin
         print(instrumentpars)
-        chop2Phase[0] -= 4500
+        if phaseOffset > 0:
+            chop2Phase[0] -= 4500
         chop2Phase = phase = chop2Phase if hasattr(chop2Phase, "__len__") else [chop2Phase]
         if len(chop2Phase) != len(dist):
             if len(chop2Phase) == len(ph_ind_v):
