@@ -62,11 +62,11 @@ def d_rates(n_dimensions: int, d_par: float, d_perp: float) -> Tuple[float]:
     """Tie dipolar rates based on the dimensionality of the system."""
     match n_dimensions:
         case 1:  # D1 = D||           D2, D3 = D_|_
-            return d_par / d_par, d_perp / d_par
+            return d_par, d_perp
         case 2:  # D1, D2 = D||       D3 = D_|_
-            return d_par / d_par, d_par / d_par, d_perp / d_par
+            return d_par, d_par, d_perp
         case 3:  # D1, D2, D3 = D||
-            return d_par / d_par, d_par / d_par, d_par / d_par
+            return d_par, d_par, d_par
         case _:
             raise RuntimeError("The number of dimensions has an upper bound of 3.")
 
