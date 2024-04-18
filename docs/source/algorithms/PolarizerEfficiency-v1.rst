@@ -47,7 +47,7 @@ Output:
 .. testoutput:: PolarizerEfficiencyExample
     :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-    Polarizer efficiency at a wavelength of 4.5 Å is ...
+    Polarizer efficiency at a wavelength of 4.0 Å is ...
 
 .. categories::
 
