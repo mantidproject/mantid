@@ -44,8 +44,6 @@ public:
       if (!ofstrm)
         std::cout << "\nCould not open file!\n";
       ofstrm << instrIndex;
-      if (ofstrm)
-        std::cout << "\nWrote to file!\n" << std::endl;
       ofstrm.close();
     }
   };

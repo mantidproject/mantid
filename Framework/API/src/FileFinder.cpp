@@ -650,26 +650,31 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
 const API::Result<std::string> FileFinderImpl::getDataCachePath(const std::string &cachePathToSearch,
                                                                 const std::set<std::string> &filenames,
                                                                 const std::vector<std::string> &exts) const {
-  auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
+  std::string errors = "";
+  try {
+    auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
 
-  for (const auto &filename : filenames) {
-    std::string parentDirPath = dataCache.getFileParentDirPath(filename);
-    g_log.notice() << "Looking for file in instrument directory " << parentDirPath << std::endl;
+    for (const auto &filename : filenames) {
+      std::string parentDirPath = dataCache.getFileParentDirPath(filename);
+      g_log.notice() << "Looking for file in instrument directory " << parentDirPath << std::endl;
 
-    if (!parentDirPath.empty()) {
+      if (!parentDirPath.empty()) {
 
-      for (const auto &ext : exts) {
-        std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
+        for (const auto &ext : exts) {
+          std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
 
-        if (std::filesystem::exists(filePath)) {
-          g_log.notice() << "Found file " << filePath << std::endl;
-          return API::Result<std::string>(filePath.string());
+          if (std::filesystem::exists(filePath)) {
+            g_log.notice() << "Found file " << filePath << std::endl;
+            return API::Result<std::string>(filePath.string());
+          }
         }
+        errors += "Cannot find filename and matching extension in data cache: " + filename + '\n';
       }
-      g_log.notice() << "Could not find matching extension for filename " << filename << std::endl;
     }
+  } catch (std::filesystem::filesystem_error const &e) {
+    errors += "Cannot open file in data cache: " + std::string(e.what()) + '\n';
   }
-  return API::Result<std::string>("", "File not found in Data Cache.");
+  return API::Result<std::string>("", errors);
 }
 
 /**
@@ -776,13 +781,13 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
 
     API::Result<std::string> cacheFilePath = getDataCachePath(cachePathToSearch.string(), filenames, exts);
 
-    if (!cacheFilePath) {
-      errors += cacheFilePath.errors();
-    } else {
+    if (cacheFilePath) {
       return cacheFilePath;
     }
+    errors += cacheFilePath.errors();
+
   } else {
-    g_log.notice() << "Data cache directory " << cachePathToSearch << " was not found.\n";
+    errors += "Cannot find data cache directory: " + cachePathToSearch.string();
   }
 
   // Search the archive
@@ -801,7 +806,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
       errors += archivePath.errors();
 
   } // archs
-
+  g_log.error() << errors;
   return API::Result<std::string>("", errors);
 }
 
