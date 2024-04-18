@@ -214,7 +214,8 @@ void GenerateGroupingPowder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                                         std::make_shared<InstrumentValidator>()),
                   "A workspace from which to generate the grouping.");
-  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output,
+                                                                         PropertyMode::Optional),
                   "The grouping workspace created");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
@@ -273,10 +274,12 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {
+
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
   const auto &spectrumInfo = input_ws->spectrumInfo();
   const auto &detectorInfo = input_ws->detectorInfo();
   const auto &detectorIDs = detectorInfo.detectorIDs();
+
   if (detectorIDs.empty())
     throw std::invalid_argument("Workspace contains no detectors.");
 
@@ -285,8 +288,10 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 
-  auto groupWS = std::make_shared<GroupingWorkspace>(inst);
-  this->setProperty("GroupingWorkspace", groupWS);
+  this->m_groupWS = std::make_shared<GroupingWorkspace>(inst);
+  if (!isDefault("GroupingWorkspace")) {
+    this->setProperty("GroupingWorkspace", this->m_groupWS);
+  }
 
   const double step = getProperty("AngleStep");
 
@@ -315,12 +320,12 @@ void GenerateGroupingPowder::exec() {
     const double groupId = (double)(*label)(spectrumInfo, i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      groupWS->setValue(det.getID(), groupId);
+      this->m_groupWS->setValue(det.getID(), groupId);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();
       const auto ids = std::set<detid_t>(idv.begin(), idv.end());
-      groupWS->setValue(ids, groupId);
+      this->m_groupWS->setValue(ids, groupId);
     }
   }
 
@@ -340,19 +345,18 @@ void GenerateGroupingPowder::exec() {
 
 // XML file
 void GenerateGroupingPowder::saveAsXML() {
-  GroupingWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   const std::string XMLfilename = this->getProperty("GroupingFilename");
   // XML
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", groupWS->getInstrument()->getName());
+  pRoot->setAttribute("instrument", this->m_groupWS->getInstrument()->getName());
 
   const double step = getProperty("AngleStep");
   const auto numSteps = int(180. / step + 1);
 
   for (int i = 0; i < numSteps; ++i) {
-    std::vector<detid_t> group = groupWS->getDetectorIDsOfGroup(i);
+    std::vector<detid_t> group = this->m_groupWS->getDetectorIDsOfGroup(i);
     size_t gSize = group.size();
     if (gSize > 0) {
       std::stringstream spID, textvalue;
@@ -398,10 +402,9 @@ void GenerateGroupingPowder::saveAsXML() {
 
 // HDF5 file
 void GenerateGroupingPowder::saveAsNexus() {
-  GroupingWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
   const std::string filename = this->getProperty("GroupingFilename");
   auto saveNexus = createChildAlgorithm("SaveNexusProcessed");
-  saveNexus->setProperty("InputWorkspace", groupWS);
+  saveNexus->setProperty("InputWorkspace", this->m_groupWS);
   saveNexus->setProperty("Filename", filename);
   saveNexus->executeAsChildAlg();
 }
