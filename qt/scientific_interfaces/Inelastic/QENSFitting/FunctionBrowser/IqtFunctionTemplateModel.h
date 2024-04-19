@@ -72,6 +72,8 @@ private:
   IqtTypes::FitType m_fitType = IqtTypes::FitType::None;
   IqtTypes::BackgroundType m_backgroundType = IqtTypes::BackgroundType::None;
   IqtTypes::TieIntensitiesType m_tieIntensitiesType = IqtTypes::TieIntensitiesType::False;
+
+  std::vector<double> m_qValues;
 };
 
 } // namespace Inelastic

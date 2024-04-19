@@ -93,7 +93,7 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
     return;
   }
   bool areExponentialsSet = false;
-  bool isStretchSet = false;
+  bool isFitTypeSet = false;
   bool isBackgroundSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     auto f = fun->getFunction(i);
@@ -109,23 +109,23 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
         areExponentialsSet = true;
       }
     } else if (name == "StretchExp") {
-      if (isStretchSet) {
+      if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_fitType = FitType::StretchExponential;
       areExponentialsSet = true;
-      isStretchSet = true;
+      isFitTypeSet = true;
     } else if (name == "TeixeiraWaterIqt") {
       m_fitType = FitType::TeixeiraWaterIqt;
-      areExponentialsSet = false;
-      isStretchSet = false;
+      areExponentialsSet = true;
+      isFitTypeSet = true;
     } else if (name == "FlatBackground") {
       if (isBackgroundSet) {
         throw std::runtime_error("Function has wrong structure.");
       }
       m_backgroundType = BackgroundType::Flat;
       areExponentialsSet = true;
-      isStretchSet = true;
+      isFitTypeSet = true;
       isBackgroundSet = true;
     } else {
       clear();
@@ -291,7 +291,7 @@ void IqtFunctionTemplateModel::setResolution(const std::vector<std::pair<std::st
   (void)fitResolutions;
 }
 
-void IqtFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
+void IqtFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
 
 void IqtFunctionTemplateModel::tieIntensities() {
   auto heightName = getParameterName(ParamID::STRETCH_HEIGHT);
@@ -352,7 +352,9 @@ std::string IqtFunctionTemplateModel::buildStretchExpFunctionString() const {
 }
 
 std::string IqtFunctionTemplateModel::buildTeixeiraWaterIqtFunctionString() const {
-  return "name=TeixeiraWaterIqt,Amp=1,Tau1=0.05,Gamma=1.2,constraints=(Amp>"
+  auto qValue = m_qValues.empty() ? 0.0 : m_qValues[0];
+  return "name=TeixeiraWaterIqt,Q=" + std::to_string(qValue) +
+         ",Amp=1,Tau1=0.05,Gamma=1.2,constraints=(Amp>"
          "0,Tau1>0,Gamma>0)";
 }
 

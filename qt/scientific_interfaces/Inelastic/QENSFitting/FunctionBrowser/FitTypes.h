@@ -36,6 +36,8 @@ enum SubTypeIndex {
   TieIntensities = 3,
 };
 
+extern std::map<FitType, bool> FitTypeQDepends;
+
 struct ExponentialSubType : public TemplateSubTypeImpl<ExponentialType> {
   std::string name() const override { return "Exponentials"; }
   bool isType(const std::type_info &type) const override { return type == typeid(int); }
