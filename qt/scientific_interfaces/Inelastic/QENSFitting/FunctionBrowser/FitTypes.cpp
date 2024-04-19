@@ -10,13 +10,6 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-namespace IqtTypes {
-
-std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>(
-    {{FitType::None, false}, {FitType::StretchExponential, false}, {FitType::TeixeiraWaterIqt, true}});
-
-}
-
 template <>
 std::map<IqtTypes::ExponentialType, TemplateSubTypeDescriptor>
     TemplateSubTypeImpl<IqtTypes::ExponentialType>::g_typeMap{

@@ -36,7 +36,6 @@ public:
   std::map<std::size_t, int> getSubTypes() const override;
   std::string setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void setQValues(const std::vector<double> &qValues) override;
 
   int numberOfExponentials() const;
   bool hasExponential() const;
@@ -53,7 +52,7 @@ private:
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
 
   void clearData();
-  void setModel();
+  void setModel() override;
 
   void tieIntensities();
 
@@ -62,18 +61,16 @@ private:
   std::optional<std::string> getFitTypePrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;
 
-  std::string buildFunctionString() const;
+  std::string buildFunctionString(int const domainIndex) const override;
   std::string buildExpDecayFunctionString() const;
   std::string buildStretchExpFunctionString() const;
-  std::string buildTeixeiraWaterIqtFunctionString() const;
+  std::string buildTeixeiraWaterIqtFunctionString(int const domainIndex) const;
   std::string buildBackgroundFunctionString() const;
 
   IqtTypes::ExponentialType m_exponentialType = IqtTypes::ExponentialType::None;
   IqtTypes::FitType m_fitType = IqtTypes::FitType::None;
   IqtTypes::BackgroundType m_backgroundType = IqtTypes::BackgroundType::None;
   IqtTypes::TieIntensitiesType m_tieIntensitiesType = IqtTypes::TieIntensitiesType::False;
-
-  std::vector<double> m_qValues;
 };
 
 } // namespace Inelastic

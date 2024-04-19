@@ -64,11 +64,8 @@ void IqtFunctionTemplateModel::clearData() {
 }
 
 void IqtFunctionTemplateModel::setModel() {
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
-
+  MultiFunctionTemplateModel::setModel();
   tieIntensities();
-
   estimateFunctionParameters();
 }
 
@@ -248,8 +245,7 @@ bool IqtFunctionTemplateModel::hasFitType(FitType fitType) const { return m_fitT
 void IqtFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();
   m_backgroundType = BackgroundType::None;
-  m_model->setFunctionString(buildFunctionString());
-  m_model->setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
 }
 
@@ -290,8 +286,6 @@ std::string IqtFunctionTemplateModel::setBackgroundA0(double value) {
 void IqtFunctionTemplateModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   (void)fitResolutions;
 }
-
-void IqtFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
 
 void IqtFunctionTemplateModel::tieIntensities() {
   auto heightName = getParameterName(ParamID::STRETCH_HEIGHT);
@@ -351,8 +345,8 @@ std::string IqtFunctionTemplateModel::buildStretchExpFunctionString() const {
          "0,Lifetime>0,0<Stretching<1.001)";
 }
 
-std::string IqtFunctionTemplateModel::buildTeixeiraWaterIqtFunctionString() const {
-  auto qValue = m_qValues.empty() ? 0.0 : m_qValues[0];
+std::string IqtFunctionTemplateModel::buildTeixeiraWaterIqtFunctionString(int const domainIndex) const {
+  auto const qValue = domainIndex < static_cast<int>(m_qValues.size()) ? m_qValues[domainIndex] : 0.4;
   return "name=TeixeiraWaterIqt,Q=" + std::to_string(qValue) +
          ",Amp=1,Tau1=0.05,Gamma=1.2,constraints=(Amp>"
          "0,Tau1>0,Gamma>0)";
@@ -362,7 +356,7 @@ std::string IqtFunctionTemplateModel::buildBackgroundFunctionString() const {
   return "name=FlatBackground,A0=0,constraints=(A0>0)";
 }
 
-std::string IqtFunctionTemplateModel::buildFunctionString() const {
+std::string IqtFunctionTemplateModel::buildFunctionString(int const domainIndex) const {
   QStringList functions;
   if (hasExponential()) {
     functions << QString::fromStdString(buildExpDecayFunctionString());
@@ -374,7 +368,7 @@ std::string IqtFunctionTemplateModel::buildFunctionString() const {
     functions << QString::fromStdString(buildStretchExpFunctionString());
   }
   if (hasFitType(FitType::TeixeiraWaterIqt)) {
-    functions << QString::fromStdString(buildTeixeiraWaterIqtFunctionString());
+    functions << QString::fromStdString(buildTeixeiraWaterIqtFunctionString(domainIndex));
   }
   if (hasBackground()) {
     functions << QString::fromStdString(buildBackgroundFunctionString());
