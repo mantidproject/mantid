@@ -99,7 +99,7 @@ class ISISFermi:
 
     # For Merlin, set the disk chopper phase to block neutrons with energy greater than 200meV
     # For MAPS and MARI, corresponds to the default slit to let the desired rep through
-    __DiskChopperMode = {"MERLIN": 17000, "MAPS": 0, "MARI": 2}
+    __DiskChopperMode = {"MERLIN": 1500, "MAPS": 0, "MARI": 2}
 
     def __init__(self, instname=None, choppername="", freq=0):
         warnings.warn(
