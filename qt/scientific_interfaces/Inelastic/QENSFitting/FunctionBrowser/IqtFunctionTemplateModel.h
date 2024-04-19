@@ -40,7 +40,8 @@ public:
 
   int numberOfExponentials() const;
   bool hasExponential() const;
-  bool hasStretchExponential() const;
+  bool hasFitType() const;
+  bool hasFitType(IqtTypes::FitType fitType) const;
   void removeBackground();
   bool hasBackground() const;
   void tieIntensities(bool on);
@@ -58,12 +59,13 @@ private:
 
   std::optional<std::string> getExp1Prefix() const;
   std::optional<std::string> getExp2Prefix() const;
-  std::optional<std::string> getStretchPrefix() const;
+  std::optional<std::string> getFitTypePrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;
 
   std::string buildFunctionString() const;
   std::string buildExpDecayFunctionString() const;
   std::string buildStretchExpFunctionString() const;
+  std::string buildTeixeiraWaterIqtFunctionString() const;
   std::string buildBackgroundFunctionString() const;
 
   IqtTypes::ExponentialType m_exponentialType = IqtTypes::ExponentialType::None;

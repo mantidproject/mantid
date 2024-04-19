@@ -82,6 +82,8 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
       m_exponentialType = ExponentialType::OneExponential;
     } else if (name == "StretchExp") {
       m_fitType = FitType::StretchExponential;
+    } else if (name == "TeixeiraWaterIqt") {
+      m_fitType = FitType::TeixeiraWaterIqt;
     } else if (name == "FlatBackground") {
       m_backgroundType = BackgroundType::Flat;
     } else {
@@ -113,6 +115,10 @@ void IqtFunctionTemplateModel::setFunction(IFunction_sptr fun) {
       m_fitType = FitType::StretchExponential;
       areExponentialsSet = true;
       isStretchSet = true;
+    } else if (name == "TeixeiraWaterIqt") {
+      m_fitType = FitType::TeixeiraWaterIqt;
+      areExponentialsSet = false;
+      isStretchSet = false;
     } else if (name == "FlatBackground") {
       if (isBackgroundSet) {
         throw std::runtime_error("Function has wrong structure.");
@@ -146,10 +152,15 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
       newPrefix = *getExp1Prefix();
     }
   } else if (name == "StretchExp") {
-    if (hasStretchExponential())
+    if (hasFitType(FitType::StretchExponential))
       throw std::runtime_error("Cannot add more stretched exponentials.");
     m_fitType = FitType::StretchExponential;
-    newPrefix = *getStretchPrefix();
+    newPrefix = *getFitTypePrefix();
+  } else if (name == "TeixeiraWaterIqt") {
+    if (hasFitType(FitType::TeixeiraWaterIqt))
+      throw std::runtime_error("Cannot add another TeixeiraWaterIqt function.");
+    m_fitType = FitType::TeixeiraWaterIqt;
+    newPrefix = *getFitTypePrefix();
   } else if (name == "FlatBackground") {
     if (hasBackground())
       throw std::runtime_error("Cannot add more backgrounds.");
@@ -213,7 +224,7 @@ void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
     m_exponentialType = ExponentialType::OneExponential;
     return;
   }
-  prefix1 = getStretchPrefix();
+  prefix1 = getFitTypePrefix();
   if (prefix1 && *prefix1 == prefix) {
     m_fitType = FitType::None;
     return;
@@ -230,7 +241,9 @@ int IqtFunctionTemplateModel::numberOfExponentials() const { return static_cast<
 
 bool IqtFunctionTemplateModel::hasExponential() const { return m_exponentialType != ExponentialType::None; }
 
-bool IqtFunctionTemplateModel::hasStretchExponential() const { return m_fitType == FitType::StretchExponential; }
+bool IqtFunctionTemplateModel::hasFitType() const { return m_fitType != FitType::None; }
+
+bool IqtFunctionTemplateModel::hasFitType(FitType fitType) const { return m_fitType == fitType; }
 
 void IqtFunctionTemplateModel::removeBackground() {
   auto oldValues = getCurrentValues();
@@ -298,8 +311,8 @@ std::optional<std::string> IqtFunctionTemplateModel::getPrefix(ParamID name) con
     return getExp1Prefix();
   } else if (name <= ParamID::EXP2_LIFETIME) {
     return getExp2Prefix();
-  } else if (name <= ParamID::STRETCH_STRETCHING) {
-    return getStretchPrefix();
+  } else if (name <= ParamID::TWI_GAMMA) {
+    return getFitTypePrefix();
   } else {
     return getBackgroundPrefix();
   }
@@ -314,10 +327,15 @@ void IqtFunctionTemplateModel::applyParameterFunction(const std::function<void(P
     paramFun(ParamID::EXP2_HEIGHT);
     paramFun(ParamID::EXP2_LIFETIME);
   }
-  if (hasStretchExponential()) {
+  if (hasFitType(FitType::StretchExponential)) {
     paramFun(ParamID::STRETCH_HEIGHT);
     paramFun(ParamID::STRETCH_LIFETIME);
     paramFun(ParamID::STRETCH_STRETCHING);
+  }
+  if (hasFitType(FitType::TeixeiraWaterIqt)) {
+    paramFun(ParamID::TWI_AMPLITUDE);
+    paramFun(ParamID::TWI_TAU);
+    paramFun(ParamID::TWI_GAMMA);
   }
   if (hasBackground()) {
     paramFun(ParamID::FLAT_BG_A0);
@@ -333,6 +351,11 @@ std::string IqtFunctionTemplateModel::buildStretchExpFunctionString() const {
          "0,Lifetime>0,0<Stretching<1.001)";
 }
 
+std::string IqtFunctionTemplateModel::buildTeixeiraWaterIqtFunctionString() const {
+  return "name=TeixeiraWaterIqt,Amp=1,Tau1=0.05,Gamma=1.2,constraints=(Amp>"
+         "0,Tau1>0,Gamma>0)";
+}
+
 std::string IqtFunctionTemplateModel::buildBackgroundFunctionString() const {
   return "name=FlatBackground,A0=0,constraints=(A0>0)";
 }
@@ -345,8 +368,11 @@ std::string IqtFunctionTemplateModel::buildFunctionString() const {
   if (numberOfExponentials() > 1) {
     functions << QString::fromStdString(buildExpDecayFunctionString());
   }
-  if (hasStretchExponential()) {
+  if (hasFitType(FitType::StretchExponential)) {
     functions << QString::fromStdString(buildStretchExpFunctionString());
+  }
+  if (hasFitType(FitType::TeixeiraWaterIqt)) {
+    functions << QString::fromStdString(buildTeixeiraWaterIqtFunctionString());
   }
   if (hasBackground()) {
     functions << QString::fromStdString(buildBackgroundFunctionString());
@@ -357,7 +383,7 @@ std::string IqtFunctionTemplateModel::buildFunctionString() const {
 std::optional<std::string> IqtFunctionTemplateModel::getExp1Prefix() const {
   if (!hasExponential())
     return std::optional<std::string>();
-  if (numberOfExponentials() == 1 && !hasStretchExponential() && !hasBackground())
+  if (numberOfExponentials() == 1 && !hasFitType() && !hasBackground())
     return std::string("");
   return std::string("f0.");
 }
@@ -368,8 +394,8 @@ std::optional<std::string> IqtFunctionTemplateModel::getExp2Prefix() const {
   return std::string("f1.");
 }
 
-std::optional<std::string> IqtFunctionTemplateModel::getStretchPrefix() const {
-  if (!hasStretchExponential())
+std::optional<std::string> IqtFunctionTemplateModel::getFitTypePrefix() const {
+  if (!hasFitType())
     return std::optional<std::string>();
   if (!hasExponential() && !hasBackground())
     return std::string("");
@@ -379,9 +405,9 @@ std::optional<std::string> IqtFunctionTemplateModel::getStretchPrefix() const {
 std::optional<std::string> IqtFunctionTemplateModel::getBackgroundPrefix() const {
   if (!hasBackground())
     return std::optional<std::string>();
-  if (!hasExponential() && !hasStretchExponential())
+  if (!hasExponential() && !hasFitType())
     return std::string("");
-  return "f" + std::to_string(numberOfExponentials() + (hasStretchExponential() ? 1 : 0)) + ".";
+  return "f" + std::to_string(numberOfExponentials() + (hasFitType() ? 1 : 0)) + ".";
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic
