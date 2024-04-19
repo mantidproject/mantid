@@ -17,7 +17,7 @@ from scipy.special import i0e
 from typing import Tuple
 
 MUON_MAGNETOGYRIC_RATIO = (
-    physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6)
+    physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6) / (2 * np.pi)
 )  # MHz / T
 
 
