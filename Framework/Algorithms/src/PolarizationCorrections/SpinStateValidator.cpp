@@ -33,7 +33,7 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   if (input.empty())
     return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 11";
 
-  std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::SplitSpinStateString(input);
+  std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(input);
 
   int numberSpinStates = static_cast<int>(spinStates.size());
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())

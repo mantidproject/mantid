@@ -13,12 +13,12 @@
 
 namespace Mantid::Algorithms {
 namespace PolarizationCorrectionsHelpers {
-MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr WorkspaceForSpinState(API::WorkspaceGroup_sptr group,
+MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group,
                                                                       const std::string &spinStateOrder,
                                                                       const std::string &targetSpinState);
-MANTID_ALGORITHMS_DLL size_t IndexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group,
+MANTID_ALGORITHMS_DLL size_t indexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group,
                                                           const std::string &spinStateOrder,
                                                           const std::string &targetSpinState);
-MANTID_ALGORITHMS_DLL std::vector<std::string> SplitSpinStateString(const std::string &spinStates);
+MANTID_ALGORITHMS_DLL std::vector<std::string> splitSpinStateString(const std::string &spinStates);
 } // namespace PolarizationCorrectionsHelpers
 } // namespace Mantid::Algorithms

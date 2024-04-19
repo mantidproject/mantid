@@ -131,13 +131,13 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
-  const auto t11Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+  const auto t11Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                            SpinStateValidator::ONE_ONE);
-  const auto t10Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+  const auto t10Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                            SpinStateValidator::ONE_ZERO);
-  const auto t01Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+  const auto t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                            SpinStateValidator::ZERO_ONE);
-  const auto t00Ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(groupWorkspace, spinConfigurationInput,
+  const auto t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                            SpinStateValidator::ZERO_ZERO);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)

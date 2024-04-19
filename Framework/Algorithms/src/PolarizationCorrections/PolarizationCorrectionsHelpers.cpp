@@ -17,9 +17,9 @@ For a given workspace group, spin state order, and desired spin state, this meth
 extract the specified workspace from the group, using the position of the desired spin
 state in the spin state order as the index of the workspace in the group.
 */
-API::MatrixWorkspace_sptr WorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
+API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                                 const std::string &targetSpinState) {
-  const auto wsIndex = IndexOfWorkspaceForSpinState(group, spinStateOrder, targetSpinState);
+  const auto wsIndex = indexOfWorkspaceForSpinState(group, spinStateOrder, targetSpinState);
   return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
 }
 
@@ -28,9 +28,9 @@ For a given workspace group, spin state order, and desired spin state, this meth
 return the index of the specified workspace from the group, using the position of the desired spin
 state in the spin state order.
 */
-size_t IndexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
+size_t indexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                     const std::string &targetSpinState) {
-  std::vector<std::string> spinStateVector = SplitSpinStateString(spinStateOrder);
+  std::vector<std::string> spinStateVector = splitSpinStateString(spinStateOrder);
   auto trimmedTargetSpinState = targetSpinState;
   boost::trim(trimmedTargetSpinState);
   return std::find(spinStateVector.cbegin(), spinStateVector.cend(), trimmedTargetSpinState) - spinStateVector.cbegin();
@@ -41,7 +41,7 @@ For a given spin state input string of the form e.g. "01,11,00,10", split the st
 into a vector of individual spin states. This will also trim any leading/trailing
 whitespace in the individual spin states.
 */
-std::vector<std::string> SplitSpinStateString(const std::string &spinStates) {
+std::vector<std::string> splitSpinStateString(const std::string &spinStates) {
   std::vector<std::string> spinStateVector;
   boost::split(spinStateVector, spinStates, boost::is_any_of(","));
   for (auto &spinState : spinStateVector) {

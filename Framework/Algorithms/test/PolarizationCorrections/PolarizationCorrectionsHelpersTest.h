@@ -60,9 +60,9 @@ private:
     auto spinStateOrder = boost::join(spinStates, ",");
     auto grp = createGroupWorkspaceWithFourSpinStates(spinStates);
     for (const auto &spinState : spinStates) {
-      auto ws = PolarizationCorrectionsHelpers::WorkspaceForSpinState(grp, spinStateOrder, spinState);
+      auto ws = PolarizationCorrectionsHelpers::workspaceForSpinState(grp, spinStateOrder, spinState);
       // The workspace name is not going to have any spaces in, regardless of the input. This is not
-      // related to the actual WorkspaceForSpinState algorithm, it's just how the test is checking the
+      // related to the actual workspaceForSpinState algorithm, it's just how the test is checking the
       // order
       auto trimmedSpinState = trimString(spinState);
       TS_ASSERT_EQUALS(trimmedSpinState, ws->getName());
