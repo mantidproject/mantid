@@ -1236,22 +1236,22 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
     const double tofRange = std::fabs(tofmax_wksp - tofmin_wksp);
 
     // constants estimating size difference of various events
-    constexpr double TOF_EVENT_FIELDS{2.};
-    constexpr double WEIGHTED_EVENT_FIELDS{4.};
-    constexpr double WEIGHTED_NOTIME_EVENT_FIELDS{3.};
+    constexpr double TOF_EVENT_BYTE_SIZE{static_cast<double>(sizeof(Types::Event::TofEvent))};
+    constexpr double WEIGHTED_EVENT_BYTE_SIZE{static_cast<double>(sizeof(WeightedEvent))};
+    constexpr double WEIGHTED_NOTIME_EVENT_BYTE_SIZE{static_cast<double>(sizeof(WeightedEventNoTime))};
 
     // assume one frame although this is generically wrong
     // there are 3 fields in weighted events no time
-    const double sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_FIELDS * tofRange / compressTolerance;
+    const double sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_BYTE_SIZE * tofRange / compressTolerance;
 
     double numEvents = static_cast<double>(eventWS->getNumberEvents());
     const auto eventType = eventWS->getEventType();
     if (eventType == API::EventType::TOF) {
       // there are two fields in tof
-      numEvents *= TOF_EVENT_FIELDS;
+      numEvents *= TOF_EVENT_BYTE_SIZE;
     } else if (eventType == API::EventType::WEIGHTED) {
       // there are four fields in weighted w/ time
-      numEvents *= WEIGHTED_EVENT_FIELDS;
+      numEvents *= WEIGHTED_EVENT_BYTE_SIZE;
     } else if (eventType == API::EventType::WEIGHTED_NOTIME) {
       // it looks like things are already compressed
       return false;
