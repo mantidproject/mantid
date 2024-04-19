@@ -286,7 +286,6 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename += suffix;
   }
 
-  g_log.notice() << "makeFileName(" << hint << ", " << instrument.shortName() << ") = " << filename << ")\n";
   return filename;
 }
 

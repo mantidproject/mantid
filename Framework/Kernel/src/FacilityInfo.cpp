@@ -187,19 +187,6 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
                               [&iName](const auto &inst) { return boost::iequals(inst.shortName(), iName); });
   }
 
-  // Cover edge case where delimiter is present
-  if (instrument == m_instruments.cend()) {
-    instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(), [&iName](const auto &inst) {
-      return boost::iequals(inst.name() + inst.delimiter(), iName);
-    });
-  }
-
-  if (instrument == m_instruments.cend()) {
-    instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(), [&iName](const auto &inst) {
-      return boost::iequals(inst.shortName() + inst.delimiter(), iName);
-    });
-  }
-
   if (instrument != m_instruments.cend()) {
     g_log.debug() << "Instrument '" << iName << "' found as " << instrument->name() << " at " << name() << ".\n";
     return *instrument;

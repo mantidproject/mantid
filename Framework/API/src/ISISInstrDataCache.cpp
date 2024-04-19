@@ -43,7 +43,7 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
   std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
   std::string instrName = fileName.substr(0, nChars);
   try {
-    auto instrInfo = Kernel::ConfigService::Instance().getInstrument(instrName);
+    auto instrInfo = FileFinder::Instance().getInstrument(instrName);
     instrName = instrInfo.name();
   } catch (const Kernel::Exception::NotFoundError &) {
     g_log.debug() << "Instrument name not recognized, skipping data cache search ...";
