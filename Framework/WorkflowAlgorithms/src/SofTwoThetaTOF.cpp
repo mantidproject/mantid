@@ -182,15 +182,21 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   generateGrouping->setProperty("AngleStep", twoThetaStep);
   generateGrouping->setProperty("GroupingWorkspace", GROUP_WS);
 
-  if (!isDefault(Prop::FILENAME)) {
+  std::string filename;
+  // RemoveFileAtScopeExit deleteThisLater;
+  if (isDefault(Prop::FILENAME)) {
+    auto tempPath = boost::filesystem::temp_directory_path();
+    tempPath /= boost::filesystem::unique_path("detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
+    filename = tempPath.string();
 
-    std::string filename = static_cast<std::string>(getProperty(Prop::FILENAME));
+    // Make sure the file gets deleted at scope exit.
+    // deleteThisLater.name = filename;
+  } else {
+    filename = static_cast<std::string>(getProperty(Prop::FILENAME));
     filename = ensureXMLExtension(filename);
-
-    generateGrouping->setProperty("GroupingFilename", filename);
     generateGrouping->setProperty("GenerateParFile", true);
   }
-
+  generateGrouping->setProperty("GroupingFilename", filename);
   generateGrouping->execute();
 
   auto groupDetectors = createChildAlgorithm("GroupDetectors", 0.7, 0.9);
