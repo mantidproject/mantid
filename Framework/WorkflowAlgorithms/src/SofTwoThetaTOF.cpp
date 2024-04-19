@@ -181,7 +181,6 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   generateGrouping->setProperty("InputWorkspace", ws);
   generateGrouping->setProperty("AngleStep", twoThetaStep);
   generateGrouping->setProperty("GroupingWorkspace", GROUP_WS);
-  generateGrouping->setProperty("GenerateParFile", true);
 
   std::string filename;
   RemoveFileAtScopeExit deleteThisLater;
@@ -189,6 +188,7 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
     auto tempPath = boost::filesystem::temp_directory_path();
     tempPath /= boost::filesystem::unique_path("detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
     filename = tempPath.string();
+
     // Make sure the file gets deleted at scope exit.
     deleteThisLater.name = filename;
   } else {
