@@ -2159,6 +2159,73 @@ public:
     // last value
   }
 
+  void test_compressEvents_log() {
+    this->fake_uniform_data(10000.);
+
+    // First lets compare histogramming with compression versus without.
+    // This may only work exactly when the smallest tof is equal to the minimum rebin parameter,
+    // in this case 100
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams({100., -1., 819200}, X, true);
+
+    // get expected results
+    el.generateHistogram(X, expected_Y, expected_E);
+
+    // do compress events with log binning then histogram to compare to un-compressed
+    EventList el_output;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(-1, &el_output));
+    el_output.generateHistogram(X, Y, E);
+
+    for (size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(expected_Y[i], Y[i]);
+      TS_ASSERT_EQUALS(expected_E[i], E[i]);
+    }
+
+    // now check individual events
+    TS_ASSERT_EQUALS(el.getNumberEvents(), 9999900);
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 17);
+
+    // event weights should double for each one, 100, 200, 400, 800...
+    // event tofs should double, it will be roughly 150, 300, 600, 1200...
+
+    // don't check last event as bin will be partially filled
+    for (int i = 0; i < 16; i++) {
+      TS_ASSERT_EQUALS(el_output.getEvent(i).weight(), 100 * pow(2, i))
+      TS_ASSERT_EQUALS(el_output.getEvent(i).errorSquared(), 100 * pow(2, i))
+      TS_ASSERT_DELTA(el_output.getEvent(i).tof(), 150 * pow(2, i), 0.5)
+    }
+  }
+
+  void test_compressEvents_log2() {
+    // Check that for very sparse events
+    // Add four events, one that is repeated
+    // Should result in 3 events, with the second of weight 2
+    el = EventList();
+    el += TofEvent(100, 0);
+    el += TofEvent(1000, 0);
+    el += TofEvent(1000, 0);
+    el += TofEvent(100000, 0);
+
+    // do compress events with log binning
+    EventList el_output;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(-0.01, &el_output))
+
+    // now check individual events
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 3)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(0).weight(), 1)
+    TS_ASSERT_EQUALS(el_output.getEvent(0).errorSquared(), 1)
+    TS_ASSERT_DELTA(el_output.getEvent(0).tof(), 100, 1e-5)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(1).weight(), 2)
+    TS_ASSERT_EQUALS(el_output.getEvent(1).errorSquared(), 2)
+    TS_ASSERT_DELTA(el_output.getEvent(1).tof(), 1000, 1e-5)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(2).weight(), 1)
+    TS_ASSERT_EQUALS(el_output.getEvent(2).errorSquared(), 1)
+    TS_ASSERT_DELTA(el_output.getEvent(2).tof(), 100000, 1e-5)
+  }
+
   //==================================================================================
   // Mocking functions
   //==================================================================================

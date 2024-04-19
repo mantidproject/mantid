@@ -1450,7 +1450,7 @@ inline double calcNorm(const double errorSquared) {
  * @param events :: input event list.
  * @param out :: output WeightedEventNoTime vector.
  * @param tolerance :: how close do two event's TOF have to be to be considered
- *the same.
+ *the same. Negative implies log grouping.
  */
 
 template <class T>
@@ -1471,34 +1471,74 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   double errorSquared = 0;
   double normalization = 0.;
 
-  for (auto it = events.cbegin(); it != events.cend(); it++) {
-    if ((it->m_tof - lastTof) <= tolerance) {
-      // Carry the error and weight
-      weight += it->weight();
-      errorSquared += it->errorSquared();
-      // Track the average tof
-      num++;
-      const double norm = calcNorm(it->errorSquared());
-      normalization += norm;
-      totalTof += it->m_tof * norm;
-    } else {
-      // We exceeded the tolerance
-      // Create a new event with the average TOF and summed weights and
-      // squared errors.
-      if (num == 1) {
-        // last time-of-flight is the only one contributing
-        out.emplace_back(lastTof, weight, errorSquared);
-      } else if (num > 1) {
-        out.emplace_back(totalTof / normalization, weight, errorSquared);
+  if (tolerance < 0) {
+    lastTof = events.front().m_tof;
+    double bin_end = lastTof * (1 - tolerance);
+
+    for (auto it = events.cbegin(); it != events.cend(); it++) {
+      if (it->m_tof < bin_end) {
+        // Carry the error and weight
+        weight += it->weight();
+        errorSquared += it->errorSquared();
+        // Track the average tof
+        num++;
+        const double norm = calcNorm(it->errorSquared());
+        normalization += norm;
+        totalTof += it->m_tof * norm;
+      } else {
+        // We exceeded the tolerance
+        // Create a new event with the average TOF and summed weights and
+        // squared errors.
+        if (num == 1) {
+          // last time-of-flight is the only one contributing
+          out.emplace_back(lastTof, weight, errorSquared);
+        } else if (num > 1) {
+          out.emplace_back(totalTof / normalization, weight, errorSquared);
+        }
+        // Start a new combined object
+        num = 1;
+        const double norm = calcNorm(it->errorSquared());
+        normalization = norm;
+        totalTof = it->m_tof * norm;
+        weight = it->weight();
+        errorSquared = it->errorSquared();
+        lastTof = it->m_tof;
+
+        // advance the bin_end until we find the one that this next event falls into
+        while (lastTof >= bin_end)
+          bin_end = bin_end * (1 - tolerance);
       }
-      // Start a new combined object
-      num = 1;
-      const double norm = calcNorm(it->errorSquared());
-      normalization = norm;
-      totalTof = it->m_tof * norm;
-      weight = it->weight();
-      errorSquared = it->errorSquared();
-      lastTof = it->m_tof;
+    }
+  } else {
+    for (auto it = events.cbegin(); it != events.cend(); it++) {
+      if ((it->m_tof - lastTof) <= tolerance) {
+        // Carry the error and weight
+        weight += it->weight();
+        errorSquared += it->errorSquared();
+        // Track the average tof
+        num++;
+        const double norm = calcNorm(it->errorSquared());
+        normalization += norm;
+        totalTof += it->m_tof * norm;
+      } else {
+        // We exceeded the tolerance
+        // Create a new event with the average TOF and summed weights and
+        // squared errors.
+        if (num == 1) {
+          // last time-of-flight is the only one contributing
+          out.emplace_back(lastTof, weight, errorSquared);
+        } else if (num > 1) {
+          out.emplace_back(totalTof / normalization, weight, errorSquared);
+        }
+        // Start a new combined object
+        num = 1;
+        const double norm = calcNorm(it->errorSquared());
+        normalization = norm;
+        totalTof = it->m_tof * norm;
+        weight = it->weight();
+        errorSquared = it->errorSquared();
+        lastTof = it->m_tof;
+      }
     }
   }
 
