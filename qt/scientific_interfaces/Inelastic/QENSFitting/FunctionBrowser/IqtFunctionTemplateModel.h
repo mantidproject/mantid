@@ -58,7 +58,7 @@ private:
 
   std::optional<std::string> getExp1Prefix() const;
   std::optional<std::string> getExp2Prefix() const;
-  std::optional<std::string> getFitTypePrefix() const;
+  std::optional<std::string> getFitTypePrefix(IqtTypes::FitType fitType) const;
   std::optional<std::string> getBackgroundPrefix() const;
 
   std::string buildFunctionString(int const domainIndex) const override;

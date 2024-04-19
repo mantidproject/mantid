@@ -152,12 +152,12 @@ void IqtFunctionTemplateModel::addFunction(std::string const &prefix, std::strin
     if (hasFitType(FitType::StretchExponential))
       throw std::runtime_error("Cannot add more stretched exponentials.");
     m_fitType = FitType::StretchExponential;
-    newPrefix = *getFitTypePrefix();
+    newPrefix = *getFitTypePrefix(m_fitType);
   } else if (name == "TeixeiraWaterIqt") {
     if (hasFitType(FitType::TeixeiraWaterIqt))
       throw std::runtime_error("Cannot add another TeixeiraWaterIqt function.");
     m_fitType = FitType::TeixeiraWaterIqt;
-    newPrefix = *getFitTypePrefix();
+    newPrefix = *getFitTypePrefix(m_fitType);
   } else if (name == "FlatBackground") {
     if (hasBackground())
       throw std::runtime_error("Cannot add more backgrounds.");
@@ -221,7 +221,7 @@ void IqtFunctionTemplateModel::removeFunction(std::string const &prefix) {
     m_exponentialType = ExponentialType::OneExponential;
     return;
   }
-  prefix1 = getFitTypePrefix();
+  prefix1 = getFitTypePrefix(m_fitType);
   if (prefix1 && *prefix1 == prefix) {
     m_fitType = FitType::None;
     return;
@@ -305,8 +305,10 @@ std::optional<std::string> IqtFunctionTemplateModel::getPrefix(ParamID name) con
     return getExp1Prefix();
   } else if (name <= ParamID::EXP2_LIFETIME) {
     return getExp2Prefix();
+  } else if (name <= ParamID::STRETCH_STRETCHING) {
+    return getFitTypePrefix(FitType::StretchExponential);
   } else if (name <= ParamID::TWI_GAMMA) {
-    return getFitTypePrefix();
+    return getFitTypePrefix(FitType::TeixeiraWaterIqt);
   } else {
     return getBackgroundPrefix();
   }
@@ -390,8 +392,8 @@ std::optional<std::string> IqtFunctionTemplateModel::getExp2Prefix() const {
   return std::string("f1.");
 }
 
-std::optional<std::string> IqtFunctionTemplateModel::getFitTypePrefix() const {
-  if (!hasFitType())
+std::optional<std::string> IqtFunctionTemplateModel::getFitTypePrefix(FitType fitType) const {
+  if (!hasFitType(fitType))
     return std::optional<std::string>();
   if (!hasExponential() && !hasBackground())
     return std::string("");
