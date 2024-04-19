@@ -10,11 +10,10 @@
 #include "FitTypes.h"
 #include "FunctionTemplateView.h"
 
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <QMap>
 
 class QtProperty;
 
@@ -47,12 +46,12 @@ private:
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
   // Map fit type to a list of function parameters (QtProperties for those parameters)
-  std::vector<QMap<int, std::vector<QtProperty *>>> m_subTypeParameters;
+  std::vector<std::map<int, std::vector<QtProperty *>>> m_subTypeParameters;
   std::vector<std::vector<QtProperty *>> m_currentSubTypeParameters;
   std::vector<QtProperty *> m_subTypeProperties;
 
-  QMap<QtProperty *, ParamID> m_parameterMap;
-  QMap<ParamID, QtProperty *> m_parameterReverseMap;
+  std::map<QtProperty *, ParamID> m_parameterMap;
+  std::map<ParamID, QtProperty *> m_parameterReverseMap;
 };
 
 } // namespace Inelastic

@@ -41,7 +41,8 @@ void MultiFunctionTemplateView::createProperties() {
 void MultiFunctionTemplateView::updateParameterNames(const std::map<int, std::string> &parameterNames) {
   m_parameterNames.clear();
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  for (auto const prop : m_parameterMap.keys()) {
+  for (auto const &propParam : m_parameterMap) {
+    auto const &prop = propParam.first;
     auto const it = parameterNames.find(static_cast<int>(m_parameterMap[prop]));
     if (it != parameterNames.cend()) {
       auto const name = it->second;
@@ -55,7 +56,8 @@ void MultiFunctionTemplateView::updateParameterNames(const std::map<int, std::st
 
 void MultiFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string> const &globals) {
   MantidQt::MantidWidgets::ScopedFalse _paramBlock(m_emitParameterValueChange);
-  for (auto const prop : m_parameterMap.keys()) {
+  for (auto const &propParam : m_parameterMap) {
+    auto const &prop = propParam.first;
     auto const parameterName = m_parameterNames[prop];
     auto const findIter = std::find(globals.cbegin(), globals.cend(), parameterName);
     m_parameterManager->setGlobal(prop, findIter != globals.cend());
@@ -74,11 +76,16 @@ void MultiFunctionTemplateView::createFunctionParameterProperties() {
       auto const descriptions = subType->getParameterDescriptions(index);
       std::vector<QtProperty *> props;
       for (auto i = 0u; i < names.size(); ++i) {
+        auto const id = paramIDs[i];
+        if (m_parameterReverseMap.find(id) != m_parameterReverseMap.end()) {
+          // Skip if the parameter has already been defined as part of another sub type
+          continue;
+        }
+
         auto prop = m_parameterManager->addProperty(QString::fromStdString(names[i]));
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);
         props.emplace_back(prop);
-        auto const id = paramIDs[i];
         m_parameterMap[prop] = id;
         m_parameterReverseMap[id] = prop;
       }
