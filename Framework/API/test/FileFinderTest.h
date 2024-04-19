@@ -636,9 +636,10 @@ public:
   DataCacheTest()
       : // The constructor will create a temporary directory that mimicks the data cache structure and
         // populate it with the files defined here
-        m_filesToCreate(
-            {"MER40871.nxs", "MAR26045.raw", "WISH39495.s01", "LOQ106084.nxs", "LARMOR26462.nxs", "ZOOM4656.RAW"}),
+        m_filesToCreate({"MER40871.nxs", "MAR26045.raw", "WISH39495.s01", "LOQ106084.nxs", "LARMOR26462.nxs",
+                         "ZOOM4656.RAW", "GEM90421.nxs"}),
         m_dataCacheDir("_DataCacheTestDummyData") {
+
     Mantid::Kernel::ConfigService::Instance().setString("datacachesearch.directory", m_dataCacheDir);
     Mantid::Kernel::ConfigService::Instance().setLogLevel("debug");
 
@@ -677,9 +678,15 @@ public:
       jsonFile << jsonStr;
       jsonFile.close();
     }
+
+    std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::none,
+                                 std::filesystem::perm_options::replace);
   }
 
   ~DataCacheTest() override {
+    // Change permissions again to allow delete
+    std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::owner_all,
+                                 std::filesystem::perm_options::add);
     // Destroy dummy folder and files.
     std::filesystem::remove_all(m_dataCacheDir);
   }
@@ -717,5 +724,10 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result(), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result(), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result(), "");
+  }
+
+  void testDirectoryWithoutPermissin() {
+    std::string error = FileFinder::Instance().getPath({}, {"GEM90421"}, {".nxs"}).errors();
+    TS_ASSERT(error.find("filesystem error: status: Permission denied") != std::string::npos);
   }
 };
