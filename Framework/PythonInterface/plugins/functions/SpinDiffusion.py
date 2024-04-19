@@ -13,6 +13,7 @@ from mantid.api import IFunction1D, FunctionFactory
 from mantid.kernel import IntBoundedValidator
 from scipy.constants import elementary_charge, physical_constants
 from scipy.fft import fft, fftshift
+from scipy.integrate import quad
 from scipy.special import i0e
 from typing import Tuple
 
@@ -38,15 +39,34 @@ def perform_fft(d_1: float, d_2: float, d_3: float, t: Tuple[float]) -> NDArray[
     return fftshift(fft(g))
 
 
+def integrand(t, d_1, d_2, d_3, w):
+    return autocorrelation_st(d_1, d_2, d_3, t) * np.cos(w * t)
+
+
+def jw(d_1, d_2, d_3, w):
+    integral, error = quad(
+        integrand,
+        0,
+        300,
+        args=(
+            d_1,
+            d_2,
+            d_3,
+            w,
+        ),
+    )  # Change integration range so it tends towards infinity
+    return 2 * integral
+
+
 def d_rates_from_dimensionality(n_dimensions: int, d_parallel: float, d_perpendicular: float) -> Tuple[float]:
     """Tie dipolar rates based on the dimensionality of the system."""
     match n_dimensions:
         case 1:  # D1 = D||           D2, D3 = D_|_
-            return d_parallel, d_perpendicular, d_perpendicular
+            return d_parallel / d_parallel, d_perpendicular / d_parallel, d_perpendicular / d_parallel
         case 2:  # D1, D2 = D||       D3 = D_|_
-            return d_parallel, d_parallel, d_perpendicular
+            return d_parallel / d_parallel, d_parallel / d_parallel, d_perpendicular / d_parallel
         case 3:  # D1, D2, D3 = D||
-            return d_parallel, d_parallel, d_parallel
+            return d_parallel / d_parallel, d_parallel / d_parallel, d_parallel / d_parallel
         case _:
             raise RuntimeError("The number of dimensions has an upper bound of 3.")
 
@@ -74,9 +94,10 @@ class SpinDiffusion(IFunction1D):
         d_rates = d_rates_from_dimensionality(n_dimensions, d_parallel, d_perpendicular)
 
         # xvals is assumed to be B(LF), in units of Tesla. We need to convert to inverse MHz
-        t_values = 1 / (MUON_MAGNETOGYRIC_RATIO * np.array(xvals))
+        # t_values = 1 / (MUON_MAGNETOGYRIC_RATIO * np.array(xvals))
+        w_values = 2 * np.pi * MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
 
-        spectral_density_complex = perform_fft(*d_rates, tuple(t_values))
+        spectral_density_complex = [jw(*d_rates, w) for w in w_values]
 
         # Convert from an NDArray(complex64) to a NDArray(float64)
         spectral_density_real = np.array(np.real(spectral_density_complex))
