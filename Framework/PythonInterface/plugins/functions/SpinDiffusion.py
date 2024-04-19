@@ -65,7 +65,6 @@ class SpinDiffusion(IFunction1D):
         self.declareAttribute("NDimensions", 1, IntBoundedValidator(lower=1, upper=3))
 
     def function1D(self, xvals):
-        # xvals is assumed to be B(LF)
         A = self.getParameterValue("A")
         d_parallel = self.getParameterValue("DParallel")
         d_perpendicular = self.getParameterValue("DPerpendicular")
@@ -73,8 +72,11 @@ class SpinDiffusion(IFunction1D):
         n_dimensions = self.getAttributeValue("NDimensions")
 
         d_rates = d_rates_from_dimensionality(n_dimensions, d_parallel, d_perpendicular)
-        # w_values = MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
-        spectral_density_complex = perform_fft(*d_rates, tuple(xvals))
+
+        # xvals is assumed to be B(LF), in units of Tesla. We need to convert to inverse MHz
+        t_values = 1 / (MUON_MAGNETOGYRIC_RATIO * np.array(xvals))
+
+        spectral_density_complex = perform_fft(*d_rates, tuple(t_values))
 
         # Convert from an NDArray(complex64) to a NDArray(float64)
         spectral_density_real = np.array(np.real(spectral_density_complex))
