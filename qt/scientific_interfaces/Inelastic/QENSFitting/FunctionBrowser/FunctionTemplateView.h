@@ -124,9 +124,6 @@ protected:
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;
 
-  /// Precision of doubles in m_doubleManager
-  const int m_decimals;
-
   /// The corresponding template presenter
   ITemplatePresenter *m_presenter;
 };

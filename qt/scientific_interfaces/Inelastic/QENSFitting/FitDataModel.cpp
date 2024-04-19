@@ -125,7 +125,7 @@ bool FitDataModel::setResolution(const std::string &name, WorkspaceID workspaceI
   bool hasValidValues = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    auto y = resolution->readY(workspaceID.value);
+    const auto &y = resolution->readY(workspaceID.value);
     hasValidValues = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
 
     if (m_resolutions->size() > workspaceID.value) {
@@ -303,7 +303,7 @@ void FitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
 }
 
 std::vector<double> FitDataModel::getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  auto fitData = m_fittingData->at(workspaceID.value);
+  auto const &fitData = m_fittingData->at(workspaceID.value);
   return fitData.excludeRegionsVector(spectrum);
 }
 

@@ -47,7 +47,7 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
   m_fitTypeToFunctionStore.clear();
   m_globalParameterStore.clear();
   m_fitTypeList.clear();
-  for (auto functionInfo : functionInitialisationStrings) {
+  for (auto const &functionInfo : functionInitialisationStrings) {
     IFunction_sptr function;
     try {
       function = FunctionFactory::Instance().createInitialized(functionInfo.second);

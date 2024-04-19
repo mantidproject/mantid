@@ -376,9 +376,12 @@ void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID worksp
 void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
 
-  auto subIndices = m_model->getSubIndices(row);
+  const auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
   const auto axis = dynamic_cast<Mantid::API::TextAxis const *>(workspace->getAxis(1));
+  if (!axis) {
+    return;
+  }
   const auto parameter = axis->label(subIndices.second.value);
 
   const auto workspaceIndex = m_model->getSpectrum(row);

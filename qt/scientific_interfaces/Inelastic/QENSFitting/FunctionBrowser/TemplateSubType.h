@@ -83,7 +83,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   QList<std::string> getParameterDescriptions(int typeIndex) const override {
     auto const type = static_cast<Type>(typeIndex);
     QList<std::string> descriptions;
-    auto const function = g_typeMap[type].function;
+    auto const &function = g_typeMap[type].function;
     if (!function.empty()) {
       Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createFunction(function);
       auto fillDescriptions = [&descriptions, &fun](ParamID id) {

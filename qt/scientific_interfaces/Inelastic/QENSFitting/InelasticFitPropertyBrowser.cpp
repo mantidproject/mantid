@@ -53,7 +53,8 @@ struct ScopedSignalBlocker {
  * @param mantidui :: The UI form for MantidPlot
  */
 InelasticFitPropertyBrowser::InelasticFitPropertyBrowser(QWidget *parent)
-    : QDockWidget(parent), m_templatePresenter(nullptr), m_functionWidget(nullptr) {
+    : QDockWidget(parent), m_mainLayout(), m_functionBrowser(), m_fitOptionsBrowser(), m_templatePresenter(),
+      m_fitStatusWidget(), m_functionWidget(), m_browserSwitcher(), m_fitStatus(), m_fitChiSquared() {
   setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
@@ -99,7 +100,7 @@ MultiDomainFunction_sptr InelasticFitPropertyBrowser::getGlobalFunction() const 
     return temp;
   } else if (fun) {
     MultiDomainFunction_sptr multiFunction = std::make_shared<MultiDomainFunction>();
-    multiFunction->addFunction(fun);
+    multiFunction->addFunction(std::move(fun));
     multiFunction->setDomainIndex(0, 0);
     return multiFunction;
   } else {

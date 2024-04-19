@@ -46,8 +46,8 @@ parameterEstimateSetter(FunctionParameterEstimation::ParameterEstimator estimato
   };
 }
 
-FunctionParameterEstimation::FunctionParameterEstimation(
-    std::unordered_map<std::string, ParameterEstimator> estimators) {
+FunctionParameterEstimation::FunctionParameterEstimation(std::unordered_map<std::string, ParameterEstimator> estimators)
+    : m_funcMap() {
   for (auto it = estimators.cbegin(); it != estimators.cend(); ++it) {
     addParameterEstimationFunction(it->first, parameterEstimateSetter(it->second));
   }

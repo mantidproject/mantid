@@ -92,7 +92,7 @@ void FitPlotPresenter::handleHWHMMinimumChanged(double maximum) {
   m_view->setHWHMMinimum(m_model->calculateHWHMMinimum(maximum));
 }
 
-void FitPlotPresenter::appendLastDataToSelection(std::vector<std::string> displayNames) {
+void FitPlotPresenter::appendLastDataToSelection(std::vector<std::string> const &displayNames) {
   const auto workspaceCount = displayNames.size();
   if (m_view->dataSelectionSize() == workspaceCount) {
     // if adding a spectra to an existing workspace, update all the combo box
@@ -104,7 +104,7 @@ void FitPlotPresenter::appendLastDataToSelection(std::vector<std::string> displa
     m_view->appendToDataSelection(displayNames.back());
 }
 
-void FitPlotPresenter::updateDataSelection(std::vector<std::string> displayNames) {
+void FitPlotPresenter::updateDataSelection(std::vector<std::string> const &displayNames) {
   m_view->clearDataSelection();
   const auto workspaceCount = displayNames.size();
   for (size_t i = 0; i < workspaceCount; ++i) {
@@ -142,7 +142,7 @@ void FitPlotPresenter::enableAllDataSelection() {
 }
 
 void FitPlotPresenter::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
-  m_model->setFitFunction(function);
+  m_model->setFitFunction(std::move(function));
 }
 
 void FitPlotPresenter::setFitSingleSpectrumIsFitting(bool fitting) {

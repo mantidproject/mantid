@@ -82,7 +82,7 @@ void MultiFunctionTemplateView::createFunctionParameterProperties() {
         m_parameterMap[prop] = id;
         m_parameterReverseMap[id] = prop;
       }
-      parameters[index] = props;
+      parameters[index] = std::move(props);
     }
     QtProperty *subTypeProp;
     if (subType->isType(typeid(int))) {
