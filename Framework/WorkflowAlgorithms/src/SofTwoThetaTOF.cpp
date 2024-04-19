@@ -181,7 +181,6 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   generateGrouping->setProperty("InputWorkspace", ws);
   generateGrouping->setProperty("AngleStep", twoThetaStep);
   generateGrouping->setProperty("GroupingWorkspace", GROUP_WS);
-  generateGrouping->setProperty("GenerateParFile", true);
 
   std::string filename;
   RemoveFileAtScopeExit deleteThisLater;
@@ -195,6 +194,7 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   } else {
     filename = static_cast<std::string>(getProperty(Prop::FILENAME));
     filename = ensureXMLExtension(filename);
+    generateGrouping->setProperty("GenerateParFile", true);
   }
   generateGrouping->setProperty("GroupingFilename", filename);
   generateGrouping->execute();
