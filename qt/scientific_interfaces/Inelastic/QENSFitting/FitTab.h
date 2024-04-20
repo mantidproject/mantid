@@ -59,7 +59,7 @@ class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
   Q_OBJECT
 
 public:
-  FitTab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
+  FitTab(std::string const &tabName, QWidget *parent = nullptr);
   virtual ~FitTab() override = default;
 
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
@@ -78,7 +78,7 @@ public:
   }
 
   template <typename FitDataView> void setupFitDataView() {
-    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, getTabName()));
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
@@ -100,8 +100,6 @@ public:
                                                      const IFunction *compositeFunction);
 
   std::string getTabName() const noexcept { return m_tabName; }
-  bool hasResolution() const noexcept { return m_hasResolution; }
-  void setFileExtensionsByName(bool filter);
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
   void handleDataChanged() override;
@@ -121,14 +119,7 @@ public slots:
   void handleEndXChanged(double endX) override;
 
 protected:
-  FittingModel *getFittingModel() const;
   void run() override;
-  void setSampleWSSuffixes(const QStringList &suffices);
-  void setSampleFBSuffixes(const QStringList &suffices);
-  void setResolutionWSSuffixes(const QStringList &suffices);
-  void setResolutionFBSuffixes(const QStringList &suffices);
-  void setSampleSuffixes(std::string const &tab, bool filter);
-  void setResolutionSuffixes(std::string const &tab, bool filter);
 
   void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -164,7 +155,6 @@ private:
   std::string getFitTypeString() const;
 
   std::string m_tabName;
-  bool m_hasResolution;
 
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;

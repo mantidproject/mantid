@@ -45,18 +45,6 @@ void FitDataPresenter::setResolution(const std::string &name) {
   }
 }
 
-void FitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_view->setSampleWSSuffices(suffixes); }
-
-void FitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_view->setSampleFBSuffices(suffixes); }
-
-void FitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
-  m_view->setResolutionWSSuffices(suffixes);
-}
-
-void FitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
-  m_view->setResolutionFBSuffices(suffixes);
-}
-
 void FitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
   if (m_model->getNumberOfWorkspaces() > workspaceID) {
     m_model->setStartX(startX, workspaceID);

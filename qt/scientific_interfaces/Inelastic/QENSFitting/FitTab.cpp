@@ -62,8 +62,8 @@ size_t FitTab::getNumberOfSpecificFunctionContained(const std::string &functionN
   }
 }
 
-FitTab::FitTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
-    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
+FitTab::FitTab(std::string const &tabName, QWidget *parent)
+    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName) {
   m_uiForm->setupUi(parent);
 }
 
@@ -104,37 +104,6 @@ void FitTab::setRunIsRunning(bool running) { m_uiForm->pbRun->setText(running ? 
 
 void FitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
-void FitTab::setFileExtensionsByName(bool filter) {
-  auto const tab = getTabName();
-  setSampleSuffixes(tab, filter);
-  if (hasResolution())
-    setResolutionSuffixes(tab, filter);
-}
-
-void FitTab::setSampleSuffixes(std::string const &tab, bool filter) {
-  QStringList const noSuffixes{""};
-  setSampleWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tab) : noSuffixes);
-  setSampleFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
-}
-
-void FitTab::setResolutionSuffixes(std::string const &tab, bool filter) {
-  QStringList const noSuffixes{""};
-  setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tab) : noSuffixes);
-  setResolutionFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
-}
-
-void FitTab::setSampleWSSuffixes(const QStringList &suffices) { m_dataPresenter->setSampleWSSuffices(suffices); }
-
-void FitTab::setSampleFBSuffixes(const QStringList &suffices) { m_dataPresenter->setSampleFBSuffices(suffices); }
-
-void FitTab::setResolutionWSSuffixes(const QStringList &suffices) {
-  m_dataPresenter->setResolutionWSSuffices(suffices);
-}
-
-void FitTab::setResolutionFBSuffixes(const QStringList &suffices) {
-  m_dataPresenter->setResolutionFBSuffices(suffices);
-}
-
 WorkspaceID FitTab::getSelectedDataIndex() const { return m_plotPresenter->getActiveWorkspaceID(); }
 
 WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->getActiveWorkspaceIndex(); }
@@ -142,8 +111,6 @@ WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->get
 bool FitTab::isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   return m_plotPresenter->isCurrentlySelected(workspaceID, spectrum);
 }
-
-FittingModel *FitTab::getFittingModel() const { return m_fittingModel.get(); }
 
 /**
  * @param functionName  The name of the function.

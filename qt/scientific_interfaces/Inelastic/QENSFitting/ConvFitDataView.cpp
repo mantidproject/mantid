@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataView.h"
+#include "Common/InterfaceUtils.h"
 #include "ConvFitAddWorkspaceDialog.h"
 
 #include <QComboBox>
@@ -26,9 +27,11 @@ QStringList convFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
+ConvFitDataView::ConvFitDataView(QWidget *parent, std::string const &tabName)
+    : ConvFitDataView(convFitHeaders(), parent, tabName) {}
 
-ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
+ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
+    : FitDataView(headers, parent, tabName) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -39,10 +42,10 @@ void ConvFitDataView::showAddWorkspaceDialog() {
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
-  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
-  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
+  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(m_tabName));
+  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(m_tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

@@ -25,12 +25,6 @@ QENSFitting::QENSFitting(QWidget *parent)
   m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
 }
 
-void QENSFitting::applySettings(std::map<std::string, QVariant> const &settings) {
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setFileExtensionsByName(settings.at("RestrictInput").toBool());
-  }
-}
-
 /**
  * Initialised the layout of the interface.  MUST be called.
  */

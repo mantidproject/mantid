@@ -45,11 +45,6 @@ public:
   virtual QModelIndexList getSelectedIndexes() const = 0;
   virtual bool dataColumnContainsText(std::string const &columnText) const = 0;
 
-  virtual void setSampleWSSuffices(const QStringList &suffices) = 0;
-  virtual void setSampleFBSuffices(const QStringList &suffices) = 0;
-  virtual void setResolutionWSSuffices(const QStringList &suffices) = 0;
-  virtual void setResolutionFBSuffices(const QStringList &suffices) = 0;
-
   virtual void displayWarning(std::string const &warning) = 0;
 };
 } // namespace Inelastic

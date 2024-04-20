@@ -32,10 +32,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-FitDataView::FitDataView(QWidget *parent) : FitDataView(defaultHeaders(), parent) {}
+FitDataView::FitDataView(QWidget *parent, std::string const &tabName)
+    : FitDataView(defaultHeaders(), parent, tabName) {}
 
-FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
-    : QTabWidget(parent), m_uiForm(new Ui::FitDataView) {
+FitDataView::FitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
+    : QTabWidget(parent), m_uiForm(new Ui::FitDataView), m_tabName(tabName) {
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);
@@ -131,22 +132,14 @@ QModelIndexList FitDataView::getSelectedIndexes() const {
   return m_uiForm->tbFitData->selectionModel()->selectedIndexes();
 }
 
-void FitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
-
-void FitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
-
-void FitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
-
-void FitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
-
 void FitDataView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

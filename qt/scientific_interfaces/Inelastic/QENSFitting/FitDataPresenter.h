@@ -38,10 +38,6 @@ public:
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
   void setStartX(double startX, WorkspaceID workspaceID);
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void setEndX(double startX, WorkspaceID workspaceID);

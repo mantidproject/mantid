@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataView.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/SettingsHelper.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataPresenter.h"
 
@@ -27,11 +29,13 @@ QStringList FqFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {
+FqFitDataView::FqFitDataView(QWidget *parent, std::string const &tabName)
+    : FqFitDataView(FqFitHeaders(), parent, tabName) {
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
 }
 
-FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
+FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
+    : FitDataView(headers, parent, tabName) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -46,8 +50,8 @@ void FqFitDataView::showAddWorkspaceDialog() {
           SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

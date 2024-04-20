@@ -28,7 +28,7 @@ class IFitDataPresenter;
 class MANTIDQT_INELASTIC_DLL FitDataView : public QTabWidget, public IFitDataView {
   Q_OBJECT
 public:
-  FitDataView(QWidget *parent);
+  FitDataView(QWidget *parent, std::string const &tabName);
   ~FitDataView() override = default;
 
   void subscribePresenter(IFitDataPresenter *presenter) override;
@@ -45,26 +45,18 @@ public:
   QModelIndexList getSelectedIndexes() const override;
   bool dataColumnContainsText(std::string const &columnText) const override;
 
-  void setSampleWSSuffices(const QStringList &suffices) override;
-  void setSampleFBSuffices(const QStringList &suffices) override;
-  void setResolutionWSSuffices(const QStringList &suffices) override;
-  void setResolutionFBSuffices(const QStringList &suffices) override;
-
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 protected:
-  FitDataView(const QStringList &headers, QWidget *parent);
+  FitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName);
+
+  std::string m_tabName;
 
   std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
-
-  QStringList m_wsSampleSuffixes;
-  QStringList m_fbSampleSuffixes;
-  QStringList m_wsResolutionSuffixes;
-  QStringList m_fbResolutionSuffixes;
 
   IFitDataPresenter *m_presenter;
 
