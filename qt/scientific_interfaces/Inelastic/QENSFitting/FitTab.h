@@ -74,7 +74,9 @@ public:
     m_uiForm->dockArea->m_fitPropertyBrowser->init();
     m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
     m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
-    setConvolveMembers(convolveMembers);
+    m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+    if (convolveMembers)
+      m_fitPropertyBrowser->setOutputCompositeMembers(true);
   }
 
   template <typename FitDataView> void setupFitDataView() {
@@ -92,9 +94,7 @@ public:
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   size_t getNumberOfCustomFunctions(const std::string &functionName) const;
-  void setConvolveMembers(bool convolveMembers);
 
   static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
                                                      const IFunction *compositeFunction);
@@ -128,7 +128,6 @@ protected:
 
   void setRunIsRunning(bool running);
   void setRunEnabled(bool enable);
-  void setEditResultVisible(bool visible);
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<FittingModel> m_fittingModel;

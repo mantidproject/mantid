@@ -108,10 +108,6 @@ WorkspaceID FitTab::getSelectedDataIndex() const { return m_plotPresenter->getAc
 
 WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->getActiveWorkspaceIndex(); }
 
-bool FitTab::isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  return m_plotPresenter->isCurrentlySelected(workspaceID, spectrum);
-}
-
 /**
  * @param functionName  The name of the function.
  * @return              The number of custom functions, with the specified name,
@@ -142,14 +138,14 @@ void FitTab::setModelEndX(double endX) {
 }
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  if (isRangeCurrentlySelected(workspaceID, spectrum)) {
+  if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setStartX(startX);
     m_plotPresenter->updateGuess();
   }
 }
 
 void FitTab::handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  if (isRangeCurrentlySelected(workspaceID, spectrum)) {
+  if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();
   }
@@ -169,18 +165,6 @@ void FitTab::handleEndXChanged(double endX) {
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
   m_dataPresenter->updateTableFromModel();
-}
-
-/**
- * Sets whether fit members should be convolved with the resolution after a fit.
- *
- * @param convolveMembers If true, members are to be convolved.
- */
-void FitTab::setConvolveMembers(bool convolveMembers) {
-  m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
-  // if convolve members is on, output members should also be on
-  if (convolveMembers)
-    m_fitPropertyBrowser->setOutputCompositeMembers(true);
 }
 
 void FitTab::updateFitOutput(bool error) {
@@ -455,12 +439,6 @@ void FitTab::updateParameterEstimationData() {
     m_fitPropertyBrowser->estimateFunctionParameters();
   }
 }
-
-/**
- * Sets the visiblity of the output options Edit Result button
- * @param visible :: true to make the edit result button visible
- */
-void FitTab::setEditResultVisible(bool visible) { m_outOptionsPresenter->setEditResultVisible(visible); }
 
 void FitTab::setAlgorithmProperties(const IAlgorithm_sptr &fitAlgorithm) const {
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
