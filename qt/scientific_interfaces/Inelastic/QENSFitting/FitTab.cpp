@@ -323,27 +323,6 @@ void FitTab::updateParameterEstimationData() {
   }
 }
 
-void FitTab::setAlgorithmProperties(const IAlgorithm_sptr &fitAlgorithm) const {
-  fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
-  fitAlgorithm->setProperty("MaxIterations", m_fitPropertyBrowser->maxIterations());
-  fitAlgorithm->setProperty("PeakRadius", m_fitPropertyBrowser->getPeakRadius());
-  fitAlgorithm->setProperty("CostFunction", m_fitPropertyBrowser->costFunction());
-  fitAlgorithm->setProperty("IgnoreInvalidData", m_fitPropertyBrowser->ignoreInvalidData());
-  fitAlgorithm->setProperty("EvaluationType", m_fitPropertyBrowser->fitEvaluationType());
-  fitAlgorithm->setProperty("PeakRadius", m_fitPropertyBrowser->getPeakRadius());
-  if (m_fitPropertyBrowser->convolveMembers()) {
-    fitAlgorithm->setProperty("ConvolveMembers", true);
-    fitAlgorithm->setProperty("OutputCompositeMembers", true);
-  } else {
-    fitAlgorithm->setProperty("OutputCompositeMembers", m_fitPropertyBrowser->outputCompositeMembers());
-  }
-
-  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-    fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
-  }
-  fitAlgorithm->setProperty("OutputFitStatus", true);
-}
-
 /*
  * Runs the specified fit algorithm and calls the algorithmComplete
  * method of this fit analysis tab once completed.
@@ -363,9 +342,9 @@ void FitTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void FitTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  setAlgorithmProperties(fitAlgorithm);
+  auto properties = m_fitPropertyBrowser->fitProperties(m_fittingModel->getFittingMode());
   m_fittingAlgorithm = fitAlgorithm;
-  m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
+  m_batchAlgoRunner->addAlgorithm(fitAlgorithm, std::move(properties));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 

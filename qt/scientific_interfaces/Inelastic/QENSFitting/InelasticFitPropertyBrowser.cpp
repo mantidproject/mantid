@@ -11,6 +11,7 @@
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -247,6 +248,30 @@ bool InelasticFitPropertyBrowser::ignoreInvalidData() const {
 
 std::string InelasticFitPropertyBrowser::fitType() const {
   return m_fitOptionsBrowser->getProperty("FitType").toStdString();
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+InelasticFitPropertyBrowser::fitProperties(FittingMode const &fittingMode) const {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  Mantid::API::AlgorithmProperties::update("Minimizer", minimizer(true), *properties);
+  Mantid::API::AlgorithmProperties::update("MaxIterations", maxIterations(), *properties);
+  Mantid::API::AlgorithmProperties::update("PeakRadius", getPeakRadius(), *properties);
+  Mantid::API::AlgorithmProperties::update("CostFunction", costFunction(), *properties);
+  Mantid::API::AlgorithmProperties::update("IgnoreInvalidData", ignoreInvalidData(), *properties);
+  Mantid::API::AlgorithmProperties::update("EvaluationType", fitEvaluationType(), *properties);
+  Mantid::API::AlgorithmProperties::update("PeakRadius", getPeakRadius(), *properties);
+  Mantid::API::AlgorithmProperties::update("CostFunction", costFunction(), *properties);
+  Mantid::API::AlgorithmProperties::update("ConvolveMembers", convolveMembers(), *properties);
+  if (convolveMembers()) {
+    Mantid::API::AlgorithmProperties::update("OutputCompositeMembers", true, *properties);
+  } else {
+    Mantid::API::AlgorithmProperties::update("OutputCompositeMembers", outputCompositeMembers(), *properties);
+  }
+  if (fittingMode == FittingMode::SEQUENTIAL) {
+    Mantid::API::AlgorithmProperties::update("FitType", fitType(), *properties);
+  }
+  Mantid::API::AlgorithmProperties::update("OutputFitStatus", true, *properties);
+  return properties;
 }
 
 int InelasticFitPropertyBrowser::getNumberOfDatasets() const {

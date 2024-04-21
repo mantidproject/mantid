@@ -68,6 +68,7 @@ public:
   std::string fitEvaluationType() const;
   std::string fitType() const;
   bool ignoreInvalidData() const;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties(FittingMode const &fittingMode) const;
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);

@@ -110,7 +110,6 @@ public slots:
 protected:
   void run() override;
 
-  void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
