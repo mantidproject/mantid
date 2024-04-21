@@ -334,10 +334,10 @@ std::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) co
     return model()->fitTypePrefix();
   } else {
     auto const prefixes = model()->peakPrefixes();
-    if (!prefixes)
-      return std::optional<std::string>();
     auto const index = name > ParamID::LOR1_FWHM && name <= ParamID::LOR2_FWHM ? 1 : 0;
-    return prefixes->at(index).toStdString();
+    if (!prefixes || index >= prefixes->size())
+      return std::optional<std::string>();
+    return (*prefixes)[index];
   }
 }
 
@@ -519,11 +519,17 @@ std::string ConvFunctionTemplateModel::buildBackgroundFunctionString() const {
 }
 
 std::optional<std::string> ConvFunctionTemplateModel::getLor1Prefix() const {
-  return model()->peakPrefixes()->at(0).toStdString();
+  auto const prefixes = model()->peakPrefixes();
+  if (!prefixes || prefixes->size() < 1)
+    return std::optional<std::string>();
+  return (*prefixes)[0];
 }
 
 std::optional<std::string> ConvFunctionTemplateModel::getLor2Prefix() const {
-  return model()->peakPrefixes()->at(1).toStdString();
+  auto const prefixes = model()->peakPrefixes();
+  if (!prefixes || prefixes->size() < 2)
+    return std::optional<std::string>();
+  return (*prefixes)[1];
 }
 
 std::optional<std::string> ConvFunctionTemplateModel::getFitTypePrefix() const { return model()->fitTypePrefix(); }
