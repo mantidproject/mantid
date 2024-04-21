@@ -21,7 +21,9 @@ namespace CustomInterfaces {
 namespace Inelastic {
 
 FitTab::FitTab(std::string const &tabName, QWidget *parent)
-    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName) {
+    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
+      m_outOptionsPresenter(), m_fitPropertyBrowser(), m_tabName(tabName), m_activeWorkspaceID(),
+      m_activeSpectrumIndex(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
 }
 
@@ -58,15 +60,6 @@ void FitTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
   m_plotPresenter->setFitFunction(func);
   m_fittingModel->setFitFunction(func);
-}
-
-void FitTab::setModelStartX(double startX) {
-  m_dataPresenter->setStartX(startX, m_plotPresenter->getActiveWorkspaceID(),
-                             m_plotPresenter->getActiveWorkspaceIndex());
-}
-
-void FitTab::setModelEndX(double endX) {
-  m_dataPresenter->setStartX(endX, m_plotPresenter->getActiveWorkspaceID(), m_plotPresenter->getActiveWorkspaceIndex());
 }
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
@@ -175,7 +168,6 @@ void FitTab::updateFitBrowserParameterValuesFromAlg() {
  * Updates the fit output status
  */
 void FitTab::updateFitStatus() {
-
   if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
@@ -193,29 +185,11 @@ void FitTab::updateFitStatus() {
  */
 void FitTab::handlePlotSelectedSpectra() {
   enableFitButtons(false);
-  plotSelectedSpectra(m_outOptionsPresenter->getSpectraToPlot());
+  for (auto const &spectrum : m_outOptionsPresenter->getSpectraToPlot())
+    m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), SettingsHelper::externalPlotErrorBars());
+  m_outOptionsPresenter->clearSpectraToPlot();
   enableFitButtons(true);
   m_outOptionsPresenter->setPlotting(false);
-}
-
-/**
- * Plots the spectra corresponding to the selected parameters
- * @param spectra :: a vector of spectra to plot from a group workspace
- */
-void FitTab::plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra) {
-  for (auto const &spectrum : spectra)
-    plotSpectrum(spectrum.first, spectrum.second);
-  m_outOptionsPresenter->clearSpectraToPlot();
-}
-
-/**
- * Plots a spectrum with the specified index in a workspace
- * @workspaceName :: the workspace containing the spectrum to plot
- * @index :: the index in the workspace
- * @errorBars :: true if you want error bars to be plotted
- */
-void FitTab::plotSpectrum(std::string const &workspaceName, std::size_t const &index) {
-  m_plotter->plotSpectra(workspaceName, std::to_string(index), SettingsHelper::externalPlotErrorBars());
 }
 
 void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {

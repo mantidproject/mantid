@@ -74,7 +74,7 @@ public:
   }
 
   template <typename FitDataView> void setupFitDataView() {
-    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, getTabName()));
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, m_tabName));
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
@@ -85,8 +85,6 @@ public:
   void setupOutputOptionsPresenter(bool const editResults = false);
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
   void subscribeFitBrowserToDataPresenter();
-
-  std::string getTabName() const noexcept { return m_tabName; }
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
   void handleDataChanged() override;
@@ -107,50 +105,45 @@ public slots:
 
   void handleFunctionChanged() override;
 
-protected:
+private slots:
+  void updateFitOutput(bool error);
+  void updateSingleFitOutput(bool error);
+  void fitAlgorithmComplete(bool error);
+
+private:
+  void setup() override;
+  bool validate() override;
   void run() override;
 
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  std::unique_ptr<FitDataPresenter> m_dataPresenter;
-  std::unique_ptr<FitPlotPresenter> m_plotPresenter;
-  std::unique_ptr<FittingModel> m_fittingModel;
-  InelasticFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
-  WorkspaceID m_activeWorkspaceID;
-  WorkspaceIndex m_activeSpectrumIndex;
-
-  std::unique_ptr<Ui::FitTab> m_uiForm;
-
-private:
-  void setup() override;
-  bool validate() override;
-  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
-  void updateParameterEstimationData();
-
-  std::string m_tabName;
-
-  std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
-  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-
-protected slots:
   void setModelFitFunction();
-  void setModelStartX(double startX);
-  void setModelEndX(double endX);
-  void updateFitOutput(bool error);
-  void updateSingleFitOutput(bool error);
-  void fitAlgorithmComplete(bool error);
-  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
-                                           std::unordered_map<std::string, ParameterValue>());
-  void updateFitBrowserParameterValuesFromAlg();
+
+  void updateParameterEstimationData();
   void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
+  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
+                                           std::unordered_map<std::string, ParameterValue>());
+  void updateFitBrowserParameterValuesFromAlg();
+
+  std::unique_ptr<Ui::FitTab> m_uiForm;
+
+  std::unique_ptr<FitDataPresenter> m_dataPresenter;
+  std::unique_ptr<FittingModel> m_fittingModel;
+  std::unique_ptr<FitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
+  InelasticFitPropertyBrowser *m_fitPropertyBrowser;
+
+  std::string m_tabName;
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
 } // namespace Inelastic
