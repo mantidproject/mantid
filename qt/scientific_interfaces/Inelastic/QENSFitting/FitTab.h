@@ -115,8 +115,6 @@ protected:
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  void setRunIsRunning(bool running);
-  void setRunEnabled(bool enable);
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<FittingModel> m_fittingModel;
@@ -149,7 +147,6 @@ protected slots:
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
   void executeFit();
-  void updateParameterValues();
   void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
                                            std::unordered_map<std::string, ParameterValue>());

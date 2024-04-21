@@ -59,10 +59,6 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
   m_plotPresenter->updatePlots();
 }
 
-void FitTab::setRunIsRunning(bool running) { m_uiForm->pbRun->setText(running ? "Running..." : "Run"); }
-
-void FitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
-
 void FitTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
   m_plotPresenter->setFitFunction(func);
@@ -134,7 +130,6 @@ void FitTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void FitTab::fitAlgorithmComplete(bool error) {
-  setRunIsRunning(false);
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
   enableOutputOptions(!error);
@@ -146,14 +141,6 @@ void FitTab::fitAlgorithmComplete(bool error) {
   }
   m_plotPresenter->updatePlots();
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
-}
-
-/**
- * Updates the parameter values and errors in the fit property browser.
- */
-void FitTab::updateParameterValues() {
-  updateParameterValues(m_fittingModel->getParameterValues(m_plotPresenter->getActiveWorkspaceID(),
-                                                           m_plotPresenter->getActiveWorkspaceIndex()));
 }
 
 /**
@@ -275,7 +262,6 @@ void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spec
  */
 void FitTab::executeFit() {
   if (validate()) {
-    setRunIsRunning(true);
     enableFitButtons(false);
     enableOutputOptions(false);
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
@@ -299,7 +285,6 @@ bool FitTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void FitTab::run() {
-  setRunIsRunning(true);
   enableFitButtons(false);
   enableOutputOptions(false);
   m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
@@ -312,7 +297,8 @@ void FitTab::run() {
  * @param enable :: true to enable buttons
  */
 void FitTab::enableFitButtons(bool enable) {
-  setRunEnabled(enable);
+  m_uiForm->pbRun->setText(enable ? "Run" : "Running...");
+  m_uiForm->pbRun->setEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
 }
