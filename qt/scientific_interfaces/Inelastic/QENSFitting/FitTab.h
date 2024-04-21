@@ -16,17 +16,9 @@
 #include "InelasticFitPropertyBrowser.h"
 #include "ui_FitTab.h"
 
-#include "MantidQtWidgets/Common/FunctionModelDataset.h"
-
-#include <boost/optional.hpp>
-
-#include <QtCore>
-
 #include <memory>
 #include <optional>
-#include <type_traits>
 
-#include <QPair>
 #include <QString>
 
 namespace MantidQt {
@@ -52,6 +44,9 @@ public:
 
   // Used by FitOutputOptionsPresenter
   virtual void handlePlotSelectedSpectra() = 0;
+
+  // Used by InelasticFitPropertyBrowser
+  virtual void handleFunctionChanged() = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
@@ -91,9 +86,6 @@ public:
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
   void subscribeFitBrowserToDataPresenter();
 
-  WorkspaceID getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
-
   std::string getTabName() const noexcept { return m_tabName; }
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
@@ -112,6 +104,8 @@ public:
 public slots:
   void handleStartXChanged(double startX) override;
   void handleEndXChanged(double endX) override;
+
+  void handleFunctionChanged() override;
 
 protected:
   void run() override;
@@ -135,12 +129,8 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  void connectFitPropertyBrowser();
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
-  std::string getOutputBasename() const;
-  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
-  std::vector<std::string> getFitParameterNames() const;
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
@@ -158,7 +148,6 @@ protected slots:
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
-  void singleFit();
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
@@ -168,7 +157,6 @@ protected slots:
   void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
-  void respondToFunctionChanged();
 };
 
 } // namespace Inelastic

@@ -7,28 +7,14 @@
 #include "FitTab.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "FitPlotView.h"
+
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
-#include "FitPlotView.h"
-#include "FitTabConstants.h"
-
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
-#include "MantidQtWidgets/Common/FittingMode.h"
-#include "MantidQtWidgets/Common/PropertyHandler.h"
-
-#include <QSignalBlocker>
 #include <QString>
-#include <QtCore>
-
-#include <algorithm>
-#include <utility>
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
 
 namespace {
 /// Logger
@@ -48,11 +34,7 @@ void FitTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connectFitPropertyBrowser();
-}
-
-void FitTab::connectFitPropertyBrowser() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(handleFunctionChanged()));
 }
 
 void FitTab::subscribeFitBrowserToDataPresenter() {
@@ -81,10 +63,6 @@ void FitTab::setRunIsRunning(bool running) { m_uiForm->pbRun->setText(running ? 
 
 void FitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
-WorkspaceID FitTab::getSelectedDataIndex() const { return m_plotPresenter->getActiveWorkspaceID(); }
-
-WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->getActiveWorkspaceIndex(); }
-
 void FitTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
   m_plotPresenter->setFitFunction(func);
@@ -92,13 +70,12 @@ void FitTab::setModelFitFunction() {
 }
 
 void FitTab::setModelStartX(double startX) {
-  const auto dataIndex = getSelectedDataIndex();
-  m_dataPresenter->setStartX(startX, dataIndex, getSelectedSpectrum());
+  m_dataPresenter->setStartX(startX, m_plotPresenter->getActiveWorkspaceID(),
+                             m_plotPresenter->getActiveWorkspaceIndex());
 }
 
 void FitTab::setModelEndX(double endX) {
-  const auto dataIndex = getSelectedDataIndex();
-  m_dataPresenter->setStartX(endX, dataIndex, getSelectedSpectrum());
+  m_dataPresenter->setStartX(endX, m_plotPresenter->getActiveWorkspaceID(), m_plotPresenter->getActiveWorkspaceIndex());
 }
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
@@ -175,7 +152,8 @@ void FitTab::fitAlgorithmComplete(bool error) {
  * Updates the parameter values and errors in the fit property browser.
  */
 void FitTab::updateParameterValues() {
-  updateParameterValues(m_fittingModel->getParameterValues(getSelectedDataIndex(), getSelectedSpectrum()));
+  updateParameterValues(m_fittingModel->getParameterValues(m_plotPresenter->getActiveWorkspaceID(),
+                                                           m_plotPresenter->getActiveWorkspaceIndex()));
 }
 
 /**
@@ -194,7 +172,7 @@ void FitTab::updateParameterValues(const std::unordered_map<std::string, Paramet
 }
 
 void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
-  IFunction_sptr fun = m_fittingModel->getFitFunction();
+  auto fun = m_fittingModel->getFitFunction();
   if (fun) {
     for (auto const &pair : params) {
       fun->setParameter(pair.first, pair.second.value);
@@ -279,26 +257,6 @@ void FitTab::plotSpectrum(std::string const &workspaceName, std::size_t const &i
   m_plotter->plotSpectra(workspaceName, std::to_string(index), SettingsHelper::externalPlotErrorBars());
 }
 
-/**
- * Gets the name used for the base of the result workspaces
- */
-std::string FitTab::getOutputBasename() const { return m_fittingModel->getOutputBasename(); }
-
-/**
- * Gets the Result workspace from a fit
- */
-WorkspaceGroup_sptr FitTab::getResultWorkspace() const { return m_fittingModel->getResultWorkspace(); }
-
-/**
- * Gets the names of the Fit Parameters
- */
-std::vector<std::string> FitTab::getFitParameterNames() const { return m_fittingModel->getFitParameterNames(); }
-
-/**
- * Executes the single fit algorithm defined in this indirect fit analysis tab.
- */
-void FitTab::singleFit() { handleSingleFitClicked(getSelectedDataIndex(), getSelectedSpectrum()); }
-
 void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (validate()) {
     m_activeSpectrumIndex = spectrum;
@@ -366,8 +324,8 @@ void FitTab::enableFitButtons(bool enable) {
  */
 void FitTab::enableOutputOptions(bool enable) {
   if (enable) {
-    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
-    setPDFWorkspace(getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
+    setPDFWorkspace(m_fittingModel->getOutputBasename() + "_PDFs");
     m_outOptionsPresenter->setPlotTypes("Result Group");
   } else
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
@@ -397,7 +355,8 @@ void FitTab::setPDFWorkspace(std::string const &workspaceName) {
 void FitTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
       m_dataPresenter->getDataForParameterEstimation(m_fitPropertyBrowser->getEstimationDataSelector()));
-  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
+  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                     m_plotPresenter->getActiveWorkspaceIndex());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
     m_fitPropertyBrowser->estimateFunctionParameters();
@@ -462,9 +421,10 @@ void FitTab::updateDataReferences() {
  * enabled/disabled.
  */
 void FitTab::updateResultOptions() {
-  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
+  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                     m_plotPresenter->getActiveWorkspaceIndex());
   if (isFit)
-    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
@@ -514,7 +474,7 @@ void FitTab::handleBackgroundChanged(double value) {
   m_plotPresenter->updateGuess();
 }
 
-void FitTab::respondToFunctionChanged() {
+void FitTab::handleFunctionChanged() {
   setModelFitFunction();
   m_fittingModel->removeFittingData();
   m_plotPresenter->updatePlots();
