@@ -20,10 +20,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-FitTab::FitTab(std::string const &tabName, QWidget *parent)
+FitTab::FitTab(QWidget *parent)
     : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
-      m_outOptionsPresenter(), m_fitPropertyBrowser(), m_tabName(tabName), m_activeWorkspaceID(),
-      m_activeSpectrumIndex(), m_fittingAlgorithm() {
+      m_outOptionsPresenter(), m_fitPropertyBrowser(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
 }
 
@@ -107,10 +106,12 @@ void FitTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_activeWorkspaceID);
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
     m_fittingAlgorithm.reset();
-  } else
-    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_activeWorkspaceID, m_activeSpectrumIndex);
+  } else {
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
+                                       m_plotPresenter->getActiveWorkspaceIndex());
+  }
 }
 
 /**
@@ -194,12 +195,10 @@ void FitTab::handlePlotSelectedSpectra() {
 
 void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (validate()) {
-    m_activeSpectrumIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-    m_activeWorkspaceID = workspaceID;
     runSingleFit(m_fittingModel->getSingleFit(workspaceID, spectrum));
   }
 }

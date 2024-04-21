@@ -53,7 +53,7 @@ class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
   Q_OBJECT
 
 public:
-  FitTab(std::string const &tabName, QWidget *parent = nullptr);
+  FitTab(QWidget *parent);
   virtual ~FitTab() override = default;
 
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
@@ -73,8 +73,8 @@ public:
       m_fitPropertyBrowser->setOutputCompositeMembers(true);
   }
 
-  template <typename FitDataView> void setupFitDataView() {
-    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, m_tabName));
+  template <typename FitDataView> void setupFitDataView(std::string const &tabName) {
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, tabName));
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
@@ -140,9 +140,6 @@ private:
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
   InelasticFitPropertyBrowser *m_fitPropertyBrowser;
 
-  std::string m_tabName;
-  WorkspaceID m_activeWorkspaceID;
-  WorkspaceIndex m_activeSpectrumIndex;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
