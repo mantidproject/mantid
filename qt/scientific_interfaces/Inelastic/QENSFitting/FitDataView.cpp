@@ -69,10 +69,9 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
-UserInputValidator &FitDataView::validate(UserInputValidator &validator) {
+void FitDataView::validate(UserInputValidator &validator) {
   if (m_uiForm->tbFitData->rowCount() == 0)
     validator.addErrorMessage("No input data has been provided.");
-  return validator;
 }
 
 void FitDataView::displayWarning(const std::string &warning) {

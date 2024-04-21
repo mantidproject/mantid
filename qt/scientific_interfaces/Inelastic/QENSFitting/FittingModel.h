@@ -15,6 +15,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -44,6 +45,8 @@ class MANTIDQT_INELASTIC_DLL FittingModel : public IFittingModel {
 public:
   FittingModel();
   virtual ~FittingModel() = default;
+
+  void validate(UserInputValidator &validator) const;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;

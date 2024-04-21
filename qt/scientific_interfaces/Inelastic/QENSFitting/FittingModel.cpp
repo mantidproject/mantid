@@ -311,6 +311,11 @@ FittingModel::FittingModel()
     : m_fitDataModel(std::make_unique<FitDataModel>()), m_previousModelSelected(false),
       m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<FitOutput>()) {}
 
+void FittingModel::validate(UserInputValidator &validator) const {
+  if (auto const invalidFunction = isInvalidFunction())
+    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+}
+
 // Functions that interact with FitDataModel
 
 void FittingModel::addDefaultParameters() { m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0})); }

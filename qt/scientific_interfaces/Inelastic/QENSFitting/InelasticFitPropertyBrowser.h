@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "FunctionBrowser/ITemplatePresenter.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

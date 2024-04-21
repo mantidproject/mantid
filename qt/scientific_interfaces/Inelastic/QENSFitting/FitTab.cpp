@@ -206,14 +206,11 @@ void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spec
 bool FitTab::validate() {
   UserInputValidator validator;
   m_dataPresenter->validate(validator);
+  m_fittingModel->validate(validator);
 
-  const auto invalidFunction = m_fittingModel->isInvalidFunction();
-  if (invalidFunction)
-    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
-
-  const auto error = validator.generateErrorMessage();
-  emit showMessageBox(error);
-  return error.isEmpty();
+  const auto error = validator.generateErrorMessage().toStdString();
+  displayWarning(error);
+  return error.empty();
 }
 
 /**
