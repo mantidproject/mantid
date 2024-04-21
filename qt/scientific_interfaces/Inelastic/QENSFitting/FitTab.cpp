@@ -16,11 +16,6 @@
 
 using namespace Mantid::API;
 
-namespace {
-/// Logger
-Mantid::Kernel::Logger g_log("QENS Fitting");
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
@@ -143,21 +138,6 @@ void FitTab::fitAlgorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
-/**
- * Updates the parameter values and errors in the fit property browser.
- *
- * @param parameters  The parameter values to update the browser with.
- */
-void FitTab::updateParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
-  try {
-    updateFitBrowserParameterValues(params);
-  } catch (const std::out_of_range &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  } catch (const std::invalid_argument &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  }
-}
-
 void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
   auto fun = m_fittingModel->getFitFunction();
   if (fun) {
@@ -173,28 +153,22 @@ void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::strin
 }
 
 void FitTab::updateFitBrowserParameterValuesFromAlg() {
-  try {
-    updateFitBrowserParameterValues();
-    if (m_fittingAlgorithm) {
-      QSignalBlocker blocker(m_fitPropertyBrowser);
-      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-        auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
-        auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
-        auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
-          m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
-      } else {
-        IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-        if (fun->getNumberDomains() > 1)
-          m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-        else
-          m_fitPropertyBrowser->updateParameters(*fun);
-      }
+  updateFitBrowserParameterValues();
+  if (m_fittingAlgorithm) {
+    QSignalBlocker blocker(m_fitPropertyBrowser);
+    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+      auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
+      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
+      auto rowCount = static_cast<int>(paramWs->rowCount());
+      if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
+        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
+    } else {
+      IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
+      if (fun->getNumberDomains() > 1)
+        m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+      else
+        m_fitPropertyBrowser->updateParameters(*fun);
     }
-  } catch (const std::out_of_range &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  } catch (const std::invalid_argument &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
   }
 }
 /**
