@@ -230,18 +230,6 @@ void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spec
   }
 }
 
-/**
- * Executes the sequential fit algorithm defined in this indirect fit analysis
- * tab.
- */
-void FitTab::executeFit() {
-  if (validate()) {
-    enableFitButtons(false);
-    enableOutputOptions(false);
-    runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
-  }
-}
-
 bool FitTab::validate() {
   UserInputValidator validator;
   m_dataPresenter->validate(validator);

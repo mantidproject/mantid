@@ -145,7 +145,6 @@ protected slots:
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
-  void executeFit();
   void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
                                            std::unordered_map<std::string, ParameterValue>());
   void updateFitBrowserParameterValuesFromAlg();
