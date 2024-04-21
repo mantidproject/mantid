@@ -94,10 +94,6 @@ public:
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  size_t getNumberOfCustomFunctions(const std::string &functionName) const;
-
-  static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                                     const IFunction *compositeFunction);
 
   std::string getTabName() const noexcept { return m_tabName; }
 
@@ -151,7 +147,6 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
-  std::string getFitTypeString() const;
 
   std::string m_tabName;
 

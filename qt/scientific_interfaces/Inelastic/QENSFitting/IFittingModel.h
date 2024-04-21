@@ -57,7 +57,7 @@ public:
   virtual void setFittingMode(FittingMode mode) = 0;
   virtual FittingMode getFittingMode() const = 0;
 
-  virtual void setFitTypeString(const std::string &fitType) = 0;
+  virtual void updateFitTypeString() = 0;
   virtual boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID,
                                                                WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const = 0;

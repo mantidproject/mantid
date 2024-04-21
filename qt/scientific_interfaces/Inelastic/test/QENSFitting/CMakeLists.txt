@@ -4,7 +4,6 @@ set(TEST_FILES
     ConvFitModelTest.h
     ConvFitDataPresenterTest.h
     ConvFunctionTemplateModelTest.h
-    FitTabTest.h
     FqFitDataPresenterTest.h
     FqFitModelTest.h
     FitDataPresenterTest.h

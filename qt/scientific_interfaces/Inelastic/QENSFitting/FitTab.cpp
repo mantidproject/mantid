@@ -39,29 +39,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-/**
- * @param functionName  The name of the function.
- * @param compositeFunction  The function to search within.
- * @return              The number of custom functions, with the specified name,
- *                      included in the selected model.
- */
-size_t FitTab::getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                                    const IFunction *compositeFunction) {
-  // Whilst this could be a free method it would require its own
-  // dll_export in the header, so it's easier to make it static
-  assert(compositeFunction);
-
-  if (compositeFunction->nFunctions() == 0) {
-    return compositeFunction->name() == functionName ? 1 : 0;
-  } else {
-    size_t count{0};
-    for (size_t i{0}; i < compositeFunction->nFunctions(); i++) {
-      count += getNumberOfSpecificFunctionContained(functionName, compositeFunction->getFunction(i).get());
-    }
-    return count;
-  }
-}
-
 FitTab::FitTab(std::string const &tabName, QWidget *parent)
     : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName) {
   m_uiForm->setupUi(parent);
@@ -107,19 +84,6 @@ void FitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 WorkspaceID FitTab::getSelectedDataIndex() const { return m_plotPresenter->getActiveWorkspaceID(); }
 
 WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->getActiveWorkspaceIndex(); }
-
-/**
- * @param functionName  The name of the function.
- * @return              The number of custom functions, with the specified name,
- *                      included in the selected model.
- */
-size_t FitTab::getNumberOfCustomFunctions(const std::string &functionName) const {
-  auto fittingFunction = m_fittingModel->getFitFunction();
-  if (fittingFunction && fittingFunction->nFunctions() > 0)
-    return getNumberOfSpecificFunctionContained(functionName, fittingFunction->getFunction(0).get());
-  else
-    return 0;
-}
 
 void FitTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
@@ -567,28 +531,7 @@ void FitTab::respondToFunctionChanged() {
   m_fittingModel->removeFittingData();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
-  m_fittingModel->setFitTypeString(getFitTypeString());
-}
-
-std::string FitTab::getFitTypeString() const {
-  auto const multiDomainFunction = m_fittingModel->getFitFunction();
-  if (!multiDomainFunction || multiDomainFunction->nFunctions() == 0) {
-    return "NoCurrentFunction";
-  }
-
-  std::string fitType{""};
-  for (auto const &fitFunctionName : FUNCTION_STRINGS) {
-    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
-    if (occurances > 0) {
-      fitType += std::to_string(occurances) + fitFunctionName.second;
-    }
-  }
-
-  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
-    fitType += "Delta";
-  }
-
-  return fitType;
+  m_fittingModel->updateFitTypeString();
 }
 
 } // namespace Inelastic

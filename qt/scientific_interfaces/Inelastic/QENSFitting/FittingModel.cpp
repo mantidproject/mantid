@@ -7,6 +7,7 @@
 #include "FittingModel.h"
 #include "FitDataModel.h"
 #include "FitOutput.h"
+#include "FitTabConstants.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -278,6 +279,27 @@ void setFirstBackground(IFunction_sptr function, double value) {
   firstFunctionWithParameter(function, "Background", "A0")->setParameter("A0", value);
 }
 
+size_t getNumberOfSpecificFunctionContained(const std::string &functionName, const IFunction *compositeFunction) {
+  assert(compositeFunction);
+
+  if (compositeFunction->nFunctions() == 0) {
+    return compositeFunction->name() == functionName ? 1 : 0;
+  }
+
+  size_t count{0};
+  for (size_t i{0}; i < compositeFunction->nFunctions(); i++) {
+    count += getNumberOfSpecificFunctionContained(functionName, compositeFunction->getFunction(i).get());
+  }
+  return count;
+}
+
+size_t getNumberOfCustomFunctions(MultiDomainFunction_const_sptr const &fittingFunction,
+                                  const std::string &functionName) {
+  if (fittingFunction && fittingFunction->nFunctions() > 0)
+    return getNumberOfSpecificFunctionContained(functionName, fittingFunction->getFunction(0).get());
+  return 0u;
+}
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::Inelastic {
@@ -313,7 +335,25 @@ WorkspaceID FittingModel::getNumberOfWorkspaces() const { return m_fitDataModel-
 bool FittingModel::isMultiFit() const { return m_fitDataModel->getNumberOfWorkspaces().value > 1; }
 
 // Other Functions
-void FittingModel::setFitTypeString(const std::string &fitType) { m_fitString = fitType; }
+void FittingModel::updateFitTypeString() {
+  auto const multiDomainFunction = getFitFunction();
+  if (!multiDomainFunction || multiDomainFunction->nFunctions() == 0) {
+    m_fitString = "NoCurrentFunction";
+    return;
+  }
+
+  m_fitString.clear();
+  for (auto const &fitFunctionName : FUNCTION_STRINGS) {
+    auto occurances = getNumberOfCustomFunctions(multiDomainFunction, fitFunctionName.first);
+    if (occurances > 0) {
+      m_fitString += std::to_string(occurances) + fitFunctionName.second;
+    }
+  }
+
+  if (getNumberOfCustomFunctions(multiDomainFunction, "DeltaFunction") > 0) {
+    m_fitString += "Delta";
+  }
+}
 
 std::string FittingModel::createOutputName(const std::string &fitMode, const std::string &workspaceName,
                                            const std::string &spectra) const {
