@@ -48,7 +48,7 @@ public:
   void updateTableFromModel();
   WorkspaceID getNumberOfWorkspaces() const;
   size_t getNumberOfDomains() const;
-  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  QList<FunctionModelDataset> getDatasets() const;
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;

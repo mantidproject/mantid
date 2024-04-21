@@ -61,6 +61,11 @@ FunctionModelSpectra FitDataModel::getSpectra(WorkspaceID workspaceID) const {
   return FunctionModelSpectra("");
 }
 
+FunctionModelDataset FitDataModel::getDataset(WorkspaceID workspaceID) const {
+  auto const name = getWorkspace(workspaceID)->getName();
+  return FunctionModelDataset(QString::fromStdString(name), getSpectra(workspaceID));
+}
+
 std::string FitDataModel::createDisplayName(WorkspaceID workspaceID) const {
   if (getNumberOfWorkspaces() > workspaceID)
     return getFitDataName(getWorkspaceNames()[workspaceID.value], getSpectra(workspaceID));

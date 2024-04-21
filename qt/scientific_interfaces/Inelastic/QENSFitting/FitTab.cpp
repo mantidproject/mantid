@@ -450,21 +450,9 @@ void FitTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
-QList<FunctionModelDataset> FitTab::getDatasets() const {
-  QList<FunctionModelDataset> datasets;
-
-  for (auto i = 0u; i < m_dataPresenter->getNumberOfWorkspaces().value; ++i) {
-    WorkspaceID workspaceID{i};
-
-    auto const name = m_fittingModel->getWorkspace(workspaceID)->getName();
-    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_dataPresenter->getSpectra(workspaceID)));
-  }
-  return datasets;
-}
-
 void FitTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
-                                                  getDatasets(), m_dataPresenter->getQValuesForData(),
+                                                  m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
                                                   m_dataPresenter->getResolutionsForFit());
   setModelFitFunction();
 }

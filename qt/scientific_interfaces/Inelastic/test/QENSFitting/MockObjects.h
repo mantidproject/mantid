@@ -198,6 +198,7 @@ public:
   MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
   MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getDataset, FunctionModelDataset(WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(getSpectrum, size_t(FitDomainIndex index));
   MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
 

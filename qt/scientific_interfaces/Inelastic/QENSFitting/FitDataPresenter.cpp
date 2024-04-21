@@ -98,8 +98,14 @@ WorkspaceID FitDataPresenter::getNumberOfWorkspaces() const { return m_model->ge
 
 size_t FitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
 
-FunctionModelSpectra FitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
-  return m_model->getSpectra(workspaceID);
+QList<FunctionModelDataset> FitDataPresenter::getDatasets() const {
+  QList<FunctionModelDataset> datasets;
+
+  for (auto i = 0u; i < m_model->getNumberOfWorkspaces().value; ++i) {
+    WorkspaceID workspaceID{i};
+    datasets.append(m_model->getDataset(workspaceID));
+  }
+  return datasets;
 }
 
 DataForParameterEstimationCollection
