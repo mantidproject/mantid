@@ -250,7 +250,7 @@ void GenerateGroupingPowder::init() {
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
-                  "grouping file will be generated.");
+                  "grouping file will be generated. Ignored if grouping file is not specified.");
 }
 
 //----------------------------------------------------------------------------------------------

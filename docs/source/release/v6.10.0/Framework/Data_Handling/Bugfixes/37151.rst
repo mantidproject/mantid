@@ -1,3 +1,1 @@
-- :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` now accepts ``GroupingWorkspace`` as an optional argument instead of required
-- :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` now accepts ``GroupingFilename`` as an optional argument instead of required
-- :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` now requires at least one optional argument {``GroupingWorkspace``, ``GroupingFilename``}
+- The properties ``GroupingWorkspace`` and ``GroupingFilename`` are now optional in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`. At least one must be specified.
