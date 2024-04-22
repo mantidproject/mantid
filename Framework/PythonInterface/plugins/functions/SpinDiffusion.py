@@ -7,18 +7,17 @@
 # pylint: disable=no-init,invalid-name
 import numpy as np
 from functools import cache
-from numpy import complex64, float64
+from numpy import float64
 from numpy.typing import NDArray
 from mantid.api import IFunction1D, FunctionFactory
 from mantid.kernel import IntBoundedValidator
 from scipy.constants import elementary_charge, physical_constants
-from scipy.fft import fft, fftshift
 from scipy.integrate import quad
 from scipy.special import i0e
 from typing import Tuple
 
 MUON_MAGNETOGYRIC_RATIO = (
-    physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6) / (2 * np.pi)
+    physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6)
 )  # MHz / T
 
 
@@ -33,12 +32,6 @@ def autocorrelation_st(d_1: float, d_2: float, d_3: float, t: Tuple[float]) -> N
     return cached_i0e(d_1, t) * cached_i0e(d_2, t) * cached_i0e(d_3, t)
 
 
-def perform_fft(d_1: float, d_2: float, d_3: float, t: Tuple[float]) -> NDArray[complex64]:
-    """Calculate the discrete Fast Fourier Transform of S(t)."""
-    g = autocorrelation_st(d_1, d_2, d_3, t)
-    return fftshift(fft(g))
-
-
 def integrand(t, d_1, d_2, d_3, w):
     return autocorrelation_st(d_1, d_2, d_3, t) * np.cos(w * t)
 
@@ -47,14 +40,16 @@ def jw(d_1, d_2, d_3, w):
     integral, error = quad(
         integrand,
         0,
-        300,
+        np.inf,  # Integration upper bound
         args=(
             d_1,
             d_2,
             d_3,
             w,
         ),
-    )  # Change integration range so it tends towards infinity
+        epsrel=1e-5,  # Changing these parameters can provide better results at high frequencies
+        limit=50,
+    )
     return 2 * integral
 
 
@@ -62,11 +57,11 @@ def d_rates_from_dimensionality(n_dimensions: int, d_parallel: float, d_perpendi
     """Tie dipolar rates based on the dimensionality of the system."""
     match n_dimensions:
         case 1:  # D1 = D||           D2, D3 = D_|_
-            return d_parallel / d_parallel, d_perpendicular / d_parallel, d_perpendicular / d_parallel
+            return d_parallel, d_perpendicular, d_perpendicular
         case 2:  # D1, D2 = D||       D3 = D_|_
-            return d_parallel / d_parallel, d_parallel / d_parallel, d_perpendicular / d_parallel
+            return d_parallel, d_parallel, d_perpendicular
         case 3:  # D1, D2, D3 = D||
-            return d_parallel / d_parallel, d_parallel / d_parallel, d_parallel / d_parallel
+            return d_parallel, d_parallel, d_parallel
         case _:
             raise RuntimeError("The number of dimensions has an upper bound of 3.")
 
@@ -94,15 +89,11 @@ class SpinDiffusion(IFunction1D):
         d_rates = d_rates_from_dimensionality(n_dimensions, d_parallel, d_perpendicular)
 
         # xvals is assumed to be B(LF), in units of Tesla. We need to convert to inverse MHz
-        # t_values = 1 / (MUON_MAGNETOGYRIC_RATIO * np.array(xvals))
-        w_values = 2 * np.pi * MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
+        w_values = MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
 
-        spectral_density_complex = [jw(*d_rates, w) for w in w_values]
+        spectral_density = [jw(*d_rates, w) for w in w_values]
 
-        # Convert from an NDArray(complex64) to a NDArray(float64)
-        spectral_density_real = np.array(np.real(spectral_density_complex))
-
-        return np.square(A) / 4 * spectral_density_real
+        return np.square(A) / 4 * np.array(spectral_density)
 
 
 FunctionFactory.subscribe(SpinDiffusion)
