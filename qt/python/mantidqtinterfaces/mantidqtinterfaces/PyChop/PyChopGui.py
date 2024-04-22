@@ -756,7 +756,7 @@ class PyChopGui(QMainWindow):
                 percent = res / ee * 100
                 chop_width = out["chopper"][ie]
                 mod_width = out["moderator"][ie]
-                new_str += "Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n" % (ee, res[0] * 1000, percent)
+                new_str += "Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n" % (ee, res * 1000, percent)
                 new_str += "FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n" % (chop_width, mod_width)
         else:
             ei = self.engine.getEi()
