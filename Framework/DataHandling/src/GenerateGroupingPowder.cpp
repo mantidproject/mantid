@@ -248,7 +248,7 @@ void GenerateGroupingPowder::init() {
   declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::OptionalSave,
                                                  std::vector<std::string>{"xml", "nxs", "nx5"}),
                   "A grouping file that will be created.");
-  declareProperty("GenerateParFile", false,
+  declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
                   "grouping file will be generated.");
 }
@@ -273,12 +273,6 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
   if (isDefault("GroupingWorkspace") && isDefault("GroupingFilename")) {
     std::string err = "At least one of {'GroupingWorkspace', 'GroupingFilename'} must be passed.";
     issues["GroupingWorkspace"] = err;
-    issues["GroupingFilename"] = err;
-  }
-
-  if (getProperty("GenerateParFile") && isDefault("GroupingFilename")) {
-    std::string err = "'GenerateParFile' requires 'GroupingFilename' be passed.";
-    issues["GenerateParFile"] = err;
     issues["GroupingFilename"] = err;
   }
 
