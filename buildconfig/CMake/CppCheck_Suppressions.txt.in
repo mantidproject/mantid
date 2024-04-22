@@ -71,7 +71,7 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:94
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MaterialBuilder.cpp:219
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MaterialBuilder.cpp:231
-constvariablepointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NeutronAtom.cpp:713
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NeutronAtom.cpp:713
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/IPropertyManager.cpp:58
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:36
@@ -1113,7 +1113,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/EQSANS
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLoad.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLoad.cpp:215
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLoad.cpp:223
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:194
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:192
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/AndMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/BinaryOperationMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/BooleanBinaryOperationMD.cpp:0
