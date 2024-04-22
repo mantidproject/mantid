@@ -75,7 +75,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
