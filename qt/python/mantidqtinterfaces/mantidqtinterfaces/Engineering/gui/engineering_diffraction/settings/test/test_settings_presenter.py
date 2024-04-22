@@ -109,6 +109,27 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     @patch(dir_path + ".path.isfile")
+    def test_save_blank_primary_log_settings(self, mock_isfile):
+        mock_isfile.return_value = True
+        self.view.get_save_location.return_value = self.settings["save_location"][:]
+        self.view.get_full_calibration.return_value = self.settings["full_calibration"][:]
+        self.view.get_checked_logs.return_value = self.settings["logs"][:]
+        self.view.get_primary_log.return_value = ""
+        self.view.get_ascending_checked.return_value = self.settings["sort_ascending"]
+        self.view.get_peak_function.return_value = self.settings["default_peak"]
+        self.view.get_path_to_gsas2.return_value = self.settings["path_to_gsas2"]
+        self.view.get_timeout.return_value = self.settings["timeout"]
+        self.view.get_dSpacing_min.return_value = self.settings["dSpacing_min"]
+        self.presenter.savedir_notifier = mock.MagicMock()
+
+        self.presenter.save_new_settings()
+
+        self.assertEqual(self.view.close.call_count, 0)
+        self.assertEqual(self.presenter.settings["primary_log"], "")
+        self.model.set_settings_dict.assert_called_with(self.presenter.settings)
+        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
+
+    @patch(dir_path + ".path.isfile")
     def test_show(self, mock_isfile):
         mock_isfile.return_value = True
         self.presenter.settings = self.settings.copy()
