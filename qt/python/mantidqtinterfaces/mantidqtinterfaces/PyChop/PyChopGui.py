@@ -753,7 +753,7 @@ class PyChopGui(QMainWindow):
             new_str = "\n"
             for ie, ee in enumerate(out["Eis"]):
                 res = out["Energy"][ie]
-                percent = res[0] / ee * 100
+                percent = res / ee * 100
                 chop_width = out["chopper"][ie]
                 mod_width = out["moderator"][ie]
                 new_str += "Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n" % (ee, res[0] * 1000, percent)

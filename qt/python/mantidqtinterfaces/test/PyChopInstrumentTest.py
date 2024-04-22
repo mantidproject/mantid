@@ -412,7 +412,7 @@ class PyChopGuiTests(unittest.TestCase):
         for inst, ch, frq, ei, res0, flux0 in zip(instruments, choppers, freqs, eis, ref_res, ref_flux):
             res, flux = Instrument.calculate(inst, ch, frq, ei, 0)
             np.testing.assert_allclose(res[0], res0, rtol=1e-4, atol=0)
-            np.testing.assert_allclose(flux[0], flux0, rtol=1e-4, atol=0)
+            np.testing.assert_allclose(flux, flux0, rtol=1e-4, atol=0)
 
     def test_erange(self):
         # Tests MARI raises if Ei outside range [0, 180meV] with G chopper only ('S' chopper ok up to 1000meV)
