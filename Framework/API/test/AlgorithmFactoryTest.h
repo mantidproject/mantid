@@ -129,7 +129,7 @@ public:
 
     TS_ASSERT_EQUALS(resultAlias->first, "ToyAlgorithm");
     TS_ASSERT_EQUALS(resultAlias->second, 1);
-    TS_ASSERT_EQUALS(resultFakeAlias, boost::none);
+    TS_ASSERT(!resultFakeAlias);
   }
 
   void test_HighestVersion() {

@@ -54,8 +54,7 @@ std::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string &name,
 
   // Fallback, name might be an alias
   // Try get real name and create from that instead
-  const auto realNameAndVersion = getRealNameFromAlias(name);
-  if (realNameAndVersion) {
+  if (const auto realNameAndVersion = getRealNameFromAlias(name)) {
     // Try create algorithm again with real name
     try {
       auto alg = this->createAlgorithm(realNameAndVersion->first, local_version);
@@ -214,11 +213,11 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys(bool includeHidden)
  * @param alias The name of the algorithm to look up in the alias map
  * @return Real name of algorithm if found
  */
-boost::optional<std::pair<std::string, int>>
+std::optional<std::pair<std::string, int>>
 AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const noexcept {
   auto a_it = m_amap.find(alias);
   if (a_it == m_amap.end())
-    return boost::none;
+    return std::nullopt;
   else
     return a_it->second;
 }
@@ -235,8 +234,7 @@ int AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const
   else {
     // Fall back, algorithmName might be an alias
     // Check alias map, then find version from real name
-    const auto realNameAndVersion = getRealNameFromAlias(algorithmName);
-    if (realNameAndVersion != boost::none) {
+    if (const auto realNameAndVersion = getRealNameFromAlias(algorithmName)) {
       return realNameAndVersion->second;
     } else {
       throw std::runtime_error("AlgorithmFactory::highestVersion() - Unknown algorithm '" + algorithmName + "'");

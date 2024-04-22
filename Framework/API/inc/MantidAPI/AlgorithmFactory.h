@@ -14,6 +14,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -113,7 +114,7 @@ public:
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
   /// Get an algorithms name and version from the alias map
-  boost::optional<std::pair<std::string, int>> getRealNameFromAlias(const std::string &alias) const noexcept;
+  std::optional<std::pair<std::string, int>> getRealNameFromAlias(const std::string &alias) const noexcept;
 
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;
