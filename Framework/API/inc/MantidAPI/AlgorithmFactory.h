@@ -14,6 +14,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -96,11 +97,12 @@ public:
     } else {
       throw std::invalid_argument("Cannot register empty algorithm name");
     }
+    auto nameAndVersion = std::make_pair(className, version);
 
     if (!alias.empty())
-      m_amap[alias] = className;
+      m_amap[alias] = nameAndVersion;
 
-    return std::make_pair(className, version);
+    return nameAndVersion;
   }
   /// Unsubscribe the given algorithm
   void unsubscribe(const std::string &algorithmName, const int version);
@@ -111,8 +113,8 @@ public:
   const std::vector<std::string> getKeys() const override;
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
-  /// Get an algorithms name from the alias map
-  boost::optional<std::string> getRealNameFromAlias(const std::string &alias) const noexcept;
+  /// Get an algorithms name and version from the alias map
+  std::optional<std::pair<std::string, int>> getRealNameFromAlias(const std::string &alias) const noexcept;
 
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;
@@ -156,7 +158,7 @@ private:
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
   /// A typedef for the map of algorithm aliases
-  using AliasMap = std::unordered_map<std::string, std::string>;
+  using AliasMap = std::unordered_map<std::string, std::pair<std::string, int>>;
   /// The map holding the alias names of registered algorithms
   AliasMap m_amap;
 };

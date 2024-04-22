@@ -127,15 +127,15 @@ public:
     const auto resultAlias = algFactory.getRealNameFromAlias("Dog");
     const auto resultFakeAlias = algFactory.getRealNameFromAlias("Frog");
 
-    TS_ASSERT_EQUALS(resultAlias.get(), "ToyAlgorithm");
-    TS_ASSERT_EQUALS(resultFakeAlias, boost::none);
+    TS_ASSERT_EQUALS(resultAlias->first, "ToyAlgorithm");
+    TS_ASSERT_EQUALS(resultAlias->second, 1);
+    TS_ASSERT(!resultFakeAlias);
   }
 
   void test_HighestVersion() {
     auto &algFactory = AlgorithmFactory::Instance();
 
     TS_ASSERT_THROWS(algFactory.highestVersion("ToyAlgorithm"), const std::runtime_error &);
-    TS_ASSERT_THROWS(algFactory.highestVersion("Dog"), const std::runtime_error &);
 
     algFactory.subscribe<ToyAlgorithm>();
     TS_ASSERT_EQUALS(1, algFactory.highestVersion("ToyAlgorithm"));
@@ -328,5 +328,16 @@ public:
 
     mangledName = "Cat 1";
     TS_ASSERT_THROWS_ANYTHING(outPair = algFactory.decodeName(mangledName));
+  }
+
+  void testAliasPointsToCorrectVersion() {
+    auto &algFactory = AlgorithmFactory::Instance();
+    algFactory.subscribe<CoolAlgorithm1>();
+    algFactory.subscribe<CoolAlgorithm2>();
+
+    const auto nameAndVersion = algFactory.getRealNameFromAlias("TheCoolestAlgorithm");
+
+    TS_ASSERT_EQUALS(nameAndVersion->first, "CoolAlgorithm");
+    TS_ASSERT_EQUALS(nameAndVersion->second, 1);
   }
 };
