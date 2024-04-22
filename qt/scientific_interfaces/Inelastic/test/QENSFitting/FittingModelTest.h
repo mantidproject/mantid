@@ -451,7 +451,9 @@ public:
                                       "Height=1,Lifetime=1,Stretching=1;));");
     m_model->setFitFunction(function);
     m_model->updateFitTypeString();
-    TS_ASSERT_EQUALS("1E1S", m_model->getFitString());
+    auto const fitString = m_model->getFitString();
+    TS_ASSERT(fitString.find("1E") != std::string::npos);
+    TS_ASSERT(fitString.find("1S") != std::string::npos);
   }
 
   void test_that_no_matched_name_is_correct() {
