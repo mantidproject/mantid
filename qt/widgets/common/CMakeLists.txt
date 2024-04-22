@@ -54,7 +54,6 @@ set(SRC_FILES
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
-    src/TableWidgetValidators.cpp
     src/LineEditWithClear.cpp
     src/ListPropertyWidget.cpp
     src/LocalParameterEditor.cpp
@@ -99,6 +98,7 @@ set(SRC_FILES
     src/SelectFunctionDialog.cpp
     src/SelectWorkspacesDialog.cpp
     src/SlitCalculator.cpp
+    src/TableWidgetValidators.cpp
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
@@ -298,7 +298,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
-    inc/MantidQtWidgets/Common/TableWidgetValidators.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
@@ -312,6 +311,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
+    inc/MantidQtWidgets/Common/TableWidgetValidators.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
