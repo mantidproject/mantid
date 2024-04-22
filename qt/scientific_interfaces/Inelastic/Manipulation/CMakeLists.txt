@@ -2,35 +2,35 @@ get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
     DataManipulationInterface.cpp
-    ElwinTab.cpp
-    ElwinTabModel.cpp
-    ElwinTabView.cpp
-    IqtTab.cpp
-    IqtTabView.cpp
-    IqtTabModel.cpp
-    MomentsTab.cpp
-    MomentsTabModel.cpp
-    MomentsTabView.cpp
-    DataManipulationTab.cpp
-    SqwTab.cpp
-    SqwTabModel.cpp
-    SqwTabView.cpp
-    SymmetriseTab.cpp
-    SymmetriseTabView.cpp
-    SymmetriseTabModel.cpp
+    ElwinPresenter.cpp
+    ElwinModel.cpp
+    ElwinView.cpp
+    IqtPresenter.cpp
+    IqtView.cpp
+    IqtModel.cpp
+    MomentsPresenter.cpp
+    MomentsModel.cpp
+    MomentsView.cpp
+    DataManipulation.cpp
+    SqwPresenter.cpp
+    SqwModel.cpp
+    SqwView.cpp
+    SymmetrisePresenter.cpp
+    SymmetriseView.cpp
+    SymmetriseModel.cpp
 )
 
 set(INC_FILES
-    ElwinTabModel.h
-    ElwinTab.h
-    IqtTabModel.h
-    IqtTab.h
-    MomentsTabModel.h
-    MomentsTab.h
-    SqwTabModel.h
-    SqwTab.h
-    SymmetriseTabModel.h
-    SymmetriseTab.h
+    ElwinModel.h
+    ElwinPresenter.h
+    IqtModel.h
+    IqtPresenter.h
+    MomentsModel.h
+    MomentsPresenter.h
+    SqwModel.h
+    SqwPresenter.h
+    SymmetriseModel.h
+    SymmetrisePresenter.h
     ISqwView.h
     IMomentsView.h
     ISymmetriseView.h
@@ -40,12 +40,12 @@ set(INC_FILES
 
 set(MOC_FILES
     DataManipulationInterface.h
-    ElwinTabView.h
-    IqtTabView.h
-    MomentsTabView.h
-    SqwTabView.h
-    SymmetriseTabView.h
-    DataManipulationTab.h
+    ElwinView.h
+    IqtView.h
+    MomentsView.h
+    SqwView.h
+    SymmetriseView.h
+    DataManipulation.h
 )
 
 set(UI_FILES DataManipulationInterface.ui ElwinTab.ui IqtTab.ui MomentsTab.ui SqwTab.ui SymmetriseTab.ui)
