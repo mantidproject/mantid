@@ -18,9 +18,9 @@ constexpr auto DEFAULT_NUMERICAL_PRECISION = 6;
 namespace MantidQt {
 namespace MantidWidgets {
 
-enum regexValidatorStrings { MaskValidator, SpectraValidator };
+enum RegexValidatorStrings { MaskValidator, SpectraValidator };
 
-EXPORT_OPT_MANTIDQT_COMMON std::string getRegexValidatorString(const regexValidatorStrings &validatorMask);
+EXPORT_OPT_MANTIDQT_COMMON std::string getRegexValidatorString(const RegexValidatorStrings &validatorMask);
 EXPORT_OPT_MANTIDQT_COMMON QString makeQStringNumber(double value, int precision);
 
 class EXPORT_OPT_MANTIDQT_COMMON RegexInputDelegate : public QStyledItemDelegate {

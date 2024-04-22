@@ -15,7 +15,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 constexpr auto NUMERICAL_PRECISION = 6;
-const std::string MASK_LIST = getRegexValidatorString(regexValidatorStrings::MaskValidator);
+const std::string MASK_LIST = getRegexValidatorString(RegexValidatorStrings::MaskValidator);
 namespace {
 QStringList defaultHeaders() {
   QStringList headers;

@@ -37,14 +37,14 @@ constexpr auto NUMERICAL_PRECISION = 6;
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::string getRegexValidatorString(const regexValidatorStrings &validatorMask) {
+std::string getRegexValidatorString(const RegexValidatorStrings &validatorMask) {
   switch (validatorMask) {
-  case regexValidatorStrings::SpectraValidator:
+  case RegexValidatorStrings::SpectraValidator:
     return SPECTRA_LIST;
-  case regexValidatorStrings::MaskValidator:
+  case RegexValidatorStrings::MaskValidator:
     return MASK_LIST;
   default:
-    return SPECTRA_LIST;
+    throw std::logic_error("Invalid or Missing Validator String");
   }
 }
 

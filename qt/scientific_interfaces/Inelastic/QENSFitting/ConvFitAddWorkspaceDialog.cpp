@@ -20,7 +20,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
-  const auto validatorString = QString::fromStdString(getRegexValidatorString(regexValidatorStrings::SpectraValidator));
+  const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
   m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
   setAllSpectraSelectionEnabled(false);
 
