@@ -161,7 +161,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
       {
         const auto it = std::find_if(instrName.begin(), instrName.end(), isdigit);
         const auto nChars = std::distance(instrName.begin(), it);
-        instrName = instrName.substr(0, nChars);
+        instrName.resize(nChars);
       }
 
       // go backwards looking for the instrument name to end - gets around
@@ -169,7 +169,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
       if (!instrName.empty()) {
         const auto it = std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
         const auto nChars = std::distance(it, instrName.rend());
-        instrName = instrName.substr(0, nChars);
+        instrName.resize(nChars);
       }
     }
     try {
@@ -306,7 +306,7 @@ std::string FileFinderImpl::getExtension(const std::string &filename, const std:
     std::string extension = toUpper(ext);
     if (extension.rfind('*') == extension.size() - 1) // there is a wildcard at play
     {
-      extension = extension.substr(0, extension.rfind('*'));
+      extension.resize(extension.rfind('*'));
     }
 
     std::size_t found = toUpper(filename).rfind(extension);
