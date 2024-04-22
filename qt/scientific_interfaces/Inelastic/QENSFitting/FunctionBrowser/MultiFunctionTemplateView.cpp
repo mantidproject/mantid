@@ -65,18 +65,19 @@ void MultiFunctionTemplateView::setGlobalParametersQuiet(std::vector<std::string
 }
 
 void MultiFunctionTemplateView::createFunctionParameterProperties() {
-  m_subTypeParameters.resize(m_templateSubTypes.size());
+  m_subTypeParamIDs.resize(m_templateSubTypes.size());
   m_currentSubTypeParameters.resize(m_templateSubTypes.size());
   for (size_t isub = 0; isub < m_templateSubTypes.size(); ++isub) {
     auto const &subType = m_templateSubTypes[isub];
-    auto &parameters = m_subTypeParameters[isub];
+    auto &parameters = m_subTypeParamIDs[isub];
     for (int index = 0; index < subType->getNTypes(); ++index) {
       auto const paramIDs = subType->getParameterIDs(index);
       auto const names = subType->getParameterNames(index);
       auto const descriptions = subType->getParameterDescriptions(index);
-      std::vector<QtProperty *> props;
+      std::vector<ParamID> allParamIDs;
       for (auto i = 0u; i < names.size(); ++i) {
         auto const id = paramIDs[i];
+        allParamIDs.emplace_back(id);
         if (m_parameterReverseMap.find(id) != m_parameterReverseMap.end()) {
           // Skip if the parameter has already been defined as part of another sub type
           continue;
@@ -85,11 +86,10 @@ void MultiFunctionTemplateView::createFunctionParameterProperties() {
         auto prop = m_parameterManager->addProperty(QString::fromStdString(names[i]));
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);
-        props.emplace_back(prop);
         m_parameterMap[prop] = id;
         m_parameterReverseMap[id] = prop;
       }
-      parameters[index] = std::move(props);
+      parameters[index] = std::move(allParamIDs);
     }
     QtProperty *subTypeProp;
     if (subType->isType(typeid(int))) {
@@ -129,8 +129,8 @@ void MultiFunctionTemplateView::setSubType(std::size_t subTypeIndex, int typeInd
     subTypeProp->removeSubProperty(prop);
   }
   currentParameters.clear();
-  auto &subTypeParameters = m_subTypeParameters[subTypeIndex];
-  for (auto &&prop : subTypeParameters[typeIndex]) {
+  for (auto const &id : m_subTypeParamIDs[subTypeIndex][typeIndex]) {
+    auto &prop = m_parameterReverseMap[id];
     subTypeProp->addSubProperty(prop);
     currentParameters.emplace_back(prop);
   }
