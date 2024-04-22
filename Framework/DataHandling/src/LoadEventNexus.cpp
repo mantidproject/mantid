@@ -1586,8 +1586,6 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
   filter_tof_max = getProperty(prefix + "ByTofMax");
   if ((filter_tof_min == EMPTY_DBL()) && (filter_tof_max == EMPTY_DBL())) {
     // Nothing specified. Include everything
-    filter_tof_min = -1e20;
-    filter_tof_max = +1e20;
     filter_tof_range = false;
   } else if ((filter_tof_min != EMPTY_DBL()) && (filter_tof_max != EMPTY_DBL())) {
     // Both specified. Keep these values
@@ -1679,7 +1677,7 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
   noParallelConstrictions &= !(m_ws->nPeriods() != 1);
   noParallelConstrictions &= !haveWeights;
   noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &= !(filter_tof_range);
   noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
                                 filter_time_stop != Types::Core::DateAndTime::maximum()));
   noParallelConstrictions &= !((!isDefault(PropertyNames::COMPRESS_TOL) || !isDefault("SpectrumMin") ||
