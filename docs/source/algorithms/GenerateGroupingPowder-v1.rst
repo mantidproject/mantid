@@ -63,7 +63,7 @@ Usage
     ws=Load("CNCS_7860")
 
     #generate the files
-    GenerateGroupingPowder(ws,10,outputFilename)
+    GenerateGroupingPowder(ws,10, GroupingFilename=outputFilename)
 
     #check that it works
     import os.path
@@ -94,28 +94,23 @@ Output:
 
 ----
 
-Similarly, one could specify the grouping workspace:
+Similarly, one could instead specify the grouping workspace:
 
 .. testcode:: GenerateGroupingPowder_GroupingWorkspace
 
     # create some grouping file
     import mantid
-    outputFilename=mantid.config.getString("defaultsave.directory")+"powder.xml"
 
     #load some file
     ws=Load("CNCS_7860")
     gws= "a_nice_name_for_grouping_workspace"
 
     #generate the files
-    GenerateGroupingPowder(ws,10,outputFilename, GroupingWorkspace=gws)
+    GenerateGroupingPowder(ws,10, GroupingWorkspace=gws)
 
     #check that it works
     import os.path
-    if(os.path.isfile(outputFilename)):
-        print("Found file powder.xml")
-    if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
-        print("Found file powder.par")
-    wsg=GroupDetectors(ws,outputFilename)
+    wsg=GroupDetectors(ws,gws)
     print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingPowder_GroupingWorkspace
@@ -123,18 +118,12 @@ Similarly, one could specify the grouping workspace:
    DeleteWorkspace(ws)
    DeleteWorkspace(gws)
    DeleteWorkspace(wsg)
-   import os,mantid
-   filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
-   os.remove(filename)
-   filename=mantid.config.getString("defaultsave.directory")+"powder.par"
-   os.remove(filename)
+
 
 Output:
 
 .. testoutput:: GenerateGroupingPowder_GroupingWorkspace
 
-    Found file powder.xml
-    Found file powder.par
     The grouped workspace has 14 histograms
 
 
