@@ -50,7 +50,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
             np.full(col_length, col_values[1]),
             np.full(col_length, col_values[2]),
             np.full(col_length, col_values[3]),
-            q_unit=MantidORSODataColumns.Unit.Nm,
+            q_unit=MantidORSODataColumns.Unit.InverseNm,
             r_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
             q_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
         )
@@ -58,7 +58,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_default_header(
             columns,
             len(col_values),
-            MantidORSODataColumns.Unit.Nm,
+            MantidORSODataColumns.Unit.InverseNm,
             MantidORSODataColumns.ErrorValue.FWHM,
             MantidORSODataColumns.ErrorValue.FWHM,
         )
@@ -73,7 +73,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
             np.full(col_length, col_values[1]),
             np.full(col_length, col_values[2]),
             np.full(col_length, col_values[3]),
-            q_unit=MantidORSODataColumns.Unit.Nm,
+            q_unit=MantidORSODataColumns.Unit.InverseNm,
             r_error_value_is=None,
             q_error_value_is=None,
         )
@@ -81,7 +81,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_default_header(
             columns,
             len(col_values),
-            MantidORSODataColumns.Unit.Nm,
+            MantidORSODataColumns.Unit.InverseNm,
             None,
             None,
         )

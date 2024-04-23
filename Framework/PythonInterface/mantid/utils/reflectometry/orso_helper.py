@@ -144,7 +144,7 @@ class MantidORSODataColumns:
     class Unit(Enum):
         Angstrom = "angstrom"
         InverseAngstrom = "1/angstrom"
-        Nm = "1/nm"
+        InverseNm = "1/nm"
         Degrees = "degrees"
 
     # Data column labels
