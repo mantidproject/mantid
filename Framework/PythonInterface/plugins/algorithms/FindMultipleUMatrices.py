@@ -150,12 +150,6 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         # Get input
         peaks = self.getProperty("PeakWorkspace").value
         num_ubs = self.getProperty("NumberOfUBs").value
-        a = self.getProperty("a").value
-        b = self.getProperty("b").value
-        c = self.getProperty("c").value
-        alpha = self.getProperty("alpha").value
-        beta = self.getProperty("beta").value
-        gamma = self.getProperty("gamma").value
         hkl_tol = self.getProperty("HKLTolerance").value
         dmax = self.getProperty("MaxDSpacing").value
         dmin = self.getProperty("MinDSpacing").value
@@ -166,9 +160,19 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         spgr_sym = self.getProperty("Spacegroup").value
         spgr = SpaceGroupFactory.createSpaceGroup(spgr_sym)
         ptgr = PointGroupFactory.createPointGroupFromSpaceGroup(spgr)
+        # put properties in kwargs dict for index peaks
+        self.index_peaks_kwargs = {"Tolerance": hkl_tol, "CommonUBForAll": True}
+        max_order = self.getProperty("MaxOrder").value
+        if max_order > 0:
+            self.index_peaks_kwargs.update({f"ModVector{ivec}": self.getProperty(f"ModVector{ivec}").value for ivec in range(1, 4)})
+            self.index_peaks_kwargs["MaxOrder"] = max_order
+            self.index_peaks_kwargs["ToleranceForSatellite"] = hkl_tol  # same as main reflections
+            self.index_peaks_kwargs["SaveModulationInfo"] = True
+        # put properties in kwargs dict for CalculateUMatrix
+        self.calc_u_kwargs = {prop: self.getProperty(prop).value for prop in ("a", "b", "c", "alpha", "beta", "gamma")}
 
         # generate reflections and calc angles between them
-        hkls, dhkls, latt = self.calculate_reflections(spgr_sym, a, b, c, alpha, beta, gamma, dmin, dmax, dtol)
+        hkls, dhkls, latt = self.calculate_reflections(spgr_sym, dmin, dmax, dtol, **self.calc_u_kwargs)
         bmat = latt.getB()
         bmat_inv = latt.getBinv()  # used later when comparing U matrices
         angles = self.calculate_angles_between_reflections(hkls, bmat)
@@ -180,15 +184,6 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         peaks_filtered = FilterPeaks(
             InputWorkspace=peaks_filtered, StoreInADS=False, FilterVariable="DSpacing", FilterValue=dmax + dtol, Operator="<="
         )
-
-        # get modulation vector kwargs
-        mod_vec_kwargs = {}
-        max_order = self.getProperty("MaxOrder").value
-        if max_order > 0:
-            mod_vec_kwargs = {f"ModVector{ivec}": self.getProperty(f"ModVector{ivec}").value for ivec in range(1, 4)}
-            mod_vec_kwargs["MaxOrder"] = max_order
-            mod_vec_kwargs["ToleranceForSatellite"] = hkl_tol  # same as main reflections
-            mod_vec_kwargs["SaveModulationInfo"] = True
 
         # loop over every pair of peaks
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(dhkls))
@@ -219,23 +214,14 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                                 [pk.setHKL(0, 0, 0) for pk in peaks_filtered]  # reset HKL of all peaks
                                 [pk.setHKL(*hkls[ihkl_pair[ipk]]) for ipk, pk in enumerate(pks)]
                                 try:
-                                    self.exec_child_alg(
-                                        "CalculateUMatrix",
-                                        PeaksWorkspace=peaks_filtered,
-                                        a=a,
-                                        b=b,
-                                        c=c,
-                                        alpha=alpha,
-                                        beta=beta,
-                                        gamma=gamma,
-                                    )
+                                    self.exec_child_alg("CalculateUMatrix", PeaksWorkspace=peaks_filtered, **self.calc_u_kwargs)
                                 except ValueError:
                                     continue  # skip this pair
                                 # SetUB in all found peaks and calc hkl_ers
                                 this_ub = peaks_filtered.sample().getOrientedLattice().getUB().copy()
                                 self.exec_child_alg("SetUB", Workspace=peaks, UB=this_ub)
                                 nindexed, *_ = self.exec_child_alg(
-                                    "IndexPeaks", PeaksWorkspace=peaks, Tolerance=hkl_tol, **mod_vec_kwargs, RoundHKLs=False
+                                    "IndexPeaks", PeaksWorkspace=peaks, RoundHKLs=False, **self.index_peaks_kwargs
                                 )
                                 if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                                     # calculate hkl er in indexing
@@ -272,38 +258,8 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                                                 hkl_ers.pop(iub)
                                             ubs.append(this_ub)
                                             hkl_ers.append(this_hkl_ers)
-        # see which ubs index the most peaks most accurately (with minimum error)
-        iub_min_er = np.argmin(hkl_ers, axis=0)
-        # exclude reflections that are not indexed by any UB
-        i_indexed = np.any(np.isfinite(hkl_ers), axis=0)
-        iub, nindex = np.unique(iub_min_er[i_indexed], return_counts=True)
-        # sort by ubs that index most peaks
-        isort = np.argsort(-nindex)  # descending
-        iub = iub[isort]
-        nindex = nindex[isort]
-        # return peak tables with peaks best indexed by top nub
-        nub = min(num_ubs, len(iub))
-        peaks_out_list = []
-        for itable in range(nub):
-            # get peaks indexed best by this UB and re-run UB optimisation
-            ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], i_indexed))
-            peaks_out = self.exec_child_alg(
-                "CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0, OutputWorkspace=f"{peaks.name()}_ub{itable}"
-            )
-            [peaks_out.addPeak(peaks.getPeak(int(ipk))) for ipk in ipks]
-            self.exec_child_alg("SetUB", Workspace=peaks_out, UB=ubs[iub[itable]])
-            self.exec_child_alg(
-                "IndexPeaks", PeaksWorkspace=peaks_out, RoundHKLs=True, CommonUBForAll=True, Tolerance=hkl_tol, **mod_vec_kwargs
-            )
-            if optimise_ubs and peaks_out.getNumberPeaks() > _MIN_NUM_INDEXED_PEAKS:
-                try:
-                    self.exec_child_alg("CalculateUMatrix", PeaksWorkspace=peaks_out, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
-                    CalculateUMatrix(peaks_out, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, EnableLogging=False)
-                except ValueError:
-                    # reset UB
-                    self.exec_child_alg("SetUB", Workspace=peaks_out, UB=ubs[iub[itable]])
-            peaks_out_list.append(peaks_out)
-
+        # categorise peaks belonging to each UB requested
+        peaks_out_list = self.get_peak_tables_for_each_ub(peaks, ubs, hkl_ers, num_ubs, optimise_ubs)
         ws_out = self.exec_child_alg("GroupWorkspaces", InputWorkspaces=peaks_out_list)
         self.setProperty("OutputWorkspace", ws_out)
 
@@ -315,8 +271,38 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         alg.execute()
         return (alg.getProperty(prop).value for prop in alg.outputProperties())
 
+    def get_peak_tables_for_each_ub(self, peaks, ubs, hkl_ers, num_ubs, optimise_ubs):
+        # see which ubs index the most peaks most accurately (with minimum error)
+        iub_min_er = np.argmin(hkl_ers, axis=0)
+        # exclude reflections that are not indexed by any UB
+        i_indexed = np.any(np.isfinite(hkl_ers), axis=0)
+        iub, nindex = np.unique(iub_min_er[i_indexed], return_counts=True)
+        # sort by ubs that index most peaks
+        isort = np.argsort(-nindex)  # descending
+        iub = iub[isort]
+        # return peak tables with peaks best indexed by top nub
+        nub = min(num_ubs, len(iub))
+        peaks_out_list = []
+        for itable in range(nub):
+            # get peaks indexed best by this UB
+            ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], i_indexed))
+            peaks_out = self.exec_child_alg(
+                "CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0, OutputWorkspace=f"{peaks.name()}_ub{itable}"
+            )
+            [peaks_out.addPeak(peaks.getPeak(int(ipk))) for ipk in ipks]
+            self.exec_child_alg("SetUB", Workspace=peaks_out, UB=ubs[iub[itable]])
+            self.exec_child_alg("IndexPeaks", PeaksWorkspace=peaks_out, RoundHKLs=True, **self.index_peaks_kwargs)
+            if optimise_ubs and peaks_out.getNumberPeaks() > _MIN_NUM_INDEXED_PEAKS:
+                try:
+                    self.exec_child_alg("CalculateUMatrix", PeaksWorkspace=peaks_out, **self.calc_u_kwargs)
+                except ValueError:
+                    # reset UB
+                    self.exec_child_alg("SetUB", Workspace=peaks_out, UB=ubs[iub[itable]])
+            peaks_out_list.append(peaks_out)
+        return peaks_out_list
+
     @staticmethod
-    def calculate_reflections(spgr_sym, a, b, c, alpha, beta, gamma, dmin, dmax, dtol):
+    def calculate_reflections(spgr_sym, dmin, dmax, dtol, a, b, c, alpha, beta, gamma):
         xtal = CrystalStructure(f"{a} {b} {c} {alpha} {beta} {gamma}", spgr_sym, "")  # no basis required
         generator = ReflectionGenerator(xtal, ReflectionConditionFilter.Centering)
         hkls = generator.getHKLs(dmin - dtol, dmax + dtol)
