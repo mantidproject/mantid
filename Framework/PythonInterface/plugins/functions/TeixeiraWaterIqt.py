@@ -46,27 +46,5 @@ class TeixeiraWaterIqt(IFunction1D):
             iqt = amp * rotational * translational
         return iqt
 
-    def functionDeriv1D(self, xvals, jacobian):
-        amp = self.getParameterValue("Amp")
-        tau1 = self.getParameterValue("Tau1")
-        gamma = self.getParameterValue("Gamma")
 
-        q_value = self.getAttributeValue("Q")
-        radius = self.getAttributeValue("a")
-
-        qr = np.array(q_value * radius)
-        j0 = spherical_jn(0, qr)
-        j1 = spherical_jn(1, qr)
-        j2 = spherical_jn(2, qr)
-        with np.errstate(divide="ignore"):
-            for i, x in enumerate(xvals, start=0):
-                rotational = np.square(j0) + 3 * np.square(j1) * np.exp(-x / (3 * tau1)) + 5 * np.square(j2) * np.exp(-x / tau1)
-                translational = np.exp(-gamma * x)
-                partial_tau = (x / np.square(tau1)) * (np.square(j1) * np.exp(-x / (3 * tau1)) + 5 * np.square(j2) * np.exp(-x / tau1))
-                jacobian.set(i, 0, rotational * translational)
-                jacobian.set(i, 1, amp * rotational * partial_tau)
-                jacobian.set(i, 2, -x * amp * rotational * translational)
-
-
-# Required to have Mantid recognise the new function
 FunctionFactory.subscribe(TeixeiraWaterIqt)
