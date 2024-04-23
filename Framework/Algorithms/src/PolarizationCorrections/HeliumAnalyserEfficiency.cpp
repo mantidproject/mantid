@@ -162,7 +162,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   double pHe, pHeError;
   MantidVec eCalc;
   fitAnalyserEfficiency(mu, e, wavelengthValues, pHe, pHeError, eCalc);
-  auto efficiency = calculateEfficiencyWorkspace(wavelengthValues, eCalc, pHe, pHeError, mu, pd);
+  auto efficiency = calculateEfficiencyWorkspace(wavelengthValues, eCalc, pHe, pHeError, mu);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, efficiency);
 }
 
@@ -183,9 +183,7 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   const bool ignoreFitQualityError = getProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR);
   const std::string &status = fit->getProperty("OutputStatus");
   if (!ignoreFitQualityError && (!fit->isExecuted() || status != "success")) {
-    auto const &errMsg{"Failed to fit to data in the calculation of p_He: " + status};
-    g_log.error(errMsg);
-    throw std::runtime_error(errMsg);
+    throw std::runtime_error("Failed to fit to data in the calculation of p_He: " + status);
   }
 
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
@@ -201,8 +199,7 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiency::calculateEfficiencyWorkspace(const MantidVec &wavelengthValues,
                                                                             const MantidVec &eValues, const double pHe,
-                                                                            const double pHeError, const double mu,
-                                                                            const double pd) {
+                                                                            const double pHeError, const double mu) {
   // This value is used to give us the correct error bounds
   const double tCrit = calculateTCrit(wavelengthValues.size());
   const double pdError = getProperty(PropertyNames::PD_ERROR);
@@ -254,7 +251,7 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::addTwoWorkspaces(MatrixWorkspace_
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiency::createWorkspace(const std::string &name, const std::string &title,
                                                                const MantidVec &xData, const MantidVec &yData,
-                                                               const MantidVec &eData, const bool addToAds) {
+                                                               const MantidVec &eData) {
   auto createWorkspace = createChildAlgorithm("CreateWorkspace");
   createWorkspace->initialize();
   createWorkspace->setProperty("OutputWorkspace", name);
@@ -265,9 +262,6 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiency::createWorkspace(const std::string
   createWorkspace->setProperty("WorkspaceTitle", title);
   createWorkspace->execute();
   MatrixWorkspace_sptr ws = createWorkspace->getProperty("OutputWorkspace");
-  if (addToAds) {
-    AnalysisDataService::Instance().addOrReplace(name, ws);
-  }
   return ws;
 }
 
