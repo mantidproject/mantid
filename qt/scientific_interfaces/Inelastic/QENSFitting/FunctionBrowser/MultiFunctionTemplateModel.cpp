@@ -212,7 +212,11 @@ void MultiFunctionTemplateModel::setModel() {
   auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
   for (int i = 0; i < m_model->getNumberDomains(); ++i) {
-    auto singleDomainFunction = FunctionFactory::Instance().createInitialized(buildFunctionString(i));
+    auto domainFunctionString = buildFunctionString(i);
+    if (domainFunctionString.empty()) {
+      break;
+    }
+    auto singleDomainFunction = FunctionFactory::Instance().createInitialized(domainFunctionString);
     multiDomainFunction->addFunction(std::move(singleDomainFunction));
     multiDomainFunction->setDomainIndex(i, i);
   }
