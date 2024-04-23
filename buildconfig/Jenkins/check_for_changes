@@ -42,7 +42,7 @@ case "$TYPE" in
         fi
     ;;
     docs-gui-only)
-        if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^dev-docs/|^qt/; then
+        if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^dev-docs/|^qt/'; then
             exit $FOUND
         else
             exit $NOTFOUND
