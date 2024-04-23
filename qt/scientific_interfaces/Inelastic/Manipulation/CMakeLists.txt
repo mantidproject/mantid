@@ -1,36 +1,36 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    InelasticDataManipulation.cpp
-    InelasticDataManipulationElwinTab.cpp
-    InelasticDataManipulationElwinTabModel.cpp
-    InelasticDataManipulationElwinTabView.cpp
-    InelasticDataManipulationIqtTab.cpp
-    InelasticDataManipulationIqtTabView.cpp
-    InelasticDataManipulationIqtTabModel.cpp
-    InelasticDataManipulationMomentsTab.cpp
-    InelasticDataManipulationMomentsTabModel.cpp
-    InelasticDataManipulationMomentsTabView.cpp
-    InelasticDataManipulationTab.cpp
-    InelasticDataManipulationSqwTab.cpp
-    InelasticDataManipulationSqwTabModel.cpp
-    InelasticDataManipulationSqwTabView.cpp
-    InelasticDataManipulationSymmetriseTab.cpp
-    InelasticDataManipulationSymmetriseTabView.cpp
-    InelasticDataManipulationSymmetriseTabModel.cpp
+    DataManipulationInterface.cpp
+    ElwinPresenter.cpp
+    ElwinModel.cpp
+    ElwinView.cpp
+    IqtPresenter.cpp
+    IqtView.cpp
+    IqtModel.cpp
+    MomentsPresenter.cpp
+    MomentsModel.cpp
+    MomentsView.cpp
+    DataManipulation.cpp
+    SqwPresenter.cpp
+    SqwModel.cpp
+    SqwView.cpp
+    SymmetrisePresenter.cpp
+    SymmetriseView.cpp
+    SymmetriseModel.cpp
 )
 
 set(INC_FILES
-    InelasticDataManipulationElwinTabModel.h
-    InelasticDataManipulationElwinTab.h
-    InelasticDataManipulationIqtTabModel.h
-    InelasticDataManipulationIqtTab.h
-    InelasticDataManipulationMomentsTabModel.h
-    InelasticDataManipulationMomentsTab.h
-    InelasticDataManipulationSqwTabModel.h
-    InelasticDataManipulationSqwTab.h
-    InelasticDataManipulationSymmetriseTabModel.h
-    InelasticDataManipulationSymmetriseTab.h
+    ElwinModel.h
+    ElwinPresenter.h
+    IqtModel.h
+    IqtPresenter.h
+    MomentsModel.h
+    MomentsPresenter.h
+    SqwModel.h
+    SqwPresenter.h
+    SymmetriseModel.h
+    SymmetrisePresenter.h
     ISqwView.h
     IMomentsView.h
     ISymmetriseView.h
@@ -39,19 +39,16 @@ set(INC_FILES
 )
 
 set(MOC_FILES
-    InelasticDataManipulation.h
-    InelasticDataManipulationElwinTabView.h
-    InelasticDataManipulationIqtTabView.h
-    InelasticDataManipulationMomentsTabView.h
-    InelasticDataManipulationSqwTabView.h
-    InelasticDataManipulationSymmetriseTabView.h
-    InelasticDataManipulationTab.h
+    DataManipulationInterface.h
+    ElwinView.h
+    IqtView.h
+    MomentsView.h
+    SqwView.h
+    SymmetriseView.h
+    DataManipulation.h
 )
 
-set(UI_FILES
-    InelasticDataManipulation.ui InelasticDataManipulationElwinTab.ui InelasticDataManipulationIqtTab.ui
-    InelasticDataManipulationMomentsTab.ui InelasticDataManipulationSqwTab.ui InelasticDataManipulationSymmetriseTab.ui
-)
+set(UI_FILES DataManipulationInterface.ui ElwinTab.ui IqtTab.ui MomentsTab.ui SqwTab.ui SymmetriseTab.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM INC_FILES PREPEND ${SUB_DIRECTORY}/)
