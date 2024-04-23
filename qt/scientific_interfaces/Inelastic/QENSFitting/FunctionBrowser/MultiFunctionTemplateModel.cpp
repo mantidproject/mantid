@@ -53,7 +53,10 @@ std::string MultiFunctionTemplateModel::getParameterDescription(std::string cons
 
 std::vector<std::string> MultiFunctionTemplateModel::getParameterNames() const { return m_model->getParameterNames(); }
 
-void MultiFunctionTemplateModel::setNumberDomains(int n) { m_model->setNumberDomains(n); }
+void MultiFunctionTemplateModel::setNumberDomains(int n) {
+  m_model->setNumberDomains(n);
+  setModel();
+}
 
 int MultiFunctionTemplateModel::getNumberDomains() const { return m_model->getNumberDomains(); }
 
