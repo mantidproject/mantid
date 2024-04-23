@@ -30,12 +30,26 @@ std::string const FlipperEfficiency::summary() const { return "Calculate the eff
 void FlipperEfficiency::init() {
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input),
                   "Group workspace containing the 4 polarisation periods.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_WS, "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_WS, "", Direction::Output,
+                                                                       PropertyMode::Optional),
                   "Workspace containing the wavelength-dependent efficiency for the flipper.");
   declareProperty(std::make_unique<FileProperty>(PropNames::OUTPUT_FILE, "", FileProperty::OptionalSave, ".nxs"),
                   "File name or path for the output to be saved to.");
 }
 
-void FlipperEfficiency::exec() {}
+void FlipperEfficiency::exec() {
+  WorkspaceGroup_sptr const groupWs = getProperty(PropNames::INPUT_WS);
+  MatrixWorkspace_sptr const firstWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(0));
+  auto const filePath = getPropertyValue(PropNames::OUTPUT_FILE);
+  saveToFile(firstWs, filePath);
+}
+
+void FlipperEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePath) {
+  auto saveAlg = createChildAlgorithm("SaveNexus");
+  saveAlg->initialize();
+  saveAlg->setProperty("Filename", filePath);
+  saveAlg->setProperty("InputWorkspace", workspace);
+  saveAlg->execute();
+}
 
 } // namespace Mantid::Algorithms

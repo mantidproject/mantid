@@ -46,6 +46,7 @@ public:
     auto group = createTestingWorkspace("testWs");
     alg.setProperty("InputWorkspace", group);
     alg.setPropertyValue("OutputFilePath", temp_filename.string());
+    alg.execute();
     TS_ASSERT(std::filesystem::exists(temp_filename));
   }
 

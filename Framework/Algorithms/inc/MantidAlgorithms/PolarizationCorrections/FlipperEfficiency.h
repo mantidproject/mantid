@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid::Algorithms {
@@ -31,5 +32,7 @@ private:
 
   /// Execute the algorithm with the provided properties.
   void exec() override;
+
+  void saveToFile(API::MatrixWorkspace_sptr const &workspace, std::string const &filepath);
 };
 } // namespace Mantid::Algorithms
