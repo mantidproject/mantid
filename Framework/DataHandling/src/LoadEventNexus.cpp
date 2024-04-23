@@ -184,9 +184,9 @@ void LoadEventNexus::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOL, EMPTY_DBL(), Direction::Input),
-      "CompressEvents while loading (optional, leave blank to not do). "
+      "CompressEvents while loading (optional, default: off). "
       "This specified the tolerance to use (in microseconds) when compressing where positive is linear tolerance, "
-      "negative is logorithmic tolerance, and zero is that time-of-flight must be identical to compress.");
+      "negative is logorithmic tolerance, and zero indicates that time-of-flight must be identical to compress.");
   declareProperty(
       PropertyNames::COMPRESS_MODE, binningModeNames[size_t(BinningMode::DEFAULT)],
       std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),

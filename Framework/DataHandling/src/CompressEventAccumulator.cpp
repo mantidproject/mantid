@@ -51,12 +51,13 @@ boost::optional<size_t> CompressEventAccumulator::findBin(const float tof) const
 // ------------------------------------------------------------------------
 namespace { // anonymous
 
-constexpr size_t MAX_EVENTS_FOR_SPARSE_INT{20000};
-
 // minimum size of a vector to bother doing parallel_sort
 // the grain size shouldn't get too small or the overhead of threading/sync overwhelms everything else
 // TODO this can be tuned
 constexpr size_t MIN_VEC_LENGTH_PARALLEL_SORT{5000};
+
+// blindly assume 10 raw events are compressed to a single weighed event on average
+constexpr size_t EXP_COMRESS_RATIO{10};
 
 /**
  * Private class for implementation details of sparse event collection, when there are less events than bins
@@ -125,7 +126,8 @@ public:
       // code below assumes the tofs are sorted
       this->sort();
 
-      raw_events->reserve(m_tof.size() / 10); // blindly assume 10 raw events get compressed on average
+      // blindly assume ratio of raw events which are compressed to a single weighed event on average
+      raw_events->reserve(m_tof.size() / EXP_COMRESS_RATIO);
 
       // this finds the bin for the current event, then moves the iterator until an event that is out of range is
       // encountered at that point, an event is added to the output and the iterators are moved
@@ -239,7 +241,7 @@ public:
       // don't bother with temporary objects and such if there is only one event
       const auto tof = this->getBinCenter(m_tof_bin.front());
       raw_events->emplace_back(tof, 1., 1.);
-    } else if (m_tof_bin.size() < (MAX_EVENTS_FOR_SPARSE_INT / 10)) { // 10 was found to give good performance
+    } else if (m_tof_bin.size() < (MAX_EVENTS / 10)) { // 10 was found to give good performance
       // this branch removes events as it accumulates them. It does not assume that the time-of-flight is sorted
       // before starting so the output will not be sorted either
       auto last_end = m_tof_bin.end();
@@ -262,8 +264,8 @@ public:
         raw_events->emplace_back(tof, counts, counts);
       }
     } else {
-      // blindly assume 10 raw events are compressed to a single weighed event on average
-      raw_events->reserve(m_tof_bin.size() / 10);
+      // blindly assume ratio of raw events which are compressed to a single weighed event on average
+      raw_events->reserve(m_tof_bin.size() / EXP_COMRESS_RATIO);
 
       // accumulation method is different for "large" number of events
       this->sort(); // sort big lists
@@ -291,6 +293,8 @@ public:
     else
       return DataObjects::UNSORTED;
   }
+
+  static constexpr size_t MAX_EVENTS{20000};
 
 private:
   mutable bool m_is_sorted;
@@ -368,7 +372,7 @@ std::unique_ptr<CompressEventAccumulator> CompressEventAccumulatorFactory::creat
   /*
    * The logic for which accumulator to use is a little selective, a little tuned, and a little arbitrary.
    *
-   * When there are "lots" more events than bin edges, the dense case should use less memory. The threashold for this
+   * When there are "lots" more events than bin edges, the dense case should use less memory. The threshold for this
    * could probably be lowered, but the current place is a sensible mark.
    *
    * When there aren't many events, then the cost of converting each tof to a bin number is fairly cheap and the
@@ -383,7 +387,7 @@ std::unique_ptr<CompressEventAccumulator> CompressEventAccumulatorFactory::creat
   if (num_events > NUM_EDGES) {
     // this is a dense array
     return std::make_unique<CompressDense>(m_histogram_edges, m_divisor, m_bin_mode);
-  } else if (num_events < MAX_EVENTS_FOR_SPARSE_INT) { // somewhat arbitrary value
+  } else if (num_events < CompressSparseInt::MAX_EVENTS) { // somewhat arbitrary value
     return std::make_unique<CompressSparseInt>(m_histogram_edges, num_events, m_divisor, m_bin_mode);
   } else {
     return std::make_unique<CompressSparseFloat>(m_histogram_edges, num_events, m_divisor, m_bin_mode);
