@@ -795,15 +795,10 @@ class Instrument(object):
 
     def getMultiRepFlux(self, Ei_in=None, frequency=None):
         Ei, _ = _check_input(self.chopper_system, Ei_in, frequency)
-        print("Ei")
-        print(Ei)
         if frequency:
-            print(frequency)
             oldfreq = self.frequency
             self.frequency = frequency
         fluxes = [self.getFlux(ei, frequency) for ei in self.getAllowedEi(Ei)]
-        print("fluxes")
-        print(fluxes)
         if frequency:
             self.frequency = oldfreq
         return fluxes
@@ -1014,9 +1009,6 @@ class Instrument(object):
             popt, pcov = curve_fit(cubic, etrans, res)
             res = popt
         flux = obj.getFlux()
-        print("res, flux")
-        print(flux)
-        print(res)
         return res, flux
 
     def __repr__(self):
