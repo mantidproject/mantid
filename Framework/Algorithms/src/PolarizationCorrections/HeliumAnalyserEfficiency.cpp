@@ -27,7 +27,7 @@ DECLARE_ALGORITHM(HeliumAnalyserEfficiency)
 using namespace Kernel;
 using namespace API;
 
-const double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
+constexpr double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
 
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
