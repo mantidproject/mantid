@@ -5,16 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-
-"""
-@author Spencer Howells, ISIS
-@date December 05, 2013
-"""
-
 import numpy as np
 
 from mantid.api import IFunction1D, FunctionFactory
-from scipy.special import spherical_jn  # bessel
+from scipy.special import spherical_jn
 
 
 class TeixeiraWaterIqt(IFunction1D):
@@ -32,19 +26,17 @@ class TeixeiraWaterIqt(IFunction1D):
         self.declareAttribute("Q", 0.4)
         self.declareAttribute("a", 0.98)
 
-    def setAttributeValue(self, name, value):
-        if name == "Q":
-            self.Q = value
-        if name == "a":
-            self.radius = value
-
     def function1D(self, xvals):
         amp = self.getParameterValue("Amp")
         tau1 = self.getParameterValue("Tau1")
         gamma = self.getParameterValue("Gamma")
+
+        q_value = self.getAttributeValue("Q")
+        radius = self.getAttributeValue("a")
+
         xvals = np.array(xvals)
 
-        qr = np.array(self.Q * self.radius)
+        qr = np.array(q_value * radius)
         j0 = spherical_jn(0, qr)
         j1 = spherical_jn(1, qr)
         j2 = spherical_jn(2, qr)
@@ -59,7 +51,10 @@ class TeixeiraWaterIqt(IFunction1D):
         tau1 = self.getParameterValue("Tau1")
         gamma = self.getParameterValue("Gamma")
 
-        qr = np.array(self.Q * self.radius)
+        q_value = self.getAttributeValue("Q")
+        radius = self.getAttributeValue("a")
+
+        qr = np.array(q_value * radius)
         j0 = spherical_jn(0, qr)
         j1 = spherical_jn(1, qr)
         j2 = spherical_jn(2, qr)
