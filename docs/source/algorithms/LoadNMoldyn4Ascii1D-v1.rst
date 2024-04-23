@@ -56,7 +56,7 @@ resolution convolution**
 
 .. code-block:: python
 
-    data = LoadNMoldyn4Ascii1D(Directory='C:\MantidInstall\data\pristinedata',
+    data = LoadNMoldyn4Ascii1D(Directory='/MantidInstall/data/pristinedata',
                                Functions=['dos_total', 'vacf_total'])
 
     for ws in data:
@@ -73,4 +73,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

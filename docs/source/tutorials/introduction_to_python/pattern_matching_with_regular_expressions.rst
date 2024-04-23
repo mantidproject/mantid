@@ -25,6 +25,7 @@ Pattern Matching With Regular Expressions
    regex: 'email' # This is a regular expression but albeit not a very
                   # useful one as only matches with one word!
 
+
 -  In reality regexes are used to search for a string that "has the
    form" of the regular expression, as in the above email example. For
    this to be possible we need to define some syntax that lets us
@@ -52,6 +53,7 @@ Special Characters
    test: 'aaaabab'   # Matches as there is an occurrence of a string of
                      # a's followed by a b
 
+
 -  A range of characters, or a "character class" is defined using square
    brackets ``[]``, e.g.
 
@@ -61,6 +63,7 @@ Special Characters
    test: 'm' # Matches as it is a lower case letter
    test: 'M' # Fails as it is an upper case letter
    test: '4' # Fails as it is a number
+
 
 -  Several ranges can be specified such that they are all checked, e.g.
 
@@ -72,6 +75,7 @@ Special Characters
    test: '4'  # Matches!
    test: 'mm' #Fails as there are two characters
 
+
 -  Combining ranges and the asterisk allows us to specify any number of
    alphanumeric characters!, e.g.
 
@@ -81,6 +85,7 @@ Special Characters
    test: 'mm'    # Matches
    test: 'a0123' # Matches
 
+
 -  To specify an exact number of characters use braces ``{}``, e.g.
 
 .. code::
@@ -88,6 +93,7 @@ Special Characters
    regex: 'a{2}'
    test: 'abab'  # Fails as there is not two consecutive a's in the string
    test: 'aaaab' # Matches
+
 
 -  For more complicated regular expressions it is not obvious whether
    you have written the expression correctly so it can be useful to
@@ -185,6 +191,7 @@ word 'OK!' or the test is considered a failure.
    print("Tests Passed: {}".format(testsPass))
    print("Tests Failed: {}".format(failCount))
    print("Total Tests: {}".format(testCount))
+
 
 -  The loop keeps track of test crashes and failures by using regular
    expressions to match the required text within each line of the file
