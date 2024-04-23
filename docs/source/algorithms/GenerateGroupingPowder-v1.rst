@@ -98,31 +98,22 @@ Similarly, one could instead specify the grouping workspace:
 
 .. testcode:: GenerateGroupingPowder_GroupingWorkspace
 
-    # create some grouping file
-    import mantid
-    outputFilename=mantid.config.getString("defaultsave.directory")+"powder.xml"
-
     #load some file
     ws=Load("CNCS_7860")
-    gws= "a_nice_name_for_grouping_workspace"
+    gws_name= "a_nice_name_for_grouping_workspace"
 
     #generate the files
-    GenerateGroupingPowder(ws,10, GroupingWorkspace=gws)
+    GenerateGroupingPowder(ws,10, GroupingWorkspace=gws_name)
 
     #check that it works
-    import os.path
-    if(os.path.isfile(outputFilename)):
-	print("Found file powder.xml")
-    if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
-	print("Found file powder.par")
-    wsg=GroupDetectors(ws,outputFilename)
-    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
+    gws = mtd[gws_name]
+    print("The grouping workspace has {} histograms".format(gws.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingPowder_GroupingWorkspace
 
    DeleteWorkspace(ws)
    DeleteWorkspace(gws)
-   DeleteWorkspace(wsg)
+
 
 
 Output:
