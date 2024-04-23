@@ -118,7 +118,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
       auto loader = getFileLoader(getPropertyValue(name));
       assert(loader); // (getFileLoader should throw if no loader is found.)
       declareLoaderProperties(loader);
-      m_loader = loader;
+      m_loader = std::move(loader);
     }
     // Else we've got multiple files, and must enforce the rule that only one
     // type of loader is allowed.
