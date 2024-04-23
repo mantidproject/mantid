@@ -120,7 +120,7 @@ Output:
 
 .. testoutput:: GenerateGroupingPowder_GroupingWorkspace
 
-    The grouped workspace has 14 histograms
+    The grouped workspace has 51200 histograms
 
 
 
