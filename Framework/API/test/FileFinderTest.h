@@ -640,8 +640,8 @@ public:
                          "ZOOM4656.RAW", "GEM90421.nxs"}),
         m_dataCacheDir("_DataCacheTestDummyData") {
 
-    Mantid::Kernel::ConfigService::Instance().setString("datacachesearch.directory", m_dataCacheDir);
-    Mantid::Kernel::ConfigService::Instance().setLogLevel("debug");
+    ConfigService::Instance().setString("datacachesearch.directory", m_dataCacheDir);
+    ConfigService::Instance().setString("datasearch.searcharchive", "Off");
 
     for (auto filename : m_filesToCreate) {
       // Extract extension
@@ -728,6 +728,6 @@ public:
 
   void testDirectoryWithoutPermissin() {
     std::string error = FileFinder::Instance().getPath({}, {"GEM90421"}, {".nxs"}).errors();
-    TS_ASSERT(error.find("filesystem error: status: Permission denied") != std::string::npos);
+    TS_ASSERT(error.find("Permission denied") != std::string::npos);
   }
 };

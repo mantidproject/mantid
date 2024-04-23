@@ -18,13 +18,12 @@ Mantid::Kernel::Logger g_log("ISISInstrDataCache");
 } // namespace
 
 std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fileName) {
-  g_log.notice() << "ISISInstrDataCache::getFileParentDirPath(" << fileName << ")";
+  g_log.debug() << "ISISInstrDataCache::getFileParentDirPath(" << fileName << ")" << std::endl;
 
   // Check if suffix eg. -add is present in filename
   std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
   if (!suffix.empty()) {
-    g_log.debug() << "Suffix detected, skipping data cache search ...";
-    return "";
+    throw std::invalid_argument("Unsuported format: Suffix detected.");
   }
 
   // Find the last non-digit as the instrument name can contain numbers
@@ -34,8 +33,7 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
   // Check run number
   std::string runNumber = fileName.substr(nChars);
   if (runNumber.empty() || !std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check for wrong format
-    g_log.debug() << "Filename not in correct format, skipping data cache search ...";
-    return "";
+    throw std::invalid_argument("Filename not in correct format.");
   };
   runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
 
@@ -46,23 +44,26 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
     auto instrInfo = FileFinder::Instance().getInstrument(instrName);
     instrName = instrInfo.name();
   } catch (const Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "Instrument name not recognized, skipping data cache search ...";
-    return "";
+    throw std::invalid_argument("Instrument name not recognized.");
   }
 
   // Build path to index file
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
-  g_log.notice() << "Opening index file " << jsonPath;
+  g_log.debug() << "Opening instrument index file at " << jsonPath << std::endl;
   std::ifstream ifstrm{jsonPath};
   if (!ifstrm) {
-    g_log.notice() << "Error opennig index file at " << jsonPath << std::endl;
-    return "";
+    throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
   }
 
   // Read directory path from json file
   Json::Value json;
   ifstrm >> json;
   std::string relativePath = json[runNumber].asString();
+
+  if (relativePath.empty()) {
+    throw std::invalid_argument("Run number " + runNumber + " not found for instrument " + instrName + ".");
+  }
+
   std::string dirPath = m_dataCachePath + "/" + instrName + "/" + relativePath;
   return dirPath;
 }

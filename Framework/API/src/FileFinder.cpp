@@ -649,29 +649,41 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
 const API::Result<std::string> FileFinderImpl::getDataCachePath(const std::string &cachePathToSearch,
                                                                 const std::set<std::string> &filenames,
                                                                 const std::vector<std::string> &exts) const {
-  std::string errors = "";
-  try {
-    auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
+  std::string errors;
+  auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
 
-    for (const auto &filename : filenames) {
-      std::string parentDirPath = dataCache.getFileParentDirPath(filename);
-      g_log.notice() << "Looking for file in instrument directory " << parentDirPath << std::endl;
+  for (const auto &filename : filenames) {
 
-      if (!parentDirPath.empty()) {
+    std::string parentDirPath;
 
-        for (const auto &ext : exts) {
-          std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
-
-          if (std::filesystem::exists(filePath)) {
-            g_log.notice() << "Found file " << filePath << std::endl;
-            return API::Result<std::string>(filePath.string());
-          }
-        }
-        errors += "Cannot find filename and matching extension in data cache: " + filename + '\n';
-      }
+    try {
+      parentDirPath = dataCache.getFileParentDirPath(filename);
+    } catch (const std::invalid_argument &e) {
+      errors += "Data cache: " + std::string(e.what());
+      return API::Result<std::string>("", errors);
     }
-  } catch (std::filesystem::filesystem_error const &e) {
-    errors += "Cannot open file in data cache: " + std::string(e.what()) + '\n';
+
+    try {
+      // Check for permission by trying to access first file in folder
+      std::filesystem::exists(*begin(std::filesystem::directory_iterator(parentDirPath)));
+    } catch (const std::filesystem::filesystem_error &e) {
+      errors += "Data cache: Could not access " + e.path1().parent_path().string() + ". Permission denied.";
+      return API::Result<std::string>("", errors);
+    }
+
+    g_log.debug() << "Searching for file in data cache directory " << parentDirPath << std::endl;
+
+    if (!parentDirPath.empty()) {
+
+      for (const auto &ext : exts) {
+        std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
+
+        if (std::filesystem::exists(filePath)) {
+          return API::Result<std::string>(filePath.string());
+        }
+      }
+      errors += "Data cache: Could not find matching extension for " + filename;
+    }
   }
   return API::Result<std::string>("", errors);
 }
@@ -772,8 +784,8 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     }
   }
 
-  // Implementation to search data cache
-  string errors = "";
+  // Search data cache
+  string errors;
   std::filesystem::path cachePathToSearch(
       Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
   if (std::filesystem::exists(cachePathToSearch)) {
@@ -786,7 +798,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     errors += cacheFilePath.errors();
 
   } else {
-    errors += "Cannot find data cache directory: " + cachePathToSearch.string();
+    errors += "Could not find data cache directory: " + cachePathToSearch.string();
   }
 
   // Search the archive
@@ -805,7 +817,6 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
       errors += archivePath.errors();
 
   } // archs
-  g_log.error() << errors;
   return API::Result<std::string>("", errors);
 }
 

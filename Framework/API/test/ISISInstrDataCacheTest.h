@@ -27,6 +27,11 @@ std::string pg3Json = R"({
 }
 )";
 
+std::string wishJson = R"({
+"12345": "subdir1/subdir2",
+}
+)";
+
 class ISISInstrDataCacheTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
@@ -35,16 +40,18 @@ public:
     std::filesystem::create_directory(m_dataCacheDir);
 
     std::unordered_map<std::string, std::string> instrFiles = {
-        {"MARI", marJson}, {"SANS2D", sansJson}, {"POWGEN", pg3Json}};
+        {"MARI", marJson}, {"SANS2D", sansJson}, {"POWGEN", pg3Json}, {"WISH", wishJson}};
     for (const auto &[instrName, instrIndex] : instrFiles) {
 
       std::filesystem::create_directory(m_dataCacheDir + "/" + instrName);
-      std::ofstream ofstrm{m_dataCacheDir + "/" + instrName + "/" + instrName + "_index.json"};
 
-      if (!ofstrm)
-        std::cout << "\nCould not open file!\n";
-      ofstrm << instrIndex;
-      ofstrm.close();
+      if (instrName == "WISH") {
+        // Do not create index file to test for missing file
+      } else {
+        std::ofstream ofstrm{m_dataCacheDir + "/" + instrName + "/" + instrName + "_index.json"};
+        ofstrm << instrIndex;
+        ofstrm.close();
+      }
     }
   };
 
@@ -71,20 +78,32 @@ public:
 
   void testInstrWithSuffix() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("LOQ11111-add");
-    TS_ASSERT_EQUALS(actualPath, "");
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("LOQ11111-add"), const std::invalid_argument &e,
+                            std::string(e.what()), "Unsuported format: Suffix detected.");
   }
 
   void testBadInput() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("s0me_us$r_dEfined_n4me");
-    TS_ASSERT_EQUALS(actualPath, "");
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("s0me_us$r_dEfined_n4me"), const std::invalid_argument &e,
+                            std::string(e.what()), "Filename not in correct format.");
   }
 
   void testBadInstrument() {
     ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("MARO111111");
-    TS_ASSERT_EQUALS(actualPath, "");
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("BADINSTR111111"), const std::invalid_argument &e,
+                            std::string(e.what()), "Instrument name not recognized.");
+  }
+
+  void testMissingIndexFile() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("WISH12345"), const std::invalid_argument &e, std::string(e.what()),
+                            "Error opennig instrument index file: " + m_dataCacheDir + "/WISH/WISH_index.json");
+  }
+
+  void testRunNumberNotFound() {
+    ISISInstrDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("SANS2D1234"), const std::invalid_argument &e,
+                            std::string(e.what()), "Run number 1234 not found for instrument SANS2D.");
   }
 
 private:
