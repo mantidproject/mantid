@@ -980,7 +980,7 @@ template <class RandomIt, class Compare> void switchable_sort(RandomIt first, Ra
   if (vec_size < 2)
     return;
   else if (vec_size < MIN_VEC_LENGTH_PARALLEL_SORT)
-    std::sort(first, last, comp);
+    std::sort(first, last, std::move(comp));
   else
     tbb::parallel_sort(first, last, comp);
 }
@@ -1126,10 +1126,10 @@ void EventList::sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start, con
 
   switch (eventType) {
   case TOF:
-    switchable_sort(events.begin(), events.end(), comparator);
+    switchable_sort(events.begin(), events.end(), std::move(comparator));
     break;
   case WEIGHTED:
-    switchable_sort(weightedEvents.begin(), weightedEvents.end(), comparator);
+    switchable_sort(weightedEvents.begin(), weightedEvents.end(), std::move(comparator));
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
