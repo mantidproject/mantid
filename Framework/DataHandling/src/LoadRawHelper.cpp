@@ -997,9 +997,9 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<specnum_t> &monito
                   << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
-      const auto msize = std::count_if(monitorSpecList.cbegin(), monitorSpecList.cend(),
-                                       [&](const auto &spec) { return (spec >= m_spec_min && spec < m_spec_max); });
-      monitorwsSpecs = static_cast<specnum_t>(msize);
+      int msize = std::count_if(monitorSpecList.cbegin(), monitorSpecList.cend(),
+                                [](const auto &spec) { return (spec >= m_spec_min && spec < m_spec_min); });
+      monitorwsSpecs = msize;
       normalwsSpecs = m_total_specs - monitorwsSpecs;
       g_log.debug() << "normalwsSpecs when  m_interval true is  " << normalwsSpecs << "  monitorwsSpecs is "
                     << monitorwsSpecs << '\n';
@@ -1055,7 +1055,7 @@ void LoadRawHelper::loadSpectra(FILE *file, const int &period, const int &total_
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
-  const auto &isisRawRef = isisRaw();
+  auto &isisRawRef = isisRaw();
   auto numberOfPeriods = static_cast<int64_t>(isisRawRef.t_nper);
   auto histTotal = static_cast<double>(total_specs * numberOfPeriods);
   int64_t noTimeRegimes = getNumberofTimeRegimes();
@@ -1198,7 +1198,7 @@ bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) { retur
  * property.
  */
 void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bseparateMonitors, bool &bexcludeMonitors,
-                                              const API::Algorithm *pAlgo) {
+                                              API::Algorithm *pAlgo) {
   // process monitor option
   std::string monitorOption = pAlgo->getProperty("LoadMonitors");
   if (monitorOption == "1")

@@ -301,7 +301,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
       const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
       *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
     } else {
-      removeTie(iPar);
+      removeTie(m_ties.size() - 1);
     }
     throw;
   }
@@ -418,7 +418,7 @@ IConstraint *IFunction::getConstraint(size_t i) const {
 void IFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
   const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
-                               [&iPar](const auto &constraint) { return iPar == constraint->getLocalIndex(); });
+                               [&iPar](const auto &constraint) { return constraint->getLocalIndex == iPar; });
   if (it != m_constraints.cend()) {
     m_constraints.erase(it);
   }
@@ -455,7 +455,7 @@ void IFunction::setUpForFit() {
 std::string IFunction::writeConstraints() const {
   std::ostringstream stream;
   bool first = true;
-  for (const auto &constrint : m_constraints) {
+  for (auto &constrint : m_constraints) {
     if (constrint->isDefault())
       continue;
     if (!first) {
@@ -729,7 +729,7 @@ std::string IFunction::Attribute::asUnquotedString() const {
   if (*(attr.begin()) == '\"')
     unquoted = std::string(attr.begin() + 1, attr.end() - 1);
   if (*(unquoted.end() - 1) == '\"')
-    unquoted.resize(unquoted.size() - 1);
+    unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
 
   return unquoted;
 }
@@ -1673,8 +1673,7 @@ IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(const std::s
 template <>
 MANTID_API_DLL std::shared_ptr<const Mantid::API::IFunction>
 IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(const std::string &name) const {
-  const auto *prop =
-      dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
+  auto *prop = dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

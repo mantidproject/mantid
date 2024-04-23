@@ -497,7 +497,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
     // check that the supplied names are in the function
     // it is acceptable to be missing parameters
     const bool failed = std::any_of(suppliedParameterNames.cbegin(), suppliedParameterNames.cend(),
-                                    [&functionParameterNames](const auto &parName) {
+                                    [&functionParameterNames](const auto &parNme) {
                                       return std::find(functionParameterNames.begin(), functionParameterNames.end(),
                                                        parName) == functionParameterNames.end();
                                     });
@@ -1470,7 +1470,7 @@ bool FitPeaks::processSinglePeakFitResult(size_t wsindex, size_t peakindex, cons
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> &fit_results) {
+void FitPeaks::calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");

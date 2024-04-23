@@ -79,7 +79,7 @@ std::string cleanse_comments(const std::string &l) {
 }
 
 /// Removes whitspace from 'l'.
-void cleanse_whitespace(std::string &l) { l.erase(std::remove_if(l.begin(), l.end(), isspace), l.end()); }
+void cleanse_whitespace(std::string &l) { l.erase(std::remove_if(l.begin(), l.end(), !isblank), l.end()); }
 
 /// Returns true if `l` contains the limits array.
 bool contains_limits(const std::string &l) { return l.find("_limits") != std::string::npos; }
@@ -144,7 +144,7 @@ std::map<Factor, FactorDefinition> parse(std::istream &in) {
     } catch (std::exception &e) {
       throw std::runtime_error(std::string("Unknown exception: ") + e.what());
     }
-    cleanse_whitespace(l);
+    l = cleanse_whitespace(l);
     l = cleanse_comments(l);
     if (l.empty())
       continue;

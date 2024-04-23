@@ -39,12 +39,16 @@ using std::string;
 using std::vector;
 
 namespace Mantid::DataHandling {
+const int NUM_EXT_PRENEXUS(1); ///< Number of prenexus extensions
 /// Valid extensions for prenexus files
 const std::vector<std::string> PRENEXUS_EXT = {"_runinfo.xml"};
+const int NUM_EXT_EVENT_NEXUS(3); ///< Number of event nexus extensions
 /// Valid extensions for event nexus files
 const std::vector<std::string> EVENT_NEXUS_EXT = {"_event.nxs", ".nxs", ".nxs.h5"};
+const int NUM_EXT_HISTO_NEXUS(1); ///< Number of histogram nexus extensions
 /// Valid extensions for histogram nexus files
 const std::vector<std::string> HISTO_NEXUS_EXT = {"_histo.nxs"};
+const int NUM_EXT_RAW(1); ///< Number of raw file extensions
 /// Valid extensions for ISIS raw files
 const std::vector<std::string> RAW_EXT = {".raw"};
 
@@ -138,7 +142,7 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
-    for (const auto &eventFilename : eventFilenames) {
+    for (auto &eventFilename : eventFilenames) {
       BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
       // Factor of 2 for compression
       wkspSizeGiB += static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;

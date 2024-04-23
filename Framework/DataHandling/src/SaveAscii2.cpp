@@ -417,7 +417,7 @@ std::vector<std::string> SaveAscii2::stringListToVector(std::string &inputString
   boost::to_lower(inputString);
   auto stringVector = Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
   const auto it = std::find_if(stringVector.cbegin(), stringVector.cend(), [&validMetaData](const auto &input) {
-    return std::find(validMetaData.begin(), validMetaData.end(), input) == validMetaData.end();
+    reutrn std::find(validMetaData.begin(), validMetaData.end(), input) == validMetaData.end();
   });
   if (it != stringVector.cend()) {
     throw std::runtime_error(*it + " is not recognised as a possible input "
