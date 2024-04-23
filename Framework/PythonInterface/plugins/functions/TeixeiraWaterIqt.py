@@ -41,7 +41,7 @@ class TeixeiraWaterIqt(IFunction1D):
         j1 = spherical_jn(1, qr)
         j2 = spherical_jn(2, qr)
         with np.errstate(divide="ignore"):
-            rotational = j0 * j0 + 3 * j1 * j1 * np.exp(-xvals / (3 * tau1)) + 5 * j2 * j2 * np.exp(-xvals / tau1)
+            rotational = np.square(j0) + 3 * np.square(j1) * np.exp(-xvals / (3 * tau1)) + 5 * np.square(j2) * np.exp(-xvals / tau1)
             translational = np.exp(-gamma * xvals)
             iqt = amp * rotational * translational
         return iqt
@@ -60,9 +60,9 @@ class TeixeiraWaterIqt(IFunction1D):
         j2 = spherical_jn(2, qr)
         with np.errstate(divide="ignore"):
             for i, x in enumerate(xvals, start=0):
-                rotational = j0 * j0 + 3 * j1 * j1 * np.exp(-x / (3 * tau1)) + 5 * j2 * j2 * np.exp(-x / tau1)
+                rotational = np.square(j0) + 3 * np.square(j1) * np.exp(-x / (3 * tau1)) + 5 * np.square(j2) * np.exp(-x / tau1)
                 translational = np.exp(-gamma * x)
-                partial_tau = (x / np.square(tau1)) * (j1 * j1 * np.exp(-x / (3 * tau1)) + 5 * j2 * j2 * np.exp(-x / tau1))
+                partial_tau = (x / np.square(tau1)) * (np.square(j1) * np.exp(-x / (3 * tau1)) + 5 * np.square(j2) * np.exp(-x / tau1))
                 jacobian.set(i, 0, rotational * translational)
                 jacobian.set(i, 1, amp * rotational * partial_tau)
                 jacobian.set(i, 2, -x * amp * rotational * translational)
