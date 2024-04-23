@@ -9,6 +9,7 @@
 #include "Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "SymmetrisePresenter.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
