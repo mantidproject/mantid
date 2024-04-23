@@ -232,14 +232,12 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
     std::size_t monitors(0);
     if (m_map) {
       const auto &in_dets = m_instr->m_detectorCache;
-      for (const auto &in_det : in_dets)
-        if (std::get<2>(in_det))
-          monitors += 1;
+      monitors =
+          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
     } else {
       const auto &in_dets = m_detectorCache;
-      for (const auto &in_det : in_dets)
-        if (std::get<2>(in_det))
-          monitors += 1;
+      monitors =
+          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
     }
     return (numDetIDs - monitors);
   } else {

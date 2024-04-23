@@ -417,11 +417,10 @@ IConstraint *IFunction::getConstraint(size_t i) const {
  */
 void IFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getLocalIndex()) {
-      m_constraints.erase(it);
-      break;
-    }
+  const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                               [&iPar](const auto &constraint) { return constraint->getLocalIndex == iPar; });
+  if (it != m_constraints.cend()) {
+    m_constraints.erase(it);
   }
 }
 

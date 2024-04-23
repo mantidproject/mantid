@@ -312,10 +312,11 @@ int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std:
     return 0;
   }
   int buff_size = max_str_size;
-  if (buff_size <= 0)
-    for (const auto &str : str_vec) {
-      buff_size = std::max(buff_size, int(str.size()));
-    }
+  if (buff_size <= 0) {
+    buff_size = std::max_element(str_vec.cbegin(), str_vec.cend(), [](const auto a, const auto b) {
+                  return a.size() < b.size();
+                })->size();
+  }
   if (buff_size <= 0)
     buff_size = 1;
   auto buff = new char[buff_size];

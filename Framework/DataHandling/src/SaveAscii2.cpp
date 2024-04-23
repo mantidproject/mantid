@@ -416,12 +416,13 @@ std::vector<std::string> SaveAscii2::stringListToVector(std::string &inputString
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
   boost::to_lower(inputString);
   auto stringVector = Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
-  for (const auto &input : stringVector) {
-    if (std::find(validMetaData.begin(), validMetaData.end(), input) == validMetaData.end()) {
-      throw std::runtime_error(input + " is not recognised as a possible input "
-                                       "for SpectrumMetaData.\n Valid inputs "
-                                       "are: SpectrumNumber, Q, Angle.");
-    }
+  const auto it = std::find_if(stringVector.cbegin(), stringVector.cend(), [&validMetaData](const auto &input) {
+    reutrn std::find(validMetaData.begin(), validMetaData.end(), input) == validMetaData.end();
+  });
+  if (it != stringVector.cend()) {
+    throw std::runtime_error(*it + " is not recognised as a possible input "
+                                   "for SpectrumMetaData.\n Valid inputs "
+                                   "are: SpectrumNumber, Q, Angle.");
   }
 
   return stringVector;

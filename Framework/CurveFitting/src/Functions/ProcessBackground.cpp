@@ -366,11 +366,10 @@ void ProcessBackground::addRegion() {
   }
 
   // Check
-  for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
-    if (*it <= *it - 1) {
-      g_log.error() << "The vector X with value inserted is not ordered incrementally\n";
-      throw std::runtime_error("Build new vector error!");
-    }
+  const auto it = std::adjacent_find(vx.cbegin(), vx.cend(), std::greater_equal<double>());
+  if (it != vx.cend()) {
+    g_log.error() << "The vector X with value inserted is not ordered incrementally" << std::endl;
+    throw std::runtime_error("Build new vector error!");
   }
 
   // Construct the new Workspace

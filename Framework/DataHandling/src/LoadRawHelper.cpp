@@ -997,12 +997,8 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<specnum_t> &monito
                   << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
   } else if (m_interval || m_bmspeclist) {
     if (m_interval) {
-      int msize = 0;
-      std::vector<specnum_t>::const_iterator itr1;
-      for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end(); ++itr1) {
-        if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
-          ++msize;
-      }
+      int msize = std::count_if(monitorSpecList.cbegin(), monitorSpecList.cend(),
+                                [](const auto &spec) { return (spec >= m_spec_min && spec < m_spec_min); });
       monitorwsSpecs = msize;
       normalwsSpecs = m_total_specs - monitorwsSpecs;
       g_log.debug() << "normalwsSpecs when  m_interval true is  " << normalwsSpecs << "  monitorwsSpecs is "

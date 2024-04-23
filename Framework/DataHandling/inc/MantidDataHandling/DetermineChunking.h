@@ -59,6 +59,7 @@ private:
   void exec() override;
   std::string setTopEntryName(const std::string &filename);
   FileType getFileType(const std::string &filename);
+  bool filenameHasExtension(const std::string &filename, const std::vector<std::string> &fileExtensions);
 };
 
 } // namespace DataHandling
