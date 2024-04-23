@@ -50,7 +50,7 @@ public:
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-  const Kernel::InstrumentInfo getInstrument(const std::string &hint) const;
+  const Kernel::InstrumentInfo getInstrument(const std::string &hint, const bool &throwOnThrow = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename, const std::vector<std::string> &exts) const;
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
