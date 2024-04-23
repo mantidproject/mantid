@@ -100,6 +100,7 @@ Similarly, one could instead specify the grouping workspace:
 
     # create some grouping file
     import mantid
+    outputFilename=mantid.config.getString("defaultsave.directory")+"powder.xml"
 
     #load some file
     ws=Load("CNCS_7860")
@@ -110,7 +111,11 @@ Similarly, one could instead specify the grouping workspace:
 
     #check that it works
     import os.path
-    wsg=GroupDetectors(ws,gws)
+    if(os.path.isfile(outputFilename)):
+	print("Found file powder.xml")
+    if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
+	print("Found file powder.par")
+    wsg=GroupDetectors(ws,outputFilename)
     print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingPowder_GroupingWorkspace
