@@ -14,6 +14,7 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace {} // namespace
 
@@ -21,36 +22,72 @@ using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::FlipperEfficiency;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Kernel::ConfigService;
 
 class FlipperEfficiencyTest : public CxxTest::TestSuite {
 public:
+  void setUp() override { m_defaultSaveDirectory = ConfigService::Instance().getString("defaultsave.directory"); }
+
+  void tearDown() override { ConfigService::Instance().setString("defaultsave.directory", m_defaultSaveDirectory); }
+
   void test_name() {
     FlipperEfficiency const alg;
-    TS_ASSERT_EQUALS(alg.name(), "FlipperEfficiency");
+    TS_ASSERT_EQUALS(alg.name(), "FlipperEfficiency")
   }
 
   void test_version() {
     FlipperEfficiency const alg;
-    TS_ASSERT_EQUALS(alg.version(), 1);
+    TS_ASSERT_EQUALS(alg.version(), 1)
   }
 
   void test_category() {
     FlipperEfficiency const alg;
-    TS_ASSERT_EQUALS(alg.category(), "SANS\\PolarizationCorrections");
+    TS_ASSERT_EQUALS(alg.category(), "SANS\\PolarizationCorrections")
   }
 
   void test_saving_absolute() {
     FlipperEfficiency alg;
     alg.initialize();
-    auto temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
-    auto group = createTestingWorkspace("testWs");
+    auto const temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
+    auto const &group = createTestingWorkspace("testWs");
     alg.setProperty("InputWorkspace", group);
     alg.setPropertyValue("OutputFilePath", temp_filename.string());
     alg.execute();
-    TS_ASSERT(std::filesystem::exists(temp_filename));
+    TS_ASSERT(std::filesystem::exists(temp_filename))
+    std::filesystem::remove(temp_filename);
+  }
+
+  void test_saving_relative() {
+    auto tempDir = std::filesystem::temp_directory_path();
+    ConfigService::Instance().setString("defaultsave.directory", tempDir);
+    FlipperEfficiency alg;
+    alg.initialize();
+    std::string const &filename = "something.nxs";
+    auto const &group = createTestingWorkspace("testWs");
+    alg.setProperty("InputWorkspace", group);
+    alg.setPropertyValue("OutputFilePath", filename);
+    alg.execute();
+    auto savedPath = tempDir /= filename;
+    TS_ASSERT(std::filesystem::exists(savedPath))
+    std::filesystem::remove(savedPath);
+  }
+
+  void test_saving_no_ext() {
+    FlipperEfficiency alg;
+    alg.initialize();
+    auto const temp_filename = std::filesystem::temp_directory_path() /= "something";
+    auto const &group = createTestingWorkspace("testWs");
+    alg.setProperty("InputWorkspace", group);
+    alg.setPropertyValue("OutputFilePath", temp_filename.string());
+    alg.execute();
+    auto savedPath = temp_filename.string() + ".nxs";
+    TS_ASSERT(std::filesystem::exists(savedPath))
+    std::filesystem::remove(savedPath);
   }
 
 private:
+  std::string m_defaultSaveDirectory;
+
   Mantid::API::WorkspaceGroup_sptr createTestingWorkspace(std::string const &outName, int const numSpectra = 1,
                                                           bool const isMonitor = true, double const binWidth = 0.1) {
 
