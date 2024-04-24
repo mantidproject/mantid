@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
@@ -67,6 +69,32 @@ list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &n
   return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
 }
 
+list retrieveGroupPeaksWorkspaces(AnalysisDataServiceImpl const *const self, const list &names) {
+  using WeakPtr = std::weak_ptr<Workspace>;
+
+  auto wsSharedPtrs = self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), false);
+
+  auto isGroupPeakWorkspace = [](const Workspace_sptr &wksp) {
+    if (auto gws = dynamic_cast<WorkspaceGroup *>(wksp.get())) {
+      for (auto it = gws->begin(); it != gws->end(); it++) {
+        if (auto ws = dynamic_cast<IPeaksWorkspace *>(it->get())) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  auto end = std::remove_if(wsSharedPtrs.begin(), wsSharedPtrs.end(), isGroupPeakWorkspace);
+  wsSharedPtrs.erase(end, wsSharedPtrs.end());
+
+  std::vector<WeakPtr> wsWeakPtrs;
+  wsWeakPtrs.reserve(wsSharedPtrs.size());
+  std::transform(wsSharedPtrs.cbegin(), wsSharedPtrs.cend(), std::back_inserter(wsWeakPtrs),
+                 [](const Workspace_sptr &wksp) -> WeakPtr { return WeakPtr(wksp); });
+
+  return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
+}
+
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -86,6 +114,7 @@ void export_AnalysisDataService() {
       .def("retrieveWorkspaces", retrieveWorkspaces,
            AdsRetrieveWorkspacesOverloads("Retrieve a list of workspaces by name",
                                           (arg("self"), arg("names"), arg("unrollGroups") = false)))
+      .def("retrieveGroupPeaksWorkspaces", retrieveGroupPeaksWorkspaces, (arg("self"), arg("names")))
       .def("addToGroup", &AnalysisDataServiceImpl::addToGroup, (arg("groupName"), arg("wsName")),
            "Add a workspace in the ADS to a group in the ADS")
       .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
