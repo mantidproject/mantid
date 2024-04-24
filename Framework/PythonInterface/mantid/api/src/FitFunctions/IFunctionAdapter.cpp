@@ -33,13 +33,13 @@ public:
   AttrVisitor(IFunction::Attribute &attrToUpdate) : m_attr(attrToUpdate) {}
 
   void operator()(bool value) const override { m_attr.setValue(value); }
-  void operator()(long value) const override { m_attr.setValue(static_cast<int>(value)); }
+  void operator()(int value) const override { m_attr.setValue(value); }
   void operator()(double value) const override { m_attr.setValue(value); }
   void operator()(std::string value) const override { m_attr.setValue(std::move(value)); }
   void operator()(Mantid::API::Workspace_sptr) const override { throw std::invalid_argument(m_errorMsg); }
 
   void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
-  void operator()(std::vector<long> value) const override {
+  void operator()(std::vector<int> value) const override {
     // Previous existing code blindly converted any list type into a list of doubles.
     // We now have to preserve this behaviour to maintain API compatibility as
     // setValue only takes std::vector<double>.
