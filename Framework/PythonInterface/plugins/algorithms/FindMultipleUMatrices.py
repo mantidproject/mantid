@@ -4,8 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, Progress, WorkspaceGroupProperty
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.api import (
+    DataProcessorAlgorithm,
+    AlgorithmFactory,
+    Progress,
+    WorkspaceGroupProperty,
+    IPeaksWorkspaceProperty,
+    AnalysisDataService as ADS,
+)
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.geometry import SpaceGroupFactory, PointGroupFactory, CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from itertools import combinations, product
 from mantid.kernel import V3D
@@ -34,7 +41,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
     def PyInit(self):
         # Input
         self.declareProperty(
-            IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.Output),
+            IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.Input),
             doc="A PeaksWorkspace containing the peaks to integrate.",
         )
         self.declareProperty(
@@ -82,14 +89,14 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="AngleTolerance",
-            defaultValue=1,
+            defaultValue=1.0,
             direction=Direction.Input,
             validator=positiveFloatValidator,
             doc="Tolerance (in degrees) of angle between peaks in QLab when identifying possible pairs of HKL.",
         )
         self.declareProperty(
             name="MinAngle",
-            defaultValue=2,
+            defaultValue=2.0,
             direction=Direction.Input,
             validator=positiveFloatValidator,
             doc="Minimum angle in QLab (in degrees) between pairs of peaks in when calculating U matrix.",
@@ -114,41 +121,40 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="Spacegroup Hermann–Mauguin symbol used to determine the point group of the Laue class.",
         )
-        enable_spacegroup = EnabledWhenProperty("Pointgroup", PropertyCriterion.IsDefault)
-        self.setPropertySettings("Spacegroup", enable_spacegroup)
-        enable_pointgroup = EnabledWhenProperty("Spacegroup", PropertyCriterion.IsDefault)
-        self.setPropertySettings("Pointgroup", enable_pointgroup)
-        self.declareProperty(name="ModVector1", defaultValue="0.0,0.0,0.0", direction=Direction.Input, doc="Offsets for h, k, l directions")
-        self.declareProperty(name="ModVector2", defaultValue="0.0,0.0,0.0", direction=Direction.Input, doc="Offsets for h, k, l directions")
-        self.declareProperty(name="ModVector3", defaultValue="0.0,0.0,0.0", direction=Direction.Input, doc="Offsets for h, k, l directions")
         self.declareProperty(
             name="MaxOrder", defaultValue=0, direction=Direction.Input, doc="Maximum order to apply ModVectors. Default = 0"
         )
+        enable_modvecs = EnabledWhenProperty("MaxOrder", PropertyCriterion.IsNotDefault)
+        for ivec in range(1, 4):
+            prop_name = f"ModVector{ivec}"
+            self.declareProperty(
+                name=prop_name, defaultValue="0.0,0.0,0.0", direction=Direction.Input, doc="Offsets for h, k, l directions"
+            )
+            self.setPropertySettings(prop_name, enable_modvecs)
         self.declareProperty(
             name="OptimiseFoundUBs",
             defaultValue=True,
             direction=Direction.Input,
-            validator=positiveFloatValidator,
             doc="Optimise final UBs using all peaks indexed best by that UB.",
         )
 
     def validateInputs(self):
         issues = dict()
         # check enough peaks
-        if self.getProperty("PeakWorkspaces").value.getNumberPeaks() < _MIN_NUM_INDEXED_PEAKS * self.getProperty("NumberOfUBs").value:
-            issues["PeakWorkspaces"] = f"There must be at least {_MIN_NUM_INDEXED_PEAKS} peaks for each UB requested."
+        if self.getProperty("PeaksWorkspace").value.getNumberPeaks() < _MIN_NUM_INDEXED_PEAKS * self.getProperty("NumberOfUBs").value:
+            issues["PeaksWorkspace"] = f"There must be at least {_MIN_NUM_INDEXED_PEAKS} peaks for each UB requested."
         # check point group of laue class can be retrieved
         spgr_sym = self.getProperty("Spacegroup").value
         if not SpaceGroupFactory.isSubscribedSymbol(spgr_sym):
             issues["Spacegroup"] = "Not a valid spacegroup symbol."
         # check min < max
-        if self.getProperty("MinDSpacing") >= self.getProperty("MaxDSpacing"):
+        if self.getProperty("MinDSpacing").value >= self.getProperty("MaxDSpacing").value:
             issues["MinDSpacing"] = "Minimum d-spacing must be less than maximum."
         return issues
 
     def PyExec(self):
         # Get input
-        peaks = self.getProperty("PeakWorkspace").value
+        peaks = self.getProperty("PeaksWorkspace").value
         num_ubs = self.getProperty("NumberOfUBs").value
         hkl_tol = self.getProperty("HKLTolerance").value
         dmax = self.getProperty("MaxDSpacing").value
@@ -178,13 +184,12 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         angles = self.calculate_angles_between_reflections(hkls, bmat)
 
         # get all peaks between d-spacing limits
-        peaks_filtered = FilterPeaks(
-            InputWorkspace=peaks, StoreInADS=False, FilterVariable="DSpacing", FilterValue=dmin - dtol, Operator=">="
+        peaks_filtered = self.exec_child_alg(
+            "FilterPeaks", InputWorkspace=peaks, FilterVariable="DSpacing", FilterValue=dmin - dtol, Operator=">="
         )
-        peaks_filtered = FilterPeaks(
-            InputWorkspace=peaks_filtered, StoreInADS=False, FilterVariable="DSpacing", FilterValue=dmax + dtol, Operator="<="
+        peaks_filtered = self.exec_child_alg(
+            "FilterPeaks", InputWorkspace=peaks_filtered, FilterVariable="DSpacing", FilterValue=dmax + dtol, Operator="<="
         )
-
         # loop over every pair of peaks
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(dhkls))
         ipairs = list(combinations(range(peaks_filtered.getNumberPeaks()), 2))
@@ -197,7 +202,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             if angle_observed > min_angle:
                 # this means don't have to worry about reflections being along same direction
                 # get index of reflections with consistent d-spacing
-                ihkls = [np.flatnonzero(abs(dhkls - pks[ii].getDSpacing()) < d_tol) for ii in range(2)]
+                ihkls = [np.flatnonzero(abs(dhkls - pks[ii].getDSpacing()) < dtol) for ii in range(2)]
                 ihkl_pairs_used = []
                 if all(irefl.size > 0 for irefl in ihkls):
                     # peaks are both consistent with d-spacing of at least one reflection
@@ -208,7 +213,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                         if angle_hkl > min_angle and abs(angle_hkl - angle_observed) < angle_tol:
                             # angle between observed peaks is consistent with reflections
                             # check pair of reflections are not equivalent to any pair previously used
-                            if not any_equivalent_pair_reflections(ptgr, angles, hkls, ihkl_pair, ihkl_pairs_used):
+                            if not self.any_equivalent_pair_reflections(ptgr, angles, hkls, ihkl_pair, ihkl_pairs_used):
                                 ihkl_pairs_used.append(ihkl_pair)
                                 # set hkl of peaks
                                 [pk.setHKL(0, 0, 0) for pk in peaks_filtered]  # reset HKL of all peaks
@@ -259,17 +264,21 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                                             ubs.append(this_ub)
                                             hkl_ers.append(this_hkl_ers)
         # categorise peaks belonging to each UB requested
-        peaks_out_list = self.get_peak_tables_for_each_ub(peaks, ubs, hkl_ers, num_ubs, optimise_ubs)
+        if not ubs:
+            raise RuntimeError(f"No valid UBs found using {peaks_filtered.getNumberPeaks()} peaks in d-spacing range.")
+        peaks_out_list = self.get_peak_tables_for_each_ub(peaks, ubs, hkl_ers, num_ubs, optimise_ubs) if ubs else []
         ws_out = self.exec_child_alg("GroupWorkspaces", InputWorkspaces=peaks_out_list)
         self.setProperty("OutputWorkspace", ws_out)
 
     def exec_child_alg(self, alg_name, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
+        alg.setAlwaysStoreInADS(False)
         alg.initialize()
         for prop, value in kwargs.items():
             alg.setProperty(prop, value)
         alg.execute()
-        return (alg.getProperty(prop).value for prop in alg.outputProperties())
+        out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
+        return out_props[0] if len(out_props) == 1 else out_props
 
     def get_peak_tables_for_each_ub(self, peaks, ubs, hkl_ers, num_ubs, optimise_ubs):
         # see which ubs index the most peaks most accurately (with minimum error)
@@ -286,9 +295,8 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         for itable in range(nub):
             # get peaks indexed best by this UB
             ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], i_indexed))
-            peaks_out = self.exec_child_alg(
-                "CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0, OutputWorkspace=f"{peaks.name()}_ub{itable}"
-            )
+            peaks_out = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0)
+            ADS.addOrReplace(f"{peaks.name()}_ub{itable}", peaks_out)
             [peaks_out.addPeak(peaks.getPeak(int(ipk))) for ipk in ipks]
             self.exec_child_alg("SetUB", Workspace=peaks_out, UB=ubs[iub[itable]])
             self.exec_child_alg("IndexPeaks", PeaksWorkspace=peaks_out, RoundHKLs=True, **self.index_peaks_kwargs)
@@ -314,7 +322,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
 
     @staticmethod
     def calculate_angles_between_reflections(hkls, bmat):
-        angles = np.zeros(2 * [hkls.shape[0]])
+        angles = np.zeros(2 * [len(hkls)])
         for ihkl_1 in range(1, angles.shape[0]):
             qlab1 = 2 * np.pi * bmat @ hkls[ihkl_1]
             for ihkl_2 in range(0, ihkl_1):
@@ -329,7 +337,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         hkl_pair = [hkls[irefl] * (1 / hkls[irefl].norm()) for irefl in ihkl_pair]
         for ihkl_pair_prev in ihkl_pairs_used:
             # check is not equivalent to any previous one
-            same_angle = np.isclose(angles[ihkl_pair_prev] - angles[ihkl_pair])
+            same_angle = np.isclose(angles[ihkl_pair_prev], angles[ihkl_pair])
             # check hkls unit vectors are not equivalent
             hkl_pair_prev = [hkls[irefl] * (1 / hkls[irefl].norm()) for irefl in ihkl_pair_prev]
             equiv_hkl = all([ptgr.isEquivalent(hkl_pair[irefl], hkl_pair_prev[irefl]) for irefl in range(len(hkl_pair))])
