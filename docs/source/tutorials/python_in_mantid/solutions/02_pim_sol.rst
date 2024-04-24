@@ -64,7 +64,7 @@ B - Plotting ILL Data
     axes.errorbar(_164198, capsize=1.0, color='#ff7f0e', label='A funky label', linewidth=1.0, specNum=50)
     axes.plot(_164198, color='#000000', label='164198: spec 300', linewidth=1.0, markeredgecolor='#d62728', markerfacecolor='#d62728', specNum=300, zorder=2.1)
     axes.set_title('My Beautiful Plot')
-    axes.set_xlabel('Time-of-flight ($\mu s$)')
+    axes.set_xlabel(r'Time-of-flight ($\mu s$)')
     axes.set_ylabel('Counts')
     axes.set_xlim([460.0, 600.0])
     axes.set_ylim([1.0, 2000.0])
