@@ -62,7 +62,7 @@ void FlipperEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace) {
   std::filesystem::path filePath = getPropertyValue(PropNames::OUTPUT_FILE);
   // Add the nexus extension if it's not been applied already.
   if (filePath.extension() != FILE_EXTENSION) {
-    filePath += FILE_EXTENSION;
+    filePath.replace_extension(FILE_EXTENSION);
   }
   auto saveAlg = createChildAlgorithm("SaveNexus");
   saveAlg->initialize();

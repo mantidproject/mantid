@@ -45,6 +45,8 @@ public:
     TS_ASSERT_EQUALS(alg.category(), "SANS\\PolarizationCorrections")
   }
 
+  /// Saving Tests
+
   void test_saving_absolute() {
     FlipperEfficiency alg;
     alg.initialize();
@@ -83,6 +85,19 @@ public:
     auto savedPath = temp_filename.string() + ".nxs";
     TS_ASSERT(std::filesystem::exists(savedPath))
     std::filesystem::remove(savedPath);
+  }
+
+  /// Validation Tests
+
+  void test_no_workspaces_or_file_output_fails() {
+    FlipperEfficiency alg;
+    alg.initialize();
+    auto const &group = createTestingWorkspace("testWs");
+    alg.setProperty("InputWorkspace", group);
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n OutputFilePath: Either an output workspace or output file must be "
+        "provided.\n OutputWorkspace: Either an output workspace or output file must be provided.")
   }
 
 private:
@@ -130,9 +145,9 @@ private:
     groupAlg.initialize();
     groupAlg.setChild(true);
     std::vector<std::string> const &input{outName + "_10", outName + "_11", outName + "_01", outName + "_00"};
-    TS_ASSERT_THROWS_NOTHING(groupAlg.setProperty("InputWorkspaces", input));
-    TS_ASSERT_THROWS_NOTHING(groupAlg.setPropertyValue("OutputWorkspace", outName));
-    TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
+    groupAlg.setProperty("InputWorkspaces", input);
+    groupAlg.setPropertyValue("OutputWorkspace", outName);
+    groupAlg.execute();
     TS_ASSERT(groupAlg.isExecuted());
 
     return groupAlg.getProperty("OutputWorkspace");
