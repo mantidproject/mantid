@@ -9,7 +9,7 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt, Signal, Slot
+from qtpy.QtCore import QVariant, Qt, Signal, Slot, QSortFilterProxyModel
 from qtpy.QtGui import QKeySequence, QStandardItemModel
 from qtpy.QtWidgets import QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox, QStyledItemDelegate, QTableView
 
@@ -34,10 +34,16 @@ class PreciseDoubleFactory(QItemEditorFactory):
 class TableWorkspaceDisplayView(QTableView):
     repaint_signal = Signal()
 
-    def __init__(self, presenter=None, parent=None, window_flags=Qt.Window, table_model=None):
+    def __init__(self, presenter=None, parent=None, window_flags=Qt.Window, table_model=None, wrap_sorting=False):
         super().__init__(parent)
         self.table_model = table_model if table_model else QStandardItemModel(parent)
-        self.setModel(self.table_model)
+
+        if wrap_sorting:
+            sorting_model = QSortFilterProxyModel()
+            sorting_model.setSourceModel(self.table_model)
+            self.setModel(sorting_model)
+        else:
+            self.setModel(self.table_model)
 
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
@@ -55,6 +61,9 @@ class TableWorkspaceDisplayView(QTableView):
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
         self.setWindowFlags(window_flags)
+
+    def model(self):
+        return self.table_model
 
     def columnCount(self):
         return self.table_model.columnCount()
@@ -245,3 +254,6 @@ class TableWorkspaceDisplayView(QTableView):
 
     def show_warning(self, message, title="Mantid Workbench"):
         QMessageBox.warning(self, title, message)
+
+    def sortBySelectedColumn(self, selected_column, sort_ascending):
+        self.sortByColumn(selected_column, Qt.AscendingOrder if sort_ascending else Qt.DescendingOrder)

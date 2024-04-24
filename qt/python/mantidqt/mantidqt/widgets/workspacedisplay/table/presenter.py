@@ -22,7 +22,8 @@ from mantidqt.widgets.workspacedisplay.table.presenter_batch import TableWorkspa
 from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard
 from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, create_table_item, RevertibleItem  # noqa: F401
+from mantidqt.widgets.workspacedisplay.table.group_table_model import GroupTableModel
+from mantidqt.widgets.workspacedisplay.table.presenter_group import TableWorkspaceDataPresenterGroup
 
 
 class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
@@ -133,8 +134,15 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
     def _create_table_group(self, ws, parent, window_flags, view, model):
         model = model if model is not None else GroupTableWorkspaceDisplayModel(ws)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
-        self.presenter = TableWorkspaceDataPresenterStandard(model, view)
+        table_model = GroupTableModel(model, view)
+        view = (
+            view
+            if view
+            else TableWorkspaceDisplayView(
+                presenter=self, parent=parent, window_flags=window_flags, table_model=table_model, wrap_sorting=True
+            )
+        )
+        self.presenter = TableWorkspaceDataPresenterGroup(model, view)
         return view, model
 
     @classmethod
@@ -184,10 +192,13 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         selected_rows = selection_model.selectedRows()
-        selected_rows_list = [index.row() for index in selected_rows]
-        selected_rows_str = ",".join([str(row) for row in selected_rows_list])
-
-        self.presenter.model.delete_rows(selected_rows_str)
+        if not self.group:
+            selected_rows_list = [index.row() for index in selected_rows]
+            selected_rows_str = ",".join([str(row) for row in selected_rows_list])
+            self.presenter.model.delete_rows(selected_rows_str)
+        else:
+            selected_rows_list = [index.row() for index in selected_rows]
+            self.presenter.delete_rows(selected_rows_list)
 
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.presenter.view.selectionModel()
@@ -292,7 +303,10 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         except ValueError:
             return
 
-        self.presenter.model.sort(selected_column, sort_ascending)
+        if not self.group:
+            self.presenter.model.sort(selected_column, sort_ascending)
+        else:
+            self.presenter.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
         try:
