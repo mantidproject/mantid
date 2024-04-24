@@ -135,6 +135,7 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
  * Return the InstrumentInfo as determined from the hint.
  *
  * @param hint :: The name hint.
+ * @param returnDefaultIfNotFound :: Flag to control return. May throw exception if set to false.
  * @return This will return the default instrument if it cannot be determined.
  */
 const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
