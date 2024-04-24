@@ -128,7 +128,7 @@ Alternatively, you can set a title or label to have certain `font properties <ht
 
 .. code-block:: python
 
-   axes.set_xlabel('Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
+   axes.set_xlabel(r'Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
 
 Here's `how to find available fonts <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_ .
 
