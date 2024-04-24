@@ -9,13 +9,11 @@
 from mantid.api import WorkspaceGroup
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
-from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel
 from collections import defaultdict
 
 
-class GroupTableWorkspaceDisplayModel:
-    SPECTRUM_PLOT_LEGEND_STRING = "{}-{}"
-    BIN_PLOT_LEGEND_STRING = "{}-bin-{}"
+class GroupTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
     EDITABLE_COLUMN_NAMES = ["h", "k", "l"]
 
     ALLOWED_WORKSPACE_TYPES = [WorkspaceGroup]
@@ -39,51 +37,57 @@ class GroupTableWorkspaceDisplayModel:
         self.supports(ws)
 
         self.ws: WorkspaceGroup = ws
+        self.group_name = self.ws.name()
+        self.child_names = self.ws.getNames()
         self.ws_num_rows = sum(peakWs.rowCount() for peakWs in ws)
-        self.ws_num_cols = self.ws[0].columnCount() + 1
+        self.ws_num_cols = 0
+        if self.ws.size() != 0:
+            self.ws_num_cols = self.ws[0].columnCount() + 2
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
         self.block_model_replace = False
-        # loads the types of the columns
-        for col in range(1, len(self._original_column_headers)):
-            plot_type = self.ws[0].getPlotType(col - 1)
+        self._row_mapping = self._make_row_mapping()
+        if self.ws_num_cols:
+            self._load_col_types()
+
+    def _make_row_mapping(self):
+        """
+        Create mapping between table row index and workspace group and spectrum index
+        """
+        row_index = 0
+        row_mapping = []
+        for group_index, peaksWs in enumerate(self.ws):
+            group_start = row_index
+            group_end = row_index + len(peaksWs)
+            row_mapping.extend([(group_index, index - group_start) for index in range(group_start, group_end)])
+            row_index += len(peaksWs)
+        return row_mapping
+
+    def _load_col_types(self):
+        for col in range(2, len(self._original_column_headers)):
+            plot_type = self.ws[0].getPlotType(col - 2)
             if plot_type == TableWorkspaceColumnTypeMapping.X:
                 self.marked_columns.add_x(col)
             elif plot_type == TableWorkspaceColumnTypeMapping.Y:
                 self.marked_columns.add_y(col)
             elif plot_type == TableWorkspaceColumnTypeMapping.YERR:
-                err_for_column = self.ws[0].getLinkedYCol(col - 1)
+                err_for_column = self.ws[0].getLinkedYCol(col - 2)
                 if err_for_column >= 0:
-                    self.marked_columns.add_y_err(ErrorColumn(col, err_for_column))
-
-    def _get_group_and_workspace_indcies(self, row_indicies):
-        cumulative_size = 0
-        ws_range_limits = []
-        for peaksWs in self.ws:
-            ws_range_limits.append((cumulative_size, cumulative_size + len(peaksWs)))
-            cumulative_size += len(peaksWs)
-
-        row_to_ws_index = defaultdict(list)
-
-        for row_index in list(map(int, row_indicies.split(","))):
-            for group_index, ws_range_limit in enumerate(ws_range_limits):
-                if row_index >= ws_range_limit[0] and row_index < ws_range_limit[1]:
-                    row_to_ws_index[group_index].append(row_index - ws_range_limit[0])
-                    break
-
-        return row_to_ws_index
-
-    def original_column_headers(self):
-        return self._original_column_headers[:]
+                    self.marked_columns.add_y_err(ErrorColumn(col, err_for_column + 2))
 
     def build_current_labels(self):
         return self.marked_columns.build_labels()
 
     def get_name(self):
-        return self.ws.name()
+        return self.group_name
+
+    def get_child_names(self):
+        return self.child_names
 
     def get_column_headers(self):
-        return ["Group Index"] + self.ws[0].getColumnNames()
+        if self.ws.size() != 0:
+            return ["WS Index", "Group Index"] + self.ws[0].getColumnNames()
+        return []
 
     def get_column(self, index):
         column_data = []
@@ -91,64 +95,56 @@ class GroupTableWorkspaceDisplayModel:
         for i, ws_item in enumerate(self.ws):
             if index == 0:
                 column_data.extend([i] * ws_item.rowCount())
+            elif index == 1:
+                column_data.extend([i for i in range(ws_item.rowCount())])
             else:
-                column_data.extend(ws_item.column(index - 1))
+                column_data.extend(ws_item.column(index - 2))
 
         return column_data
-
-    def get_number_of_rows(self):
-        return self.ws_num_rows
-
-    def get_number_of_columns(self):
-        return self.ws_num_cols
-
-    def get_column_header(self, index):
-        return self.get_column_headers()[index]
 
     def is_editable_column(self, icol):
         return self.get_column_headers()[icol] in self.EDITABLE_COLUMN_NAMES
 
-    def workspace_equals(self, workspace_name):
-        return self.ws.name() == workspace_name
-
     def set_column_type(self, col, type, linked_col_index=-1):
-        for peaksWs in self.ws:
-            peaksWs.setPlotType(col, type, linked_col_index)
+        self.ws[0].setPlotType(col - 2, type, linked_col_index - 2 if linked_col_index != -1 else linked_col_index)
 
     def get_cell(self, row, column):
-        row_to_ws_index = self._get_group_and_workspace_indcies(f"{row}")
+        group_index, ws_index = self._row_mapping[row]
 
-        group_index, ws_index = next(iter(row_to_ws_index.items()))
+        if column == 0:
+            return ws_index
 
-        return self.ws[group_index][ws_index]
+        if column == 1:
+            return group_index
+
+        column = column - 2
+
+        return self.ws[group_index].cell(ws_index, column)
 
     def set_cell_data(self, row, col, data, is_v3d):
-        cumulative_size = 0
-        col = col - 1
-        for peaksWs in self.ws:
-            if cumulative_size + len(peaksWs) > row:
-                local_index = row - cumulative_size
+        group_index, ws_index = row
+        col_name = self.get_column_header(col)
 
-                p = peaksWs[local_index]
-                if self.ws.getColumnNames()[col] == "h":
-                    p.setH(data)
-                elif self.ws.getColumnNames()[col] == "k":
-                    p.setK(data)
-                elif self.ws.getColumnNames()[col] == "l":
-                    p.setL(data)
+        p = self.ws[group_index].getPeak(ws_index)
 
-            cumulative_size += len(peaksWs)
+        if col_name == "h":
+            p.setH(data)
+        elif col_name == "k":
+            p.setK(data)
+        elif col_name == "l":
+            p.setL(data)
 
     def delete_rows(self, selected_rows):
         from mantid.simpleapi import DeleteTableRows
 
-        row_to_ws_index = self._get_group_and_workspace_indcies(selected_rows)
+        row_to_ws_index = defaultdict(list)
+        for group_index, ws_index in selected_rows:
+            row_to_ws_index[group_index].append(ws_index)
 
         for group_index in row_to_ws_index:
             DeleteTableRows(self.ws[group_index], ",".join(map(str, row_to_ws_index[group_index])))
 
     def get_statistics(self, selected_columns):
-
         from mantid.simpleapi import StatisticsOfTableWorkspace
 
         stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
@@ -157,15 +153,6 @@ class GroupTableWorkspaceDisplayModel:
     def sort(self, column_index, sort_ascending):
         from mantid.simpleapi import SortPeaksWorkspace
 
-        if column_index == 0:
-            return
+        column_name = self.get_column_header(column_index)
 
-        column_name = self.get_column_headers()[column_index]
-
-        for peakWs in self.ws:
-            SortPeaksWorkspace(
-                InputWorkspace=peakWs,
-                OutputWorkspace=peakWs,
-                ColumnNameToSortBy=column_name,
-                SortAscending=sort_ascending,
-            )
+        SortPeaksWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name, SortAscending=sort_ascending)

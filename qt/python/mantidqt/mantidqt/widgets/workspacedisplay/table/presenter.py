@@ -8,6 +8,7 @@
 from functools import partial
 from qtpy.QtCore import Qt
 
+from mantid.api import mtd
 from mantid.kernel import logger
 from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
@@ -22,7 +23,9 @@ from mantidqt.widgets.workspacedisplay.table.presenter_batch import TableWorkspa
 from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard
 from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, create_table_item, RevertibleItem  # noqa: F401
+from mantidqt.widgets.workspacedisplay.table.group_table_model import GroupTableModel
+from mantidqt.widgets.workspacedisplay.table.presenter_group import TableWorkspaceDataPresenterGroup
+from mantidqt.widgets.workspacedisplay.table.group_view import GroupTableWorkspaceDisplayView
 
 
 class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
@@ -99,7 +102,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.plot = plot
         self.group = group
 
-        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self, observe_group_update=self.group)
 
         self.presenter.refresh()
 
@@ -133,8 +136,13 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
     def _create_table_group(self, ws, parent, window_flags, view, model):
         model = model if model is not None else GroupTableWorkspaceDisplayModel(ws)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
-        self.presenter = TableWorkspaceDataPresenterStandard(model, view)
+        table_model = GroupTableModel(model, view)
+        view = (
+            view
+            if view
+            else GroupTableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
+        )
+        self.presenter = TableWorkspaceDataPresenterGroup(model, view)
         return view, model
 
     @classmethod
@@ -152,18 +160,45 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             except ValueError:
                 raise ValueError("The workspace type is not supported: {0}".format(ws))
 
+    def _update_group_model(self, group_name):
+        self.presenter.view.blockSignals(True)
+        ws = mtd[group_name]
+        self.presenter.model = GroupTableWorkspaceDisplayModel(ws)
+        self.presenter.load_data(self.presenter.view)
+        self.presenter.view.blockSignals(False)
+
     def replace_workspace(self, workspace_name, workspace):
-        if self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
+        model = self.presenter.model
+        if not self.group and model.workspace_equals(workspace_name) and not model.block_model_replace:
             self.presenter.view.blockSignals(True)
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
 
-        if self.group and workspace_name in self.model.ws.getNames() and not self.presenter.model.block_model_replace:
-            self.presenter.view.blockSignals(True)
-            self.presenter.model = GroupTableWorkspaceDisplayModel(self.model.ws)
-            self.presenter.load_data(self.presenter.view)
-            self.presenter.view.blockSignals(False)
+        if (
+            self.group
+            and not model.block_model_replace
+            and (model.workspace_equals(workspace_name) or workspace_name in model.get_child_names())
+        ):
+            self._update_group_model(model.get_name())
+
+    def group_update(self, workspace_name, workspace):
+        model = self.presenter.model
+        if (
+            self.group
+            and not model.block_model_replace
+            and (model.workspace_equals(workspace_name) or workspace_name in model.get_child_names())
+        ):
+            self._update_group_model(model.get_name())
+
+    def close(self, workspace_name):
+        if self.current_workspace_equals(workspace_name):
+            self.clear_observer()
+            self.container.emit_close()
+
+        if self.group and workspace_name in self.presenter.model.get_child_names():
+            self.clear_observer()
+            self.container.emit_close()
 
     def action_copy_cells(self):
         self.copy_cells(self.presenter.view)
@@ -184,10 +219,13 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         selected_rows = selection_model.selectedRows()
-        selected_rows_list = [index.row() for index in selected_rows]
-        selected_rows_str = ",".join([str(row) for row in selected_rows_list])
-
-        self.presenter.model.delete_rows(selected_rows_str)
+        if not self.group:
+            selected_rows_list = [index.row() for index in selected_rows]
+            selected_rows_str = ",".join([str(row) for row in selected_rows_list])
+            self.presenter.model.delete_rows(selected_rows_str)
+        else:
+            selected_rows_list = [index.row() for index in selected_rows]
+            self.presenter.delete_rows(selected_rows_list)
 
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.presenter.view.selectionModel()
@@ -293,6 +331,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         self.presenter.model.sort(selected_column, sort_ascending)
+
+        if self.group:
+            self.presenter.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
         try:

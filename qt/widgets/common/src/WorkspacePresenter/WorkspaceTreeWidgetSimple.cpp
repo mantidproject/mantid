@@ -334,9 +334,6 @@ void WorkspaceTreeWidgetSimple::addWorkspaceGroupActions(QMenu *menu, const Mant
   if (containsMatrixWorkspace) {
     menu->addMenu(createMatrixWorkspacePlotMenu(menu, true));
     menu->addSeparator();
-  }
-
-  if (containsMatrixWorkspace) {
     menu->addAction(m_showDetectors);
   }
 
