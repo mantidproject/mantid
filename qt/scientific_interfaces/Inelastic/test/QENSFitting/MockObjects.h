@@ -9,6 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Manipulation/DataManipulation.h"
+#include "Manipulation/ElwinModel.h"
+#include "Manipulation/ElwinPresenter.h"
+#include "Manipulation/ElwinView.h"
+#include "Manipulation/IElwinView.h"
 #include "QENSFitting/FitTab.h"
 #include "QENSFitting/FunctionBrowser/FunctionTemplateView.h"
 #include "QENSFitting/FunctionBrowser/ITemplatePresenter.h"
@@ -28,6 +33,7 @@
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces::Inelastic;
+using namespace MantidQt::CustomInterfaces;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -355,6 +361,85 @@ public:
   virtual ~MockInelasticFitPropertyBrowser() = default;
 
   MOCK_METHOD1(updateFunctionListInBrowser, void(const std::map<std::string, std::string> &functionStrings));
+};
+
+class MockElwinView : public IElwinView {
+public:
+  virtual ~MockElwinView() = default;
+
+  MOCK_METHOD1(subscribePresenter, void(IElwinPresenter *presenter));
+  MOCK_METHOD0(setup, void());
+  MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
+
+  MOCK_METHOD2(setAvailableSpectra,
+               void(MantidQt::MantidWidgets::WorkspaceIndex minimum, MantidQt::MantidWidgets::WorkspaceIndex maximum));
+  MOCK_METHOD2(setAvailableSpectra,
+               void(const std::vector<MantidQt::MantidWidgets::WorkspaceIndex>::const_iterator &from,
+                    const std::vector<MantidQt::MantidWidgets::WorkspaceIndex>::const_iterator &to));
+  MOCK_METHOD2(plotInput, void(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum));
+  MOCK_METHOD1(newInputDataFromDialog, void(std::vector<std::string> const &names));
+  MOCK_METHOD0(clearPreviewFile, void());
+
+  MOCK_METHOD1(setRunIsRunning, void(const bool running));
+  MOCK_METHOD1(setSaveResultEnabled, void(const bool enabled));
+  MOCK_CONST_METHOD0(getPreviewSpec, int());
+
+  MOCK_CONST_METHOD1(getPreviewWorkspaceName, std::string(int index));
+  MOCK_CONST_METHOD1(getPreviewFilename, std::string(int index));
+  MOCK_CONST_METHOD0(getCurrentPreview, std::string());
+
+  MOCK_METHOD0(clearDataTable, void());
+  MOCK_METHOD3(addTableEntry, void(int row, std::string const &name, std::string const &wsIndexes));
+
+  MOCK_METHOD0(getSelectedData, QModelIndexList());
+
+  MOCK_CONST_METHOD0(isGroupInput, bool());
+  MOCK_CONST_METHOD0(isRowCollapsed, bool());
+  MOCK_CONST_METHOD0(isTableEmpty, bool());
+
+  MOCK_METHOD0(getNormalise, bool());
+  MOCK_METHOD0(getBackgroundSubtraction, bool());
+  MOCK_METHOD0(getLogName, std::string());
+  MOCK_METHOD0(getLogValue, std::string());
+
+  MOCK_METHOD1(setIntegrationStart, void(double value));
+  MOCK_METHOD1(setIntegrationEnd, void(double value));
+  MOCK_METHOD1(setBackgroundStart, void(double value));
+  MOCK_METHOD1(setBackgroundEnd, void(double value));
+
+  MOCK_METHOD0(getIntegrationStart, double());
+  MOCK_METHOD0(getIntegrationEnd, double());
+  MOCK_METHOD0(getBackgroundStart, double());
+  MOCK_METHOD0(getBackgroundEnd, double());
+
+  MOCK_CONST_METHOD1(showMessageBox, void(std::string const &message));
+};
+
+class MockElwinModel : public ElwinModel {
+public:
+  virtual ~MockElwinModel() = default;
+
+  MOCK_METHOD3(setupLoadAlgorithm, void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                        std::string const &filepath, std::string const &outputName));
+  MOCK_METHOD2(createGroupedWorkspaces,
+               std::string(MatrixWorkspace_sptr workspce, FunctionModelSpectra const &spectra));
+  MOCK_METHOD3(setupGroupAlgorithm,
+               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &inputWorkspacesString,
+                    std::string const &inputGroupWsName));
+  MOCK_METHOD5(setupElasticWindowMultiple,
+               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &workspaceBaseName,
+                    std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
+                    std::string const &sampleEnvironmentLogValue));
+  MOCK_CONST_METHOD1(ungroupAlgorithm, void(std::string const &inputWorkspaces));
+  MOCK_CONST_METHOD2(groupAlgorithm, void(std::string const &inputWorkspaces, std::string const &outputWorkspace));
+  MOCK_METHOD1(setIntegrationStart, void(double integrationStart));
+  MOCK_METHOD1(setIntegrationEnd, void(double integrationEnd));
+  MOCK_METHOD1(setBackgroundStart, void(double backgroundStart));
+  MOCK_METHOD1(setBackgroundEnd, void(double backgroundEnd));
+  MOCK_METHOD1(setBackgroundSubtraction, void(bool backgroundSubstraction));
+  MOCK_METHOD1(setNormalise, void(bool normalise));
+  MOCK_METHOD1(setOutputWorkspaceNames, void(std::string const &workspaceBaseName));
+  MOCK_CONST_METHOD0(getOutputWorkspaceNames, std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
