@@ -388,14 +388,9 @@ Code Freeze
   the next steps.
 * Click ``Build Now`` on `open-release-testing
   <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
-  which will perform the following actions:
-
-  * Create or update the ``release-next`` branch.
-  * Enable the job to periodically merge ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
-    This will turn off publishing for the ``main`` branch pipeline and switch it on for the
-    ``release-next`` pipeline.
-
+  which will perform the following action set the value of the Jenkins global property
+  ``BRANCH_TO_PUBLISH`` to ``release-next``, which will re-enable package publishing for
+  the ``release-next`` nightly pipeline.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
