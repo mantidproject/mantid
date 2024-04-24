@@ -17,12 +17,12 @@ efficiency, :math:`\epsilon_{cell}`, is given by ``AnalyserEfficiency``.
 The polarization of the polarizer, :math:`P_{SM}`, is given by
 
 .. math::
-    P_{SM} = \frac{T_{00} - T_{01}}{2P_{cell}}
+    P_{SM} = \frac{T_{00} - T_{01}}{P_{cell}(T_{00} + T_{01})}
 
 Since the efficiency, :math:`\epsilon_{SM}`, is given by :math:`\frac{1 + P_{SM}}{2}`, we have that
 
 .. math::
-    \epsilon_{SM} = \frac{1}{2} + \frac{T_{00} - T_{01}}{8\epsilon_{cell} - 4}
+    \epsilon_{SM} = \frac{\epsilon_{cell}(T_{00} + T_{01}) - T_{01}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})}
 
 Usage
 -----
@@ -31,9 +31,9 @@ Usage
 
 .. testcode:: PolarizerEfficiencyExample
 
-    wsPara = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1-0.9))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1')
+    wsPara = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1-0.1))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1')
     wsPara1 = CloneWorkspace(wsPara)
-    wsAnti = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1+0.9))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1')
+    wsAnti = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1+0.1))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1')
     wsAnti1 = CloneWorkspace(wsAnti)
 
     grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
