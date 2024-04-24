@@ -160,7 +160,11 @@ sampling = {
 }
 
 # Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals
-autoconvolution = {"max_order": 10, "fine_bin_factor": 10}  # Highest quantum order accessed by autoconvolution
+autoconvolution = {
+    "fine_bin_factor": 10,  # Bin size reduction during autoconvolution
+    "max_order": 10,  # Highest quantum order accessed by autoconvolution
+    "min_order": 3,  # Lowest quantum order accessed by autoconvolution. (Abins v1 disregards this.)
+}
 
 performance = {
     "optimal_size": 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
