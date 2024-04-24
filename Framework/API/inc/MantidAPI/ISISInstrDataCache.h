@@ -22,6 +22,8 @@ public:
   std::string getFileParentDirPath(std::string filename);
 
 private:
+  std::pair<std::string, std::string> validateInstrumentAndNumber(std::string filename);
+  std::pair<std::string, std::string> splitIntoInstrumentAndNumber(std::string filename);
   std::string m_dataCachePath;
 };
 } // namespace API

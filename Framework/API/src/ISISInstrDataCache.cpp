@@ -15,36 +15,10 @@ Mantid::Kernel::Logger g_log("ISISInstrDataCache");
 std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fileName) {
   g_log.debug() << "ISISInstrDataCache::getFileParentDirPath(" << fileName << ")" << std::endl;
 
-  // Check if suffix eg. -add is present in filename
-  std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
-  if (!suffix.empty()) {
-    throw std::invalid_argument("Unsuported format: Suffix detected: " + suffix);
-  }
+  auto [instrName, runNumber] = validateInstrumentAndNumber(fileName);
 
-  // Find the last non-digit as the instrument name can contain numbers
-  const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
-  const auto nChars = std::distance(itRev, fileName.rend());
-
-  // Check run number
-  std::string runNumber = fileName.substr(nChars);
-  if (runNumber.empty() || !std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check for wrong format
-    throw std::invalid_argument("Filename not in correct format.");
-  };
-  runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
-
-  // Get instrument full name from short name
-  std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
-  std::string instrName = fileName.substr(0, nChars);
-  try {
-    auto instrInfo = FileFinder::Instance().getInstrument(instrName, false);
-    instrName = instrInfo.name();
-  } catch (const Kernel::Exception::NotFoundError &) {
-    throw std::invalid_argument("Instrument name not recognized.");
-  }
-
-  // Build path to index file
+  // Open index json file
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
-  g_log.debug() << "Opening instrument index file at " << jsonPath << std::endl;
   std::ifstream ifstrm{jsonPath};
   if (!ifstrm) {
     throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
@@ -60,5 +34,47 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
   }
 
   std::string dirPath = m_dataCachePath + "/" + instrName + "/" + relativePath;
+
+  g_log.debug() << "Opened instrument index file: " << jsonPath << ". Found path to search: " << dirPath << "."
+                << std::endl;
   return dirPath;
+}
+
+std::pair<std::string, std::string> Mantid::API::ISISInstrDataCache::validateInstrumentAndNumber(std::string fileName) {
+
+  // Check if suffix eg. -add is present in filename
+  std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
+  if (!suffix.empty()) {
+    throw std::invalid_argument("Unsuported format: Suffix detected: " + suffix);
+  }
+
+  auto [instrName, runNumber] = splitIntoInstrumentAndNumber(fileName);
+
+  if (runNumber.empty() || !std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check run number
+    throw std::invalid_argument("Filename not in correct format.");
+  };
+  runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
+
+  try { // Expand instrument name
+    instrName = FileFinder::Instance().getInstrument(instrName, false).name();
+  } catch (const Kernel::Exception::NotFoundError &) {
+    throw std::invalid_argument("Instrument name not recognized.");
+  }
+
+  return std::pair(instrName, runNumber);
+}
+
+std::pair<std::string, std::string>
+Mantid::API::ISISInstrDataCache::splitIntoInstrumentAndNumber(std::string fileName) {
+
+  // Find the last non-digit as the instrument name can contain numbers
+  const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
+  const auto nChars = std::distance(itRev, fileName.rend());
+  std::string runNumber = fileName.substr(nChars);
+
+  // Get instrument full name from short name, throws exception if not found
+  std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
+  std::string instrName = fileName.substr(0, nChars);
+
+  return std::pair(instrName, runNumber);
 }
