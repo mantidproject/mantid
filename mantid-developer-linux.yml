@@ -38,6 +38,7 @@ dependencies:
   - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
+  - quasielasticbayes
   - requests>=2.25.1
   - scipy>=1.10.0
   - setuptools

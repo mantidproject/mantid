@@ -80,7 +80,7 @@ Usage
     ax.plot(bigG_of_r,'r-', label='$G(r)$')
     ax.plot(GK_of_r,'b-', label='$G_K(r)$')
     ax.legend() # show the legend
-    ax.set_xlabel('$r(\AA)$')
+    ax.set_xlabel(r'$r(\AA)$')
     fig.show()
 
 The output should look like:

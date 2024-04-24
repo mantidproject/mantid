@@ -49,7 +49,7 @@ For setting scales, axis titles, plot titles etc. you can use:
     axes.set_xlim(0,5000)
 
     #C hange the y-axis label
-    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
+    axes.set_ylabel(r'Counts ($\mu s$)$^{-1}$')
 
     # Add legend entries
     axes.legend(['Good Line'])

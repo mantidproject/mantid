@@ -11,8 +11,10 @@
 #   5. ENABLE_BUILD_CODE: whether or not to build the main code target
 #   6. ENABLE_UNIT_TESTS: whether or not to build the unit tests target
 #   7. ENABLE_SYSTEM_TESTS: whether or not to build the system test data
-#   8. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
-#   9. BUILD_THREADS: Pass the number of threads that can be used to build with
+#   8. ENABLE_DOC_TESTS: whether or not to build the test data for doc tests
+#   9. ENABLE_COVERITY: enables the coverity scan static analysis
+#   10. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
+#   11. BUILD_THREADS: Pass the number of threads that can be used to build with
 
 WORKSPACE=$1
 CMAKE_PRESET=$2
@@ -21,9 +23,10 @@ ENABLE_DEV_DOCS=$4
 ENABLE_BUILD_CODE=$5
 ENABLE_UNIT_TESTS=$6
 ENABLE_SYSTEM_TESTS=$7
-ENABLE_COVERITY=$8
-EXTRA_CMAKE_FLAGS=$9
-BUILD_THREADS=${10}
+ENABLE_DOC_TESTS=$8
+ENABLE_COVERITY=$9
+EXTRA_CMAKE_FLAGS=${10}
+BUILD_THREADS=${11}
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
 if [[ -n "${MANTID_DATA_STORE}" ]]; then
@@ -65,8 +68,11 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
     cmake --build . --target AllTests $BUILD_OPTIONS
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+if [[ $ENABLE_UNIT_TESTS == true || $ENABLE_SYSTEM_TESTS == true || $ENABLE_DOC_TESTS == true ]]; then
     cmake --build . --target StandardTestData $BUILD_OPTIONS
+fi
+
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     cmake --build . --target SystemTestData $BUILD_OPTIONS
 fi
 
@@ -80,7 +86,7 @@ if [[ $ENABLE_DOCS == true ]]; then
     cmake --build . --target docs-html $BUILD_OPTIONS
 fi
 
-# Build dev-docs turned off until dev docs run without error
+# Build dev-docs
 if [[ $ENABLE_DEV_DOCS == true ]]; then
     rm -fr $BUILD_DIR/dev-docs/doctree/*
     rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
