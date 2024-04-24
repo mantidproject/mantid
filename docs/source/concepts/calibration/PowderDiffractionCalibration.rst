@@ -162,7 +162,6 @@ The workflow follows these step:
     for detid, difc in zip(detectorTable.column('Detector ID(s)'), detectorTable.column('DIFC')):
         print(f'{detid:>5} {difc:.1f}')
 
-
 .. testoutput:: group_cal
 
     DetID DIFC
@@ -308,7 +307,6 @@ The evolution in the calibration can be seen with
    fig.tight_layout()
    #fig.savefig('tofpd_group_calibration.png')
    fig.show()
-
 
 .. figure:: /images/tofpd_group_calibration.png
   :align: center
@@ -619,7 +617,6 @@ While many of the calibration methods will generate a mask based on the detector
    BinaryOperateMasks(InputWorkspace1='mask_from_cal', InputWorkspace2='mask_detdiag',
                       OperationType='OR', OutputWorkspace='mask_final')
 
-
 Creating detector grouping
 --------------------------
 
@@ -749,7 +746,6 @@ A mask can also be applied with a ``MaskWorkspace`` to hide pixels from the plot
     LoadDiffCal(Filename="NOM_calibrate_d131573_2019_08_18.h5", WorkspaceName="old")
     fig, ax = diagnostics.difc_plot2d("new_cal", "old_cal", instr_ws="new_group", mask="new_mask")
 
-
 Relative Strain
 ###############
 
@@ -855,7 +851,6 @@ The following script can be used to generate the above plot.
     center_tof = diagnostics.collect_fit_result('diag_fitparam', 'center_tof', peakpositions, donor='ws', infotype='centre')
     fig, ax = diagnostics.plot_corr('center_tof')
 
-
 Peak Information
 ################
 
@@ -913,6 +908,5 @@ The above figure can be generated using the following script:
             OutputPeakParametersWorkspace='parameters')
 
     fig, ax = diagnostics.plot_peak_info('parameters', peakpositions)
-
 
 .. categories:: Calibration

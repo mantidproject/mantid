@@ -35,7 +35,6 @@ After the grouping is performed, the analysis described in :ref:`algm-EstimateMu
 
     AddSampleLog(workspace=workspace, LogName="goodfram", LogText ="10")
 
-
 Multi period data
 #################
 

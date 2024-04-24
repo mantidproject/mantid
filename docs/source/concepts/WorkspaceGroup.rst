@@ -190,7 +190,6 @@ Output:
     Member 0 ws1
     Member 1 ws2
 
-
 Using Workspace Groups in Algorithms
 ####################################
 
