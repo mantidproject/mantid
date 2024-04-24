@@ -40,5 +40,5 @@ template <typename T> ListValidator<T> *createListValidator(const boost::python:
 
 void export_ListValidator() {
   EXPORT_LISTVALIDATOR(std::string, String);
-  EXPORT_LISTVALIDATOR(long, Int);
+  EXPORT_LISTVALIDATOR(int, Int);
 }
