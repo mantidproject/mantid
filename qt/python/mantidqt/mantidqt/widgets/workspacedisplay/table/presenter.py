@@ -16,6 +16,7 @@ from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
+from mantidqt.widgets.workspacedisplay.table.group_model import GroupTableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.presenter_batch import TableWorkspaceDataPresenterBatch
 from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWorkspaceDataPresenterStandard
@@ -58,6 +59,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         window_width=600,
         window_height=400,
         batch=False,
+        group=False,
     ):
         """
         Creates a display for the provided workspace.
@@ -73,7 +75,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
-        view, model = self.create_table(ws, parent, window_flags, model, view, batch)
+        view, model = self.create_table(ws, parent, window_flags, model, view, batch, group)
         self.view = view
         self.model = model
         self.name = name if name else model.get_name()
@@ -95,6 +97,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         self.parent = parent
         self.plot = plot
+        self.group = group
 
         self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
@@ -103,8 +106,10 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def show_view(self):
         self.container.show()
 
-    def create_table(self, ws, parent, window_flags, model, view, batch):
-        if batch:
+    def create_table(self, ws, parent, window_flags, model, view, batch, group):
+        if group:
+            view, model = self._create_table_group(ws, parent, window_flags, view, model)
+        elif batch:
             view, model = self._create_table_batch(ws, parent, window_flags, view, model)
         else:
             view, model = self._create_table_standard(ws, parent, window_flags, view, model)
@@ -126,6 +131,12 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 
+    def _create_table_group(self, ws, parent, window_flags, view, model):
+        model = model if model is not None else GroupTableWorkspaceDisplayModel(ws)
+        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
+        self.presenter = TableWorkspaceDataPresenterStandard(model, view)
+        return view, model
+
     @classmethod
     def supports(cls, ws):
         """
@@ -133,12 +144,24 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         :param ws: Workspace to be checked for support
         :raises ValueError: if the workspace is not supported
         """
-        return TableWorkspaceDisplayModel.supports(ws)
+        try:
+            TableWorkspaceDisplayModel.supports(ws)
+        except ValueError:
+            try:
+                GroupTableWorkspaceDisplayModel.supports(ws)
+            except ValueError:
+                raise ValueError("The workspace type is not supported: {0}".format(ws))
 
     def replace_workspace(self, workspace_name, workspace):
         if self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
             self.presenter.view.blockSignals(True)
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
+            self.presenter.load_data(self.presenter.view)
+            self.presenter.view.blockSignals(False)
+
+        if self.group and workspace_name in self.model.ws.getNames() and not self.presenter.model.block_model_replace:
+            self.presenter.view.blockSignals(True)
+            self.presenter.model = GroupTableWorkspaceDisplayModel(self.model.ws)
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
 
@@ -196,7 +219,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         stats = self.presenter.model.get_statistics(selected_columns)
-        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
+        if not self.group:
+            TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
         try:
