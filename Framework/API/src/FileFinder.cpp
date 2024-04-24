@@ -791,8 +791,8 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
 
   // Search data cache
   string errors;
-  std::filesystem::path cachePathToSearch(
-      Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  std::filesystem::path cachePathToSearch(Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  // Only expect to find path to data cache on IDAaaS
   if (std::filesystem::exists(cachePathToSearch)) {
 
     API::Result<std::string> cacheFilePath = getDataCachePath(cachePathToSearch.string(), filenames, exts);
