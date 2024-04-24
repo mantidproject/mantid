@@ -12,30 +12,17 @@
 
 using namespace Mantid::API;
 
-std::string marJson = R"({
-"25054": "2019/RB1868000-1",
-}
-)";
-
-std::string sansJson = R"({
-"101115": "2018/RB1800009-2",
-}
-)";
-
-std::string pg3Json = R"({
-"11111": "mock/path",
-}
-)";
-
-std::string wishJson = R"({
-"12345": "subdir1/subdir2",
-}
-)";
-
 class ISISInstrDataCacheTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     m_dataCacheDir = "./TestDataCache";
+
+    // Example index files
+    std::string marJson = R"({"25054": "2019/RB1868000-1"})";
+    std::string sansJson = R"({"101115": "2018/RB1800009-2"})";
+    std::string pg3Json = R"({"11111": "mock/path"})";
+    std::string wishJson = R"({"12345": "subdir1/subdir2"})";
+
     // Create test JSON file
     std::filesystem::create_directory(m_dataCacheDir);
 
@@ -53,9 +40,9 @@ public:
         ofstrm.close();
       }
     }
-  };
+  }
 
-  void tearDown() override { std::filesystem::remove_all(m_dataCacheDir); };
+  void tearDown() override { std::filesystem::remove_all(m_dataCacheDir); }
 
   void testInstrNameExpanded() {
     ISISInstrDataCache dc(m_dataCacheDir);

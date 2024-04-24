@@ -52,7 +52,7 @@ std::pair<std::string, std::string> Mantid::API::ISISInstrDataCache::validateIns
 
   if (runNumber.empty() || !std::all_of(runNumber.begin(), runNumber.end(), ::isdigit)) { // Check run number
     throw std::invalid_argument("Filename not in correct format.");
-  };
+  }
   runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
 
   try { // Expand instrument name
