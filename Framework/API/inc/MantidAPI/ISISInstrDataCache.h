@@ -11,8 +11,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
-
-#include <sstream>
 #include <string>
 
 namespace Mantid {
