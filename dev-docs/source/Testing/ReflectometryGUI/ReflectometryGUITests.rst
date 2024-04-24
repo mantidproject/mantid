@@ -159,8 +159,8 @@ Saving a batch
 - Close and re-open the interface. Note that you should *not* be prompted about discarding unsaved changes.
 - Load your saved batch file and check that the items you changed are restored.
 
-Export as ASCII
----------------
+Save tab
+--------
 
 - Load a batch file and process it, if you have not already.
 - Go to the Save tab and hit Refresh. The workspaces list will contain all of the workspaces in the ADS.
@@ -178,11 +178,11 @@ Export as ASCII
 
 - Try changing the separator to spaces or tabs and check that the 3 or 4 columns of numbers are separated using that separator.
 - Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out.
-- Untick ``Q resolution`` and click Save. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 3 columns of numbers with headings ``Qz``, ``R`` and ``sR``.
+- Untick ``Q resolution`` and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 3 columns of numbers with headings ``Qz``, ``R`` and ``sR``.
 - Tick ``Q resolution`` and re-save. The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
-- Change the dropdown to ``3 column (*.dat)``. The settings should remain greyed out and the ``Q resolution`` checkbox should also be greyed out as it is not applicable. Click save and you should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.
-- Change the dropdown to ``ANSTO, MotoFit, 4 Column (*.txt)``. The settings remain greyed out. Click save and you should get 4 columns of numbers separated by tabs (with no leading tab).
-- Change the dropdown to ``ILL Cosmos (*.mft)``. The settings remain greyed out apart from the parameters which should now be enabled. Click save and you should get 3 columns of numbers padded by spaces (including leading spaces). There should be a header starting ``MFT`` which includes any parameters you selected, the same as the Custom format.
+- Change the dropdown to ``3 column (*.dat)``. The settings should remain greyed out and the ``Q resolution`` checkbox should also be greyed out as it is not applicable. Click Save to create the ``.dat`` file. You should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.
+- Change the dropdown to ``ANSTO, MotoFit, 4 Column (*.txt)``. The settings remain greyed out. Click Save to create the ``.txt`` file. You should get 4 columns of numbers separated by tabs (with no leading tab).
+- Change the dropdown to ``ILL Cosmos (*.mft)``. The settings remain greyed out apart from the parameters which should now be enabled. Click Save to create the ``.mft`` file. You should get 3 columns of numbers padded by spaces (including leading spaces). There should be a header starting ``MFT`` which includes any parameters you selected, the same as the Custom format.
 
 - Try entering a non-existent or invalid save path and then try to Save. You should get an error saying that the path is invalid.
 
