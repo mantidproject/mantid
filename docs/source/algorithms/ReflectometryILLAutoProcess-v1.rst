@@ -192,7 +192,7 @@ Usage
    ax.set_ylim(0.000001, 2.)
    ax.set_yscale("log")
    ax.set_xscale("log")
-   ax.set_xlabel('Q [$\AA^{-1}$]')
+   ax.set_xlabel(r'Q [$\AA^{-1}$]')
    ax.set_ylabel('R')
    ax.legend()
    fig.show()

@@ -92,7 +92,7 @@ Usage
     ax.plot(s_of_q,'k-', label='$S(Q)$')
     ax.plot(f_of_q,'r-', label='$F(Q)$')
     ax.plot(fk_of_q,'b-', label='$F_K(Q)$')
-    ax.plot(dcs_of_q,'g-', label='$d\sigma / d\Omega(Q)$')
+    ax.plot(dcs_of_q,'g-', label=r'$d\sigma / d\Omega(Q)$')
     ax.legend() # show the legend
     fig.show()
 
