@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include <map>
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,12 +38,26 @@ private:
   bool processGroups() override;
   void validateGroupInput();
   void calculatePolarizerEfficiency();
-  MatrixWorkspace_sptr workspaceForSpinConfig(WorkspaceGroup_sptr group,
-                                              const std::vector<std::string> &spinConfigOrder,
-                                              const std::string &spinConfig);
-  void scaleWorkspace(MatrixWorkspace_sptr ws, const double factor) { runScaleAlgorithm(ws, factor, true); }
-  void addOffsetToWorkspace(MatrixWorkspace_sptr ws, const double offset) { runScaleAlgorithm(ws, offset, false); }
-  void runScaleAlgorithm(MatrixWorkspace_sptr ws, const double factor, const bool isMultiply);
+  void scaleWorkspace(MatrixWorkspace_sptr ws, const double factor);
+  MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr a, MatrixWorkspace_sptr b,
+                                        MatrixWorkspace_sptr output = nullptr) {
+    return runMathsAlgorithm("Plus", a, b, output);
+  }
+  MatrixWorkspace_sptr subtractTwoWorkspaces(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
+                                             MatrixWorkspace_sptr output = nullptr) {
+    return runMathsAlgorithm("Minus", lhs, rhs, output);
+  }
+  MatrixWorkspace_sptr multiplyWorkspaces(MatrixWorkspace_sptr a, MatrixWorkspace_sptr b,
+                                          MatrixWorkspace_sptr output = nullptr) {
+    return runMathsAlgorithm("Multiply", a, b, output);
+  }
+  MatrixWorkspace_sptr divideWorkspaces(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator,
+                                        MatrixWorkspace_sptr output = nullptr) {
+    return runMathsAlgorithm("Divide", numerator, denominator, output);
+  }
+  MatrixWorkspace_sptr runMathsAlgorithm(std::string algName, MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
+                                         MatrixWorkspace_sptr output);
+  MatrixWorkspace_sptr convertToHistIfNecessary(const MatrixWorkspace_sptr ws);
 };
 
 } // namespace Algorithms
