@@ -11,6 +11,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -23,13 +25,6 @@ DECLARE_ALGORITHM(PolarizerEfficiency)
 
 using namespace Kernel;
 using namespace API;
-
-namespace SpinConfigurations {
-static const std::string UP_UP = "11";
-static const std::string UP_DOWN = "10";
-static const std::string DOWN_UP = "01";
-static const std::string DOWN_DOWN = "00";
-} // namespace SpinConfigurations
 
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
@@ -46,28 +41,18 @@ void PolarizerEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
+  auto wavelengthValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::ANALYSER_EFFICIENCY, "",
-                                                                       Direction::Input, validator),
+                                                                       Direction::Input, wavelengthValidator),
                   "Analyser efficiency as a function of wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
       "Polarizer efficiency as a function of wavelength");
 
-  std::vector<std::string> initialSpinConfig{{SpinConfigurations::UP_UP, SpinConfigurations::UP_DOWN,
-                                              SpinConfigurations::DOWN_UP, SpinConfigurations::DOWN_DOWN}};
-  std::sort(initialSpinConfig.begin(), initialSpinConfig.end());
-  std::vector<std::string> allowedSpinConfigs;
-  allowedSpinConfigs.push_back(boost::algorithm::join(initialSpinConfig, ","));
-  while (std::next_permutation(initialSpinConfig.begin(), initialSpinConfig.end())) {
-    allowedSpinConfigs.push_back(boost::algorithm::join(initialSpinConfig, ","));
-  }
-  // "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\""
-  declareProperty(
-      PropertyNames::SPIN_STATES,
-      boost::algorithm::join(std::vector<std::string>{{SpinConfigurations::UP_UP, SpinConfigurations::DOWN_UP,
-                                                       SpinConfigurations::DOWN_DOWN, SpinConfigurations::UP_DOWN}},
-                             ","),
-      std::make_shared<ListValidator<std::string>>(allowedSpinConfigs));
+  auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
+  std::string initialSpinConfig = "11,10,01,00";
+  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator,
+                  "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 }
 
 /**
@@ -121,66 +106,76 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   const auto groupWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
   std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
-  std::vector<std::string> spinConfigurations;
-  boost::split(spinConfigurations, spinConfigurationInput, boost::is_any_of(","));
 
-  const auto t01Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::DOWN_UP);
-  const auto t00Ws = workspaceForSpinConfig(groupWorkspace, spinConfigurations, SpinConfigurations::DOWN_DOWN);
+  const auto t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ZERO_ONE);
+  const auto t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                           SpinStateValidator::ZERO_ZERO);
 
-  const MatrixWorkspace_sptr effCell =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getProperty(PropertyNames::ANALYSER_EFFICIENCY));
+  auto effCell = convertToHistIfNecessary(
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getProperty(PropertyNames::ANALYSER_EFFICIENCY)));
 
-  // The efficiency is given by 0.5 + (T_00 - T_01) / (8 * e_cell - 4)
+  auto rebin = createChildAlgorithm("RebinToWorkspace");
+  rebin->initialize();
+  rebin->setProperty("WorkspaceToRebin", effCell);
+  rebin->setProperty("WorkspaceToMatch", t00Ws);
+  rebin->setProperty("OutputWorkspace", "rebinToWorkspace");
+  rebin->execute();
+  effCell = rebin->getProperty("OutputWorkspace");
 
-  auto minus = createChildAlgorithm("Minus");
-  minus->initialize();
-  minus->setProperty("LHSWorkspace", t00Ws);
-  minus->setProperty("RHSWorkspace", t01Ws);
-  minus->setProperty("OutputWorkspace", "numerator");
-  minus->execute();
-  MatrixWorkspace_sptr numerator = minus->getProperty("OutputWorkspace");
+  // The efficiency is given by (e_cell * (T00 + T01) - T01) / ((2 * e_cell - 1) * (T00 + T01))
 
-  // To divide workspaces they need to have matching bins
-  auto rebinToWorkspace = createChildAlgorithm("RebinToWorkspace");
-  rebinToWorkspace->initialize();
-  rebinToWorkspace->setProperty("WorkspaceToRebin", effCell);
-  rebinToWorkspace->setProperty("WorkspaceToMatch", numerator);
-  rebinToWorkspace->setProperty("OutputWorkspace", "effCellRebinned");
-  rebinToWorkspace->execute();
-  MatrixWorkspace_sptr denominator = rebinToWorkspace->getProperty("OutputWorkspace");
-
-  scaleWorkspace(denominator, 8);
-  addOffsetToWorkspace(denominator, -4);
-
-  auto divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty("LHSWorkspace", numerator);
-  divide->setProperty("RHSWorkspace", denominator);
-  divide->setProperty("OutputWorkspace", "effPolarizer");
-  divide->execute();
-  MatrixWorkspace_sptr effPolarizer = divide->getProperty("OutputWorkspace");
-
-  addOffsetToWorkspace(effPolarizer, 0.5);
-
+  auto sumT = addTwoWorkspaces(t00Ws, t01Ws);
+  auto eCellTimesSum = multiplyWorkspaces(effCell, sumT);
+  auto numerator = subtractTwoWorkspaces(eCellTimesSum, t01Ws);
+  scaleWorkspace(eCellTimesSum, 2);
+  auto denominator = subtractTwoWorkspaces(eCellTimesSum, sumT);
+  auto effPolarizer = divideWorkspaces(numerator, denominator);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
 }
 
-void PolarizerEfficiency::runScaleAlgorithm(MatrixWorkspace_sptr ws, const double factor, const bool isMultiply) {
+void PolarizerEfficiency::scaleWorkspace(MatrixWorkspace_sptr ws, const double factor) {
   auto scale = createChildAlgorithm("Scale");
   scale->initialize();
   scale->setProperty("InputWorkspace", ws);
   scale->setProperty("OutputWorkspace", ws);
   scale->setProperty("Factor", factor);
-  const std::string operation = isMultiply ? "Multiply" : "Add";
-  scale->setProperty("Operation", operation);
+  scale->setProperty("Operation", "Multiply");
   scale->execute();
 }
 
-MatrixWorkspace_sptr PolarizerEfficiency::workspaceForSpinConfig(WorkspaceGroup_sptr group,
-                                                                 const std::vector<std::string> &spinConfigOrder,
-                                                                 const std::string &spinConfig) {
-  const auto wsIndex =
-      std::find(spinConfigOrder.cbegin(), spinConfigOrder.cend(), spinConfig) - spinConfigOrder.cbegin();
-  return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(wsIndex));
+MatrixWorkspace_sptr PolarizerEfficiency::runMathsAlgorithm(std::string algName, MatrixWorkspace_sptr lhs,
+                                                            MatrixWorkspace_sptr rhs,
+                                                            MatrixWorkspace_sptr output = nullptr) {
+  auto alg = createChildAlgorithm(algName);
+  alg->initialize();
+  alg->setProperty("LHSWorkspace", lhs);
+  alg->setProperty("RHSWorkspace", rhs);
+  if (output) {
+    alg->setProperty("OutputWorkspace", output);
+  } else {
+    alg->setProperty("OutputWorkspace", "algOutput");
+  }
+  alg->execute();
+  return alg->getProperty("OutputWorkspace");
 }
+
+MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixWorkspace_sptr ws) {
+  if (ws->isHistogramData() && ws->isDistribution())
+    return ws;
+
+  MatrixWorkspace_sptr wsClone = std::move(ws->clone());
+  wsClone->setDistribution(true);
+
+  if (wsClone->isHistogramData())
+    return wsClone;
+
+  auto convertToHistogram = createChildAlgorithm("ConvertToHistogram");
+  convertToHistogram->initialize();
+  convertToHistogram->setProperty("InputWorkspace", wsClone);
+  convertToHistogram->setProperty("OutputWorkspace", wsClone);
+  convertToHistogram->execute();
+  return convertToHistogram->getProperty("OutputWorkspace");
+}
+
 } // namespace Mantid::Algorithms

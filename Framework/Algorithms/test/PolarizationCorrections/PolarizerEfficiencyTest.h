@@ -90,9 +90,9 @@ public:
     auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
     auto tPara1 = generateFunctionDefinedWorkspace("T_para1", "4 + x*0");
     auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
-    auto tAnti1 = generateFunctionDefinedWorkspace("T_anti1", "2 * x*0");
+    auto tAnti1 = generateFunctionDefinedWorkspace("T_anti1", "2 + x*0");
 
-    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tPara1, tAnti1});
+    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tAnti1, tPara1});
 
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     polariserEfficiency->execute();
@@ -100,9 +100,9 @@ public:
         polariserEfficiency->getProperty("OutputWorkspace"));
 
     // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
-    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 1
+    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
     for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
-      TS_ASSERT_DELTA(1, y, 1e-8);
+      TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
 
@@ -113,8 +113,10 @@ public:
         polarizerEfficiency->getProperty("OutputWorkspace"));
     const auto errors = eff->dataE(0);
     // Skip the first error because with this toy data it'll be NaN
-    for (size_t i = 1; i < errors.size(); ++i) {
-      TS_ASSERT_DELTA(353.55339059327378, errors[i], 1e-8);
+    const std::vector<double> expectedErrors{293.15439618057928, 130.29700166149377, 73.301389823113183,
+                                             46.925472826600263};
+    for (size_t i = 0; i < expectedErrors.size(); ++i) {
+      TS_ASSERT_DELTA(expectedErrors[i], errors[i + 1], 1e-7);
     }
   }
 
@@ -157,6 +159,7 @@ private:
     createWorkspace->setProperty("DataE", e);
     createWorkspace->setProperty("UnitX", xUnit);
     createWorkspace->setProperty("OutputWorkspace", name);
+    createWorkspace->setProperty("Distribution", true);
     createWorkspace->execute();
 
     auto convertToHistogram = AlgorithmManager::Instance().create("ConvertToHistogram");
@@ -198,6 +201,8 @@ private:
     createSampleWorkspace->execute();
 
     MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    result->setYUnit("");
+    result->setDistribution(true);
     return result;
   }
 
