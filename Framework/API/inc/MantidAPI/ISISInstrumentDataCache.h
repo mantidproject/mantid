@@ -16,10 +16,10 @@
 namespace Mantid {
 namespace API {
 
-class MANTID_API_DLL ISISInstrDataCache {
+class MANTID_API_DLL ISISInstrumentDataCache {
 public:
-  ISISInstrDataCache(const std::string &path) : m_dataCachePath(path) {}
-  std::string getFileParentDirPath(std::string filename);
+  ISISInstrumentDataCache(const std::string &path) : m_dataCachePath(path) {}
+  std::string getFileParentDirectoryPath(std::string filename);
 
 private:
   std::pair<std::string, std::string> validateInstrumentAndNumber(std::string filename);

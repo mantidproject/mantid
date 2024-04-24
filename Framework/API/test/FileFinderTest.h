@@ -619,7 +619,7 @@ private:
   size_t m_filesToFind;
 };
 
-class DataCacheTest : public CxxTest::TestSuite {
+class FileFinderISISInstrumentDataCacheTest : public CxxTest::TestSuite {
 private:
   std::set<std::string> m_filesToCreate;
   std::string m_dataCacheDir;
@@ -627,10 +627,10 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DataCacheTest *createSuite() { return new DataCacheTest(); }
-  static void destroySuite(DataCacheTest *suite) { delete suite; }
+  static FileFinderISISInstrumentDataCacheTest *createSuite() { return new FileFinderISISInstrumentDataCacheTest(); }
+  static void destroySuite(FileFinderISISInstrumentDataCacheTest *suite) { delete suite; }
 
-  DataCacheTest()
+  FileFinderISISInstrumentDataCacheTest()
       : // The constructor will create a temporary directory that mimicks the data cache structure and
         // populate it with the files defined here
         m_filesToCreate({"MER40871.nxs", "MAR26045.raw", "WISH39495.s01", "LOQ106084.nxs", "LARMOR26462.nxs",
@@ -681,7 +681,7 @@ public:
                                  std::filesystem::perm_options::replace);
   }
 
-  ~DataCacheTest() override {
+  ~FileFinderISISInstrumentDataCacheTest() override {
     // Change permissions again to allow delete
     std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::owner_all,
                                  std::filesystem::perm_options::add);

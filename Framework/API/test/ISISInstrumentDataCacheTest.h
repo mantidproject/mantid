@@ -6,13 +6,13 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "MantidAPI/ISISInstrDataCache.h"
+#include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 
-class ISISInstrDataCacheTest : public CxxTest::TestSuite {
+class ISISInstrumentDataCacheTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     m_dataCacheDir = "./TestDataCache";
@@ -45,51 +45,52 @@ public:
   void tearDown() override { std::filesystem::remove_all(m_dataCacheDir); }
 
   void testInstrNameExpanded() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("MAR25054");
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getFileParentDirectoryPath("MAR25054");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MARI/2019/RB1868000-1");
   }
 
   void testCorrectInstrRunSplit() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("SANS2D101115");
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getFileParentDirectoryPath("SANS2D101115");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/SANS2D/2018/RB1800009-2");
   }
 
   void testInstrWithDelimiter() {
     // Checks short name + delimiter gets correctly identified
-    ISISInstrDataCache dc(m_dataCacheDir);
-    std::string actualPath = dc.getFileParentDirPath("PG3_11111");
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getFileParentDirectoryPath("PG3_11111");
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/POWGEN/mock/path");
   }
 
   void testInstrWithSuffix() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("LOQ11111-add"), const std::invalid_argument &e,
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("LOQ11111-add"), const std::invalid_argument &e,
                             std::string(e.what()), "Unsuported format: Suffix detected: -add");
   }
 
   void testBadInput() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("s0me_us$r_dEfined_n4me"), const std::invalid_argument &e,
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("s0me_us$r_dEfined_n4me"), const std::invalid_argument &e,
                             std::string(e.what()), "Filename not in correct format.");
   }
 
   void testBadInstrument() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("BADINSTR111111"), const std::invalid_argument &e,
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("BADINSTR111111"), const std::invalid_argument &e,
                             std::string(e.what()), "Instrument name not recognized.");
   }
 
   void testMissingIndexFile() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("WISH12345"), const std::invalid_argument &e, std::string(e.what()),
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("WISH12345"), const std::invalid_argument &e,
+                            std::string(e.what()),
                             "Error opennig instrument index file: " + m_dataCacheDir + "/WISH/WISH_index.json");
   }
 
   void testRunNumberNotFound() {
-    ISISInstrDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirPath("SANS2D1234"), const std::invalid_argument &e,
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("SANS2D1234"), const std::invalid_argument &e,
                             std::string(e.what()), "Run number 1234 not found for instrument SANS2D.");
   }
 

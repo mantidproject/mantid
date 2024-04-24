@@ -69,9 +69,9 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
-  const API::Result<std::string> getDataCachePath(const std::string &cachePathToSearch,
-                                                  const std::set<std::string> &filenames,
-                                                  const std::vector<std::string> &exts) const;
+  const API::Result<std::string> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+                                                                const std::set<std::string> &filenames,
+                                                                const std::vector<std::string> &exts) const;
   const API::Result<std::string> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                                 const std::set<std::string> &filenames,
                                                 const std::vector<std::string> &exts) const;

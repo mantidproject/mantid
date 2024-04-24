@@ -11,7 +11,7 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IArchiveSearch.h"
-#include "MantidAPI/ISISInstrDataCache.h"
+#include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -651,18 +651,19 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   return res;
 }
 
-const API::Result<std::string> FileFinderImpl::getDataCachePath(const std::string &cachePathToSearch,
-                                                                const std::set<std::string> &filenames,
-                                                                const std::vector<std::string> &exts) const {
+const API::Result<std::string>
+FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+                                               const std::set<std::string> &filenames,
+                                               const std::vector<std::string> &exts) const {
   std::string errors;
-  auto dataCache = API::ISISInstrDataCache(cachePathToSearch);
+  auto dataCache = API::ISISInstrumentDataCache(cachePathToSearch);
 
   for (const auto &filename : filenames) {
 
     std::string parentDirPath;
 
     try {
-      parentDirPath = dataCache.getFileParentDirPath(filename);
+      parentDirPath = dataCache.getFileParentDirectoryPath(filename);
     } catch (const std::invalid_argument &e) {
       errors += "Data cache: " + std::string(e.what());
       return API::Result<std::string>("", errors);
@@ -795,7 +796,8 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // Only expect to find path to data cache on IDAaaS
   if (std::filesystem::exists(cachePathToSearch)) {
 
-    API::Result<std::string> cacheFilePath = getDataCachePath(cachePathToSearch.string(), filenames, exts);
+    API::Result<std::string> cacheFilePath =
+        getISISInstrumentDataCachePath(cachePathToSearch.string(), filenames, exts);
 
     if (cacheFilePath) {
       return cacheFilePath;
