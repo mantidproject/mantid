@@ -1,0 +1,1 @@
+- Added table view for group peaks workspaces, displaying group indices alongside standard peak data, with all the capabilities of a standard table view.
