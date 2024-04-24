@@ -469,11 +469,6 @@ private:
 
 class FileFinderTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() override {
-    // TODO: temporary fix
-    Mantid::Kernel::ConfigService::Instance().setString("datacachesearch.directory", "");
-    Mantid::Kernel::ConfigService::Instance().setLogLevel("debug");
-  }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FileFinderTestPerformance *createSuite() { return new FileFinderTestPerformance(); }
