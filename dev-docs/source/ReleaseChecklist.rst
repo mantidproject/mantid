@@ -386,6 +386,17 @@ Code Freeze
   <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
+* Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
+  date with the ``main`` branch, pushing the changes directly to GitHub:
+
+.. code-block:: bash
+
+    git checkout release-next
+    git fetch origin main
+    git reset --hard origin/main
+    git push origin release-next --force
+
+* Verify that the latest commit on ``release-next`` is correct before moving to the next step.
 * Click ``Build Now`` on `open-release-testing
   <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
   which will perform the following action set the value of the Jenkins global property
