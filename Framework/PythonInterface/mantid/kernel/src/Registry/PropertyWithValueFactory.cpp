@@ -48,9 +48,7 @@ void initTypeLookup(PyTypeIndex &index) {
   using BoolHandler = TypedPropertyValueHandler<bool>;
   index.emplace(&PyBool_Type, std::make_shared<BoolHandler>());
 
-  // Python 2/3 have an arbitrary-sized long type. The handler
-  // will raise an error if the input value overflows a C long
-  using IntHandler = TypedPropertyValueHandler<long>;
+  using IntHandler = TypedPropertyValueHandler<int>;
   index.emplace(&PyLong_Type, std::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
