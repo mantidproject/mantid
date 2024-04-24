@@ -2,6 +2,7 @@ set(SRC_FILES
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
+    src/CompressEventAccumulator.cpp
     src/CompressEvents.cpp
     src/CreateChunkingFromInstrument.cpp
     src/CreatePolarizationEfficiencies.cpp
@@ -151,6 +152,7 @@ set(SRC_FILES
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
     src/PatchBBY.cpp
+    src/ProcessBankCompressed.cpp
     src/ProcessBankData.cpp
     src/PulseIndexer.cpp
     src/RawFileInfo.cpp
@@ -223,6 +225,7 @@ set(INC_FILES
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/BitStream.h
     inc/MantidDataHandling/CheckMantidVersion.h
+    inc/MantidDataHandling/CompressEventAccumulator.h
     inc/MantidDataHandling/CompressEvents.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
     inc/MantidDataHandling/CreatePolarizationEfficiencies.h
@@ -370,6 +373,7 @@ set(INC_FILES
     inc/MantidDataHandling/PDLoadCharacterizations.h
     inc/MantidDataHandling/ParallelEventLoader.h
     inc/MantidDataHandling/PatchBBY.h
+    inc/MantidDataHandling/ProcessBankCompressed.h
     inc/MantidDataHandling/ProcessBankData.h
     inc/MantidDataHandling/PulseIndexer.h
     inc/MantidDataHandling/RawFileInfo.h
@@ -446,6 +450,7 @@ set(TEST_FILES
     ApplyDiffCalTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
+    CompressEventAccumulatorTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
     CreatePolarizationEfficienciesTest.h

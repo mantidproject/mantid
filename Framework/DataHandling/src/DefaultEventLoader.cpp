@@ -59,7 +59,15 @@ DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollec
 
   // Cache a map for speed.
   if (!haveWeights) {
-    makeMapToEventLists(eventVectors);
+    if (alg->compressEvents) {
+      // Convert to weighted events
+      for (size_t i = 0; i < m_ws.getNumberHistograms(); i++) {
+        m_ws.getSpectrum(i).switchTo(API::WEIGHTED_NOTIME);
+      }
+      makeMapToEventLists(weightedNoTimeEventVectors);
+    } else {
+      makeMapToEventLists(eventVectors);
+    }
   } else {
     // Convert to weighted events
     for (size_t i = 0; i < m_ws.getNumberHistograms(); i++) {
