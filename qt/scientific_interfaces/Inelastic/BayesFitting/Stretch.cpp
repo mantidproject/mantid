@@ -7,11 +7,14 @@
 #include "Stretch.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
@@ -81,12 +84,10 @@ Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m
 void Stretch::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Stretch");
-  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                          : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
-                                              : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Stretch::setup() {}
@@ -187,7 +188,7 @@ void Stretch::algorithmComplete(const bool &error) {
     setPlotContourEnabled(false);
     setSaveResultEnabled(false);
   } else {
-    if (WorkspaceUtils::doesExistInADS(m_contourWorkspaceName))
+    if (doesExistInADS(m_contourWorkspaceName))
       populateContourWorkspaceComboBox();
     else
       setPlotContourEnabled(false);
@@ -198,7 +199,7 @@ void Stretch::algorithmComplete(const bool &error) {
 
 void Stretch::populateContourWorkspaceComboBox() {
   m_uiForm.cbPlotContour->clear();
-  auto const contourGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_contourWorkspaceName);
+  auto const contourGroup = getADSWorkspace<WorkspaceGroup>(m_contourWorkspaceName);
   auto const contourNames = contourGroup->getNames();
   for (auto const &name : contourNames)
     m_uiForm.cbPlotContour->addItem(QString::fromStdString(name));
@@ -267,7 +268,7 @@ void Stretch::plotWorkspaces() {
   auto const plotSigma = (plotType == "All" || plotType == "Sigma");
   auto const plotBeta = (plotType == "All" || plotType == "Beta");
 
-  auto const fitWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
+  auto const fitWorkspace = getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
   for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
     auto const name = (*it)->getName();
     if (plotSigma && name.substr(name.length() - 5) == "Sigma") {
@@ -316,7 +317,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   }
 
   // update the maximum and minimum range bar positions
-  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
@@ -325,7 +326,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   eRangeSelector->setMaximum(range.second);
 
   // set the max spectrum
-  MatrixWorkspace_const_sptr sampleWs = WorkspaceUtils::getADSWorkspace(filename.toStdString());
+  MatrixWorkspace_const_sptr sampleWs = getADSWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }

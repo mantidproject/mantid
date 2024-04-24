@@ -8,10 +8,10 @@
 
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"

@@ -4,16 +4,15 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "ElwinView.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include <QFileInfo>
 
 #include <algorithm>
 
@@ -24,43 +23,6 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
-
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
-const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
-const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
-const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
-} // namespace Regexes
-
-class ExcludeRegionDelegate : public QItemDelegate {
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
-                        const QModelIndex & /*index*/) const override {
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
-    lineEdit->setValidator(validator.release());
-    return lineEdit.release();
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toString();
-    static_cast<QLineEdit *>(editor)->setText(value);
-  }
-
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-    auto *lineEdit = static_cast<QLineEdit *>(editor);
-    model->setData(index, lineEdit->text(), Qt::EditRole);
-  }
-
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                            const QModelIndex & /*index*/) const override {
-    editor->setGeometry(option.rect);
-  }
-};
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -222,8 +184,6 @@ void ElwinView::setHorizontalHeaders() {
   m_uiForm.tbElwinData->setHorizontalHeaderLabels(headers);
   auto header = m_uiForm.tbElwinData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-  m_uiForm.tbElwinData->setItemDelegateForColumn(headers.size() - 1,
-                                                 std::make_unique<ExcludeRegionDelegate>().release());
   m_uiForm.tbElwinData->verticalHeader()->setVisible(false);
 }
 

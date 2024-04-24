@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/WorkspaceUtils.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QPair>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::WorkspaceUtils;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
 
 class WorkspaceUtilsTest : public CxxTest::TestSuite {
@@ -118,5 +118,19 @@ public:
     TS_ASSERT_EQUALS(parseRunNumbers(workspaces_with_run_numbers), "irs60-280_test");
     TS_ASSERT_EQUALS(parseRunNumbers(workspaces_without_run_numbers), "irs_test");
     TS_ASSERT_EQUALS(parseRunNumbers(individual_workspace), "irs123_test");
+  }
+
+  void test_MaximumIndex_returns_properIndex() {
+    auto const testWorkspace = createWorkspace(3);
+
+    TS_ASSERT_EQUALS(*maximumIndex(testWorkspace), 2);
+  }
+
+  void test_getIndexStrings_return_formatted_index_range() {
+    auto const testWorkspace = createWorkspace(5);
+    AnalysisDataService::Instance().add("testWs", testWorkspace);
+
+    TS_ASSERT_EQUALS(getIndexString("testWs"), "0-4");
+    AnalysisDataService::Instance().clear();
   }
 };

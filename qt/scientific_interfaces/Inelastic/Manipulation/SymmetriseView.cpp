@@ -7,7 +7,7 @@
 #include "SymmetriseView.h"
 #include "Common/IndirectDataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "SymmetrisePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -17,11 +17,11 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
-#include <QDoubleValidator>
-#include <QFileInfo>
-
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 constexpr auto NUMERICAL_PRECISION = 2;
 
@@ -210,7 +210,7 @@ void SymmetriseView::notifyReflectTypeChanged(QtProperty *prop, int value) {
 
       MatrixWorkspace_sptr sampleWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-      auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
+      auto const axisRange = getXRangeFromWorkspace(sampleWS);
 
       resetEDefaults(value == 0, axisRange);
     }
@@ -250,17 +250,17 @@ void SymmetriseView::resetEDefaults(bool isPositive, QPair<double, double> range
  */
 bool SymmetriseView::verifyERange(std::string const &workspaceName) {
   MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-  auto axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
+  auto axisRange = getXRangeFromWorkspace(sampleWS);
   auto Erange = QPair(getElow(), getEhigh());
 
   bool const reflectType = m_enumManager->value(m_properties["ReflectType"]);
   if ((reflectType == 0) && (Erange.first > abs(axisRange.first))) {
     showMessageBox("Invalid Data Range: Elow is larger than the lower limit of spectrum.\nReduce Elow to " +
-                   InterfaceUtils::makeQStringNumber(abs(axisRange.first), NUMERICAL_PRECISION).toStdString());
+                   makeQStringNumber(abs(axisRange.first), NUMERICAL_PRECISION).toStdString());
     return false;
   } else if ((reflectType == 1) && (abs(Erange.second) > axisRange.second)) {
     showMessageBox("Invalid Data Range: Ehigh is larger than the upper limit of spectrum.\nIncrease Ehigh to " +
-                   InterfaceUtils::makeQStringNumber(axisRange.second, NUMERICAL_PRECISION).toStdString());
+                   makeQStringNumber(axisRange.second, NUMERICAL_PRECISION).toStdString());
     return false;
   }
   return true;
@@ -299,7 +299,7 @@ void SymmetriseView::plotNewData(std::string const &workspaceName) {
   m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
   // Set the preview range to the maximum absolute X value
-  auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(sampleWS);
+  auto const axisRange = getXRangeFromWorkspace(sampleWS);
 
   // Set some default (and valid) values for E range
   resetEDefaults(m_enumManager->value(m_properties["ReflectType"]) == 0, axisRange);
@@ -327,13 +327,13 @@ void SymmetriseView::updateMiniPlots() {
   m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
   // Match X axis range on preview plot
-  auto const axisRange = WorkspaceUtils::getXRangeFromWorkspace(input);
+  auto const axisRange = getXRangeFromWorkspace(input);
   m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 
   // Update bounds for horizontal markers
   auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-  updateHorizontalMarkers(InterfaceUtils::convertTupleToQPair(verticalRange));
+  updateHorizontalMarkers(convertTupleToQPair(verticalRange));
 }
 
 /**

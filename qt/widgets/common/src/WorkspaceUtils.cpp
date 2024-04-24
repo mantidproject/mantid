@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "WorkspaceUtils.h"
-#include "InterfaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/TableWidgetValidators.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -30,8 +30,33 @@ QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, 
 auto const regDigits = std::regex("\\d+");
 } // namespace
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 namespace WorkspaceUtils {
+
+/**
+ * Gets the maximum number of histograms for a 2D Workspace
+ *
+ * @param workspace Workspace pointer
+ * @return size_t if index is found or null pointer if not found.
+ */
+
+std::optional<std::size_t> maximumIndex(const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  if (workspace) {
+    const auto numberOfHistograms = workspace->getNumberHistograms();
+    if (numberOfHistograms > 0)
+      return numberOfHistograms - 1;
+  }
+  return std::nullopt;
+}
+
+std::string getIndexString(const MatrixWorkspace_sptr &workspace) {
+  const auto maximum = maximumIndex(workspace);
+  if (maximum)
+    return "0-" + std::to_string(*maximum);
+  return "";
+}
+
+std::string getIndexString(const std::string &workspaceName) { return getIndexString(getADSWorkspace(workspaceName)); }
 
 /**
  * Gets the suffix of a workspace (i.e. part after last underscore (red, sqw)).
@@ -225,5 +250,5 @@ std::string parseRunNumbers(std::vector<std::string> const &workspaceNames) {
 }
 
 } // namespace WorkspaceUtils
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

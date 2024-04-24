@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../DllConfig.h"
-#include "QString"
-#include "QStringList"
+#include <QString>
+#include <QStringList>
 #include <string>
 
 namespace MantidQt {
@@ -41,6 +41,7 @@ MANTIDQT_INELASTIC_DLL QStringList getCorrectionsWSSuffixes(std::string const &i
 MANTIDQT_INELASTIC_DLL QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL QString makeQStringNumber(double value, int precision);
+
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt

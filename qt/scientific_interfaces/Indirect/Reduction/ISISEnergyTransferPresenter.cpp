@@ -7,10 +7,10 @@
 #include "ISISEnergyTransferPresenter.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -25,6 +25,9 @@
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 
@@ -236,7 +239,7 @@ void IETPresenter::plotRawComplete(bool error) {
 void IETPresenter::notifySaveClicked() {
   IETSaveData saveData = m_view->getSaveData();
   for (auto const &workspaceName : m_model->outputWorkspaceNames())
-    if (WorkspaceUtils::doesExistInADS(workspaceName))
+    if (doesExistInADS(workspaceName))
       m_model->saveWorkspace(workspaceName, saveData);
 }
 
@@ -250,7 +253,7 @@ void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrou
     m_view->displayWarning("The custom grouping is empty.");
   }
 
-  if (WorkspaceUtils::doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
+  if (doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
     auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     m_view->showSaveCustomGroupingDialog(IETGroupingConstants::GROUPING_WS_NAME,
                                          IETGroupingConstants::DEFAULT_GROUPING_FILENAME, saveDirectory);
@@ -271,9 +274,8 @@ void IETPresenter::notifyRunFinished() {
 void IETPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ISISEnergyTransfer");
-  auto fbSuffixes =
-      filter ? InterfaceUtils::getCalibrationFBSuffixes(tabName) : InterfaceUtils::getCalibrationExtensions(tabName);
-  auto wsSuffixes = filter ? InterfaceUtils::getCalibrationWSSuffixes(tabName) : noSuffixes;
+  auto fbSuffixes = filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName);
+  auto wsSuffixes = filter ? getCalibrationWSSuffixes(tabName) : noSuffixes;
 
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }

@@ -14,6 +14,7 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("SymmetrisePresenter");
@@ -115,8 +116,8 @@ void SymmetrisePresenter::runComplete(bool error) {
 void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Symmetrise");
-  m_view->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName) : InterfaceUtils::getExtensions(tabName));
-  m_view->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void SymmetrisePresenter::handleReflectTypeChanged(int value) { m_model->setIsPositiveReflect(value == 0); }

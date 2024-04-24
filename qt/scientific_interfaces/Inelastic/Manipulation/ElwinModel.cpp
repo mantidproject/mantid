@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ElwinModel.h"
 #include "Common/IndirectDataValidationHelper.h"
-#include "Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"

@@ -7,7 +7,6 @@
 #include "SqwModel.h"
 #include "Common/IndirectDataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,12 +14,16 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
@@ -117,7 +120,7 @@ std::string SqwModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
 MatrixWorkspace_sptr SqwModel::getRqwWorkspace() {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
-  return WorkspaceUtils::getADSWorkspace(outputName);
+  return getADSWorkspace(outputName);
 }
 
 UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
@@ -129,15 +132,15 @@ UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
 
   // Validate Q binning
   uiv.checkBins(m_qLow, m_qWidth, m_qHigh, tolerance);
-  uiv.checkRangeIsEnclosed("The contour plots Q axis", InterfaceUtils::convertTupleToPair(qRange),
-                           "the Q range provided", std::make_pair(m_qLow, m_qHigh));
+  uiv.checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
+                           std::make_pair(m_qLow, m_qHigh));
 
   // If selected, validate energy binning
   if (m_rebinInEnergy) {
 
     uiv.checkBins(m_eLow, m_eWidth, m_eHigh, tolerance);
-    uiv.checkRangeIsEnclosed("The contour plots Energy axis", InterfaceUtils::convertTupleToPair(eRange),
-                             "the E range provided", std::make_pair(m_eLow, m_eHigh));
+    uiv.checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
+                             std::make_pair(m_eLow, m_eHigh));
   }
   return uiv;
 }

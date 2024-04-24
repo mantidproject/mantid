@@ -17,6 +17,7 @@
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ContainerSubtraction");
@@ -203,12 +204,10 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ContainerSubtraction");
-  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                          : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? InterfaceUtils::getContainerFBSuffixes(tabName)
-                                             : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? InterfaceUtils::getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
