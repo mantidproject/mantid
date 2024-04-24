@@ -264,7 +264,7 @@ void LoadDetectorsGroupingFile::setByDetectors() {
   const detid2index_map indexmap = m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (auto &detectorMap : m_groupDetectorsMap) {
+  for (const auto &detectorMap : m_groupDetectorsMap) {
     g_log.debug() << "Group ID = " << detectorMap.first << '\n';
 
     for (auto detid : detectorMap.second) {

@@ -241,7 +241,6 @@ duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseByCurrent.cpp:61
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseByCurrent.cpp:66
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MedianDetectorTest.cpp:280
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1476
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Power.h:48
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:752
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1804
@@ -296,7 +295,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/So
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:230
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:274
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmManager.cpp:112
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1DMany.cpp:291
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:138
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:65
@@ -409,14 +407,11 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cp
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:313
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:325
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1608
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1651
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1607
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1650
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:459
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:285
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1608
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1677
-uselessCallsConstructor:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:733
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1607
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:383
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:405
@@ -580,9 +575,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/H5Util.cpp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/H5Util.cpp:191
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DataBlockComposite.cpp:383
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/IFittingAlgorithm.cpp:230
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ProcessBackground.cpp:898
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ProcessBackground.cpp:899
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ProcessBackground.cpp:900
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ProcessBackground.cpp:507
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficiencies.cpp:119
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunkingFromInstrument.cpp:415
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunkingFromInstrument.cpp:422
@@ -599,8 +593,7 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BinaryFile.h:52
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDspacemap.cpp:342
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDetectorsGroupingFile.cpp:221
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDetectorsGroupingFile.cpp:280
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDetectorsGroupingFile.cpp:213
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:211
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp:58
@@ -610,7 +603,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cp
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:126
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DetermineChunking.cpp:144
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSS.cpp:449
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1842
@@ -629,8 +621,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventP
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:942
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:582
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:589
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:170
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:171
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:448
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:177
@@ -662,7 +652,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectomet
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMcStas.cpp:97
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:172
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:355
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:453
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:452
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:38
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadPSIMuonBin.h:74
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:207
@@ -686,8 +676,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNe
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus2.cpp:486
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:133
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:162
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRawHelper.cpp:1062
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRawHelper.cpp:1205
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:814
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:481
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:483
@@ -718,13 +706,13 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexus
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1179
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1965
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:425
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:388
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:389
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:598
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:609
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:390
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:599
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:610
-constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:695
-constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:700
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:611
+constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:696
+constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:701
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:397
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
@@ -733,7 +721,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFullpr
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:222
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:244
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:328
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDiffCal.cpp:164
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDiffCal.cpp:158
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:67
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSASInstrumentFile.cpp:68
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTOFRawNexus.cpp:285
@@ -828,10 +816,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspac
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:92
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:146
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:631
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:644
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:758
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:798
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:629
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:642
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ObjCompAssembly.cpp:346
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
@@ -1511,4 +1497,4 @@ constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/C
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FitDataView.h:42
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:52
-
+derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77

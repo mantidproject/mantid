@@ -753,7 +753,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (auto component : m_children) {
+      for (const auto component : m_children) {
         BoundingBox compBox;
         if (component && component->getComponentID() != sourceID) {
           component->getBoundingBox(compBox);
@@ -793,7 +793,7 @@ std::shared_ptr<const std::vector<IObjComponent_const_sptr>> Instrument::getPlot
 void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
-    auto *a = dynamic_cast<CompAssembly *>(c);
+    const auto *a = dynamic_cast<CompAssembly *>(c);
     if (a)
       appendPlottable(*a, lst);
     else {

@@ -163,8 +163,9 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
-                                                 std::string &parent_class, int level, bool useFullPath) {
+void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+                                                 const std::string &parent_name, const std::string &parent_class,
+                                                 int level, bool useFullPath) {
   // Classes
   NXstatus getnextentry_status; ///< return status
   int datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see

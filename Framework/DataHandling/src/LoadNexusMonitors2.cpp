@@ -176,7 +176,6 @@ void LoadNexusMonitors2::exec() {
 
   // open the correct entry
   using string_map_t = std::map<std::string, std::string>;
-  string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
 
   if (m_top_entry_name.empty()) {
