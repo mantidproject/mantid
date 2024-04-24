@@ -676,6 +676,7 @@ public:
       jsonFile.close();
     }
 
+    // Remove permissions to test for unauthorized access to instrument folder
     std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::none,
                                  std::filesystem::perm_options::replace);
   }
