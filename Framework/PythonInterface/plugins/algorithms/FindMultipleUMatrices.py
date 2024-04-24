@@ -12,7 +12,7 @@ from mantid.api import (
     IPeaksWorkspaceProperty,
     AnalysisDataService as ADS,
 )
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion, logger
 from mantid.geometry import SpaceGroupFactory, PointGroupFactory, CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from itertools import combinations, product
 from mantid.kernel import V3D
@@ -190,6 +190,13 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         peaks_filtered = self.exec_child_alg(
             "FilterPeaks", InputWorkspace=peaks_filtered, FilterVariable="DSpacing", FilterValue=dmax + dtol, Operator="<="
         )
+
+        # print info about reflections considered to log
+        logger.information("H, K, L, d-spac (Ang)")
+        logger.information(f"{np.c_[hkls, np.round(dhkls, 3)]}")
+        logger.information(f"Observed peak d-spacings within limits: {dmin} < d < {dmax}")
+        logger.information(f"{np.round(peaks_filtered.column('DSpacing'), 3)}")
+
         # loop over every pair of peaks
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=len(dhkls))
         ipairs = list(combinations(range(peaks_filtered.getNumberPeaks()), 2))
