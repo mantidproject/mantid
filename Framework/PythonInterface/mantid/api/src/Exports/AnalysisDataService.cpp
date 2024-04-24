@@ -74,17 +74,13 @@ list retrieveGroupPeaksWorkspaces(AnalysisDataServiceImpl const *const self, con
 
   auto wsSharedPtrs = self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), false);
 
-  auto isGroupPeakWorkspace = [](const Workspace_sptr &wksp) {
+  auto isNotGroupPeakWorkspace = [](const Workspace_sptr &wksp) {
     if (auto gws = dynamic_cast<WorkspaceGroup *>(wksp.get())) {
-      for (auto it = gws->begin(); it != gws->end(); it++) {
-        if (auto ws = dynamic_cast<IPeaksWorkspace *>(it->get())) {
-          return false;
-        }
-      }
+      return !gws->isGroupPeaksWorkspaces();
     }
     return true;
   };
-  auto end = std::remove_if(wsSharedPtrs.begin(), wsSharedPtrs.end(), isGroupPeakWorkspace);
+  auto end = std::remove_if(wsSharedPtrs.begin(), wsSharedPtrs.end(), isNotGroupPeakWorkspace);
   wsSharedPtrs.erase(end, wsSharedPtrs.end());
 
   std::vector<WeakPtr> wsWeakPtrs;
