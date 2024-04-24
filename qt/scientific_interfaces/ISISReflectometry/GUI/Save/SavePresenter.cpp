@@ -212,13 +212,19 @@ void SavePresenter::filterWorkspaceNames() {
 void SavePresenter::populateParametersList() {
   m_view->clearParametersList();
 
-  std::string wsName = m_view->getCurrentWorkspaceName();
-  std::vector<std::string> logs;
-  const auto &properties = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->run().getProperties();
-  for (auto it = properties.begin(); it != properties.end(); it++) {
-    logs.emplace_back((*it)->name());
+  const std::string wsName = m_view->getCurrentWorkspaceName();
+  if (!AnalysisDataService::Instance().doesExist(wsName)) {
+    return;
   }
-  m_view->setParametersList(logs);
+
+  if (const auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)) {
+    std::vector<std::string> logs;
+    const auto &properties = ws->run().getProperties();
+    for (auto it = properties.begin(); it != properties.end(); it++) {
+      logs.emplace_back((*it)->name());
+    }
+    m_view->setParametersList(logs);
+  }
 }
 
 bool SavePresenter::isValidSaveDirectory(std::string const &directory) {

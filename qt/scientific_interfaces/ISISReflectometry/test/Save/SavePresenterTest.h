@@ -151,6 +151,15 @@ public:
     presenter.notifyPopulateParametersList();
   }
 
+  void testNotifyPopulateParametersListWithWorkspaceNotInADS() {
+    auto presenter = makePresenter();
+    auto const workspaceName = "test";
+    EXPECT_CALL(m_view, clearParametersList()).Times(1);
+    EXPECT_CALL(m_view, getCurrentWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(m_view, setParametersList(_)).Times(0);
+    presenter.notifyPopulateParametersList();
+  }
+
   void testNotifySaveSelectedWorkspacesWithLogs() {
     auto presenter = makePresenter();
     auto const inputWorkspaces = std::vector<std::string>{"test1", "test2", "test3", "test4"};
