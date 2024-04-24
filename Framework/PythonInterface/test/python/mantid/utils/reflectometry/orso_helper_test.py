@@ -50,7 +50,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
             np.full(col_length, col_values[1]),
             np.full(col_length, col_values[2]),
             np.full(col_length, col_values[3]),
-            q_unit=MantidORSODataColumns.Unit.Nm,
+            q_unit=MantidORSODataColumns.Unit.InverseNm,
             r_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
             q_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
         )
@@ -58,7 +58,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_default_header(
             columns,
             len(col_values),
-            MantidORSODataColumns.Unit.Nm,
+            MantidORSODataColumns.Unit.InverseNm,
             MantidORSODataColumns.ErrorValue.FWHM,
             MantidORSODataColumns.ErrorValue.FWHM,
         )
@@ -73,7 +73,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
             np.full(col_length, col_values[1]),
             np.full(col_length, col_values[2]),
             np.full(col_length, col_values[3]),
-            q_unit=MantidORSODataColumns.Unit.Nm,
+            q_unit=MantidORSODataColumns.Unit.InverseNm,
             r_error_value_is=None,
             q_error_value_is=None,
         )
@@ -81,7 +81,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_default_header(
             columns,
             len(col_values),
-            MantidORSODataColumns.Unit.Nm,
+            MantidORSODataColumns.Unit.InverseNm,
             None,
             None,
         )
@@ -108,6 +108,21 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_column_header(header[4], extra_col[0], extra_col[1], extra_col[2])
         self._check_error_column_header(header[5], extra_error_col[0], extra_error_col[1], extra_error_col[2])
         self._check_column_data(columns, col_values, col_length)
+
+    def test_adding_additional_column_using_unit_enum(self):
+        col_length = 5
+
+        extra_col = ["test_1", MantidORSODataColumns.Unit.InverseAngstrom, "angstrom_unit_test"]
+        columns = MantidORSODataColumns(
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+            np.full(col_length, 1),
+        )
+        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, 1))
+
+        header = columns.header_info
+        self._check_column_header(header[4], extra_col[0], extra_col[1].value, extra_col[2])
 
     def test_adding_additional_column_with_no_resolution(self):
         col_length = 5
@@ -143,7 +158,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self,
         columns,
         num_columns_expected,
-        q_unit=MantidORSODataColumns.Unit.Angstrom,
+        q_unit=MantidORSODataColumns.Unit.InverseAngstrom,
         r_error_is=MantidORSODataColumns.ErrorValue.Sigma,
         q_error_is=MantidORSODataColumns.ErrorValue.Sigma,
     ):
