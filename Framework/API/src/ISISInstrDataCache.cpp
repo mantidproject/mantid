@@ -18,7 +18,7 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
   // Check if suffix eg. -add is present in filename
   std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
   if (!suffix.empty()) {
-    throw std::invalid_argument("Unsuported format: Suffix detected.");
+    throw std::invalid_argument("Unsuported format: Suffix detected: " + suffix);
   }
 
   // Find the last non-digit as the instrument name can contain numbers
