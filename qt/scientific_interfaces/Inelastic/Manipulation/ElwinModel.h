@@ -23,26 +23,26 @@ class MANTIDQT_INELASTIC_DLL ElwinModel {
 
 public:
   ElwinModel();
-  ~ElwinModel() = default;
-  void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                          std::string const &outputName);
-  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra);
-  void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                           std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
-  void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                  std::string const &workspaceBaseName, std::string const &inputGroupWsName,
-                                  std::string const &sampleEnvironmentLogName,
-                                  std::string const &sampleEnvironmentLogValue);
-  void ungroupAlgorithm(std::string const &inputWorkspace) const;
-  void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const;
-  void setIntegrationStart(double integrationStart);
-  void setIntegrationEnd(double integrationEnd);
-  void setBackgroundStart(double backgroundStart);
-  void setBackgroundEnd(double backgroundEnd);
-  void setBackgroundSubtraction(bool backgroundSubtraction);
-  void setNormalise(bool normalise);
-  void setOutputWorkspaceNames(std::string const &workspaceBaseName);
-  std::string getOutputWorkspaceNames() const;
+  virtual ~ElwinModel() = default;
+  virtual void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
+                                  std::string const &outputName);
+  virtual std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra);
+  virtual void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                   std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
+  virtual void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                          std::string const &workspaceBaseName, std::string const &inputGroupWsName,
+                                          std::string const &sampleEnvironmentLogName,
+                                          std::string const &sampleEnvironmentLogValue);
+  virtual void ungroupAlgorithm(std::string const &inputWorkspace) const;
+  virtual void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const;
+  virtual void setIntegrationStart(double integrationStart);
+  virtual void setIntegrationEnd(double integrationEnd);
+  virtual void setBackgroundStart(double backgroundStart);
+  virtual void setBackgroundEnd(double backgroundEnd);
+  virtual void setBackgroundSubtraction(bool backgroundSubtraction);
+  virtual void setNormalise(bool normalise);
+  virtual void setOutputWorkspaceNames(std::string const &workspaceBaseName);
+  virtual std::string getOutputWorkspaceNames() const;
 
 private:
   double m_integrationStart;
