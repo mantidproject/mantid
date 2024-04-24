@@ -318,7 +318,7 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
   if (commonBoundaries) {
     // Calculate the new (common) X values
     std::transform(outputWS->mutableX(0).cbegin(), outputWS->mutableX(0).cend(), outputWS->mutableX(0).begin(),
-                   [&](auto &x) { return factor * std::pow(x, power); });
+                   [&](const auto &x) { return factor * std::pow(x, power); });
 
     auto xVals = outputWS->sharedX(0);
 
@@ -345,7 +345,7 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
     PARALLEL_START_INTERRUPT_REGION
     if (!commonBoundaries) {
       std::transform(outputWS->mutableX(k).cbegin(), outputWS->mutableX(k).cend(), outputWS->mutableX(k).begin(),
-                     [&](auto &x) { return factor * std::pow(x, power); });
+                     [&](const auto &x) { return factor * std::pow(x, power); });
     }
     // Convert the events themselves if necessary.
     if (m_inputEvents) {
