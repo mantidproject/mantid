@@ -225,7 +225,7 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
-    TS_ASSERT_THROWS(FileFinder::Instance().getInstrument("BADINSTR12354.nxs", true),
+    TS_ASSERT_THROWS(FileFinder::Instance().getInstrument("BADINSTR12354.nxs", false),
                      const Mantid::Kernel::Exception::NotFoundError &);
   }
 
