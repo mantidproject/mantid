@@ -22,8 +22,8 @@ std::string Mantid::API::ISISInstrDataCache::getFileParentDirPath(std::string fi
   }
 
   // Find the last non-digit as the instrument name can contain numbers
-  std::string::reverse_iterator itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
-  std::string::size_type nChars = std::distance(itRev, fileName.rend());
+  const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
+  const auto nChars = std::distance(itRev, fileName.rend());
 
   // Check run number
   std::string runNumber = fileName.substr(nChars);
