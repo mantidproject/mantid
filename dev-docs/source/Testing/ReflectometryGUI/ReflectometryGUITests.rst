@@ -187,7 +187,7 @@ Save tab
 - Try entering a non-existent or invalid save path and then try to Save. You should get an error saying that the path is invalid.
 
 Preview tab
----------------
+-----------
 
 - Go to the Reduction Preview tab.
 - Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data on a detector with four banks. Note, with this dataset, we expect an error "Detector with ID..." to be thrown at this stage.
@@ -200,17 +200,19 @@ Preview tab
 - Click the drop-down on the rectangle select button and select ``Transmission``. Draw a transmission region onto the slice viewer plot. Then, in the same way, add one or more ``Background`` regions. The reduction should be re-run each time a region is added:
 
   - You should see the tab quickly disable and re-enable.
-  - Another run of ``ReflectometryReductionOneAuto`` will be logged in the Messages bar.
+  - Another run of ``ReflectometryISISLoadAndProcess`` will be logged in the Messages bar.
   - The 1D plot should update (although this is usually only noticeable when changes are made to the Signal region).
 
 - Check that moving and resizing regions triggers a re-run of the reduction.
-- Check that you can delete one of the Background regions by selecting it and pressing delete on your keyboard.
+- Check that you can delete one of the Background regions by selecting it and pressing the ``Delete`` key on your keyboard.
 - Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
 - Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
 - Right-click the workspace and select ``Show History``:
 
-  - View the history for ``ReflectometryReductionOneAuto`` and check that the inputs for ``ProcessingInstructions``, ``BackgroundProcessingInstructions`` and ``TransmissionProcessingInstructions`` correspond to the ranges of spectra you selected.
-  - View the history for ``ReflectometryISISSumBanks`` and check that the input for ``ROIDetectorIDs`` matches the range of detector IDs you selected.
+  - In the Algorithms list, expand ``ReflectometryISISLoadAndProcess``.
+  - Click on ``ReflectometryReductionOneAuto`` and check in the right hand pane that the inputs for ``ProcessingInstructions``, ``BackgroundProcessingInstructions`` and ``TransmissionProcessingInstructions`` correspond to the ranges of spectra you selected.
+  - Expand ``ReflectometryReductionOneAuto``.
+  - Click on ``ReflectometryISISSumBanks`` and check that the input for ``ROIDetectorIDs`` matches the range of detector IDs you selected.
 
 - Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run ``INTER45455`` and Angle ``1`` into the first child row. Click Process.
 - Compare plots of the ``preview_reduced_ws`` (from the Preview reduction) with ``IvsQ_binned_45455`` (from the batch reduction). They should be the same.
