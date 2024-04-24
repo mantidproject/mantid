@@ -59,8 +59,9 @@ std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::
 Mantid::API::Workspace_sptr AsciiSaver::workspace(std::string const &workspaceName) const {
   auto const &ads = Mantid::API::AnalysisDataService::Instance();
 
-  if (!ads.doesExist(workspaceName))
-    return nullptr;
+  if (!ads.doesExist(workspaceName)) {
+    throw std::runtime_error("Cannot find workspace " + workspaceName + " in the ADS.");
+  }
 
   return ads.retrieveWS<Mantid::API::Workspace>(workspaceName);
 }
