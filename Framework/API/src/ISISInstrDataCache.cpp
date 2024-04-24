@@ -1,17 +1,12 @@
-
 #include "MantidAPI/ISISInstrDataCache.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
-#include <algorithm>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
-#include <iterator>
 #include <json/reader.h>
 #include <json/value.h>
-#include <string>
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrDataCache");
