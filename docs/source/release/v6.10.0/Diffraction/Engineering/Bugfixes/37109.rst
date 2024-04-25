@@ -1,0 +1,3 @@
+- GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` uses :ref:`LoadCIF <algm-LoadCIF>` to load phase files which fixes a bug reading the lattice parameters from .cif files with multiple loop blocks with elements with ``_atom*`` prefix.
+- Fixed bug in GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` where lattice overridden in all phases provided (now only the first phase file lattice is overridden).
+- Fixed bug in GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` where Pawley reflections from all phases were added to each individual phase.

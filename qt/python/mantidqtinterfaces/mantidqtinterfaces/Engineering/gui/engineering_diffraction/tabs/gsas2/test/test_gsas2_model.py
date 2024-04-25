@@ -14,6 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model
 
 from mantid.api import FileFinder
 from mantid.simpleapi import LoadNexus, CompareWorkspaces, ReplaceSpecialValues, mtd, CreateEmptyTableWorkspace
+from mantid.geometry import CrystalStructure
 
 model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model"
 output_sample_log_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs"
@@ -113,29 +114,6 @@ class TestGSAS2Model(unittest.TestCase):
         no_limits_2 = self.model.further_validation()
         self.assertFalse(no_limits_2)
 
-    def test_find_in_file(self):
-        # read_space_group() is a specific wrapper for find_in_file()
-        read_space_group_string = self.model.read_space_group(self.phase_file_path)
-        self.assertEqual("F m 3 m", read_space_group_string)
-
-    def test_insert_minus_before_first_digit(self):
-        self.assertEqual(self.model.insert_minus_before_first_digit("F m 3 m"), "F m -3 m")
-        self.assertEqual(self.model.insert_minus_before_first_digit("42m"), "-42m")
-        self.assertEqual(self.model.insert_minus_before_first_digit("F d d d"), "F d d d")
-
-    def test_read_basis(self):
-        self.assertEqual(self.model.read_basis(self.phase_file_path), ["Fe 0.0 0.0 0.0 1.0 0.025"])
-        self.assertEqual(self.model.read_basis("invalid_phase_file"), None)
-
-    def test_choose_cell_lengths(self):
-        self.assertEqual(self.model.choose_cell_lengths(self.phase_file_path), "3.6105 3.6105 3.6105")
-
-        self.model.override_cell_length_string = "3.65"
-        self.assertEqual(self.model.choose_cell_lengths("phase_file_not_used"), "3.65 3.65 3.65")
-
-        self.model.override_cell_length_string = None
-        self.assertEqual(self.model.choose_cell_lengths("invalid_phase_file"), None)
-
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
     @patch(model_path + ".Load")
     def test_loading_single_file(self, mock_load, mock_update_logws_group):
@@ -149,17 +127,39 @@ class TestGSAS2Model(unittest.TestCase):
         mock_update_logws_group.assert_called_once()
 
     def test_generate_reflections_from_space_group(self):
-        self.model.dSpacing_min = 1.0
-        mantid_reflections = self.model.generate_reflections_from_space_group(self.phase_file_path, "3.65 3.65 3.65")
-        self.assertEqual(
-            mantid_reflections,
-            [
-                [[1.0, 1.0, 1.0], 2.107328482542134, 8],
-                [[2.0, 0.0, 0.0], 1.8250000000000002, 6],
-                [[2.0, 2.0, 0.0], 1.2904698756654494, 12],
-                [[3.0, 1.0, 1.0], 1.1005164077088374, 24],
-                [[2.0, 2.0, 2.0], 1.053664241271067, 8],
-            ],
+        self.model.dSpacing_min = 1.15
+        self.model.crystal_structures = [CrystalStructure("3.6105 3.6105 3.6105", "F m -3 m", "Fe 0.0 0.0 0.0 1 0.025")]
+        self.model.generate_reflections_from_space_group()
+        self.assertEqual(len(self.model.mantid_pawley_reflections), 1)  # 1 phase
+        self.assertEqual(len(self.model.mantid_pawley_reflections[0]), 3)  # 3 reflections
+        hkls = ([1.0, 1.0, 1.0], [2.0, 0.0, 0.0], [2.0, 2.0, 0.0])
+        multiplicities = (8, 6, 12)
+        dspacs = (2.0845, 1.8052, 1.2765)
+        for irefl, refl in enumerate(self.model.mantid_pawley_reflections[0]):
+            hkl, dspac, mult = refl
+            self.assertListEqual(hkl, hkls[irefl])
+            self.assertAlmostEqual(dspac, dspacs[irefl], delta=1e-4)
+            self.assertEqual(mult, multiplicities[irefl])
+
+    def test_read_phase_files_no_override_lattice(self):
+        self.model.phase_filepaths = [self.phase_file_path]
+        self.model.override_cell_length_string = None
+        self.model.read_phase_files()
+
+        self.assertEqual(len(self.model.crystal_structures), len(self.model.phase_filepaths))  # 1 phase
+        self.assertListEqual(
+            self.model._get_lattice_parameters_from_crystal_structure(self.model.crystal_structures[0]),
+            [3.6105, 3.6105, 3.6105, 90.0, 90.0, 90.0],
+        )
+        self.assertEqual(self.model.crystal_structures[0].getSpaceGroup().getHMSymbol(), "F m -3 m")
+
+    def test_read_phase_files_with_override_lattice(self):
+        self.model.phase_filepaths = [self.phase_file_path]
+        self.model.override_cell_length_string = "3.5"
+        self.model.read_phase_files()
+
+        self.assertListEqual(
+            self.model._get_lattice_parameters_from_crystal_structure(self.model.crystal_structures[0]), [3.5, 3.5, 3.5, 90.0, 90.0, 90.0]
         )
 
     def test_understand_data_structure(self):
