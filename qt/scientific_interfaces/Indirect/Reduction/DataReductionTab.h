@@ -88,9 +88,11 @@ protected:
 
 private slots:
   void tabExecutionComplete(bool error);
+  void handleNewInstrumentConfiguration();
 
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void updateInstrumentConfiguration() = 0;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   bool m_tabRunning;

@@ -46,10 +46,10 @@ public slots:
 private slots:
   void algorithmComplete(bool error);
   void plotRawComplete(bool error);
-  void setInstrumentDefault();
 
 private:
   bool validateInstrumentDetails();
+  void updateInstrumentConfiguration() override;
 
   InstrumentData getInstrumentData();
 

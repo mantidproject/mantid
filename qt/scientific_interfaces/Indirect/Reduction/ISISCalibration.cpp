@@ -129,9 +129,6 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
   auto resPeak = m_uiForm.ppResolution->addRangeSelector("ResPeak");
   resPeak->setColour(Qt::red);
 
-  // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
-
   // Update property map when a range selector is moved
   connectRangeSelectors();
   // Update range selector positions when a value in the double manager changes
@@ -373,7 +370,7 @@ bool ISISCalibration::validate() {
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISCalibration::setDefaultInstDetails() {
+void ISISCalibration::updateInstrumentConfiguration() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
@@ -466,7 +463,7 @@ void ISISCalibration::calPlotRaw() {
   setPeakRangeLimits(dataX.front(), dataX.back());
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
-  setDefaultInstDetails();
+  updateInstrumentConfiguration();
 
   m_uiForm.ppCalibration->replot();
 
