@@ -30,7 +30,6 @@ public slots:
 
 private slots:
   void algorithmComplete(bool error);
-  void setInstrumentDefault();
 
   void runClicked();
   void setRunEnabled(bool enabled);
@@ -38,6 +37,8 @@ private slots:
                        QString const &message = "Run", QString const &tooltip = "");
 
 private:
+  void updateInstrumentConfiguration() override;
+
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
   double m_backCalibScaling = 1.;
