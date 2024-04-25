@@ -178,6 +178,7 @@ public:
 
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
+  bool compressEvents;
 
   /// Pulse times for ALL banks, taken from proton_charge log.
   std::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;

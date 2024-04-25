@@ -1,0 +1,1 @@
+- Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall. However, the execution time of ``LoadEventNexus`` itself is generally longer; workflows that benefit from ``CompressEvents`` generally run faster.
