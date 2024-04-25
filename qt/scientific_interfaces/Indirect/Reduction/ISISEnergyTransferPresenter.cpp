@@ -174,8 +174,6 @@ void IETPresenter::run() {
   InstrumentData instrumentData = getInstrumentData();
   IETRunData runData = m_view->getRunData();
 
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
-
   m_view->setRunButtonText("Running...");
   m_view->setEnableOutputOptions(false);
 
@@ -195,6 +193,12 @@ void IETPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algor
 
     setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
     m_view->setSaveEnabled(!outputWorkspaceNames.empty());
+  } else if (algorithm->algorithm()->name() == "GroupDetectors") {
+    m_view->setPlotTimeIsPlotting(false);
+    auto const filename = m_view->getFirstFilename();
+    std::filesystem::path fileInfo(filename);
+    auto const name = fileInfo.filename().string();
+    m_plotter->plotSpectra(name + "_grp", "0", SettingsHelper::externalPlotErrorBars());
   }
 }
 
@@ -214,10 +218,8 @@ void IETPresenter::notifyPlotRawClicked() {
   if (errors.empty()) {
     m_view->setPlotTimeIsPlotting(true);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
-
-    m_batchAlgoRunner->setQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
-    m_batchAlgoRunner->executeBatchAsync();
+    m_algorithmRunner->setAlgorithmQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
+    m_algorithmRunner->executeQueue();
   } else {
     m_view->setPlotTimeIsPlotting(false);
     for (auto const &error : errors) {
@@ -225,19 +227,6 @@ void IETPresenter::notifyPlotRawClicked() {
         m_view->showMessageBox(error);
     }
   }
-}
-
-void IETPresenter::plotRawComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
-
-  if (!error) {
-    auto const filename = m_view->getFirstFilename();
-    std::filesystem::path fileInfo(filename);
-    auto const name = fileInfo.filename().string();
-    m_plotter->plotSpectra(name + "_grp", "0", SettingsHelper::externalPlotErrorBars());
-  }
-
-  m_view->setPlotTimeIsPlotting(false);
 }
 
 void IETPresenter::notifySaveClicked() {
