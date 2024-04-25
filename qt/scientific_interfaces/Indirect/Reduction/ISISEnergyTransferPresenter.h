@@ -45,8 +45,10 @@ public:
   void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
 
+  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
+  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
+
 private slots:
-  void algorithmComplete(bool error);
   void plotRawComplete(bool error);
 
 private:
