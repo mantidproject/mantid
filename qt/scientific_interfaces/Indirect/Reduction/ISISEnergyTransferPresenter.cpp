@@ -177,7 +177,7 @@ void IETPresenter::run() {
   m_view->setRunButtonText("Running...");
   m_view->setEnableOutputOptions(false);
 
-  m_algorithmRunner->execute("ISISIndirectEnergyTransfer", m_model->energyTransferProperties(instrumentData, runData));
+  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
 }
 
 void IETPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
@@ -217,9 +217,7 @@ void IETPresenter::notifyPlotRawClicked() {
 
   if (errors.empty()) {
     m_view->setPlotTimeIsPlotting(true);
-
-    m_algorithmRunner->setAlgorithmQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
-    m_algorithmRunner->executeQueue();
+    m_algorithmRunner->execute(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
   } else {
     m_view->setPlotTimeIsPlotting(false);
     for (auto const &error : errors) {

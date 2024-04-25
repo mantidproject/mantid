@@ -29,7 +29,6 @@ public:
 class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab,
                                            public IIETPresenter,
                                            public IAlgorithmRunnerSubscriber {
-  Q_OBJECT
 
 public:
   IETPresenter(IDataReduction * idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
