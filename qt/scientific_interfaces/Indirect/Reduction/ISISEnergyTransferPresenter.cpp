@@ -36,6 +36,7 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
                            std::unique_ptr<IAlgorithmRunner> algorithmRunner)
     : DataReductionTab(idrUI, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
+  m_algorithmRunner->subscribe(this);
 
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
@@ -181,7 +182,7 @@ void IETPresenter::run() {
   m_view->setRunButtonText("Running...");
   m_view->setEnableOutputOptions(false);
 
-  m_outputGroupName = m_model->runIETAlgorithm(m_batchAlgoRunner, instrumentData, runData);
+  m_algorithmRunner->execute("ISISIndirectEnergyTransfer", m_model->energyTransferProperties(instrumentData, runData));
 }
 
 void IETPresenter::algorithmComplete(bool error) {
@@ -192,8 +193,8 @@ void IETPresenter::algorithmComplete(bool error) {
   if (!error) {
     InstrumentData instrumentData = getInstrumentData();
     auto const outputWorkspaceNames =
-        m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(), m_view->getGroupOutputOption(),
-                                 m_view->getGroupOutputCheckbox());
+        m_model->groupWorkspaces(m_model->outputGroupName(), instrumentData.getInstrument(),
+                                 m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
     m_pythonExportWsName = outputWorkspaceNames[0];
 
     setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
