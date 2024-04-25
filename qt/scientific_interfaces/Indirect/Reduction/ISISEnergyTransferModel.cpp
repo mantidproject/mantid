@@ -119,8 +119,8 @@ std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::st
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-std::unique_ptr<AlgorithmRuntimeProps> IETModel::energyTransferProperties(InstrumentData const &instData,
-                                                                          IETRunData &runData) {
+MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
+                                                                           IETRunData &runData) {
   auto properties = runData.groupingProperties();
 
   setInstrumentProperties(*properties, instData);
@@ -132,7 +132,10 @@ std::unique_ptr<AlgorithmRuntimeProps> IETModel::energyTransferProperties(Instru
 
   m_outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName);
-  return properties;
+
+  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  reductionAlg->initialize();
+  return std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {

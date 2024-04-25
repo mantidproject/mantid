@@ -27,8 +27,8 @@ public:
   virtual std::vector<std::string> validateRunData(IETRunData const &runData) = 0;
   virtual std::vector<std::string> validatePlotData(IETPlotData const &plotData) = 0;
 
-  virtual std::unique_ptr<AlgorithmRuntimeProps> energyTransferProperties(InstrumentData const &instData,
-                                                                          IETRunData &runParams) = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
+                                                                           IETRunData &runParams) = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const = 0;
 
@@ -55,8 +55,8 @@ public:
   std::vector<std::string> validateRunData(IETRunData const &runData) override;
   std::vector<std::string> validatePlotData(IETPlotData const &plotData) override;
 
-  std::unique_ptr<AlgorithmRuntimeProps> energyTransferProperties(InstrumentData const &instData,
-                                                                  IETRunData &runParams) override;
+  MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
+                                                                   IETRunData &runParams) override;
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const override;
 
