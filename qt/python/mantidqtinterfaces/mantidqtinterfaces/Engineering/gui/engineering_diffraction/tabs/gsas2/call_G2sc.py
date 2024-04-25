@@ -181,7 +181,7 @@ number_of_regions = inputs_dict["number_of_regions"]
 """Call GSASIIscriptable"""
 import_path = None
 try:
-    import_path = os.path.join(path_to_gsas2, "GSAS-II", "GSASII")
+    import_path = os.path.join(path_to_gsas2, "GSASII")
     sys.path.insert(0, import_path)
     import GSASIIscriptable as G2sc
 except ModuleNotFoundError:
