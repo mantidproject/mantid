@@ -46,9 +46,7 @@ public:
     checkPropertyValue<CType>(std::move(valueProp), pyvalue);                                                          \
   }
 
-  void test_builtin_type_creates_int_type_property_without_error() {
-    testCreateSingleValueProperty<long>(FROM_INT(10));
-  }
+  void test_builtin_type_creates_int_type_property_without_error() { testCreateSingleValueProperty<int>(FROM_INT(10)); }
 
   void test_builtin_type_creates_double_type_property_without_error() {
     testCreateSingleValueProperty<double>(PyFloat_FromDouble(50.123));
