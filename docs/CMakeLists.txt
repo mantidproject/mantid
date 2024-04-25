@@ -11,6 +11,7 @@ set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.e
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
 option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" ON)
+option(SPHINX_FRESH_ENV "Don't use a saved environment, but rebuild it completely" ON)
 
 # Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -40,6 +41,11 @@ if(SPHINX_WARNINGS_AS_ERRORS)
 else()
   set(SPHINX_WARNINGS_AS_ERRORS_FLAG "")
 endif()
+if(SPHINX_FRESH_ENV)
+  set(SPHINX_FRESH_ENV_FLAG "-E")
+else()
+  set(SPHINX_FRESH_ENV_FLAG "")
+endif()
 
 # Add a sphinx build target to build documentation builder - Name of the sphinx builder: html, qthelp etc target_name -
 # Optional target name. Default=docs-${builder}
@@ -61,6 +67,7 @@ function(add_sphinx_build_target builder math_renderer)
       ${SPHINX_NOCOLOR}
       ${SPHINX_KEEPGOING}
       ${SPHINX_WARNINGS_AS_ERRORS_FLAG}
+      ${SPHINX_FRESH_ENV_FLAG}
       -b
       ${builder}
       -d
