@@ -48,9 +48,6 @@ public:
   void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
 
-private slots:
-  void plotRawComplete(bool error);
-
 private:
   bool validateInstrumentDetails();
   void updateInstrumentConfiguration() override;
