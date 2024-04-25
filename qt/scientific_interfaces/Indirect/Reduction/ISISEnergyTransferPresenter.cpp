@@ -37,8 +37,6 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
 
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
-
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 }
 
 void IETPresenter::setup() {}
@@ -75,7 +73,7 @@ InstrumentData IETPresenter::getInstrumentData() {
       instrumentDetails["save-ascii-choice"] == "true", instrumentDetails["fold-frames-choice"] == "true");
 }
 
-void IETPresenter::setInstrumentDefault() {
+void IETPresenter::updateInstrumentConfiguration() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     auto const instrumentName = instrumentDetails.getInstrument();

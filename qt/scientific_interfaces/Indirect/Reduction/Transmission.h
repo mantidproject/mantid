@@ -28,7 +28,6 @@ public:
 
 private slots:
   void transAlgDone(bool error);
-  void setInstrument();
 
   void runClicked();
   void saveClicked();
@@ -40,6 +39,7 @@ private slots:
 
 private:
   void setInstrument(QString const &instrumentName);
+  void updateInstrumentConfiguration() override;
 
   Ui::Transmission m_uiForm;
 };
