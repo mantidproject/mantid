@@ -227,6 +227,9 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
     TS_ASSERT_THROWS(FileFinder::Instance().getInstrument("BADINSTR12354.nxs", false),
                      const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D").name(), "SANS2D");
   }
 
   void testGetExtension() {
@@ -694,6 +697,15 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
     TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
+  }
+
+  void testInstrWithLowercase() {
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mar26045"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mAr26045"}, {".raw", ".nxs", ".s01"}).result(),
+                     m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"Mer40871"}, {".raw", ".nxs", ".s01"}).result(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 

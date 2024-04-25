@@ -73,7 +73,6 @@ Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(std::string f
   const auto nChars = std::distance(itRev, fileName.rend());
   std::string runNumber = fileName.substr(nChars);
 
-  // Get instrument full name from short name, throws exception if not found
   std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
   std::string instrName = fileName.substr(0, nChars);
 
