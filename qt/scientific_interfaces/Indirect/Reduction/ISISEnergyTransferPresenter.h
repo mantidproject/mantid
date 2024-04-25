@@ -29,7 +29,8 @@ class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab, public IIETP
   Q_OBJECT
 
 public:
-  IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model);
+  IETPresenter(IDataReduction * idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
+               std::unique_ptr<IAlgorithmRunner> algorithmRunner);
 
   void setup() override;
   void run() override;
