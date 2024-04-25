@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IAlgorithmRunnerSubscriber.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
@@ -25,7 +26,9 @@ public:
   virtual void notifyRunFinished() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab, public IIETPresenter {
+class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab,
+                                           public IIETPresenter,
+                                           public IAlgorithmRunnerSubscriber {
   Q_OBJECT
 
 public:
@@ -53,8 +56,6 @@ private:
   InstrumentData getInstrumentData();
 
   void setFileExtensionsByName(bool filter) override;
-
-  std::string m_outputGroupName;
 
   IIETView *m_view;
   std::unique_ptr<IIETModel> m_model;
