@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "Common/AlgorithmRunner.h"
 #include "Common/InelasticTab.h"
 #include "Common/InstrumentConfig.h"
 #include "Common/OutputPlotOptionsPresenter.h"
@@ -46,6 +47,7 @@ class MANTIDQT_INDIRECT_DLL DataReductionTab : public InelasticTab {
 
 public:
   DataReductionTab(IDataReduction *idrUI, QObject *parent = nullptr);
+  DataReductionTab(IDataReduction *idrUI, std::unique_ptr<IAlgorithmRunner> algorithmRunner);
   ~DataReductionTab() override;
 
   /// Set the presenter for the output plotting options
@@ -84,7 +86,8 @@ protected:
                                                         QString reflection = "");
 
 protected:
-  IDataReduction *m_idrUI;
+  IDataReduction * m_idrUI;
+  std::unique_ptr<IAlgorithmRunner> m_algorithmRunner;
 
 private slots:
   void tabExecutionComplete(bool error);

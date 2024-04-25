@@ -31,6 +31,13 @@ DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
+DataReductionTab::DataReductionTab(IDataReduction *idrUI,
+                                                   std::unique_ptr<IAlgorithmRunner> algorithmRunner)
+    : InelasticTab(), m_idrUI(idrUI), m_tabRunning(false), m_algorithmRunner(std::move(algorithmRunner)) {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
+}
+
 DataReductionTab::~DataReductionTab() = default;
 
 void DataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {

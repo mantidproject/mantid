@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/algorithm/string/classification.hpp>
@@ -31,8 +32,9 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
-    : DataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
+IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
+                           std::unique_ptr<IAlgorithmRunner> algorithmRunner)
+    : DataReductionTab(idrUI, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 
   setOutputPlotOptionsPresenter(
