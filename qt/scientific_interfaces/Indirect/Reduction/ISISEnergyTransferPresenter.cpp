@@ -25,8 +25,6 @@
 #include <regex>
 
 using namespace Mantid::API;
-using MantidQt::API::BatchAlgorithmRunner;
-
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
@@ -176,7 +174,6 @@ void IETPresenter::run() {
   InstrumentData instrumentData = getInstrumentData();
   IETRunData runData = m_view->getRunData();
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
   m_view->setRunButtonText("Running...");
@@ -185,12 +182,11 @@ void IETPresenter::run() {
   m_algorithmRunner->execute("ISISIndirectEnergyTransfer", m_model->energyTransferProperties(instrumentData, runData));
 }
 
-void IETPresenter::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-  m_view->setRunButtonText("Run");
-  m_view->setEnableOutputOptions(!error);
+void IETPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
+  if (algorithm->algorithm()->name() == "ISISIndirectEnergyTransfer") {
+    m_view->setRunButtonText("Run");
+    m_view->setEnableOutputOptions(true);
 
-  if (!error) {
     InstrumentData instrumentData = getInstrumentData();
     auto const outputWorkspaceNames =
         m_model->groupWorkspaces(m_model->outputGroupName(), instrumentData.getInstrument(),
@@ -202,6 +198,14 @@ void IETPresenter::algorithmComplete(bool error) {
   }
 }
 
+void IETPresenter::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
+  (void)algorithm;
+  (void)message;
+  m_view->setRunButtonText("Run");
+  m_view->setEnableOutputOptions(false);
+  m_view->setPlotTimeIsPlotting(false);
+}
+
 void IETPresenter::notifyPlotRawClicked() {
   InstrumentData instrumentData = getInstrumentData();
   IETPlotData plotParams = m_view->getPlotData();
@@ -210,7 +214,6 @@ void IETPresenter::notifyPlotRawClicked() {
   if (errors.empty()) {
     m_view->setPlotTimeIsPlotting(true);
 
-    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
     m_batchAlgoRunner->setQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
