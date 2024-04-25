@@ -65,11 +65,11 @@ public:
   }
 
   void test_builtin_type_create_long_array_from_list_type_property() {
-    testCreateArrayProperty<long>(Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
+    testCreateArrayProperty<int>(Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
   }
 
   void test_builtin_type_create_int_array_from_list_type_property() {
-    testCreateArrayProperty<long>(Py_BuildValue("[ii]", -10, 4));
+    testCreateArrayProperty<int>(Py_BuildValue("[ii]", -10, 4));
   }
 
 private:
