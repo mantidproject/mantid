@@ -27,8 +27,8 @@ public:
   virtual std::vector<std::string> validateRunData(IETRunData const &runData) = 0;
   virtual std::vector<std::string> validatePlotData(IETPlotData const &plotData) = 0;
 
-  virtual std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                      InstrumentData const &instData, IETRunData &runParams) = 0;
+  virtual std::unique_ptr<AlgorithmRuntimeProps> energyTransferProperties(InstrumentData const &instData,
+                                                                          IETRunData &runParams) = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const = 0;
 
@@ -41,6 +41,7 @@ public:
   virtual std::vector<std::string> groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                                    std::string const &groupOption, bool const shouldGroup) = 0;
 
+  virtual std::string outputGroupName() const = 0;
   virtual std::vector<std::string> outputWorkspaceNames() const = 0;
 };
 
@@ -54,8 +55,8 @@ public:
   std::vector<std::string> validateRunData(IETRunData const &runData) override;
   std::vector<std::string> validatePlotData(IETPlotData const &plotData) override;
 
-  std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
-                              IETRunData &runParams) override;
+  std::unique_ptr<AlgorithmRuntimeProps> energyTransferProperties(InstrumentData const &instData,
+                                                                  IETRunData &runParams) override;
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const override;
 
@@ -79,6 +80,8 @@ public:
                            std::string const &outputGroupName);
   std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
+  [[nodiscard]] inline std::string outputGroupName() const noexcept override { return m_outputGroupName; }
+
   [[nodiscard]] inline std::vector<std::string> outputWorkspaceNames() const noexcept override {
     return m_outputWorkspaces;
   }
@@ -97,6 +100,7 @@ private:
   plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename, std::string const &instrumentName,
                         std::vector<int> const &detectorList, IETBackgroundData const &backgroundData) const;
 
+  std::string m_outputGroupName;
   std::vector<std::string> m_outputWorkspaces;
 };
 } // namespace CustomInterfaces
