@@ -33,15 +33,13 @@ public:
 
   void setup() override;
   void run() override;
+  bool validate() override;
 
   void notifySaveClicked() override;
   void notifyRunClicked() override;
   void notifyPlotRawClicked() override;
   void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
-
-public slots:
-  bool validate() override;
 
 private slots:
   void algorithmComplete(bool error);
