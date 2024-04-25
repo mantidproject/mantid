@@ -19,7 +19,7 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
   m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
   setAllSpectraSelectionEnabled(false);
-
+  connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
   connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
@@ -55,6 +55,9 @@ void AddWorkspaceDialog::selectAllSpectra(int state) {
 void AddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
   const auto workspace = WorkspaceUtils::getADSWorkspace(name);
+  m_uiForm.pbAdd->setText("Add");
+  m_uiForm.pbAdd->setEnabled(true);
+
   if (workspace)
     setWorkspace(name);
   else
@@ -62,6 +65,11 @@ void AddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
 }
 
 void AddWorkspaceDialog::emitAddData() { emit addData(this); }
+
+void AddWorkspaceDialog::handleAutoLoaded() {
+  m_uiForm.pbAdd->setText("Loading");
+  m_uiForm.pbAdd->setEnabled(false);
+}
 
 void AddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);

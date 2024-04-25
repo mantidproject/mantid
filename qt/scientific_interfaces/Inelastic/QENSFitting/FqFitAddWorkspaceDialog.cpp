@@ -17,6 +17,7 @@ FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(pare
   m_uiForm.dsWorkspace->setLoadProperty("LoadHistory", false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
+  connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
   connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
@@ -65,11 +66,17 @@ void FqFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
 }
 
 void FqFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
+  m_uiForm.pbAdd->setText("Add");
+  m_uiForm.pbAdd->setEnabled(true);
   emit workspaceChanged(this, name.toStdString());
 }
 
 void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
+}
+void FqFitAddWorkspaceDialog::handleAutoLoaded() {
+  m_uiForm.pbAdd->setText("Loading");
+  m_uiForm.pbAdd->setEnabled(false);
 }
 
 void FqFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
