@@ -98,6 +98,7 @@ set(SRC_FILES
     src/SelectFunctionDialog.cpp
     src/SelectWorkspacesDialog.cpp
     src/SlitCalculator.cpp
+    src/TableWidgetValidators.cpp
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
@@ -113,6 +114,7 @@ set(SRC_FILES
     src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
     src/WorkspaceSelector.cpp
     src/WorkspaceMultiSelector.cpp
+    src/WorkspaceUtils.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
     src/AlgorithmProgress/AlgorithmProgressModel.cpp
@@ -309,9 +311,11 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
+    inc/MantidQtWidgets/Common/TableWidgetValidators.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
+    inc/MantidQtWidgets/Common/WorkspaceUtils.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -715,6 +719,7 @@ set(TEST_FILES
     test/SelectionNotificationServiceTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
+    test/WorkspaceUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -750,6 +755,7 @@ set(QT5_TEST_FILES
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h

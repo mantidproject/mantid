@@ -6,9 +6,8 @@ set(TEST_FILES
     OutputPlotOptionsPresenterTest.h
     SettingsModelTest.h
     SettingsPresenterTest.h
-    WorkspaceUtilsTest.h
-    InterfaceUtilsTest.h
     ValidationUtilsTest.h
+    InterfaceUtilsTest.h
 )
 
 set(TEST_HELPERS MockObjects.h)

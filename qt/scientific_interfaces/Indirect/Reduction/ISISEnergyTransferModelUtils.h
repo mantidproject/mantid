@@ -6,15 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include <boost/algorithm/string.hpp>
 
 #include <filesystem>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 
@@ -63,8 +64,8 @@ double loadSampleLog(std::string const &filename, std::vector<std::string> const
 
   double value(defaultValue);
 
-  if (WorkspaceUtils::doesExistInADS(temporaryWorkspace)) {
-    auto workspace = WorkspaceUtils::getADSWorkspace(temporaryWorkspace);
+  if (doesExistInADS(temporaryWorkspace)) {
+    auto workspace = getADSWorkspace(temporaryWorkspace);
     value = getSampleLog(workspace, logNames, defaultValue);
     deleteWorkspace(workspace->getName());
   }

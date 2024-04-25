@@ -7,7 +7,7 @@
 #include "FitTab.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include "FitPlotView.h"
 #include "FitTabConstants.h"

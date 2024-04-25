@@ -30,7 +30,7 @@ public:
   std::optional<std::string> convolutionPrefix() const { return m_convolutionPrefix; }
   std::optional<std::string> deltaFunctionPrefix() const { return m_deltaFunctionPrefix; }
   std::optional<std::string> tempFunctionPrefix() const { return m_tempFunctionPrefix; }
-  std::optional<QStringList> peakPrefixes() const { return m_peakPrefixes; }
+  std::optional<std::vector<std::string>> peakPrefixes() const { return m_peakPrefixes; }
   std::optional<std::string> fitTypePrefix() const { return m_fitTypePrefix; }
 
   std::string resolutionWorkspace() const { return m_resolutionWorkspace; }
@@ -55,7 +55,7 @@ private:
   std::optional<std::string> m_deltaFunctionPrefix;
   std::optional<std::string> m_tempFunctionPrefix;
   std::optional<std::string> m_fitTypePrefix;
-  std::optional<QStringList> m_peakPrefixes;
+  std::optional<std::vector<std::string>> m_peakPrefixes;
   std::string m_resolutionWorkspace;
   int m_resolutionWorkspaceIndex;
 };

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "InterfaceUtils.h"
+#include "Common/InterfaceUtils.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <QDomDocument>
@@ -15,7 +15,9 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
-}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {

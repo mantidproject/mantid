@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -16,8 +15,8 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 class InterfaceUtilsTest : public CxxTest::TestSuite {
 public:

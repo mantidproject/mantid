@@ -45,8 +45,7 @@ private:
   std::optional<std::size_t> propertySubTypeIndex(QtProperty *prop);
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
-  // Map fit type to a list of function parameters (QtProperties for those parameters)
-  std::vector<std::map<int, std::vector<QtProperty *>>> m_subTypeParameters;
+  std::vector<std::map<int, std::vector<ParamID>>> m_subTypeParamIDs;
   std::vector<std::vector<QtProperty *>> m_currentSubTypeParameters;
   std::vector<QtProperty *> m_subTypeProperties;
 

@@ -76,7 +76,12 @@ class SpaceGroupBuilder(object):
             raise RuntimeError("No space group symbol in CIF.")
 
         cleanSpaceGroupSymbol = self._getCleanSpaceGroupSymbol(rawSpaceGroupSymbol[0])
-
+        if not SpaceGroupFactory.isSubscribedSymbol(cleanSpaceGroupSymbol):
+            # try adding rotoinversion (i.e. prefix '-' to first digit,  sometimes omitted but is implicit)
+            match = re.search(r"\d", cleanSpaceGroupSymbol)
+            if match:
+                idigit = match.start()
+                cleanSpaceGroupSymbol = cleanSpaceGroupSymbol[:idigit] + "-" + cleanSpaceGroupSymbol[idigit:]
         # If the symbol is not registered, throw as well.
         return SpaceGroupFactory.createSpaceGroup(cleanSpaceGroupSymbol).getHMSymbol()
 

@@ -7,11 +7,14 @@
 #include "Quasi.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Quasi");
@@ -97,12 +100,10 @@ void Quasi::loadSettings(const QSettings &settings) {
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Quasi");
-  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                          : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
-                                              : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Quasi::setup() {}
@@ -338,7 +339,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
-  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
