@@ -1,0 +1,1 @@
+- Fixed a bug where it wasn't possible to use a custom fit function on the IqtFit tab of :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>`.
