@@ -38,10 +38,9 @@ IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view)
 void IqtPresenter::setup() { m_view->setup(); }
 
 void IqtPresenter::handleSampDataReady(const std::string &wsname) {
-  MatrixWorkspace_sptr workspace;
   try {
-    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
-    setInputWorkspace(workspace);
+    auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    setInputWorkspace(std::move(workspace));
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     m_view->showMessageBox("Unable to retrieve workspace: " + wsname);
     m_view->setPreviewSpectrumMaximum(0);

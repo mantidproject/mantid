@@ -20,13 +20,12 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SymmetriseModel::SymmetriseModel() {}
+SymmetriseModel::SymmetriseModel()
+    : m_inputWorkspace(), m_reflectedInputWorkspace(), m_negativeOutputWorkspace(), m_positiveOutputWorkspace(),
+      m_eMin(), m_eMax(), m_isPositiveReflect(), m_spectraRange() {}
 
 void SymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::vector<long> spectraRange) {
+                                            std::vector<long> const &spectraRange) {
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();

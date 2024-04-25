@@ -39,10 +39,9 @@ void convertToSpectrumAxis(std::string const &inputName, std::string const &outp
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SqwModel::SqwModel() { m_rebinInEnergy = false; }
+SqwModel::SqwModel()
+    : m_inputWorkspace(), m_baseName(), m_eFixed(), m_qLow(), m_qWidth(0.05), m_qHigh(), m_eLow(), m_eWidth(0.005),
+      m_eHigh(), m_rebinInEnergy(false) {}
 
 void SqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   if (m_rebinInEnergy) {
