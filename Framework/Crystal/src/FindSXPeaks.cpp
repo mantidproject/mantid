@@ -228,8 +228,8 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
     validationOutput["XResolution"] = "XResolution must be set to a value greater than 0";
   }
 
-  const int minNSpectraPerPeak = static_cast<int>(getProperty("MinNSpectraPerPeak"));
-  const int maxNSpectraPerPeak = static_cast<int>(getProperty("MaxNSpectraPerPeak"));
+  const int minNSpectraPerPeak = getProperty("MinNSpectraPerPeak");
+  const int maxNSpectraPerPeak = getProperty("MaxNSpectraPerPeak");
   if (!isEmpty(minNSpectraPerPeak) && !isEmpty(maxNSpectraPerPeak)) {
     if (maxNSpectraPerPeak < minNSpectraPerPeak) {
       validationOutput["MaxNSpectraPerPeak"] = "MaxNSpectraPerPeak must be greater than MinNSpectraPerPeak";
@@ -239,8 +239,8 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   if (inputWorkspace) {
-    int minWsIndex = static_cast<int>(getProperty("StartWorkspaceIndex"));
-    int maxWsIndex = static_cast<int>(getProperty("EndWorkspaceIndex"));
+    const int minWsIndex = getProperty("StartWorkspaceIndex");
+    const int maxWsIndex = getProperty("EndWorkspaceIndex");
     size_t numberOfSpectraToConsider =
         !isEmpty(minWsIndex) ? (!isEmpty(maxWsIndex) ? (maxWsIndex - minWsIndex + 1)
                                                      : (inputWorkspace->getNumberHistograms() - minWsIndex))
@@ -260,7 +260,7 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
       }
     }
 
-    const int minNBinsPerPeak = static_cast<int>(getProperty("MinNBinsPerPeak"));
+    const int minNBinsPerPeak = getProperty("MinNBinsPerPeak");
     if (!isEmpty(minNBinsPerPeak)) {
       if (minNBinsPerPeak > inputWorkspace->getMaxNumberBins()) {
         validationOutput["MinNBinsPerPeak"] =
@@ -327,7 +327,7 @@ void FindSXPeaks::exec() {
   auto peakFindingStrategy =
       getPeakFindingStrategy(backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange, xUnit);
 
-  const int minNBinsPerPeak = static_cast<int>(getProperty("MinNBinsPerPeak"));
+  const int minNBinsPerPeak = getProperty("MinNBinsPerPeak");
   if (!isEmpty(minNBinsPerPeak)) {
     peakFindingStrategy->setMinNBinsPerPeak(minNBinsPerPeak);
   }
@@ -382,12 +382,12 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   auto compareStrategy = getCompareStrategy();
   auto reductionStrategy = getReducePeakListStrategy(compareStrategy.get());
 
-  const int minNSpectraPerPeak = static_cast<int>(getProperty("MinNSpectraPerPeak"));
+  const int minNSpectraPerPeak = getProperty("MinNSpectraPerPeak");
   if (!isEmpty(minNSpectraPerPeak)) {
     reductionStrategy->setMinNSpectraPerPeak(minNSpectraPerPeak);
   }
 
-  const int maxNSpectraPerPeak = static_cast<int>(getProperty("MaxNSpectraPerPeak"));
+  const int maxNSpectraPerPeak = getProperty("MaxNSpectraPerPeak");
   if (!isEmpty(maxNSpectraPerPeak)) {
     reductionStrategy->setMaxNSpectraPerPeak(maxNSpectraPerPeak);
   }
