@@ -50,8 +50,7 @@ void PolarizerEfficiency::init() {
       "Polarizer efficiency as a function of wavelength");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
-  std::string initialSpinConfig = "11,10,01,00";
-  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator,
+  declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 }
 
@@ -88,8 +87,9 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
  */
 void PolarizerEfficiency::validateGroupInput() {
   const auto results = validateInputs();
-  for (const auto &result : results) {
-    throw std::runtime_error("Issue in " + result.first + " property: " + result.second);
+  if (results.size() > 0) {
+    const auto result = results.cbegin();
+    throw std::runtime_error("Issue in " + result->first + " property: " + result->second);
   }
 }
 
@@ -130,7 +130,7 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   auto numerator = subtractTwoWorkspaces(eCellTimesSum, t01Ws);
   scaleWorkspace(eCellTimesSum, 2);
   auto denominator = subtractTwoWorkspaces(eCellTimesSum, sumT);
-  auto effPolarizer = divideWorkspaces(numerator, denominator);
+  auto effPolarizer = divideWorkspaces(std::move(numerator), std::move(denominator));
   setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
 }
 
