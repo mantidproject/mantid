@@ -1462,7 +1462,7 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = std::numeric_limits<double>::lowest();
+  double lastTof = events.front().m_tof;
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
@@ -1471,74 +1471,58 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   double errorSquared = 0;
   double normalization = 0.;
 
-  if (tolerance < 0) {
-    lastTof = events.front().m_tof;
-    double bin_end = lastTof * (1 - tolerance);
+  double bin_end = lastTof;
+  std::function<bool(const double, const double)> compareTof;
+  std::function<double(const double, double)> next_bin;
 
-    for (auto it = events.cbegin(); it != events.cend(); it++) {
-      if (it->m_tof < bin_end) {
-        // Carry the error and weight
-        weight += it->weight();
-        errorSquared += it->errorSquared();
-        // Track the average tof
-        num++;
-        const double norm = calcNorm(it->errorSquared());
-        normalization += norm;
-        totalTof += it->m_tof * norm;
-      } else {
-        // We exceeded the tolerance
-        // Create a new event with the average TOF and summed weights and
-        // squared errors.
-        if (num == 1) {
-          // last time-of-flight is the only one contributing
-          out.emplace_back(lastTof, weight, errorSquared);
-        } else if (num > 1) {
-          out.emplace_back(totalTof / normalization, weight, errorSquared);
-        }
-        // Start a new combined object
-        num = 1;
-        const double norm = calcNorm(it->errorSquared());
-        normalization = norm;
-        totalTof = it->m_tof * norm;
-        weight = it->weight();
-        errorSquared = it->errorSquared();
-        lastTof = it->m_tof;
+  if (tolerance < 0) { // log
+    // for log we do "less than" so that is matches the log binning of the Rebin algorithm
+    compareTof = [](const double lhs, const double rhs) { return lhs < rhs; };
+    next_bin = [tolerance](const double lastTof, double bin_end) {
+      // advance the bin_end until we find the one that this next event falls into
+      while (lastTof >= bin_end)
+        bin_end = bin_end * (1 - tolerance);
+      return bin_end;
+    };
+  } else { // linear
+    // for linear we do "less than or equals" because that is how it was originally implemented
+    compareTof = [](const double lhs, const double rhs) { return lhs <= rhs; };
+    next_bin = [tolerance](const double lastTof, double) { return lastTof + tolerance; };
+  }
 
-        // advance the bin_end until we find the one that this next event falls into
-        while (lastTof >= bin_end)
-          bin_end = bin_end * (1 - tolerance);
+  // get first bin_end
+  bin_end = next_bin(lastTof, bin_end);
+
+  for (auto it = events.cbegin(); it != events.cend(); it++) {
+    if (compareTof(it->m_tof, bin_end)) {
+      // Carry the error and weight
+      weight += it->weight();
+      errorSquared += it->errorSquared();
+      // Track the average tof
+      num++;
+      const double norm = calcNorm(it->errorSquared());
+      normalization += norm;
+      totalTof += it->m_tof * norm;
+    } else {
+      // We exceeded the tolerance
+      // Create a new event with the average TOF and summed weights and
+      // squared errors.
+      if (num == 1) {
+        // last time-of-flight is the only one contributing
+        out.emplace_back(lastTof, weight, errorSquared);
+      } else if (num > 1) {
+        out.emplace_back(totalTof / normalization, weight, errorSquared);
       }
-    }
-  } else {
-    for (auto it = events.cbegin(); it != events.cend(); it++) {
-      if ((it->m_tof - lastTof) <= tolerance) {
-        // Carry the error and weight
-        weight += it->weight();
-        errorSquared += it->errorSquared();
-        // Track the average tof
-        num++;
-        const double norm = calcNorm(it->errorSquared());
-        normalization += norm;
-        totalTof += it->m_tof * norm;
-      } else {
-        // We exceeded the tolerance
-        // Create a new event with the average TOF and summed weights and
-        // squared errors.
-        if (num == 1) {
-          // last time-of-flight is the only one contributing
-          out.emplace_back(lastTof, weight, errorSquared);
-        } else if (num > 1) {
-          out.emplace_back(totalTof / normalization, weight, errorSquared);
-        }
-        // Start a new combined object
-        num = 1;
-        const double norm = calcNorm(it->errorSquared());
-        normalization = norm;
-        totalTof = it->m_tof * norm;
-        weight = it->weight();
-        errorSquared = it->errorSquared();
-        lastTof = it->m_tof;
-      }
+      // Start a new combined object
+      num = 1;
+      const double norm = calcNorm(it->errorSquared());
+      normalization = norm;
+      totalTof = it->m_tof * norm;
+      weight = it->weight();
+      errorSquared = it->errorSquared();
+      lastTof = it->m_tof;
+
+      bin_end = next_bin(lastTof, bin_end);
     }
   }
 
@@ -1568,7 +1552,7 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = std::numeric_limits<double>::lowest();
+  double lastTof = events.front().m_tof;
   // For getting an accurate average TOF
   double totalTof = 0;
 
@@ -1599,103 +1583,79 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
   // bin if the pulses are histogrammed
   int64_t lastPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
 
-  if (tolerance < 0) {
+  double bin_end = lastTof;
+  double tof_min{0};
+  std::function<bool(const double, const double)> compareTof;
+  std::function<double(const double, double)> next_bin;
+
+  if (tolerance < 0) { // log
+    // for log we do "less than" so that is matches the log binning of the Rebin algorithm
+    compareTof = [](const double lhs, const double rhs) { return lhs < rhs; };
+    next_bin = [tolerance](const double lastTof, double bin_end) {
+      // advance the bin_end until we find the one that this next event falls into
+      while (lastTof >= bin_end)
+        bin_end = bin_end * (1 - tolerance);
+      return bin_end;
+    };
+
     // get minimum Tof so that binning is consistent across all pulses
     const auto event_min = std::min_element(
         events.cbegin(), events.cend(), [](const auto &left, const auto &right) { return left.tof() < right.tof(); });
-    const auto tof_min = event_min->tof();
+    bin_end = tof_min = event_min->tof();
+  } else { // linear
+    // for linear we do "less than or equals" because that is how it was originally implemented
+    compareTof = [](const double lhs, const double rhs) { return lhs <= rhs; };
+    next_bin = [tolerance](const double lastTof, double) { return lastTof + tolerance; };
+  }
 
-    lastTof = events.front().m_tof;
-    double bin_end = tof_min * (1 - tolerance);
+  // get first bin_end
+  bin_end = next_bin(lastTof, bin_end);
 
-    // loop through events and accumulate weight
-    for (; it != events.cend(); ++it) {
-      const int64_t eventPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
-      if ((eventPulseBin <= lastPulseBin) && (it->m_tof < bin_end)) {
-        // Carry the error and weight
-        weight += it->weight();
-        errorSquared += it->errorSquared();
-        double norm = calcNorm(it->errorSquared());
-        tofNormalization += norm;
-        // Track the average tof
-        totalTof += it->m_tof * norm;
-        // Accumulate the pulse times
-        pulsetimes.emplace_back(it->m_pulsetime);
-        pulsetimeWeights.emplace_back(norm);
-      } else {
-        // We exceeded the tolerance
-        if (!pulsetimes.empty()) {
-          // Create a new event with the average TOF and summed weights and
-          // squared errors. 1 event used doesn't need to average
-          if (pulsetimes.size() == 1) {
-            out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
-          } else {
-            out.emplace_back(totalTof / tofNormalization,
-                             Kernel::DateAndTimeHelpers::averageSorted(pulsetimes, pulsetimeWeights), weight,
-                             errorSquared);
-          }
+  // loop through events and accumulate weight
+  for (; it != events.cend(); ++it) {
+    const int64_t eventPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
+    if ((eventPulseBin <= lastPulseBin) && compareTof(it->m_tof, bin_end)) {
+      // Carry the error and weight
+      weight += it->weight();
+      errorSquared += it->errorSquared();
+      double norm = calcNorm(it->errorSquared());
+      tofNormalization += norm;
+      // Track the average tof
+      totalTof += it->m_tof * norm;
+      // Accumulate the pulse times
+      pulsetimes.emplace_back(it->m_pulsetime);
+      pulsetimeWeights.emplace_back(norm);
+    } else {
+      // We exceeded the tolerance
+      if (!pulsetimes.empty()) {
+        // Create a new event with the average TOF and summed weights and
+        // squared errors. 1 event used doesn't need to average
+        if (pulsetimes.size() == 1) {
+          out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
+        } else {
+          out.emplace_back(totalTof / tofNormalization,
+                           Kernel::DateAndTimeHelpers::averageSorted(pulsetimes, pulsetimeWeights), weight,
+                           errorSquared);
         }
-        // Start a new combined object
-        double norm = calcNorm(it->errorSquared());
-        totalTof = it->m_tof * norm;
-        weight = it->weight();
-        errorSquared = it->errorSquared();
-        tofNormalization = norm;
-        lastTof = it->m_tof;
-        if (eventPulseBin != lastPulseBin)
-          bin_end = tof_min * (1 - tolerance);
-        lastPulseBin = eventPulseBin;
-        pulsetimes.clear();
-        pulsetimes.emplace_back(it->m_pulsetime);
-        pulsetimeWeights.clear();
-        pulsetimeWeights.emplace_back(norm);
+      }
+      if (tolerance < 0 && eventPulseBin != lastPulseBin)
+        // reset the bin_end for the new pulse bin
+        bin_end = tof_min;
 
-        // advance the bin_end until we find the one that this next event falls into
-        while (lastTof >= bin_end)
-          bin_end = bin_end * (1 - tolerance);
-      }
-    }
-  } else {
-    // loop through events and accumulate weight
-    for (; it != events.cend(); ++it) {
-      const int64_t eventPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
-      if ((eventPulseBin <= lastPulseBin) && (std::fabs(it->m_tof - lastTof) <= tolerance)) {
-        // Carry the error and weight
-        weight += it->weight();
-        errorSquared += it->errorSquared();
-        double norm = calcNorm(it->errorSquared());
-        tofNormalization += norm;
-        // Track the average tof
-        totalTof += it->m_tof * norm;
-        // Accumulate the pulse times
-        pulsetimes.emplace_back(it->m_pulsetime);
-        pulsetimeWeights.emplace_back(norm);
-      } else {
-        // We exceeded the tolerance
-        if (!pulsetimes.empty()) {
-          // Create a new event with the average TOF and summed weights and
-          // squared errors. 1 event used doesn't need to average
-          if (pulsetimes.size() == 1) {
-            out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
-          } else {
-            out.emplace_back(totalTof / tofNormalization,
-                             Kernel::DateAndTimeHelpers::averageSorted(pulsetimes, pulsetimeWeights), weight,
-                             errorSquared);
-          }
-        }
-        // Start a new combined object
-        double norm = calcNorm(it->errorSquared());
-        totalTof = it->m_tof * norm;
-        weight = it->weight();
-        errorSquared = it->errorSquared();
-        tofNormalization = norm;
-        lastTof = it->m_tof;
-        lastPulseBin = eventPulseBin;
-        pulsetimes.clear();
-        pulsetimes.emplace_back(it->m_pulsetime);
-        pulsetimeWeights.clear();
-        pulsetimeWeights.emplace_back(norm);
-      }
+      // Start a new combined object
+      double norm = calcNorm(it->errorSquared());
+      totalTof = it->m_tof * norm;
+      weight = it->weight();
+      errorSquared = it->errorSquared();
+      tofNormalization = norm;
+      lastTof = it->m_tof;
+      lastPulseBin = eventPulseBin;
+      pulsetimes.clear();
+      pulsetimes.emplace_back(it->m_pulsetime);
+      pulsetimeWeights.clear();
+      pulsetimeWeights.emplace_back(norm);
+
+      bin_end = next_bin(lastTof, bin_end);
     }
   }
 
