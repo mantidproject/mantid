@@ -129,6 +129,8 @@ void InelasticFitPropertyBrowser::syncFullBrowserWithTemplate() {
     m_functionBrowser->updateMultiDatasetParameters(*m_templatePresenter->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(m_templatePresenter->getGlobalParameters());
     m_functionBrowser->setCurrentDataset(m_templatePresenter->getCurrentDataset());
+  } else {
+    m_functionBrowser->clear();
   }
   m_functionBrowser->blockSignals(false);
 }
@@ -141,6 +143,8 @@ void InelasticFitPropertyBrowser::syncTemplateBrowserWithFull() {
     m_templatePresenter->updateMultiDatasetParameters(*fun);
     m_templatePresenter->setGlobalParameters(m_functionBrowser->getGlobalParameters());
     m_templatePresenter->setCurrentDataset(m_functionBrowser->getCurrentDataset());
+  } else {
+    m_templatePresenter->setFunction("");
   }
   m_templatePresenter->browser()->blockSignals(false);
 }
