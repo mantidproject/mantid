@@ -383,7 +383,7 @@ Code Freeze
 **Create the Release Branch (once most PRs are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
 * Click ``Build Now`` on `open-release-testing
