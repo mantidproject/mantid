@@ -112,6 +112,10 @@ public:
                             "workspace for all four spin states.")
   }
 
+  /// Calculation Tests
+
+  void test_correct_calculation() {}
+
 private:
   std::string m_defaultSaveDirectory;
 

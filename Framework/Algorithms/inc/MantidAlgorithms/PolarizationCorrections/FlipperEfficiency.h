@@ -33,8 +33,11 @@ private:
   /// Execute the algorithm with the provided properties.
   void exec() override;
 
+  /// Check that the inputs to the algorithm are valid.
   std::map<std::string, std::string> validateInputs() override;
 
-  void saveToFile(API::MatrixWorkspace_sptr const &workspace);
+  void saveToFile(API::MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
+
+  API::MatrixWorkspace_sptr calculateEfficiency(API::WorkspaceGroup_sptr const &groupWs);
 };
 } // namespace Mantid::Algorithms

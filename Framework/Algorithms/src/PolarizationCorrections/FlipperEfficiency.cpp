@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 
 namespace {
@@ -29,6 +30,7 @@ namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
+using PolarizationCorrectionsHelpers::workspaceForSpinState;
 
 // Register the algorithm in the AlgorithmFactory
 DECLARE_ALGORITHM(FlipperEfficiency)
@@ -37,7 +39,7 @@ std::string const FlipperEfficiency::summary() const { return "Calculate the eff
 
 void FlipperEfficiency::init() {
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input),
-                  "Group workspace containing the 4 polarisation periods.");
+                  "Group workspace containing flipper transmissions for all 4 polarisation states.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_WS, "", Direction::Output,
                                                                        PropertyMode::Optional),
                   "Workspace containing the wavelength-dependent efficiency for the flipper.");
@@ -67,13 +69,35 @@ std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
 }
 
 void FlipperEfficiency::exec() {
-  WorkspaceGroup_sptr const groupWs = getProperty(PropNames::INPUT_WS);
-  MatrixWorkspace_sptr const firstWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(0));
-  saveToFile(firstWs);
+  WorkspaceGroup_sptr const &groupWs = getProperty(PropNames::INPUT_WS);
+  auto const &efficiency = calculateEfficiency(groupWs);
+
+  auto const &filename = getPropertyValue(PropNames::OUTPUT_FILE);
+  if (!filename.empty()) {
+    saveToFile(efficiency, filename);
+  }
+
+  auto const &outputWsName = getPropertyValue(PropNames::OUTPUT_WS);
+  if (!outputWsName.empty()) {
+    setProperty(PropNames::OUTPUT_WS, efficiency);
+  }
 }
 
-void FlipperEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace) {
-  std::filesystem::path filePath = getPropertyValue(PropNames::OUTPUT_FILE);
+MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr const &groupWs) {
+  auto const &spinConfig = getPropertyValue(PropNames::SPIN_STATES);
+  auto const &t11Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ONE_ONE);
+  auto const &t10Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ONE_ZERO);
+  auto const &t01Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ONE);
+  auto const &t00Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ZERO);
+
+  auto const &numerator = t00Ws - t01Ws + t11Ws - t10Ws;
+  auto const &denominator = 2 * (t00Ws - t01Ws);
+  auto const &efficiency = numerator / denominator;
+  return efficiency;
+}
+
+void FlipperEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr) {
+  std::filesystem::path filePath = filePathStr;
   // Add the nexus extension if it's not been applied already.
   if (filePath.extension() != FILE_EXTENSION) {
     filePath.replace_extension(FILE_EXTENSION);
