@@ -41,7 +41,6 @@ public:
   std::map<std::size_t, int> getSubTypes() const override;
   std::string setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void setQValues(const std::vector<double> &qValues) override;
 
   bool hasDeltaFunction() const;
   bool hasTempCorrection() const;
@@ -55,7 +54,7 @@ private:
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
 
   void clearData();
-  void setModel();
+  void setModel() override;
 
   std::optional<std::string> getLor1Prefix() const;
   std::optional<std::string> getLor2Prefix() const;
@@ -63,6 +62,7 @@ private:
   std::optional<std::string> getDeltaPrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;
 
+  std::string buildFunctionString(int const domainIndex) const override { return ""; }
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
   std::string buildFickFunctionString() const;
@@ -96,7 +96,6 @@ private:
   BackgroundSubType m_backgroundSubtype;
 
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
-  std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;
 };
 

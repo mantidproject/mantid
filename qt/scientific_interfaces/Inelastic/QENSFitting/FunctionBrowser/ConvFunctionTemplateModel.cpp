@@ -159,8 +159,6 @@ void ConvFunctionTemplateModel::checkSingleFunction(const IFunction_sptr &fun, b
   }
 }
 
-void ConvFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
-
 void ConvFunctionTemplateModel::addFunction(std::string const &prefix, std::string const &funStr) {
   if (!prefix.empty())
     throw std::runtime_error("Function doesn't have member function with prefix " + prefix);

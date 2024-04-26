@@ -351,7 +351,7 @@ public:
 
   UserSubWindow *createSubWindow(
       const QString &interface_name,
-      QWidget *parent = nullptr);
+      QWidget *parent = nullptr) throw(std::exception);
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());

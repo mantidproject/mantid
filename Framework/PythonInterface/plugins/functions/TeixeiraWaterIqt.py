@@ -5,16 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-
-"""
-@author Spencer Howells, ISIS
-@date December 05, 2013
-"""
-
 import numpy as np
 
 from mantid.api import IFunction1D, FunctionFactory
-from scipy.special import spherical_jn  # bessel
+from scipy.special import spherical_jn
 
 
 class TeixeiraWaterIqt(IFunction1D):
@@ -32,46 +26,25 @@ class TeixeiraWaterIqt(IFunction1D):
         self.declareAttribute("Q", 0.4)
         self.declareAttribute("a", 0.98)
 
-    def setAttributeValue(self, name, value):
-        if name == "Q":
-            self.Q = value
-        if name == "a":
-            self.radius = value
-
     def function1D(self, xvals):
         amp = self.getParameterValue("Amp")
         tau1 = self.getParameterValue("Tau1")
         gamma = self.getParameterValue("Gamma")
+
+        q_value = self.getAttributeValue("Q")
+        radius = self.getAttributeValue("a")
+
         xvals = np.array(xvals)
 
-        qr = np.array(self.Q * self.radius)
+        qr = np.array(q_value * radius)
         j0 = spherical_jn(0, qr)
         j1 = spherical_jn(1, qr)
         j2 = spherical_jn(2, qr)
         with np.errstate(divide="ignore"):
-            rotational = j0 * j0 + 3 * j1 * j1 * np.exp(-xvals / (3 * tau1)) + 5 * j2 * j2 * np.exp(-xvals / tau1)
+            rotational = np.square(j0) + 3 * np.square(j1) * np.exp(-xvals / (3 * tau1)) + 5 * np.square(j2) * np.exp(-xvals / tau1)
             translational = np.exp(-gamma * xvals)
             iqt = amp * rotational * translational
         return iqt
 
-    def functionDeriv1D(self, xvals, jacobian):
-        amp = self.getParameterValue("Amp")
-        tau1 = self.getParameterValue("Tau1")
-        gamma = self.getParameterValue("Gamma")
 
-        qr = np.array(self.Q * self.radius)
-        j0 = spherical_jn(0, qr)
-        j1 = spherical_jn(1, qr)
-        j2 = spherical_jn(2, qr)
-        with np.errstate(divide="ignore"):
-            for i, x in enumerate(xvals, start=0):
-                rotational = j0 * j0 + 3 * j1 * j1 * np.exp(-x / (3 * tau1)) + 5 * j2 * j2 * np.exp(-x / tau1)
-                translational = np.exp(-gamma * x)
-                partial_tau = (x / np.square(tau1)) * (j1 * j1 * np.exp(-x / (3 * tau1)) + 5 * j2 * j2 * np.exp(-x / tau1))
-                jacobian.set(i, 0, rotational * translational)
-                jacobian.set(i, 1, amp * rotational * partial_tau)
-                jacobian.set(i, 2, -x * amp * rotational * translational)
-
-
-# Required to have Mantid recognise the new function
 FunctionFactory.subscribe(TeixeiraWaterIqt)

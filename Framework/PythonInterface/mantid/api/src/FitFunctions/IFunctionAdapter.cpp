@@ -203,11 +203,12 @@ void IFunctionAdapter::setAttributePythonValue(IFunction &self, const std::strin
  * @param attr An attribute object
  */
 void IFunctionAdapter::setAttribute(const std::string &attName, const Attribute &attr) {
-  try {
+  auto self = getSelf();
+  if (typeHasAttribute(self, "setAttributeValue")) {
     object value = object(handle<>(getAttributeValue(*this, attr)));
-    callMethod<void, std::string, object>(getSelf(), "setAttributeValue", attName, value);
+    callMethod<void, std::string, object>(self, "setAttributeValue", attName, value);
     storeAttributeValue(attName, attr);
-  } catch (UndefinedAttributeError &) {
+  } else {
     IFunction::setAttribute(attName, attr);
   }
 }

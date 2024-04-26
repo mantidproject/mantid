@@ -25,6 +25,8 @@ std::map<IqtTypes::FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<IqtTy
     {IqtTypes::FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
     {IqtTypes::FitType::StretchExponential,
      {"Stretch Exponential", "StretchExp", {ParamID::STRETCH_HEIGHT, ParamID::STRETCH_STRETCHING}}},
+    {IqtTypes::FitType::TeixeiraWaterIqt,
+     {"Teixeira Water Iqt", "TeixeiraWaterIqt", {ParamID::TWI_AMPLITUDE, ParamID::TWI_GAMMA}}},
 };
 
 template <>

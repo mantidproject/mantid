@@ -174,23 +174,23 @@ void FunctionModel::setParameterError(std::string const &parameterName, double v
 }
 
 double FunctionModel::getParameter(std::string const &parameterName) const {
-  return getCurrentFunction()->getParameter(parameterName);
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasParameter(parameterName) ? fun->getParameter(parameterName) : 0.0;
 }
 
 IFunction::Attribute FunctionModel::getAttribute(std::string const &attrName) const {
-  return getCurrentFunction()->getAttribute(attrName);
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasAttribute(attrName) ? fun->getAttribute(attrName) : IFunction::Attribute();
 }
 
 double FunctionModel::getParameterError(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(parameterName);
-  return fun->getError(index);
+  return fun && fun->hasParameter(parameterName) ? fun->getError(fun->parameterIndex(parameterName)) : 0.0;
 }
 
 std::string FunctionModel::getParameterDescription(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(parameterName);
-  return fun->parameterDescription(index);
+  return fun && fun->hasParameter(parameterName) ? fun->parameterDescription(fun->parameterIndex(parameterName)) : "";
 }
 
 bool FunctionModel::isParameterFixed(std::string const &parameterName) const {

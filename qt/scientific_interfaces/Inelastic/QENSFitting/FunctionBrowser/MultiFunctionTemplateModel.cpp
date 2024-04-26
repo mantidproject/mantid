@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiFunctionTemplateModel.h"
 
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
@@ -51,7 +53,10 @@ std::string MultiFunctionTemplateModel::getParameterDescription(std::string cons
 
 std::vector<std::string> MultiFunctionTemplateModel::getParameterNames() const { return m_model->getParameterNames(); }
 
-void MultiFunctionTemplateModel::setNumberDomains(int n) { m_model->setNumberDomains(n); }
+void MultiFunctionTemplateModel::setNumberDomains(int n) {
+  m_model->setNumberDomains(n);
+  setModel();
+}
 
 int MultiFunctionTemplateModel::getNumberDomains() const { return m_model->getNumberDomains(); }
 
@@ -175,6 +180,8 @@ void MultiFunctionTemplateModel::setGlobalParameterValue(std::string const &para
   m_model->setGlobalParameterValue(parameterName, value);
 }
 
+void MultiFunctionTemplateModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
+
 void MultiFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }
@@ -202,6 +209,24 @@ std::map<int, std::string> MultiFunctionTemplateModel::getParameterNameMap() con
   auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
   return out;
+}
+
+void MultiFunctionTemplateModel::setModel() {
+  auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
+
+  for (int i = 0; i < m_model->getNumberDomains(); ++i) {
+    auto domainFunctionString = buildFunctionString(i);
+    if (domainFunctionString.empty()) {
+      break;
+    }
+    auto singleDomainFunction = FunctionFactory::Instance().createInitialized(domainFunctionString);
+    multiDomainFunction->addFunction(std::move(singleDomainFunction));
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+
+  m_model->setFunction(std::move(multiDomainFunction));
+
+  m_model->setGlobalParameters(makeGlobalList());
 }
 
 std::vector<std::string> MultiFunctionTemplateModel::makeGlobalList() const {

@@ -23,6 +23,7 @@ static const auto FUNCTION_STRINGS =
                                                   {"Lorentzian", "L"},
                                                   {"StretchedExpFT", "SFT"},
                                                   {"TeixeiraWater", "TxWater"},
+                                                  {"TeixeiraWaterIqt", "TxWater"},
                                                   {"TeixeiraWaterSQE", "TxWater"},
                                                   {"FickDiffusionSQE", "FickDiff"},
                                                   {"ChudleyElliotSQE", "ChudElliot"},

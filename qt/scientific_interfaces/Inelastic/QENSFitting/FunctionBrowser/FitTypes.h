@@ -23,7 +23,7 @@ enum class ExponentialType {
   TwoExponentials,
 };
 
-enum class FitType { None, StretchExponential };
+enum class FitType { None, StretchExponential, TeixeiraWaterIqt };
 
 enum class BackgroundType { None, Flat };
 
