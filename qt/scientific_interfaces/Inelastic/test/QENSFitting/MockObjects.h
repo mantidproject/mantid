@@ -415,7 +415,7 @@ public:
   MOCK_CONST_METHOD1(showMessageBox, void(std::string const &message));
 };
 
-class MockElwinModel : public ElwinModel {
+class MockElwinModel : public IElwinModel {
 public:
   virtual ~MockElwinModel() = default;
 

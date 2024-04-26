@@ -43,7 +43,7 @@ public:
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataManipulation, public IElwinPresenter {
 public:
   ElwinPresenter(QWidget *parent, IElwinView *view);
-  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<ElwinModel> model,
+  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
                  std::unique_ptr<IFitDataModel> dataModel);
   ~ElwinPresenter();
 
@@ -89,7 +89,7 @@ private:
   size_t findWorkspaceID();
 
   IElwinView *m_view;
-  std::unique_ptr<ElwinModel> m_model;
+  std::unique_ptr<IElwinModel> m_model;
   std::unique_ptr<IFitDataModel> m_dataModel;
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
