@@ -12,7 +12,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QRegExp>
