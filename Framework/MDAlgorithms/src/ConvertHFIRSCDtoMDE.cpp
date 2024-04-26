@@ -245,7 +245,7 @@ void ConvertHFIRSCDtoMDE::exec() {
         if (lorentz) {
           factor = lorentz_pre[m];
         }
-        inserter.insertMDEvent(signal * factor, signal * factor, 0, goniometerIndex, 0, q_sample.data());
+        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, 0, q_sample.data());
       }
     }
   }
