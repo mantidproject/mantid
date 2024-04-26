@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DataReductionTab.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
-#include "DataReductionTab.h"
 
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 
