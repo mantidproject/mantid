@@ -24,6 +24,7 @@ from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 from mantidqt.widgets.workspacedisplay.table.group_table_model import GroupTableModel
 from mantidqt.widgets.workspacedisplay.table.presenter_group import TableWorkspaceDataPresenterGroup
+from mantidqt.widgets.workspacedisplay.table.group_view import GroupTableWorkspaceDisplayView
 
 
 class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
@@ -138,9 +139,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         view = (
             view
             if view
-            else TableWorkspaceDisplayView(
-                presenter=self, parent=parent, window_flags=window_flags, table_model=table_model, wrap_sorting=True
-            )
+            else GroupTableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
         )
         self.presenter = TableWorkspaceDataPresenterGroup(model, view)
         return view, model
