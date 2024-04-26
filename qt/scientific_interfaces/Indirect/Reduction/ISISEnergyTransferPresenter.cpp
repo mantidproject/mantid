@@ -180,8 +180,14 @@ void IETPresenter::run() {
   m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
 }
 
-void IETPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
-  if (algorithm->algorithm()->name() == "ISISIndirectEnergyTransfer") {
+void IETPresenter::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) {
+  if (error) {
+    m_view->setRunButtonText("Run");
+    m_view->setEnableOutputOptions(false);
+    m_view->setPlotTimeIsPlotting(false);
+    return;
+  }
+  if (lastAlgorithm->algorithm()->name() == "ISISIndirectEnergyTransfer") {
     m_view->setRunButtonText("Run");
     m_view->setEnableOutputOptions(true);
 
@@ -193,21 +199,13 @@ void IETPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algor
 
     setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
     m_view->setSaveEnabled(!outputWorkspaceNames.empty());
-  } else if (algorithm->algorithm()->name() == "GroupDetectors") {
+  } else if (lastAlgorithm->algorithm()->name() == "GroupDetectors") {
     m_view->setPlotTimeIsPlotting(false);
     auto const filename = m_view->getFirstFilename();
     std::filesystem::path fileInfo(filename);
     auto const name = fileInfo.filename().string();
     m_plotter->plotSpectra(name + "_grp", "0", SettingsHelper::externalPlotErrorBars());
   }
-}
-
-void IETPresenter::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
-  (void)algorithm;
-  (void)message;
-  m_view->setRunButtonText("Run");
-  m_view->setEnableOutputOptions(false);
-  m_view->setPlotTimeIsPlotting(false);
 }
 
 void IETPresenter::notifyPlotRawClicked() {
