@@ -20,6 +20,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Types::Core;
 
 class CompressEventsTest : public CxxTest::TestSuite {
 public:
@@ -178,17 +179,18 @@ public:
     }
 
     if (wallClockTolerance > 0.) {
-      int64_t firstTime = 631152000000000000;
-      TS_ASSERT_EQUALS(el.getEvent(0).pulseTime().totalNanoseconds(), firstTime);
-      TS_ASSERT_EQUALS(el.getEvent(1).pulseTime().totalNanoseconds(), firstTime + 1000000000);
-      TS_ASSERT_EQUALS(el.getEvent(2).pulseTime().totalNanoseconds(), firstTime + 2500000000);
-      TS_ASSERT_EQUALS(el.getEvent(3).pulseTime().totalNanoseconds(), firstTime + 5500000000);
-      TS_ASSERT_EQUALS(el.getEvent(4).pulseTime().totalNanoseconds(), firstTime + 11500000000);
-      TS_ASSERT_EQUALS(el.getEvent(5).pulseTime().totalNanoseconds(), firstTime + 23500000000);
-      TS_ASSERT_EQUALS(el.getEvent(6).pulseTime().totalNanoseconds(), firstTime + 47500000000);
+      const auto startTime = DateAndTime("2010-01-01T00:00:00");
+      TS_ASSERT_EQUALS(el.getEvent(0).pulseTime(), startTime);
+      TS_ASSERT_EQUALS(el.getEvent(1).pulseTime(), startTime + 1.0);
+      TS_ASSERT_EQUALS(el.getEvent(2).pulseTime(), startTime + 2.5);
+      TS_ASSERT_EQUALS(el.getEvent(3).pulseTime(), startTime + 5.5);
+      TS_ASSERT_EQUALS(el.getEvent(4).pulseTime(), startTime + 11.5);
+      TS_ASSERT_EQUALS(el.getEvent(5).pulseTime(), startTime + 23.5);
+      TS_ASSERT_EQUALS(el.getEvent(6).pulseTime(), startTime + 47.5);
     } else {
+      const auto timeZero = DateAndTime{0};
       for (int i = 0; i < 7; i++) {
-        TS_ASSERT_EQUALS(el.getEvent(i).pulseTime().totalNanoseconds(), 0);
+        TS_ASSERT_EQUALS(el.getEvent(i).pulseTime(), timeZero);
       }
     }
   }
