@@ -100,6 +100,18 @@ public:
         "provided.\n OutputWorkspace: Either an output workspace or output file must be provided.")
   }
 
+  void test_invalid_group_size_is_captured() {
+    FlipperEfficiency alg;
+    alg.initialize();
+    auto const &group = createTestingWorkspace("testWs");
+    group->removeItem(0);
+    alg.setProperty("InputWorkspace", group);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n InputWorkspace: The input group must contain a "
+                            "workspace for all four spin states.")
+  }
+
 private:
   std::string m_defaultSaveDirectory;
 
