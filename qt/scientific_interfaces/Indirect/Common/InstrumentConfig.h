@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
 #include <QWidget>
 
