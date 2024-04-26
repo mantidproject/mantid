@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IAlgorithmRunnerSubscriber.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
-
 #include "DataReductionTab.h"
+
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,11 +28,11 @@ public:
 
 class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab,
                                            public IIETPresenter,
-                                           public IAlgorithmRunnerSubscriber {
+                                           public API::IAlgorithmRunnerSubscriber {
 
 public:
-  IETPresenter(IDataReduction * idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
-               std::unique_ptr<IAlgorithmRunner> algorithmRunner);
+  IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
+               std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
 
   void setup() override;
   void run() override;
