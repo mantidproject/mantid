@@ -50,6 +50,9 @@ private:
   bool validateInstrumentDetails();
   void updateInstrumentConfiguration() override;
 
+  void handleReductionComplete();
+  void handlePlotRawPreProcessComplete();
+
   InstrumentData getInstrumentData();
 
   void setFileExtensionsByName(bool filter) override;
