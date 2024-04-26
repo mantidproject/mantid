@@ -201,6 +201,11 @@ Getter for the detector Id.
 */
 detid_t SXPeak::getDetectorId() const { return m_detId; }
 
+/**
+Getter for spectrum indexes of a peak
+*/
+const std::vector<int> &SXPeak::getPeakSpectras() const { return m_spectra; }
+
 PeakContainer::PeakContainer(const HistogramData::HistogramY &y)
     : m_y(y), m_startIndex(0), m_stopIndex(m_y.size() - 1), m_maxIndex(0) {}
 
@@ -233,8 +238,10 @@ size_t PeakContainer::getNumberOfPointsInPeak() const {
   if (m_startIndex >= m_y.size()) {
     return 0;
   }
-
-  return m_stopIndex - m_startIndex;
+  if (m_stopIndex >= m_startIndex) {
+    return m_stopIndex - m_startIndex + 1;
+  }
+  return 0;
 }
 
 yIt PeakContainer::getMaxIterator() const { return m_y.begin() + m_maxIndex; }
@@ -294,6 +301,22 @@ PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x, co
   // Perform the search of the peaks
   // ---------------------------------------
   return dofindSXPeaks(x, y, e, lowit, highit, workspaceIndex);
+}
+
+void PeakFindingStrategy::setMinNBinsPerPeak(int minNBinsPerPeak) { m_minNBinsPerPeak = minNBinsPerPeak; }
+
+void PeakFindingStrategy::filterPeaksForMinBins(std::vector<std::unique_ptr<PeakContainer>> &inputPeakList) const {
+  if (m_minNBinsPerPeak == EMPTY_INT() || inputPeakList.empty()) {
+    return;
+  }
+
+  for (auto inputIt = inputPeakList.begin(); inputIt != inputPeakList.end();) {
+    if ((*inputIt)->getNumberOfPointsInPeak() < m_minNBinsPerPeak) {
+      inputIt = inputPeakList.erase(inputIt);
+    } else {
+      ++inputIt;
+    }
+  }
 }
 
 BoundsIterator PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
@@ -435,6 +458,9 @@ PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, con
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
 
+  // Filter the found peaks having the mininum number of bins
+  filterPeaksForMinBins(foundPeaks);
+
   // Convert the found peaks to SXPeaks
   auto peaks = convertToSXPeaks(x, y, foundPeaks, workspaceIndex);
 
@@ -514,6 +540,10 @@ PeakList NSigmaPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, 
                                             const HistogramData::HistogramE &e, Bound low, Bound high,
                                             const int workspaceIndex) const {
   auto nsigmaPeaks = getAllNSigmaPeaks(x, y, e, low, high);
+
+  // Filter the found peaks having the mininum number of bins
+  filterPeaksForMinBins(nsigmaPeaks);
+
   auto sxPeaks = convertToSXPeaks(x, y, nsigmaPeaks, workspaceIndex);
   return sxPeaks;
 }
@@ -596,6 +626,14 @@ std::vector<std::unique_ptr<PeakContainer>> NSigmaPeaksStrategy::getAllNSigmaPea
 ReducePeakListStrategy::ReducePeakListStrategy(const CompareStrategy *compareStrategy)
     : m_compareStrategy(compareStrategy) {}
 
+void ReducePeakListStrategy::setMinNSpectraPerPeak(int minNSpectraPerPeak) {
+  m_minNSpectraPerPeak = minNSpectraPerPeak;
+}
+
+void ReducePeakListStrategy::setMaxNSpectraPerPeak(int maxSpectrasForPeak) {
+  m_maxNSpectraPerPeak = maxSpectrasForPeak;
+}
+
 SimpleReduceStrategy::SimpleReduceStrategy(const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
@@ -621,7 +659,24 @@ std::vector<SXPeak> SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peak
     }
   }
 
+  reducePeaksFromNumberOfSpectras(finalPeaks);
+
   return finalPeaks;
+}
+
+void SimpleReduceStrategy::reducePeaksFromNumberOfSpectras(std::vector<SXPeak> &inputPeaks) const {
+  if (m_minNSpectraPerPeak == EMPTY_INT() && m_maxNSpectraPerPeak == EMPTY_INT()) {
+    return;
+  }
+
+  for (auto peakIt = inputPeaks.begin(); peakIt != inputPeaks.end();) {
+    if (((m_minNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() < m_minNSpectraPerPeak)) ||
+        ((m_maxNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() > m_maxNSpectraPerPeak))) {
+      peakIt = inputPeaks.erase(peakIt);
+    } else {
+      ++peakIt;
+    }
+  }
 }
 
 FindMaxReduceStrategy::FindMaxReduceStrategy(const CompareStrategy *compareStrategy)
@@ -733,8 +788,17 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
   // Currently we select the peak with the largest signal (this strategy could
   // be changed to something like a weighted mean or similar)
   for (const auto &group : peakGroups) {
+    // When MinNSpectraPerPeak or maxNSpectraPerPeak parameters are provided,
+    // a group will be ignored if it does not satisfy the minimum or the maximum number of spectrums
+    // required to identify as a peak.
+    if ((m_minNSpectraPerPeak != EMPTY_INT() && group.size() < m_minNSpectraPerPeak) ||
+        (m_maxNSpectraPerPeak != EMPTY_INT() && group.size() > m_maxNSpectraPerPeak)) {
+      continue;
+    }
+
     SXPeak *maxPeak = nullptr;
     double maxIntensity = std::numeric_limits<double>::min();
+
     for (auto *element : group) {
       if (element->getIntensity() > maxIntensity) {
         maxIntensity = element->getIntensity();
@@ -748,6 +812,7 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
       peaks.emplace_back(*maxPeak);
     }
   }
+
   return peaks;
 }
 
