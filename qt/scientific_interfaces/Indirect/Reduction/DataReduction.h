@@ -12,6 +12,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
@@ -167,14 +168,10 @@ private:
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-<<<<<<< HEAD:qt/scientific_interfaces/Indirect/Reduction/DataReduction.h
-    DataReductionTab *tabIDRContent = new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>());
-=======
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
-    auto algorithmRunner = std::make_unique<AlgorithmRunner>(std::move(jobRunner));
-    IndirectDataReductionTab *tabIDRContent =
+    auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+    DataReductionTab *tabIDRContent =
         new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>(), std::move(algorithmRunner));
->>>>>>> 555213b9f43 (Move algorithm runner into DataReductionTab):qt/scientific_interfaces/Indirect/Reduction/IndirectDataReduction.h
 
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
