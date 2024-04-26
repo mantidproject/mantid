@@ -13,7 +13,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QRegExp>
@@ -190,8 +189,6 @@ private:
   Ui::DataReduction m_uiForm;
   /// The settings group
   QString m_settingsGroup;
-  /// Runner for insturment load algorithm
-  MantidQt::API::QtAlgorithmRunner *m_algRunner;
 
   // All indirect tabs
   QMap<QString, QPair<QWidget *, DataReductionTab *>> m_tabs;

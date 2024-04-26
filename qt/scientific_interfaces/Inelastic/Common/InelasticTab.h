@@ -12,7 +12,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"

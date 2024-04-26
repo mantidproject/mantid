@@ -45,6 +45,5 @@ public:
   virtual void executeAlgorithmQueue() = 0;
   virtual void executeAlgorithm(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void cancelAlgorithmQueue() = 0;
-  virtual std::size_t queueLength() = 0;
 };
 } // namespace MantidQt::API
