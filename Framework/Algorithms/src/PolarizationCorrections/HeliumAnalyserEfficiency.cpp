@@ -54,8 +54,7 @@ void HeliumAnalyserEfficiency::init() {
                   "Helium analyzer efficiency as a function of wavelength");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
-  std::string initialSpinConfig = "11,10,01,00";
-  declareProperty(PropertyNames::SPIN_STATES, initialSpinConfig, spinValidator,
+  declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -112,8 +111,9 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
  */
 void HeliumAnalyserEfficiency::validateGroupInput() {
   const auto results = validateInputs();
-  for (const auto &result : results) {
-    throw std::runtime_error("Issue in " + result.first + " property: " + result.second);
+  if (results.size() > 0) {
+    const auto result = results.cbegin();
+    throw std::runtime_error("Issue in " + result->first + " property: " + result->second);
   }
 }
 
@@ -150,8 +150,8 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // We're going to calculate e from the data, e = T_NSF / (T_NSF + T_SF),
   // then fit (1 + tanh(mu * phe))/2 to it in order to calculate phe, the
   // helium atom polarization in the analyser.
-  MatrixWorkspace_sptr denom = addTwoWorkspaces(tnsfWs, tsfWs);
-  MatrixWorkspace_sptr e = divideWorkspace(tnsfWs, denom);
+  MatrixWorkspace_sptr denom = addTwoWorkspaces(tnsfWs, std::move(tsfWs));
+  MatrixWorkspace_sptr e = divideWorkspace(std::move(tnsfWs), std::move(denom));
 
   // Now we fit (1 + tanh(mu*pHe*x))/2 to P to give us pHe
 
@@ -161,7 +161,7 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   const MantidVec wavelengthValues = e->dataX(0);
   double pHe, pHeError;
   MantidVec eCalc;
-  fitAnalyserEfficiency(mu, e, wavelengthValues, pHe, pHeError, eCalc);
+  fitAnalyserEfficiency(mu, std::move(e), wavelengthValues, pHe, pHeError, eCalc);
   auto efficiency = calculateEfficiencyWorkspace(wavelengthValues, eCalc, pHe, pHeError, mu);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, efficiency);
 }
