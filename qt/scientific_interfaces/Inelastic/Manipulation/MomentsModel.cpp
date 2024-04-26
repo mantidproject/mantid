@@ -20,10 +20,7 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MomentsModel::MomentsModel() { m_scale = false; }
+MomentsModel::MomentsModel() : m_inputWorkspace(), m_outputWorkspaceName(), m_eMin(), m_eMax(), m_scale(false) {}
 
 IAlgorithm_sptr MomentsModel::setupAlgorithm() {
   IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);

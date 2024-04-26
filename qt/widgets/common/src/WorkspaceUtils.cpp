@@ -207,7 +207,7 @@ QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName, d
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                                              double precision) {
-  auto const xValues = workspace->x(0);
+  auto const &xValues = workspace->x(0);
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 

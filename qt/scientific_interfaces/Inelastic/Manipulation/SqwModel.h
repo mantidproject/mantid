@@ -48,10 +48,10 @@ private:
   std::string m_baseName;
   double m_eFixed;
   double m_qLow;
-  double m_qWidth = 0.05;
+  double m_qWidth;
   double m_qHigh;
   double m_eLow;
-  double m_eWidth = 0.005;
+  double m_eWidth;
   double m_eHigh;
   bool m_rebinInEnergy;
 };

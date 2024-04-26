@@ -73,7 +73,7 @@ void DataManipulationInterface::initLayout() {
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  auto const facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  auto const &facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
 
   IndirectInterface::initLayout();
