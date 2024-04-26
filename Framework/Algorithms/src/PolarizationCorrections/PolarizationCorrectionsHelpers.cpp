@@ -19,17 +19,16 @@ state in the spin state order as the index of the workspace in the group.
 */
 API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                                 const std::string &targetSpinState) {
-  const auto wsIndex = indexOfWorkspaceForSpinState(group, spinStateOrder, targetSpinState);
+  const auto wsIndex = indexOfWorkspaceForSpinState(spinStateOrder, targetSpinState);
   return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
 }
 
 /*
 For a given workspace group, spin state order, and desired spin state, this method will
-return the index of the specified workspace from the group, using the position of the desired spin
+return the index of the specified workspace in the group, using the position of the desired spin
 state in the spin state order.
 */
-size_t indexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
-                                    const std::string &targetSpinState) {
+size_t indexOfWorkspaceForSpinState(const std::string &spinStateOrder, const std::string &targetSpinState) {
   std::vector<std::string> spinStateVector = splitSpinStateString(spinStateOrder);
   auto trimmedTargetSpinState = targetSpinState;
   boost::trim(trimmedTargetSpinState);
