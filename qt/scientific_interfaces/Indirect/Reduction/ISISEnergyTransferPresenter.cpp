@@ -50,7 +50,7 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
 namespace MantidQt::CustomInterfaces {
 
 IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
-                           std::unique_ptr<IAlgorithmRunner> algorithmRunner)
+                           std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
     : DataReductionTab(idrUI, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   m_algorithmRunner->subscribe(this);

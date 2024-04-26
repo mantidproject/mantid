@@ -5,6 +5,7 @@ set(SRC_FILES
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
+    src/AlgorithmRunner.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlgorithmRunner.cpp
     src/AlternateCSPythonLexer.cpp
