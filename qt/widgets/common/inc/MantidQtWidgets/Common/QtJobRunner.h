@@ -29,7 +29,6 @@ public:
   void executeAlgorithmQueue() override;
   void executeAlgorithm(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   void cancelAlgorithmQueue() override;
-  std::size_t queueLength() override;
 
 private slots:
   void onBatchComplete(bool error);
