@@ -5,7 +5,6 @@ set(SRC_FILES
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
-    src/AlgorithmRunner.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlgorithmRunner.cpp
     src/AlternateCSPythonLexer.cpp
@@ -391,7 +390,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
     inc/MantidQtWidgets/Common/PythonRunner.h
-    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
     inc/MantidQtWidgets/Common/QtSignalChannel.h
     inc/MantidQtWidgets/Common/RepoTreeView.h
@@ -523,7 +521,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QStringUtils.h
-    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
     inc/MantidQtWidgets/Common/SelectionNotificationService.h

@@ -31,9 +31,8 @@ DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
-DataReductionTab::DataReductionTab(IDataReduction *idrUI,
-                                   std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
-    : InelasticTab(), m_idrUI(idrUI), m_tabRunning(false), m_algorithmRunner(std::move(algorithmRunner)) {
+DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : InelasticTab(), m_idrUI(idrUI), m_algorithmRunner(std::move(algorithmRunner)), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
@@ -83,7 +82,7 @@ void DataReductionTab::tabExecutionComplete(bool error) {
   }
 }
 
-void IndirectDataReductionTab::handleNewInstrumentConfiguration() { updateInstrumentConfiguration(); }
+void DataReductionTab::handleNewInstrumentConfiguration() { updateInstrumentConfiguration(); }
 
 /**
  * Gets the current instrument workspace
