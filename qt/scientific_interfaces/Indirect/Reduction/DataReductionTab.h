@@ -7,10 +7,11 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/AlgorithmRunner.h"
 #include "Common/InelasticTab.h"
 #include "Common/InstrumentConfig.h"
 #include "Common/OutputPlotOptionsPresenter.h"
+
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -47,7 +48,7 @@ class MANTIDQT_INDIRECT_DLL DataReductionTab : public InelasticTab {
 
 public:
   DataReductionTab(IDataReduction *idrUI, QObject *parent = nullptr);
-  DataReductionTab(IDataReduction *idrUI, std::unique_ptr<IAlgorithmRunner> algorithmRunner);
+  DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
   ~DataReductionTab() override;
 
   /// Set the presenter for the output plotting options
@@ -86,8 +87,8 @@ protected:
                                                         QString reflection = "");
 
 protected:
-  IDataReduction * m_idrUI;
-  std::unique_ptr<IAlgorithmRunner> m_algorithmRunner;
+  IDataReduction *m_idrUI;
+  std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
 
 private slots:
   void tabExecutionComplete(bool error);
