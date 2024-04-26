@@ -44,8 +44,7 @@ public:
   void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
 
-  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
-  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
 private:
   bool validateInstrumentDetails();
