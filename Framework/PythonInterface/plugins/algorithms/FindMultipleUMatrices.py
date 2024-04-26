@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -181,7 +181,6 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         hkls, dhkls, latt = self.calculate_reflections(spgr_sym, dmin, dmax, dtol, **self.calc_u_kwargs)
         bmat = latt.getB()
         bmat_inv = latt.getBinv()  # used later when comparing U matrices
-        angles = self.calculate_angles_between_reflections(hkls, bmat)
 
         # get all peaks between d-spacing limits
         peaks_filtered = self.exec_child_alg(
@@ -210,66 +209,68 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                 # this means don't have to worry about reflections being along same direction
                 # get index of reflections with consistent d-spacing
                 ihkls = [np.flatnonzero(abs(dhkls - pks[ii].getDSpacing()) < dtol) for ii in range(2)]
-                ihkl_pairs_used = []
                 if all(irefl.size > 0 for irefl in ihkls):
                     # peaks are both consistent with d-spacing of at least one reflection
                     # loop over every pair of consistent reflections
                     ihkl_pairs = list(product(*ihkls))
                     for ihkl_pair in ihkl_pairs:
-                        angle_hkl = angles[ihkl_pair]  # angle between reflections
+                        # generate angles between equivalent hkls for these reflections
+                        hkls1 = ptgr.getEquivalents(hkls[ihkl_pair[0]])
+                        hkls2 = ptgr.getEquivalents(hkls[ihkl_pair[1]])
+                        angles = self.calculate_angles_between_reflections(hkls1, hkls2, bmat)
+                        # get a single pair of HKL consistent with observed angle
+                        ihkl1, ihkl2 = np.unravel_index(np.argmin(abs(angles - angle_observed)), angles.shape)
+                        angle_hkl = angles[ihkl1, ihkl2]
                         if angle_hkl > min_angle and abs(angle_hkl - angle_observed) < angle_tol:
-                            # angle between observed peaks is consistent with reflections
-                            # check pair of reflections are not equivalent to any pair previously used
-                            if not self.any_equivalent_pair_reflections(ptgr, angles, hkls, ihkl_pair, ihkl_pairs_used):
-                                ihkl_pairs_used.append(ihkl_pair)
-                                # set hkl of peaks
-                                [pk.setHKL(0, 0, 0) for pk in peaks_filtered]  # reset HKL of all peaks
-                                [pk.setHKL(*hkls[ihkl_pair[ipk]]) for ipk, pk in enumerate(pks)]
-                                try:
-                                    self.exec_child_alg("CalculateUMatrix", PeaksWorkspace=peaks_filtered, **self.calc_u_kwargs)
-                                except ValueError:
-                                    continue  # skip this pair
-                                # SetUB in all found peaks and calc hkl_ers
-                                this_ub = peaks_filtered.sample().getOrientedLattice().getUB().copy()
-                                self.exec_child_alg("SetUB", Workspace=peaks, UB=this_ub)
-                                nindexed, *_ = self.exec_child_alg(
-                                    "IndexPeaks", PeaksWorkspace=peaks, RoundHKLs=False, **self.index_peaks_kwargs
+                            # set hkl of peaks
+                            [pk.setHKL(0, 0, 0) for pk in peaks_filtered]  # reset HKL of all peaks
+                            pks[0].setHKL(*hkls1[ihkl1])
+                            pks[1].setHKL(*hkls2[ihkl2])
+                            try:
+                                self.exec_child_alg("CalculateUMatrix", PeaksWorkspace=peaks_filtered, **self.calc_u_kwargs)
+                            except ValueError:
+                                continue  # skip this pair
+                            # SetUB in all found peaks and calc hkl_ers
+                            this_ub = peaks_filtered.sample().getOrientedLattice().getUB().copy()
+                            self.exec_child_alg("SetUB", Workspace=peaks, UB=this_ub)
+                            nindexed, *_ = self.exec_child_alg(
+                                "IndexPeaks", PeaksWorkspace=peaks, RoundHKLs=False, **self.index_peaks_kwargs
+                            )
+                            if nindexed >= _MIN_NUM_INDEXED_PEAKS:
+                                # calculate hkl er in indexing
+                                mod_hkl = peaks.sample().getOrientedLattice().getModHKL()
+                                this_hkl_ers = np.array(
+                                    [
+                                        (
+                                            np.sum((pk.getIntHKL() + (mod_hkl @ pk.getIntMNP()) - pk.getHKL()) ** 2)
+                                            if np.any(pk.getHKL())
+                                            else np.inf
+                                        )
+                                        for pk in peaks
+                                    ]
                                 )
-                                if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                                    # calculate hkl er in indexing
-                                    mod_hkl = peaks.sample().getOrientedLattice().getModHKL()
-                                    this_hkl_ers = np.array(
-                                        [
-                                            (
-                                                np.sum((pk.getIntHKL() + (mod_hkl @ pk.getIntMNP()) - pk.getHKL()) ** 2)
-                                                if np.any(pk.getHKL())
-                                                else np.inf
-                                            )
-                                            for pk in peaks
-                                        ]
-                                    )
 
-                                    # see if similar UBs have already been calculated
-                                    this_u = this_ub @ bmat_inv
-                                    iub_similar = np.array(
-                                        [
-                                            iub
-                                            for iub in range(len(ubs))
-                                            if self.calculate_angle_between_rotation_matrices(ubs[iub] @ bmat_inv, this_u) < angle_tol
-                                        ]
-                                    )
-                                    if len(iub_similar) == 0:
+                                # see if similar UBs have already been calculated
+                                this_u = this_ub @ bmat_inv
+                                iub_similar = np.array(
+                                    [
+                                        iub
+                                        for iub in range(len(ubs))
+                                        if self.calculate_angle_between_rotation_matrices(ubs[iub] @ bmat_inv, this_u) < angle_tol
+                                    ]
+                                )
+                                if len(iub_similar) == 0:
+                                    ubs.append(this_ub)
+                                    hkl_ers.append(this_hkl_ers)
+                                else:
+                                    idel = self.find_similar_ubs_that_index_less_accurately(hkl_ers, iub_similar, this_hkl_ers)
+                                    if idel:
+                                        # delete in reverse order so as to preserve indexing
+                                        for iub in idel[::-1]:
+                                            ubs.pop(iub)
+                                            hkl_ers.pop(iub)
                                         ubs.append(this_ub)
                                         hkl_ers.append(this_hkl_ers)
-                                    else:
-                                        idel = self.find_similar_ubs_that_index_less_accurately(hkl_ers, iub_similar, this_hkl_ers)
-                                        if idel:
-                                            # delete in reverse order so as to preserve indexing
-                                            for iub in idel[::-1]:
-                                                ubs.pop(iub)
-                                                hkl_ers.pop(iub)
-                                            ubs.append(this_ub)
-                                            hkl_ers.append(this_hkl_ers)
         # categorise peaks belonging to each UB requested
         if not ubs:
             raise RuntimeError(f"No valid UBs found using {peaks_filtered.getNumberPeaks()} peaks in d-spacing range.")
@@ -320,7 +321,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
     def calculate_reflections(spgr_sym, dmin, dmax, dtol, a, b, c, alpha, beta, gamma):
         xtal = CrystalStructure(f"{a} {b} {c} {alpha} {beta} {gamma}", spgr_sym, "")  # no basis required
         generator = ReflectionGenerator(xtal, ReflectionConditionFilter.Centering)
-        hkls = generator.getHKLs(dmin - dtol, dmax + dtol)
+        hkls = generator.getUniqueHKLs(dmin - dtol, dmax + dtol)  # getUnique
         dhkls = np.array(generator.getDValues(hkls))
         isort = np.argsort(-dhkls)
         dhkls = dhkls[isort]
@@ -328,30 +329,15 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         return hkls, dhkls, xtal.getUnitCell()
 
     @staticmethod
-    def calculate_angles_between_reflections(hkls, bmat):
-        angles = np.zeros(2 * [len(hkls)])
-        for ihkl_1 in range(1, angles.shape[0]):
-            qlab1 = 2 * np.pi * bmat @ hkls[ihkl_1]
-            for ihkl_2 in range(0, ihkl_1):
-                qlab2 = 2 * np.pi * bmat @ hkls[ihkl_2]
+    def calculate_angles_between_reflections(hkls1, hkls2, bmat):
+        angles = np.zeros((len(hkls1), len(hkls2)))
+        for ihkl_1, hkl1 in enumerate(hkls1):
+            qlab1 = 2 * np.pi * bmat @ hkl1
+            for ihkl_2, hkl2 in enumerate(hkls2):
+                qlab2 = 2 * np.pi * bmat @ hkl2
                 angles[ihkl_1, ihkl_2] = V3D(*qlab1).angle(V3D(*qlab2))
-                angles[ihkl_2, ihkl_1] = angles[ihkl_1, ihkl_2]
-        return angles
 
-    @staticmethod
-    def any_equivalent_pair_reflections(ptgr, angles, hkls, ihkl_pair, ihkl_pairs_used):
-        any_equiv = False
-        hkl_pair = [hkls[irefl] * (1 / hkls[irefl].norm()) for irefl in ihkl_pair]
-        for ihkl_pair_prev in ihkl_pairs_used:
-            # check is not equivalent to any previous one
-            same_angle = np.isclose(angles[ihkl_pair_prev], angles[ihkl_pair])
-            # check hkls unit vectors are not equivalent
-            hkl_pair_prev = [hkls[irefl] * (1 / hkls[irefl].norm()) for irefl in ihkl_pair_prev]
-            equiv_hkl = all([ptgr.isEquivalent(hkl_pair[irefl], hkl_pair_prev[irefl]) for irefl in range(len(hkl_pair))])
-            if same_angle and equiv_hkl:
-                any_equiv = True
-                break
-        return any_equiv
+        return angles
 
     @staticmethod
     def calculate_angle_between_rotation_matrices(R1, R2):
