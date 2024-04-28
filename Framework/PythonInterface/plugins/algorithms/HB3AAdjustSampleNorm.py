@@ -46,6 +46,7 @@ from mantid.simpleapi import (
     CreateSimulationWorkspace,
     MoveInstrumentComponent,
     AddSampleLog,
+    CopySample,
     Rebin,
 )
 import os
@@ -428,6 +429,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         run = mtd["__scan_grouped"].getExperimentInfo(0).run()
         for log in logs:
             run[log.name] = log
+
+        CopySample(scan, "__scan_grouped", CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
         twotheta = mtd["_PreprocessedDetectorsWS"].column(2)
         azimuthal = mtd["_PreprocessedDetectorsWS"].column(3)
