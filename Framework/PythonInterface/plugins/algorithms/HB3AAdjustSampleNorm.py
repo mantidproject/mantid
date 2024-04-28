@@ -336,11 +336,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     BinningDim2=bin2,
                     OutputWorkspace=out_ws_name,
                 )
-                if load_files:
-                    DeleteWorkspace(scan)
             else:
                 norm_data = self.__normalization(scan, vanws, load_files)
                 RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
+            DeleteWorkspace(scan)
 
         if has_multiple:
             out_ws_name = out_ws
@@ -350,7 +349,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             else:
                 GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
 
-        # Don't delete workspaces if they were passed in
+        # Delete workspaces
         if load_van:
             DeleteWorkspace(vanws)
 
