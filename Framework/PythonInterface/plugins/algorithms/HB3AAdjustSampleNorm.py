@@ -40,7 +40,6 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     RenameWorkspace,
     ConvertToMD,
-    PreprocessDetectorsToMD,
     LoadInstrument,
     CreateMDHistoWorkspace,
     CreateSimulationWorkspace,
@@ -269,7 +268,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if load_van:
             vanws = LoadMD(vanadiumfile, StoreInADS=False)
-            vanws = self.__regrouping_and_move(vanws, grouping, height, distance)
+            vanws = self.__regroup_and_move(vanws, grouping, height, distance)
 
         has_multiple = len(datafiles) > 1
 
@@ -277,13 +276,15 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             if load_files:
                 scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
             else:
-                scan = mtd[in_file]
+                scan = CloneMDWorkspace(in_file)
 
             # Make sure the workspace has experiment info, otherwise SetGoniometer will add some, causing issues.
             if scan.getNumExperimentInfo() == 0:
                 raise RuntimeError("No experiment info was found in '{}'".format(in_file))
 
-            scan = self.__regrouping_and_move(scan, grouping, height, distance)
+            self.log().notice("Detector adjustments '({},{})'".format(height, distance))
+
+            scan = self.__regroup_and_move(scan, grouping, height, distance)
 
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
@@ -355,7 +356,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
-    def __regrouping_and_move(self, scan, grouping, height, distance):
+    def __regroup_and_move(self, scan, grouping, height, distance):
 
         ws = scan.name()
 
@@ -386,8 +387,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         y_dim, x_dim, number_of_runs = array.shape
 
         run = mtd[ws].getExperimentInfo(0).run()
-        det_trans = run.getProperty("det_trans").value[0]
-        two_theta = run.getProperty("2theta").value[0]
+        det_trans = run.getProperty("det_trans").timeAverageValue()
+        two_theta = run.getProperty("2theta").timeAverageValue()
         logs = run.getLogData()
 
         _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
@@ -397,8 +398,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.__move_components(_tmp_ws, height, distance)
 
         CreateMDHistoWorkspace(
-            SignalInput=array.flatten().tolist(),
-            ErrorInput=np.sqrt(array).flatten().tolist(),
+            SignalInput=array.T.flatten().tolist(),
+            ErrorInput=np.sqrt(array.T).flatten().tolist(),
             Dimensionality=3,
             Extents="0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5),
             NumberOfBins="{},{},{}".format(y_dim, x_dim, number_of_runs),
@@ -418,7 +419,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     detector_list += "," + "+".join(spectra_list)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
-        PreprocessDetectorsToMD(InputWorkspace=_tmp_ws, OutputWorkspace="_PreprocessedDetectorsWS")
         _tmp_ws = Rebin(InputWorkspace=_tmp_ws, Params="0,1,2", EnableLogging=False)
         _tmp_ws = ConvertToMD(
             InputWorkspace=_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="_PreprocessedDetectorsWS"
@@ -494,17 +494,18 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         # Adjust detector height and distance with new offsets
         instrument = ws.getInstrument()
         for bank in range(1, 4):
-            # Set height offset (y) first on bank?
-            panel_name = "bank{}".format(bank)
+            # Set height offset (y) first on bank
+            panel_name = "bank{}/panel".format(bank)
             if height != 0.0:
                 MoveInstrumentComponent(Workspace=ws, ComponentName=panel_name, Y=height)
 
             # Set distance offset to detector (x,z) on bank/panel
             if distance != 0.0:
                 component = instrument.getComponentByName(panel_name)
-                panel_rel_pos = component.getRelativePos()
+                panel_pos = component.getPos()
                 # need to move detector in direction in x-z plane
-                panel_offset = panel_rel_pos * (distance / panel_rel_pos.norm())
+                panel_pos[1] = 0
+                panel_offset = panel_pos * (distance / panel_pos.norm())
                 MoveInstrumentComponent(Workspace=ws, ComponentName=panel_name, X=panel_offset[0], Z=panel_offset[2])
 
     def __get_wavelength(self, exp_info):
