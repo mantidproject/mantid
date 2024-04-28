@@ -284,7 +284,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             if scan.getNumExperimentInfo() == 0:
                 raise RuntimeError("No experiment info was found in '{}'".format(in_file))
 
-            self.log().notice("Detector adjustments '({},{})'".format(height, distance))
+            self.log().information("Detector adjustments '({},{})m'".format(height, distance))
 
             scan = self.__regroup_and_move(scan, grouping, height, distance)
 
@@ -386,6 +386,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             )
 
         y_dim, x_dim, number_of_runs = array.shape
+        array = array.T.flatten()
 
         run = mtd[ws].getExperimentInfo(0).run()
         det_trans = run.getProperty("det_trans").timeAverageValue()
@@ -399,8 +400,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.__move_components(_tmp_ws, height, distance)
 
         CreateMDHistoWorkspace(
-            SignalInput=array.T.flatten().tolist(),
-            ErrorInput=np.sqrt(array.T).flatten().tolist(),
+            SignalInput=array,
+            ErrorInput=np.sqrt(array),
             Dimensionality=3,
             Extents="0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5),
             NumberOfBins="{},{},{}".format(y_dim, x_dim, number_of_runs),
@@ -411,12 +412,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if grouping > 1:
             detector_list = ""
-            for x in range(0, 512 * 3, grouping):
-                for y in range(0, 512, grouping):
+            for x in range(0, 512, grouping):
+                for y in range(0, 512 * 3, grouping):
                     spectra_list = []
                     for j in range(grouping):
                         for i in range(grouping):
-                            spectra_list.append(str(y + i + (x + j) * 512))
+                            spectra_list.append(str(y + i + (x + j) * 512 * 3))
                     detector_list += "," + "+".join(spectra_list)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
@@ -439,6 +440,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
         DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
+        DeleteWorkspace(scan)
 
         RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
 
