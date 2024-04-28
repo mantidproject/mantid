@@ -372,21 +372,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             k = 2 * np.pi / self.getProperty("Wavelength").value
 
         progress.report("Calculating Qlab for each pixel")
-        if inWS.getExperimentInfo(0).run().hasProperty("twotheta"):
-            polar = np.array(inWS.getExperimentInfo(0).run().getProperty("twotheta").value)
-        else:
-            di = inWS.getExperimentInfo(0).detectorInfo()
-            polar = np.array([di.twoTheta(i) for i in range(di.size()) if not di.isMonitor(i)])
-            if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
-                polar = polar.reshape(512 * 3, 512).T.flatten()
-
-        if inWS.getExperimentInfo(0).run().hasProperty("azimuthal"):
-            azim = np.array(inWS.getExperimentInfo(0).run().getProperty("azimuthal").value)
-        else:
-            di = inWS.getExperimentInfo(0).detectorInfo()
-            azim = np.array([di.azimuthal(i) for i in range(di.size()) if not di.isMonitor(i)])
-            if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
-                azim = azim.reshape(512 * 3, 512).T.flatten()
+        polar = np.array(inWS.getExperimentInfo(0).run().getProperty("twotheta").value)
+        azim = np.array(inWS.getExperimentInfo(0).run().getProperty("azimuthal").value)
 
         # check convention to determine the sign
         if config["Q.convention"] == "Crystallography":

@@ -40,6 +40,7 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     RenameWorkspace,
     ConvertToMD,
+    GroupDetectors,
     LoadInstrument,
     CreateMDHistoWorkspace,
     CreateSimulationWorkspace,
@@ -336,10 +337,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     BinningDim2=bin2,
                     OutputWorkspace=out_ws_name,
                 )
+                DeleteWorkspace(scan)
             else:
                 norm_data = self.__normalization(scan, vanws, load_files)
                 RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
-            DeleteWorkspace(scan)
 
         if has_multiple:
             out_ws_name = out_ws
