@@ -753,7 +753,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (const auto component : m_children) {
+      for (const auto &component : m_children) {
         BoundingBox compBox;
         if (component && component->getComponentID() != sourceID) {
           component->getBoundingBox(compBox);
