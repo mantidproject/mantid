@@ -412,12 +412,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if grouping > 1:
             detector_list = ""
-            for y in range(0, 512 * 3, grouping):
-                for x in range(0, 512, grouping):
+            for x in range(0, 512 * 3, grouping):
+                for y in range(0, 512, grouping):
                     spectra_list = []
                     for j in range(grouping):
                         for i in range(grouping):
-                            spectra_list.append(str(y + i + (x + j) * 512 * 3))
+                            spectra_list.append(str(y + i + (x + j) * 512))
                     detector_list += "," + "+".join(spectra_list)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
