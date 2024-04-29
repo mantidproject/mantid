@@ -329,10 +329,10 @@ size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double>> &Xbin
                    })->size();
   // resize all vectors to maximum size, fill last vector element at the end
   for (auto &v : Xbins) {
-    if (v.size() < max_size)
-      v.resize(max_size, v.back());
+    if (v.size() < maxSize)
+      v.resize(maxSize, v.back());
   }
-  return max_size;
+  return maxSize;
 }
 
 void Bin2DPowderDiffraction::normalizeToBinArea(const MatrixWorkspace_sptr &outWS) {
