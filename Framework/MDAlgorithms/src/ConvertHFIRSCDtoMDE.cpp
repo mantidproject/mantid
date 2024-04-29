@@ -168,21 +168,8 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::string instrument = expInfo.getInstrument()->getName();
 
   std::vector<double> twotheta, azimuthal;
-  if (instrument == "HB3A") {
-    const auto &di = expInfo.detectorInfo();
-    for (size_t x = 0; x < 512; x++) {
-      for (size_t y = 0; y < 512 * 3; y++) {
-        size_t n = x + y * 512;
-        if (!di.isMonitor(n)) {
-          twotheta.push_back(di.twoTheta(n));
-          azimuthal.push_back(di.azimuthal(n));
-        }
-      }
-    }
-  } else { // HB2C
-    azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
-    twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
-  }
+  azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
+  twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
 
   auto outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
   Mantid::Geometry::QSample frame;

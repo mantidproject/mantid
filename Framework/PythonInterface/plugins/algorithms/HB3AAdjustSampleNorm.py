@@ -361,7 +361,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         ws = scan.name()
 
-        array = mtd[ws].getSignalArray()
+        array = mtd[ws].getSignalArray().copy()
 
         if grouping == 2:
             array = array[0::2, 0::2] + array[1::2, 0::2] + array[0::2, 1::2] + array[1::2, 1::2]
@@ -412,12 +412,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if grouping > 1:
             detector_list = ""
-            for x in range(0, 512, grouping):
-                for y in range(0, 512 * 3, grouping):
+            for y in range(0, 512 * 3, grouping):
+                for x in range(0, 512, grouping):
                     spectra_list = []
-                    for i in range(grouping):
-                        for j in range(grouping):
-                            spectra_list.append(str(x + j + (y + i) * 512))
+                    for j in range(grouping):
+                        for i in range(grouping):
+                            spectra_list.append(str(x + i + (y + j) * 512))
                     detector_list += "," + "+".join(spectra_list)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
@@ -440,8 +440,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
         DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
-        DeleteWorkspace(scan)
 
+        DeleteWorkspace(scan)
         RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
 
         return mtd[ws]
