@@ -28,7 +28,7 @@ class IFitDataPresenter;
 class MANTIDQT_INELASTIC_DLL FitDataView : public QTabWidget, public IFitDataView {
   Q_OBJECT
 public:
-  FitDataView(QWidget *parent, std::string const &tabName);
+  FitDataView(QWidget *parent);
   ~FitDataView() override = default;
 
   void subscribePresenter(IFitDataPresenter *presenter) override;
@@ -51,9 +51,7 @@ protected slots:
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 protected:
-  FitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName);
-
-  std::string m_tabName;
+  FitDataView(const QStringList &headers, QWidget *parent);
 
   std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);

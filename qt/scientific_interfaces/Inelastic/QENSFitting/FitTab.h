@@ -28,6 +28,7 @@ namespace Inelastic {
 class MANTIDQT_INELASTIC_DLL IFitTab {
 public:
   // Used by FitDataPresenter
+  virtual std::string tabName() const = 0;
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleDataChanged() = 0;
   virtual void handleDataRemoved() = 0;
@@ -53,7 +54,7 @@ class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
   Q_OBJECT
 
 public:
-  FitTab(QWidget *parent);
+  FitTab(QWidget *parent, std::string const &tabName);
   virtual ~FitTab() override = default;
 
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
@@ -73,8 +74,8 @@ public:
       m_fitPropertyBrowser->setOutputCompositeMembers(true);
   }
 
-  template <typename FitDataView> void setupFitDataView(std::string const &tabName) {
-    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea, tabName));
+  template <typename FitDataView> void setupFitDataView() {
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
@@ -85,6 +86,8 @@ public:
   void setupOutputOptionsPresenter(bool const editResults = false);
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
   void subscribeFitBrowserToDataPresenter();
+
+  std::string tabName() const override;
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
   void handleDataChanged() override;

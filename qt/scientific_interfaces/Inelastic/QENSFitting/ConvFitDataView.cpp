@@ -7,6 +7,7 @@
 #include "ConvFitDataView.h"
 #include "Common/InterfaceUtils.h"
 #include "ConvFitAddWorkspaceDialog.h"
+#include "FitDataPresenter.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -27,11 +28,9 @@ QStringList convFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitDataView::ConvFitDataView(QWidget *parent, std::string const &tabName)
-    : ConvFitDataView(convFitHeaders(), parent, tabName) {}
+ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
 
-ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
-    : FitDataView(headers, parent, tabName) {
+ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -41,11 +40,12 @@ void ConvFitDataView::showAddWorkspaceDialog() {
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
-  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
-  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(m_tabName));
-  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(m_tabName));
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
+  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

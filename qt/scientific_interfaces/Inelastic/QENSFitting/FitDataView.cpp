@@ -32,11 +32,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-FitDataView::FitDataView(QWidget *parent, std::string const &tabName)
-    : FitDataView(defaultHeaders(), parent, tabName) {}
+FitDataView::FitDataView(QWidget *parent) : FitDataView(defaultHeaders(), parent) {}
 
-FitDataView::FitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
-    : QTabWidget(parent), m_uiForm(new Ui::FitDataView), m_tabName(tabName) {
+FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
+    : QTabWidget(parent), m_uiForm(new Ui::FitDataView) {
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);
@@ -136,9 +135,10 @@ void FitDataView::showAddWorkspaceDialog() {
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
-  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

@@ -24,6 +24,8 @@ class IFitTab;
 
 class MANTIDQT_INELASTIC_DLL IFitDataPresenter {
 public:
+  virtual std::string tabName() const = 0;
+
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveClicked() = 0;
   virtual void handleUnifyClicked() = 0;
@@ -72,6 +74,8 @@ public:
   };
 
   virtual void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
+
+  std::string tabName() const override;
 
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;

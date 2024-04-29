@@ -29,13 +29,11 @@ QStringList FqFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FqFitDataView::FqFitDataView(QWidget *parent, std::string const &tabName)
-    : FqFitDataView(FqFitHeaders(), parent, tabName) {
+FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
 }
 
-FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent, std::string const &tabName)
-    : FitDataView(headers, parent, tabName) {
+FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
@@ -49,9 +47,10 @@ void FqFitDataView::showAddWorkspaceDialog() {
   connect(dialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
           SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(m_tabName));
-  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(m_tabName));
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

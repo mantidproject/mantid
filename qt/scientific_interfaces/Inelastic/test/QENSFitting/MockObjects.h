@@ -35,6 +35,7 @@ class MockFitTab : public IFitTab {
 public:
   virtual ~MockFitTab() = default;
 
+  MOCK_CONST_METHOD0(tabName, std::string());
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());
   MOCK_METHOD0(handleDataRemoved, void());

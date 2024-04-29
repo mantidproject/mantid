@@ -26,6 +26,8 @@ std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFi
 
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
+std::string FitDataPresenter::tabName() const { return m_tab->tabName(); }
+
 bool FitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
     addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());

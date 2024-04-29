@@ -20,10 +20,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-FitTab::FitTab(QWidget *parent)
+FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
       m_outOptionsPresenter(), m_fitPropertyBrowser(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
+  parent->setWindowTitle(QString::fromStdString(tabName));
 }
 
 void FitTab::setup() {
@@ -328,6 +329,8 @@ void FitTab::updateResultOptions() {
   m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
+
+std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
 
 void FitTab::handleDataChanged() {
   updateDataReferences();
