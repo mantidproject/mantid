@@ -417,7 +417,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     spectra_list = []
                     for i in range(grouping):
                         for j in range(grouping):
-                            spectra_list.append(x + j + (y + i) * 512)
+                            spectra_list.append(str(x + j + (y + i) * 512))
                     detector_list += "," + "+".join(spectra_list)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
