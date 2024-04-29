@@ -209,7 +209,9 @@ bool FitTab::validate() {
   m_fittingModel->validate(validator);
 
   const auto error = validator.generateErrorMessage().toStdString();
-  displayWarning(error);
+  if (!error.empty()) {
+    displayWarning(error);
+  }
   return error.empty();
 }
 
