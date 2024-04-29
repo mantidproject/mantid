@@ -19,30 +19,54 @@ using namespace MantidQt::MantidWidgets;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL ElwinModel {
+class MANTIDQT_INELASTIC_DLL IElwinModel {
+public:
+  virtual ~IElwinModel() = default;
+  virtual void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
+                                  std::string const &outputName) = 0;
+  virtual std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) = 0;
+  virtual void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                   std::string const &inputWorkspacesString, std::string const &inputGroupWsName) = 0;
+  virtual void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                          std::string const &workspaceBaseName, std::string const &inputGroupWsName,
+                                          std::string const &sampleEnvironmentLogName,
+                                          std::string const &sampleEnvironmentLogValue) = 0;
+  virtual void ungroupAlgorithm(std::string const &inputWorkspace) const = 0;
+  virtual void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const = 0;
+  virtual void setIntegrationStart(double integrationStart) = 0;
+  virtual void setIntegrationEnd(double integrationEnd) = 0;
+  virtual void setBackgroundStart(double backgroundStart) = 0;
+  virtual void setBackgroundEnd(double backgroundEnd) = 0;
+  virtual void setBackgroundSubtraction(bool backgroundSubtraction) = 0;
+  virtual void setNormalise(bool normalise) = 0;
+  virtual void setOutputWorkspaceNames(std::string const &workspaceBaseName) = 0;
+  virtual std::string getOutputWorkspaceNames() const = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL ElwinModel : public IElwinModel {
 
 public:
   ElwinModel();
   ~ElwinModel() = default;
   void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                          std::string const &outputName);
-  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra);
+                          std::string const &outputName) override;
+  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) override;
   void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                           std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
+                           std::string const &inputWorkspacesString, std::string const &inputGroupWsName) override;
   void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                                   std::string const &workspaceBaseName, std::string const &inputGroupWsName,
                                   std::string const &sampleEnvironmentLogName,
-                                  std::string const &sampleEnvironmentLogValue);
-  void ungroupAlgorithm(std::string const &inputWorkspace) const;
-  void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const;
-  void setIntegrationStart(double integrationStart);
-  void setIntegrationEnd(double integrationEnd);
-  void setBackgroundStart(double backgroundStart);
-  void setBackgroundEnd(double backgroundEnd);
-  void setBackgroundSubtraction(bool backgroundSubtraction);
-  void setNormalise(bool normalise);
-  void setOutputWorkspaceNames(std::string const &workspaceBaseName);
-  std::string getOutputWorkspaceNames() const;
+                                  std::string const &sampleEnvironmentLogValue) override;
+  void ungroupAlgorithm(std::string const &inputWorkspace) const override;
+  void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const override;
+  void setIntegrationStart(double integrationStart) override;
+  void setIntegrationEnd(double integrationEnd) override;
+  void setBackgroundStart(double backgroundStart) override;
+  void setBackgroundEnd(double backgroundEnd) override;
+  void setBackgroundSubtraction(bool backgroundSubtraction) override;
+  void setNormalise(bool normalise) override;
+  void setOutputWorkspaceNames(std::string const &workspaceBaseName) override;
+  std::string getOutputWorkspaceNames() const override;
 
 private:
   double m_integrationStart;

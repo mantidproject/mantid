@@ -49,6 +49,15 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view)
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 }
 
+ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
+                               std::unique_ptr<IFitDataModel> dataModel)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::move(dataModel)),
+      m_selectedSpectrum(0) {
+  m_view->subscribePresenter(this);
+  setOutputPlotOptionsPresenter(
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+}
+
 ElwinPresenter::~ElwinPresenter() {}
 
 void ElwinPresenter::setup() {

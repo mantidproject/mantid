@@ -174,7 +174,7 @@ void ElwinView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   }
 }
 
-OutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void ElwinView::setHorizontalHeaders() {
   QStringList headers;

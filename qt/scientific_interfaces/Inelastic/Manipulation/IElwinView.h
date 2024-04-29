@@ -23,7 +23,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IOutputPlotOptionsView;
 class IElwinPresenter;
 
 class MANTIDQT_INELASTIC_DLL IElwinView {
@@ -31,7 +31,7 @@ class MANTIDQT_INELASTIC_DLL IElwinView {
 public:
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &from,
