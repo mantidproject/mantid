@@ -324,7 +324,7 @@ size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double>> &Xbin
   if (Xbins.size() == 0)
     return 0;
   // get maximal vector size
-  size_t max_size = std::max_element(Xbins.begin(), Xbins.end(), [](const auto a, const auto b) {
+  size_t maxSize = std::max_element(Xbins.cbegin(), Xbins.cend(), [](const auto &a, const auto &b) {
                       return a.size() < b.size();
                     })->size();
   // resize all vectors to maximum size, fill last vector element at the end
