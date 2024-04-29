@@ -199,7 +199,9 @@ Save Other
 
 *Single Workspace*
 
-#. On the ``Runs`` tab, with some workspaces present in the ADS, click the ``Save Other`` button.
+#. Navigate to the ``Runs`` tab, making sure there are some reduced workspaces present in the ADS. Follow one of the
+   "Processing" instruction sets above if you need to create some.
+#. Click the ``Save Other`` button.
 #. Select one of the workspaces from the list.
 #. Provide a path to a new save directory, and provide a file name.
 #. Click ``Save``.
