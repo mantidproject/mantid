@@ -386,7 +386,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             )
 
         y_dim, x_dim, number_of_runs = array.shape
-        array = array.T.flatten()
+        array = np.swapaxes(array.T, 1, 2).flatten()
 
         run = mtd[ws].getExperimentInfo(0).run()
         det_trans = run.getProperty("det_trans").timeAverageValue()
@@ -396,7 +396,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
         AddSampleLog(Workspace=_tmp_ws, LogName="det_trans", LogText=str(det_trans), LogType="Number Series", NumberType="Double")
         AddSampleLog(Workspace=_tmp_ws, LogName="2theta", LogText=str(two_theta), LogType="Number Series", NumberType="Double")
-        LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=True, InstrumentName="HB3A")
+        LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=False, InstrumentName="HB3A")
         self.__move_components(_tmp_ws, height, distance)
 
         CreateMDHistoWorkspace(
@@ -433,10 +433,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         CopySample(scan, "__scan_grouped", CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
-        twotheta = mtd["_PreprocessedDetectorsWS"].column(2)
-        azimuthal = mtd["_PreprocessedDetectorsWS"].column(3)
-        run["azimuthal"] = azimuthal
-        run["twotheta"] = twotheta
+        run["twotheta"] = mtd["_PreprocessedDetectorsWS"].column(2)
+        run["azimuthal"] = mtd["_PreprocessedDetectorsWS"].column(3)
 
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
         DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
