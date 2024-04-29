@@ -358,8 +358,8 @@ void FitScriptGeneratorView::openEditLocalParameterDialog(
     std::vector<std::string> const &domainNames, std::vector<double> const &values, std::vector<bool> const &fixes,
     std::vector<std::string> const &ties, std::vector<std::string> const &constraints) {
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      this, parameter, stdVectorToQStringList(workspaceNames), stdVectorToQStringList(domainNames),
-      convertToQList(values), convertToQList(fixes), stdVectorToQStringList(ties), stdVectorToQStringList(constraints));
+      this, parameter, workspaceNames, domainNames, convertToQList(values), convertToQList(fixes),
+      stdVectorToQStringList(ties), stdVectorToQStringList(constraints));
 
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(onEditLocalParameterFinished(int)));
 

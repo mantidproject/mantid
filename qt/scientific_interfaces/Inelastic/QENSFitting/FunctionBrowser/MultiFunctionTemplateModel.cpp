@@ -59,9 +59,11 @@ void MultiFunctionTemplateModel::setDatasets(const QList<FunctionModelDataset> &
   m_model->setDatasets(datasets);
 }
 
-QStringList MultiFunctionTemplateModel::getDatasetNames() const { return m_model->getDatasetNames(); }
+std::vector<std::string> MultiFunctionTemplateModel::getDatasetNames() const { return m_model->getDatasetNames(); }
 
-QStringList MultiFunctionTemplateModel::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
+std::vector<std::string> MultiFunctionTemplateModel::getDatasetDomainNames() const {
+  return m_model->getDatasetDomainNames();
+}
 
 void MultiFunctionTemplateModel::setCurrentDomainIndex(int i) { m_model->setCurrentDomainIndex(i); }
 

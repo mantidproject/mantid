@@ -49,11 +49,11 @@ public:
   void clearErrors();
   boost::optional<std::string> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
-  void setDatasets(const QStringList &datasetNames);
+  void setDatasets(const std::vector<std::string> &datasetNames);
   void setDatasets(const QList<FunctionModelDataset> &datasets);
-  void addDatasets(const QStringList &datasetNames);
-  QStringList getDatasetNames() const;
-  QStringList getDatasetDomainNames() const;
+  void addDatasets(const std::vector<std::string> &datasetNames);
+  std::vector<std::string> getDatasetNames() const;
+  std::vector<std::string> getDatasetDomainNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);

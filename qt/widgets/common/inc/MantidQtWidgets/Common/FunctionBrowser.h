@@ -77,9 +77,9 @@ public:
   /// Get the number of datasets
   int getNumberOfDatasets() const override;
   /// Get the names of datasets
-  QStringList getDatasetNames() const override;
+  std::vector<std::string> getDatasetNames() const override;
   /// Get the names of the dataset domains
-  QStringList getDatasetDomainNames() const override;
+  std::vector<std::string> getDatasetDomainNames() const override;
   /// Get value of a local parameter
   double getLocalParameterValue(std::string const &parameterName, int i) const override;
   /// Set value of a local parameter
@@ -137,12 +137,12 @@ public slots:
 
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
-  void setDatasets(const QStringList &datasetNames) override;
+  void setDatasets(const std::vector<std::string> &datasetNames) override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(const QList<int> &indices);
-  void addDatasets(const QStringList &names);
+  void addDatasets(const std::vector<std::string> &names);
 
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;

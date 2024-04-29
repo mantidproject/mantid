@@ -72,9 +72,11 @@ void FunctionTemplatePresenter::setDatasets(const QList<MantidWidgets::FunctionM
   m_model->setDatasets(datasets);
 }
 
-QStringList FunctionTemplatePresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
+std::vector<std::string> FunctionTemplatePresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
 
-QStringList FunctionTemplatePresenter::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
+std::vector<std::string> FunctionTemplatePresenter::getDatasetDomainNames() const {
+  return m_model->getDatasetDomainNames();
+}
 
 void FunctionTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
@@ -123,8 +125,7 @@ void FunctionTemplatePresenter::handleEditLocalParameter(std::string const &para
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = domainNames.size();
-  for (auto i = 0; i < n; ++i) {
+  for (auto i = 0; i < static_cast<int>(domainNames.size()); ++i) {
     const double value = getLocalParameterValue(parameterName, i);
     values.push_back(value);
     const bool fixed = isLocalParameterFixed(parameterName, i);
