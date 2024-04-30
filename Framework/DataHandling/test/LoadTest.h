@@ -311,6 +311,21 @@ public:
     loader.setPropertyValue("Filename", "argus0026287.nxs");
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
   }
+
+  void test_must_set_loadername() {
+    Load loader;
+    // run Load with the LoaderName set to something
+    // verify that at the end, it is correctly set back according to the output
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    std::string correctLoader = loader.getPropertyValue("LoaderName");
+    std::string incorrectLoader = "NotALoader";
+    TS_ASSERT_DIFFERS(correctLoader, incorrectLoader);
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("LoaderName", incorrectLoader));
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    // make sure the loader name has been correctly set
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), correctLoader);
+  }
 };
 
 //-------------------------------------------------------------------------------------------------
