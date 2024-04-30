@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -59,10 +60,13 @@ private:
   WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
-  WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
+  WorkspaceMap mapInputsToDirections(const std::string &flippers);
   void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  API::MatrixWorkspace_sptr workspaceForGivenFlipper(const std::vector<std::string> &flipperOptions,
+                                                     const std::string &flipperInput,
+                                                     const std::vector<std::string> &wsNameList);
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidKernel/StringTokenizer.h"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <vector>
@@ -41,11 +43,16 @@ into a vector of individual spin states. This will also trim any leading/trailin
 whitespace in the individual spin states.
 */
 std::vector<std::string> splitSpinStateString(const std::string &spinStates) {
-  std::vector<std::string> spinStateVector;
-  boost::split(spinStateVector, spinStates, boost::is_any_of(","));
-  for (auto &spinState : spinStateVector) {
-    boost::trim(spinState);
-  }
-  return spinStateVector;
+  using Mantid::Kernel::StringTokenizer;
+  StringTokenizer tokens{spinStates, ",", StringTokenizer::TOK_TRIM};
+  return std::vector<std::string>{tokens.begin(), tokens.end()};
+}
+
+/*
+True if there is a spin state in the input string specified with one character, e.g. 0 (instead of 00 or 10)
+*/
+bool hasSingleSpinStates(const std::string &spinStates) {
+  const auto splitString = splitSpinStateString(spinStates);
+  return std::any_of(splitString.cbegin(), splitString.cend(), [](std::string s) { return s.size() == 1; });
 }
 } // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers
