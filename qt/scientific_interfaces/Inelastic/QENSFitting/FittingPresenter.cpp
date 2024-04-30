@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FittingPresenter.h"
+#include "FitTab.h"
 #include "IFitOutput.h"
 #include "InelasticFitPropertyBrowser.h"
 
@@ -12,7 +13,11 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 FittingPresenter::FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser,
                                    std::unique_ptr<FittingModel> model)
-    : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)) {}
+    : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)) {
+  m_fitPropertyBrowser->subscribePresenter(this);
+}
+
+void FittingPresenter::notifyFunctionChanged() { m_tab->handleFunctionChanged(); }
 
 void FittingPresenter::validate(UserInputValidator &validator) { m_model->validate(validator); }
 
