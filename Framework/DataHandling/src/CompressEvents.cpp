@@ -12,6 +12,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/ListValidator.h"
 
 #include "tbb/parallel_for.h"
 
@@ -26,6 +28,12 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
+namespace {
+const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+} // namespace
+
 void CompressEvents::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the EventWorkspace on which to perform the algorithm");
@@ -36,10 +44,12 @@ void CompressEvents::init() {
   // Tolerance must be >= 0.0
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, mustBePositive, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, Direction::Input),
                   "The tolerance on each event's X value (normally TOF, but may be a "
                   "different unit if you have used ConvertUnits).\n"
-                  "Any events within Tolerance will be summed into a single event.");
+                  "Any events within Tolerance will be summed into a single event. When compressing where positive is "
+                  "linear tolerance, negative is logorithmic tolerance, and zero indicates that time-of-flight must be "
+                  "identical to compress.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("WallClockTolerance", EMPTY_DBL(), mustBePositive, Direction::Input),
@@ -54,15 +64,28 @@ void CompressEvents::init() {
                   "starting filtering. Ignored if WallClockTolerance is not specified. "
                   "Default is start of run",
                   Direction::Input);
+
+  declareProperty("BinningMode", binningModeNames[size_t(BinningMode::DEFAULT)],
+                  std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+                  "Binning behavior can be specified in the usual way through sign of tolerance and other properties "
+                  "('Default'); or can be set to one of the allowed binning modes. This will override all other "
+                  "specification or default behavior.");
 }
 
 void CompressEvents::exec() {
   // Get the input workspace
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  const double toleranceTof = getProperty("Tolerance");
+  double toleranceTof = getProperty("Tolerance");
   const double toleranceWallClock = getProperty("WallClockTolerance");
   const bool compressFat = !isEmpty(toleranceWallClock);
+
+  BINMODE mode = getPropertyValue("BinningMode");
+  if (mode == BinningMode::LINEAR)
+    toleranceTof = std::fabs(toleranceTof);
+  else if (mode == BinningMode::LOGARITHMIC)
+    toleranceTof = -1. * std::fabs(toleranceTof);
+
   Types::Core::DateAndTime startTime;
 
   if (compressFat) {

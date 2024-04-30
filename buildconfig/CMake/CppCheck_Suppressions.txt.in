@@ -767,11 +767,11 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDat
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:999
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1095
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableWorkspace.h:199
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3890
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4037
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4164
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4165
-derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1560
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3962
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4109
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4236
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4237
+derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1590
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TableWorkspace.cpp:253
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TableWorkspace.cpp:318
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:620
