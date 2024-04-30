@@ -72,7 +72,7 @@ public:
   virtual void removeFittingData() = 0;
   virtual void addDefaultParameters() = 0;
   virtual void removeDefaultParameters() = 0;
-  virtual IFitDataModel *getFitDataModel() = 0;
+  virtual IFitDataModel *getFitDataModel() const = 0;
 };
 
 } // namespace Inelastic
