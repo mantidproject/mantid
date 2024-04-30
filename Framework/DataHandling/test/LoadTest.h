@@ -318,8 +318,8 @@ public:
     // verify that at the end, it is correctly set back according to the output
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
-    std::string correctLoader = loader.getPropertyValue("LoaderName");
-    std::string incorrectLoader = "NotALoader";
+    std::string const correctLoader = loader.getPropertyValue("LoaderName");
+    std::string const incorrectLoader = "NotALoader";
     TS_ASSERT_DIFFERS(correctLoader, incorrectLoader);
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("LoaderName", incorrectLoader));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
