@@ -11,7 +11,6 @@
 #include "DataManipulation.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 #include <QRegExp>
 #include <QScrollArea>

@@ -10,8 +10,8 @@
 #include "ui_DataSelector.h"
 
 #include "MantidAPI/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
 #include <QWidget>
 
@@ -373,7 +373,7 @@ private:
   /// Extra load properties to set on the load algorithm before execution
   Mantid::API::AlgorithmRuntimeProps m_loadProperties;
   /// Algorithm Runner used to run the load algorithm
-  MantidQt::API::AlgorithmRunner m_algRunner;
+  MantidQt::API::QtAlgorithmRunner m_algRunner;
   /// Flag to enable auto loading. By default this is set to true.
   bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.

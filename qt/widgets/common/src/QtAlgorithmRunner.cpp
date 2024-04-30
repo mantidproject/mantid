@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -16,15 +16,15 @@ namespace MantidQt::API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AlgorithmRunner::AlgorithmRunner(QObject *parent)
-    : QObject(parent), m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
-      m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
-      m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification), m_asyncResult(nullptr) {}
+QtAlgorithmRunner::QtAlgorithmRunner(QObject *parent)
+    : QObject(parent), m_finishedObserver(*this, &QtAlgorithmRunner::handleAlgorithmFinishedNotification),
+      m_progressObserver(*this, &QtAlgorithmRunner::handleAlgorithmProgressNotification),
+      m_errorObserver(*this, &QtAlgorithmRunner::handleAlgorithmErrorNotification), m_asyncResult(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AlgorithmRunner::~AlgorithmRunner() {
+QtAlgorithmRunner::~QtAlgorithmRunner() {
   if (m_asyncAlg) {
     m_asyncAlg->removeObserver(m_finishedObserver);
     m_asyncAlg->removeObserver(m_errorObserver);
@@ -38,7 +38,7 @@ AlgorithmRunner::~AlgorithmRunner() {
  * Does nothing if no algorithm is running. This blocks
  * for up to 1 second to wait for the algorithm to finish cancelling.
  */
-void AlgorithmRunner::cancelRunningAlgorithm() {
+void QtAlgorithmRunner::cancelRunningAlgorithm() {
   // Cancel any currently running algorithms
   if (m_asyncAlg) {
     if (m_asyncAlg->isRunning()) {
@@ -62,11 +62,11 @@ void AlgorithmRunner::cancelRunningAlgorithm() {
  * @param alg :: algorithm to execute. All properties should have been set
  *properly.
  */
-void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void QtAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   if (!alg)
-    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given a NULL Algorithm");
+    throw std::invalid_argument("QtAlgorithmRunner::startAlgorithm() given a NULL Algorithm");
   if (!alg->isInitialized())
-    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
+    throw std::invalid_argument("QtAlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
 
   cancelRunningAlgorithm();
 
@@ -80,7 +80,7 @@ void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 }
 
 /// Get back a pointer to the running algorithm
-Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const { return m_asyncAlg; }
+Mantid::API::IAlgorithm_sptr QtAlgorithmRunner::getAlgorithm() const { return m_asyncAlg; }
 
 //--------------------------------------------------------------------------------------
 /** Observer called when the asynchronous algorithm has completed.
@@ -92,7 +92,7 @@ Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const { return m_as
  *
  * @param pNf :: finished notification object.
  */
-void AlgorithmRunner::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
+void QtAlgorithmRunner::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
   UNUSED_ARG(pNf);
   emit algorithmComplete(false);
 }
@@ -102,7 +102,7 @@ void AlgorithmRunner::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Al
  *
  * @param pNf :: notification object
  */
-void AlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
+void QtAlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
   emit algorithmProgress(pNf->progress, pNf->message);
 }
 
@@ -112,7 +112,7 @@ void AlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<Al
  *
  * @param pNf :: notification object
  */
-void AlgorithmRunner::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
+void QtAlgorithmRunner::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
   UNUSED_ARG(pNf);
   emit algorithmComplete(true);
 }

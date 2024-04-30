@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
 #include <gmock/gmock.h>
 
@@ -16,9 +16,9 @@ using namespace MantidQt::API;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockAlgorithmRunner : public AlgorithmRunner {
+class MockQtAlgorithmRunner : public QtAlgorithmRunner {
 public:
-  MockAlgorithmRunner() = default;
+  MockQtAlgorithmRunner() = default;
   MOCK_METHOD0(cancelRunningAlgorithm, void());
   MOCK_METHOD1(startAlgorithmImpl, void(Mantid::API::IAlgorithm_sptr));
   MOCK_CONST_METHOD0(getAlgorithm, Mantid::API::IAlgorithm_sptr());

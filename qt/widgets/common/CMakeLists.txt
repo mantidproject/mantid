@@ -5,7 +5,6 @@ set(SRC_FILES
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
-    src/AlgorithmRunner.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlternateCSPythonLexer.cpp
     src/BatchAlgorithmRunner.cpp
@@ -87,6 +86,7 @@ set(SRC_FILES
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
+    src/QtAlgorithmRunner.cpp
     src/QtJobRunner.cpp
     src/QtSignalChannel.cpp
     src/QtJSONUtils.cpp
@@ -164,7 +164,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/BoolPropertyWidget.h
@@ -216,6 +215,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
     inc/MantidQtWidgets/Common/PythonRunner.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtSignalChannel.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
@@ -267,7 +267,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BaseEncoder.h
     inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -309,6 +308,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/TableWidgetValidators.h
@@ -369,7 +369,6 @@ set(QT5_UI_FILES
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/BoolPropertyWidget.h
@@ -435,6 +434,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
     inc/MantidQtWidgets/Common/SaveWorkspaces.h
     inc/MantidQtWidgets/Common/ScriptEditor.h
@@ -478,8 +478,7 @@ set(INC_FILES
     ${MOC_FILES}
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
-    inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/MockQtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -515,6 +514,7 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/PluginLibraries.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QStringUtils.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h

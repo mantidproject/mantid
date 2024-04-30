@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace API {
-/** The AlgorithmRunner is a QObject that encapsulates
+/** The QtAlgorithmRunner is a QObject that encapsulates
  * methods for running an algorithm asynchronously (in the background)
  * and feeds-back to a GUI widget.
  *
@@ -23,18 +23,18 @@ namespace API {
  * Signals are emitted when the algorithm progresses or finishes.
  *
  * TO USE:
- *  - Create the AlgorithmRunner object.
+ *  - Create the QtAlgorithmRunner object.
  *  - Connect the desired signal(s) to slots on your GUI.
  *  - Call startAlgorithm() to start.
 
   @date 2012-04-23
 */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmRunner : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON QtAlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
-  explicit AlgorithmRunner(QObject *parent = nullptr);
-  ~AlgorithmRunner() override;
+  explicit QtAlgorithmRunner(QObject *parent = nullptr);
+  ~QtAlgorithmRunner() override;
 
   virtual void cancelRunningAlgorithm();
 
@@ -52,13 +52,13 @@ signals:
 protected:
   /// Algorithm notification handlers
   void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
+  Poco::NObserver<QtAlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
 
   void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+  Poco::NObserver<QtAlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
 
   void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
+  Poco::NObserver<QtAlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
   /// For the asynchronous call in dynamic rebinning. Holds the result of
   /// asyncExecute() algorithm call
