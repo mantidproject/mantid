@@ -52,7 +52,7 @@ std::string getRegexValidatorString(const RegexValidatorStrings &validatorMask) 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
 
 RegexInputDelegate::RegexInputDelegate(QWidget *parent, const std::string &validator)
-    : QStyledItemDelegate(parent), m_validator(QRegExp(QString::fromStdString(validator))){};
+    : QStyledItemDelegate(parent), m_validator(QRegExp(QString::fromStdString(validator))) {}
 
 QWidget *RegexInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
                                           const QModelIndex & /*index*/) const {
@@ -63,7 +63,7 @@ QWidget *RegexInputDelegate::createEditor(QWidget *parent, const QStyleOptionVie
 }
 
 NumericInputDelegate::NumericInputDelegate(QWidget *parent, double precision)
-    : QStyledItemDelegate(parent), m_precision(precision){};
+    : QStyledItemDelegate(parent), m_precision(precision) {}
 
 QWidget *NumericInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
 
