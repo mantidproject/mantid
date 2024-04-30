@@ -30,9 +30,16 @@ class IFitOutput;
 class IFitTab;
 class InelasticFitPropertyBrowser;
 
-class MANTIDQT_INELASTIC_DLL FittingPresenter {
+class MANTIDQT_INELASTIC_DLL IFittingPresenter {
+public:
+  virtual void notifyFunctionChanged() = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL FittingPresenter : public IFittingPresenter {
 public:
   FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser, std::unique_ptr<FittingModel> model);
+
+  void notifyFunctionChanged() override;
 
   void validate(UserInputValidator &validator);
 
