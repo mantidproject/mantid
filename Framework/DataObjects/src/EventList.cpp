@@ -1476,6 +1476,12 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   std::function<double(const double, double)> next_bin;
 
   if (tolerance < 0) { // log
+    if (lastTof < 0)
+      throw std::runtime_error("compressEvents with log binning doesn't work with negative TOF");
+
+    if (lastTof == 0)
+      bin_end = fabs(tolerance);
+
     // for log we do "less than" so that is matches the log binning of the Rebin algorithm
     compareTof = [](const double lhs, const double rhs) { return lhs < rhs; };
     next_bin = [tolerance](const double lastTof, double bin_end) {
@@ -1602,6 +1608,13 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
     const auto event_min = std::min_element(
         events.cbegin(), events.cend(), [](const auto &left, const auto &right) { return left.tof() < right.tof(); });
     bin_end = tof_min = event_min->tof();
+
+    if (tof_min < 0)
+      throw std::runtime_error("compressEvents with log binning doesn't work with negative TOF");
+
+    if (tof_min == 0)
+      bin_end = fabs(tolerance);
+
   } else { // linear
     // for linear we do "less than or equals" because that is how it was originally implemented
     compareTof = [](const double lhs, const double rhs) { return lhs <= rhs; };

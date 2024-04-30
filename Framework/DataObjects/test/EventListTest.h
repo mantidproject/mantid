@@ -2226,6 +2226,34 @@ public:
     TS_ASSERT_DELTA(el_output.getEvent(2).tof(), 100000, 1e-5)
   }
 
+  void test_compressEvents_log3() {
+    // check the behavior when TOF is zero or negative
+    el = EventList();
+    el += TofEvent(0, 0);
+    el += TofEvent(0.5, 0);
+    el += TofEvent(1, 0);
+
+    // Do compress events with log binning
+    // Since there is a tof==0 then the first bin_end should be 1
+    EventList el_output;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(-1, &el_output))
+
+    // now check individual events
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 2)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(0).weight(), 2)
+    TS_ASSERT_EQUALS(el_output.getEvent(0).errorSquared(), 2)
+    TS_ASSERT_DELTA(el_output.getEvent(0).tof(), 0.25, 1e-5)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(1).weight(), 1)
+    TS_ASSERT_EQUALS(el_output.getEvent(1).errorSquared(), 1)
+    TS_ASSERT_DELTA(el_output.getEvent(1).tof(), 1, 1e-5)
+
+    // now add a negative TOF and it should throw
+    el += TofEvent(-1, 0);
+    TS_ASSERT_THROWS(el.compressEvents(-1, &el_output), const std::runtime_error &)
+  }
+
   void test_compressFatEvents_log() {
     el = EventList();
     for (int pulseTime = 0; pulseTime < 5; pulseTime++)
@@ -2348,6 +2376,34 @@ public:
     TS_ASSERT_EQUALS(el_output.getEvent(3).errorSquared(), 2)
     TS_ASSERT_DELTA(el_output.getEvent(3).tof(), 1000.5, 1e-5)
     TS_ASSERT_DELTA(el_output.getEvent(3).pulseTime().totalNanoseconds(), 6000000000, 1e-5)
+  }
+
+  void test_compressFatEvents_log3() {
+    // check the behavior when TOF is zero or negative
+    el = EventList();
+    el += TofEvent(0.5, 1);
+    el += TofEvent(1, 2);
+    el += TofEvent(0, 3);
+
+    // Do compress events with log binning
+    // Since there is a tof==0 then the first bin_end should be 1
+    EventList el_output;
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(-1, DateAndTime{0}, 10, &el_output))
+
+    // now check individual events
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 2)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(0).weight(), 2)
+    TS_ASSERT_EQUALS(el_output.getEvent(0).errorSquared(), 2)
+    TS_ASSERT_DELTA(el_output.getEvent(0).tof(), 0.25, 1e-5)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(1).weight(), 1)
+    TS_ASSERT_EQUALS(el_output.getEvent(1).errorSquared(), 1)
+    TS_ASSERT_DELTA(el_output.getEvent(1).tof(), 1, 1e-5)
+
+    // now add a negative TOF and it should throw
+    el += TofEvent(-1, 0);
+    TS_ASSERT_THROWS(el.compressFatEvents(-1, DateAndTime{0}, 10, &el_output), const std::runtime_error &)
   }
 
   //==================================================================================
