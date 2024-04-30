@@ -21,6 +21,7 @@ set(SRC_FILES
     FitPlotView.cpp
     FitTab.cpp
     FittingModel.cpp
+    FittingPresenter.cpp
     FqFitAddWorkspaceDialog.cpp
     FqFitDataPresenter.cpp
     FqFitDataView.cpp
@@ -58,6 +59,7 @@ set(INC_FILES
     FitPlotModel.h
     FitPlotPresenter.h
     FittingModel.h
+    FittingPresenter.h
     FitTabConstants.h
     FqFitDataPresenter.h
     FqFitModel.h
