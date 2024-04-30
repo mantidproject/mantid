@@ -256,7 +256,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "084446+084447.nxs");
 
-    std::string outputWS = AnalysisDataService::Instance().uniqueName();
+    std::string outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -279,7 +279,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "084446-084447");
 
-    std::string outputWS = AnalysisDataService::Instance().uniqueName();
+    std::string outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -313,7 +313,7 @@ public:
   }
 
   void test_must_set_loadername() {
-    std::string const outputWS = AnalysisDataService::Instance().uniqueName();
+    std::string const outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
     std::string const incorrectLoader = "NotALoader";
     int const incorrectVersion = -2;
 
