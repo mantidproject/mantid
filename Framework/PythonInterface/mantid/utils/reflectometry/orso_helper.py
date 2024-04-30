@@ -10,7 +10,7 @@ from typing import Optional, Union, List
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
 from orsopy.fileio import Reduction, Software
-from orsopy.fileio.orso import Orso, OrsoDataset, save_orso
+from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
 from orsopy.fileio.base import Column, ErrorColumn, File
 
 from mantid.kernel import version
@@ -18,10 +18,11 @@ from enum import Enum
 
 
 class MantidORSOSaver:
-    FILE_EXT = ".ort"
+    ASCII_FILE_EXT = ".ort"
+    NEXUS_FILE_EXT = ".orb"
 
     def __init__(self, filename: str, comment: str = None) -> None:
-        self._filename = filename if filename.endswith(self.FILE_EXT) else f"{filename}{self.FILE_EXT}"
+        self._filename = filename
         self._comment = comment
         self._datasets = []
 
@@ -33,7 +34,17 @@ class MantidORSOSaver:
         self._datasets.append(dataset.dataset)
 
     def save_orso_ascii(self) -> None:
-        save_orso(datasets=self._datasets, fname=self._filename, comment=self._comment)
+        save_orso(datasets=self._datasets, fname=self._get_filename_with_extension(self.ASCII_FILE_EXT), comment=self._comment)
+
+    def save_orso_nexus(self) -> None:
+        save_nexus(datasets=self._datasets, fname=self._get_filename_with_extension(self.NEXUS_FILE_EXT), comment=self._comment)
+
+    def _get_filename_with_extension(self, extension):
+        return self._filename if self._filename.endswith(extension) else f"{self._filename}{extension}"
+
+    @staticmethod
+    def is_supported_extension(filename):
+        return filename.endswith(MantidORSOSaver.ASCII_FILE_EXT) or filename.endswith(MantidORSOSaver.NEXUS_FILE_EXT)
 
 
 class MantidORSODataset:

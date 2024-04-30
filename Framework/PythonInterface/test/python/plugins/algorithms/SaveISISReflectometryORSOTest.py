@@ -23,7 +23,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime
-from mantid.utils.reflectometry.orso_helper import MantidORSODataset
+from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -72,6 +72,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _WS_UNITS_ERROR = "must have units of"
     _WS_NUM_SPECTRA_ERROR = "must contain only one spectrum"
     _WS_NOT_FOUND_ERROR = "Cannot find workspace"
+    _FILE_EXT_ERROR = "must end with a supported ORSO extension"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -82,7 +83,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         config["default.instrument"] = "INTER"
 
         self._rb_number = str(123456)
-        self._filename = "ORSO_save_test.ort"
+        self._filename = f"ORSO_save_test{MantidORSOSaver.ASCII_FILE_EXT}"
         self._temp_dir = tempfile.TemporaryDirectory()
         self._output_filename = os.path.join(self._temp_dir.name, self._filename)
         # The optional ISIS header entries that are not taken from the ws history
@@ -566,6 +567,19 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
+    def test_filename_must_have_supported_extension(self):
+        ws = self._create_sample_workspace()
+        with self.assertRaisesRegex(RuntimeError, self._FILE_EXT_ERROR):
+            self._run_save_alg([ws], write_resolution=False, filename="file_extension.invalid")
+
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.MantidORSOSaver.save_orso_ascii")
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.MantidORSOSaver.save_orso_nexus")
+    def test_saved_as_nexus_if_relevant_filename_extension(self, mock_save_orso_nexus, mock_save_orso_ascii):
+        ws = self._create_sample_workspace()
+        self._run_save_alg(ws, filename=f"test_nexus_save{MantidORSOSaver.NEXUS_FILE_EXT}")
+        mock_save_orso_nexus.assert_called_once()
+        mock_save_orso_ascii.assert_not_called()
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
@@ -695,12 +709,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertEqual(1, spectrum_info.size())
         return float(np.rad2deg(spectrum_info.signedTwoTheta(0))) / 2.0
 
-    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False):
+    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None):
         SaveISISReflectometryORSO(
             WorkspaceList=ws_list,
             WriteResolution=write_resolution,
             IncludeAdditionalColumns=include_extra_cols,
-            Filename=self._output_filename,
+            Filename=self._output_filename if filename is None else os.path.join(self._temp_dir.name, filename),
         )
 
 

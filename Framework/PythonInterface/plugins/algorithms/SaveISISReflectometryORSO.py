@@ -206,7 +206,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
 
         self.declareProperty(
-            FileProperty(Prop.FILENAME, "", FileAction.Save, MantidORSOSaver.FILE_EXT), doc="File path to save the .ort file to"
+            FileProperty(Prop.FILENAME, "", FileAction.Save, extensions=[MantidORSOSaver.ASCII_FILE_EXT, MantidORSOSaver.NEXUS_FILE_EXT]),
+            doc="File path to save the ORSO file to. Must end with a supported ORSO file extension. "
+            f"Use {MantidORSOSaver.ASCII_FILE_EXT} to save into the ASCII format or {MantidORSOSaver.NEXUS_FILE_EXT} to "
+            "save into the Nexus format",
         )
 
     def validateInputs(self):
@@ -219,6 +222,12 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             if ws_issue:
                 issues[Prop.WORKSPACE_LIST] = ws_issue
                 break
+
+        if not MantidORSOSaver.is_supported_extension(self.getProperty(Prop.FILENAME).value):
+            issues[Prop.FILENAME] = (
+                f"File path to save to must end with a supported ORSO extension. Use {MantidORSOSaver.ASCII_FILE_EXT} "
+                f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
+            )
 
         return issues
 
@@ -246,15 +255,20 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         for refl_dataset in self._create_and_sort_refl_datasets():
             orso_saver.add_dataset(self._create_orso_dataset(refl_dataset))
 
-        # Write the file to disk in the ORSO ASCII format
-        if Path(orso_saver.filename).is_file():
+        # Write the file to disk in the relevant ORSO format
+        save_filepath = Path(orso_saver.filename)
+        if save_filepath.is_file():
             self.log().warning("File already exists and will be overwritten")
 
+        file_ext = save_filepath.suffix
         try:
-            orso_saver.save_orso_ascii()
+            if file_ext == MantidORSOSaver.ASCII_FILE_EXT:
+                orso_saver.save_orso_ascii()
+            else:
+                orso_saver.save_orso_nexus()
         except OSError as e:
             raise RuntimeError(
-                f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
+                f"Error writing ORSO {file_ext} file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
             )
 
     @staticmethod
