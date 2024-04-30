@@ -656,7 +656,7 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
                 # get index in y where kernel starts
                 iy_start = ipos[idim] - kernel.shape[idim] // 2
                 if iy_start < 0:
-                    istart = -iy_start  # chop of ii elements at the begnining of the kernel along this dimension
+                    istart = -iy_start  # chop of ii elements at the beginning of the kernel along this dimension
                 elif iy_start > y.shape[idim] - kernel.shape[idim]:
                     iend = y.shape[idim] - iy_start  # include only up to number of elements remaining in y
                 kernel_slices.append(slice(istart, iend))

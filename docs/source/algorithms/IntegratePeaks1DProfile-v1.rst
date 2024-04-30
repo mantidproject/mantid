@@ -13,8 +13,8 @@ Description
 This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` with x-units
 of Time-of-Flight (TOF). It is adapted and extended from an algorithm in SXD2001 [1]_.
 
-The algorithm proceeds by fitting a ``PEakFunction`` and ``BackgroundFunction`` to the TOF spectrum of individual
-pixels. If the fit is successful (fit converged and the ratio of intensity/sigma > ``IoverSigmaThreshold``), then the
+The algorithm proceeds by fitting a ``PeakFunction`` and ``BackgroundFunction`` to the TOF spectrum of individual
+pixels. If the fit is successful (fit converged and the ratio of intensity/sigma > ``IOverSigmaThreshold``), then the
 fit is attempted on a pixel that is adjacent to a previously successfully fit pixel. The algorithm stops
 when no adjacent pixels can be successfully fitted.
 

@@ -67,7 +67,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         )
         self.declareProperty(
             IPeaksWorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
-            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the" " integrated intensities.",
+            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the integrated intensities.",
         )
         # peak window dimensions
         self.declareProperty(
@@ -131,14 +131,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         )
         self.declareProperty(
             StringArrayProperty(name="FixPeakParameters", direction=Direction.Input),
-            doc="Peak parameters to fix in the fits (reccommend fixing A for back-to-back exponential based functions).",
+            doc="Peak parameters to fix in the fits (recommend fixing A for back-to-back exponential based functions).",
         )
         self.declareProperty(
             name="BackgroundFunction",
             defaultValue="FlatBackground",
             direction=Direction.Input,
             validator=StringListValidator(["FlatBackground", "LinearBackground"]),
-            doc="Background funtion to fit.",
+            doc="Background function to fit.",
         )
         self.declareProperty(
             name="ErrorStrategy",
@@ -147,11 +147,11 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             validator=StringListValidator(["Hessian", "Summation"]),
             doc="If Hessian then error on the integrated intensity will be determined from the partial derivatives of "
             "the cost-function wrt the parameters (this is only supported for BackToBackExponential function for "
-            "which the integrated intensity is a parameter. If Summation then the error will be the quadratue "
+            "which the integrated intensity is a parameter. If Summation then the error will be the quadrature "
             "sum of the individual errors.",
         )
         self.declareProperty(
-            name="IoverSigmaThreshold",
+            name="IOverSigmaThreshold",
             defaultValue=2.5,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
@@ -170,7 +170,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             "FixPeakParameters",
             "BackgroundFunction",
             "ErrorStrategy",
-            "IoverSigmaThreshold",
+            "IOverSigmaThreshold",
             "FractionalChangeDSpacing",
         ]:
             self.setPropertyGroup(prop, "Fit Options")
@@ -212,7 +212,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         # plotting
         self.declareProperty(
             FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
-            "Optional file path in which to write diagnostic plots (note this will slow the " "execution of algorithm).",
+            "Optional file path in which to write diagnostic plots (note this will slow the execution of algorithm).",
         )
         self.setPropertyGroup("OutputFile", "Plotting")
 
@@ -265,7 +265,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         peak_func_name = self.getProperty("PeakFunction").value
         peak_params_to_fix = self.getProperty("FixPeakParameters").value
         bg_func_name = self.getProperty("BackgroundFunction").value
-        i_over_sig_threshold = self.getProperty("IoverSigmaThreshold").value
+        i_over_sig_threshold = self.getProperty("IOverSigmaThreshold").value
         frac_dspac_delta = self.getProperty("FractionalChangeDSpacing").value
         error_strategy = self.getProperty("ErrorStrategy").value
         # validation

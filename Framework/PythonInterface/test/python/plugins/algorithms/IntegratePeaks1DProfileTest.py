@@ -104,9 +104,9 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 57922.22, delta=1e-2)  # not realistic fit
 
-    def test_exec_IoverSigmaThreshold_respected(self):
+    def test_exec_IOverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
-        kwargs["IoverSigmaThreshold"] = 100  # set this higher than I/sigma in any pixel i.e. should not fit any pixels
+        kwargs["IOverSigmaThreshold"] = 100  # set this higher than I/sigma in any pixel i.e. should not fit any pixels
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_6", **kwargs)
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 0.0, delta=1e-2)
 
