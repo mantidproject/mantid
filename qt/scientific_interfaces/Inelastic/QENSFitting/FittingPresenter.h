@@ -93,10 +93,11 @@ public:
                                            std::unordered_map<std::string, ParameterValue>());
   void updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
                                               std::size_t const &numberOfDomains);
-  void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, std::size_t const &numberOfDomains);
   void updateFitTypeString();
 
 private:
+  void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, std::size_t const &numberOfDomains);
+
   IFitTab *m_tab;
   InelasticFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<FittingModel> m_model;
