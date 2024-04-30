@@ -194,6 +194,26 @@ Processing
 #. Check that your save location contains files for both the background subtracted workspace and the normal reduction
    output.
 
+Save Other
+##########
+
+*Single Workspace*
+
+#. Navigate to the ``Runs`` tab, making sure there are some reduced workspaces present in the ADS. Follow one of the
+   "Processing" instruction sets above if you need to create some.
+#. Click the ``Save Other`` button.
+#. Select one of the workspaces from the list.
+#. Provide a path to a new save directory, and provide a file name.
+#. Click ``Save``.
+#. Check the file was saved to the correct location on your system.
+
+*Multiple Workspaces*
+
+#. Select multiple workspaces with Shift or Ctrl/Cmd.
+#. Provide a suffix for the files.
+#. Click ``Save``.
+#. Check that the files were saved with their workspace's names, but with the provided suffix appended.
+
 Beam centre finder
 ##################
 
