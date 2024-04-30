@@ -73,8 +73,6 @@ public:
     UNUSED_ARG(single);
   };
 
-  virtual void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
-
   std::string tabName() const override;
 
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
