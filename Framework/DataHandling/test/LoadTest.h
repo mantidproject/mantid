@@ -332,11 +332,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("LoaderName", incorrectLoader));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoaderVersion", incorrectVersion));
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), incorrectLoader);
-    TS_ASSERT_EQUALS(loader.getProperty("LoaderVersion"), incorrectVersion);
+    TS_ASSERT_EQUALS((int)loader.getProperty("LoaderVersion"), incorrectVersion);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     // make sure the loader name has been correctly set
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), correctLoader);
-    TS_ASSERT_EQUALS(loader.getProperty("LoaderVersion"), correctVersion);
+    TS_ASSERT_EQUALS((int)loader.getProperty("LoaderVersion"), correctVersion);
   }
 };
 
