@@ -618,6 +618,6 @@ void FittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAlgorithm,
   cleanTemporaries(base + "_0");
 }
 
-IFitDataModel *FittingModel::getFitDataModel() { return m_fitDataModel.get(); }
+IFitDataModel *FittingModel::getFitDataModel() const { return m_fitDataModel.get(); }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

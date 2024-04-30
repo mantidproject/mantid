@@ -11,7 +11,7 @@
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
 #include "FitPlotPresenter.h"
-#include "FittingModel.h"
+#include "FittingPresenter.h"
 #include "FunctionBrowser/TemplateSubType.h"
 #include "InelasticFitPropertyBrowser.h"
 #include "ui_FitTab.h"
@@ -34,6 +34,7 @@ public:
   virtual void handleDataRemoved() = 0;
   virtual void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
   virtual void handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
+  virtual void handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) = 0;
 
   // Used by FitPlotPresenter
   virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
@@ -46,7 +47,7 @@ public:
   // Used by FitOutputOptionsPresenter
   virtual void handlePlotSelectedSpectra() = 0;
 
-  // Used by InelasticFitPropertyBrowser
+  // Used by FittingModel
   virtual void handleFunctionChanged() = 0;
 };
 
@@ -57,8 +58,6 @@ public:
   FitTab(QWidget *parent, std::string const &tabName);
   virtual ~FitTab() override = default;
 
-  template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
-
   template <typename TemplateBrowser, typename TemplatePresenter, typename FunctionModel>
   void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false,
                                TemplateBrowserCustomizations customizations = TemplateBrowserCustomizations()) {
@@ -68,10 +67,15 @@ public:
     m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplatePresenter(std::move(templatePresenter));
     m_uiForm->dockArea->m_fitPropertyBrowser->init();
     m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
-    m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
-    m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+    m_uiForm->dockArea->m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
     if (convolveMembers)
-      m_fitPropertyBrowser->setOutputCompositeMembers(true);
+      m_uiForm->dockArea->m_fitPropertyBrowser->setOutputCompositeMembers(true);
+  }
+
+  template <typename FittingModel> void setupFittingPresenter() {
+    auto model = std::make_unique<FittingModel>();
+    m_fittingPresenter =
+        std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser, std::move(model));
   }
 
   template <typename FitDataView> void setupFitDataView() {
@@ -79,13 +83,12 @@ public:
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
-    m_dataPresenter =
-        std::make_unique<FitDataPresenter>(this, m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+    m_dataPresenter = std::make_unique<FitDataPresenter>(this, m_fittingPresenter->getFitDataModel(),
+                                                         m_uiForm->dockArea->m_fitDataView);
   }
 
   void setupOutputOptionsPresenter(bool const editResults = false);
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
-  void subscribeFitBrowserToDataPresenter();
 
   std::string tabName() const override;
 
@@ -94,6 +97,7 @@ public:
   void handleDataRemoved() override;
   void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
+  void handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) override;
 
   void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handlePlotSpectrumChanged() override;
@@ -102,11 +106,11 @@ public:
 
   void handlePlotSelectedSpectra() override;
 
+  void handleFunctionChanged() override;
+
 public slots:
   void handleStartXChanged(double startX) override;
   void handleEndXChanged(double endX) override;
-
-  void handleFunctionChanged() override;
 
 private slots:
   void updateFitOutput(bool error);
@@ -128,20 +132,15 @@ private:
   void setModelFitFunction();
 
   void updateParameterEstimationData();
-  void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
-  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
-                                           std::unordered_map<std::string, ParameterValue>());
-  void updateFitBrowserParameterValuesFromAlg();
 
   std::unique_ptr<Ui::FitTab> m_uiForm;
 
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
-  std::unique_ptr<FittingModel> m_fittingModel;
+  std::unique_ptr<FittingPresenter> m_fittingPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
-  InelasticFitPropertyBrowser *m_fitPropertyBrowser;
 
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
