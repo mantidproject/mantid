@@ -29,7 +29,7 @@ public:
   virtual void notifyBatchCancelled() = 0;
   virtual void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &algorithm) = 0;
   virtual void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) = 0;
-  virtual void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) = 0;
+  virtual void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) = 0;
 };
 
 /** @class IJobRunner

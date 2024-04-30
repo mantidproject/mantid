@@ -55,7 +55,7 @@ public:
   void notifyBatchCancelled() override;
   void notifyAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm) override;
   void notifyAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm) override;
-  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
+  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
 
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;

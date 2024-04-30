@@ -6,6 +6,7 @@ set(SRC_FILES
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
     src/AlgorithmSelectorWidget.cpp
+    src/AlgorithmRunner.cpp
     src/AlternateCSPythonLexer.cpp
     src/BatchAlgorithmRunner.cpp
     src/BoolPropertyWidget.cpp
@@ -268,6 +269,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
+    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h
@@ -284,6 +286,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IAddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -478,7 +481,6 @@ set(INC_FILES
     ${MOC_FILES}
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
-    inc/MantidQtWidgets/Common/MockQtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -508,6 +510,8 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
+    inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/MockQtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/NonOrthogonal.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/PlotAxis.h

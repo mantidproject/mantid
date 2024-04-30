@@ -196,7 +196,7 @@ void ALFAlgorithmManager::executeAlgorithm(Mantid::API::IAlgorithm_sptr algorith
   m_jobRunner->executeAlgorithm(std::move(configuredAlg));
 }
 
-void ALFAlgorithmManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+void ALFAlgorithmManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
   (void)algorithm;
   m_subscriber->notifyAlgorithmError(message);
 }
