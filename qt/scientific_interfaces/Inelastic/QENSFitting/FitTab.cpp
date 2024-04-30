@@ -125,7 +125,6 @@ void FitTab::fitAlgorithmComplete(bool error) {
   if (!error) {
     m_fittingPresenter->updateFitBrowserParameterValuesFromAlg(m_fittingAlgorithm,
                                                                m_dataPresenter->getNumberOfDomains());
-    m_fittingPresenter->updateFitStatus(m_fittingAlgorithm, m_dataPresenter->getNumberOfDomains());
     setModelFitFunction();
   }
   m_plotPresenter->updatePlots();

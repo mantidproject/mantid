@@ -155,6 +155,7 @@ void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API:
         m_fitPropertyBrowser->updateParameters(*fun);
     }
   }
+  updateFitStatus(fittingAlgorithm, numberOfDomains);
 }
 
 void FittingPresenter::updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
