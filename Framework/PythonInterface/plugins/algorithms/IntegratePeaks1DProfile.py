@@ -14,6 +14,8 @@ from mantid.api import (
     FileAction,
     Progress,
     FunctionFactory,
+    IPeak,
+    SpectrumInfo,
 )
 from mantid.kernel import (
     Direction,
@@ -34,6 +36,7 @@ from scipy.ndimage import binary_dilation
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, find_nearest_peak_in_data_window, set_peak_intensity
 from enum import Enum
+from typing import Callable
 
 
 class IntegratePeaks1DProfile(DataProcessorAlgorithm):
@@ -407,26 +410,26 @@ class PeakFitter:
         frac_dspac_delta,
         i_over_sig_threshold,
     ):
-        self.pk = pk
-        self.peak_pos = (peak_data.irow, peak_data.icol)
-        self.spec_info = ws.spectrumInfo()
-        self.error_strategy = error_strategy
-        self.weight_func = weight_func
-        self.cost_func = cost_func
-        self.det_edges = peak_data.det_edges
-        self.frac_dspac_delta = frac_dspac_delta
-        self.i_over_sig_threshold = i_over_sig_threshold
-        self.tofs = None
-        self.y = None
-        self.esq = None
-        self.ispecs = None
-        self.peak_func = None
-        self.profile_func = None
-        self.nparams_pk = None
-        self.nparams_bg = None
-        self.iparam_cen = None
-        self.ifix_initial = None  # parameters to keep fixed on initial fit
-        self.ifix_final = None
+        self.pk: IPeak = pk
+        self.peak_pos: tuple[int, int] = (peak_data.irow, peak_data.icol)
+        self.spec_info: SpectrumInfo = ws.spectrumInfo()
+        self.error_strategy: str = error_strategy
+        self.weight_func: Callable = weight_func
+        self.cost_func: Callable = cost_func
+        self.det_edges: np.ndarray = peak_data.det_edges
+        self.frac_dspac_delta: float = frac_dspac_delta
+        self.i_over_sig_threshold: float = i_over_sig_threshold
+        self.tofs: np.ndarray = None
+        self.y: np.ndarray = None
+        self.esq: np.ndarray = None
+        self.ispecs: np.ndarray = None
+        self.peak_func: IPeakFunction = None
+        self.profile_func: FunctionWrapper = None
+        self.nparams_pk: int = None
+        self.nparams_bg: int = None
+        self.iparam_cen: int = None
+        self.ifix_initial: list[int] = None  # parameters to keep fixed on initial fit
+        self.ifix_final: list[int] = None
 
         self.get_data_arrays(ws, peak_data, nbins)
         self.update_initial_peak_position(ws, peaks, ipk)
