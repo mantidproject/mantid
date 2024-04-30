@@ -308,7 +308,7 @@ def sum_regular_runs(workspace_names):
     summed_monitor_ws_name = workspace_names[0] + "_mon"
 
     # Get a list of the run numbers for the original data
-    run_numbers = ",".join([str(mtd[ws_name].getRunNumber()) for ws_name in workspace_names])
+    run_numbers = add_run_numbers(workspace_names)
 
     # Generate lists of the detector and monitor workspaces
     detector_workspaces = ",".join(workspace_names)
@@ -332,7 +332,8 @@ def sum_regular_runs(workspace_names):
     Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name, Factor=scale_factor)
 
     # Add the list of run numbers to the result workspace as a sample log
-    AddSampleLog(Workspace=summed_detector_ws_name, LogName="multi_run_numbers", LogType="String", LogText=run_numbers)
+    AddSampleLog(Workspace=workspace_names[0], LogName="multi_run_reduction", LogType="String", LogText="regular_runs")
+    AddSampleLog(Workspace=workspace_names[0], LogName="run_number", LogType="String", LogText=run_numbers)
 
     # Only have the one workspace now
     return [summed_detector_ws_name]
@@ -345,7 +346,7 @@ def sum_chopped_runs(workspace_names):
     """
     Sum runs with chopped data.
     """
-    from mantid.simpleapi import MergeRuns, Scale, DeleteWorkspace
+    from mantid.simpleapi import MergeRuns, Scale, DeleteWorkspace, AddSampleLog
 
     try:
         num_merges = len(mtd[workspace_names[0]].getNames())
@@ -353,6 +354,8 @@ def sum_chopped_runs(workspace_names):
         raise RuntimeError("Not all runs have been chopped, cannot sum.")
 
     merges = list()
+
+    run_numbers = add_run_numbers(workspace_names)
 
     # Generate a list of workspaces to be merged
     for idx in range(0, num_merges):
@@ -381,11 +384,30 @@ def sum_chopped_runs(workspace_names):
             DeleteWorkspace(merge["detector"][idx])
             DeleteWorkspace(merge["monitor"][idx])
 
+    # Add the list of run numbers to the result workspace as a sample log
+    AddSampleLog(Workspace=workspace_names[0], LogName="multi_run_reduction", LogType="String", LogText="chopped_runs")
+    AddSampleLog(Workspace=workspace_names[0], LogName="run_number", LogType="String", LogText=run_numbers)
+
     # Only have the one workspace now
     return [workspace_names[0]]
 
 
 # --------------------------------------------------------------------------------
+def add_run_numbers(workspace_names):
+    run_numbers = []
+    for ws_name in workspace_names:
+        ws = mtd[ws_name]
+        if ws.isGroup():
+            number = ws[0].getRunNumber()
+        else:
+            number = ws.getRunNumber()
+        run_numbers.append(number)
+
+    # Get a list of the run numbers for the original data
+    return ",".join([str(number) for number in run_numbers])
+
+
+# ---------------------------------------------------------------------------------
 
 
 def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
@@ -883,11 +905,15 @@ def rename_reduction(workspace_name, multiple_files):
 
     is_multi_frame = isinstance(mtd[workspace_name], WorkspaceGroup)
 
-    # Get the instrument
+    # Get the instrument, run number and title
     if is_multi_frame:
         instrument = mtd[workspace_name].getItem(0).getInstrument()
+        run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
+        run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
     else:
         instrument = mtd[workspace_name].getInstrument()
+        run_number = mtd[workspace_name].getRun()["run_number"].value
+        run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
 
     # Get the naming convention parameter form the parameter file
     try:
@@ -896,26 +922,16 @@ def rename_reduction(workspace_name, multiple_files):
         # Default to run title if naming convention parameter not set
         convention = "RunTitle"
     logger.information("Naming convention for workspace %s is %s" % (workspace_name, convention))
-
-    # Get run number
-    if is_multi_frame:
-        run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
-    else:
-        run_number = mtd[workspace_name].getRun()["run_number"].value
     logger.information("Run number for workspace %s is %s" % (workspace_name, run_number))
+    logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
 
     inst_name = instrument.getName()
     inst_name = inst_name.lower()
 
-    # Get run title
-    if is_multi_frame:
-        run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
-    else:
-        run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
-    logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
-
     if multiple_files:
         multi_run_marker = "_multi"
+        split_runs = [int(run) for run in run_number.split(",")]
+        run_number = str(min(split_runs)) + "-" + str(max(split_runs))
     else:
         multi_run_marker = ""
 
