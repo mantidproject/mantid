@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
+#include "FitTab.h"
 #include "FitTabConstants.h"
 #include "MantidAPI/TextAxis.h"
 #include "ParameterEstimation.h"
@@ -197,11 +198,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFitDataPresenter::FqFitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view)
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_fitPropertyBrowser() {}
-
-void FqFitDataPresenter::subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) {
-  m_fitPropertyBrowser = browser;
-}
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
 bool FqFitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
@@ -236,8 +233,7 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  m_fitPropertyBrowser->updateFunctionListInBrowser(fqFitFunctionList);
-
+  m_tab->handleFunctionListChanged(fqFitFunctionList);
   if (paramType == "Width") {
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);

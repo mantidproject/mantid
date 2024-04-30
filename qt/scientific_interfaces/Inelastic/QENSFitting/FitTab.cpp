@@ -21,8 +21,8 @@ namespace CustomInterfaces {
 namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
-    : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
-      m_outOptionsPresenter(), m_fitPropertyBrowser(), m_fittingAlgorithm() {
+    : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
+      m_outOptionsPresenter(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
 }
@@ -31,11 +31,7 @@ void FitTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(handleFunctionChanged()));
-}
-
-void FitTab::subscribeFitBrowserToDataPresenter() {
-  m_dataPresenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser);
+  // connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(handleFunctionChanged()));
 }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
@@ -49,7 +45,7 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
   auto model = std::make_unique<FitPlotModel>();
   m_plotPresenter = std::make_unique<FitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView, std::move(model));
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
-  m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
+  m_plotPresenter->setFitOutput(m_fittingPresenter->getFitOutput());
   if (xPlotBounds) {
     m_plotPresenter->setXBounds(*xPlotBounds);
   }
@@ -57,9 +53,9 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
 }
 
 void FitTab::setModelFitFunction() {
-  auto func = m_fitPropertyBrowser->getFitFunction();
+  auto func = m_fittingPresenter->fitFunction();
   m_plotPresenter->setFitFunction(func);
-  m_fittingModel->setFitFunction(func);
+  m_fittingPresenter->setFitFunction(func);
 }
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
@@ -74,6 +70,10 @@ void FitTab::handleTableEndXChanged(double endX, WorkspaceID workspaceID, Worksp
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();
   }
+}
+
+void FitTab::handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) {
+  m_fittingPresenter->updateFunctionListInBrowser(functionStrings);
 }
 
 void FitTab::handleStartXChanged(double startX) {
@@ -96,10 +96,10 @@ void FitTab::updateFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
+    m_fittingPresenter->cleanFailedRun(m_fittingAlgorithm);
     m_fittingAlgorithm.reset();
   } else {
-    m_fittingModel->addOutput(m_fittingAlgorithm);
+    m_fittingPresenter->addOutput(m_fittingAlgorithm);
   }
 }
 
@@ -107,11 +107,11 @@ void FitTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
+    m_fittingPresenter->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
     m_fittingAlgorithm.reset();
   } else {
-    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
-                                       m_plotPresenter->getActiveWorkspaceIndex());
+    m_fittingPresenter->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
+                                           m_plotPresenter->getActiveWorkspaceIndex());
   }
 }
 
@@ -123,65 +123,17 @@ void FitTab::fitAlgorithmComplete(bool error) {
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
   enableOutputOptions(!error);
-  m_fitPropertyBrowser->setErrorsEnabled(!error);
+  m_fittingPresenter->setErrorsEnabled(!error);
   if (!error) {
-    updateFitBrowserParameterValuesFromAlg();
-    updateFitStatus();
+    m_fittingPresenter->updateFitBrowserParameterValuesFromAlg(m_fittingAlgorithm,
+                                                               m_dataPresenter->getNumberOfDomains());
+    m_fittingPresenter->updateFitStatus(m_fittingAlgorithm, m_dataPresenter->getNumberOfDomains());
     setModelFitFunction();
   }
   m_plotPresenter->updatePlots();
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
-void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
-  auto fun = m_fittingModel->getFitFunction();
-  if (fun) {
-    for (auto const &pair : params) {
-      fun->setParameter(pair.first, pair.second.value);
-    }
-    if (fun->getNumberDomains() > 1) {
-      m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-    } else {
-      m_fitPropertyBrowser->updateParameters(*fun);
-    }
-  }
-}
-
-void FitTab::updateFitBrowserParameterValuesFromAlg() {
-  updateFitBrowserParameterValues();
-  if (m_fittingAlgorithm) {
-    QSignalBlocker blocker(m_fitPropertyBrowser);
-    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-      auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
-      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
-      auto rowCount = static_cast<int>(paramWs->rowCount());
-      if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
-    } else {
-      IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-      if (fun->getNumberDomains() > 1)
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-      else
-        m_fitPropertyBrowser->updateParameters(*fun);
-    }
-  }
-}
-/**
- * Updates the fit output status
- */
-void FitTab::updateFitStatus() {
-  if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
-    std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
-    double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
-    const std::vector<std::string> status(m_dataPresenter->getNumberOfDomains(), fit_status);
-    const std::vector<double> chiSquared(m_dataPresenter->getNumberOfDomains(), chi2);
-    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
-  } else {
-    const std::vector<std::string> status = m_fittingAlgorithm->getProperty("OutputStatus");
-    const std::vector<double> chiSquared = m_fittingAlgorithm->getProperty("OutputChiSquared");
-    m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
-  }
-}
 /**
  * Plots the spectra corresponding to the selected parameters
  */
@@ -199,15 +151,15 @@ void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spec
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-    runSingleFit(m_fittingModel->getSingleFit(workspaceID, spectrum));
+    m_fittingPresenter->setFittingMode(FittingMode::SIMULTANEOUS);
+    runSingleFit(m_fittingPresenter->getSingleFit(workspaceID, spectrum));
   }
 }
 
 bool FitTab::validate() {
   UserInputValidator validator;
   m_dataPresenter->validate(validator);
-  m_fittingModel->validate(validator);
+  m_fittingPresenter->validate(validator);
 
   const auto error = validator.generateErrorMessage().toStdString();
   if (!error.empty()) {
@@ -222,8 +174,8 @@ bool FitTab::validate() {
 void FitTab::run() {
   enableFitButtons(false);
   enableOutputOptions(false);
-  m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
-  runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
+  m_fittingPresenter->updateFittingModeFromBrowser();
+  runFitAlgorithm(m_fittingPresenter->getFittingAlgorithm(m_fittingPresenter->getFittingMode()));
 }
 
 /**
@@ -235,7 +187,7 @@ void FitTab::enableFitButtons(bool enable) {
   m_uiForm->pbRun->setText(enable ? "Run" : "Running...");
   m_uiForm->pbRun->setEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
-  m_fitPropertyBrowser->setFitEnabled(enable);
+  m_fittingPresenter->setFitEnabled(enable);
 }
 
 /**
@@ -245,8 +197,8 @@ void FitTab::enableFitButtons(bool enable) {
  */
 void FitTab::enableOutputOptions(bool enable) {
   if (enable) {
-    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
-    setPDFWorkspace(m_fittingModel->getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setResultWorkspace(m_fittingPresenter->getResultWorkspace());
+    setPDFWorkspace(m_fittingPresenter->getOutputBasename() + "_PDFs");
     m_outOptionsPresenter->setPlotTypes("Result Group");
   } else
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
@@ -262,7 +214,7 @@ void FitTab::enableOutputOptions(bool enable) {
  * @param workspaceName :: the name of the PDF workspace if it exists
  */
 void FitTab::setPDFWorkspace(std::string const &workspaceName) {
-  auto const fabMinimizer = m_fitPropertyBrowser->minimizer() == "FABADA";
+  auto const fabMinimizer = m_fittingPresenter->minimizer() == "FABADA";
   auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && fabMinimizer;
 
   if (enablePDFOptions) {
@@ -274,14 +226,10 @@ void FitTab::setPDFWorkspace(std::string const &workspaceName) {
 }
 
 void FitTab::updateParameterEstimationData() {
-  m_fitPropertyBrowser->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(m_fitPropertyBrowser->getEstimationDataSelector()));
-  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
-                                                     m_plotPresenter->getActiveWorkspaceIndex());
-  // If we haven't fit the data yet we may update the guess
-  if (!isFit) {
-    m_fitPropertyBrowser->estimateFunctionParameters();
-  }
+  m_fittingPresenter->updateParameterEstimationData(
+      m_dataPresenter->getDataForParameterEstimation(m_fittingPresenter->getEstimationDataSelector()));
+  m_fittingPresenter->estimateFunctionParameters(m_plotPresenter->getActiveWorkspaceID(),
+                                                 m_plotPresenter->getActiveWorkspaceIndex());
 }
 
 /*
@@ -303,16 +251,16 @@ void FitTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void FitTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  auto properties = m_fitPropertyBrowser->fitProperties(m_fittingModel->getFittingMode());
+  auto properties = m_fittingPresenter->fitProperties();
   m_fittingAlgorithm = fitAlgorithm;
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm, std::move(properties));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
 void FitTab::updateDataReferences() {
-  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
-                                                  m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
-                                                  m_dataPresenter->getResolutionsForFit());
+  m_fittingPresenter->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
+                                                m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
+                                                m_dataPresenter->getResolutionsForFit());
   setModelFitFunction();
 }
 
@@ -321,10 +269,10 @@ void FitTab::updateDataReferences() {
  * enabled/disabled.
  */
 void FitTab::updateResultOptions() {
-  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
-                                                     m_plotPresenter->getActiveWorkspaceIndex());
+  const bool isFit = m_fittingPresenter->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                         m_plotPresenter->getActiveWorkspaceIndex());
   if (isFit)
-    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
+    m_outOptionsPresenter->setResultWorkspace(m_fittingPresenter->getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
@@ -334,7 +282,7 @@ std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStd
 
 void FitTab::handleDataChanged() {
   updateDataReferences();
-  m_fittingModel->removeFittingData();
+  m_fittingPresenter->removeFittingData();
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
@@ -344,7 +292,7 @@ void FitTab::handleDataChanged() {
 
 void FitTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
   if (m_dataPresenter->addWorkspaceFromDialog(dialog)) {
-    m_fittingModel->addDefaultParameters();
+    m_fittingPresenter->addDefaultParameters();
   }
   updateDataReferences();
   m_plotPresenter->appendLastDataToSelection(m_dataPresenter->createDisplayNames());
@@ -352,7 +300,7 @@ void FitTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
 }
 
 void FitTab::handleDataRemoved() {
-  m_fittingModel->removeDefaultParameters();
+  m_fittingPresenter->removeDefaultParameters();
   updateDataReferences();
   m_plotPresenter->updateDataSelection(m_dataPresenter->createDisplayNames());
   updateParameterEstimationData();
@@ -360,28 +308,27 @@ void FitTab::handleDataRemoved() {
 
 void FitTab::handlePlotSpectrumChanged() {
   auto const index = m_plotPresenter->getSelectedDomainIndex();
-  m_fitPropertyBrowser->setCurrentDataset(index);
+  m_fittingPresenter->setCurrentDataset(index);
 }
 
 void FitTab::handleFwhmChanged(double fwhm) {
-  m_fittingModel->setFWHM(fwhm, m_plotPresenter->getActiveWorkspaceID());
-  updateFitBrowserParameterValues();
+  m_fittingPresenter->setFWHM(m_plotPresenter->getActiveWorkspaceID(), fwhm);
+  m_fittingPresenter->updateFitBrowserParameterValues();
   m_plotPresenter->updateGuess();
 }
 
 void FitTab::handleBackgroundChanged(double value) {
-  m_fittingModel->setBackground(value, m_plotPresenter->getActiveWorkspaceID());
-  m_fitPropertyBrowser->setBackgroundA0(value);
+  m_fittingPresenter->setBackground(m_plotPresenter->getActiveWorkspaceID(), value);
   setModelFitFunction();
   m_plotPresenter->updateGuess();
 }
 
 void FitTab::handleFunctionChanged() {
   setModelFitFunction();
-  m_fittingModel->removeFittingData();
+  m_fittingPresenter->removeFittingData();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
-  m_fittingModel->updateFitTypeString();
+  m_fittingPresenter->updateFitTypeString();
 }
 
 } // namespace Inelastic

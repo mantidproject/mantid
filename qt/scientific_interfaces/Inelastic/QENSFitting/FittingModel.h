@@ -95,7 +95,7 @@ public:
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
 
-  IFitDataModel *getFitDataModel() override;
+  IFitDataModel *getFitDataModel() const override;
 
   // Used for testing purposes
   [[nodiscard]] inline std::string getFitString() const noexcept { return m_fitString; }
