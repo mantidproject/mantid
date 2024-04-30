@@ -204,11 +204,8 @@ double DetectorGroup::solidAngle(const Geometry::SolidAngleParams &params) const
  *
  */
 bool DetectorGroup::isParametrized() const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
-    if ((*it).second->isParametrized())
-      return true;
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [](const auto &detector) { return detector.second->isParametrized(); });
 }
 
 /** isValid() is true if the point is inside any of the detectors, i.e. one of
@@ -218,12 +215,8 @@ bool DetectorGroup::isParametrized() const {
  *  @return if the point is in a detector it returns true else it returns false
  */
 bool DetectorGroup::isValid(const V3D &point) const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if ((*it).second->isValid(point))
-      return true;
-  }
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [&point](const auto &detector) { return detector.second->isValid(point); });
 }
 
 /** Does the point given lie on the surface of one of the detectors
@@ -232,12 +225,8 @@ bool DetectorGroup::isValid(const V3D &point) const {
  *  @return true if the point is on the side of a detector else it returns false
  */
 bool DetectorGroup::isOnSide(const V3D &point) const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if ((*it).second->isOnSide(point))
-      return true;
-  }
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [&point](const auto &detector) { return detector.second->isOnSide(point); });
 }
 
 /** tries to find a point that lies on or within the first detector in the

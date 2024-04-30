@@ -1135,21 +1135,21 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
   std::map<std::string, std::string> errors;
 
   const std::string pattern = getPropertyValue("GroupingPattern");
+  if (pattern.empty())
+    return errors;
 
-  static const boost::regex re(R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
+  const boost::regex re(R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
 
   try {
-    if (!pattern.empty() && !boost::regex_match(pattern, re)) {
+    if (!boost::regex_match(pattern, re)) {
       errors["GroupingPattern"] = "GroupingPattern is not well formed: " + pattern;
     }
   } catch (boost::exception &) {
     // If the pattern is too large, split on comma and evaluate each piece.
     auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
-    for (const auto &groupStr : groups) {
-      if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
-        errors["GroupingPattern"] = "GroupingPattern is not well formed: " + pattern;
-        break;
-      }
+    if (std::any_of(groups.cbegin(), groups.cend(),
+                    [&re](const auto &groupStr) { return !boost::regex_match(groupStr, re); })) {
+      errors["GroupingPattern"] = "GroupingPattern is not well formed: " + pattern;
     }
   }
 

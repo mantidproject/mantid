@@ -477,13 +477,9 @@ bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDi
     peak->function(localpeakvalue, datax);
 
     // check data
-    size_t numbadpts(0);
-    vector<double>::const_iterator localpeakvalue_end = localpeakvalue.end();
-    for (auto it = localpeakvalue.begin(); it != localpeakvalue_end; ++it) {
-      if ((*it != 0.) && (*it < NEG_DBL_MAX || *it > DBL_MAX)) {
-        numbadpts++;
-      }
-    }
+    const auto numbadpts = std::count_if(localpeakvalue.cbegin(), localpeakvalue.cend(), [&](const auto &pt) {
+      return (pt != 0.) && (pt < NEG_DBL_MAX || pt > DBL_MAX);
+    });
 
     // report the problem and/or integrate data
     if (numbadpts == 0) {
