@@ -398,10 +398,9 @@ Code Freeze
 
 * Verify that the latest commit on ``release-next`` is correct before moving to the next step.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
-  which will perform the following action set the value of the Jenkins global property
-  ``BRANCH_TO_PUBLISH`` to ``release-next``, which will re-enable package publishing for
-  the ``release-next`` nightly pipeline.
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__. This will
+  set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``,
+  which will re-enable package publishing for the ``release-next`` nightly pipeline.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
