@@ -911,10 +911,10 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i) throw(std::exception);
     int getCurrentDataset() const;
-    void setDatasets(const QStringList &datasetNames);
-    void addDatasets(const QStringList &names);
+    void setDatasets(const std::vector<std::string> &datasetNames);
+    void addDatasets(const std::vector<std::string> &names);
     void removeDatasets(QList<int> indices);
-    QStringList getDatasetNames() const;
+    std::vector<std::string> getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
     void hideGlobalCheckbox();
     void showGlobalCheckbox();

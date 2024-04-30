@@ -376,9 +376,9 @@ public:
     TS_ASSERT_EQUALS(m_model->getFittingMode(), simultaneous);
   }
 
-  void test_setFitTypeString_sets_member() {
+  void test_updateFitTypeString_does_not_throw() {
     addWorkspaceToModel("Workspace1", 3, "0-2");
-    TS_ASSERT_THROWS_NOTHING(m_model->setFitTypeString("TestString"));
+    TS_ASSERT_THROWS_NOTHING(m_model->updateFitTypeString());
   }
 
   void test_getResultLocation_returns_none_when_out_of_index() {
@@ -433,6 +433,46 @@ public:
     addWorkspaceToModel("wsName", 3, "0-2");
     std::string outputString = "wsName_FitType_seq_FitString_0-2";
     TS_ASSERT_EQUALS(m_model->getOutputBasename(), outputString);
+  }
+
+  void test_that_single_function_correctly_identified() {
+    auto const function = getFunction("composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+                                      "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
+                                      "WorkspaceIndex=0,X=(),Y=();(name=ExpDecay,Height=1,Lifetime=1;));");
+    m_model->setFitFunction(function);
+    m_model->updateFitTypeString();
+    TS_ASSERT_EQUALS("1E", m_model->getFitString());
+  }
+
+  void test_that_single_layer_composite_function_handled_correctly() {
+    auto const function = getFunction("composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+                                      "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
+                                      "WorkspaceIndex=0,X=(),Y=();(name=ExpDecay,Height=1,Lifetime=1;name=StretchExp,"
+                                      "Height=1,Lifetime=1,Stretching=1;));");
+    m_model->setFitFunction(function);
+    m_model->updateFitTypeString();
+    auto const fitString = m_model->getFitString();
+    TS_ASSERT(fitString.find("1E") != std::string::npos);
+    TS_ASSERT(fitString.find("1S") != std::string::npos);
+  }
+
+  void test_that_no_matched_name_is_correct() {
+    auto const function = getFunction("composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+                                      "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
+                                      "WorkspaceIndex=0,X=(),Y=();(name=ExpDecayMuon,A=1,Lambda=1;));");
+    m_model->setFitFunction(function);
+    m_model->updateFitTypeString();
+    TS_ASSERT_EQUALS("", m_model->getFitString());
+  }
+
+  void test_that_multi_layer_composite_function_handled_correctly() {
+    auto const function = getFunction(
+        "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+        "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
+        "WorkspaceIndex=0,X=(),Y=();(name=ExpDecay,Height=1,Lifetime=1;name=ExpDecay,Height=1,Lifetime=1;));");
+    m_model->setFitFunction(function);
+    m_model->updateFitTypeString();
+    TS_ASSERT_EQUALS("2E", m_model->getFitString());
   }
 
 private:

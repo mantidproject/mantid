@@ -219,7 +219,7 @@ public:
       WorkspaceID workspaceID{i};
 
       auto const name = "wsName" + std::to_string(i);
-      datasets.append(FunctionModelDataset(QString::fromStdString(name), FunctionModelSpectra("0")));
+      datasets.append(FunctionModelDataset(name, FunctionModelSpectra("0")));
     }
     std::vector<double> qValues = {0.0, 1.0};
     std::vector<std::pair<std::string, size_t>> fitResolutions(1, std::make_pair<std::string, size_t>("resWS", 0));

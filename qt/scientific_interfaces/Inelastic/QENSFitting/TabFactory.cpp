@@ -39,7 +39,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 TabFactory::TabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
 FitTab *TabFactory::makeMSDFitTab(int const index) const {
-  auto tab = new FitTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  auto tab = new FitTab(m_tabWidget->widget(index), MSDFit::TAB_NAME);
   tab->setupFittingModel<MSDFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
       MSDFit::HIDDEN_PROPS);
@@ -51,7 +51,7 @@ FitTab *TabFactory::makeMSDFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeIqtFitTab(int const index) const {
-  auto tab = new FitTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  auto tab = new FitTab(m_tabWidget->widget(index), IqtFit::TAB_NAME);
   tab->setupFittingModel<IqtFitModel>();
   auto browserCustomizations = packBrowserCustomizations(IqtFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, IqtFunctionTemplateModel>(
@@ -64,7 +64,7 @@ FitTab *TabFactory::makeIqtFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeConvFitTab(int const index) const {
-  auto tab = new FitTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  auto tab = new FitTab(m_tabWidget->widget(index), ConvFit::TAB_NAME);
   tab->setupFittingModel<ConvFitModel>();
   auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, ConvFunctionTemplateModel>(
@@ -77,7 +77,7 @@ FitTab *TabFactory::makeConvFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeFqFitTab(int const index) const {
-  auto tab = new FitTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  auto tab = new FitTab(m_tabWidget->widget(index), FqFit::TAB_NAME);
   tab->setupFittingModel<FqFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(
       FqFit::HIDDEN_PROPS);

@@ -47,8 +47,8 @@ public:
   void setNumberDomains(int) override;
   int getNumberDomains() const override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
-  QStringList getDatasetNames() const override;
-  QStringList getDatasetDomainNames() const override;
+  std::vector<std::string> getDatasetNames() const override;
+  std::vector<std::string> getDatasetDomainNames() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
 

@@ -16,18 +16,9 @@
 #include "InelasticFitPropertyBrowser.h"
 #include "ui_FitTab.h"
 
-#include "MantidQtWidgets/Common/FunctionModelDataset.h"
-
-#include <boost/optional.hpp>
-
-#include <QtCore>
-
 #include <memory>
 #include <optional>
-#include <type_traits>
 
-#include <QList>
-#include <QPair>
 #include <QString>
 
 namespace MantidQt {
@@ -37,6 +28,7 @@ namespace Inelastic {
 class MANTIDQT_INELASTIC_DLL IFitTab {
 public:
   // Used by FitDataPresenter
+  virtual std::string tabName() const = 0;
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleDataChanged() = 0;
   virtual void handleDataRemoved() = 0;
@@ -53,13 +45,16 @@ public:
 
   // Used by FitOutputOptionsPresenter
   virtual void handlePlotSelectedSpectra() = 0;
+
+  // Used by InelasticFitPropertyBrowser
+  virtual void handleFunctionChanged() = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
   Q_OBJECT
 
 public:
-  FitTab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
+  FitTab(QWidget *parent, std::string const &tabName);
   virtual ~FitTab() override = default;
 
   template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
@@ -74,7 +69,9 @@ public:
     m_uiForm->dockArea->m_fitPropertyBrowser->init();
     m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
     m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
-    setConvolveMembers(convolveMembers);
+    m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+    if (convolveMembers)
+      m_fitPropertyBrowser->setOutputCompositeMembers(true);
   }
 
   template <typename FitDataView> void setupFitDataView() {
@@ -90,18 +87,7 @@ public:
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
   void subscribeFitBrowserToDataPresenter();
 
-  WorkspaceID getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
-  size_t getNumberOfCustomFunctions(const std::string &functionName) const;
-  void setConvolveMembers(bool convolveMembers);
-
-  static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                                     const IFunction *compositeFunction);
-
-  std::string getTabName() const noexcept { return m_tabName; }
-  bool hasResolution() const noexcept { return m_hasResolution; }
-  void setFileExtensionsByName(bool filter);
+  std::string tabName() const override;
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
   void handleDataChanged() override;
@@ -120,73 +106,44 @@ public slots:
   void handleStartXChanged(double startX) override;
   void handleEndXChanged(double endX) override;
 
-protected:
-  FittingModel *getFittingModel() const;
-  void run() override;
-  void setSampleWSSuffixes(const QStringList &suffices);
-  void setSampleFBSuffixes(const QStringList &suffices);
-  void setResolutionWSSuffixes(const QStringList &suffices);
-  void setResolutionFBSuffixes(const QStringList &suffices);
-  void setSampleSuffixes(std::string const &tab, bool filter);
-  void setResolutionSuffixes(std::string const &tab, bool filter);
+  void handleFunctionChanged() override;
 
-  void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
-  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-
-  void setRunIsRunning(bool running);
-  void setRunEnabled(bool enable);
-  void setEditResultVisible(bool visible);
-  std::unique_ptr<FitDataPresenter> m_dataPresenter;
-  std::unique_ptr<FitPlotPresenter> m_plotPresenter;
-  std::unique_ptr<FittingModel> m_fittingModel;
-  InelasticFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
-  WorkspaceID m_activeWorkspaceID;
-  WorkspaceIndex m_activeSpectrumIndex;
-
-  std::unique_ptr<Ui::FitTab> m_uiForm;
+private slots:
+  void updateFitOutput(bool error);
+  void updateSingleFitOutput(bool error);
+  void fitAlgorithmComplete(bool error);
 
 private:
   void setup() override;
   bool validate() override;
-  void connectFitPropertyBrowser();
-  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
-  std::string getOutputBasename() const;
-  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
-  std::vector<std::string> getFitParameterNames() const;
-  QList<MantidWidgets::FunctionModelDataset> getDatasets() const;
+  void run() override;
+
+  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
-  void updateParameterEstimationData();
-  std::string getFitTypeString() const;
-
-  std::string m_tabName;
-  bool m_hasResolution;
-
-  std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
-  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-
-protected slots:
   void setModelFitFunction();
-  void setModelStartX(double startX);
-  void setModelEndX(double endX);
-  void updateFitOutput(bool error);
-  void updateSingleFitOutput(bool error);
-  void fitAlgorithmComplete(bool error);
-  void singleFit();
-  void executeFit();
-  void updateParameterValues();
-  void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
-  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
-                                           std::unordered_map<std::string, ParameterValue>());
-  void updateFitBrowserParameterValuesFromAlg();
+
+  void updateParameterEstimationData();
   void updateFitStatus();
   void updateDataReferences();
   void updateResultOptions();
-  void respondToFunctionChanged();
+  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
+                                           std::unordered_map<std::string, ParameterValue>());
+  void updateFitBrowserParameterValuesFromAlg();
+
+  std::unique_ptr<Ui::FitTab> m_uiForm;
+
+  std::unique_ptr<FitDataPresenter> m_dataPresenter;
+  std::unique_ptr<FittingModel> m_fittingModel;
+  std::unique_ptr<FitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
+  InelasticFitPropertyBrowser *m_fitPropertyBrowser;
+
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
 } // namespace Inelastic

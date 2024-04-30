@@ -44,12 +44,12 @@ public:
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
-  void setDatasets(const QStringList &datasetNames);
+  void setDatasets(const std::vector<std::string> &datasetNames);
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
-  void addDatasets(const QStringList &datasetNames);
+  void addDatasets(const std::vector<std::string> &datasetNames);
   void removeDatasets(QList<int> &indices);
-  QStringList getDatasetNames() const override;
-  QStringList getDatasetDomainNames() const override;
+  std::vector<std::string> getDatasetNames() const override;
+  std::vector<std::string> getDatasetDomainNames() const override;
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;

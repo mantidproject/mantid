@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataView.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/SettingsHelper.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataPresenter.h"
 
@@ -45,9 +47,10 @@ void FqFitDataView::showAddWorkspaceDialog() {
   connect(dialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
           SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

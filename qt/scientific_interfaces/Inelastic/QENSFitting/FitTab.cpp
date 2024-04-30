@@ -7,75 +7,31 @@
 #include "FitTab.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
+#include "FitPlotView.h"
+
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
-#include "FitPlotView.h"
-#include "FitTabConstants.h"
-
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
-#include "MantidQtWidgets/Common/FittingMode.h"
-#include "MantidQtWidgets/Common/PropertyHandler.h"
-
-#include <QSignalBlocker>
 #include <QString>
-#include <QtCore>
-
-#include <algorithm>
-#include <utility>
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
-
-namespace {
-/// Logger
-Mantid::Kernel::Logger g_log("QENS Fitting");
-} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-/**
- * @param functionName  The name of the function.
- * @param compositeFunction  The function to search within.
- * @return              The number of custom functions, with the specified name,
- *                      included in the selected model.
- */
-size_t FitTab::getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                                    const IFunction *compositeFunction) {
-  // Whilst this could be a free method it would require its own
-  // dll_export in the header, so it's easier to make it static
-  assert(compositeFunction);
-
-  if (compositeFunction->nFunctions() == 0) {
-    return compositeFunction->name() == functionName ? 1 : 0;
-  } else {
-    size_t count{0};
-    for (size_t i{0}; i < compositeFunction->nFunctions(); i++) {
-      count += getNumberOfSpecificFunctionContained(functionName, compositeFunction->getFunction(i).get());
-    }
-    return count;
-  }
-}
-
-FitTab::FitTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
-    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
+FitTab::FitTab(QWidget *parent, std::string const &tabName)
+    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
+      m_outOptionsPresenter(), m_fitPropertyBrowser(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
+  parent->setWindowTitle(QString::fromStdString(tabName));
 }
 
 void FitTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connectFitPropertyBrowser();
-}
-
-void FitTab::connectFitPropertyBrowser() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(handleFunctionChanged()));
 }
 
 void FitTab::subscribeFitBrowserToDataPresenter() {
@@ -100,89 +56,21 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
   m_plotPresenter->updatePlots();
 }
 
-void FitTab::setRunIsRunning(bool running) { m_uiForm->pbRun->setText(running ? "Running..." : "Run"); }
-
-void FitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
-
-void FitTab::setFileExtensionsByName(bool filter) {
-  auto const tab = getTabName();
-  setSampleSuffixes(tab, filter);
-  if (hasResolution())
-    setResolutionSuffixes(tab, filter);
-}
-
-void FitTab::setSampleSuffixes(std::string const &tab, bool filter) {
-  QStringList const noSuffixes{""};
-  setSampleWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tab) : noSuffixes);
-  setSampleFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
-}
-
-void FitTab::setResolutionSuffixes(std::string const &tab, bool filter) {
-  QStringList const noSuffixes{""};
-  setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tab) : noSuffixes);
-  setResolutionFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tab) : InterfaceUtils::getExtensions(tab));
-}
-
-void FitTab::setSampleWSSuffixes(const QStringList &suffices) { m_dataPresenter->setSampleWSSuffices(suffices); }
-
-void FitTab::setSampleFBSuffixes(const QStringList &suffices) { m_dataPresenter->setSampleFBSuffices(suffices); }
-
-void FitTab::setResolutionWSSuffixes(const QStringList &suffices) {
-  m_dataPresenter->setResolutionWSSuffices(suffices);
-}
-
-void FitTab::setResolutionFBSuffixes(const QStringList &suffices) {
-  m_dataPresenter->setResolutionFBSuffices(suffices);
-}
-
-WorkspaceID FitTab::getSelectedDataIndex() const { return m_plotPresenter->getActiveWorkspaceID(); }
-
-WorkspaceIndex FitTab::getSelectedSpectrum() const { return m_plotPresenter->getActiveWorkspaceIndex(); }
-
-bool FitTab::isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  return m_plotPresenter->isCurrentlySelected(workspaceID, spectrum);
-}
-
-FittingModel *FitTab::getFittingModel() const { return m_fittingModel.get(); }
-
-/**
- * @param functionName  The name of the function.
- * @return              The number of custom functions, with the specified name,
- *                      included in the selected model.
- */
-size_t FitTab::getNumberOfCustomFunctions(const std::string &functionName) const {
-  auto fittingFunction = m_fittingModel->getFitFunction();
-  if (fittingFunction && fittingFunction->nFunctions() > 0)
-    return getNumberOfSpecificFunctionContained(functionName, fittingFunction->getFunction(0).get());
-  else
-    return 0;
-}
-
 void FitTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
   m_plotPresenter->setFitFunction(func);
   m_fittingModel->setFitFunction(func);
 }
 
-void FitTab::setModelStartX(double startX) {
-  const auto dataIndex = getSelectedDataIndex();
-  m_dataPresenter->setStartX(startX, dataIndex, getSelectedSpectrum());
-}
-
-void FitTab::setModelEndX(double endX) {
-  const auto dataIndex = getSelectedDataIndex();
-  m_dataPresenter->setStartX(endX, dataIndex, getSelectedSpectrum());
-}
-
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  if (isRangeCurrentlySelected(workspaceID, spectrum)) {
+  if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setStartX(startX);
     m_plotPresenter->updateGuess();
   }
 }
 
 void FitTab::handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  if (isRangeCurrentlySelected(workspaceID, spectrum)) {
+  if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();
   }
@@ -204,18 +92,6 @@ void FitTab::handleEndXChanged(double endX) {
   m_dataPresenter->updateTableFromModel();
 }
 
-/**
- * Sets whether fit members should be convolved with the resolution after a fit.
- *
- * @param convolveMembers If true, members are to be convolved.
- */
-void FitTab::setConvolveMembers(bool convolveMembers) {
-  m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
-  // if convolve members is on, output members should also be on
-  if (convolveMembers)
-    m_fitPropertyBrowser->setOutputCompositeMembers(true);
-}
-
 void FitTab::updateFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
 
@@ -231,10 +107,12 @@ void FitTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
   if (error) {
-    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_activeWorkspaceID);
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
     m_fittingAlgorithm.reset();
-  } else
-    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_activeWorkspaceID, m_activeSpectrumIndex);
+  } else {
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
+                                       m_plotPresenter->getActiveWorkspaceIndex());
+  }
 }
 
 /**
@@ -242,7 +120,6 @@ void FitTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void FitTab::fitAlgorithmComplete(bool error) {
-  setRunIsRunning(false);
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
   enableOutputOptions(!error);
@@ -256,30 +133,8 @@ void FitTab::fitAlgorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
-/**
- * Updates the parameter values and errors in the fit property browser.
- */
-void FitTab::updateParameterValues() {
-  updateParameterValues(m_fittingModel->getParameterValues(getSelectedDataIndex(), getSelectedSpectrum()));
-}
-
-/**
- * Updates the parameter values and errors in the fit property browser.
- *
- * @param parameters  The parameter values to update the browser with.
- */
-void FitTab::updateParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
-  try {
-    updateFitBrowserParameterValues(params);
-  } catch (const std::out_of_range &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  } catch (const std::invalid_argument &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  }
-}
-
 void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
-  IFunction_sptr fun = m_fittingModel->getFitFunction();
+  auto fun = m_fittingModel->getFitFunction();
   if (fun) {
     for (auto const &pair : params) {
       fun->setParameter(pair.first, pair.second.value);
@@ -293,35 +148,28 @@ void FitTab::updateFitBrowserParameterValues(const std::unordered_map<std::strin
 }
 
 void FitTab::updateFitBrowserParameterValuesFromAlg() {
-  try {
-    updateFitBrowserParameterValues();
-    if (m_fittingAlgorithm) {
-      QSignalBlocker blocker(m_fitPropertyBrowser);
-      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-        auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
-        auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
-        auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
-          m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
-      } else {
-        IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-        if (fun->getNumberDomains() > 1)
-          m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-        else
-          m_fitPropertyBrowser->updateParameters(*fun);
-      }
+  updateFitBrowserParameterValues();
+  if (m_fittingAlgorithm) {
+    QSignalBlocker blocker(m_fitPropertyBrowser);
+    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+      auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
+      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
+      auto rowCount = static_cast<int>(paramWs->rowCount());
+      if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
+        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
+    } else {
+      IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
+      if (fun->getNumberDomains() > 1)
+        m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+      else
+        m_fitPropertyBrowser->updateParameters(*fun);
     }
-  } catch (const std::out_of_range &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
-  } catch (const std::invalid_argument &) {
-    g_log.warning("Warning issue updating parameter values in fit property browser");
   }
 }
 /**
  * Updates the fit output status
  */
 void FitTab::updateFitStatus() {
-
   if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
@@ -339,94 +187,39 @@ void FitTab::updateFitStatus() {
  */
 void FitTab::handlePlotSelectedSpectra() {
   enableFitButtons(false);
-  plotSelectedSpectra(m_outOptionsPresenter->getSpectraToPlot());
+  for (auto const &spectrum : m_outOptionsPresenter->getSpectraToPlot())
+    m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), SettingsHelper::externalPlotErrorBars());
+  m_outOptionsPresenter->clearSpectraToPlot();
   enableFitButtons(true);
   m_outOptionsPresenter->setPlotting(false);
 }
 
-/**
- * Plots the spectra corresponding to the selected parameters
- * @param spectra :: a vector of spectra to plot from a group workspace
- */
-void FitTab::plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra) {
-  for (auto const &spectrum : spectra)
-    plotSpectrum(spectrum.first, spectrum.second);
-  m_outOptionsPresenter->clearSpectraToPlot();
-}
-
-/**
- * Plots a spectrum with the specified index in a workspace
- * @workspaceName :: the workspace containing the spectrum to plot
- * @index :: the index in the workspace
- * @errorBars :: true if you want error bars to be plotted
- */
-void FitTab::plotSpectrum(std::string const &workspaceName, std::size_t const &index) {
-  m_plotter->plotSpectra(workspaceName, std::to_string(index), SettingsHelper::externalPlotErrorBars());
-}
-
-/**
- * Gets the name used for the base of the result workspaces
- */
-std::string FitTab::getOutputBasename() const { return m_fittingModel->getOutputBasename(); }
-
-/**
- * Gets the Result workspace from a fit
- */
-WorkspaceGroup_sptr FitTab::getResultWorkspace() const { return m_fittingModel->getResultWorkspace(); }
-
-/**
- * Gets the names of the Fit Parameters
- */
-std::vector<std::string> FitTab::getFitParameterNames() const { return m_fittingModel->getFitParameterNames(); }
-
-/**
- * Executes the single fit algorithm defined in this indirect fit analysis tab.
- */
-void FitTab::singleFit() { handleSingleFitClicked(getSelectedDataIndex(), getSelectedSpectrum()); }
-
 void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (validate()) {
-    m_activeSpectrumIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-    m_activeWorkspaceID = workspaceID;
     runSingleFit(m_fittingModel->getSingleFit(workspaceID, spectrum));
-  }
-}
-
-/**
- * Executes the sequential fit algorithm defined in this indirect fit analysis
- * tab.
- */
-void FitTab::executeFit() {
-  if (validate()) {
-    setRunIsRunning(true);
-    enableFitButtons(false);
-    enableOutputOptions(false);
-    runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
   }
 }
 
 bool FitTab::validate() {
   UserInputValidator validator;
   m_dataPresenter->validate(validator);
+  m_fittingModel->validate(validator);
 
-  const auto invalidFunction = m_fittingModel->isInvalidFunction();
-  if (invalidFunction)
-    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
-
-  const auto error = validator.generateErrorMessage();
-  emit showMessageBox(error);
-  return error.isEmpty();
+  const auto error = validator.generateErrorMessage().toStdString();
+  if (!error.empty()) {
+    displayWarning(error);
+  }
+  return error.empty();
 }
 
 /**
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void FitTab::run() {
-  setRunIsRunning(true);
   enableFitButtons(false);
   enableOutputOptions(false);
   m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
@@ -439,7 +232,8 @@ void FitTab::run() {
  * @param enable :: true to enable buttons
  */
 void FitTab::enableFitButtons(bool enable) {
-  setRunEnabled(enable);
+  m_uiForm->pbRun->setText(enable ? "Run" : "Running...");
+  m_uiForm->pbRun->setEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
 }
@@ -451,8 +245,8 @@ void FitTab::enableFitButtons(bool enable) {
  */
 void FitTab::enableOutputOptions(bool enable) {
   if (enable) {
-    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
-    setPDFWorkspace(getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
+    setPDFWorkspace(m_fittingModel->getOutputBasename() + "_PDFs");
     m_outOptionsPresenter->setPlotTypes("Result Group");
   } else
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
@@ -482,38 +276,12 @@ void FitTab::setPDFWorkspace(std::string const &workspaceName) {
 void FitTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
       m_dataPresenter->getDataForParameterEstimation(m_fitPropertyBrowser->getEstimationDataSelector()));
-  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
+  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                     m_plotPresenter->getActiveWorkspaceIndex());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
     m_fitPropertyBrowser->estimateFunctionParameters();
   }
-}
-
-/**
- * Sets the visiblity of the output options Edit Result button
- * @param visible :: true to make the edit result button visible
- */
-void FitTab::setEditResultVisible(bool visible) { m_outOptionsPresenter->setEditResultVisible(visible); }
-
-void FitTab::setAlgorithmProperties(const IAlgorithm_sptr &fitAlgorithm) const {
-  fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
-  fitAlgorithm->setProperty("MaxIterations", m_fitPropertyBrowser->maxIterations());
-  fitAlgorithm->setProperty("PeakRadius", m_fitPropertyBrowser->getPeakRadius());
-  fitAlgorithm->setProperty("CostFunction", m_fitPropertyBrowser->costFunction());
-  fitAlgorithm->setProperty("IgnoreInvalidData", m_fitPropertyBrowser->ignoreInvalidData());
-  fitAlgorithm->setProperty("EvaluationType", m_fitPropertyBrowser->fitEvaluationType());
-  fitAlgorithm->setProperty("PeakRadius", m_fitPropertyBrowser->getPeakRadius());
-  if (m_fitPropertyBrowser->convolveMembers()) {
-    fitAlgorithm->setProperty("ConvolveMembers", true);
-    fitAlgorithm->setProperty("OutputCompositeMembers", true);
-  } else {
-    fitAlgorithm->setProperty("OutputCompositeMembers", m_fitPropertyBrowser->outputCompositeMembers());
-  }
-
-  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-    fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
-  }
-  fitAlgorithm->setProperty("OutputFitStatus", true);
 }
 
 /*
@@ -535,27 +303,15 @@ void FitTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void FitTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  setAlgorithmProperties(fitAlgorithm);
+  auto properties = m_fitPropertyBrowser->fitProperties(m_fittingModel->getFittingMode());
   m_fittingAlgorithm = fitAlgorithm;
-  m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
+  m_batchAlgoRunner->addAlgorithm(fitAlgorithm, std::move(properties));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
-}
-
-QList<FunctionModelDataset> FitTab::getDatasets() const {
-  QList<FunctionModelDataset> datasets;
-
-  for (auto i = 0u; i < m_dataPresenter->getNumberOfWorkspaces().value; ++i) {
-    WorkspaceID workspaceID{i};
-
-    auto const name = m_fittingModel->getWorkspace(workspaceID)->getName();
-    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_dataPresenter->getSpectra(workspaceID)));
-  }
-  return datasets;
 }
 
 void FitTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
-                                                  getDatasets(), m_dataPresenter->getQValuesForData(),
+                                                  m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
                                                   m_dataPresenter->getResolutionsForFit());
   setModelFitFunction();
 }
@@ -565,13 +321,16 @@ void FitTab::updateDataReferences() {
  * enabled/disabled.
  */
 void FitTab::updateResultOptions() {
-  const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
+  const bool isFit = m_fittingModel->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                     m_plotPresenter->getActiveWorkspaceIndex());
   if (isFit)
-    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setResultWorkspace(m_fittingModel->getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
+
+std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
 
 void FitTab::handleDataChanged() {
   updateDataReferences();
@@ -617,33 +376,12 @@ void FitTab::handleBackgroundChanged(double value) {
   m_plotPresenter->updateGuess();
 }
 
-void FitTab::respondToFunctionChanged() {
+void FitTab::handleFunctionChanged() {
   setModelFitFunction();
   m_fittingModel->removeFittingData();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
-  m_fittingModel->setFitTypeString(getFitTypeString());
-}
-
-std::string FitTab::getFitTypeString() const {
-  auto const multiDomainFunction = m_fittingModel->getFitFunction();
-  if (!multiDomainFunction || multiDomainFunction->nFunctions() == 0) {
-    return "NoCurrentFunction";
-  }
-
-  std::string fitType{""};
-  for (auto const &fitFunctionName : FUNCTION_STRINGS) {
-    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
-    if (occurances > 0) {
-      fitType += std::to_string(occurances) + fitFunctionName.second;
-    }
-  }
-
-  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
-    fitType += "Delta";
-  }
-
-  return fitType;
+  m_fittingModel->updateFitTypeString();
 }
 
 } // namespace Inelastic

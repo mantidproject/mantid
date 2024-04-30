@@ -81,8 +81,8 @@ public:
 protected:
   virtual void updateView() = 0;
 
-  QStringList getDatasetNames() const;
-  QStringList getDatasetDomainNames() const;
+  std::vector<std::string> getDatasetNames() const;
+  std::vector<std::string> getDatasetDomainNames() const;
 
   void setLocalParameterValue(std::string const &parameterName, int i, double value);
   void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie);

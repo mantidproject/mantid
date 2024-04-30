@@ -163,38 +163,6 @@ public:
     m_presenter->setResolution("WorkspaceName");
   }
 
-  void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
-    QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(Exactly(1));
-
-    m_presenter->setSampleWSSuffices(suffices);
-  }
-
-  void test_that_setSampleFBSuffices_will_set_the_sample_file_suffices_in_the_view() {
-    QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(Exactly(1));
-
-    m_presenter->setSampleFBSuffices(suffices);
-  }
-
-  void test_that_setResolutionWSSuffices_will_set_the_Resolution_workspace_suffices_in_the_view() {
-    QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(Exactly(1));
-
-    m_presenter->setResolutionWSSuffices(suffices);
-  }
-
-  void test_that_setResolutionFBSuffices_will_set_the_Resolution_file_suffices_in_the_view() {
-    QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(Exactly(1));
-
-    m_presenter->setResolutionFBSuffices(suffices);
-  }
-
   void test_getResolutionsForFit_calls_from_model() {
     std::vector<std::pair<std::string, size_t>> resolutions = {{"string", 1}};
     EXPECT_CALL(*m_model, getResolutionsForFit()).Times(Exactly(1)).WillOnce(Return(resolutions));

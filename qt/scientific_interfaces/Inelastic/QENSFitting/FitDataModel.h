@@ -11,6 +11,7 @@
 #include "IFitDataModel.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -43,6 +44,7 @@ public:
   void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;
   void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) override;
   FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
+  FunctionModelDataset getDataset(WorkspaceID workspaceID) const override;
   size_t getSpectrum(FitDomainIndex index) const override;
   size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
 

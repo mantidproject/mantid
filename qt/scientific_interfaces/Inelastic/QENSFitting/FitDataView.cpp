@@ -68,10 +68,9 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
-UserInputValidator &FitDataView::validate(UserInputValidator &validator) {
+void FitDataView::validate(UserInputValidator &validator) {
   if (m_uiForm->tbFitData->rowCount() == 0)
     validator.addErrorMessage("No input data has been provided.");
-  return validator;
 }
 
 void FitDataView::displayWarning(const std::string &warning) {
@@ -131,22 +130,15 @@ QModelIndexList FitDataView::getSelectedIndexes() const {
   return m_uiForm->tbFitData->selectionModel()->selectedIndexes();
 }
 
-void FitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
-
-void FitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
-
-void FitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
-
-void FitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
-
 void FitDataView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

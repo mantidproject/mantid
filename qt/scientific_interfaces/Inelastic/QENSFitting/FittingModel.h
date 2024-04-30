@@ -15,6 +15,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -44,6 +45,8 @@ class MANTIDQT_INELASTIC_DLL FittingModel : public IFittingModel {
 public:
   FittingModel();
   virtual ~FittingModel() = default;
+
+  void validate(UserInputValidator &validator) const;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;
@@ -77,7 +80,7 @@ public:
   void setFittingMode(FittingMode mode) override;
   FittingMode getFittingMode() const override;
 
-  void setFitTypeString(const std::string &fitType) override;
+  void updateFitTypeString() override;
   boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
@@ -93,6 +96,9 @@ public:
   void removeDefaultParameters() override;
 
   IFitDataModel *getFitDataModel() override;
+
+  // Used for testing purposes
+  [[nodiscard]] inline std::string getFitString() const noexcept { return m_fitString; }
 
 protected:
   std::string createOutputName(const std::string &fitMode, const std::string &workspaceName,

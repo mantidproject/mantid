@@ -36,7 +36,7 @@ public:
   QTableWidget *getDataTable() const override;
   bool isTableEmpty() const override;
 
-  UserInputValidator &validate(UserInputValidator &validator) override;
+  void validate(UserInputValidator &validator) override;
   virtual void addTableEntry(size_t row, FitDataRow newRow) override;
   virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) override;
   int getColumnIndexFromName(std::string const &ColName) override;
@@ -44,11 +44,6 @@ public:
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
   bool dataColumnContainsText(std::string const &columnText) const override;
-
-  void setSampleWSSuffices(const QStringList &suffices) override;
-  void setSampleFBSuffices(const QStringList &suffices) override;
-  void setResolutionWSSuffices(const QStringList &suffices) override;
-  void setResolutionFBSuffices(const QStringList &suffices) override;
 
   void displayWarning(const std::string &warning) override;
 
@@ -60,11 +55,6 @@ protected:
 
   std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
-
-  QStringList m_wsSampleSuffixes;
-  QStringList m_fbSampleSuffixes;
-  QStringList m_wsResolutionSuffixes;
-  QStringList m_fbResolutionSuffixes;
 
   IFitDataPresenter *m_presenter;
 

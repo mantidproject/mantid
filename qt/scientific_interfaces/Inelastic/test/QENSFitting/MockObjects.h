@@ -41,6 +41,7 @@ class MockFitTab : public IFitTab {
 public:
   virtual ~MockFitTab() = default;
 
+  MOCK_CONST_METHOD0(tabName, std::string());
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
   MOCK_METHOD0(handleDataChanged, void());
   MOCK_METHOD0(handleDataRemoved, void());
@@ -55,6 +56,8 @@ public:
   MOCK_METHOD1(handleBackgroundChanged, void(double background));
 
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
+
+  MOCK_METHOD0(handleFunctionChanged, void());
 };
 
 class MockFitPlotView : public IFitPlotView {
@@ -204,6 +207,7 @@ public:
   MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
   MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getDataset, FunctionModelDataset(WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(getSpectrum, size_t(FitDomainIndex index));
   MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
 
@@ -247,8 +251,7 @@ public:
 
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());
-  MOCK_METHOD1(validate, MantidQt::CustomInterfaces::UserInputValidator &(
-                             MantidQt::CustomInterfaces::UserInputValidator &validator));
+  MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
   MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));

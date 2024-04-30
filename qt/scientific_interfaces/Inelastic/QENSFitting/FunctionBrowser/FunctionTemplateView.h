@@ -15,6 +15,9 @@
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
+#include <string>
+#include <vector>
+
 #include <QList>
 #include <QMap>
 #include <QPair>
@@ -84,8 +87,8 @@ public:
 
   void emitFunctionStructureChanged() { emit functionStructureChanged(); }
 
-  void openEditLocalParameterDialog(std::string const &parameterName, QStringList const &datasetNames,
-                                    QStringList const &domainNames, QList<double> const &values,
+  void openEditLocalParameterDialog(std::string const &parameterName, std::vector<std::string> const &datasetNames,
+                                    std::vector<std::string> const &domainNames, QList<double> const &values,
                                     QList<bool> const &fixes, QStringList const &ties, QStringList const &constraints);
 
 signals:

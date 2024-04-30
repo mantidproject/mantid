@@ -24,6 +24,8 @@ class IFitTab;
 
 class MANTIDQT_INELASTIC_DLL IFitDataPresenter {
 public:
+  virtual std::string tabName() const = 0;
+
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveClicked() = 0;
   virtual void handleUnifyClicked() = 0;
@@ -38,10 +40,6 @@ public:
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
   void setStartX(double startX, WorkspaceID workspaceID);
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void setEndX(double startX, WorkspaceID workspaceID);
@@ -52,11 +50,11 @@ public:
   void updateTableFromModel();
   WorkspaceID getNumberOfWorkspaces() const;
   size_t getNumberOfDomains() const;
-  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  QList<FunctionModelDataset> getDatasets() const;
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;
-  UserInputValidator &validate(UserInputValidator &validator);
+  void validate(UserInputValidator &validator);
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
     UNUSED_ARG(workspaceName);
@@ -76,6 +74,8 @@ public:
   };
 
   virtual void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
+
+  std::string tabName() const override;
 
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;
