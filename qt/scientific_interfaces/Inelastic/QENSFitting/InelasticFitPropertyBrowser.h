@@ -42,6 +42,7 @@ using namespace MantidWidgets;
 
 class FunctionTemplateView;
 class FitStatusWidget;
+class IFittingPresenter;
 
 class MANTIDQT_INELASTIC_DLL IInelasticFitPropertyBrowser {
 public:
@@ -53,6 +54,8 @@ class MANTIDQT_INELASTIC_DLL InelasticFitPropertyBrowser : public QDockWidget, p
 
 public:
   InelasticFitPropertyBrowser(QWidget *parent = nullptr);
+
+  void subscribePresenter(IFittingPresenter *presenter);
 
   void init();
   void setFunctionTemplatePresenter(std::unique_ptr<ITemplatePresenter> templatePresenter);
@@ -104,6 +107,9 @@ protected slots:
   void updateFitType();
   void showFullFunctionBrowser(bool on);
 
+private slots:
+  void notifyFunctionChanged();
+
 signals:
   void functionChanged();
   void fitScheduled();
@@ -133,6 +139,8 @@ private:
 
   std::vector<std::string> m_fitStatus;
   std::vector<double> m_fitChiSquared;
+
+  IFittingPresenter *m_presenter;
 };
 
 } // namespace Inelastic

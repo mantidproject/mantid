@@ -30,8 +30,6 @@ FitTab::FitTab(QWidget *parent, std::string const &tabName)
 void FitTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
-
-  // connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(handleFunctionChanged()));
 }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
