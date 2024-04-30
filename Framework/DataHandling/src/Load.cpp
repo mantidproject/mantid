@@ -340,9 +340,17 @@ void Load::exec() {
 
   // Set the remaining properties of the loader
   setOutputProperties(m_loader);
-  // Set the loader and version from correct loader
-  setPropertyValue("LoaderName", m_loader->name());
-  setProperty("LoaderVersion", m_loader->version());
+
+  /**
+   * Set the loader and version from correct loader IF one has been found,
+   * so that caller can reuse these variables for later calls.
+   * Though these are set in call to getFileLoader, they can be errantly
+   * changed by the init process .
+   */
+  if (m_loader) {
+    setPropertyValue("LoaderName", m_loader->name());
+    setProperty("LoaderVersion", m_loader->version());
+  }
 }
 
 void Load::loadSingleFile() {
