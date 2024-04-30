@@ -167,7 +167,8 @@ Save tab
 - Select a workspace in the list that starts with ``IvsQ``.
 - Type a valid path into the Save path textbox.
 - Type something in the prefix field you'd like to use to identify the file. *The files are saved in the form [prefix][workspace][ext]*.
-- In the File Format section, select ``Custom format (*.dat)``, untick ``Header`` and ``Q resolution`` and set the separator to ``Comma``.
+- In the File Format section, select ``Custom format (*.dat)``. Check that options ``Additional columns (includes Q resolution)`` and ``Save multiple datasets to a single file`` are ticked but disabled, as they are not applicable.
+- Untick ``Header`` and ``Q resolution`` and set the separator to ``Comma``.
 - Click ``Save`` and open the file that should have been saved to the save directory you specified. It should contain 3 columns of numbers, separated by commas.
 - Tick ``Q resolution`` and re-save. It should now contain 4 columns of numbers.
 - Double-click on a workspace name in the left list, e.g. ``IvsQ_13460``. The right list should be populated with parameters but be disabled.
@@ -177,10 +178,11 @@ Save tab
   - Amongst other things this text should contain the logs you selected, e.g. ``nperiods : 1`` and ``run_end : 2011-12-15T14:19:13``.
 
 - Try changing the separator to spaces or tabs and check that the 3 or 4 columns of numbers are separated using that separator.
-- Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out.
-- Untick ``Q resolution`` and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 3 columns of numbers with headings ``Qz``, ``R`` and ``sR``.
-- Tick ``Q resolution`` and re-save. The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
-- Change the dropdown to ``3 column (*.dat)``. The settings should remain greyed out and the ``Q resolution`` checkbox should also be greyed out as it is not applicable. Click Save to create the ``.dat`` file. You should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.
+- Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns (includes Q resolution)`` and ``Save multiple datasets to a single file`` checkboxes should be enabled.
+- Select a single ``IvsQ_binned`` workspace from the left list, e.g. ``IvsQ_binned_13460``, and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 8 columns of numbers with headings ``Qz``, ``R``, ``sR``, ``sQz``, ``lambda``, ``slambda``, ``incident theta`` and ``sincident theta``.
+- Untick ``Additional columns (includes Q resolution)`` and re-save. The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
+- Untick ``Q resolution`` and re-save. The file should now contain 3 columns of numbers with headings ``Qz``, ``R``, ``sR``.
+- Change the dropdown to ``3 column (*.dat)``. All the settings should be greyed out as they are not applicable. Click Save to create the ``.dat`` file. You should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.
 - Change the dropdown to ``ANSTO, MotoFit, 4 Column (*.txt)``. The settings remain greyed out. Click Save to create the ``.txt`` file. You should get 4 columns of numbers separated by tabs (with no leading tab).
 - Change the dropdown to ``ILL Cosmos (*.mft)``. The settings remain greyed out apart from the parameters which should now be enabled. Click Save to create the ``.mft`` file. You should get 3 columns of numbers padded by spaces (including leading spaces). There should be a header starting ``MFT`` which includes any parameters you selected, the same as the Custom format.
 
