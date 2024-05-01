@@ -82,11 +82,13 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
+
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split("_")[0]
     parse_file_range = create_file_range_parser(instrument)
     file_ranges = [file_range for range_str in file_ranges for file_range in range_str.split(",")]
     file_groups = [file_group for file_range in file_ranges for file_group in parse_file_range(file_range)]
+    file_groups = flatten_groups(file_groups)
 
     workspace_names = []
     chopped_data = False
@@ -96,6 +98,23 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
         workspace_names.extend(created_workspaces)
 
     return workspace_names, chopped_data
+
+
+def flatten_groups(file_groups):
+    """
+    If the list of groups to reduce is a list of list with one element per list, it can miss the sum file algorithm unless the list
+    is flattened to a single group
+
+    @param file_groups list of groups to reduce separately
+
+    @return Individual list with one group or list of lists if the groups have more than one member
+    """
+    sum_individual_workspaces = sum([len(group) for group in file_groups])
+    if len(file_groups) != sum_individual_workspaces:
+        return file_groups
+
+    file_groups = [ws[0] for ws in file_groups]
+    return [file_groups]
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None, find_masked_detectors=False):
