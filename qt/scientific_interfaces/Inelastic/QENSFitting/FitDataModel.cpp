@@ -62,7 +62,7 @@ FunctionModelSpectra FitDataModel::getSpectra(WorkspaceID workspaceID) const {
 }
 
 FunctionModelDataset FitDataModel::getDataset(WorkspaceID workspaceID) const {
-  auto const name = getWorkspace(workspaceID)->getName();
+  auto const &name = getWorkspace(workspaceID)->getName();
   return FunctionModelDataset(name, getSpectra(workspaceID));
 }
 
