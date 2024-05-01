@@ -35,13 +35,13 @@ static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
 
 void PolarizerEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto validator = std::make_shared<CompositeValidator>();
+  auto &validator = std::make_shared<CompositeValidator>();
   validator->add<WorkspaceUnitValidator>("Wavelength");
   validator->add<HistogramValidator>();
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
-  auto wavelengthValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
+  const auto &wavelengthValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::ANALYSER_EFFICIENCY, "",
                                                                        Direction::Input, wavelengthValidator),
                   "Analyser efficiency as a function of wavelength");
@@ -49,7 +49,7 @@ void PolarizerEfficiency::init() {
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
       "Polarizer efficiency as a function of wavelength");
 
-  auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
+  const auto &spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 }
@@ -67,11 +67,11 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     return errorList;
   }
 
-  const auto ws = AnalysisDataService::Instance().retrieve(inputWorkspaceName);
+  const auto &ws = AnalysisDataService::Instance().retrieve(inputWorkspaceName);
   if (!ws->isGroup()) {
     errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace.";
   } else {
-    const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    const auto &wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (wsGroup->size() != 4) {
       errorList[PropertyNames::INPUT_WORKSPACE] =
           "The input group workspace must have four periods corresponding to the four spin configurations.";
@@ -86,9 +86,9 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
  * of issues in the input properties.
  */
 void PolarizerEfficiency::validateGroupInput() {
-  const auto results = validateInputs();
+  const auto &results = validateInputs();
   if (results.size() > 0) {
-    const auto result = results.cbegin();
+    const auto &result = results.cbegin();
     throw std::runtime_error("Issue in " + result->first + " property: " + result->second);
   }
 }
@@ -103,19 +103,19 @@ void PolarizerEfficiency::exec() { calculatePolarizerEfficiency(); }
 
 void PolarizerEfficiency::calculatePolarizerEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  const auto groupWorkspace =
+  const auto &groupWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
-  std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
+  const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
-  const auto t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ZERO_ONE);
-  const auto t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ZERO_ZERO);
+  const auto &t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                            SpinStateValidator::ZERO_ONE);
+  const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
+                                                                            SpinStateValidator::ZERO_ZERO);
 
-  auto effCell = convertToHistIfNecessary(
+  auto &effCell = convertToHistIfNecessary(
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getProperty(PropertyNames::ANALYSER_EFFICIENCY)));
 
-  auto rebin = createChildAlgorithm("RebinToWorkspace");
+  auto &rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
   rebin->setProperty("WorkspaceToRebin", effCell);
   rebin->setProperty("WorkspaceToMatch", t00Ws);
@@ -125,52 +125,26 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
 
   // The efficiency is given by (e_cell * (T00 + T01) - T01) / ((2 * e_cell - 1) * (T00 + T01))
 
-  auto sumT = addTwoWorkspaces(t00Ws, t01Ws);
-  auto eCellTimesSum = multiplyWorkspaces(effCell, sumT);
-  auto numerator = subtractTwoWorkspaces(eCellTimesSum, t01Ws);
-  scaleWorkspace(eCellTimesSum, 2);
-  auto denominator = subtractTwoWorkspaces(eCellTimesSum, sumT);
-  auto effPolarizer = divideWorkspaces(std::move(numerator), std::move(denominator));
+  const auto &sumT = t00Ws + t01Ws;
+  auto &eCellTimesSum = effCell * sumT;
+  const auto &numerator = eCellTimesSum - t01Ws;
+  eCellTimesSum *= 2;
+  const auto &denominator = eCellTimesSum - sumT;
+  const auto &effPolarizer = numerator / denominator;
   setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
-}
-
-void PolarizerEfficiency::scaleWorkspace(MatrixWorkspace_sptr ws, const double factor) {
-  auto scale = createChildAlgorithm("Scale");
-  scale->initialize();
-  scale->setProperty("InputWorkspace", ws);
-  scale->setProperty("OutputWorkspace", ws);
-  scale->setProperty("Factor", factor);
-  scale->setProperty("Operation", "Multiply");
-  scale->execute();
-}
-
-MatrixWorkspace_sptr PolarizerEfficiency::runMathsAlgorithm(std::string algName, MatrixWorkspace_sptr lhs,
-                                                            MatrixWorkspace_sptr rhs,
-                                                            MatrixWorkspace_sptr output = nullptr) {
-  auto alg = createChildAlgorithm(algName);
-  alg->initialize();
-  alg->setProperty("LHSWorkspace", lhs);
-  alg->setProperty("RHSWorkspace", rhs);
-  if (output) {
-    alg->setProperty("OutputWorkspace", output);
-  } else {
-    alg->setProperty("OutputWorkspace", "algOutput");
-  }
-  alg->execute();
-  return alg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixWorkspace_sptr ws) {
   if (ws->isHistogramData() && ws->isDistribution())
     return ws;
 
-  MatrixWorkspace_sptr wsClone = std::move(ws->clone());
+  MatrixWorkspace_sptr wsClone = ws->clone();
   wsClone->setDistribution(true);
 
   if (wsClone->isHistogramData())
     return wsClone;
 
-  auto convertToHistogram = createChildAlgorithm("ConvertToHistogram");
+  auto &convertToHistogram = createChildAlgorithm("ConvertToHistogram");
   convertToHistogram->initialize();
   convertToHistogram->setProperty("InputWorkspace", wsClone);
   convertToHistogram->setProperty("OutputWorkspace", wsClone);
