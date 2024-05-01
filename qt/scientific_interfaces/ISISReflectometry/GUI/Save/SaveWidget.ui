@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Save ASCII</string>
+   <string>Save</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
    <item>
@@ -151,7 +151,7 @@
              <string>Saves stitched workspaces for multi-row group reductions and IvsQ_binned workspaces for reductions single row reductions.</string>
             </property>
             <property name="text">
-             <string>Save as ASCII on completion</string>
+             <string>Save automatically on completion</string>
             </property>
            </widget>
           </item>
