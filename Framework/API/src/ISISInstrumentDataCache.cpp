@@ -4,9 +4,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
+#include <Poco/JSON/JSON.h>
+#include <Poco/JSON/Parser.h>
 #include <fstream>
 #include <json/reader.h>
 #include <json/value.h>
+#include <json/writer.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
@@ -24,12 +27,20 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
     throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
   }
 
-  // Read directory path from json file
-  Json::Value json;
-  ifstrm >> json;
-  std::string relativePath = json[runNumber].asString();
+  std::string relativePath;
 
-  if (relativePath.empty()) {
+  try {
+    Poco::JSON::Parser parser;
+    std::stringstream jsonText;
+    jsonText << ifstrm.rdbuf();
+    Poco::Dynamic::Var jsonVar = parser.parse(jsonText.str());
+    Poco::JSON::Object::Ptr pObject = jsonVar.extract<Poco::JSON::Object::Ptr>();
+    relativePath = pObject->getValue<std::string>(runNumber);
+  } catch (...) {
+    g_log.debug() << "\nFound index file at " << jsonPath;
+    g_log.debug() << "\nRun Number deterted: " << runNumber;
+    g_log.debug() << "\nRelative Path: " << relativePath;
+    g_log.debug() << std::endl;
     throw std::invalid_argument("Run number " + runNumber + " not found for instrument " + instrName + ".");
   }
 
