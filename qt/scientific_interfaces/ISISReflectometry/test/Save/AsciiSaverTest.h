@@ -166,10 +166,13 @@ private:
   std::string expectedSavePath(const std::string &wsName, const NamedFormat format) {
     auto savePath = Poco::Path(m_saveDirectory);
 
-    if (format == NamedFormat::Custom)
+    if (format == NamedFormat::Custom) {
       savePath.append(m_prefix + wsName + std::string(".dat"));
-    else
+    } else if (format == NamedFormat::ORSOAscii) {
+      savePath.append(m_prefix + wsName + std::string(".ort"));
+    } else {
       savePath.append(m_prefix + wsName);
+    }
 
     return savePath.toString();
   }
