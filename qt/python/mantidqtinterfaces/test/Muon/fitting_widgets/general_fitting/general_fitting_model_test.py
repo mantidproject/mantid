@@ -620,6 +620,18 @@ class GeneralFittingModelTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "This method assumes the simultaneous fit function is not None."):
             self.model._add_global_ties_to_simultaneous_function()
 
+    def test_get_new_domain_function_for_does_not_error_if_the_simultaneous_function_is_not_a_composite(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.fit_function
+
+        self.model._get_new_domain_function_for(self.dataset_names[0])
+
+    def test_get_new_domain_functions_using_existing_datasets_does_not_error_if_the_simultaneous_function_is_not_a_composite(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.fit_function
+
+        self.model._get_new_domain_functions_using_existing_datasets(self.dataset_names)
+
 
 if __name__ == "__main__":
     unittest.main()

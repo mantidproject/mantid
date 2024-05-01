@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import IFunction
+from mantid.api import IFunction, MultiDomainFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
@@ -94,7 +94,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Updates the TF Asymmetry and normal simultaneous fit function based on the function from a TFA fit."""
         self.fitting_context.tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
 
-        if self.fitting_context.number_of_datasets > 1:
+        if isinstance(tf_asymmetry_simultaneous_function, MultiDomainFunction):
             self._update_parameters_of_multi_domain_simultaneous_function_from(tf_asymmetry_simultaneous_function)
         else:
             self.fitting_context.simultaneous_fit_function = self._get_normal_fit_function_from(tf_asymmetry_simultaneous_function)
@@ -112,7 +112,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def get_domain_tf_asymmetry_fit_function(self, tf_simultaneous_function: IFunction, dataset_index: int) -> IFunction:
         """Returns the fit function in the TF Asymmetry simultaneous function corresponding to the specified index."""
-        if self.fitting_context.number_of_datasets < 2 or tf_simultaneous_function is None:
+        if self.fitting_context.number_of_datasets < 2 or not isinstance(tf_simultaneous_function, MultiDomainFunction):
             return tf_simultaneous_function
 
         index = dataset_index if dataset_index is not None else 0
