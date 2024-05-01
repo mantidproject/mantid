@@ -15,15 +15,14 @@
 namespace {
 /// Property Names
 namespace PropNames {
-std::string const INPUT_WS{"InputWorkspace"};
-std::string const OUTPUT_WS{"OutputWorkspace"};
-std::string const OUTPUT_FILE{"OutputFilePath"};
-std::string const SPIN_STATES{"SpinStates"};
-
+constexpr char const *INPUT_WS{"InputWorkspace"};
+constexpr char const *OUTPUT_WS{"OutputWorkspace"};
+constexpr char const *OUTPUT_FILE{"OutputFilePath"};
+constexpr char const *SPIN_STATES{"SpinStates"};
 } // namespace PropNames
 
-std::string const FILE_EXTENSION{".nxs"};
-std::string const INITIAL_SPIN = "11,10,01,00";
+constexpr char const *FILE_EXTENSION{".nxs"};
+constexpr char const *INITIAL_SPIN{"11,10,01,00"};
 } // namespace
 
 namespace Mantid::Algorithms {
