@@ -383,8 +383,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
     def exec_child_alg(self, alg_name, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
         alg.initialize()
-        for prop, value in kwargs.items():
-            alg.setProperty(prop, value)
+        alg.setProperties(kwargs)
         alg.execute()
         if "OutputWorkspace" in alg.outputProperties():
             return alg.getProperty("OutputWorkspace").value
