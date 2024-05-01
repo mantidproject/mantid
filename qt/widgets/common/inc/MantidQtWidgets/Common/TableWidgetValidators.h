@@ -39,7 +39,7 @@ public:
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
 
 private:
-  double m_precision;
+  int m_precision;
 };
 
 } // namespace MantidWidgets
