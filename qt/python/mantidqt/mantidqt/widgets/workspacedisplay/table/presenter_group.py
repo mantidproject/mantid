@@ -32,8 +32,8 @@ class TableWorkspaceDataPresenterGroup(TableWorkspaceDataPresenterBase):
         group_ws_rows = []
         model = self.view.model()
         for row in selected_rows:
-            group_index = int(model.data(model.index(row, 0)))
-            ws_index = int(model.data(model.index(row, 1)))
+            ws_index = int(model.data(model.index(row, 0)))
+            group_index = int(model.data(model.index(row, 1)))
             group_ws_rows.append((group_index, ws_index))
         self.model.delete_rows(group_ws_rows)
 

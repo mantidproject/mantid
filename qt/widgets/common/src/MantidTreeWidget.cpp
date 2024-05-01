@@ -127,7 +127,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
     auto wsName = wsNames.front();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
     grpWSPstr = std::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
-    if (!grpWSPstr) {
+    if (!grpWSPstr || grpWSPstr->isGroupPeaksWorkspaces()) {
       if (!wsName.isEmpty()) {
         m_doubleClickAction(wsName);
         return;

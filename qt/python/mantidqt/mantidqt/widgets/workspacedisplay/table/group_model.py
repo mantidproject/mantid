@@ -39,13 +39,18 @@ class GroupTableWorkspaceDisplayModel:
         self.supports(ws)
 
         self.ws: WorkspaceGroup = ws
+        self.group_name = self.ws.name()
+        self.child_names = self.ws.getNames()
         self.ws_num_rows = sum(peakWs.rowCount() for peakWs in ws)
-        self.ws_num_cols = self.ws[0].columnCount() + 2
+        self.ws_num_cols = 0
+        if self.ws.size() != 0:
+            self.ws_num_cols = self.ws[0].columnCount() + 2
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
         self.block_model_replace = False
         self._row_mapping = self._make_row_mapping()
-        self._load_col_types()
+        if self.ws_num_cols:
+            self._load_col_types()
 
     def _make_row_mapping(self):
         row_index = 0
@@ -76,10 +81,15 @@ class GroupTableWorkspaceDisplayModel:
         return self.marked_columns.build_labels()
 
     def get_name(self):
-        return self.ws.name()
+        return self.group_name
+
+    def get_child_names(self):
+        return self.child_names
 
     def get_column_headers(self):
-        return ["Group Index", "WS Index"] + self.ws[0].getColumnNames()
+        if self.ws.size() != 0:
+            return ["WS Index", "Group Index"] + self.ws[0].getColumnNames()
+        return []
 
     def get_column(self, index):
         column_data = []
@@ -116,25 +126,26 @@ class GroupTableWorkspaceDisplayModel:
         group_index, ws_index = self._row_mapping[row]
 
         if column == 0:
-            return group_index
+            return ws_index
 
         if column == 1:
-            return ws_index
+            return group_index
 
         column = column - 2
 
         return self.ws[group_index].cell(ws_index, column)
 
     def set_cell_data(self, row, col, data, is_v3d):
-        col = col - 2
-
         group_index, ws_index = row
-        p = self.ws[group_index][ws_index]
-        if self.ws.getColumnNames()[col] == "h":
+        col_name = self.get_column_header(col)
+
+        p = self.ws[group_index].getPeak(ws_index)
+
+        if col_name == "h":
             p.setH(data)
-        elif self.ws.getColumnNames()[col] == "k":
+        elif col_name == "k":
             p.setK(data)
-        elif self.ws.getColumnNames()[col] == "l":
+        elif col_name == "l":
             p.setL(data)
 
     def delete_rows(self, selected_rows):
@@ -152,3 +163,10 @@ class GroupTableWorkspaceDisplayModel:
 
         stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
         return stats
+
+    def sort(self, column_index, sort_ascending):
+        from mantid.simpleapi import SortPeaksWorkspace
+
+        column_name = self.get_column_header(column_index)
+
+        SortPeaksWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name, SortAscending=sort_ascending)

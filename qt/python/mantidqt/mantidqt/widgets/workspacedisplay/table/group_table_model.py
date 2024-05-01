@@ -21,8 +21,8 @@ class GroupTableModel(TableModel):
     def setData(self, index, value, role):
         if index.isValid() and role == Qt.EditRole:
             model = index.model()
-            group_index = int(model.data(model.index(index.row(), 0)))
-            ws_index = int(model.data(model.index(index.row(), 1)))
+            ws_index = int(model.data(model.index(index.row(), 0)))
+            group_index = int(model.data(model.index(index.row(), 1)))
             row = (group_index, ws_index)
 
             try:

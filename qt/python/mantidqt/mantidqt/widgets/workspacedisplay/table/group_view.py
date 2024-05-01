@@ -22,8 +22,18 @@ class GroupTableWorkspaceDisplayView(TableWorkspaceDisplayView):
         self.proxy_model.setSourceModel(self.table_model)
         self.setModel(self.proxy_model)
 
+        # Always hide the ws index column, this column is just used for indexing in different models operations
+        super().hideColumn(0)
+
     def model(self):
         return self.source_model
 
     def sortBySelectedColumn(self, selected_column, sort_ascending):
         self.sortByColumn(selected_column, Qt.AscendingOrder if sort_ascending else Qt.DescendingOrder)
+
+    def showColumn(self, column_index):
+        # Never show the ws index column, this column is just used for indexing in different models operations
+        if column_index == 0:
+            return
+
+        super().showColumn(column_index)

@@ -8,6 +8,7 @@
 from functools import partial
 from qtpy.QtCore import Qt
 
+from mantid.api import mtd
 from mantid.kernel import logger
 from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
@@ -160,15 +161,15 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 raise ValueError("The workspace type is not supported: {0}".format(ws))
 
     def replace_workspace(self, workspace_name, workspace):
-        if self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
+        if not self.group and self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
             self.presenter.view.blockSignals(True)
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
 
-        if self.group and workspace_name in self.model.ws.getNames() and not self.presenter.model.block_model_replace:
+        if self.group and workspace_name in self.model.get_child_names() and not self.presenter.model.block_model_replace:
             self.presenter.view.blockSignals(True)
-            self.presenter.model = GroupTableWorkspaceDisplayModel(self.model.ws)
+            self.presenter.model = GroupTableWorkspaceDisplayModel(mtd[self.model.get_name()])
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
 
@@ -302,9 +303,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         except ValueError:
             return
 
-        if not self.group:
-            self.presenter.model.sort(selected_column, sort_ascending)
-        else:
+        self.presenter.model.sort(selected_column, sort_ascending)
+
+        if self.group:
             self.presenter.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
