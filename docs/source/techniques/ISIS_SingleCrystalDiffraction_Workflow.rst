@@ -36,7 +36,7 @@ Here is an example using the ``SXD`` class that finds peaks and then removes dup
   ws = Load(Filename='SXD33335.nxs', OutputWorkspace='SXD33335')
 
   # find peaks using SXD static method - determines peak threshold from
-  # the standard deviation of the intensity distribution
+  # the ratio of local variance over mean
   peaks_ws = SXD.find_sx_peaks(ws, ThresholdVarianceOverMean=2.0)
   SXD.remove_duplicate_peaks_by_qlab(peaks_ws, q_tol=0.05)
 
