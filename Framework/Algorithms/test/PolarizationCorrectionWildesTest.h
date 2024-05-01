@@ -773,10 +773,10 @@ private:
       AnalysisDataService::Instance().addOrReplace("ws" + originalFlipperConfig[i], wsList[i]);
     }
     using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "00")] = ws00;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "01")] = ws01;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "10")] = ws10;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "11")] = ws11;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11;
     std::vector<std ::string> wsNames{wsList.size()};
     std::transform(wsList.cbegin(), wsList.cend(), wsNames.begin(),
                    [](MatrixWorkspace_sptr w) { return w->getName(); });
@@ -839,9 +839,9 @@ private:
       AnalysisDataService::Instance().addOrReplace("ws" + originalFlipperConfig[i], wsList[i]);
     }
     using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "00")] = ws00;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, presentFlipperConf)] = wsXX;
-    wsList[indexOfWorkspaceForSpinState(nullptr, flipperConfig, "11")] = ws11;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX;
+    wsList[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11;
     std::vector<std ::string> wsNames{wsList.size()};
     std::transform(wsList.cbegin(), wsList.cend(), wsNames.begin(),
                    [](MatrixWorkspace_sptr w) { return w->getName(); });

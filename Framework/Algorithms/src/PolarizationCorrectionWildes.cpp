@@ -784,8 +784,8 @@ PolarizationCorrectionWildes::workspaceForGivenFlipper(const std::vector<std::st
                                                        const std::string &flipperInput,
                                                        const std::vector<std::string> &wsNameList) {
   for (const auto &f : flipperOptions) {
-    const auto index = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(nullptr, flipperInput, f);
-    if (index >= 0 && index < wsNameList.size()) {
+    const auto index = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(flipperInput, f);
+    if (index < wsNameList.size()) {
       auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(wsNameList[index]));
       if (!ws) {
         throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");

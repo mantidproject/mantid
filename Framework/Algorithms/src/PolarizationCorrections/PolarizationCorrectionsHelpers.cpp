@@ -53,6 +53,6 @@ True if there is a spin state in the input string specified with one character, 
 */
 bool hasSingleSpinStates(const std::string &spinStates) {
   const auto splitString = splitSpinStateString(spinStates);
-  return std::any_of(splitString.cbegin(), splitString.cend(), [](std::string s) { return s.size() == 1; });
+  return std::any_of(splitString.cbegin(), splitString.cend(), [](const std::string &s) { return s.size() == 1; });
 }
 } // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers

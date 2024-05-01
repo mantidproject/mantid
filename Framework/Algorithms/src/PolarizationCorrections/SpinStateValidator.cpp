@@ -78,6 +78,6 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
 
 bool SpinStateValidator::anyOfIsInSet(const std::vector<std::string> &anyOf,
                                       const std::unordered_set<std::string> &set) {
-  return std::any_of(anyOf.cbegin(), anyOf.cend(), [&set](std::string s) { return setContains(set, s); });
+  return std::any_of(anyOf.cbegin(), anyOf.cend(), [&set](const std::string &s) { return setContains(set, s); });
 }
 } // namespace Mantid::Algorithms
