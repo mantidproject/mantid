@@ -48,13 +48,11 @@ public:
   /// Saving Tests
 
   void test_saving_absolute() {
-    FlipperEfficiency alg;
-    alg.initialize();
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
     auto const &group = createTestingWorkspace("testWs");
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputFilePath", temp_filename.string());
-    alg.execute();
+    auto alg = initialize_alg(group, false);
+    alg->setPropertyValue("OutputFilePath", temp_filename.string());
+    alg->execute();
     TS_ASSERT(std::filesystem::exists(temp_filename))
     std::filesystem::remove(temp_filename);
   }
@@ -62,26 +60,22 @@ public:
   void test_saving_relative() {
     auto tempDir = std::filesystem::temp_directory_path();
     ConfigService::Instance().setString("defaultsave.directory", tempDir);
-    FlipperEfficiency alg;
-    alg.initialize();
     std::string const &filename = "something.nxs";
     auto const &group = createTestingWorkspace("testWs");
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputFilePath", filename);
-    alg.execute();
+    auto alg = initialize_alg(group, false);
+    alg->setPropertyValue("OutputFilePath", filename);
+    alg->execute();
     auto savedPath = tempDir /= filename;
     TS_ASSERT(std::filesystem::exists(savedPath))
     std::filesystem::remove(savedPath);
   }
 
   void test_saving_no_ext() {
-    FlipperEfficiency alg;
-    alg.initialize();
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something";
     auto const &group = createTestingWorkspace("testWs");
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputFilePath", temp_filename.string());
-    alg.execute();
+    auto alg = initialize_alg(group, false);
+    alg->setPropertyValue("OutputFilePath", temp_filename.string());
+    alg->execute();
     auto savedPath = temp_filename.string() + ".nxs";
     TS_ASSERT(std::filesystem::exists(savedPath))
     std::filesystem::remove(savedPath);
@@ -90,24 +84,19 @@ public:
   /// Validation Tests
 
   void test_no_workspaces_or_file_output_fails() {
-    FlipperEfficiency alg;
-    alg.initialize();
     auto const &group = createTestingWorkspace("testWs");
-    alg.setProperty("InputWorkspace", group);
+    auto alg = initialize_alg(group, false);
     TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::runtime_error const &e, std::string(e.what()),
+        alg->execute(), std::runtime_error const &e, std::string(e.what()),
         "Some invalid Properties found: \n OutputFilePath: Either an output workspace or output file must be "
         "provided.\n OutputWorkspace: Either an output workspace or output file must be provided.")
   }
 
   void test_invalid_group_size_is_captured() {
-    FlipperEfficiency alg;
-    alg.initialize();
     auto const &group = createTestingWorkspace("testWs");
     group->removeItem(0);
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputWorkspace", "out");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, std::string(e.what()),
+    auto alg = initialize_alg(group);
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n InputWorkspace: The input group must contain a "
                             "workspace for all four spin states.")
   }
@@ -115,14 +104,10 @@ public:
   /// Calculation Tests
 
   void test_normal_perfect_calculation_occurs() {
-    FlipperEfficiency alg;
-    alg.initialize();
-    alg.setChild(true);
     auto const &group = createTestingWorkspace("testWs");
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.execute();
-    MatrixWorkspace_sptr const outWs = alg.getProperty("OutputWorkspace");
+    auto alg = initialize_alg(group);
+    alg->execute();
+    MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
     for (const double &eff : outWs->dataY(0)) {
@@ -131,14 +116,10 @@ public:
   }
 
   void test_normal_typical_calculation_occurs() {
-    FlipperEfficiency alg;
-    alg.initialize();
-    alg.setChild(true);
     auto const &group = createTestingWorkspace("testWs", 0.9);
-    alg.setProperty("InputWorkspace", group);
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.execute();
-    MatrixWorkspace_sptr const outWs = alg.getProperty("OutputWorkspace");
+    auto alg = initialize_alg(group);
+    alg->execute();
+    MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
     for (const double &eff : outWs->dataY(0)) {
@@ -194,5 +175,17 @@ private:
     TS_ASSERT(groupAlg.isExecuted());
 
     return groupAlg.getProperty("OutputWorkspace");
+  }
+
+  std::unique_ptr<FlipperEfficiency> initialize_alg(Mantid::API::WorkspaceGroup_sptr const &inputWorkspace,
+                                                    bool const setOutput = true) {
+    auto alg = std::make_unique<FlipperEfficiency>();
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    if (setOutput) {
+      alg->setPropertyValue("OutputWorkspace", "out");
+    }
+    return alg;
   }
 };
