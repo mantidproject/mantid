@@ -1,0 +1,1 @@
+- The properties ``LoaderName`` and ``LoaderVersion`` of :ref:`Load <algm-Load>` are now guaranteed to be set by end of algorithm.
