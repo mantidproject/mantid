@@ -37,7 +37,6 @@ class SXDPeakSearchAndFindUBUsingFFT(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(alpha, latt.alpha(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.beta(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.gamma(), delta=1e-10)
-        return self.peaks, "SXD23767_found_peaks.nxs"
 
 
 class SXDDetectorCalibration(systemtesting.MantidSystemTest):
