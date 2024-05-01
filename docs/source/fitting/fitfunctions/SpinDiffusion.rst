@@ -9,7 +9,7 @@ SpinDiffusion
 Description
 -----------
 
-[Get description from Adam] [1]_.
+[Get description from Adam] [1]_. The data fitted using this fit function is assumed to be in units of Gauss.
 
 .. math::
     \lambda(B) &= \frac{A^2}{4} J(\omega) \\
@@ -21,7 +21,7 @@ where:
 
 - :math:`I_{0}(x)` is the zeroth order modified Bessel function.
 - :math:`\omega` is the angular momentum (:math:`MHz`).
-- :math:`\gamma_{\mu}` is the Muon gyromagnetic ratio (:math:`2 \pi \times 135.5 MHz/T`).
+- :math:`\gamma_{\mu}` is the Muon gyromagnetic ratio (:math:`2 \pi \times 0.001356 MHz/G`).
 - :math:`S(t)` is the autocorrelation function, represented by an anisotropic random walk.
 - :math:`J(\omega)` is the spectral density (:math:`MHz^{-1}`). It is the Fourier Transform of :math:`S(t)`.
 - :math:`A` is a parameter to be fitted.
