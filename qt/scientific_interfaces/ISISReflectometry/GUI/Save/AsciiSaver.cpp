@@ -25,6 +25,7 @@ static constexpr auto DAT = ".dat";
 static constexpr auto TXT = ".txt";
 static constexpr auto MFT = ".mft";
 static constexpr auto ORT = ".ort";
+static constexpr auto ORB = ".orb";
 } // namespace FileExtensions
 
 AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
@@ -43,6 +44,8 @@ std::string AsciiSaver::extensionForFormat(NamedFormat format) {
     return FileExtensions::MFT;
   case NamedFormat::ORSOAscii:
     return FileExtensions::ORT;
+  case NamedFormat::ORSONexus:
+    return FileExtensions::ORB;
   default:
     throw std::runtime_error("Unknown save format.");
   }
@@ -56,7 +59,7 @@ std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::
 
   if (extension == FileExtensions::CUSTOM) {
     path.append(prefix + name + std::string(FileExtensions::DAT));
-  } else if (extension == FileExtensions::ORT) {
+  } else if (extension == FileExtensions::ORT || extension == FileExtensions::ORB) {
     path.append(prefix + name + extension);
   } else {
     // The extension is added automatically for the rest of the formats

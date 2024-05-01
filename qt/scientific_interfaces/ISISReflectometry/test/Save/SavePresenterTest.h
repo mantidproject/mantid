@@ -218,6 +218,10 @@ public:
     checkNotifyAutosaveEnabledForFormat(NamedFormat::ORSOAscii, true);
   }
 
+  void testNotifyAutosaveEnabledForORSONexusFormat() {
+    checkNotifyAutosaveEnabledForFormat(NamedFormat::ORSONexus, true);
+  }
+
   void testNotifyAutosaveEnabledWithInvalidPath() {
     auto presenter = makePresenter();
     expectGetInvalidSaveDirectory();
@@ -495,6 +499,28 @@ public:
 
   void testSaveToSingleFileDisabledWithNoAutosaveForORSOAsciiFormat() {
     checkSaveToSingleFileStateForFileFormat(NamedFormat::ORSOAscii, false, false);
+  }
+
+  // ORSO Nexus format option settings
+
+  void testLogListDisabledForORSONexusFormat() { checkLogListStateForFileFormat(NamedFormat::ORSONexus, false); }
+
+  void testCustomOptionsDisabledForORSONexusFormat() {
+    checkCustomOptionsStateForFileFormat(NamedFormat::ORSONexus, false);
+  }
+
+  void testQResolutionEnabledForORSONexusFormat() { checkQResolutionStateForFileFormat(NamedFormat::ORSONexus, true); }
+
+  void testAdditionalColumnsEnabledForORSONexusFormat() {
+    checkAdditionalColumnsStateForFileFormat(NamedFormat::ORSONexus, true);
+  }
+
+  void testSaveToSingleFileEnabledWithAutosaveForORSONexusFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ORSONexus, true, true);
+  }
+
+  void testSaveToSingleFileDisabledWithNoAutosaveForORSONexusFormat() {
+    checkSaveToSingleFileStateForFileFormat(NamedFormat::ORSONexus, false, false);
   }
 
 private:

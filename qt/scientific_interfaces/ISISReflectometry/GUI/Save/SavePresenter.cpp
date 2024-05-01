@@ -63,9 +63,15 @@ bool SavePresenter::isProcessing() const { return m_mainPresenter->isProcessing(
 
 bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
+namespace {
+bool isORSOFormat(const NamedFormat &fileFormat) {
+  return fileFormat == NamedFormat::ORSOAscii || fileFormat == NamedFormat::ORSONexus;
+}
+} // unnamed namespace
+
 bool SavePresenter::hasSelectedORSOFormat() const {
   const auto selectedFormat = SavePresenter::formatFromIndex(SavePresenter::m_view->getFileFormatIndex());
-  return selectedFormat == NamedFormat::ORSOAscii;
+  return isORSOFormat(selectedFormat);
 }
 
 /** Tells the view to enable/disable certain widgets based on the
@@ -82,19 +88,19 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
     m_view->disableLogList();
 
   // Enable/disable the Q resolution checkbox for formats that can optionally include resolution
-  if (fileFormat == NamedFormat::Custom || fileFormat == NamedFormat::ORSOAscii)
+  if (fileFormat == NamedFormat::Custom || isORSOFormat(fileFormat))
     m_view->enableQResolutionCheckBox();
   else
     m_view->disableQResolutionCheckBox();
 
   // Enable/disable the additional columns checkbox for formats that can optionally include these
-  if (fileFormat == NamedFormat::ORSOAscii)
+  if (isORSOFormat(fileFormat))
     m_view->enableAdditionalColumnsCheckBox();
   else
     m_view->disableAdditionalColumnsCheckBox();
 
   // Enable/disable the save to single file checkbox for formats that support this
-  if (shouldAutosave() && fileFormat == NamedFormat::ORSOAscii)
+  if (shouldAutosave() && isORSOFormat(fileFormat))
     m_view->enableSaveToSingleFileCheckBox();
   else
     m_view->disableSaveToSingleFileCheckBox();
@@ -256,6 +262,8 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
     return NamedFormat::ILLCosmos;
   case 4:
     return NamedFormat::ORSOAscii;
+  case 5:
+    return NamedFormat::ORSONexus;
   default:
     throw std::runtime_error("Unknown save format.");
   }
