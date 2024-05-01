@@ -44,7 +44,7 @@ public:
 
     MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
 
-    auto &polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
+    auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polariserEfficiency->initialize();
     polariserEfficiency->setProperty("InputWorkspace", ws1->getName());
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
@@ -58,12 +58,12 @@ public:
     MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
     MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
     WorkspaceGroup_sptr groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2});
-    auto &polariserEfficiency = createPolarizerEfficiencyAlgorithm(groupWs);
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(groupWs);
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
   void testOutput() {
-    auto &polariserEfficiency = createPolarizerEfficiencyAlgorithm();
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     polariserEfficiency->execute();
 
     const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
@@ -71,7 +71,7 @@ public:
   }
 
   void testSpinConfigurations() {
-    auto &polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
+    auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
@@ -80,21 +80,21 @@ public:
 
   void testNonWavelengthInput() {
     // The units of the input workspace should be wavelength
-    auto &wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
-    auto &polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
+    auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polariserEfficiency->initialize();
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("InputWorkspace", wsGrp->getName()), std::invalid_argument &);
   }
 
   void testExampleCalculation() {
-    auto &tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
-    auto &tPara1 = generateFunctionDefinedWorkspace("T_para1", "4 + x*0");
-    auto &tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
-    auto &tAnti1 = generateFunctionDefinedWorkspace("T_anti1", "2 + x*0");
+    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
+    auto tPara1 = generateFunctionDefinedWorkspace("T_para1", "4 + x*0");
+    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
+    auto tAnti1 = generateFunctionDefinedWorkspace("T_anti1", "2 + x*0");
 
-    auto &grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tAnti1, tPara1});
+    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tAnti1, tPara1});
 
-    auto &polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     polariserEfficiency->execute();
     MatrixWorkspace_sptr calculatedPolariserEfficiency = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polariserEfficiency->getProperty("OutputWorkspace"));
@@ -107,7 +107,7 @@ public:
   }
 
   void testErrors() {
-    auto &polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
     polarizerEfficiency->execute();
     MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polarizerEfficiency->getProperty("OutputWorkspace"));
@@ -142,7 +142,7 @@ private:
 
   MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
                                          const std::vector<double> &y, const std::string &xUnit = "Wavelength") {
-    auto &e = std::vector<double>(x.size());
+    auto e = std::vector<double>(x.size());
     for (size_t i = 0; i < e.size(); ++i) {
       e[i] = 0;
     }
@@ -152,7 +152,7 @@ private:
   MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
                                          const std::vector<double> &y, const std::vector<double> &e,
                                          const std::string &xUnit = "Wavelength") {
-    auto &createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
+    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
     createWorkspace->setProperty("DataX", x);
     createWorkspace->setProperty("DataY", y);
@@ -162,7 +162,7 @@ private:
     createWorkspace->setProperty("Distribution", true);
     createWorkspace->execute();
 
-    auto &convertToHistogram = AlgorithmManager::Instance().create("ConvertToHistogram");
+    auto convertToHistogram = AlgorithmManager::Instance().create("ConvertToHistogram");
     convertToHistogram->initialize();
     convertToHistogram->setProperty("InputWorkspace", name);
     convertToHistogram->setProperty("OutputWorkspace", name);
@@ -173,7 +173,7 @@ private:
   }
 
   WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup) {
-    auto &groupWorkspace = AlgorithmManager::Instance().create("GroupWorkspaces");
+    auto groupWorkspace = AlgorithmManager::Instance().create("GroupWorkspaces");
     groupWorkspace->initialize();
     std::vector<std::string> wsToGroupNames(wsToGroup.size());
     std::transform(wsToGroup.cbegin(), wsToGroup.cend(), wsToGroupNames.begin(),
@@ -186,7 +186,7 @@ private:
   }
 
   MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const std::string &name, const std::string &func) {
-    auto &createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
+    auto createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
     createSampleWorkspace->initialize();
     createSampleWorkspace->setProperty("WorkspaceType", "Histogram");
     createSampleWorkspace->setProperty("OutputWorkspace", name);
@@ -210,7 +210,7 @@ private:
     if (inputGrp == nullptr) {
       inputGrp = createExampleGroupWorkspace("wsGrp");
     }
-    auto &polarizerEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
+    auto polarizerEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polarizerEfficiency->initialize();
     polarizerEfficiency->setProperty("InputWorkspace", inputGrp->getName());
     polarizerEfficiency->setProperty("AnalyserEfficiency", ANALYSER_EFFICIENCY_WS_NAME);

@@ -35,7 +35,7 @@ static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
 
 void PolarizerEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto &validator = std::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
   validator->add<WorkspaceUnitValidator>("Wavelength");
   validator->add<HistogramValidator>();
   declareProperty(
@@ -112,10 +112,10 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                             SpinStateValidator::ZERO_ZERO);
 
-  auto &effCell = convertToHistIfNecessary(
+  auto effCell = convertToHistIfNecessary(
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getProperty(PropertyNames::ANALYSER_EFFICIENCY)));
 
-  auto &rebin = createChildAlgorithm("RebinToWorkspace");
+  auto rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
   rebin->setProperty("WorkspaceToRebin", effCell);
   rebin->setProperty("WorkspaceToMatch", t00Ws);
@@ -137,7 +137,7 @@ MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixW
   if (wsClone->isHistogramData())
     return wsClone;
 
-  auto &convertToHistogram = createChildAlgorithm("ConvertToHistogram");
+  auto convertToHistogram = createChildAlgorithm("ConvertToHistogram");
   convertToHistogram->initialize();
   convertToHistogram->setProperty("InputWorkspace", wsClone);
   convertToHistogram->setProperty("OutputWorkspace", wsClone);
