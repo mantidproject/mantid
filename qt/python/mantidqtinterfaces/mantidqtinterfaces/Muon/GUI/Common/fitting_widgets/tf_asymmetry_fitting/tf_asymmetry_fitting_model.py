@@ -94,14 +94,18 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Updates the TF Asymmetry and normal simultaneous fit function based on the function from a TFA fit."""
         self.fitting_context.tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
 
-        if isinstance(tf_asymmetry_simultaneous_function, MultiDomainFunction):
+        if isinstance(self.fitting_context.simultaneous_fit_function, MultiDomainFunction) and isinstance(
+            tf_asymmetry_simultaneous_function, MultiDomainFunction
+        ):
             self._update_parameters_of_multi_domain_simultaneous_function_from(tf_asymmetry_simultaneous_function)
         else:
             self.fitting_context.simultaneous_fit_function = self._get_normal_fit_function_from(tf_asymmetry_simultaneous_function)
 
     def _update_parameters_of_multi_domain_simultaneous_function_from(self, tf_asymmetry_simultaneous_function: IFunction) -> None:
         """Updates the parameters in the normal simultaneous function based on a TF Asymmetry simultaneous function."""
-        for domain_index in range(tf_asymmetry_simultaneous_function.nFunctions()):
+        for domain_index in range(
+            min([tf_asymmetry_simultaneous_function.nFunctions(), self.fitting_context.simultaneous_fit_function.nFunctions()])
+        ):
             tf_asymmetry_domain_function = tf_asymmetry_simultaneous_function.getFunction(domain_index)
             parameter_values, errors = self.get_fit_function_parameter_values(
                 self._get_normal_fit_function_from(tf_asymmetry_domain_function)
