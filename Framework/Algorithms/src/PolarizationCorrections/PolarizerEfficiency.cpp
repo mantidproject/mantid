@@ -123,14 +123,7 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   rebin->execute();
   effCell = rebin->getProperty("OutputWorkspace");
 
-  // The efficiency is given by (e_cell * (T00 + T01) - T01) / ((2 * e_cell - 1) * (T00 + T01))
-
-  const auto &sumT = t00Ws + t01Ws;
-  auto &eCellTimesSum = effCell * sumT;
-  const auto &numerator = eCellTimesSum - t01Ws;
-  eCellTimesSum *= 2;
-  const auto &denominator = eCellTimesSum - sumT;
-  const auto &effPolarizer = numerator / denominator;
+  const auto &effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
   setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
 }
 
