@@ -11,14 +11,12 @@ from numpy import float64
 from numpy.typing import NDArray
 from mantid.api import IFunction1D, FunctionFactory
 from mantid.kernel import IntBoundedValidator
-from scipy.constants import elementary_charge, physical_constants
+from mantid.kernel import PhysicalConstants
 from scipy.integrate import quad
 from scipy.special import i0e
 from typing import Tuple
 
-MUON_MAGNETOGYRIC_RATIO = (
-    physical_constants["muon g factor"][0] * -elementary_charge / (2 * physical_constants["muon mass"][0] * 1e6)
-)  # MHz / T
+MUON_MAGNETOGYRIC_RATIO = 2 * np.pi * PhysicalConstants.MuonGyromagneticRatio  # MHz / G
 
 
 @cache
@@ -37,7 +35,7 @@ def integrand(t, d_1, d_2, d_3, w):
 
 
 def jw(d_1, d_2, d_3, w):
-    integral, error = quad(
+    integral, _ = quad(
         integrand,
         0,
         np.inf,  # Integration upper bound
@@ -88,7 +86,7 @@ class SpinDiffusion(IFunction1D):
 
         d_rates = d_rates_from_dimensionality(n_dimensions, d_parallel, d_perpendicular)
 
-        # xvals is assumed to be B(LF), in units of Tesla. We need to convert to inverse MHz
+        # xvals is assumed to be B(LF), in units of Gauss. We need to convert to inverse MHz
         w_values = MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
 
         spectral_density = [jw(*d_rates, w) for w in w_values]
