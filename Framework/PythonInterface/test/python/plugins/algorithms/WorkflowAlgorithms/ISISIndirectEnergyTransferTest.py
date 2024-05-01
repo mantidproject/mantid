@@ -287,11 +287,11 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26176_multi_graphite002_red")
+        self.assertEqual(wks.getNames()[0], "iris26173-26176_multi_graphite002_red")
 
         red_ws = wks[0]
-        self.assertTrue("multi_run_numbers" in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get("multi_run_numbers").value, "26176,26173")
+        self.assertTrue("multi_run_reduction" in red_ws.getRun())
+        self.assertEqual(red_ws.getRun().get("run_number").value, "26176,26173")
 
     def test_instrument_validation_failure(self):
         """

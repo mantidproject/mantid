@@ -92,14 +92,14 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26173_multi_diffspec_red")
+        self.assertEqual(wks.getNames()[0], "iris26173-26176_multi_diffspec_red")
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
-        self.assertTrue("multi_run_numbers" in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get("multi_run_numbers").value, "26173,26174,26175,26176")
+        self.assertTrue("multi_run_reduction" in red_ws.getRun())
+        self.assertEqual(red_ws.getRun().get("run_number").value, "26173,26174,26175,26176")
 
     def test_reduction_with_container_completes(self):
         """
