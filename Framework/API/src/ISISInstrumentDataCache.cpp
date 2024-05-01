@@ -4,9 +4,11 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
+#include <Poco/Path.h>
 #include <fstream>
 #include <json/reader.h>
 #include <json/value.h>
+#include <json/writer.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
@@ -26,8 +28,23 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
 
   // Read directory path from json file
   Json::Value json;
-  ifstrm >> json;
-  std::string relativePath = json[runNumber].asString();
+  std::string relativePath = "default";
+
+  try {
+    ifstrm >> json;
+    relativePath = json[runNumber].asString();
+  } catch (...) {
+    g_log.debug() << "\nFound index file at " << jsonPath;
+    g_log.debug() << "\nRun Number deterted: " << runNumber;
+    g_log.debug() << "\nRelative Path: " << relativePath;
+    g_log.debug() << std::endl;
+    Json::StreamWriterBuilder builder;
+    const std::string json_file = Json::writeString(builder, json);
+    std::ofstream ofstrm{Poco::Path::home() + "/" + instrName + "_index_log.json"};
+    ofstrm << json_file << std::endl;
+    ofstrm.close();
+    g_log.debug() << "\nWrote json log to file." << std::endl;
+  }
 
   if (relativePath.empty()) {
     throw std::invalid_argument("Run number " + runNumber + " not found for instrument " + instrName + ".");
