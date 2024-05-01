@@ -556,7 +556,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         load_opts = {"DeleteMonitors": True}
         load_runs = create_loader(ipf_file_name, self._spec_min, self._spec_max, self._load_logs, load_opts)
         drange_map_generator = create_drange_map_generator(load_runs, rebin_and_sum)
-
+        run_numbers = self._parse_run_numbers(self._sample_runs)
         # Create a sample drange map from the sample runs
         self._sam_ws_map = drange_map_generator(self._sample_runs, lambda name: mtd[name])
 
@@ -659,6 +659,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         d_ranges = sorted(result_map.keys())
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges", LogText=", ".join(map(str, d_ranges)))
+        if run_numbers:
+            AddSampleLog(Workspace=output_ws, LogName="run_number", LogText=run_numbers)
 
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(d_ranges)
@@ -787,6 +789,25 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 raise RuntimeError("Could not locate sample file: " + run)
 
         return run_files
+
+    def _parse_run_numbers(self, sample_runs):
+        """
+        Matches run numbers used in the reduction from the filenames
+
+        @param sample_runs A string of run numbers to find
+        @returns A list of run_numbers
+        """
+        import re
+
+        run_numbers = ""
+        for sample in sample_runs:
+            match = re.search(r"OSIRIS(\d+).", sample)
+            if match:
+                number = match.groups()[0][2:] if match.groups()[0].startswith("00") else match.groups()[0]
+                run_numbers = run_numbers + "," + number
+            else:
+                return ""
+        return run_numbers[1:]
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
