@@ -346,6 +346,8 @@ signals:
   void dataReady(const QString &wsname);
   /// Signal emitted when the load button is clicked
   void loadClicked();
+  /// Signal emitted when files are found and autoloaded
+  void filesAutoLoaded();
 
 protected:
   // Method for handling drop events

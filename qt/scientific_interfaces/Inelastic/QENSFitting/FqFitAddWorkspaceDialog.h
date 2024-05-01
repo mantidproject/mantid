@@ -44,6 +44,7 @@ private slots:
   void emitWorkspaceChanged(const QString &name);
   void emitParameterTypeChanged(const QString &index);
   void emitAddData();
+  void handleAutoLoaded();
 
 private:
   Ui::FqFitAddWorkspaceDialog m_uiForm;

@@ -112,6 +112,7 @@ void DataSelector::handleFileInput() {
 
   // attempt to load the file
   if (m_autoLoad) {
+    emit filesAutoLoaded();
     autoLoadFile(filename);
   } else {
     // files were found
