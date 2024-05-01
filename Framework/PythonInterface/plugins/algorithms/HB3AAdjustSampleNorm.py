@@ -386,7 +386,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             )
 
         y_dim, x_dim, number_of_runs = array.shape
-        array = np.swapaxes(array.T, 1, 2).flatten()
+        array = array.flatten(order="F")
 
         run = mtd[ws].getExperimentInfo(0).run()
         det_trans = run.getProperty("det_trans").timeAverageValue()
