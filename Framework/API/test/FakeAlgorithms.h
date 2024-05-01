@@ -108,3 +108,28 @@ public:
   }
   void exec() override {}
 };
+
+class CoolAlgorithm1 : public Algorithm {
+public:
+  CoolAlgorithm1() : Algorithm() {}
+  ~CoolAlgorithm1() override = default;
+  const std::string name() const override { return "CoolAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string alias() const override { return "TheCoolestAlgorithm"; }
+  const std::string summary() const override { return "Test summary"; }
+
+  void init() override {}
+  void exec() override {}
+};
+
+class CoolAlgorithm2 : public Algorithm {
+public:
+  CoolAlgorithm2() : Algorithm() {}
+  ~CoolAlgorithm2() override = default;
+  const std::string name() const override { return "CoolAlgorithm"; }
+  int version() const override { return 2; }
+  const std::string summary() const override { return "Test summary"; }
+
+  void init() override {}
+  void exec() override {}
+};

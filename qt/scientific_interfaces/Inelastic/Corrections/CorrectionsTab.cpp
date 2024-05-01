@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CorrectionsTab.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QSettings>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 /**
@@ -107,12 +108,12 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
   convertAlg->setProperty("Target", unitID);
 
   if (eMode.empty())
-    eMode = WorkspaceUtils::getEMode(ws);
+    eMode = getEMode(ws);
 
   convertAlg->setProperty("EMode", eMode);
 
   if (eMode == "Indirect" && eFixed == 0.0) {
-    if (auto const eFixedFromWs = WorkspaceUtils::getEFixed(ws)) {
+    if (auto const eFixedFromWs = getEFixed(ws)) {
       eFixed = *eFixedFromWs;
     } else {
       showMessageBox("Please enter an Efixed value.");

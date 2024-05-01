@@ -5,17 +5,18 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataReductionTab.h"
-#include "Common/WorkspaceUtils.h"
 #include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
@@ -24,7 +25,7 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent)
+IndirectDataReductionTab::IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
@@ -127,8 +128,8 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const 
  *
  * @return Instrument config widget
  */
-MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
-  return m_idrUI->m_uiForm.iicInstrumentConfiguration;
+MantidWidgets::IInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
+  return m_idrUI->getInstrumentConfiguration();
 }
 
 QString IndirectDataReductionTab::getInstrumentName() const {
@@ -249,7 +250,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->setProperty("OutputWorkspace", "__tof");
   convUnitsAlg->setProperty("Target", "TOF");
   convUnitsAlg->setProperty("EMode", "Indirect");
-  if (auto const efixed = WorkspaceUtils::getEFixed(energyWs)) {
+  if (auto const efixed = getEFixed(energyWs)) {
     convUnitsAlg->setProperty("EFixed", *efixed);
   }
   convUnitsAlg->execute();

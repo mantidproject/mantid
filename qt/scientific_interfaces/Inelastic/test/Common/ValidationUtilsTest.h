@@ -42,7 +42,7 @@ public:
 
   void test_when_grouping_method_is_file_and_a_file_is_provided() {
     m_properties->setProperty("GroupingMethod", "File");
-    m_properties->setProperty("MapFile", "/path/to/a/grouping/file.map");
+    m_properties->setProperty("GroupingFile", "/path/to/a/grouping/file.map");
 
     auto const message =
         ValidationUtils::validateGroupingProperties(std::move(m_properties), m_spectraMin, m_spectraMax);

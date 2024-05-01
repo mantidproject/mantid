@@ -46,8 +46,8 @@ public:
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
   virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
-  virtual QStringList getDatasetNames() const = 0;
-  virtual QStringList getDatasetDomainNames() const = 0;
+  virtual std::vector<std::string> getDatasetNames() const = 0;
+  virtual std::vector<std::string> getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;

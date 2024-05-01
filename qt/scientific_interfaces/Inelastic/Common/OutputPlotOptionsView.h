@@ -8,7 +8,7 @@
 
 #include "ui_OutputPlotOptions.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 

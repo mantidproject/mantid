@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <QClipboard>
 #include <QMenu>
@@ -35,10 +36,10 @@ namespace MantidQt::MantidWidgets {
  * @param constraints :: [input] Parameter constraints.
  */
 EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::string &parName,
-                                                   const QStringList &datasetNames,
-                                                   const QStringList &datasetDomainNames, const QList<double> &values,
-                                                   const QList<bool> &fixes, const QStringList &ties,
-                                                   const QStringList &constraints)
+                                                   const std::vector<std::string> &datasetNames,
+                                                   const std::vector<std::string> &datasetDomainNames,
+                                                   const QList<double> &values, const QList<bool> &fixes,
+                                                   const QStringList &ties, const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes), m_ties(std::move(ties)),
       m_constraints(std::move(constraints)) {
   assert(values.size() == datasetDomainNames.size());
@@ -58,9 +59,9 @@ EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::s
  * @param datasetNames :: [input] Names of workspaces being fitted.
  * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  */
-void EditLocalParameterDialog::doSetup(const std::string &parName, const QStringList &datasetNames,
-                                       const QStringList &datasetDomainNames) {
-  m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
+void EditLocalParameterDialog::doSetup(const std::string &parName, const std::vector<std::string> &datasetNames,
+                                       const std::vector<std::string> &datasetDomainNames) {
+  m_logFinder = std::make_unique<LogValueFinder>(stdVectorToQStringList(datasetNames));
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -78,7 +79,7 @@ void EditLocalParameterDialog::doSetup(const std::string &parName, const QString
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(datasetDomainNames[i]);
+    auto headerItem = new QTableWidgetItem(QString::fromStdString(datasetDomainNames[i]));
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();

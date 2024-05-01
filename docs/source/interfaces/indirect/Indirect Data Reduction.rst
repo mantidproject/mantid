@@ -11,7 +11,7 @@ Overview
 
 The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
-Inelastic Data Analysis and Bayes Fitting interfaces.
+Inelastic QENS Fitting and Bayes Fitting interfaces.
 
 The tabs shown on this interface will vary depending on the current default
 facility such that only tabs that will work with data from the facility are

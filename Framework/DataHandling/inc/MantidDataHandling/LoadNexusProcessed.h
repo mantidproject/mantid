@@ -12,9 +12,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses.h"
 #include <map>
@@ -40,7 +40,7 @@ Required Properties:
 <LI> InputWorkspace - The name of the workspace to put the data </LI>
 </UL>
 */
-class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::NexusFileLoader {
 
 public:
   /// Default constructor
@@ -64,7 +64,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 protected:
   /// Read the spectra
@@ -78,7 +78,7 @@ private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void exec() override;
+  void execLoader() override;
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name, const std::string &baseName, size_t wsIndex);

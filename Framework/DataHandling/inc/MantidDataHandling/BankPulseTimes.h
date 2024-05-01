@@ -23,7 +23,9 @@ namespace Mantid::DataHandling {
 class MANTID_DATAHANDLING_DLL BankPulseTimes {
 public:
   /// Starting number for assigning periods.
-  static const unsigned int FirstPeriod;
+  static const int FIRST_PERIOD;
+  /// Unix epoch used as default epoch when the file does not specify one
+  static const std::string DEFAULT_START_TIME;
 
   /// Constructor with NeXus::File
   BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers);
@@ -45,6 +47,15 @@ public:
   /// The wall clock time of the pulse
   const Mantid::Types::Core::DateAndTime &pulseTime(const size_t index) const;
 
+  /**
+   * Return a vector of [include,exclude) indices into the pulse vectors that are between the start and stop times. This
+   * is very similar to the behavior of Mantid::Kernel::TimeROI.
+   *
+   * This will return an empty vector if all pulse indices are between the start and stop.
+   */
+  std::vector<size_t> getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
+                                      const Mantid::Types::Core::DateAndTime &stop) const;
+
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 
@@ -54,6 +65,9 @@ public:
 private:
   template <typename ValueType>
   void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+
+  /// This determines the start time by finding the minimum value in the array
+  void updateStartTime();
 
   /// Ensure that we always have a consistency between nPulses and periodNumbers containers
   void finalizePeriodNumbers();

@@ -501,7 +501,7 @@ void AlignAndFocusPowder::exec() {
   double tofmax = EMPTY_DBL();
 
   // crop the workspace in time-of-flight
-  if (xmin >= 0. || xmax > 0.) {
+  if (((!isEmpty(xmin)) && (xmin >= 0.)) || ((!isEmpty(xmax)) && (xmax > 0.))) {
     getTofRange(m_outputW, tofmin, tofmax);
 
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
@@ -1219,33 +1219,42 @@ void AlignAndFocusPowder::compressEventsOutputWS(const double compressEventsTole
  */
 bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance, const double tofmin,
                                                   const double tofmax, const bool hasWallClockTolerance) {
-  // compressing isn't an option
-  if (compressTolerance <= 0)
-    return false;
   // compressing to WEIGHTED (w/ time) is harder to predict
   if (hasWallClockTolerance)
     return false;
-
-  // estimate the time-of-flight range for the data
-  // if the parameters aren't supplied, guess 20,000us range
-  const double tofRange = (isEmpty(tofmin) || isEmpty(tofmax)) ? 200000. : std::fabs(tofmax - tofmin);
-
-  // assume one frame although this is generically wrong
-  // there are 3 fields in weighted events no time
-  const double sizeWeightedEventsEstimate = 3. * tofRange / compressTolerance;
+  // compressing isn't an option
+  if (compressTolerance <= 0)
+    return false;
 
   if (const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_outputW)) {
+    // estimate the time-of-flight range for the data
+    // if the parameters aren't supplied, get them from the workspace
+    double tofmin_wksp = tofmin;
+    double tofmax_wksp = tofmax;
+    if (isEmpty(tofmin) || isEmpty(tofmax))
+      getTofRange(m_outputW, tofmin_wksp, tofmax_wksp);
+    const double tofRange = std::fabs(tofmax_wksp - tofmin_wksp);
+
+    // constants estimating size difference of various events
+    constexpr double TOF_EVENT_BYTE_SIZE{static_cast<double>(sizeof(Types::Event::TofEvent))};
+    constexpr double WEIGHTED_EVENT_BYTE_SIZE{static_cast<double>(sizeof(WeightedEvent))};
+    constexpr double WEIGHTED_NOTIME_EVENT_BYTE_SIZE{static_cast<double>(sizeof(WeightedEventNoTime))};
+
+    // assume one frame although this is generically wrong
+    // there are 3 fields in weighted events no time
+    const double sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_BYTE_SIZE * tofRange / compressTolerance;
+
     double numEvents = static_cast<double>(eventWS->getNumberEvents());
     const auto eventType = eventWS->getEventType();
     if (eventType == API::EventType::TOF) {
       // there are two fields in tof
-      numEvents *= 2.;
+      numEvents *= TOF_EVENT_BYTE_SIZE;
     } else if (eventType == API::EventType::WEIGHTED) {
       // there are four fields in weighted w/ time
-      numEvents *= 4.;
+      numEvents *= WEIGHTED_EVENT_BYTE_SIZE;
     } else if (eventType == API::EventType::WEIGHTED_NOTIME) {
-      // there are 3 fields in weighted events no time
-      numEvents *= 3.;
+      // it looks like things are already compressed
+      return false;
     } else {
       return false; // not coded for something else
     }
@@ -1255,10 +1264,10 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
     g_log.information() << "Calculation for compressing events early with size of events currently " << numEvents
                         << " and comparing to " << sizeWeightedEventsEstimate << "\n";
     return sizeWeightedEventsEstimate < numEvents;
+  } else {
+    // fall-through is to not compress
+    return false;
   }
-
-  // fall-through is to not compress
-  return false;
 }
 
 } // namespace Mantid::WorkflowAlgorithms

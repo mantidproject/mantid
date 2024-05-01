@@ -176,16 +176,15 @@ void LoadNexusMonitors2::exec() {
 
   // open the correct entry
   using string_map_t = std::map<std::string, std::string>;
-  string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
 
   if (m_top_entry_name.empty()) {
-    for (it = entries.begin(); it != entries.end(); ++it) {
-      if (((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry")) {
-        file.openGroup(it->first, it->second);
-        m_top_entry_name = it->first;
-        break;
-      }
+    const auto it = std::find_if(entries.cbegin(), entries.cend(), [](const auto &entry) {
+      return ((entry.first == "entry" || entry.first == "raw_data_1") && entry.second == "NXentry");
+    });
+    if (it != entries.cend()) {
+      file.openGroup(it->first, it->second);
+      m_top_entry_name = it->first;
     }
   } else {
     if (!keyExists(m_top_entry_name, entries)) {

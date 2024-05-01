@@ -11,11 +11,13 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class CreateDetectorTableTest : public CxxTest::TestSuite {
 public:
@@ -97,6 +99,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
+
+    // Check that a missing efixed value throws a runtime error
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
+    TS_ASSERT_THROWS(inputWS->getEFixed(detector), const std::runtime_error &);
+    // Check that an invalid efixed value throws an invalid argument error
+    auto &run = inputWS->mutableRun();
+    run.addProperty("deltaE-mode", std::string("Direct"), true);
+    run.addProperty("Ei", std::string("23423f42"));
+
+    TS_ASSERT_THROWS(inputWS->getEFixed(detector), const std::invalid_argument &);
 
     TableWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));

@@ -24,7 +24,6 @@ working_folder_name = "ISIS_Powder"
 
 # Relative to working folder
 input_folder_name = "input"
-output_folder_name = "output"
 
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
@@ -35,70 +34,16 @@ calibration_map_rel_path = os.path.join("yaml_files", "osiris_system_test_mappin
 working_dir = os.path.join(DIRS[0], working_folder_name)
 
 input_dir = os.path.join(working_dir, input_folder_name)
-output_dir = os.path.join(working_dir, output_folder_name)
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
-
-
-def run_diffraction_focusing(
-    sample_runs,
-    user_name,
-    output_file,
-    merge_drange=False,
-    subtract_empty_can=False,
-    vanadium_normalisation=False,
-    sample_empty_scale=None,
-    absorb_corrections=False,
-    empty_can_subtraction_method="Simple",
-    sample_details=None,
-    paalman_pings_events_per_point=None,
-    simple_events_per_point=None,
-    neutron_paths_multiple=None,
-    neutron_paths_single=None,
-    multiple_scattering=False,
-):
-    sample_runs = sample_runs  # Choose full drange set in the cycle 1_1
-
-    osiris_inst_obj = setup_inst_object(user_name)
-
-    osiris_inst_obj.create_vanadium(
-        run_number=sample_runs,
-        subtract_empty_can=subtract_empty_can,
-    )
-
-    if sample_details:
-        osiris_inst_obj.set_sample_details(sample=sample_details)
-
-    # Run diffraction focusing
-    osiris_inst_obj.focus(
-        run_number=sample_runs,
-        merge_drange=merge_drange,
-        subtract_empty_can=subtract_empty_can,
-        vanadium_normalisation=vanadium_normalisation,
-        sample_empty_scale=sample_empty_scale,
-        absorb_corrections=absorb_corrections,
-        empty_can_subtraction_method=empty_can_subtraction_method,
-        paalman_pings_events_per_point=paalman_pings_events_per_point,
-        simple_events_per_point=simple_events_per_point,
-        neutron_paths_multiple=neutron_paths_multiple,
-        neutron_paths_single=neutron_paths_single,
-        multiple_scattering=multiple_scattering,
-    )
-
-    focussed_rel_path = os.path.join("1_1", user_name, output_file)
-    focused_path = os.path.join(output_dir, focussed_rel_path)
-
-    foccussed_ws = mantid.Load(Filename=focused_path)
-
-    return foccussed_ws
 
 
 def setup_mantid_paths():
     config["datasearch.directories"] += ";" + input_dir
 
 
-def setup_inst_object(user_name, with_container=False):
+def setup_inst_object(user_name, output_dir):
     inst_obj = Osiris(
         user_name=user_name,
         calibration_mapping_file=calibration_map_path,
@@ -132,6 +77,7 @@ class _OSIRISDiffractionFocusingTest(systemtesting.MantidSystemTest):
     existing_config = config["datasearch.directories"]
     refrence_ws_name = None
     required_run_files = []
+    output_dir = None
 
     def skipTests(self):
         # Don't actually run this test, as it is a common interface for other tests tests
@@ -149,7 +95,7 @@ class _OSIRISDiffractionFocusingTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(output_dir)
+            _try_delete(self.output_dir)
         finally:
             mantid.mtd.clear()
             config["datasearch.directories"] = self.existing_config
@@ -159,6 +105,59 @@ class _OSIRISDiffractionFocusingTest(systemtesting.MantidSystemTest):
         input_files.append(calibration_map_path)
         return input_files
 
+    def run_diffraction_focusing(
+        self,
+        sample_runs,
+        user_name,
+        output_file,
+        merge_drange=False,
+        subtract_empty_can=False,
+        vanadium_normalisation=False,
+        sample_empty_scale=None,
+        absorb_corrections=False,
+        empty_can_subtraction_method="Simple",
+        sample_details=None,
+        paalman_pings_events_per_point=None,
+        simple_events_per_point=None,
+        neutron_paths_multiple=None,
+        neutron_paths_single=None,
+        multiple_scattering=False,
+    ):
+        sample_runs = sample_runs  # Choose full drange set in the cycle 1_1
+
+        osiris_inst_obj = setup_inst_object(user_name, self.output_dir)
+
+        osiris_inst_obj.create_vanadium(
+            run_number=sample_runs,
+            subtract_empty_can=subtract_empty_can,
+        )
+
+        if sample_details:
+            osiris_inst_obj.set_sample_details(sample=sample_details)
+
+        # Run diffraction focusing
+        osiris_inst_obj.focus(
+            run_number=sample_runs,
+            merge_drange=merge_drange,
+            subtract_empty_can=subtract_empty_can,
+            vanadium_normalisation=vanadium_normalisation,
+            sample_empty_scale=sample_empty_scale,
+            absorb_corrections=absorb_corrections,
+            empty_can_subtraction_method=empty_can_subtraction_method,
+            paalman_pings_events_per_point=paalman_pings_events_per_point,
+            simple_events_per_point=simple_events_per_point,
+            neutron_paths_multiple=neutron_paths_multiple,
+            neutron_paths_single=neutron_paths_single,
+            multiple_scattering=multiple_scattering,
+        )
+
+        focussed_rel_path = os.path.join("1_1", user_name, output_file)
+        focused_path = os.path.join(self.output_dir, focussed_rel_path)
+
+        foccussed_ws = mantid.Load(Filename=focused_path)
+
+        return foccussed_ws
+
 
 class OSIRISDiffractionFocusingWithSubtractionTest(_OSIRISDiffractionFocusingTest):
     refrence_ws_name = "OSI119977_d_spacing.nxs"
@@ -167,10 +166,11 @@ class OSIRISDiffractionFocusingWithSubtractionTest(_OSIRISDiffractionFocusingTes
         "OSIRIS00119963.nxs",  # van
         "OSIRIS00119977.nxs",
     ]
+    output_dir = os.path.join(working_dir, "output_with_subtraction")
 
     def runTest(self):
         super().runPreTest()
-        self.results = run_diffraction_focusing(
+        self.results = self.run_diffraction_focusing(
             "119977",
             "Test",
             "OSI119977_d_spacing.nxs",
@@ -191,10 +191,11 @@ class OSIRISDiffractionFocusingWithMergingTest(_OSIRISDiffractionFocusingTest):
         "OSIRIS00119977.nxs",
         "OSIRIS00119978.nxs",
     ]
+    output_dir = os.path.join(working_dir, "output_with_merging")
 
     def runTest(self):
         super().runPreTest()
-        self.results = run_diffraction_focusing(
+        self.results = self.run_diffraction_focusing(
             "119977-119978",
             "Test_Merge",
             "OSI119977-119978_d_spacing.nxs",
@@ -212,12 +213,13 @@ class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(_OSIRISDiffraction
         "OSIRIS00119963.nxs",
         "OSIRIS00120032.nxs",  # van
     ]
+    output_dir = os.path.join(working_dir, "output_with_simple")
 
     def runTest(self):
         super().runPreTest()
         sample_details = setup_sample_details()
 
-        self.results = run_diffraction_focusing(
+        self.results = self.run_diffraction_focusing(
             "120032",
             "Test_Simple_Absorb",
             "OSI120032_d_spacing.nxs",
@@ -238,6 +240,7 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffr
         "OSIRIS00119964.nxs",  # van
         "OSIRIS00120032.nxs",
     ]
+    output_dir = os.path.join(working_dir, "output_with_paalman")
 
     def runTest(self):
         self.tolerance = 1e-8
@@ -245,7 +248,7 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffr
         super().runPreTest()
         sample_details = setup_sample_details()
 
-        self.results = run_diffraction_focusing(
+        self.results = self.run_diffraction_focusing(
             "120032",
             "Test_PaalmanPings_Absorb",
             "OSI120032_d_spacing.nxs",
@@ -268,12 +271,13 @@ class OSIRISDiffractionFocusingWithMultipleScattering(_OSIRISDiffractionFocusing
         "OSIRIS00119964.nxs",  # van
         "OSIRIS00120032.nxs",
     ]
+    output_dir = os.path.join(working_dir, "output_with_multiple")
 
     def runTest(self):
         super().runPreTest()
         sample_details = setup_sample_details()
 
-        self.results = run_diffraction_focusing(
+        self.results = self.run_diffraction_focusing(
             "120032",
             "Test_Multiple_Scattering",
             "OSI120032_d_spacing.nxs",
@@ -285,8 +289,6 @@ class OSIRISDiffractionFocusingWithMultipleScattering(_OSIRISDiffractionFocusing
             neutron_paths_single=5,
             neutron_paths_multiple=5,
         )
-
-        mantid.SaveNexus(InputWorkspace=self.results, Filename=r"C:\Users\joy22959\Documents\test\multiscatt")
 
     def skipTests(self):
         return False

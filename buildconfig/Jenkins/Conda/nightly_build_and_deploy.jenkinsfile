@@ -516,7 +516,11 @@ def package_conda_options(platform, base_or_workbench) {
     package_flags = "--build-mantid --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
-    package_flags = "--build-workbench"
+    if(BUILD_MANTIDDOCS_PACKAGE) {
+      package_flags = "--build-workbench"
+    } else {
+      package_flags = "--build-workbench-without-docs"
+    }
   }
 
   package_options = "${package_flags} --git-tag ${GIT_TAG}"

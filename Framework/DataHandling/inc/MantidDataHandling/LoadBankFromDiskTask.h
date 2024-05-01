@@ -39,7 +39,7 @@ private:
   void loadPulseTimes(::NeXus::File &file);
   std::unique_ptr<std::vector<uint64_t>> loadEventIndex(::NeXus::File &file);
   void prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
-                      const std::vector<uint64_t> &event_index);
+                      const uint64_t &start_event_index);
   std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadEventWeights(::NeXus::File &file);

@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, DeleteWorkspace, DiffractionFocussing, Load
-from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
+from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load, Rebin
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, AlgorithmManager
+from mantid.dataobjects import GroupingWorkspace
 from mantid import mtd, logger, config
 
 try:
@@ -16,6 +17,8 @@ except ImportError:
 
 import os
 import numpy as np
+from math import expm1, log
+from typing import List, Tuple
 
 
 # -------------------------------------------------------------------------------
@@ -647,36 +650,58 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace_name, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
+def group_spectra(
+    workspace: str | MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[float] = None,
+) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
-    @param workspace_name Name of workspace to group spectra of
+    @param workspace A workspace object, or the name of a workspace in the ADS
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], method, group_file, group_ws, group_string, number_of_groups, spectra_range)
+    return group_spectra_of(
+        mtd[workspace] if isinstance(workspace, str) else workspace,
+        method,
+        group_file,
+        group_ws,
+        group_string,
+        number_of_groups,
+        spectra_range,
+    )
 
-    if grouped_ws is not None:
-        mtd.addOrReplace(workspace_name, grouped_ws)
 
-
-def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_string=None, number_of_groups=None, spectra_range=None):
+def group_spectra_of(
+    workspace: MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[int] = None,
+) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
     @param workspace Workspace to group spectra of
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
     @param number_of_groups The number of groups to split the spectra into
     @param spectra_range The min and max spectra numbers
     """
+
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)
@@ -699,7 +724,7 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
 
     if grouping_method == "Individual":
         # Nothing to do here
-        return None
+        return workspace
 
     elif grouping_method == "All":
         # Get a list of all spectra minus those which are masked
@@ -712,6 +737,13 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
     elif grouping_method == "File":
         # Get the filename for the grouping file
         if group_file is not None:
+            # If grouping file is a *.cal file
+            if group_file.endswith(".cal"):
+                group_ws = create_grouping_workspace(workspace, group_file)
+                group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
+                group_detectors.execute()
+                return group_detectors.getProperty("OutputWorkspace").value
+
             grouping_file = group_file
             group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
@@ -743,7 +775,6 @@ def group_spectra_of(workspace, method, group_file=None, group_ws=None, group_st
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 
-    group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
 
@@ -770,6 +801,24 @@ def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spe
     if remainder != 0:
         grouping_string += f",{create_range_string(spectra_min + number_of_spectra - remainder, spectra_min + number_of_spectra - 1)}"
     return grouping_string
+
+
+def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> GroupingWorkspace:
+    group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=workspace.getInstrument().getName(), OldCalFilename=cal_file, StoreInADS=False)
+    return group_ws
+
+
+def _excluded_detector_ids(grouping_workspace: GroupingWorkspace) -> List[int]:
+    """
+    Finds the detector IDs which are not included in the grouping. These detector IDs will be in a group with a negative group ID.
+    @param grouping_workspace The GroupingWorkspace containing the detector grouping information.
+    @return A list of detector IDs which are excluded from the grouping.
+    """
+    excluded_ids = []
+    for group_id in grouping_workspace.getGroupIDs():
+        if group_id < 0:
+            excluded_ids.extend(grouping_workspace.getDetectorIDsOfGroup(int(group_id)))
+    return excluded_ids
 
 
 # -------------------------------------------------------------------------------
@@ -1009,6 +1058,54 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 # -------------------------------------------------------------------------------
 
 
+def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> Tuple[float]:
+    """
+    Finds the minimum and maximum X values for a workspace with varying bins. It will only search for the min
+    and max x values in spectra which are included in the grouping provided by the GroupingWorkspace.
+    @param workspace The workspace to search for the min and max X.
+    @param grouping_workspace The workspace containing detector grouping information.
+    @return A minimum and maximum X value.
+    """
+    excluded_ids = _excluded_detector_ids(grouping_workspace)
+
+    min_value, max_value = float("inf"), float("-inf")
+    spec_info = workspace.spectrumInfo()
+    for i in range(workspace.getNumberHistograms()):
+        if spec_info.isMasked(i) or not spec_info.hasDetectors(i):
+            continue
+        detector_ids = workspace.getSpectrum(i).getDetectorIDs()
+        if detector_ids[0] in excluded_ids:
+            continue
+        x = workspace.extractX()[i]
+        min_value = x.min() if x.min() < min_value else min_value
+        max_value = x.max() if x.max() > max_value else max_value
+
+    assert min_value > 0, "The minimum x value in a dSpacing workspace should be a positive number."
+    assert max_value == float("-inf") or max_value > 0, "The maximum x value in a dSpacing workspace should be a positive number."
+
+    return min_value, max_value
+
+
+def rebin_logarithmic(workspace: MatrixWorkspace, calibration_file: str) -> MatrixWorkspace:
+    """
+    Performs logarithmic rebinning on the provided workspace. The rebinning parameters are calculated
+    based on the spectra which are included in the grouping provided in the calibration file.
+    @param workspace The workspace to be logarithmically rebinned.
+    @param calibration_file The *.cal file to use to find which detectors are excluded from the grouping.
+    @return A rebinned workspace.
+    """
+    grouping_workspace = create_grouping_workspace(workspace, calibration_file)
+
+    min_value, max_value = _get_x_range_when_bins_vary(workspace, grouping_workspace)
+
+    if min_value == float("inf") or max_value == float("-inf"):
+        raise RuntimeError("No selected Detectors found in .cal file for input range.")
+
+    step = expm1((log(max_value) - log(min_value)) / workspace.blocksize())
+
+    return Rebin(InputWorkspace=workspace, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
+
+
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
     """
     @param workspace_name Name of workspace to rebin
@@ -1050,14 +1147,14 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
 # -------------------------------------------------------------------------------
 
 
-def calibrate_and_group(workspace, calibration_file: str):
+def calibrate(workspace, calibration_file: str):
     """
-    Calibrates the workspace using the calibration file, converts from TOF to dSpacing, and then groups the detectors.
+    Calibrates the workspace using the calibration file, and converts from TOF to dSpacing.
 
     @param workspace The workspace or workspace name to be calibrated.
     @param calibration_file The calibration file to use.
 
-    @return The calibrated and grouped workspace.
+    @return The calibrated workspace.
     """
     ApplyDiffCal(InstrumentWorkspace=workspace, CalibrationFile=calibration_file, StoreInADS=False, EnableLogging=False)
 
@@ -1069,14 +1166,7 @@ def calibrate_and_group(workspace, calibration_file: str):
     )
 
     ApplyDiffCal(InstrumentWorkspace=converted, ClearCalibration=True, StoreInADS=False, EnableLogging=False)
-
-    focussed = DiffractionFocussing(
-        InputWorkspace=converted,
-        GroupingFileName=calibration_file,
-        StoreInADS=False,
-        EnableLogging=False,
-    )
-    return focussed
+    return converted
 
 
 # -------------------------------------------------------------------------------

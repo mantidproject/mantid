@@ -113,6 +113,8 @@ class OSIRISDiffonlyDiffractionTest(systemtesting.MantidSystemTest):
             Sample="OSI89813.raw, OSI89814.raw, OSI89815.raw, OSI89816.raw, OSI89817.raw",
             CalFile="osiris_041_RES10.cal",
             Vanadium="OSI89757, OSI89758, OSI89759, OSI89760, OSI89761",
+            GroupingMethod="File",
+            GroupingFile="osiris_041_RES10.cal",
         )
 
     def validate(self):

@@ -10,12 +10,13 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidDataHandling/PulseIndexer.h"
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::DataObjects;
 
 namespace Mantid::DataHandling {
 
-ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
+ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> event_id,
                                  std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents,
                                  size_t startAt, std::shared_ptr<std::vector<uint64_t>> event_index,
@@ -102,7 +103,7 @@ void ProcessBankData::run() {
   auto *alg = m_loader.alg;
 
   // Will we need to compress?
-  const bool compress = (alg->compressTolerance >= 0);
+  const bool compress = (alg->compressEvents);
 
   // Which detector IDs were touched?
   std::vector<bool> usedDetIds(m_max_detid - m_min_detid + 1, false);
@@ -111,24 +112,23 @@ void ProcessBankData::run() {
   const double TOF_MAX = alg->filter_tof_max;
   const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
-  const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name);
-  const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex(); // for whole file reading is 0
-  const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();   // for whole file reading is event_index->size()
-  for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
-    // determine range of events for the pulse
-    const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
-    if (eventIndexRange.first > numEvents)
-      break;
-    else if (eventIndexRange.first == eventIndexRange.second)
-      continue;
+  // set up wall-clock filtering if it was requested
+  std::vector<size_t> pulseROI;
+  if (alg->m_is_time_filtered) {
+    pulseROI = thisBankPulseTimes->getPulseIndices(alg->filter_time_start, alg->filter_time_stop);
+  }
 
+  const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name, pulseROI);
+
+  // loop over all pulses
+  for (const auto &pulseIter : pulseIndexer) {
     // Save the pulse time at this index for creating those events
-    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIndex);
-    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIndex);
-    const int periodIndex = logPeriodNumber - 1;
+    const auto &pulsetime = thisBankPulseTimes->pulseTime(pulseIter.pulseIndex);
+    const int logPeriodNumber = thisBankPulseTimes->periodNumber(pulseIter.pulseIndex);
+    const auto periodIndex = static_cast<size_t>(logPeriodNumber - 1);
 
     // loop through events associated with a single pulse
-    for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
+    for (std::size_t eventIndex = pulseIter.eventIndexStart; eventIndex < pulseIter.eventIndexStop; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
       const detid_t &detId = static_cast<detid_t>((*event_detid)[eventIndex]);
@@ -153,7 +153,7 @@ void ProcessBankData::run() {
             auto *eventVector = m_loader.eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-              eventVector->emplace_back(tof, pulsetime);
+              eventVector->emplace_back(std::move(tof), pulsetime);
             } else {
               ++my_discarded_events;
             }
@@ -181,7 +181,7 @@ void ProcessBankData::run() {
       } // valid detector IDs
     }   // for events in pulse
     // check if cancelled after each 100s of pulses (assumes 60Hz)
-    if ((pulseIndex % 6000 == 0) && alg->getCancel())
+    if ((pulseIter.pulseIndex % 6000 == 0) && alg->getCancel())
       return;
   } // for pulses
 

@@ -387,6 +387,7 @@ set(PYTHON_PLUGINS
     functions/StretchedKT.py
     functions/TFMuonium.py
     functions/TeixeiraWater.py
+    functions/TeixeiraWaterIqt.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py

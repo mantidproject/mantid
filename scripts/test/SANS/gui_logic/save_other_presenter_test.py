@@ -9,6 +9,7 @@ import unittest
 from mantid import ConfigService
 from unittest import mock
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
+from os.path import join
 
 
 class SaveOtherPresenterTest(unittest.TestCase):
@@ -74,6 +75,26 @@ class SaveOtherPresenterTest(unittest.TestCase):
         expected_list = ["base_dir/workspace_1"]
 
         self.assertEqual(expected_list, returned_list)
+
+    @mock.patch("sans.gui_logic.presenter.save_other_presenter.AnalysisDataService")
+    def test_on_save_clicked_calls_save_workspace_to_file(self, mock_ads):
+        # This test is to make sure that any positional argument changes are caught.
+        self.mock_view.get_selected_workspaces.return_value = ["a"]
+        self.mock_view.get_filenames.return_value = ["a.nxs"]
+        self.presenter.on_save_clicked()
+
+    @mock.patch("sans.gui_logic.presenter.save_other_presenter.save_workspace_to_file")
+    @mock.patch("sans.gui_logic.presenter.save_other_presenter.AnalysisDataService")
+    def test_on_save_clicked_calls_save_workspace_to_file_with_correct_params(self, _, mock_save):
+        # This one is to ensure on_save is passing the correct params. Split, else the mocking hides bugs.
+        workspace_names = ["aworkspace"]
+        file_name = "afile"
+        file_types = ["Nexus"]
+        self.mock_view.get_selected_workspaces.return_value = workspace_names
+        self.presenter.filename = file_name
+        self.mock_view.get_save_options.return_value = file_types
+        self.presenter.on_save_clicked()
+        mock_save.assert_called_with(workspace_names[0], file_types, join(self.presenter.current_directory, file_name), {}, {})
 
 
 if __name__ == "__main__":

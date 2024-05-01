@@ -339,6 +339,8 @@ Smoke Testing
 
 * This is the final day for code changes to the build for blocker issues.
 
+.. _release-manager-announcements:
+
 Release Day
 ###########
 
@@ -381,19 +383,24 @@ Code Freeze
 **Create the Release Branch (once most PRs are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
+* Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
+  date with the ``main`` branch, pushing the changes directly to GitHub:
+
+.. code-block:: bash
+
+    git checkout release-next
+    git fetch origin main
+    git reset --hard origin/main
+    git push origin release-next --force
+
+* Verify that the latest commit on ``release-next`` is correct before moving to the next step.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
-  which will perform the following actions:
-
-  * Create or update the ``release-next`` branch.
-  * Enable the job to periodically merge ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
-    This will turn off publishing for the ``main`` branch pipeline and switch it on for the
-    ``release-next`` pipeline.
-
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__. This will
+  set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``,
+  which will re-enable package publishing for the ``release-next`` nightly pipeline.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
@@ -479,7 +486,11 @@ We are now ready to create the release candidates for Smoke testing.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
 
-**Create the Release Candidates For Release**
+
+.. _technical-release-manager-release-candidates:
+
+Create Final Release Candidates
+###############################
 
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
 have been fixed. The release candidates must now be recreated with their final version numbers. To do this, build the
@@ -497,6 +508,7 @@ with the following parameters (most are already defaulted to the correct values)
 * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
 * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z``, where ``X.Y.Z`` is the release number.
 
+.. _technical-release-manager-release-day:
 
 Release Day
 ###########

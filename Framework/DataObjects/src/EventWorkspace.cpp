@@ -632,7 +632,13 @@ public:
   // Execute the sort as specified.
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t wi = range.begin(); wi < range.end(); ++wi) {
-      m_WS->getSpectrum(wi).sort(m_sortType);
+      // because EventList::sort calls tbb::parallel_sort checking that the EventList is non-empty reduces the number of
+      // threads created that return immediately
+      const auto &spectrum = m_WS->getSpectrum(wi); // follow the method signature
+      if (spectrum.empty())
+        spectrum.setSortOrder(m_sortType); // empty lists are easy to sort
+      else
+        spectrum.sort(m_sortType);
     }
     // Report progress
     if (prog)
@@ -675,9 +681,11 @@ void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress *prog
     return;
   }
 
-  // Create the thread pool, and optimize by doing the longest sorts first.
+  // Create the thread pool using tbb
   EventSortingTask task(this, sortType, prog);
-  tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size()), task);
+  constexpr size_t GRAINSIZE_DEFAULT{100}; // somewhat arbitrary
+  const size_t grainsize = std::min<size_t>(GRAINSIZE_DEFAULT, this->getNumberHistograms() / GRAINSIZE_DEFAULT);
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size(), grainsize), task);
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.

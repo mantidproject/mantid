@@ -52,15 +52,16 @@ class IqtFitSequentialTest(unittest.TestCase):
         nbins = matrixWS.blocksize()
         nhists = matrixWS.getNumberHistograms()
         self.assertEqual(nbins, 17)
-        self.assertEqual(nhists, 4)
+        self.assertEqual(nhists, 5)
 
         # Check histogram names
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEqual("f0.A0", text_axis.label(0))
-        self.assertEqual("f1.Height", text_axis.label(1))
-        self.assertEqual("f1.Lifetime", text_axis.label(2))
-        self.assertEqual("Chi_squared", text_axis.label(3))
+        self.assertEqual("f0.A1", text_axis.label(1))
+        self.assertEqual("f1.Height", text_axis.label(2))
+        self.assertEqual("f1.Lifetime", text_axis.label(3))
+        self.assertEqual("Chi_squared", text_axis.label(4))
 
         # Check bin units
         self.assertEqual("MomentumTransfer", matrixWS.getAxis(0).getUnit().unitID())
@@ -99,18 +100,18 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEqual(round(row["f1.Lifetime"], 7), 0.0287491)
 
     def _validate_matrix_values(self, matrixWS):
-        # Check f1.A0
+        # Check f0.A0
         a0 = matrixWS.readY(0)
         self.assertEqual(round(a0[0], 7), 0.0336564)
         self.assertEqual(round(a0[-1], 7), 0.0182411)
 
         # Check f1.Height
-        height = matrixWS.readY(1)
+        height = matrixWS.readY(2)
         self.assertEqual(round(height[0], 6), 0.966344)
         self.assertEqual(round(height[-1], 6), 0.981759)
 
         # Check f1.Lifetime
-        lifetime = matrixWS.readY(2)
+        lifetime = matrixWS.readY(3)
         self.assertEqual(round(lifetime[0], 7), 0.0287491)
         self.assertEqual(round(lifetime[-1], 7), 0.0034427)
 

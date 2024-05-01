@@ -1,11 +1,10 @@
-import logging
 from typing import Optional, Tuple, Union
 
 import numpy as np
-import mantid.kernel
 from pychop import Instruments as pychop_instruments
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
+from abins.logging import get_logger, Logger
 from .directinstrument import DirectInstrument
 
 
@@ -32,16 +31,13 @@ class PyChopInstrument(DirectInstrument):
         # Get detector 2θ limits from Pychop dataset
         self._tthlims = self._pychop_instrument.detector.tthlims
 
-    def _check_chopper_frequency(
-        self, chopper_frequency: Union[int, None], logger: Union[logging.Logger, mantid.kernel.Logger, None] = None
-    ) -> int:
+    def _check_chopper_frequency(self, chopper_frequency: Union[int, None], logger: Optional[Logger] = None) -> int:
 
         if chopper_frequency is None:
             chopper_frequency = self.get_parameter("chopper_frequency_default")
 
-            if logger is None:
-                mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
-                logger = mantid_logger
+            logger = get_logger(logger=logger)
+            assert isinstance(logger, Logger)
 
             logger.notice(f"Using default chopper frequency for instrument {self._name}: " f"{chopper_frequency} Hz")
 

@@ -1,0 +1,2 @@
+- The default format of the total scattering pdf name created by ``create_total_scattering_pdf`` in polaris script has been changed to include the pdf type as a suffix
+- Add a new parameter ``pdf_output_name`` to ``create_total_scattering_pdf`` in polaris script, which modifies the output name of the total scattering pdf

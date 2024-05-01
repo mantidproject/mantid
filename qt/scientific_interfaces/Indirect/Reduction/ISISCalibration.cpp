@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -41,7 +41,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
+ISISCalibration::ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(

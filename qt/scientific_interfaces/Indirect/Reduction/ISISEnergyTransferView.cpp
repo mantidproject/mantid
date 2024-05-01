@@ -8,6 +8,7 @@
 #include "ISISEnergyTransferView.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "Common/IndirectDataValidationHelper.h"
+#include "ISISEnergyTransferPresenter.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -19,7 +20,7 @@ using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(subscriber) {
+IETView::IETView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
@@ -38,7 +39,7 @@ IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(
           SLOT(saveCustomGroupingClicked(std::string const &)));
 }
 
-IETView::~IETView() {}
+void IETView::subscribePresenter(IIETPresenter *presenter) { m_presenter = presenter; }
 
 IETRunData IETView::getRunData() const {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
@@ -95,7 +96,7 @@ std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutpu
 
 bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
-OutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
+IOutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
 
 std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 
@@ -187,7 +188,6 @@ void IETView::setSingleRebin(bool enable) {
 void IETView::setMultipleRebin(bool enable) { m_uiForm.valRebinString->setVisible(enable); }
 
 void IETView::setSaveEnabled(bool enable) {
-  enable = !m_outputWorkspaces.empty() ? enable : false;
   m_uiForm.pbSave->setEnabled(enable);
   m_uiForm.ckSaveAclimax->setEnabled(enable);
   m_uiForm.ckSaveASCII->setEnabled(enable);
@@ -198,16 +198,12 @@ void IETView::setSaveEnabled(bool enable) {
 
 void IETView::setPlotTimeIsPlotting(bool plotting) {
   m_uiForm.pbPlotTime->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
+  setEnableOutputOptions(!plotting);
 }
 
 void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) {
   m_uiForm.dsCalibrationFile->setFBSuffixes(calibrationFbSuffixes);
   m_uiForm.dsCalibrationFile->setWSSuffixes(calibrationWSSuffixes);
-}
-
-void IETView::setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces) {
-  m_outputWorkspaces = outputWorkspaces;
 }
 
 void IETView::setInstrumentSpectraRange(int specMin, int specMax) {
@@ -276,31 +272,33 @@ void IETView::setInstrumentSpecDefault(std::map<std::string, bool> &specMap) {
   m_uiForm.ckFold->setChecked(specMap["defaultFoldMultiple"]);
 }
 
-void IETView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                              QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged") {
-    auto const enableButtons = enableOutputButtons == "enable";
-    setPlotTimeEnabled(enableButtons);
-    setSaveEnabled(enableButtons);
-  }
+void IETView::setRunButtonText(std::string const &runText) {
+  m_uiForm.pbRun->setText(QString::fromStdString(runText));
+  m_uiForm.pbRun->setEnabled(runText == "Run");
+  m_uiForm.pbRun->setToolTip(runText == "Invalid Run(s)" ? "Cannot find data files for some of the run numbers entered."
+                                                         : "");
 }
 
-void IETView::showMessageBox(const QString &message) { m_subscriber->notifyNewMessage(message); }
+void IETView::setEnableOutputOptions(bool const enable) {
+  setPlotTimeEnabled(enable);
+  setSaveEnabled(enable);
+}
 
-void IETView::saveClicked() { m_subscriber->notifySaveClicked(); }
+void IETView::showMessageBox(std::string const &message) {
+  QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
+}
 
-void IETView::runClicked() { m_subscriber->notifyRunClicked(); }
+void IETView::saveClicked() { m_presenter->notifySaveClicked(); }
 
-void IETView::plotRawClicked() { m_subscriber->notifyPlotRawClicked(); }
+void IETView::runClicked() { m_presenter->notifyRunClicked(); }
+
+void IETView::plotRawClicked() { m_presenter->notifyPlotRawClicked(); }
 
 void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
-  m_subscriber->notifySaveCustomGroupingClicked(customGrouping);
+  m_presenter->notifySaveCustomGroupingClicked(customGrouping);
 }
 
-void IETView::pbRunFinished() { m_subscriber->notifyRunFinished(); }
+void IETView::pbRunFinished() { m_presenter->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
   UserInputValidator uiv;
@@ -308,19 +306,15 @@ void IETView::handleDataReady() {
 
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
+    showMessageBox(errorMessage.toStdString());
 }
 
-void IETView::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...", "Run numbers are currently being edited.");
-}
+void IETView::pbRunEditing() { setRunButtonText("Editing..."); }
 
 void IETView::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...", "Searching for data files for the run numbers entered...");
+  setRunButtonText("Finding files...");
   m_uiForm.dsRunFiles->setEnabled(false);
 }
-
-void IETView::setRunEnabled(bool enable) { m_uiForm.pbRun->setEnabled(enable); }
 
 void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.pbPlotTime->setEnabled(enable);
@@ -328,9 +322,4 @@ void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.spPlotTimeSpecMax->setEnabled(enable);
 }
 
-void IETView::setButtonsEnabled(bool enable) {
-  setRunEnabled(enable);
-  setPlotTimeEnabled(enable);
-  setSaveEnabled(enable);
-}
 } // namespace MantidQt::CustomInterfaces

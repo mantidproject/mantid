@@ -165,7 +165,8 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
-                group_spectra(ws_name, self._grouping_method)
+                grouped = group_spectra(ws_name, self._grouping_method)
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)

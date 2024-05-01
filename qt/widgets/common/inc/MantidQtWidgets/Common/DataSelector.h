@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "ui_DataSelector.h"
 
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -109,6 +110,8 @@ public:
   void setLoadBtnText(const QString & /*text*/);
   /// Sets the DataSelector to always load data inside a WorkspaceGroup
   void setAlwaysLoadAsGroup(bool const loadAsGroup);
+  /// Set an extra property on the load algorithm before execution
+  void setLoadProperty(std::string const &propertyName, bool const value);
 
   // These are accessors/modifiers of the child FileFinderWidget
   /**
@@ -363,8 +366,12 @@ private slots:
 private:
   /// Attempt to automatically load a file
   void autoLoadFile(const QString &filenames);
+  /// Execute load algorithm
+  void executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
+  /// Extra load properties to set on the load algorithm before execution
+  Mantid::API::AlgorithmRuntimeProps m_loadProperties;
   /// Algorithm Runner used to run the load algorithm
   MantidQt::API::AlgorithmRunner m_algRunner;
   /// Flag to enable auto loading. By default this is set to true.

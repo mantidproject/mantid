@@ -101,23 +101,6 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertTrue("multi_run_numbers" in red_ws.getRun())
         self.assertEqual(red_ws.getRun().get("multi_run_numbers").value, "26173,26174,26175,26176")
 
-    def test_grouping_individual(self):
-        """
-        Test setting individual grouping, one spectrum per detector.
-        """
-
-        wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], GroupingMethod="Individual"
-        )
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
-        self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26176_diffspec_red")
-
-        red_ws = wks[0]
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
-        self.assertEqual(red_ws.getNumberHistograms(), 8)
-
     def test_reduction_with_container_completes(self):
         """
         Test to ensure that reduction with container subtraction works.
@@ -245,27 +228,6 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
-    def test_vesuvio_individual(self):
-        """
-        Test setting individual grouping, one spectrum per detector.
-        """
-
-        wks = ISISIndirectDiffractionReduction(
-            InputFiles=["29244"],
-            GroupingMethod="Individual",
-            InstrumentParFile="IP0005.dat",
-            Instrument="VESUVIO",
-            mode="diffspec",
-            SpectraRange=[3, 198],
-        )
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
-        self.assertEqual(len(wks), 1)
-
-        red_ws = wks[0]
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
-        self.assertEqual(red_ws.getNumberHistograms(), 196)
-
     def test_reduction_with_different_custom_groupings_creates_a_workspace_with_the_correct_size(self):
         custom_grouping_strings = {"3:198": 196, "3:25,27:198": 195, "3-198": 1, "3-25,26:198": 174, "3+5+7,8-40,41:198": 160}
 
@@ -309,7 +271,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         reduced_workspace = ISISIndirectDiffractionReduction(
             InputFiles=["29244"],
             GroupingMethod="File",
-            MapFile="vesuvio_4_by_24.map",
+            GroupingFile="vesuvio_4_by_24.map",
             InstrumentParFile="IP0005.dat",
             Instrument="VESUVIO",
             mode="diffspec",

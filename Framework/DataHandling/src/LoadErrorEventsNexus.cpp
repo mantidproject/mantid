@@ -113,23 +113,15 @@ void LoadErrorEventsNexus::exec() {
   auto min_tof = std::numeric_limits<double>::max();
   auto max_tof = std::numeric_limits<double>::lowest();
 
-  const PulseIndexer pulseIndexer(event_index, event_index->at(0), numEvents, "bank_error_events");
-  const auto firstPulseIndex = pulseIndexer.getFirstPulseIndex();
-  const auto lastPulseIndex = pulseIndexer.getLastPulseIndex();
+  const PulseIndexer pulseIndexer(event_index, event_index->at(0), numEvents, "bank_error_events",
+                                  std::vector<size_t>());
 
-  for (std::size_t pulseIndex = firstPulseIndex; pulseIndex < lastPulseIndex; pulseIndex++) {
-    // determine range of events for the pulse
-    const auto eventIndexRange = pulseIndexer.getEventIndexRange(pulseIndex);
-    if (eventIndexRange.first > numEvents)
-      break;
-    else if (eventIndexRange.first == eventIndexRange.second)
-      continue;
-
+  for (const auto &pulseIter : pulseIndexer) {
     // Save the pulse time at this index for creating those events
-    const auto &pulsetime = bankPulseTimes->pulseTime(pulseIndex);
+    const auto &pulsetime = bankPulseTimes->pulseTime(pulseIter.pulseIndex);
 
     // loop through events associated with a single pulse
-    for (std::size_t eventIndex = eventIndexRange.first; eventIndex < eventIndexRange.second; ++eventIndex) {
+    for (std::size_t eventIndex = pulseIter.eventIndexStart; eventIndex < pulseIter.eventIndexStop; ++eventIndex) {
       const auto tof = static_cast<double>(event_times[eventIndex]);
       ev.addEventQuickly(Mantid::Types::Event::TofEvent(tof, pulsetime));
       min_tof = std::min(min_tof, tof);
