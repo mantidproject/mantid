@@ -45,7 +45,7 @@ void FlipperEfficiency::init() {
                   "Workspace containing the wavelength-dependent efficiency for the flipper.");
   declareProperty(std::make_unique<FileProperty>(PropNames::OUTPUT_FILE, "", FileProperty::OptionalSave),
                   "File name or path for the output to be saved to.");
-  auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
+  auto const spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropNames::SPIN_STATES, INITIAL_SPIN, spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 }

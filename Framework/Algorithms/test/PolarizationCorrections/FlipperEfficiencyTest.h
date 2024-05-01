@@ -114,53 +114,80 @@ public:
 
   /// Calculation Tests
 
-  void test_correct_calculation() {}
+  void test_normal_perfect_calculation_occurs() {
+    FlipperEfficiency alg;
+    alg.initialize();
+    alg.setChild(true);
+    auto const &group = createTestingWorkspace("testWs");
+    alg.setProperty("InputWorkspace", group);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.execute();
+    MatrixWorkspace_sptr const outWs = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
+                     std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
+    for (const double &eff : outWs->dataY(0)) {
+      TS_ASSERT_EQUALS(1.0, eff)
+    }
+  }
+
+  void test_normal_typical_calculation_occurs() {
+    FlipperEfficiency alg;
+    alg.initialize();
+    alg.setChild(true);
+    auto const &group = createTestingWorkspace("testWs", 0.9);
+    alg.setProperty("InputWorkspace", group);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.execute();
+    MatrixWorkspace_sptr const outWs = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
+                     std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
+    for (const double &eff : outWs->dataY(0)) {
+      TS_ASSERT_DELTA(0.9333333333, eff, 1e-8);
+    }
+  }
 
 private:
   std::string m_defaultSaveDirectory;
 
-  Mantid::API::WorkspaceGroup_sptr createTestingWorkspace(std::string const &outName, int const numSpectra = 1,
-                                                          bool const isMonitor = true, double const binWidth = 0.1) {
+  Mantid::API::WorkspaceGroup_sptr createTestingWorkspace(std::string const &outName,
+                                                          double const flipAmplitudeMultiplier = 1.0) {
 
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
     makeWsAlg.setPropertyValue("Function", "User Defined");
     makeWsAlg.setPropertyValue("XUnit", "wavelength");
-    if (isMonitor) {
-      makeWsAlg.setProperty("NumBanks", 0);
-      makeWsAlg.setProperty("NumMonitors", numSpectra);
-    } else {
-      makeWsAlg.setProperty("NumBanks", numSpectra);
-    }
+    makeWsAlg.setProperty("NumBanks", 1);
     makeWsAlg.setProperty("BankPixelWidth", 1);
     makeWsAlg.setProperty("XMin", 1.45);
     makeWsAlg.setProperty("XMax", 9.50);
-    makeWsAlg.setProperty("BinWidth", binWidth);
+    makeWsAlg.setProperty("BinWidth", 0.1);
+
+    double const FLIPPER_OFF_PARA_AMP = 4;
+    double const ANTI_AMP = 1;
+    double const flipperOnParaAmp = FLIPPER_OFF_PARA_AMP * flipAmplitudeMultiplier;
 
     makeWsAlg.setPropertyValue("UserDefinedFunction",
-                               "name=Lorentzian, Amplitude=48797.2, PeakCentre=2.774, FWHM=1.733");
+                               "name=UserFunction, Formula=x*0+" + std::to_string(FLIPPER_OFF_PARA_AMP));
     makeWsAlg.setPropertyValue("OutputWorkspace", outName + "_00");
     makeWsAlg.execute();
 
     makeWsAlg.setPropertyValue("UserDefinedFunction",
-                               "name=Lorentzian, Amplitude=48797.2, PeakCentre=2.734, FWHM=1.733");
+                               "name=UserFunction, Formula=x*0+" + std::to_string(flipperOnParaAmp));
     makeWsAlg.setPropertyValue("OutputWorkspace", outName + "_11");
     makeWsAlg.execute();
 
-    makeWsAlg.setPropertyValue("UserDefinedFunction",
-                               "name=Lorentzian, Amplitude=21130.1, PeakCentre=2.574, FWHM=0.933");
+    makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=x*0+" + std::to_string(ANTI_AMP));
     makeWsAlg.setPropertyValue("OutputWorkspace", outName + "_10");
     makeWsAlg.execute();
 
-    makeWsAlg.setPropertyValue("UserDefinedFunction",
-                               "name=Lorentzian, Amplitude=48797.2, PeakCentre=2.566, FWHM=0.933");
+    makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=x*0+" + std::to_string(ANTI_AMP));
     makeWsAlg.setPropertyValue("OutputWorkspace", outName + "_01");
     makeWsAlg.execute();
 
     GroupWorkspaces groupAlg;
     groupAlg.initialize();
     groupAlg.setChild(true);
-    std::vector<std::string> const &input{outName + "_10", outName + "_11", outName + "_01", outName + "_00"};
+    std::vector<std::string> const &input{outName + "_01", outName + "_11", outName + "_00", outName + "_10"};
     groupAlg.setProperty("InputWorkspaces", input);
     groupAlg.setPropertyValue("OutputWorkspace", outName);
     groupAlg.execute();
