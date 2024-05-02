@@ -5,10 +5,10 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>
+#include <filesystem>
 #include <fstream>
 #include <json/reader.h>
 #include <json/value.h>
-#include <json/writer.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
@@ -22,28 +22,35 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
   // Open index json file
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
   std::ifstream ifstrm{jsonPath};
-  if (!ifstrm) {
+  if (!ifstrm.is_open()) {
     throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
   }
 
   // Read directory path from json file
   Json::Value json;
-  std::string relativePath = "default";
+  std::string relativePath;
 
   try {
     ifstrm >> json;
     relativePath = json[runNumber].asString();
   } catch (...) {
-    g_log.debug() << "\nFound index file at " << jsonPath;
-    g_log.debug() << "\nRun Number deterted: " << runNumber;
-    g_log.debug() << "\nRelative Path: " << relativePath;
-    g_log.debug() << std::endl;
-    Json::StreamWriterBuilder builder;
-    const std::string json_file = Json::writeString(builder, json);
-    std::ofstream ofstrm{Poco::Path::home() + "/" + instrName + "_index_log.json"};
-    ofstrm << json_file << std::endl;
+    try {
+      std::filesystem::copy_file(jsonPath, Poco::Path::home() + instrName + "_index_copy.txt",
+                                 std::filesystem::copy_options::overwrite_existing);
+    } catch (...) {
+      g_log.debug() << "Error while copying the JSON file.";
+    }
+
+    std::ofstream ofstrm{Poco::Path::home() + "/" + instrName + "_index_log.txt"};
+    ifstrm.clear();
+    ifstrm.seekg(0, std::ios::beg);
+    std::string line;
+    while (std::getline(ifstrm, line)) {
+      ofstrm << line << std::endl;
+    }
     ofstrm.close();
-    g_log.debug() << "\nWrote json log to file." << std::endl;
+    g_log.debug() << "\n\nWrote json log to file!\n\n" << std::endl;
+    throw;
   }
 
   if (relativePath.empty()) {
