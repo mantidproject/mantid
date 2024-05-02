@@ -63,6 +63,11 @@ bool SavePresenter::isProcessing() const { return m_mainPresenter->isProcessing(
 
 bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
+bool SavePresenter::hasSelectedORSOFormat() const {
+  const auto selectedFormat = SavePresenter::formatFromIndex(SavePresenter::m_view->getFileFormatIndex());
+  return selectedFormat == NamedFormat::ORSOAscii;
+}
+
 /** Tells the view to enable/disable certain widgets based on the
  * selected file format
  */
@@ -89,7 +94,7 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
     m_view->disableAdditionalColumnsCheckBox();
 
   // Enable/disable the save to single file checkbox for formats that support this
-  if (fileFormat == NamedFormat::ORSOAscii)
+  if (shouldAutosave() && fileFormat == NamedFormat::ORSOAscii)
     m_view->enableSaveToSingleFileCheckBox();
   else
     m_view->disableSaveToSingleFileCheckBox();
@@ -142,6 +147,9 @@ void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
     m_view->enableSaveIndividualRowsCheckbox();
+    if (hasSelectedORSOFormat()) {
+      m_view->enableSaveToSingleFileCheckBox();
+    }
   } else {
     m_shouldAutosave = false;
     m_view->disallowAutosave();
@@ -152,6 +160,7 @@ void SavePresenter::enableAutosave() {
 void SavePresenter::disableAutosave() {
   m_shouldAutosave = false;
   m_view->disableSaveIndividualRowsCheckbox();
+  m_view->disableSaveToSingleFileCheckBox();
 }
 
 void SavePresenter::notifySaveIndividualRowsEnabled() { m_shouldSaveIndividualRows = true; }
@@ -252,7 +261,7 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   }
 }
 
-FileFormatOptions SavePresenter::getSaveParametersFromView() const {
+FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave) const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
@@ -260,22 +269,22 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck(),
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
-      /*shouldSaveToSingleFile=*/m_view->getSaveToSingleFileCheck());
+      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
-                                   std::vector<std::string> const &logParameters) {
+                                   std::vector<std::string> const &logParameters, bool const isAutoSave) {
   auto savePath = m_view->getSavePath();
   if (m_saver->isValidSaveDirectory(savePath))
-    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView());
+    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView(isAutoSave));
   else
     errorInvalidSaveDirectory();
 }
 
 /** Saves workspaces with the names specified. */
-void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames) {
+void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames, bool const isAutoSave) {
   auto selectedLogParameters = m_view->getSelectedParameters();
-  saveWorkspaces(workspaceNames, selectedLogParameters);
+  saveWorkspaces(workspaceNames, selectedLogParameters, isAutoSave);
 }
 
 /** Saves selected workspaces */

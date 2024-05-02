@@ -146,7 +146,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
 
     if (!workspaces.empty()) {
       try {
-        m_savePresenter->saveWorkspaces(workspaces);
+        m_savePresenter->saveWorkspaces(workspaces, true);
       } catch (std::runtime_error const &e) {
         g_log.error(e.what());
       } catch (std::exception const &e) {

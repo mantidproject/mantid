@@ -949,11 +949,10 @@ for a description of the supported formats.
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
 | ORSO Format Options           | When saving in the ORSO format you can specify if you|
-|                               | want a Q Resolution column. You can also request     |
-|                               | additional Lambda, dLambda, Theta and dTheta columns.|
-|                               | If saving multiple workspaces, you can specify if    |
-|                               | they should be saved to a single file or to separate |
-|                               | files.                                               |
+|                               | want a Q Resolution column. You can also use the     |
+|                               | ``Additional columns (includes Q resolution`` option |
+|                               | to request Q Resolution, Lambda, dLambda, Theta and  |
+|                               | dTheta columns (this is selected by default).        |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |
@@ -963,6 +962,12 @@ for a description of the supported formats.
 |                               | Use the ``Include individual row outputs for groups``|
 |                               | option to also save the individual row outputs for a |
 |                               | stitched group.                                      |
+|                               | When the reduction completes, if there are multiple  |
+|                               | workspaces to save automatically then the            |
+|                               | ``Save multiple datasets to a single file`` option   |
+|                               | can be used to save them all into a single file.     |
+|                               | This option is only available when auto-saving into  |
+|                               | the ORSO format, where it is selected by default.    |
 +-------------------------------+------------------------------------------------------+
 
 Troubleshooting
