@@ -39,6 +39,7 @@ private:
   void validateGroupInput();
   void calculatePolarizerEfficiency();
   MatrixWorkspace_sptr convertToHistIfNecessary(const MatrixWorkspace_sptr ws);
+  void saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
 };
 
 } // namespace Algorithms

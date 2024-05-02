@@ -10,8 +10,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -22,9 +24,13 @@ public:
   void setUp() override {
     // Use an analyser efficiency of 1 to make test calculations simpler
     generateFunctionDefinedWorkspace(ANALYSER_EFFICIENCY_WS_NAME, "1 + x*0");
+    m_defaultSaveDirectory = Kernel::ConfigService::Instance().getString("defaultsave.directory");
   }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    Kernel::ConfigService::Instance().setString("defaultsave.directory", m_defaultSaveDirectory);
+  }
 
   void testName() {
     PolarizerEfficiency alg;
@@ -120,8 +126,42 @@ public:
     }
   }
 
+  /// Saving Tests
+
+  void testSavingAbsolute() {
+    auto const temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm(createExampleGroupWorkspace("wsGrp"), false);
+    polarizerEfficiency->setPropertyValue("OutputFilePath", temp_filename.string());
+    polarizerEfficiency->execute();
+    TS_ASSERT(std::filesystem::exists(temp_filename))
+    std::filesystem::remove(temp_filename);
+  }
+
+  void testSavingRelative() {
+    auto tempDir = std::filesystem::temp_directory_path();
+    Kernel::ConfigService::Instance().setString("defaultsave.directory", tempDir.string());
+    std::string const &filename = "something.nxs";
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
+    polarizerEfficiency->setPropertyValue("OutputFilePath", filename);
+    polarizerEfficiency->execute();
+    auto savedPath = tempDir /= filename;
+    TS_ASSERT(std::filesystem::exists(savedPath))
+    std::filesystem::remove(savedPath);
+  }
+
+  void testSavingNoExt() {
+    auto const temp_filename = std::filesystem::temp_directory_path() /= "something";
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
+    polarizerEfficiency->setPropertyValue("OutputFilePath", temp_filename.string());
+    polarizerEfficiency->execute();
+    auto savedPath = temp_filename.string() + ".nxs";
+    TS_ASSERT(std::filesystem::exists(savedPath))
+    std::filesystem::remove(savedPath);
+  }
+
 private:
   const std::string ANALYSER_EFFICIENCY_WS_NAME = "effAnalyser";
+  std::string m_defaultSaveDirectory;
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
                                                   const size_t numBins = 5) {
@@ -206,7 +246,8 @@ private:
     return result;
   }
 
-  IAlgorithm_sptr createPolarizerEfficiencyAlgorithm(WorkspaceGroup_sptr inputGrp = nullptr) {
+  IAlgorithm_sptr createPolarizerEfficiencyAlgorithm(WorkspaceGroup_sptr inputGrp = nullptr,
+                                                     const bool setOutputWs = true) {
     if (inputGrp == nullptr) {
       inputGrp = createExampleGroupWorkspace("wsGrp");
     }
@@ -214,7 +255,9 @@ private:
     polarizerEfficiency->initialize();
     polarizerEfficiency->setProperty("InputWorkspace", inputGrp->getName());
     polarizerEfficiency->setProperty("AnalyserEfficiency", ANALYSER_EFFICIENCY_WS_NAME);
-    polarizerEfficiency->setProperty("OutputWorkspace", "psm");
+    if (setOutputWs) {
+      polarizerEfficiency->setProperty("OutputWorkspace", "psm");
+    }
     return polarizerEfficiency;
   }
 };
