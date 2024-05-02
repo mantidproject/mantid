@@ -39,7 +39,7 @@ public:
   virtual void handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) = 0;
 
   // Used by FitPlotPresenter
-  virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
+  virtual void handleSingleFitClicked() = 0;
   virtual void handleStartXChanged(double startX) = 0;
   virtual void handleEndXChanged(double endX) = 0;
   virtual void handlePlotSpectrumChanged() = 0;
@@ -104,7 +104,7 @@ public:
   void handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) override;
 
-  void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
+  void handleSingleFitClicked() override;
   void handlePlotSpectrumChanged() override;
   void handleFwhmChanged(double fwhm) override;
   void handleBackgroundChanged(double background) override;
