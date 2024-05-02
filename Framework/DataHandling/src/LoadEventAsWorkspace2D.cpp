@@ -90,6 +90,7 @@ void LoadEventAsWorkspace2D::init() {
                   "The name of the units to convert to (must be one of those registered in the Unit Factory)");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+  declareProperty("LoadNexusInstrumentXML", true, "If true, load using an instrument XML file");
 }
 
 std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
@@ -160,8 +161,10 @@ void LoadEventAsWorkspace2D::exec() {
   const Kernel::NexusHDF5Descriptor descriptor(filename);
 
   // Load the instrument
-  prog->doReport("Loading instrument");
-  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, WS, "entry", this, &descriptor);
+  if (getProperty("LoadNexusInstrumentXML")) {
+    prog->doReport("Loading instrument");
+    LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, WS, "entry", this, &descriptor);
+  }
 
   // load run metadata
   prog->doReport("Loading metadata");
