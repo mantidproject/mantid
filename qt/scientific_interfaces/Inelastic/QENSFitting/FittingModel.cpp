@@ -511,7 +511,9 @@ IAlgorithm_sptr FittingModel::getFittingAlgorithm(FittingMode mode) const {
     return createSimultaneousFit(getFitFunction());
 }
 
-IAlgorithm_sptr FittingModel::getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
+IAlgorithm_sptr FittingModel::getSingleFittingAlgorithm() const {
+  const auto workspaceID = m_fitPlotModel->getActiveWorkspaceID();
+  const auto spectrum = m_fitPlotModel->getActiveWorkspaceIndex();
   const auto ws = m_fitDataModel->getWorkspace(workspaceID);
   const auto range = m_fitDataModel->getFittingRange(workspaceID, spectrum);
   const auto exclude = m_fitDataModel->getExcludeRegionVector(workspaceID, spectrum);

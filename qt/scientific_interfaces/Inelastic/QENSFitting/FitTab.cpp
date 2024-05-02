@@ -102,12 +102,12 @@ void FitTab::handlePlotSelectedSpectra() {
   m_outOptionsPresenter->setPlotting(false);
 }
 
-void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void FitTab::handleSingleFitClicked() {
   if (validate()) {
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    m_fittingPresenter->runSingleFit(workspaceID, spectrum);
+    m_fittingPresenter->runSingleFit();
   }
 }
 

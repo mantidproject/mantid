@@ -289,9 +289,7 @@ void FitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
     m_plotter->plotSpectra(m_model->getWorkspace()->getName(), std::to_string(spectrum.value), errorBars);
 }
 
-void FitPlotPresenter::handleFitSingleSpectrum() {
-  m_tab->handleSingleFitClicked(m_model->getActiveWorkspaceID(), m_model->getActiveWorkspaceIndex());
-}
+void FitPlotPresenter::handleFitSingleSpectrum() { m_tab->handleSingleFitClicked(); }
 
 void FitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
   m_tab->handleFwhmChanged(maximum - minimum);
