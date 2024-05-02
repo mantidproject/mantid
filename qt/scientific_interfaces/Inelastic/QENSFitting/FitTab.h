@@ -14,6 +14,8 @@
 #include "FittingPresenter.h"
 #include "FunctionBrowser/TemplateSubType.h"
 #include "InelasticFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "ui_FitTab.h"
 
 #include <memory>
@@ -73,9 +75,11 @@ public:
   }
 
   template <typename FittingModel> void setupFittingPresenter() {
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
     auto model = std::make_unique<FittingModel>();
-    m_fittingPresenter =
-        std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser, std::move(model));
+    m_fittingPresenter = std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser,
+                                                            std::move(model), std::move(algorithmRunner));
   }
 
   template <typename FitDataView> void setupFitDataView() {
