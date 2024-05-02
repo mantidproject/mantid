@@ -98,29 +98,11 @@ void FittingPresenter::updateFunctionListInBrowser(const std::map<std::string, s
   m_fitPropertyBrowser->updateFunctionListInBrowser(functionStrings);
 }
 
-void FittingPresenter::cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
-  m_model->cleanFailedRun(fittingAlgorithm);
-}
-
-void FittingPresenter::cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
-                                            WorkspaceID workspaceID) {
-  m_model->cleanFailedSingleRun(fittingAlgorithm, workspaceID);
-}
-
 void FittingPresenter::removeFittingData() { m_model->removeFittingData(); }
 
 void FittingPresenter::addDefaultParameters() { m_model->addDefaultParameters(); }
 
 void FittingPresenter::removeDefaultParameters() { m_model->removeDefaultParameters(); }
-
-void FittingPresenter::addOutput(Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
-  m_model->addOutput(fittingAlgorithm);
-}
-
-void FittingPresenter::addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID,
-                                          WorkspaceIndex spectrum) {
-  m_model->addSingleFitOutput(fittingAlgorithm, workspaceID, spectrum);
-}
 
 std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> FittingPresenter::fitProperties() const {
   return m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
