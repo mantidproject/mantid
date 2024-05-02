@@ -27,7 +27,6 @@ void FittingPresenter::validate(UserInputValidator &validator) { m_model->valida
 void FittingPresenter::runFit() {
   m_model->setFittingMode(m_fitPropertyBrowser->getFittingMode());
   auto alg = m_model->getFittingAlgorithm(m_model->getFittingMode());
-  // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
   auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
   MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
       std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
@@ -37,7 +36,6 @@ void FittingPresenter::runFit() {
 void FittingPresenter::runSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   m_model->setFittingMode(FittingMode::SIMULTANEOUS);
   auto alg = m_model->getSingleFit(workspaceID, spectrum);
-  // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
   auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
   MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
       std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
@@ -111,14 +109,6 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> FittingPresenter::fitPropert
 Mantid::API::WorkspaceGroup_sptr FittingPresenter::getResultWorkspace() const { return m_model->getResultWorkspace(); }
 
 IFitOutput *FittingPresenter::getFitOutput() const { return m_model->getFitOutput(); }
-
-Mantid::API::IAlgorithm_sptr FittingPresenter::getFittingAlgorithm(FittingMode mode) const {
-  return m_model->getFittingAlgorithm(mode);
-}
-
-Mantid::API::IAlgorithm_sptr FittingPresenter::getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  return m_model->getSingleFit(workspaceID, spectrum);
-}
 
 std::string FittingPresenter::getOutputBasename() const { return m_model->getOutputBasename(); }
 

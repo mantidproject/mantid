@@ -90,18 +90,6 @@ void FitTab::handleEndXChanged(double endX) {
   m_dataPresenter->updateTableFromModel();
 }
 
-// void FitTab::updateSingleFitOutput(bool error) {
-// disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
-
-// if (error) {
-//  m_fittingPresenter->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
-//  m_fittingAlgorithm.reset();
-//} else {
-//  m_fittingPresenter->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
-//                                         m_plotPresenter->getActiveWorkspaceIndex());
-//}
-//}
-
 /**
  * Plots the spectra corresponding to the selected parameters
  */
