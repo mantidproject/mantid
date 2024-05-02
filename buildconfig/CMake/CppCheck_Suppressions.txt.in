@@ -208,8 +208,8 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:620
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:304
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetDetectorOffsets.cpp:148
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:886
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:993
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:1000
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:213
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp:107
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:662
