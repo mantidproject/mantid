@@ -269,7 +269,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         out_ws_name = out_ws
 
         if load_van:
-            vanws = LoadMD(vanadiumfile, StoreInADS=False)
+            vanws = LoadMD(vanadiumfile, StoreInADS=True)
             vanws = self.__regroup_and_move(vanws, grouping, height, distance)
 
         has_multiple = len(datafiles) > 1
