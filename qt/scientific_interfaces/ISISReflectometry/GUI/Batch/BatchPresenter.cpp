@@ -155,7 +155,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   }
 }
 
-void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
   auto item = m_jobManager->getRunsTableItem(algorithm);
   if (!item) {
     return;

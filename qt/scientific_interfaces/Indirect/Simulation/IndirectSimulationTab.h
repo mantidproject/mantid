@@ -12,7 +12,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 #include <QSettings>
 #include <QWidget>

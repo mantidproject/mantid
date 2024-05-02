@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 #include "ui_IndirectInstrumentConfig.h"
 
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -137,8 +137,6 @@ private slots:
 private:
   /// Member containing the widgets child widgets.
   Ui::IndirectInstrumentConfig m_uiForm;
-  /// Algorithm Runner used to load empty instrument workspaces
-  MantidQt::API::AlgorithmRunner m_algRunner;
   /// Instrument selector widget
   MantidQt::MantidWidgets::InstrumentSelector *m_instrumentSelector;
 

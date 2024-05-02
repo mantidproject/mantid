@@ -41,7 +41,7 @@ DECLARE_SUBWINDOW(IndirectDataReduction)
 
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
-      m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
+      m_algRunner(new MantidQt::API::QtAlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
       m_instDetails() {
