@@ -386,7 +386,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             )
 
         y_dim, x_dim, number_of_runs = array.shape
-        array = array.flatten(order="F")
+        array = array.T
 
         run = mtd[ws].getExperimentInfo(0).run()
         det_trans = run.getProperty("det_trans").timeAverageValue()
@@ -396,24 +396,23 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
         AddSampleLog(Workspace=_tmp_ws, LogName="det_trans", LogText=str(det_trans), LogType="Number Series", NumberType="Double")
         AddSampleLog(Workspace=_tmp_ws, LogName="2theta", LogText=str(two_theta), LogType="Number Series", NumberType="Double")
-        LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=False, InstrumentName="HB3A")
+        LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=True, InstrumentName="HB3A")
         self.__move_components(_tmp_ws, height, distance)
 
-        CreateMDHistoWorkspace(
-            SignalInput=array,
-            ErrorInput=np.sqrt(array),
-            Dimensionality=3,
-            Extents="0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5),
-            NumberOfBins="{},{},{}".format(y_dim, x_dim, number_of_runs),
-            Names="y,x,scanIndex",
-            Units="bin,bin,number",
-            OutputWorkspace="__scan_grouped",
-        )
-
         if grouping > 1:
+            CreateMDHistoWorkspace(
+                SignalInput=array,
+                ErrorInput=np.sqrt(array),
+                Dimensionality=3,
+                Extents="0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5),
+                NumberOfBins="{},{},{}".format(y_dim, x_dim, number_of_runs),
+                Names="y,x,scanIndex",
+                Units="bin,bin,number",
+                OutputWorkspace="__scan_grouped",
+            )
             detector_list = ""
-            for y in range(0, 512 * 3, grouping):
-                for x in range(0, 512, grouping):
+            for x in range(0, 512, grouping):
+                for y in range(0, 512 * 3, grouping):
                     spectra_list = []
                     for j in range(grouping):
                         for i in range(grouping):
@@ -426,21 +425,22 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             InputWorkspace=_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="_PreprocessedDetectorsWS"
         )
 
-        mtd["__scan_grouped"].copyExperimentInfos(_tmp_ws)
-        run = mtd["__scan_grouped"].getExperimentInfo(0).run()
+        run = _tmp_ws.getExperimentInfo(0).run()
         for log in logs:
             run[log.name] = log
+        run["twotheta"] = np.array(mtd["_PreprocessedDetectorsWS"].column(2)).reshape(y_dim, x_dim).T.flatten().tolist()
+        run["azimuthal"] = np.array(mtd["_PreprocessedDetectorsWS"].column(3)).reshape(y_dim, x_dim).T.flatten().tolist()
+        CopySample(scan, _tmp_ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
-        CopySample(scan, "__scan_grouped", CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
-
-        run["twotheta"] = mtd["_PreprocessedDetectorsWS"].column(2)
-        run["azimuthal"] = mtd["_PreprocessedDetectorsWS"].column(3)
+        donor_workspace = "__scan_grouped" if grouping > 1 else ws
+        mtd[donor_workspace].copyExperimentInfos(_tmp_ws)
 
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
         DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
 
-        DeleteWorkspace(scan)
-        RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
+        if grouping > 1:
+            DeleteWorkspace(scan)
+            RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
 
         return mtd[ws]
 
