@@ -597,6 +597,15 @@ std::string FittingModel::getOutputBasename() const { return cutLastOf(sequentia
 
 void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
+
+  auto group = getOutputGroup(fittingAlgorithm);
+  if (group->size() == 1u) {
+    const auto base = prefix + std::to_string(m_fitPlotModel->getActiveWorkspaceID().value + 1);
+    removeFromADSIfExists(base);
+    cleanTemporaries(base + "_0");
+    return;
+  }
+
   for (WorkspaceID datasetIndex = 0; datasetIndex < m_fitDataModel->getNumberOfWorkspaces(); ++datasetIndex) {
     const auto base = prefix + std::to_string(datasetIndex.value + 1);
     removeFromADSIfExists(base);
@@ -604,12 +613,6 @@ void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
       cleanTemporaries(base + "_" + std::to_string(index));
     }
   }
-}
-
-void FittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) {
-  const auto base = "__" + fittingAlgorithm->name() + "_ws" + std::to_string(workspaceID.value + 1);
-  removeFromADSIfExists(base);
-  cleanTemporaries(base + "_0");
 }
 
 IFitDataModel *FittingModel::getFitDataModel() const { return m_fitDataModel.get(); }
