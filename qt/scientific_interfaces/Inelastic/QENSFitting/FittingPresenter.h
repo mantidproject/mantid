@@ -87,12 +87,12 @@ public:
 
   void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params =
                                            std::unordered_map<std::string, ParameterValue>());
-  void updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
   void updateFitTypeString();
 
 private:
   void executeFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
+  void updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
   void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
 
   IFitTab *m_tab;
