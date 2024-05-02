@@ -38,11 +38,7 @@ public:
   void clear() override;
   bool isEmpty() const override;
   void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup, Mantid::API::ITableWorkspace_sptr parameterTable,
-                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) override;
-
-  void addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                       Mantid::API::ITableWorkspace_sptr parameterTable,
-                       const Mantid::API::WorkspaceGroup_sptr &resultWorkspace, FitDomainIndex fitDomainIndex) override;
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace, FitDomainIndex fitDomainIndex) override;
 
 private:
   std::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
