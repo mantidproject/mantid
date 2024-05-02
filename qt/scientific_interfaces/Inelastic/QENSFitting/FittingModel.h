@@ -72,8 +72,6 @@ public:
   std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const override;
 
   // IFitOutput
-  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
-                          WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   IFitOutput *getFitOutput() const override;
 

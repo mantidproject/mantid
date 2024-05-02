@@ -431,19 +431,12 @@ void FittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
-  m_fitOutput->addOutput(group, parameters, result);
-  m_previousModelSelected = isPreviousModelSelected();
-}
-
-void FittingModel::addSingleFitOutput(const IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
-                                      WorkspaceIndex spectrum) {
-  auto group = getOutputGroup(fitAlgorithm);
-  auto parameters = getOutputParameters(fitAlgorithm);
-  auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = FunctionFactory::Instance().createInitialized(fitAlgorithm->getPropertyValue("Function"));
-  auto fitDomainIndex = m_fitDataModel->getDomainIndex(workspaceID, spectrum);
-  m_fitOutput->addSingleOutput(group, parameters, result, fitDomainIndex);
+  if (group->size() == 1u) {
+    m_fitFunction = FunctionFactory::Instance().createInitialized(fitAlgorithm->getPropertyValue("Function"));
+  } else {
+    m_fitFunction = extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
+  }
+  m_fitOutput->addOutput(group, parameters, result, m_fitPlotModel->getActiveDomainIndex());
   m_previousModelSelected = isPreviousModelSelected();
 }
 
