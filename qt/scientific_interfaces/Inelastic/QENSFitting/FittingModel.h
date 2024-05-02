@@ -89,7 +89,6 @@ public:
   std::string getOutputBasename() const override;
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
-  void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) override;
   void removeFittingData() override;
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
