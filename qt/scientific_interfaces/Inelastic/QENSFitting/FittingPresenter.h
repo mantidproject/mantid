@@ -72,15 +72,9 @@ public:
                                  const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings);
 
-  void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
-  void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID);
   void removeFittingData();
   void addDefaultParameters();
   void removeDefaultParameters();
-
-  void addOutput(Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
-  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID,
-                          WorkspaceIndex spectrum);
 
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties() const;
 

@@ -51,8 +51,6 @@ public:
   virtual bool isMultiFit() const = 0;
 
   // IFitOutput
-  virtual void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
-                                  WorkspaceIndex spectrum) = 0;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
   virtual IFitOutput *getFitOutput() const = 0;
 
