@@ -14,6 +14,8 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
@@ -36,14 +38,18 @@ public:
   virtual void notifyFunctionChanged() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL FittingPresenter : public IFittingPresenter {
+class MANTIDQT_INELASTIC_DLL FittingPresenter : public IFittingPresenter,
+                                                public MantidQt::API::IAlgorithmRunnerSubscriber {
 public:
   FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser, std::unique_ptr<FittingModel> model,
                    std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner);
 
   void notifyFunctionChanged() override;
+  void notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
   void validate(UserInputValidator &validator);
+  void runFit();
+  void runSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
 
@@ -90,15 +96,13 @@ public:
   void setFWHM(WorkspaceID WorkspaceID, double fwhm);
   void setBackground(WorkspaceID WorkspaceID, double background);
 
-  void updateFittingModeFromBrowser();
   void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params =
                                            std::unordered_map<std::string, ParameterValue>());
-  void updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
-                                              std::size_t const &numberOfDomains);
+  void updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
   void updateFitTypeString();
 
 private:
-  void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, std::size_t const &numberOfDomains);
+  void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
 
   IFitTab *m_tab;
   InelasticFitPropertyBrowser *m_fitPropertyBrowser;
