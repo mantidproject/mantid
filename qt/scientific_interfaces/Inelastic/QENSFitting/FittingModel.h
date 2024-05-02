@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FitPlotModel.h"
 #include "IFitDataModel.h"
 #include "IFitOutput.h"
 #include "IFittingModel.h"
@@ -96,6 +97,7 @@ public:
   void removeDefaultParameters() override;
 
   IFitDataModel *getFitDataModel() const override;
+  IFitPlotModel *getFitPlotModel() const override;
 
   // Used for testing purposes
   [[nodiscard]] inline std::string getFitString() const noexcept { return m_fitString; }
@@ -110,6 +112,7 @@ protected:
   std::string m_fitString = "FitString";
 
   std::unique_ptr<IFitDataModel> m_fitDataModel;
+  std::unique_ptr<IFitPlotModel> m_fitPlotModel;
 
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
