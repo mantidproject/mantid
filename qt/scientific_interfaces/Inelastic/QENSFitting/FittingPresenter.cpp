@@ -12,8 +12,10 @@
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 FittingPresenter::FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser,
-                                   std::unique_ptr<FittingModel> model)
-    : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)) {
+                                   std::unique_ptr<FittingModel> model,
+                                   std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner)
+    : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)),
+      m_algorithmRunner(std::move(algorithmRunner)) {
   m_fitPropertyBrowser->subscribePresenter(this);
 }
 
