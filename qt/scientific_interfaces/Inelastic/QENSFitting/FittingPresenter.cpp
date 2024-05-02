@@ -17,11 +17,44 @@ FittingPresenter::FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *br
     : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)),
       m_algorithmRunner(std::move(algorithmRunner)) {
   m_fitPropertyBrowser->subscribePresenter(this);
+  m_algorithmRunner->subscribe(this);
 }
 
 void FittingPresenter::notifyFunctionChanged() { m_tab->handleFunctionChanged(); }
 
 void FittingPresenter::validate(UserInputValidator &validator) { m_model->validate(validator); }
+
+void FittingPresenter::runFit() {
+  m_model->setFittingMode(m_fitPropertyBrowser->getFittingMode());
+  auto alg = m_model->getFittingAlgorithm(m_model->getFittingMode());
+  // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
+  auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
+  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
+  m_algorithmRunner->execute(confAlg);
+}
+
+void FittingPresenter::runSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+  m_model->setFittingMode(FittingMode::SIMULTANEOUS);
+  auto alg = m_model->getSingleFit(workspaceID, spectrum);
+  // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
+  auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
+  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
+  m_algorithmRunner->execute(confAlg);
+}
+
+void FittingPresenter::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) {
+  m_fitPropertyBrowser->setErrorsEnabled(!error);
+  if (!error) {
+    updateFitBrowserParameterValuesFromAlg(lastAlgorithm->algorithm());
+    m_model->setFitFunction(m_fitPropertyBrowser->getFitFunction());
+    m_model->addOutput(lastAlgorithm->algorithm());
+  } else {
+    m_model->cleanFailedRun(lastAlgorithm->algorithm());
+  }
+  m_tab->handleFitComplete(error);
+}
 
 void FittingPresenter::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   m_model->setFitFunction(std::move(function));
@@ -120,10 +153,6 @@ void FittingPresenter::setBackground(WorkspaceID WorkspaceID, double background)
   m_fitPropertyBrowser->setBackgroundA0(background);
 }
 
-void FittingPresenter::updateFittingModeFromBrowser() {
-  m_model->setFittingMode(m_fitPropertyBrowser->getFittingMode());
-}
-
 void FittingPresenter::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
   auto fun = m_model->getFitFunction();
   if (fun) {
@@ -138,8 +167,7 @@ void FittingPresenter::updateFitBrowserParameterValues(const std::unordered_map<
   }
 }
 
-void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
-                                                              std::size_t const &numberOfDomains) {
+void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
   updateFitBrowserParameterValues();
   if (fittingAlgorithm) {
     QSignalBlocker blocker(m_fitPropertyBrowser);
@@ -147,7 +175,7 @@ void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API:
       auto const paramWsName = fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
       auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
       auto rowCount = static_cast<int>(paramWs->rowCount());
-      if (rowCount == static_cast<int>(numberOfDomains))
+      if (rowCount == static_cast<int>(m_model->getFitDataModel()->getNumberOfDomains()))
         m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
     } else {
       IFunction_sptr fun = fittingAlgorithm->getProperty("Function");
@@ -157,14 +185,14 @@ void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API:
         m_fitPropertyBrowser->updateParameters(*fun);
     }
   }
-  updateFitStatus(fittingAlgorithm, numberOfDomains);
+  updateFitStatus(fittingAlgorithm);
 }
 
-void FittingPresenter::updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm,
-                                       std::size_t const &numberOfDomains) {
+void FittingPresenter::updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
   if (m_model->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = fittingAlgorithm->getProperty("OutputChiSquared");
+    auto numberOfDomains = m_model->getFitDataModel()->getNumberOfDomains();
     const std::vector<std::string> status(numberOfDomains, fit_status);
     const std::vector<double> chiSquared(numberOfDomains, chi2);
     m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);

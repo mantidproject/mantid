@@ -49,8 +49,9 @@ public:
   // Used by FitOutputOptionsPresenter
   virtual void handlePlotSelectedSpectra() = 0;
 
-  // Used by FittingModel
+  // Used by FittingPresenter
   virtual void handleFunctionChanged() = 0;
+  virtual void handleFitComplete(bool const error) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL FitTab : public InelasticTab, public IFitTab {
@@ -111,24 +112,16 @@ public:
   void handlePlotSelectedSpectra() override;
 
   void handleFunctionChanged() override;
+  void handleFitComplete(bool const error) override;
 
 public slots:
   void handleStartXChanged(double startX) override;
   void handleEndXChanged(double endX) override;
 
-private slots:
-  void updateFitOutput(bool error);
-  void updateSingleFitOutput(bool error);
-  void fitAlgorithmComplete(bool error);
-
 private:
   void setup() override;
   bool validate() override;
   void run() override;
-
-  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
@@ -145,8 +138,6 @@ private:
   std::unique_ptr<FittingPresenter> m_fittingPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
-
-  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
 } // namespace Inelastic

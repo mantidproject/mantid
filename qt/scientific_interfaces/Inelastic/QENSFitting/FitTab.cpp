@@ -22,7 +22,7 @@ namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
-      m_outOptionsPresenter(), m_fittingAlgorithm() {
+      m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
 }
@@ -90,46 +90,17 @@ void FitTab::handleEndXChanged(double endX) {
   m_dataPresenter->updateTableFromModel();
 }
 
-void FitTab::updateFitOutput(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
+// void FitTab::updateSingleFitOutput(bool error) {
+// disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
 
-  if (error) {
-    m_fittingPresenter->cleanFailedRun(m_fittingAlgorithm);
-    m_fittingAlgorithm.reset();
-  } else {
-    m_fittingPresenter->addOutput(m_fittingAlgorithm);
-  }
-}
-
-void FitTab::updateSingleFitOutput(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
-
-  if (error) {
-    m_fittingPresenter->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
-    m_fittingAlgorithm.reset();
-  } else {
-    m_fittingPresenter->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
-                                           m_plotPresenter->getActiveWorkspaceIndex());
-  }
-}
-
-/**
- * Performs necessary state changes when the fit algorithm was run
- * and completed within this interface.
- */
-void FitTab::fitAlgorithmComplete(bool error) {
-  m_plotPresenter->setFitSingleSpectrumIsFitting(false);
-  enableFitButtons(true);
-  enableOutputOptions(!error);
-  m_fittingPresenter->setErrorsEnabled(!error);
-  if (!error) {
-    m_fittingPresenter->updateFitBrowserParameterValuesFromAlg(m_fittingAlgorithm,
-                                                               m_dataPresenter->getNumberOfDomains());
-    setModelFitFunction();
-  }
-  m_plotPresenter->updatePlots();
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
-}
+// if (error) {
+//  m_fittingPresenter->cleanFailedSingleRun(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID());
+//  m_fittingAlgorithm.reset();
+//} else {
+//  m_fittingPresenter->addSingleFitOutput(m_fittingAlgorithm, m_plotPresenter->getActiveWorkspaceID(),
+//                                         m_plotPresenter->getActiveWorkspaceIndex());
+//}
+//}
 
 /**
  * Plots the spectra corresponding to the selected parameters
@@ -148,8 +119,7 @@ void FitTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spec
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    m_fittingPresenter->setFittingMode(FittingMode::SIMULTANEOUS);
-    runSingleFit(m_fittingPresenter->getSingleFit(workspaceID, spectrum));
+    m_fittingPresenter->runSingleFit(workspaceID, spectrum);
   }
 }
 
@@ -171,8 +141,7 @@ bool FitTab::validate() {
 void FitTab::run() {
   enableFitButtons(false);
   enableOutputOptions(false);
-  m_fittingPresenter->updateFittingModeFromBrowser();
-  runFitAlgorithm(m_fittingPresenter->getFittingAlgorithm(m_fittingPresenter->getFittingMode()));
+  m_fittingPresenter->runFit();
 }
 
 /**
@@ -227,31 +196,6 @@ void FitTab::updateParameterEstimationData() {
       m_dataPresenter->getDataForParameterEstimation(m_fittingPresenter->getEstimationDataSelector()));
   m_fittingPresenter->estimateFunctionParameters(m_plotPresenter->getActiveWorkspaceID(),
                                                  m_plotPresenter->getActiveWorkspaceIndex());
-}
-
-/*
- * Runs the specified fit algorithm and calls the algorithmComplete
- * method of this fit analysis tab once completed.
- *
- * @param fitAlgorithm      The fit algorithm to run.
- */
-void FitTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateFitOutput(bool)));
-  setupFit(std::move(fitAlgorithm));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-void FitTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(updateSingleFitOutput(bool)));
-  setupFit(std::move(fitAlgorithm));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-void FitTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  auto properties = m_fittingPresenter->fitProperties();
-  m_fittingAlgorithm = fitAlgorithm;
-  m_batchAlgoRunner->addAlgorithm(fitAlgorithm, std::move(properties));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(fitAlgorithmComplete(bool)));
 }
 
 void FitTab::updateDataReferences() {
@@ -326,6 +270,16 @@ void FitTab::handleFunctionChanged() {
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   m_fittingPresenter->updateFitTypeString();
+}
+
+void FitTab::handleFitComplete(bool const error) {
+  m_plotPresenter->setFitSingleSpectrumIsFitting(false);
+  enableFitButtons(true);
+  enableOutputOptions(!error);
+  if (!error) {
+    m_plotPresenter->setFitFunction(m_fittingPresenter->fitFunction());
+  }
+  m_plotPresenter->updatePlots();
 }
 
 } // namespace Inelastic
