@@ -90,7 +90,9 @@ void LoadEventAsWorkspace2D::init() {
                   "The name of the units to convert to (must be one of those registered in the Unit Factory)");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  declareProperty("LoadNexusInstrumentXML", true, "If true, load using an instrument XML file");
+  declareProperty("LoadNexusInstrumentXML", true,
+                  "If true, load the instrument XML file. If the instrument XML file is not needed, setting this to "
+                  "false may improve execution speed and memory usage.");
 }
 
 std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
