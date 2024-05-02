@@ -21,8 +21,6 @@
 #include <memory>
 #include <optional>
 
-#include <QString>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
@@ -105,6 +103,8 @@ public:
   void handleFunctionListChanged(const std::map<std::string, std::string> &functionStrings) override;
 
   void handleSingleFitClicked() override;
+  void handleStartXChanged(double startX) override;
+  void handleEndXChanged(double endX) override;
   void handlePlotSpectrumChanged() override;
   void handleFwhmChanged(double fwhm) override;
   void handleBackgroundChanged(double background) override;
@@ -113,10 +113,6 @@ public:
 
   void handleFunctionChanged() override;
   void handleFitComplete(bool const error) override;
-
-public slots:
-  void handleStartXChanged(double startX) override;
-  void handleEndXChanged(double endX) override;
 
 private:
   void setup() override;
