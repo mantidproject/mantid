@@ -51,7 +51,7 @@ Output:
 .. testoutput:: FlipperEfficiencyExample
     :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-    Flipper efficiency at a wavelength of 4.0 Å is ...
+    Flipper efficiency at a wavelength of 0.3 Å is ...
 
 .. categories::
 
