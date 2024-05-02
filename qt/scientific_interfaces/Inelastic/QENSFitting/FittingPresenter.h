@@ -46,18 +46,11 @@ public:
                    std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner);
 
   void notifyFunctionChanged() override;
-  void notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
   void validate(UserInputValidator &validator);
-  void runFit();
-  void runSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
 
-  void setFittingMode(FittingMode mode);
-  FittingMode getFittingMode() const;
-
-  void setErrorsEnabled(bool const enable);
   void setFitEnabled(bool const enable);
   void setCurrentDataset(FitDomainIndex index);
   Mantid::API::MultiDomainFunction_sptr fitFunction() const;
@@ -76,7 +69,9 @@ public:
   void addDefaultParameters();
   void removeDefaultParameters();
 
-  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties() const;
+  void runFit();
+  void runSingleFit();
+  void notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   IFitOutput *getFitOutput() const;
@@ -96,6 +91,8 @@ public:
   void updateFitTypeString();
 
 private:
+  void executeFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+
   void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
 
   IFitTab *m_tab;

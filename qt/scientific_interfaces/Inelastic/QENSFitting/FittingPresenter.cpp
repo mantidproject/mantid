@@ -24,45 +24,9 @@ void FittingPresenter::notifyFunctionChanged() { m_tab->handleFunctionChanged();
 
 void FittingPresenter::validate(UserInputValidator &validator) { m_model->validate(validator); }
 
-void FittingPresenter::runFit() {
-  m_model->setFittingMode(m_fitPropertyBrowser->getFittingMode());
-  auto alg = m_model->getFittingAlgorithm(m_model->getFittingMode());
-  auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
-  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
-      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
-  m_algorithmRunner->execute(confAlg);
-}
-
-void FittingPresenter::runSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  m_model->setFittingMode(FittingMode::SIMULTANEOUS);
-  auto alg = m_model->getSingleFit(workspaceID, spectrum);
-  auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
-  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
-      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(alg, std::move(properties));
-  m_algorithmRunner->execute(confAlg);
-}
-
-void FittingPresenter::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) {
-  m_fitPropertyBrowser->setErrorsEnabled(!error);
-  if (!error) {
-    updateFitBrowserParameterValuesFromAlg(lastAlgorithm->algorithm());
-    m_model->setFitFunction(m_fitPropertyBrowser->getFitFunction());
-    m_model->addOutput(lastAlgorithm->algorithm());
-  } else {
-    m_model->cleanFailedRun(lastAlgorithm->algorithm());
-  }
-  m_tab->handleFitComplete(error);
-}
-
 void FittingPresenter::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   m_model->setFitFunction(std::move(function));
 }
-
-void FittingPresenter::setFittingMode(FittingMode mode) { m_model->setFittingMode(mode); }
-
-FittingMode FittingPresenter::getFittingMode() const { return m_model->getFittingMode(); }
-
-void FittingPresenter::setErrorsEnabled(bool const enable) { m_fitPropertyBrowser->setErrorsEnabled(enable); }
 
 void FittingPresenter::setFitEnabled(bool const enable) { m_fitPropertyBrowser->setFitEnabled(enable); }
 
@@ -102,8 +66,26 @@ void FittingPresenter::addDefaultParameters() { m_model->addDefaultParameters();
 
 void FittingPresenter::removeDefaultParameters() { m_model->removeDefaultParameters(); }
 
-std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> FittingPresenter::fitProperties() const {
-  return m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
+void FittingPresenter::runFit() {
+  m_model->setFittingMode(m_fitPropertyBrowser->getFittingMode());
+  executeFit(m_model->getFittingAlgorithm(m_model->getFittingMode()));
+}
+
+void FittingPresenter::runSingleFit() {
+  m_model->setFittingMode(FittingMode::SIMULTANEOUS);
+  executeFit(m_model->getSingleFittingAlgorithm());
+}
+
+void FittingPresenter::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) {
+  m_fitPropertyBrowser->setErrorsEnabled(!error);
+  if (!error) {
+    updateFitBrowserParameterValuesFromAlg(lastAlgorithm->algorithm());
+    m_model->setFitFunction(m_fitPropertyBrowser->getFitFunction());
+    m_model->addOutput(lastAlgorithm->algorithm());
+  } else {
+    m_model->cleanFailedRun(lastAlgorithm->algorithm());
+  }
+  m_tab->handleFitComplete(error);
 }
 
 Mantid::API::WorkspaceGroup_sptr FittingPresenter::getResultWorkspace() const { return m_model->getResultWorkspace(); }
@@ -125,6 +107,13 @@ void FittingPresenter::setFWHM(WorkspaceID WorkspaceID, double fwhm) { m_model->
 void FittingPresenter::setBackground(WorkspaceID WorkspaceID, double background) {
   m_model->setBackground(background, WorkspaceID);
   m_fitPropertyBrowser->setBackgroundA0(background);
+}
+
+void FittingPresenter::executeFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+  auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
+  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(fitAlgorithm, std::move(properties));
+  m_algorithmRunner->execute(confAlg);
 }
 
 void FittingPresenter::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
