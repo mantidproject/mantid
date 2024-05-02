@@ -59,7 +59,7 @@ public:
 
   void test_saving_relative() {
     auto tempDir = std::filesystem::temp_directory_path();
-    ConfigService::Instance().setString("defaultsave.directory", tempDir);
+    ConfigService::Instance().setString("defaultsave.directory", tempDir.string());
     std::string const &filename = "something.nxs";
     auto const &group = createTestingWorkspace("testWs");
     auto alg = initialize_alg(group, false);
