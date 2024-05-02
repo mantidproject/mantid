@@ -13,6 +13,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
@@ -37,7 +38,8 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FittingPresenter : public IFittingPresenter {
 public:
-  FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser, std::unique_ptr<FittingModel> model);
+  FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser, std::unique_ptr<FittingModel> model,
+                   std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner);
 
   void notifyFunctionChanged() override;
 
@@ -101,6 +103,7 @@ private:
   IFitTab *m_tab;
   InelasticFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<FittingModel> m_model;
+  std::unique_ptr<MantidQt::API::AlgorithmRunner> m_algorithmRunner;
 };
 
 } // namespace Inelastic
