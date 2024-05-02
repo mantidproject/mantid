@@ -25,28 +25,24 @@ def cached_i0e(d_i: float, t: Tuple[float]) -> NDArray[float64]:
     return i0e(2 * d_i * np.array(t))
 
 
-def autocorrelation_st(d_1: float, d_2: float, d_3: float, t: Tuple[float]) -> NDArray[float64]:
+def autocorrelation(t: Tuple[float], d_1: float, d_2: float, d_3: float) -> NDArray[float64]:
     """Calculate S(t), the autocorrelation function represented by an anisotropic random walk."""
     return cached_i0e(d_1, t) * cached_i0e(d_2, t) * cached_i0e(d_3, t)
 
 
-def integrand(t, d_1, d_2, d_3, w):
-    return autocorrelation_st(d_1, d_2, d_3, t) * np.cos(w * t)
-
-
-def jw(d_1, d_2, d_3, w):
+def spectral_density(d_1, d_2, d_3, w):
+    """Calculate J(w), the spectral density function."""
     integral, _ = quad(
-        integrand,
+        autocorrelation,
         0,
         np.inf,  # Integration upper bound
         args=(
             d_1,
             d_2,
             d_3,
-            w,
         ),
-        epsrel=1e-5,  # Changing these parameters can provide better results at high frequencies
-        limit=50,
+        weight="cos",
+        wvar=w,
     )
     return 2 * integral
 
@@ -89,9 +85,9 @@ class SpinDiffusion(IFunction1D):
         # xvals is assumed to be B(LF), in units of Gauss. We need to convert to inverse MHz
         w_values = MUON_MAGNETOGYRIC_RATIO * np.array(xvals)
 
-        spectral_density = [jw(*d_rates, w) for w in w_values]
+        jw = [spectral_density(*d_rates, w) for w in w_values]
 
-        return np.square(A) / 4 * np.array(spectral_density)
+        return np.square(A) / 4 * np.array(jw)
 
 
 FunctionFactory.subscribe(SpinDiffusion)
