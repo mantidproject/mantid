@@ -349,7 +349,8 @@ void PolarizationCorrectionWildes::init() {
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const bool analyzer = !PolarizationCorrectionsHelpers::hasSingleSpinStates(flipperProperty);
-  const auto inputs = mapInputsToDirections(flipperProperty);
+  const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
+  const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
   checkConsistentX(inputs, efficiencies);
@@ -767,33 +768,28 @@ PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs, const 
  * @return a set of workspaces to correct
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::mapInputsToDirections(const std::string &flippers) {
+PolarizationCorrectionWildes::mapInputsToDirections(const std::vector<std::string> &flippers) {
   const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
-
-  inputs.mmWS = workspaceForGivenFlipper({Flippers::OnOn, Flippers::On}, flippers, inputNames);
-  inputs.mpWS = workspaceForGivenFlipper({Flippers::OnOff}, flippers, inputNames);
-  inputs.pmWS = workspaceForGivenFlipper({Flippers::OffOn}, flippers, inputNames);
-  inputs.ppWS = workspaceForGivenFlipper({Flippers::OffOff, Flippers::Off}, flippers, inputNames);
-
-  return inputs;
-}
-
-API::MatrixWorkspace_sptr
-PolarizationCorrectionWildes::workspaceForGivenFlipper(const std::vector<std::string> &flipperOptions,
-                                                       const std::string &flipperInput,
-                                                       const std::vector<std::string> &wsNameList) {
-  for (const auto &f : flipperOptions) {
-    const auto index = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(flipperInput, f);
-    if (index < wsNameList.size()) {
-      auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(wsNameList[index]));
-      if (!ws) {
-        throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
-      }
-      return ws;
+  for (size_t i = 0; i < flippers.size(); ++i) {
+    auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]));
+    if (!ws) {
+      throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
+    }
+    const auto &f = flippers[i];
+    if (f == Flippers::OnOn || f == Flippers::On) {
+      inputs.mmWS = ws;
+    } else if (f == Flippers::OnOff) {
+      inputs.mpWS = ws;
+    } else if (f == Flippers::OffOn) {
+      inputs.pmWS = ws;
+    } else if (f == Flippers::OffOff || f == Flippers::Off) {
+      inputs.ppWS = ws;
+    } else {
+      throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);
     }
   }
-  return nullptr;
+  return inputs;
 }
 
 /**

@@ -48,14 +48,6 @@ public:
     runIdealCaseFullCorrections("11,00,10,01", {"++", "+-", "-+", "--"});
   }
 
-  void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder) {
-    using namespace Mantid::HistogramData;
-
-    BinEdges edges{0.3, 0.6, 0.9, 1.2};
-    auto effWS = idealEfficiencies(edges);
-    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig);
-  }
-
   void test_IdealCaseThreeInputs10Missing() { idealThreeInputsTest("10", "00,01,11", {"++", "+-", "-+", "--"}); }
 
   void test_IdealCaseThreeInputs10MissingReorderedInput() {
@@ -763,6 +755,14 @@ private:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
+    /*
+    We're going to set up the test numbers in the workspaces in the order given by
+    the originalFlipperConfig vector. They are named 'ws' followed by the flipper
+    string in the ADS.
+    Following that we reorder these workspaces into the order specified by the input
+    flipperConfig argument to this method. From that we generate vector of the
+    names of the workspaces to pass to the PolarizationCorrectionWildes algorithm.
+    */
     const std::vector<std::string> originalFlipperConfig{"00", "01", "10", "11"};
     std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
     for (size_t i = 0; i != 4; ++i) {
@@ -828,6 +828,14 @@ private:
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
+    /*
+    We're going to set up the test numbers in the workspaces in the order given by
+    the originalFlipperConfig vector. They are named 'ws' followed by the flipper
+    string in the ADS.
+    Following that we reorder these workspaces into the order specified by the input
+    flipperConfig argument to this method. From that we generate vector of the
+    names of the workspaces to pass to the PolarizationCorrectionWildes algorithm.
+    */
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
     const std::vector<std::string> originalFlipperConfig{"ws00", "ws" + presentFlipperConf, "ws11"};
     std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, wsXX, ws11}};
@@ -1619,6 +1627,14 @@ private:
         }
       }
     }
+  }
+
+  void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder) {
+    using namespace Mantid::HistogramData;
+
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    auto effWS = idealEfficiencies(edges);
+    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig);
   }
 };
 

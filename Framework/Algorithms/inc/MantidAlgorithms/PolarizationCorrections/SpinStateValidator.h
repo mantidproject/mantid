@@ -24,7 +24,7 @@ particular ordering.
 */
 class MANTID_ALGORITHMS_DLL SpinStateValidator : public Kernel::TypedValidator<std::string> {
 public:
-  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, bool acceptSingleStates = false);
+  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false);
   Kernel::IValidator_sptr clone() const override;
 
   static const std::string ZERO_ONE;

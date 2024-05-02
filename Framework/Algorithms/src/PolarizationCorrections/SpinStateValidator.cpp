@@ -26,7 +26,7 @@ static const std::unordered_set<std::string> ALLOWED_SINGLE_SPIN_STATES{SpinStat
                                                                         SpinStateValidator::ONE};
 } // namespace SpinStateStrings
 
-SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, bool acceptSingleStates)
+SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
       m_acceptSingleStates(acceptSingleStates) {}
 
