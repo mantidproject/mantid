@@ -1,0 +1,1 @@
+- Fixed a crash in :ref:`FindPeaks <algm-FindPeaks>` when the number of bins in the workspace are not sufficient to run SmoothData:ref:`algm-SmoothData` algorithm and raise the error instead.
