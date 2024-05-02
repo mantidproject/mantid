@@ -36,8 +36,10 @@ private:
   /// Check that the inputs to the algorithm are valid.
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Save the given workspace to a given path as Nexus, applying the relevant extension if necessary.
   void saveToFile(API::MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
 
+  /// Perform the main calculation for determining the efficiency on the given group.
   API::MatrixWorkspace_sptr calculateEfficiency(API::WorkspaceGroup_sptr const &groupWs);
 };
 } // namespace Mantid::Algorithms

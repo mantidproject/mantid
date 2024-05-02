@@ -11,6 +11,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
@@ -18,6 +19,7 @@
 
 namespace {} // namespace
 
+using Mantid::Algorithms::ConvertUnits;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::FlipperEfficiency;
 using Mantid::Algorithms::GroupWorkspaces;
@@ -101,6 +103,14 @@ public:
                             "workspace for all four spin states.")
   }
 
+  void test_non_wavelength_workspace_is_captured() {
+    auto const &group = createTestingWorkspace("testWs", 1.0, true);
+    auto alg = initialize_alg(group);
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.")
+  }
+
   /// Calculation Tests
 
   void test_normal_perfect_calculation_occurs() {
@@ -131,12 +141,17 @@ private:
   std::string m_defaultSaveDirectory;
 
   Mantid::API::WorkspaceGroup_sptr createTestingWorkspace(std::string const &outName,
-                                                          double const flipAmplitudeMultiplier = 1.0) {
+                                                          double const flipAmplitudeMultiplier = 1.0,
+                                                          bool const TOFWs = false) {
 
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
     makeWsAlg.setPropertyValue("Function", "User Defined");
-    makeWsAlg.setPropertyValue("XUnit", "wavelength");
+    if (TOFWs) {
+      makeWsAlg.setPropertyValue("XUnit", "TOF");
+    } else {
+      makeWsAlg.setPropertyValue("XUnit", "wavelength");
+    }
     makeWsAlg.setProperty("NumBanks", 1);
     makeWsAlg.setProperty("BankPixelWidth", 1);
     makeWsAlg.setProperty("XMin", 1.45);

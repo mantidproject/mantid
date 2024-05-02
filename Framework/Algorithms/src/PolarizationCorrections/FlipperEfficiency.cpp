@@ -6,11 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <filesystem>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 namespace {
 /// Property Names
@@ -53,8 +56,20 @@ std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
   std::map<std::string, std::string> problems;
   // Check input.
   WorkspaceGroup_sptr const groupWs = getProperty(PropNames::INPUT_WS);
+  if (groupWs == nullptr) {
+    // Return early so the following checks don't freak out.
+    problems[PropNames::INPUT_WS] = "The input workspace must be a group workspace";
+    return problems;
+  }
   if (groupWs->size() != 4) {
     problems[PropNames::INPUT_WS] = "The input group must contain a workspace for all four spin states.";
+  }
+  for (size_t i = 0; i < groupWs->size(); ++i) {
+    MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
+    Unit_const_sptr unit = stateWs->getAxis(0)->unit();
+    if (unit->unitID() != "Wavelength") {
+      problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
+    }
   }
 
   // Check outputs.
