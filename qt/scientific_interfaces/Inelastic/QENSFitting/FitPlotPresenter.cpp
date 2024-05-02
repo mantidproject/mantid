@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitPlotPresenter.h"
 #include "Common/SettingsHelper.h"
+#include "FitPlotModel.h"
 #include "FitPlotView.h"
 #include "FitTab.h"
 
@@ -27,8 +28,8 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-FitPlotPresenter::FitPlotPresenter(IFitTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model)
-    : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
+FitPlotPresenter::FitPlotPresenter(IFitTab *tab, IFitPlotView *view, IFitPlotModel *model)
+    : m_tab(tab), m_view(view), m_model(model), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
 }
 

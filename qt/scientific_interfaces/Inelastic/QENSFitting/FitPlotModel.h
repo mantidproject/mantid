@@ -23,36 +23,65 @@ namespace CustomInterfaces {
 namespace Inelastic {
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL FitPlotModel {
+class MANTIDQT_INELASTIC_DLL IFitPlotModel {
+public:
+  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const = 0;
+  virtual MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
+
+  virtual WorkspaceID getActiveWorkspaceID() const = 0;
+  virtual WorkspaceIndex getActiveWorkspaceIndex() const = 0;
+  virtual FitDomainIndex getActiveDomainIndex() const = 0;
+  virtual WorkspaceID numberOfWorkspaces() const = 0;
+  virtual std::pair<double, double> getRange() const = 0;
+  virtual std::pair<double, double> getWorkspaceRange() const = 0;
+  virtual std::pair<double, double> getResultRange() const = 0;
+  virtual boost::optional<double> getFirstHWHM() const = 0;
+  virtual boost::optional<double> getFirstPeakCentre() const = 0;
+  virtual boost::optional<double> getFirstBackgroundLevel() const = 0;
+  virtual double calculateHWHMMaximum(double minimum) const = 0;
+  virtual double calculateHWHMMinimum(double maximum) const = 0;
+  virtual bool canCalculateGuess() const = 0;
+
+  virtual void setActiveIndex(WorkspaceID workspaceID) = 0;
+  virtual void setActiveSpectrum(WorkspaceIndex spectrum) = 0;
+
+  virtual void setFittingData(std::vector<FitData> *fittingData) = 0;
+  virtual void setFitOutput(IFitOutput *fitOutput) = 0;
+  virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL FitPlotModel : public IFitPlotModel {
 public:
   FitPlotModel();
   ~FitPlotModel();
 
-  Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
-  Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
-  Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  Mantid::API::MatrixWorkspace_sptr getWorkspace() const override;
+  Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const override;
+  Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const override;
+  MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
 
-  WorkspaceID getActiveWorkspaceID() const;
-  WorkspaceIndex getActiveWorkspaceIndex() const;
-  FitDomainIndex getActiveDomainIndex() const;
-  WorkspaceID numberOfWorkspaces() const;
-  std::pair<double, double> getRange() const;
-  std::pair<double, double> getWorkspaceRange() const;
-  std::pair<double, double> getResultRange() const;
-  boost::optional<double> getFirstHWHM() const;
-  boost::optional<double> getFirstPeakCentre() const;
-  boost::optional<double> getFirstBackgroundLevel() const;
-  double calculateHWHMMaximum(double minimum) const;
-  double calculateHWHMMinimum(double maximum) const;
-  bool canCalculateGuess() const;
+  WorkspaceID getActiveWorkspaceID() const override;
+  WorkspaceIndex getActiveWorkspaceIndex() const override;
+  FitDomainIndex getActiveDomainIndex() const override;
+  WorkspaceID numberOfWorkspaces() const override;
+  std::pair<double, double> getRange() const override;
+  std::pair<double, double> getWorkspaceRange() const override;
+  std::pair<double, double> getResultRange() const override;
+  boost::optional<double> getFirstHWHM() const override;
+  boost::optional<double> getFirstPeakCentre() const override;
+  boost::optional<double> getFirstBackgroundLevel() const override;
+  double calculateHWHMMaximum(double minimum) const override;
+  double calculateHWHMMinimum(double maximum) const override;
+  bool canCalculateGuess() const override;
 
-  void setActiveIndex(WorkspaceID workspaceID);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
+  void setActiveIndex(WorkspaceID workspaceID) override;
+  void setActiveSpectrum(WorkspaceIndex spectrum) override;
 
-  void setFittingData(std::vector<FitData> *fittingData);
-  void setFitOutput(IFitOutput *fitOutput);
-  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
+  void setFittingData(std::vector<FitData> *fittingData) override;
+  void setFitOutput(IFitOutput *fitOutput) override;
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
 
 private:
   std::pair<double, double> getGuessRange() const;
