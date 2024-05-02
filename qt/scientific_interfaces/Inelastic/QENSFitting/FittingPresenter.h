@@ -80,8 +80,6 @@ public:
 
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   IFitOutput *getFitOutput() const;
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
-  Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   std::string getOutputBasename() const;
 
   IFitDataModel *getFitDataModel() const;
