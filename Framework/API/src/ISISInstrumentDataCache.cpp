@@ -26,12 +26,16 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
     throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
   }
 
+  std::stringstream sstream;
+  sstream << ifstrm.rdbuf();
+  ifstrm.close();
+
   // Read directory path from json file
   Json::Value json;
   std::string relativePath;
 
   try {
-    ifstrm >> json;
+    sstream >> json;
     relativePath = json[runNumber].asString();
   } catch (...) {
     try {
