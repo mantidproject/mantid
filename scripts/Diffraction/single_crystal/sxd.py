@@ -336,16 +336,20 @@ class SXD(BaseSX):
             mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
 
     @staticmethod
-    def find_sx_peaks(ws, bg=None, nstd=None, lambda_min=0.45, lambda_max=3, nbunch=3, out_peaks=None, **kwargs):
+    def find_sx_peaks(ws, out_peaks=None, **kwargs):
         wsname = SXD.retrieve(ws).name()
-        ws_rb = wsname + "_rb"
-        mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
-        SXD.mask_detector_edges(ws_rb)
-        SXD.crop_ws(ws_rb, lambda_min, lambda_max, xunit="Wavelength")
         if out_peaks is None:
-            out_peaks = wsname + "_peaks"  # need to do this so not "_rb_peaks"
-        BaseSX.find_sx_peaks(ws_rb, bg, nstd, out_peaks, **kwargs)
-        mantid.DeleteWorkspace(ws_rb, EnableLogging=False)
+            out_peaks = wsname + "_peaks"
+        default_kwargs = {
+            "NRows": 7,
+            "NCols": 7,
+            "GetNBinsFromBackToBackParams": True,
+            "NFWHM": 6,
+            "PeakFindingStrategy": "VarianceOverMean",
+            "ThresholdVarianceOverMean": 2,
+        }
+        kwargs = {**default_kwargs, **kwargs}  # will overwrite default with provided if duplicate keys
+        mantid.FindSXPeaksConvolve(InputWorkspace=wsname, PeaksWorkspace=out_peaks, **kwargs)
         return out_peaks
 
     @staticmethod

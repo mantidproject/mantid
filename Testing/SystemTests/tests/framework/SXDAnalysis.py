@@ -21,23 +21,22 @@ class SXDPeakSearchAndFindUBUsingFFT(systemtesting.MantidSystemTest):
 
     def runTest(self):
         ws = Load(Filename="SXD23767.raw", LoadMonitors="Exclude")
-        self.peaks = SXD.find_sx_peaks(ws, nstd=6)
+        self.peaks = SXD.find_sx_peaks(ws, ThresholdVarianceOverMean=1.5)
         FindUBUsingFFT(PeaksWorkspace=self.peaks, MinD=1, MaxD=10, Tolerance=0.15)
         SelectCellOfType(PeaksWorkspace=self.peaks, CellType="Cubic", Centering="F", Apply=True)
         OptimizeLatticeForCellType(PeaksWorkspace=self.peaks, CellType="Cubic", Apply=True)
         self.nindexed, *_ = IndexPeaks(PeaksWorkspace=self.peaks, Tolerance=0.1, CommonUBForAll=True)
 
     def validate(self):
-        self.assertEqual(214, self.nindexed)
+        self.assertEqual(171, self.nindexed)
         latt = SXD.retrieve(self.peaks).sample().getOrientedLattice()
-        a, alpha = 5.6541, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
+        a, alpha = 5.6533, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
         self.assertAlmostEqual(a, latt.a(), delta=1e-5)
         self.assertAlmostEqual(a, latt.b(), delta=1e-5)
         self.assertAlmostEqual(a, latt.c(), delta=1e-5)
         self.assertAlmostEqual(alpha, latt.alpha(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.beta(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.gamma(), delta=1e-10)
-        return self.peaks, "SXD23767_found_peaks.nxs"
 
 
 class SXDDetectorCalibration(systemtesting.MantidSystemTest):
