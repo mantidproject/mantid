@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,6 +19,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <filesystem>
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
@@ -31,6 +33,7 @@ static const std::string INPUT_WORKSPACE = "InputWorkspace";
 static const std::string ANALYSER_EFFICIENCY = "AnalyserEfficiency";
 static const std::string SPIN_STATES = "SpinStates";
 static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
+static const std::string OUTPUT_FILE_PATH = "OutputFilePath";
 } // namespace PropertyNames
 
 void PolarizerEfficiency::init() {
@@ -45,13 +48,16 @@ void PolarizerEfficiency::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::ANALYSER_EFFICIENCY, "",
                                                                        Direction::Input, wavelengthValidator),
                   "Analyser efficiency as a function of wavelength");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-      "Polarizer efficiency as a function of wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "",
+                                                                       Direction::Output, PropertyMode::Optional),
+                  "Polarizer efficiency as a function of wavelength");
 
   const auto &spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
+
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::OUTPUT_FILE_PATH, "", FileProperty::OptionalSave),
+                  "File name or path for the output to be saved to.");
 }
 
 /**
@@ -76,6 +82,14 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
       errorList[PropertyNames::INPUT_WORKSPACE] =
           "The input group workspace must have four periods corresponding to the four spin configurations.";
     }
+  }
+
+  // Check outputs.
+  auto const &outputWs = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+  auto const &outputFile = getPropertyValue(PropertyNames::OUTPUT_FILE_PATH);
+  if (outputWs.empty() && outputFile.empty()) {
+    errorList[PropertyNames::OUTPUT_FILE_PATH] = "Either an output workspace or output file must be provided.";
+    errorList[PropertyNames::OUTPUT_WORKSPACE] = "Either an output workspace or output file must be provided.";
   }
 
   return errorList;
@@ -124,7 +138,30 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   effCell = rebin->getProperty("OutputWorkspace");
 
   const auto &effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
+
+  auto const &filename = getPropertyValue(PropertyNames::OUTPUT_FILE_PATH);
+  if (!filename.empty()) {
+    saveToFile(effPolarizer, filename);
+  }
+
+  auto const &outputWsName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+  if (!outputWsName.empty()) {
+    setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
+  }
+}
+
+void PolarizerEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr) {
+  std::filesystem::path filePath = filePathStr;
+  // Add the nexus extension if it's not been applied already.
+  const std::string fileExtension = ".nxs";
+  if (filePath.extension() != fileExtension) {
+    filePath.replace_extension(fileExtension);
+  }
+  auto saveAlg = createChildAlgorithm("SaveNexus");
+  saveAlg->initialize();
+  saveAlg->setProperty("Filename", filePath.string());
+  saveAlg->setProperty("InputWorkspace", workspace);
+  saveAlg->execute();
 }
 
 MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixWorkspace_sptr ws) {
