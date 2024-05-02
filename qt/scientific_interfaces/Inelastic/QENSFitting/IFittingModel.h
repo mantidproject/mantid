@@ -69,7 +69,6 @@ public:
   virtual std::string getOutputBasename() const = 0;
 
   virtual void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) = 0;
-  virtual void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) = 0;
   virtual void removeFittingData() = 0;
   virtual void addDefaultParameters() = 0;
   virtual void removeDefaultParameters() = 0;
