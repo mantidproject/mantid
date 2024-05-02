@@ -29,6 +29,7 @@ namespace CustomInterfaces {
 namespace Inelastic {
 
 class IFitDataModel;
+class IFitPlotModel;
 class IFitOutput;
 class IFitTab;
 class InelasticFitPropertyBrowser;
@@ -90,6 +91,7 @@ public:
   std::string getOutputBasename() const;
 
   IFitDataModel *getFitDataModel() const;
+  IFitPlotModel *getFitPlotModel() const;
 
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 

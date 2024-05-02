@@ -142,6 +142,8 @@ std::string FittingPresenter::getOutputBasename() const { return m_model->getOut
 
 IFitDataModel *FittingPresenter::getFitDataModel() const { return m_model->getFitDataModel(); }
 
+IFitPlotModel *FittingPresenter::getFitPlotModel() const { return m_model->getFitPlotModel(); }
+
 bool FittingPresenter::isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   return m_model->isPreviouslyFit(workspaceID, spectrum);
 }
