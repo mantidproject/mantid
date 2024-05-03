@@ -67,9 +67,9 @@ void PolarizerEfficiency::init() {
  */
 std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
-  const std::string inputWorkspaceName = getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (!AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "The workspace " + inputWorkspaceName + " does not exist in the ADS.";
+  const WorkspaceGroup_sptr inputWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
+  if (inputWorkspace == nullptr) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace  is not a workspace group."
     return errorList;
   }
 
