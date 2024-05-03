@@ -176,7 +176,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return "Saves ISIS processed reflectometry workspaces into the ASCII implementation of the ORSO data standard."
+        return "Saves ISIS processed reflectometry workspaces into either the ASCII or Nexus implementation of the ORSO data standard."
 
     def PyInit(self):
         mandatory_ws_list = CompositeValidator()
