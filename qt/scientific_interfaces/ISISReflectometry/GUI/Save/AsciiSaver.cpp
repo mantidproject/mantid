@@ -16,9 +16,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
-bool shouldSaveToSingleFile(FileFormatOptions const &fileFormat) {
-  return fileFormat.shouldSaveToSingleFile() && fileFormat.isORSOFormat();
-}
+static constexpr auto MULTI_DATASET_FILE_SUFFIX = "_multi";
 } // unnamed namespace
 
 AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
@@ -98,7 +96,8 @@ void AsciiSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames
                                   std::vector<std::string> const &logParameters,
                                   FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
-  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspaceNames.front(), extension);
+  auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
+  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
 
   if (fileFormat.isORSOFormat()) {
     runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
@@ -115,7 +114,7 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
   }
 
   // Setup the appropriate save algorithm
-  if (shouldSaveToSingleFile(fileFormat)) {
+  if (shouldSaveToSingleFile(workspaceNames, fileFormat)) {
     saveToSingleFile(workspaceNames, saveDirectory, logParameters, fileFormat);
   } else {
     for (auto const &name : workspaceNames) {
@@ -131,5 +130,29 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
       save(ws, saveDirectory, logParameters, fileFormat);
     }
   }
+}
+
+bool AsciiSaver::shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
+                                        FileFormatOptions const &fileFormat) const {
+  if (!fileFormat.shouldSaveToSingleFile()) {
+    return false;
+  }
+
+  if (!fileFormat.isORSOFormat()) {
+    return false;
+  }
+
+  if (workspaceNames.size() > 1) {
+    return true;
+  }
+
+  // If there is only one workspace name in the list then we may still have multiple datasets if it is a workspace group
+  const auto ws = workspace(workspaceNames.front());
+  if (!ws->isGroup()) {
+    return false;
+  }
+
+  Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+  return group->size() > 1;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

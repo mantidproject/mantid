@@ -46,6 +46,9 @@ private:
 
   void saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
                         std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
+
+  bool shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
+                              FileFormatOptions const &fileFormat) const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
