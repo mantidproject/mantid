@@ -84,7 +84,7 @@ private:
 
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
-  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  std::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   size_t numberOfSpectra(WorkspaceID workspaceID) const;
 
   Mantid::API::MatrixWorkspace_sptr createGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,

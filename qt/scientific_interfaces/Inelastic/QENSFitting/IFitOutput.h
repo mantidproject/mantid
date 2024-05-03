@@ -7,13 +7,13 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
-#include "MantidAPI/ITableWorkspace.h"
-
-#include "MantidAPI/IAlgorithm.h"
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,7 +45,7 @@ public:
 
   virtual std::unordered_map<std::string, ParameterValue> getParameters(FitDomainIndex index) const = 0;
 
-  virtual boost::optional<ResultLocationNew> getResultLocation(FitDomainIndex index) const = 0;
+  virtual std::optional<ResultLocationNew> getResultLocation(FitDomainIndex index) const = 0;
   virtual std::vector<std::string> getResultParameterNames() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const = 0;
