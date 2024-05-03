@@ -90,8 +90,6 @@ void FittingPresenter::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_s
 
 Mantid::API::WorkspaceGroup_sptr FittingPresenter::getResultWorkspace() const { return m_model->getResultWorkspace(); }
 
-IFitOutput *FittingPresenter::getFitOutput() const { return m_model->getFitOutput(); }
-
 std::string FittingPresenter::getOutputBasename() const { return m_model->getOutputBasename(); }
 
 IFitDataModel *FittingPresenter::getFitDataModel() const { return m_model->getFitDataModel(); }
