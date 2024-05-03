@@ -40,3 +40,4 @@ class TableWorkspaceDataPresenterGroup(TableWorkspaceDataPresenterBase):
     def sort(self, selected_column, sort_ascending):
         self.view.sortBySelectedColumn(selected_column, sort_ascending)
         self.sort_data = (selected_column, sort_ascending)
+        self.view.hideColumn(0)

@@ -78,7 +78,7 @@ list retrieveGroupPeaksWorkspaces(AnalysisDataServiceImpl const *const self, con
     if (auto gws = dynamic_cast<WorkspaceGroup *>(wksp.get())) {
       return !gws->isGroupPeaksWorkspaces();
     }
-    return false;
+    return true;
   };
   auto end = std::remove_if(wsSharedPtrs.begin(), wsSharedPtrs.end(), isNotGroupPeakWorkspace);
   wsSharedPtrs.erase(end, wsSharedPtrs.end());
