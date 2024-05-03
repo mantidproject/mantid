@@ -22,7 +22,7 @@ void AlgorithmRunner::execute(IConfiguredAlgorithm_sptr algorithm) {
 }
 
 void AlgorithmRunner::execute(std::deque<IConfiguredAlgorithm_sptr> algorithmQueue) {
-  m_jobRunner->setAlgorithmQueue(algorithmQueue);
+  m_jobRunner->setAlgorithmQueue(std::move(algorithmQueue));
   m_jobRunner->executeAlgorithmQueue();
 }
 
