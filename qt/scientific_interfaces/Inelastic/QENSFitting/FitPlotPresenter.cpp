@@ -267,7 +267,7 @@ void FitPlotPresenter::updateHWHMSelector() {
 }
 
 void FitPlotPresenter::setHWHM(double hwhm) {
-  const auto centre = m_model->getFirstPeakCentre().get_value_or(0.);
+  const auto centre = m_model->getFirstPeakCentre().value_or(0.);
   m_view->setHWHMMaximum(centre + hwhm);
   m_view->setHWHMMinimum(centre - hwhm);
 }
