@@ -42,7 +42,7 @@ void PolarizerEfficiency::init() {
   validator->add<WorkspaceUnitValidator>("Wavelength");
   validator->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
   const auto &wavelengthValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::ANALYSER_EFFICIENCY, "",
