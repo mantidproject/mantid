@@ -47,14 +47,13 @@ public:
   virtual void setActiveIndex(WorkspaceID workspaceID) = 0;
   virtual void setActiveSpectrum(WorkspaceIndex spectrum) = 0;
 
-  virtual void setFittingData(std::vector<FitData> *fittingData) = 0;
   virtual void setFitOutput(IFitOutput *fitOutput) = 0;
   virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL FitPlotModel : public IFitPlotModel {
 public:
-  FitPlotModel();
+  FitPlotModel(std::vector<FitData> *fittingData);
   ~FitPlotModel();
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const override;
@@ -79,7 +78,6 @@ public:
   void setActiveIndex(WorkspaceID workspaceID) override;
   void setActiveSpectrum(WorkspaceIndex spectrum) override;
 
-  void setFittingData(std::vector<FitData> *fittingData) override;
   void setFitOutput(IFitOutput *fitOutput) override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
 

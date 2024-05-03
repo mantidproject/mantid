@@ -308,9 +308,9 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 FittingModel::FittingModel()
-    : m_fitDataModel(std::make_unique<FitDataModel>()), m_fitPlotModel(std::make_unique<FitPlotModel>()),
-      m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
-      m_fitOutput(std::make_unique<FitOutput>()) {}
+    : m_fitDataModel(std::make_unique<FitDataModel>()),
+      m_fitPlotModel(std::make_unique<FitPlotModel>(m_fitDataModel->getFittingData())), m_previousModelSelected(false),
+      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<FitOutput>()) {}
 
 void FittingModel::validate(UserInputValidator &validator) const {
   if (auto const invalidFunction = isInvalidFunction())

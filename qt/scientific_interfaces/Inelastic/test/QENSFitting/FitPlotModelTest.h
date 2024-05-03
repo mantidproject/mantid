@@ -80,11 +80,10 @@ public:
   void setUp() override {
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<FitPlotModel>();
     m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
+    m_model = std::make_unique<FitPlotModel>(m_fittingData.get());
     m_fitOutput = std::make_unique<FitOutput>();
-    m_model->setFittingData(m_fittingData.get());
     m_model->setFitOutput(m_fitOutput.get());
   }
 
