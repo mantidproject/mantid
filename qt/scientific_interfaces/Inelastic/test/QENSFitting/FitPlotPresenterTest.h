@@ -56,9 +56,9 @@ public:
     /// FittingModel is mocked instead - which is a good
     /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
-    auto model = std::make_unique<FitPlotModel>();
+    m_model = std::make_unique<NiceMock<MockFitPlotModel>>();
     m_view = std::make_unique<NiceMock<MockFitPlotView>>();
-    m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
+    m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), m_model.get());
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
@@ -365,6 +365,7 @@ public:
 private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitPlotView>> m_view;
+  std::unique_ptr<NiceMock<MockFitPlotModel>> m_model;
   std::unique_ptr<FitPlotPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

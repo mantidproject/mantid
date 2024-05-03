@@ -15,8 +15,8 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,9 +37,9 @@ public:
   virtual std::pair<double, double> getRange() const = 0;
   virtual std::pair<double, double> getWorkspaceRange() const = 0;
   virtual std::pair<double, double> getResultRange() const = 0;
-  virtual boost::optional<double> getFirstHWHM() const = 0;
-  virtual boost::optional<double> getFirstPeakCentre() const = 0;
-  virtual boost::optional<double> getFirstBackgroundLevel() const = 0;
+  virtual std::optional<double> getFirstHWHM() const = 0;
+  virtual std::optional<double> getFirstPeakCentre() const = 0;
+  virtual std::optional<double> getFirstBackgroundLevel() const = 0;
   virtual double calculateHWHMMaximum(double minimum) const = 0;
   virtual double calculateHWHMMinimum(double maximum) const = 0;
   virtual bool canCalculateGuess() const = 0;
@@ -69,9 +69,9 @@ public:
   std::pair<double, double> getRange() const override;
   std::pair<double, double> getWorkspaceRange() const override;
   std::pair<double, double> getResultRange() const override;
-  boost::optional<double> getFirstHWHM() const override;
-  boost::optional<double> getFirstPeakCentre() const override;
-  boost::optional<double> getFirstBackgroundLevel() const override;
+  std::optional<double> getFirstHWHM() const override;
+  std::optional<double> getFirstPeakCentre() const override;
+  std::optional<double> getFirstBackgroundLevel() const override;
   double calculateHWHMMaximum(double minimum) const override;
   double calculateHWHMMinimum(double maximum) const override;
   bool canCalculateGuess() const override;
