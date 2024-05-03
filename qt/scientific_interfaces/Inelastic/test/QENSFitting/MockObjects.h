@@ -14,6 +14,8 @@
 #include "Manipulation/ElwinPresenter.h"
 #include "Manipulation/ElwinView.h"
 #include "Manipulation/IElwinView.h"
+#include "QENSFitting/FitOutput.h"
+#include "QENSFitting/FitPlotModel.h"
 #include "QENSFitting/FitTab.h"
 #include "QENSFitting/FunctionBrowser/FunctionTemplateView.h"
 #include "QENSFitting/FunctionBrowser/ITemplatePresenter.h"
@@ -23,11 +25,14 @@
 #include "QENSFitting/IFitPlotView.h"
 #include "QENSFitting/InelasticFitPropertyBrowser.h"
 
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -47,8 +52,9 @@ public:
   MOCK_METHOD0(handleDataRemoved, void());
   MOCK_METHOD3(handleTableStartXChanged, void(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
   MOCK_METHOD3(handleTableEndXChanged, void(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD1(handleFunctionListChanged, void(const std::map<std::string, std::string> &functionStrings));
 
-  MOCK_METHOD2(handleSingleFitClicked, void(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD0(handleSingleFitClicked, void());
   MOCK_METHOD1(handleStartXChanged, void(double startX));
   MOCK_METHOD1(handleEndXChanged, void(double endX));
   MOCK_METHOD0(handlePlotSpectrumChanged, void());
@@ -58,6 +64,39 @@ public:
   MOCK_METHOD0(handlePlotSelectedSpectra, void());
 
   MOCK_METHOD0(handleFunctionChanged, void());
+  MOCK_METHOD1(handleFitComplete, void(bool const error));
+};
+
+class MockFitPlotModel : public IFitPlotModel {
+public:
+  virtual ~MockFitPlotModel() = default;
+
+  MOCK_CONST_METHOD0(getWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(getResultWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(getGuessWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD1(getSpectra, MantidQt::MantidWidgets::FunctionModelSpectra(WorkspaceID workspaceID));
+
+  MOCK_CONST_METHOD0(getActiveWorkspaceID, WorkspaceID());
+  MOCK_CONST_METHOD0(getActiveWorkspaceIndex, WorkspaceIndex());
+  MOCK_CONST_METHOD0(getActiveDomainIndex, FitDomainIndex());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, WorkspaceID());
+
+  MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
+  MOCK_CONST_METHOD0(getWorkspaceRange, std::pair<double, double>());
+  MOCK_CONST_METHOD0(getResultRange, std::pair<double, double>());
+  MOCK_CONST_METHOD0(getFirstHWHM, std::optional<double>());
+  MOCK_CONST_METHOD0(getFirstPeakCentre, std::optional<double>());
+  MOCK_CONST_METHOD0(getFirstBackgroundLevel, std::optional<double>());
+  MOCK_CONST_METHOD1(calculateHWHMMaximum, double(double maximum));
+  MOCK_CONST_METHOD1(calculateHWHMMinimum, double(double minimum));
+  MOCK_CONST_METHOD0(canCalculateGuess, bool());
+
+  MOCK_METHOD1(setActiveIndex, void(WorkspaceID workspaceID));
+  MOCK_METHOD1(setActiveSpectrum, void(WorkspaceIndex spectrum));
+
+  MOCK_METHOD1(setFittingData, void(std::vector<FitData> *fittingData));
+  MOCK_METHOD1(setFitOutput, void(IFitOutput *fitOutput));
+  MOCK_METHOD1(setFitFunction, void(Mantid::API::MultiDomainFunction_sptr function));
 };
 
 class MockFitPlotView : public IFitPlotView {
