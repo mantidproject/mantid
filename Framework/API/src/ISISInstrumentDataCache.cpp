@@ -7,6 +7,7 @@
 #include <Poco/Path.h>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <json/reader.h>
 #include <json/value.h>
 
@@ -21,14 +22,14 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
 
   // Open index json file
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
-  std::ifstream ifstrm{jsonPath};
+  std::ifstream ifstrm(jsonPath);
   if (!ifstrm.is_open()) {
     throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
   }
-
-  std::stringstream sstream;
-  sstream << ifstrm.rdbuf();
+  std::string jsonString = std::string(std::istreambuf_iterator<char>(ifstrm), std::istreambuf_iterator<char>());
   ifstrm.close();
+
+  std::stringstream sstream(jsonString);
 
   // Read directory path from json file
   Json::Value json;
@@ -46,14 +47,10 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
     }
 
     std::ofstream ofstrm{Poco::Path::home() + "/" + instrName + "_index_log.txt"};
-    ifstrm.clear();
-    ifstrm.seekg(0, std::ios::beg);
-    std::string line;
-    while (std::getline(ifstrm, line)) {
-      ofstrm << line << std::endl;
-    }
+    std::cout << jsonString << std::endl;
+    ofstrm << jsonString;
     ofstrm.close();
-    g_log.debug() << "\n\nWrote json log to file!\n\n" << std::endl;
+    g_log.debug() << "\n\nWrote string to json log to file!\n\n" << std::endl;
     throw;
   }
 
