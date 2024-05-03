@@ -242,12 +242,12 @@ FitDomainIndex FitPlotModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIn
   return index;
 }
 
-boost::optional<ResultLocationNew> FitPlotModel::getResultLocation(WorkspaceID workspaceID,
-                                                                   WorkspaceIndex spectrum) const {
+std::optional<ResultLocationNew> FitPlotModel::getResultLocation(WorkspaceID workspaceID,
+                                                                 WorkspaceIndex spectrum) const {
   auto fitDomainIndex = getDomainIndex(workspaceID, spectrum);
   if (!m_fitOutput->isEmpty() && numberOfWorkspaces() > workspaceID)
     return m_fitOutput->getResultLocation(fitDomainIndex);
-  return boost::none;
+  return std::nullopt;
 }
 
 std::pair<double, double> FitPlotModel::getGuessRange() const {

@@ -7,9 +7,13 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IFitOutput.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,7 +32,7 @@ class MANTIDQT_INELASTIC_DLL IFittingModel {
 public:
   virtual ~IFittingModel(){};
   virtual bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
-  virtual boost::optional<std::string> isInvalidFunction() const = 0;
+  virtual std::optional<std::string> isInvalidFunction() const = 0;
   virtual std::vector<std::string> getFitParameterNames() const = 0;
   virtual Mantid::API::MultiDomainFunction_sptr getFitFunction() const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getParameterValues(WorkspaceID workspaceID,
@@ -43,6 +47,8 @@ public:
   virtual std::unordered_map<std::string, ParameterValue> getFitParameters(WorkspaceID workspaceID,
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
+
+  virtual void validate(MantidQt::CustomInterfaces::UserInputValidator &validator) const = 0;
 
   // Functions that interact with FitDataModel
   virtual void clearWorkspaces() = 0;
@@ -59,8 +65,8 @@ public:
   virtual FittingMode getFittingMode() const = 0;
 
   virtual void updateFitTypeString() = 0;
-  virtual boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID,
-                                                               WorkspaceIndex spectrum) const = 0;
+  virtual std::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID,
+                                                             WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultGroup() const = 0;
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const = 0;

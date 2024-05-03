@@ -384,7 +384,7 @@ public:
   void test_getResultLocation_returns_none_when_out_of_index() {
     addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
     addFitOutputDataToModel();
-    TS_ASSERT_EQUALS(m_model->getResultLocation(WorkspaceID{1}, WorkspaceIndex{0}), boost::none);
+    TS_ASSERT(!m_model->getResultLocation(WorkspaceID{1}, WorkspaceIndex{0}));
   }
 
   void test_getResultWorkspace_does_not_throw() {

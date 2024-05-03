@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FittingPresenter.h"
 #include "FitTab.h"
+#include "FittingModel.h"
 #include "IFitOutput.h"
 #include "InelasticFitPropertyBrowser.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FittingPresenter::FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser,
-                                   std::unique_ptr<FittingModel> model,
-                                   std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner)
+FittingPresenter::FittingPresenter(IFitTab *tab, IInelasticFitPropertyBrowser *browser,
+                                   std::unique_ptr<IFittingModel> model,
+                                   std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner)
     : m_tab(tab), m_fitPropertyBrowser(browser), m_model(std::move(model)),
       m_algorithmRunner(std::move(algorithmRunner)) {
   m_fitPropertyBrowser->subscribePresenter(this);
@@ -131,7 +132,6 @@ void FittingPresenter::updateFitBrowserParameterValues(const std::unordered_map<
 void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
   updateFitBrowserParameterValues();
   if (fittingAlgorithm) {
-    QSignalBlocker blocker(m_fitPropertyBrowser);
     if (m_model->getFittingMode() == FittingMode::SEQUENTIAL) {
       auto const paramWsName = fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
       auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
