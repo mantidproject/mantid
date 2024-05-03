@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -17,6 +18,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <filesystem>
@@ -37,12 +39,8 @@ static const std::string OUTPUT_FILE_PATH = "OutputFilePath";
 } // namespace PropertyNames
 
 void PolarizerEfficiency::init() {
-  // Declare required input parameters for algorithm and do some validation here
-  auto validator = std::make_shared<CompositeValidator>();
-  validator->add<WorkspaceUnitValidator>("Wavelength");
-  validator->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
       "Input group workspace to use for polarization calculation");
   const auto &wavelengthValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::ANALYSER_EFFICIENCY, "",
@@ -69,18 +67,20 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
   const WorkspaceGroup_sptr inputWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (inputWorkspace == nullptr) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace  is not a workspace group."
+    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a workspace group.";
     return errorList;
   }
 
-  const auto &ws = AnalysisDataService::Instance().retrieve(inputWorkspaceName);
-  if (!ws->isGroup()) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace.";
-  } else {
-    const auto &wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
-    if (wsGroup->size() != 4) {
-      errorList[PropertyNames::INPUT_WORKSPACE] =
-          "The input group workspace must have four periods corresponding to the four spin configurations.";
+  if (inputWorkspace->size() != 4) {
+    errorList[PropertyNames::INPUT_WORKSPACE] =
+        "The input group workspace must have four periods corresponding to the four spin configurations.";
+  }
+
+  for (size_t i = 0; i < inputWorkspace->size(); ++i) {
+    const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
+    Unit_const_sptr unit = stateWs->getAxis(0)->unit();
+    if (unit->unitID() != "Wavelength") {
+      errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
     }
   }
 
