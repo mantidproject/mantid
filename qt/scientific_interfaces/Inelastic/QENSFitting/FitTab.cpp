@@ -42,7 +42,6 @@ void FitTab::setupOutputOptionsPresenter(bool const editResults) {
 void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
   m_plotPresenter = std::make_unique<FitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView,
                                                        m_fittingPresenter->getFitPlotModel());
-  m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingPresenter->getFitOutput());
   if (xPlotBounds) {
     m_plotPresenter->setXBounds(*xPlotBounds);
