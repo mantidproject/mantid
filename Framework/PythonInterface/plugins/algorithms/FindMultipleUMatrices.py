@@ -95,11 +95,18 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             doc="Tolerance (in degrees) of angle between peaks in QLab when identifying possible pairs of HKL.",
         )
         self.declareProperty(
-            name="MinAngle",
+            name="MinAngleBetweenPeaks",
             defaultValue=2.0,
             direction=Direction.Input,
             validator=positiveFloatValidator,
             doc="Minimum angle in QLab (in degrees) between pairs of peaks in when calculating U matrix.",
+        )
+        self.declareProperty(
+            name="MinAngleBetweenUB",
+            defaultValue=2.0,
+            direction=Direction.Input,
+            validator=positiveFloatValidator,
+            doc="Minimum angle in degrees between u and v vectors (converted from HKL to QLab) of different UB.",
         )
         self.declareProperty(
             name="MinDSpacing",
@@ -161,7 +168,8 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         dmin = self.getProperty("MinDSpacing").value
         dtol = self.getProperty("DSpacingTolerance").value
         angle_tol = np.radians(self.getProperty("AngleTolerance").value)
-        min_angle = np.radians(self.getProperty("MinAngle").value)
+        min_angle = np.radians(self.getProperty("MinAngleBetweenPeaks").value)
+        min_angle_ub = np.radians(self.getProperty("MinAngleBetweenUB").value)
         optimise_ubs = self.getProperty("OptimiseFoundUBs").value
         spgr_sym = self.getProperty("Spacegroup").value
         spgr = SpaceGroupFactory.createSpaceGroup(spgr_sym)
@@ -178,9 +186,8 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         self.calc_u_kwargs = {prop: self.getProperty(prop).value for prop in ("a", "b", "c", "alpha", "beta", "gamma")}
 
         # generate reflections and calc angles between them
-        hkls, dhkls, latt = self.calculate_reflections(spgr_sym, dmin, dmax, dtol, **self.calc_u_kwargs)
-        bmat = latt.getB()
-        bmat_inv = latt.getBinv()  # used later when comparing U matrices
+        hkls, dhkls, bmat = self.calculate_reflections(spgr_sym, dmin, dmax, dtol, **self.calc_u_kwargs)
+        bmat_inv = np.linalg.inv(bmat)
 
         # get all peaks between d-spacing limits
         peaks_filtered = self.exec_child_alg(
@@ -245,7 +252,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                                     [
                                         iub
                                         for iub in range(len(ubs))
-                                        if self.calculate_angle_between_rotation_matrices(ubs[iub] @ bmat_inv, this_u) < angle_tol
+                                        if self.calculate_angle_between_rotation_matrices(ubs[iub] @ bmat_inv, this_u) < min_angle_ub
                                     ]
                                 )
                                 if len(iub_similar) == 0:
@@ -315,7 +322,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         isort = np.argsort(-dhkls)
         dhkls = dhkls[isort]
         hkls = [hkls[ihkl] for ihkl in isort]
-        return hkls, dhkls, xtal.getUnitCell()
+        return hkls, dhkls, xtal.getUnitCell().getB().copy()
 
     @staticmethod
     def calculate_angles_between_reflections(hkls1, hkls2, bmat):
@@ -327,12 +334,6 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                 angles[ihkl_1, ihkl_2] = V3D(*qlab1).angle(V3D(*qlab2))
 
         return angles
-
-    @staticmethod
-    def calculate_angle_between_rotation_matrices(R1, R2):
-        R = np.dot(R1, R2.T)
-        cos_theta = np.clip((np.trace(R) - 1) / 2, -1, 1)  # in case outside range due to machine precision
-        return np.arccos(abs(cos_theta))
 
     @staticmethod
     def find_similar_ubs_that_index_less_accurately(hkl_ers, iub_similar, this_hkl_ers):
@@ -359,6 +360,12 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                 for pk in peaks
             ]
         )
+
+    @staticmethod
+    def calculate_angle_between_rotation_matrices(R1, R2):
+        R = np.dot(R1, R2.T)
+        cos_theta = np.clip((np.trace(R) - 1) / 2, -1, 1)  # in case outside range due to machine precision
+        return np.arccos(abs(cos_theta))
 
 
 # register algorithm with mantid
