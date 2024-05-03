@@ -238,18 +238,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                             )
                             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                                 # calculate hkl er in indexing
-                                mod_hkl = peaks.sample().getOrientedLattice().getModHKL()
-                                this_hkl_ers = np.array(
-                                    [
-                                        (
-                                            np.sum((pk.getIntHKL() + (mod_hkl @ pk.getIntMNP()) - pk.getHKL()) ** 2)
-                                            if np.any(pk.getHKL())
-                                            else np.inf
-                                        )
-                                        for pk in peaks
-                                    ]
-                                )
-
+                                this_hkl_ers = self.calculate_hkl_ers(peaks, spgr)
                                 # see if similar UBs have already been calculated
                                 this_u = this_ub @ bmat_inv
                                 iub_similar = np.array(
@@ -356,6 +345,20 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             if nrefl_indexed_better > nrefl_indexed / 2:
                 idel.append(iub)
         return idel
+
+    @staticmethod
+    def calculate_hkl_ers(peaks, spacegroup):
+        mod_hkl = peaks.sample().getOrientedLattice().getModHKL()
+        return np.array(
+            [
+                (
+                    np.sum((pk.getIntHKL() + (mod_hkl @ pk.getIntMNP()) - pk.getHKL()) ** 2)
+                    if not np.allclose(pk.getHKL(), 0.0) and spacegroup.isAllowedReflection(pk.getIntHKL())
+                    else np.inf
+                )
+                for pk in peaks
+            ]
+        )
 
 
 # register algorithm with mantid
