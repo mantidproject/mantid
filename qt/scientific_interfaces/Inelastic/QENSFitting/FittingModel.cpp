@@ -384,14 +384,14 @@ bool FittingModel::isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spect
   return m_fitOutput->isSpectrumFit(domainIndex);
 }
 
-boost::optional<std::string> FittingModel::isInvalidFunction() const {
+std::optional<std::string> FittingModel::isInvalidFunction() const {
   if (!m_activeFunction)
     return std::string("No fit function has been defined");
 
   const auto composite = std::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
   if (composite && (composite->nFunctions() == 0 || composite->nParams() == 0))
     return std::string("No fitting functions have been defined.");
-  return boost::none;
+  return std::nullopt;
 }
 
 std::vector<std::string> FittingModel::getFitParameterNames() const {
@@ -484,12 +484,12 @@ std::string FittingModel::getResultXAxisUnit() const { return "MomentumTransfer"
 
 std::string FittingModel::getResultLogName() const { return "axis-1"; }
 
-boost::optional<ResultLocationNew> FittingModel::getResultLocation(WorkspaceID workspaceID,
-                                                                   WorkspaceIndex spectrum) const {
+std::optional<ResultLocationNew> FittingModel::getResultLocation(WorkspaceID workspaceID,
+                                                                 WorkspaceIndex spectrum) const {
   auto fitDomainIndex = m_fitDataModel->getDomainIndex(workspaceID, spectrum);
   if (!m_fitOutput->isEmpty() && m_fitDataModel->getNumberOfWorkspaces() > workspaceID)
     return m_fitOutput->getResultLocation(fitDomainIndex);
-  return boost::none;
+  return std::nullopt;
 }
 
 WorkspaceGroup_sptr FittingModel::getResultWorkspace() const { return m_fitOutput->getLastResultWorkspace(); }

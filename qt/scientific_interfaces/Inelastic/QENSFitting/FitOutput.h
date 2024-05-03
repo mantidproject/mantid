@@ -30,7 +30,7 @@ public:
 
   std::unordered_map<std::string, ParameterValue> getParameters(FitDomainIndex index) const override;
 
-  boost::optional<ResultLocationNew> getResultLocation(FitDomainIndex index) const override;
+  std::optional<ResultLocationNew> getResultLocation(FitDomainIndex index) const override;
   std::vector<std::string> getResultParameterNames() const override;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const override;

@@ -80,11 +80,11 @@ std::unordered_map<std::string, ParameterValue> FitOutput::getParameters(FitDoma
   }
 }
 
-boost::optional<ResultLocationNew> FitOutput::getResultLocation(FitDomainIndex index) const {
+std::optional<ResultLocationNew> FitOutput::getResultLocation(FitDomainIndex index) const {
   if (m_outputResultLocations.count(index.value) == 1) {
     return m_outputResultLocations.at(index.value);
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 std::vector<std::string> FitOutput::getResultParameterNames() const {

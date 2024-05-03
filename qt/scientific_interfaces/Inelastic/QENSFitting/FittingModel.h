@@ -18,8 +18,7 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,7 +46,7 @@ public:
   FittingModel();
   virtual ~FittingModel() = default;
 
-  void validate(UserInputValidator &validator) const;
+  void validate(UserInputValidator &validator) const override;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;
@@ -58,7 +57,7 @@ public:
   // IFittingModel
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
-  virtual boost::optional<std::string> isInvalidFunction() const override;
+  virtual std::optional<std::string> isInvalidFunction() const override;
   std::vector<std::string> getFitParameterNames() const override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setFWHM(double fwhm, WorkspaceID WorkspaceID) override;
@@ -80,7 +79,7 @@ public:
   FittingMode getFittingMode() const override;
 
   void updateFitTypeString() override;
-  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  std::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const override;

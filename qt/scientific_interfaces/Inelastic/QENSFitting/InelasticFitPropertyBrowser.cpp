@@ -294,10 +294,12 @@ int InelasticFitPropertyBrowser::getNumberOfDatasets() const {
 }
 
 void InelasticFitPropertyBrowser::updateParameters(const IFunction &fun) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateParameters(fun);
   else
     m_templatePresenter->updateParameters(fun);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateFunctionListInBrowser(
@@ -306,17 +308,21 @@ void InelasticFitPropertyBrowser::updateFunctionListInBrowser(
 }
 
 void InelasticFitPropertyBrowser::updateMultiDatasetParameters(const IFunction &fun) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateMultiDatasetParameters(fun);
   else
     m_templatePresenter->updateMultiDatasetParameters(fun);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateMultiDatasetParameters(paramTable);
   else
     m_templatePresenter->updateMultiDatasetParameters(paramTable);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateFitStatusData(const std::vector<std::string> &status,
