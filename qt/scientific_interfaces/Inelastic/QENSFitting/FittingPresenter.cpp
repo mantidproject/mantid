@@ -145,8 +145,8 @@ void FittingPresenter::updateFitBrowserParameterValuesFromAlg(const Mantid::API:
       else
         m_fitPropertyBrowser->updateParameters(*fun);
     }
+    updateFitStatus(fittingAlgorithm);
   }
-  updateFitStatus(fittingAlgorithm);
 }
 
 void FittingPresenter::updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) {
