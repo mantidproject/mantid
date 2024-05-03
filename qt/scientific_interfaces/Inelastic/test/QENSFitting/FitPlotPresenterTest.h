@@ -62,10 +62,7 @@ public:
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_fittingData = std::make_unique<std::vector<FitData>>();
-    m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
     m_fitOutput = std::make_unique<FitOutput>();
-    m_presenter->setFittingData(m_fittingData.get());
     m_presenter->setFitOutput(m_fitOutput.get());
   }
 
@@ -124,8 +121,6 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_disable_selectors_when_there_is_no_workspace() {
-    m_fittingData->clear();
-
     EXPECT_CALL(*m_view, enableSpectrumSelection(false)).Times(1);
     EXPECT_CALL(*m_view, enableFitRangeSelection(false)).Times(1);
 
@@ -138,8 +133,8 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    m_fittingData->at(0).setStartX(1.0);
-    m_fittingData->at(0).setEndX(2.0);
+    ON_CALL(*m_model, getRange()).WillByDefault(Return(std::pair<double, double>{1.0, 2.0}));
+
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
@@ -164,8 +159,8 @@ public:
   }
 
   void test_that_handlePlotSpectrumChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    m_fittingData->at(0).setStartX(1.0);
-    m_fittingData->at(0).setEndX(2.0);
+    ON_CALL(*m_model, getRange()).WillByDefault(Return(std::pair<double, double>{1.0, 2.0}));
+
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
@@ -174,7 +169,6 @@ public:
 
   void test_that_handlePlotCurrentPreview_will_display_an_error_message_if_there_is_no_input_workspace() {
     std::string const message("Workspace not found - data may not be loaded.");
-    m_fittingData->clear();
 
     EXPECT_CALL(*m_view, displayMessage(message)).Times(1);
 
@@ -370,6 +364,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<FitOutput> m_fitOutput;
 };
