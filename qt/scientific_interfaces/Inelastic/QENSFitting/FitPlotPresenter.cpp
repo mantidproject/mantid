@@ -239,7 +239,7 @@ void FitPlotPresenter::updateGuessAvailability() {
 void FitPlotPresenter::handlePlotGuess(bool doPlotGuess) {
   if (doPlotGuess) {
     const auto guessWorkspace = m_model->getGuessWorkspace();
-    if (guessWorkspace->x(0).size() >= 2) {
+    if (guessWorkspace && guessWorkspace->x(0).size() >= 2) {
       plotGuess(guessWorkspace);
     }
   } else {
