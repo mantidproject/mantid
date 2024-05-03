@@ -111,6 +111,13 @@ public:
         "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.")
   }
 
+  void test_non_group_workspace_is_captured() {
+    auto const &group = createTestingWorkspace("testWs", 1.0);
+    auto alg = initialize_alg(group);
+    TS_ASSERT_THROWS_EQUALS(alg->setProperty("InputWorkspace", group->getItem(0)), std::invalid_argument const &e,
+                            std::string(e.what()), "Enter a name for the Input/InOut workspace")
+  }
+
   /// Calculation Tests
 
   void test_normal_perfect_calculation_occurs() {
