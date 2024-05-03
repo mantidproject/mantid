@@ -7,7 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "FittingModel.h"
+#include "IFitOutput.h"
+#include "IFittingModel.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -15,6 +17,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -32,7 +35,7 @@ class IFitDataModel;
 class IFitPlotModel;
 class IFitOutput;
 class IFitTab;
-class InelasticFitPropertyBrowser;
+class IInelasticFitPropertyBrowser;
 
 class MANTIDQT_INELASTIC_DLL IFittingPresenter {
 public:
@@ -42,8 +45,8 @@ public:
 class MANTIDQT_INELASTIC_DLL FittingPresenter : public IFittingPresenter,
                                                 public MantidQt::API::IAlgorithmRunnerSubscriber {
 public:
-  FittingPresenter(IFitTab *tab, InelasticFitPropertyBrowser *browser, std::unique_ptr<FittingModel> model,
-                   std::unique_ptr<MantidQt::API::AlgorithmRunner> algorithmRunner);
+  FittingPresenter(IFitTab *tab, IInelasticFitPropertyBrowser *browser, std::unique_ptr<IFittingModel> model,
+                   std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner);
 
   void notifyFunctionChanged() override;
 
@@ -95,9 +98,9 @@ private:
   void updateFitStatus(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm);
 
   IFitTab *m_tab;
-  InelasticFitPropertyBrowser *m_fitPropertyBrowser;
-  std::unique_ptr<FittingModel> m_model;
-  std::unique_ptr<MantidQt::API::AlgorithmRunner> m_algorithmRunner;
+  IInelasticFitPropertyBrowser *m_fitPropertyBrowser;
+  std::unique_ptr<IFittingModel> m_model;
+  std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
 };
 
 } // namespace Inelastic
