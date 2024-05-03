@@ -51,10 +51,6 @@ public:
   static void destroySuite(FitPlotPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    /// Note that the FitPlotModel could not be mocked as the
-    /// Presenter takes an FittingModel. This means the
-    /// FittingModel is mocked instead - which is a good
-    /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_model = std::make_unique<NiceMock<MockFitPlotModel>>();
     m_view = std::make_unique<NiceMock<MockFitPlotView>>();
@@ -62,8 +58,6 @@ public:
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_fitOutput = std::make_unique<FitOutput>();
-    m_presenter->setFitOutput(m_fitOutput.get());
   }
 
   void tearDown() override {
@@ -388,5 +382,4 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<FitOutput> m_fitOutput;
 };

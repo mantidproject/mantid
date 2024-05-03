@@ -83,9 +83,9 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
-FitPlotModel::FitPlotModel(std::vector<FitData> *fittingData)
-    : m_fittingData(fittingData), m_fitOutput(), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0}, m_activeFunction() {
-}
+FitPlotModel::FitPlotModel(std::vector<FitData> *fittingData, IFitOutput *fitOutput)
+    : m_fittingData(fittingData), m_fitOutput(fitOutput), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0},
+      m_activeFunction() {}
 
 FitPlotModel::~FitPlotModel() {}
 
@@ -96,8 +96,6 @@ void FitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeWorkspac
 void FitPlotModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   m_activeFunction = std::move(function);
 }
-
-void FitPlotModel::setFitOutput(IFitOutput *fitOutput) { m_fitOutput = fitOutput; }
 
 MatrixWorkspace_sptr FitPlotModel::getWorkspace() const {
   if (m_activeWorkspaceID < m_fittingData->size())

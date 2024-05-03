@@ -72,8 +72,6 @@ void FitPlotPresenter::setEndX(double value) { m_view->setFitRangeMaximum(value)
 
 void FitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) { m_view->setFitRangeBounds(bounds); }
 
-void FitPlotPresenter::setFitOutput(IFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
-
 void FitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
   updateHWHMSelector();
