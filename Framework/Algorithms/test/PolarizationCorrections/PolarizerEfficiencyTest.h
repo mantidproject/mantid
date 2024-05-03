@@ -52,8 +52,7 @@ public:
 
     auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polariserEfficiency->initialize();
-    polariserEfficiency->setProperty("InputWorkspace", ws1->getName());
-    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+    TS_ASSERT_THROWS(polariserEfficiency->setProperty("InputWorkspace", ws1), const std::invalid_argument &);
   }
 
   void testGroupWorkspaceWithWrongSize() {
@@ -89,7 +88,8 @@ public:
     auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
     auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polariserEfficiency->initialize();
-    TS_ASSERT_THROWS(polariserEfficiency->setProperty("InputWorkspace", wsGrp->getName()), std::invalid_argument &);
+    polariserEfficiency->setProperty("InputWorkspace", wsGrp);
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
   void testExampleCalculation() {
