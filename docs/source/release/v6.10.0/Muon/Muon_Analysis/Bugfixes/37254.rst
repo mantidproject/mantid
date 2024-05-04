@@ -1,0 +1,1 @@
+- Fixed a bug that can crashed Mantid  in the groupings or difference tables of the groupings tab. The crashed occurred when you deleted any rows other than the last one from the table and then clicked on the interactive widgets of the remainings rows of the table.
