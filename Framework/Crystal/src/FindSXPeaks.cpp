@@ -247,14 +247,14 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
                              : (!isEmpty(maxWsIndex) ? (maxWsIndex + 1) : (inputWorkspace->getNumberHistograms()));
 
     if (!isEmpty(minNSpectraPerPeak)) {
-      if (numberOfSpectraToConsider < minNSpectraPerPeak) {
+      if (static_cast<int>(numberOfSpectraToConsider) < minNSpectraPerPeak) {
         validationOutput["MinNSpectraPerPeak"] =
             "MinNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
       }
     }
 
     if (!isEmpty(maxNSpectraPerPeak)) {
-      if (numberOfSpectraToConsider < maxNSpectraPerPeak) {
+      if (static_cast<int>(numberOfSpectraToConsider) < maxNSpectraPerPeak) {
         validationOutput["MaxNSpectraPerPeak"] =
             "MaxNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
       }
@@ -262,7 +262,7 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
 
     const int minNBinsPerPeak = getProperty("MinNBinsPerPeak");
     if (!isEmpty(minNBinsPerPeak)) {
-      if (minNBinsPerPeak > inputWorkspace->getMaxNumberBins()) {
+      if (minNBinsPerPeak > static_cast<int>(inputWorkspace->getMaxNumberBins())) {
         validationOutput["MinNBinsPerPeak"] =
             "MinNBinsPerPeak must be less than the number of bins in the InputWorkspace";
       }
