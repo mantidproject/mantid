@@ -93,7 +93,6 @@ void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string 
 }
 
 void AsciiSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
-                                  std::vector<std::string> const &logParameters,
                                   FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
@@ -115,7 +114,7 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
 
   // Setup the appropriate save algorithm
   if (shouldSaveToSingleFile(workspaceNames, fileFormat)) {
-    saveToSingleFile(workspaceNames, saveDirectory, logParameters, fileFormat);
+    saveToSingleFile(workspaceNames, saveDirectory, fileFormat);
   } else {
     for (auto const &name : workspaceNames) {
       auto ws = workspace(name);
@@ -134,11 +133,7 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
 
 bool AsciiSaver::shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
                                         FileFormatOptions const &fileFormat) const {
-  if (!fileFormat.shouldSaveToSingleFile()) {
-    return false;
-  }
-
-  if (!fileFormat.isORSOFormat()) {
+  if (!fileFormat.shouldSaveToSingleFile() || !fileFormat.isORSOFormat()) {
     return false;
   }
 
