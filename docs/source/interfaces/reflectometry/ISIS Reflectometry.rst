@@ -950,9 +950,10 @@ for a description of the supported formats.
 +-------------------------------+------------------------------------------------------+
 | ORSO Format Options           | When saving in the ORSO format you can specify if you|
 |                               | want a Q Resolution column. You can also use the     |
-|                               | ``Additional columns (includes Q resolution`` option |
-|                               | to request Q Resolution, Lambda, dLambda, Theta and  |
-|                               | dTheta columns (this is selected by default).        |
+|                               | ``Additional columns (includes Q resolution)``       |
+|                               | option to request Q Resolution, Lambda, dLambda,     |
+|                               | Theta and dTheta columns (this is selected by        |
+|                               | default).                                            |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |
