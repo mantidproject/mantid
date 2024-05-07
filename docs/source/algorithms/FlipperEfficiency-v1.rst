@@ -26,6 +26,19 @@ the flipper directly using:
 
    \epsilon_{F} = \frac{T_{00} - T_{01} + T_{11} - T_{10}}{2(T_{00} - T_{01})}
 
+
+Outputs
+=======
+
+If an output file path is provided, a NeXus file containing the output workspace will be saved. If an absolute path is
+provided, the output workspace will be saved to the given path. If only a filename or a relative path is provided, the
+output workspace will be saved with that filename into the location set in the ``Default Save Directory`` field of the
+``File -> Manage User Directories`` window.
+
+A workspace will not be output by the algorithm unless an output workspace name is provided.
+
+An output workspace name, output file path, or both must be given.
+
 Usage
 -----
 
