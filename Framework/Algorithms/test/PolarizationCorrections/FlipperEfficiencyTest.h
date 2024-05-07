@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -30,7 +31,10 @@ class FlipperEfficiencyTest : public CxxTest::TestSuite {
 public:
   void setUp() override { m_defaultSaveDirectory = ConfigService::Instance().getString("defaultsave.directory"); }
 
-  void tearDown() override { ConfigService::Instance().setString("defaultsave.directory", m_defaultSaveDirectory); }
+  void tearDown() override {
+    ConfigService::Instance().setString("defaultsave.directory", m_defaultSaveDirectory);
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
 
   void test_name() {
     FlipperEfficiency const alg;
