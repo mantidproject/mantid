@@ -188,7 +188,7 @@ public:
                          const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                          const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                         const HistogramData::HistogramE &e, Bound low, Bound high,
+                         [[maybe_unused]] const HistogramData::HistogramE &e, Bound low, Bound high,
                          const int workspaceIndex) const override;
 };
 
@@ -198,7 +198,7 @@ public:
                    const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                    const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                         const HistogramData::HistogramE &e, Bound low, Bound high,
+                         [[maybe_unused]] const HistogramData::HistogramE &e, Bound low, Bound high,
                          const int workspaceIndex) const override;
 
 private:

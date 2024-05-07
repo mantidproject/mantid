@@ -416,8 +416,8 @@ StrongestPeaksStrategy::StrongestPeaksStrategy(const BackgroundStrategy *backgro
     : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue, units) {}
 
 PeakList StrongestPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                               const HistogramData::HistogramE &e, Bound low, Bound high,
-                                               const int workspaceIndex) const {
+                                               [[maybe_unused]] const HistogramData::HistogramE &e, Bound low,
+                                               Bound high, const int workspaceIndex) const {
   auto distmin = std::distance(x.begin(), low);
   auto distmax = std::distance(x.begin(), high);
 
@@ -453,7 +453,7 @@ AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
 }
 
 PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
-                                         const HistogramData::HistogramE &e, Bound low, Bound high,
+                                         [[maybe_unused]] const HistogramData::HistogramE &e, Bound low, Bound high,
                                          const int workspaceIndex) const {
   // Get all peaks from the container
   auto foundPeaks = getAllPeaks(x, y, low, high, m_backgroundStrategy);
