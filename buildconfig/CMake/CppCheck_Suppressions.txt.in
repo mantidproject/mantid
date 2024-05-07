@@ -1498,3 +1498,5 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:52
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
+unusedParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindSXPeaksHelper.cpp:419
+unusedParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindSXPeaksHelper.cpp:456

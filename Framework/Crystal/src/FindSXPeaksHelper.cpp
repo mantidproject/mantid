@@ -311,7 +311,7 @@ void PeakFindingStrategy::filterPeaksForMinBins(std::vector<std::unique_ptr<Peak
   }
 
   for (auto inputIt = inputPeakList.begin(); inputIt != inputPeakList.end();) {
-    if ((*inputIt)->getNumberOfPointsInPeak() < m_minNBinsPerPeak) {
+    if (static_cast<int>((*inputIt)->getNumberOfPointsInPeak()) < m_minNBinsPerPeak) {
       inputIt = inputPeakList.erase(inputIt);
     } else {
       ++inputIt;
@@ -670,8 +670,10 @@ void SimpleReduceStrategy::reducePeaksFromNumberOfSpectras(std::vector<SXPeak> &
   }
 
   for (auto peakIt = inputPeaks.begin(); peakIt != inputPeaks.end();) {
-    if (((m_minNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() < m_minNSpectraPerPeak)) ||
-        ((m_maxNSpectraPerPeak != EMPTY_INT()) && ((*peakIt).getPeakSpectras().size() > m_maxNSpectraPerPeak))) {
+    if (((m_minNSpectraPerPeak != EMPTY_INT()) &&
+         (static_cast<int>((*peakIt).getPeakSpectras().size()) < m_minNSpectraPerPeak)) ||
+        ((m_maxNSpectraPerPeak != EMPTY_INT()) &&
+         (static_cast<int>((*peakIt).getPeakSpectras().size()) > m_maxNSpectraPerPeak))) {
       peakIt = inputPeaks.erase(peakIt);
     } else {
       ++peakIt;
@@ -791,8 +793,8 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
     // When MinNSpectraPerPeak or maxNSpectraPerPeak parameters are provided,
     // a group will be ignored if it does not satisfy the minimum or the maximum number of spectrums
     // required to identify as a peak.
-    if ((m_minNSpectraPerPeak != EMPTY_INT() && group.size() < m_minNSpectraPerPeak) ||
-        (m_maxNSpectraPerPeak != EMPTY_INT() && group.size() > m_maxNSpectraPerPeak)) {
+    if ((m_minNSpectraPerPeak != EMPTY_INT() && static_cast<int>(group.size()) < m_minNSpectraPerPeak) ||
+        (m_maxNSpectraPerPeak != EMPTY_INT() && static_cast<int>(group.size()) > m_maxNSpectraPerPeak)) {
       continue;
     }
 
