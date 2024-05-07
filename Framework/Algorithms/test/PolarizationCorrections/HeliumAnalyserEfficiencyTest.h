@@ -131,7 +131,7 @@ private:
     std::vector<double> yNsf(numBins);
     std::vector<double> ySf(numBins);
     for (size_t i = 0; i < numBins; ++i) {
-      x[i] = 2.0 + i * 8.0 / numBins;
+      x[i] = 2.0 + static_cast<double>(i) * 8.0 / static_cast<double>(numBins);
       yNsf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 - examplePHe));
       ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
     }
