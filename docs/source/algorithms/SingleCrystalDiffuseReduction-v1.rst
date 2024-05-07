@@ -240,7 +240,7 @@ Usage
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    c = ax.pcolormesh(mtd['output'],vmin=0, vmax=1e-5)
    fig.colorbar(c)
-   plt.show()
+   fig.show()
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_HH0.png
 

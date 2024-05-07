@@ -83,7 +83,8 @@ Basic example of plotting a `Surface <https://matplotlib.org/mpl_toolkits/mplot3
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_surface(data, cmap='viridis')
-    plt.show()
+
+    fig.show()
 
 For more advice: :ref:`02_scripting_plots`
 
@@ -150,7 +151,8 @@ Basic example of plotting a `Wireframe <https://matplotlib.org/mpl_toolkits/mplo
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_wireframe(data, color='#1f77b4')
-    plt.show()
+
+    fig.show()
 
 For more advice: :ref:`02_scripting_plots`
 
