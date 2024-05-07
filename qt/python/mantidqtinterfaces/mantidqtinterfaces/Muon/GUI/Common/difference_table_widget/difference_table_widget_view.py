@@ -207,7 +207,7 @@ class DifferenceTableView(QtWidgets.QWidget):
 
     def on_cell_changed(self, row, column):
         if not self._updating:
-            if not isinstance(self.sender(), QtWidgets.QTableWidget):
+            if not (isinstance(self.sender(), QtWidgets.QTableWidget) or self.sender().pos().isNull()):
                 pos_index = self.diff_table.indexAt(self.sender().pos())
                 row = pos_index.row()
                 column = pos_index.column()
