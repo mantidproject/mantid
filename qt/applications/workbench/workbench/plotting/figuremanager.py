@@ -186,7 +186,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         parent, flags = get_window_config()
         self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
         self.window.activated.connect(self._window_activated)
-        self.window.closing.connect(canvas.close_event)
+        close_event = matplotlib.backend_bases.CloseEvent("close_event", canvas)
+        self.window.closing.connect(lambda: canvas.callbacks.process(close_event.name, close_event))
         self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
 
