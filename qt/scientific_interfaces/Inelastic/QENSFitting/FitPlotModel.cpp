@@ -87,8 +87,6 @@ FitPlotModel::FitPlotModel(std::vector<FitData> *fittingData, IFitOutput *fitOut
     : m_fittingData(fittingData), m_fitOutput(fitOutput), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0},
       m_activeFunction() {}
 
-FitPlotModel::~FitPlotModel() {}
-
 void FitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWorkspaceID = workspaceID; }
 
 void FitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeWorkspaceIndex = spectrum; }
