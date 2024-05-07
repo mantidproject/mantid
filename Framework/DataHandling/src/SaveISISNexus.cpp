@@ -313,9 +313,10 @@ int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std:
   }
   int buff_size = max_str_size;
   if (buff_size <= 0) {
-    buff_size = std::max_element(str_vec.cbegin(), str_vec.cend(), [](const auto &a, const auto &b) {
-                  return a.size() < b.size();
-                })->size();
+    const auto max_size = std::max_element(str_vec.cbegin(), str_vec.cend(), [](const auto &a, const auto &b) {
+                            return a.size() < b.size();
+                          })->size();
+    buff_size = boost::numeric_cast<int>(max_size);
   }
   if (buff_size <= 0)
     buff_size = 1;
@@ -693,12 +694,13 @@ void SaveISISNexus::sample() {
   saveString("id", " ");
   float tmp(0.0);
   saveFloat("distance", &tmp, 1);
-  std::string shape[] = {"cylinder", "flat plate", "HRPD slab", "unknown"};
+  const std::string shape[] = {"cylinder", "flat plate", "HRPD slab", "unknown"};
   int i = m_isisRaw->spb.e_geom - 1;
   if (i < 0 || i > 3)
     i = 3;
   saveString("shape", shape[i]);
-  std::string type[] = {"sample+can", "empty can", "vanadium", "absorber", "nothing", "sample, no can", "unknown"};
+  const std::string type[] = {"sample+can", "empty can",      "vanadium", "absorber",
+                              "nothing",    "sample, no can", "unknown"};
   i = m_isisRaw->spb.e_type - 1;
   if (i < 0 || i > 6)
     i = 6;

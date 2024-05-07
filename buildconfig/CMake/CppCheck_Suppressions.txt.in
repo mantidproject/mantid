@@ -706,13 +706,11 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexus
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1179
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1965
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:425
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:389
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:390
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:599
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:610
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:391
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:600
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:611
-constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:696
-constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:701
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:612
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:397
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
