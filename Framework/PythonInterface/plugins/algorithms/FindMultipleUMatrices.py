@@ -287,11 +287,8 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
     def get_peak_tables_for_each_ub(self, peaks, ubs, hkl_ers, num_ubs, optimise_ubs):
         # see which ubs index the most peaks most accurately (with minimum error)
         iub_min_er = np.argmin(hkl_ers, axis=0)
-        print("len(ubs) = ", len(ubs))
-        print("iub_min_er = ", iub_min_er)
         # exclude reflections that are not indexed by any UB
         i_indexed = np.any(np.isfinite(hkl_ers), axis=0)
-        print("i_indexed = ", i_indexed)
         iub, nindex = np.unique(iub_min_er[i_indexed], return_counts=True)
         # sort by ubs that index most peaks
         isort = np.argsort(-nindex)  # descending
