@@ -94,8 +94,8 @@ From this figure, it appears that the weights for 3 scattering events are practi
 We could then assume only 2 scattering events in the computation of succesive multiple scattering corrections to reduce computation time.
 Additionally, we can find in the output group workspace the ratio of all scattering events to a single scattering (as well as its inverse curve).
 
-.. figure:: ../images/Ratio_all_to_single.png
-   :alt: Ratio_all_to_single.png
+.. figure:: ../images/Ratio_All_To_Single.png
+   :alt: Ratio_All_To_Single.png
 
 Noticeable from this ratio is that the scattering weight ratio increase in the wings of the curve, where they contribute to an enlargement of the
 measured width, and thus could be appearing in fitting routines as extra peaks.
