@@ -22,12 +22,10 @@
  * without express or implied warranty.
  */
 
-#include <charconv>
 #include <climits> // CHAR_BIT
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
-#include <ios>
 #include <limits>
 #include <ostream>
 #include <random>
@@ -262,24 +260,6 @@ std::wostream &operator<<(std::wostream &out, const wide_integer<Bits, Signed> &
 template <size_t Bits, typename Signed> std::istream &operator>>(std::istream &in, wide_integer<Bits, Signed> &n);
 
 template <size_t Bits, typename Signed> std::wistream &operator>>(std::wistream &in, wide_integer<Bits, Signed> &n);
-
-//// Must be defined in another header
-struct to_chars_result {
-  char *ptr;
-  std::error_code ec;
-};
-
-struct from_chars_result {
-  const char *ptr;
-  std::error_code ec;
-};
-////
-
-template <size_t Bits, typename Signed>
-to_chars_result to_chars(char *first, char *last, const wide_integer<Bits, Signed> &value, int base = 10);
-
-template <size_t Bits, typename Signed>
-from_chars_result from_chars(const char *first, const char *last, wide_integer<Bits, Signed> &value, int base = 10);
 
 inline namespace literals {
 inline namespace wide_integer_literals {
