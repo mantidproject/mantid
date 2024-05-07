@@ -18,14 +18,14 @@
 namespace {
 /// Property Names
 namespace PropNames {
-constexpr char const *INPUT_WS{"InputWorkspace"};
-constexpr char const *OUTPUT_WS{"OutputWorkspace"};
-constexpr char const *OUTPUT_FILE{"OutputFilePath"};
-constexpr char const *SPIN_STATES{"SpinStates"};
+auto constexpr INPUT_WS{"InputWorkspace"};
+auto constexpr OUTPUT_WS{"OutputWorkspace"};
+auto constexpr OUTPUT_FILE{"OutputFilePath"};
+auto constexpr SPIN_STATES{"SpinStates"};
 } // namespace PropNames
 
-constexpr char const *FILE_EXTENSION{".nxs"};
-constexpr char const *INITIAL_SPIN{"11,10,01,00"};
+auto constexpr FILE_EXTENSION{".nxs"};
+auto constexpr INITIAL_SPIN{"11,10,01,00"};
 } // namespace
 
 namespace Mantid::Algorithms {
