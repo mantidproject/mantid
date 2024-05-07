@@ -687,6 +687,19 @@ public:
 private:
   const std::string m_outputWSName{"output"};
 
+  void setupWorkspaceData(std::vector<std::string> &wsNames,
+                          const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
+    using namespace Mantid::API;
+
+    for (size_t i = 0; i != wsNames.size(); ++i) {
+      for (size_t j = 0; j != nHist; ++j) {
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
+      }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
+  }
+
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
@@ -755,31 +768,18 @@ private:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    /*
-    We're going to set up the test numbers in the workspaces in the order given by
-    the originalFlipperConfig vector. They are named 'ws' followed by the flipper
-    string in the ADS.
-    Following that we reorder these workspaces into the order specified by the input
-    flipperConfig argument to this method. From that we generate vector of the
-    names of the workspaces to pass to the PolarizationCorrectionWildes algorithm.
-    */
-    const std::vector<std::string> originalFlipperConfig{"00", "01", "10", "11"};
-    std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
-    for (size_t i = 0; i != 4; ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
-        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
-        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
-      }
-      AnalysisDataService::Instance().addOrReplace("ws" + originalFlipperConfig[i], wsList[i]);
-    }
+
+    std::vector<std::string> wsNames{"ws00", "ws01", "ws10", "ws11"};
+    const std::vector<MatrixWorkspace_sptr> wsList{ws00, ws01, ws10, ws11};
+    setupWorkspaceData(wsNames, wsList, nHist);
+
+    // Re-order the input workspace names to match the input flipper configuration
     using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11;
-    std::vector<std ::string> wsNames{wsList.size()};
-    std::transform(wsList.cbegin(), wsList.cend(), wsNames.begin(),
-                   [](MatrixWorkspace_sptr w) { return w->getName(); });
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -828,31 +828,18 @@ private:
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    /*
-    We're going to set up the test numbers in the workspaces in the order given by
-    the originalFlipperConfig vector. They are named 'ws' followed by the flipper
-    string in the ADS.
-    Following that we reorder these workspaces into the order specified by the input
-    flipperConfig argument to this method. From that we generate vector of the
-    names of the workspaces to pass to the PolarizationCorrectionWildes algorithm.
-    */
+
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
-    const std::vector<std::string> originalFlipperConfig{"ws00", "ws" + presentFlipperConf, "ws11"};
-    std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, wsXX, ws11}};
-    for (size_t i = 0; i != 3; ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
-        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
-        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
-      }
-      AnalysisDataService::Instance().addOrReplace("ws" + originalFlipperConfig[i], wsList[i]);
-    }
+    std::vector<std::string> wsNames{"ws00", "wsXX", "ws11"};
+    const std::vector<MatrixWorkspace_sptr> wsList{ws00, wsXX, ws11};
+    setupWorkspaceData(wsNames, wsList, nHist);
+
+    // Re-order the input workspace names to match the input flipper configuration
     using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX;
-    wsList[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11;
-    std::vector<std ::string> wsNames{wsList.size()};
-    std::transform(wsList.cbegin(), wsList.cend(), wsNames.begin(),
-                   [](MatrixWorkspace_sptr w) { return w->getName(); });
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+
     auto effWS = idealEfficiencies(edges);
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
