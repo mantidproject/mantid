@@ -999,7 +999,7 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<specnum_t> &monito
     if (m_interval) {
       const auto msize = std::count_if(monitorSpecList.cbegin(), monitorSpecList.cend(),
                                        [&](const auto &spec) { return (spec >= m_spec_min && spec < m_spec_max); });
-      monitorwsSpecs = msize;
+      monitorwsSpecs = static_cast<specnum_t>(msize);
       normalwsSpecs = m_total_specs - monitorwsSpecs;
       g_log.debug() << "normalwsSpecs when  m_interval true is  " << normalwsSpecs << "  monitorwsSpecs is "
                     << monitorwsSpecs << '\n';
