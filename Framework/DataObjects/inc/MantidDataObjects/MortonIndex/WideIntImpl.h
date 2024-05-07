@@ -10,7 +10,9 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstring>
+#include <ios>
 #include <iterator>
 #include <numeric>
 
@@ -180,8 +182,8 @@ template <size_t Bits, typename Signed> struct wide_integer<Bits, Signed>::_impl
   }
 
   constexpr static void wide_integer_from_bultin(wide_integer<Bits, Signed> &self, double rhs) noexcept {
-    if ((rhs > 0 && rhs < std::numeric_limits<uint64_t>::max()) ||
-        (rhs < 0 && rhs > std::numeric_limits<int64_t>::min())) {
+    if ((rhs > 0 && rhs < static_cast<double>(std::numeric_limits<uint64_t>::max())) ||
+        (rhs < 0 && rhs > static_cast<double>(std::numeric_limits<int64_t>::min()))) {
       self = to_Integral(rhs);
       return;
     }
