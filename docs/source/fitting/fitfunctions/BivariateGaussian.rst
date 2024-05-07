@@ -53,7 +53,7 @@ Here is an example of fitting a 2D histogram:
     x, y = np.mgrid[-0.5:0.5:.01, -0.5:0.5:.01]
     pos = np.dstack((x, y))
     Z = rv.pdf(pos)
-    Z += 0.1*(np.random.random(x.shape) - 0.5) # Noise
+    Z += 1.5*(np.random.random(x.shape) - 0.5) # Noise
 
     # Here we'll format it so we can fit this as a 1D function:
     ZForFitting = np.empty(Z.shape + (2,))
