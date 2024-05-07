@@ -47,12 +47,4 @@ std::vector<std::string> splitSpinStateString(const std::string &spinStates) {
   StringTokenizer tokens{spinStates, ",", StringTokenizer::TOK_TRIM};
   return std::vector<std::string>{tokens.begin(), tokens.end()};
 }
-
-/*
-True if there is a spin state in the input string specified with one character, e.g. 0 (instead of 00 or 10)
-*/
-bool hasSingleSpinStates(const std::string &spinStates) {
-  const auto splitString = splitSpinStateString(spinStates);
-  return std::any_of(splitString.cbegin(), splitString.cend(), [](const std::string &s) { return s.size() == 1; });
-}
 } // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers

@@ -348,7 +348,6 @@ void PolarizationCorrectionWildes::init() {
  */
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const bool analyzer = !PolarizationCorrectionsHelpers::hasSingleSpinStates(flipperProperty);
   const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
   const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
@@ -360,7 +359,8 @@ void PolarizationCorrectionWildes::exec() {
     outputs = directBeamCorrections(inputs, efficiencies);
     break;
   case 2:
-    if (analyzer) {
+    // Check if the input flipper configuration includes an analyser
+    if (flippers.front().size() > 1) {
       outputs = twoInputCorrections(inputs, efficiencies);
     } else {
       outputs = analyzerlessCorrections(inputs, efficiencies);
