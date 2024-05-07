@@ -197,10 +197,10 @@ class GeneralFittingModel(BasicFittingModel):
         simultaneous_function = self.fitting_context.simultaneous_fit_function
 
         if len(dataset_names) == len(new_dataset_names) and simultaneous_function is not None:
-            if len(dataset_names) == 1:
-                return [simultaneous_function.clone()]
-            else:
+            if isinstance(simultaneous_function, MultiDomainFunction):
                 return [simultaneous_function.getFunction(i).clone() for i in range(simultaneous_function.nFunctions())]
+            else:
+                return [simultaneous_function.clone()]
         elif len(dataset_names) <= 1:
             return [self._clone_function(simultaneous_function) for _ in range(len(new_dataset_names))]
         else:
@@ -211,7 +211,7 @@ class GeneralFittingModel(BasicFittingModel):
         dataset_names = self.fitting_context.dataset_names
         simultaneous_function = self.fitting_context.simultaneous_fit_function
 
-        if new_dataset_name in dataset_names and simultaneous_function is not None:
+        if new_dataset_name in dataset_names and isinstance(simultaneous_function, MultiDomainFunction):
             return self._clone_function(simultaneous_function.getFunction(dataset_names.index(new_dataset_name)))
         else:
             return self._clone_function(self.current_domain_fit_function())

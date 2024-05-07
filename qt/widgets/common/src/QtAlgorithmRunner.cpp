@@ -75,7 +75,7 @@ void QtAlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   alg->addObserver(m_errorObserver);
   alg->addObserver(m_progressObserver);
   // Start asynchronous execution
-  m_asyncAlg = alg;
+  m_asyncAlg = std::move(alg);
   m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
 }
 

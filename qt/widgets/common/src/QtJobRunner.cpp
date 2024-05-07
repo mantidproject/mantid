@@ -26,7 +26,7 @@ void QtJobRunner::subscribe(JobRunnerSubscriber *notifyee) { m_notifyee = notify
 void QtJobRunner::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
 
 void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
-  m_batchAlgoRunner.setQueue(algorithms);
+  m_batchAlgoRunner.setQueue(std::move(algorithms));
 }
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }

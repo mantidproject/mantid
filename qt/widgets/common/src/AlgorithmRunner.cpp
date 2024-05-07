@@ -22,17 +22,17 @@ void AlgorithmRunner::execute(IConfiguredAlgorithm_sptr algorithm) {
 }
 
 void AlgorithmRunner::execute(std::deque<IConfiguredAlgorithm_sptr> algorithmQueue) {
-  m_jobRunner->setAlgorithmQueue(algorithmQueue);
+  m_jobRunner->setAlgorithmQueue(std::move(algorithmQueue));
   m_jobRunner->executeAlgorithmQueue();
 }
 
-void AlgorithmRunner::notifyBatchComplete(bool error) { m_subscriber->notifyBatchComplete(m_lastAlgorithm, error); };
+void AlgorithmRunner::notifyBatchComplete(bool error) { m_subscriber->notifyBatchComplete(m_lastAlgorithm, error); }
 
 void AlgorithmRunner::notifyBatchCancelled() { m_subscriber->notifyBatchCancelled(); }
 
 void AlgorithmRunner::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) {
   m_subscriber->notifyAlgorithmStarted(algorithm);
-};
+}
 
 void AlgorithmRunner::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
   m_subscriber->notifyAlgorithmComplete(algorithm);
