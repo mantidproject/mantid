@@ -63,12 +63,13 @@ std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
   }
   if (groupWs->size() != 4) {
     problems[PropNames::INPUT_WS] = "The input group must contain a workspace for all four spin states.";
-  }
-  for (size_t i = 0; i < groupWs->size(); ++i) {
-    MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
-    Unit_const_sptr unit = stateWs->getAxis(0)->unit();
-    if (unit->unitID() != "Wavelength") {
-      problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
+  } else {
+    for (size_t i = 0; i < groupWs->size(); ++i) {
+      MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
+      Unit_const_sptr unit = stateWs->getAxis(0)->unit();
+      if (unit->unitID() != "Wavelength") {
+        problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
+      }
     }
   }
 
