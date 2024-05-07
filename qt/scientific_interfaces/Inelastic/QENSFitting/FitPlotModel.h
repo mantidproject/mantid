@@ -25,6 +25,8 @@ using namespace MantidWidgets;
 
 class MANTIDQT_INELASTIC_DLL IFitPlotModel {
 public:
+  virtual ~IFitPlotModel() = default;
+
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const = 0;
@@ -50,10 +52,9 @@ public:
   virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL FitPlotModel : public IFitPlotModel {
+class MANTIDQT_INELASTIC_DLL FitPlotModel final : public IFitPlotModel {
 public:
   FitPlotModel(std::vector<FitData> *fittingData, IFitOutput *fitOutput);
-  ~FitPlotModel();
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const override;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const override;

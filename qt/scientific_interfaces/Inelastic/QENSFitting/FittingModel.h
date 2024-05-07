@@ -104,8 +104,8 @@ protected:
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
-  std::string m_fitType = "FitType";
-  std::string m_fitString = "FitString";
+  std::string m_fitType;
+  std::string m_fitString;
 
   std::unique_ptr<IFitDataModel> m_fitDataModel;
   std::unique_ptr<IFitPlotModel> m_fitPlotModel;
