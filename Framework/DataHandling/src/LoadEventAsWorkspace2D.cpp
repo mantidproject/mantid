@@ -163,10 +163,8 @@ void LoadEventAsWorkspace2D::exec() {
   const Kernel::NexusHDF5Descriptor descriptor(filename);
 
   // Load the instrument
-  if (getProperty("LoadNexusInstrumentXML")) {
-    prog->doReport("Loading instrument");
-    LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, WS, "entry", this, &descriptor);
-  }
+  prog->doReport("Loading instrument");
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, WS, "entry", this, &descriptor);
 
   // load run metadata
   prog->doReport("Loading metadata");
