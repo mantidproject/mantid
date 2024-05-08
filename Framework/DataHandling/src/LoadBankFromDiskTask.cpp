@@ -134,7 +134,7 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(::Ne
  * @param start_event :: set to the index of the first event
  * @param stop_event :: set to the index of the last event + 1
  * @param start_event_index ::  (a list of size of # of pulses giving the index in
- *the event list for that pulse)
+ * the event list for that pulse)
  */
 void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
                                           const uint64_t &start_event_index) {

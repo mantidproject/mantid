@@ -176,6 +176,7 @@ The logging priority levels for the file logging and console logging can also be
   # Set the log to information and do not log that it was changed
   ConfigService.setLogLevel("information", True)
 
+More details on logging can be found in the :ref:`developer docs <mantid-dev:Logging>` .
 
 
 Mantid Graphical User Interface Properties
