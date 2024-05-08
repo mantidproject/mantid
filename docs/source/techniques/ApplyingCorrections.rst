@@ -21,7 +21,7 @@ This algorithm is based on M. Johnson's DISCUS fortran program [1]_, which has b
 For Inelastic geometry instruments, we can additionally use the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm, which is also based on DISCUS.
 More information about the theory and application of absorption and multiple scattering corrections can be found in the :ref:`Absorption and Scatering Corrections <Sample Corrections>` documentation.
 
-There are some features of these algorithms to take in consideration when applying absorption and multiple scattering corrections in Mantid:
+There are some features of these algorithms to consider when applying absorption and multiple scattering corrections in Mantid:
 
 1. They can be used for diffraction measurements and both with Indirect and Direct Inelastic geometry instruments.
 
