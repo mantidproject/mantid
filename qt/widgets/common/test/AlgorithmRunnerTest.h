@@ -29,6 +29,8 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm() {
   return configuredAlg;
 }
 
+} // namespace
+
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockAlgorithmRunnerSubscriber : public IAlgorithmRunnerSubscriber {
@@ -48,8 +50,6 @@ MATCHER(CheckAlgorithmNull, "Check the algorithm is a nullptr") { return !arg; }
 MATCHER_P(CheckQueueSize, size, "Check the size of a std::deque") { return arg.size() == size; }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-} // namespace
 
 class AlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
