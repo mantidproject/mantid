@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectSassena</class>
- <widget class="QWidget" name="IndirectSassena">
+ <class>Sassena</class>
+ <widget class="QWidget" name="Sassena">
   <property name="geometry">
    <rect>
     <x>0</x>

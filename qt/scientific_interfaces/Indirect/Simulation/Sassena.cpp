@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSassena.h"
+#include "Sassena.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -12,7 +12,7 @@
 #include <QString>
 
 namespace MantidQt::CustomInterfaces {
-IndirectSassena::IndirectSassena(QWidget *parent) : IndirectSimulationTab(parent) {
+Sassena::Sassena(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
@@ -23,14 +23,14 @@ IndirectSassena::IndirectSassena(QWidget *parent) : IndirectSimulationTab(parent
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
-void IndirectSassena::setup() {}
+void Sassena::setup() {}
 
 /**
  * Validate the form to check the program can be run.
  *
  * @return Whether the form was valid
  */
-bool IndirectSassena::validate() {
+bool Sassena::validate() {
   UserInputValidator uiv;
 
   auto const inputFileName = m_uiForm.mwInputFile->getFirstFilename();
@@ -44,7 +44,7 @@ bool IndirectSassena::validate() {
 /**
  * Configures and executes the LoadSassena algorithm.
  */
-void IndirectSassena::run() {
+void Sassena::run() {
   using namespace Mantid::API;
   using MantidQt::API::BatchAlgorithmRunner;
 
@@ -74,7 +74,7 @@ void IndirectSassena::run() {
  *
  * @param error If the batch was stopped due to error
  */
-void IndirectSassena::handleAlgorithmFinish(bool error) {
+void Sassena::handleAlgorithmFinish(bool error) {
   setRunIsRunning(false);
   if (error)
     setSaveEnabled(false);
@@ -88,9 +88,9 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void IndirectSassena::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
+void Sassena::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
 
-void IndirectSassena::runClicked() {
+void Sassena::runClicked() {
   clearOutputPlotOptionsWorkspaces();
   runTab();
 }
@@ -98,24 +98,24 @@ void IndirectSassena::runClicked() {
 /**
  * Handle saving of workspace
  */
-void IndirectSassena::saveClicked() {
+void Sassena::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectSassena::setRunIsRunning(bool running) {
+void Sassena::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }
 
-void IndirectSassena::setButtonsEnabled(bool enabled) {
+void Sassena::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
-void IndirectSassena::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void Sassena::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectSassena::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void Sassena::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 } // namespace MantidQt::CustomInterfaces

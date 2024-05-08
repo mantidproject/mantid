@@ -8,15 +8,15 @@
 
 #include "../DllConfig.h"
 #include "IndirectSimulationTab.h"
-#include "ui_IndirectSassena.h"
+#include "ui_Sassena.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL IndirectSassena : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL Sassena : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
-  IndirectSassena(QWidget *parent = nullptr);
+  Sassena(QWidget *parent = nullptr);
 
   void setup() override;
   bool validate() override;
@@ -38,7 +38,7 @@ private:
   void setSaveEnabled(bool enabled);
 
   /// The ui form
-  Ui::IndirectSassena m_uiForm;
+  Ui::Sassena m_uiForm;
   /// Name of the output workspace group
   QString m_outWsName;
 };
