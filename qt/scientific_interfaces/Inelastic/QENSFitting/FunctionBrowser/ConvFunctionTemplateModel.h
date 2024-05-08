@@ -62,7 +62,10 @@ private:
   std::optional<std::string> getDeltaPrefix() const;
   std::optional<std::string> getBackgroundPrefix() const;
 
-  std::string buildFunctionString(int const domainIndex) const override { return ""; }
+  std::string buildFunctionString(int const domainIndex) const override {
+    (void)domainIndex;
+    return "";
+  }
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
   std::string buildFickFunctionString() const;

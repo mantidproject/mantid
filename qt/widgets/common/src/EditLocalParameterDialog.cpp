@@ -75,7 +75,7 @@ void EditLocalParameterDialog::doSetup(const std::string &parName, const std::ve
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this, SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + QString::fromStdString(parName));
 
-  for (int i = 0; i < datasetDomainNames.size(); i++) {
+  for (int i = 0; i < static_cast<int>(datasetDomainNames.size()); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
