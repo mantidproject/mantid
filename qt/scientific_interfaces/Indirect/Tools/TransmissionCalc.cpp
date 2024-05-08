@@ -22,7 +22,7 @@ Mantid::Kernel::Logger g_log("TransmissionCalc");
 }
 
 namespace MantidQt::CustomInterfaces {
-TransmissionCalc::TransmissionCalc(QWidget *parent) : IndirectToolsTab(parent) {
+TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));

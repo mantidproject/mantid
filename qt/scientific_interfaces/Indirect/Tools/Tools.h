@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "ui_IndirectTools.h"
+#include "ui_Tools.h"
 
 #include "Common/IndirectInterface.h"
-#include "IndirectToolsTab.h"
+#include "ToolsTab.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -24,7 +24,7 @@ the interface window and
 @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectTools : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL Tools : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -33,9 +33,9 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectTools(QWidget *parent = nullptr);
+  Tools(QWidget *parent = nullptr);
   /// Destructor
-  ~IndirectTools() override;
+  ~Tools() override;
   /// Interface name
   static std::string name() { return "Tools"; }
   // This interface's categories.
@@ -58,11 +58,11 @@ private:
   void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// Map of tabs indexed by position on the window
-  std::map<unsigned int, IndirectToolsTab *> m_tabs;
+  std::map<unsigned int, ToolsTab *> m_tabs;
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectTools, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+  Poco::NObserver<Tools, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
-  Ui::IndirectTools m_uiForm;
+  Ui::Tools m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectToolsTab.h"
+#include "ToolsTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt::CustomInterfaces {
@@ -12,11 +12,11 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectToolsTab::IndirectToolsTab(QWidget *parent) : IndirectTab(parent) {}
+ToolsTab::ToolsTab(QWidget *parent) : IndirectTab(parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectToolsTab::~IndirectToolsTab() = default;
+ToolsTab::~ToolsTab() = default;
 
 } // namespace MantidQt::CustomInterfaces

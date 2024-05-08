@@ -24,12 +24,12 @@ namespace CustomInterfaces {
     @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectToolsTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL ToolsTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectToolsTab(QWidget *parent = nullptr);
-  ~IndirectToolsTab() override;
+  ToolsTab(QWidget *parent = nullptr);
+  ~ToolsTab() override;
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;

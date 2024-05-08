@@ -4,22 +4,21 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectTools.h"
+#include "Tools.h"
 #include "Common/Settings.h"
 #include "TransmissionCalc.h"
 
 #include "MantidKernel/ConfigService.h"
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectTools)
+DECLARE_SUBWINDOW(Tools)
 } // namespace MantidQt::CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectTools::IndirectTools(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
+Tools::Tools(QWidget *parent) : IndirectInterface(parent), m_changeObserver(*this, &Tools::handleDirectoryChange) {}
 
-void IndirectTools::initLayout() {
+void Tools::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -27,10 +26,10 @@ void IndirectTools::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Insert each tab into the interface on creation
-  m_tabs.emplace(TRANSMISSION, new TransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION)));
+  m_tabs.emplace(TRANSMISSION, new TransmissionCalc(m_uiForm.ToolsTabs->widget(TRANSMISSION)));
 
   // Connect each tab to the actions available in this GUI
-  std::map<unsigned int, IndirectToolsTab *>::iterator iter;
+  std::map<unsigned int, ToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
     iter->second->setupTab();
@@ -48,7 +47,7 @@ void IndirectTools::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectTools::closeEvent(QCloseEvent * /*unused*/) {
+void Tools::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -57,7 +56,7 @@ void IndirectTools::closeEvent(QCloseEvent * /*unused*/) {
  *
  * @param pNf :: notification
  */
-void IndirectTools::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void Tools::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
   if (key == "defaultsave.directory") {
     loadSettings();
@@ -70,7 +69,7 @@ void IndirectTools::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotific
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void IndirectTools::loadSettings() {
+void Tools::loadSettings() {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
   QString saveDir =
@@ -79,7 +78,7 @@ void IndirectTools::loadSettings() {
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-  std::map<unsigned int, IndirectToolsTab *>::iterator iter;
+  std::map<unsigned int, ToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
     iter->second->loadSettings(settings);
   }
@@ -94,11 +93,11 @@ void IndirectTools::loadSettings() {
  * This method checks the tabs validate method is passing before calling
  * the run method.
  */
-void IndirectTools::runClicked() {
-  int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
+void Tools::runClicked() {
+  int tabIndex = m_uiForm.ToolsTabs->currentIndex();
   m_tabs[tabIndex]->runTab();
 }
 
-std::string IndirectTools::documentationPage() const { return "Indirect Tools"; }
+std::string Tools::documentationPage() const { return "Indirect Tools"; }
 
-IndirectTools::~IndirectTools() = default;
+Tools::~Tools() = default;

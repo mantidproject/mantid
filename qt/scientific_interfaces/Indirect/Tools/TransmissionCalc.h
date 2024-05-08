@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "ToolsTab.h"
 #include "ui_TransmissionCalc.h"
 
 #include <QComboBox>
@@ -17,7 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL TransmissionCalc : public IndirectToolsTab {
+class MANTIDQT_INDIRECT_DLL TransmissionCalc : public ToolsTab {
   Q_OBJECT
 
 public:
