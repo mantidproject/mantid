@@ -312,23 +312,23 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and not refl_dataset.is_stitched:
             # Add additional data columns
-            size = q_data.size
             try:
                 l_data = self._convert_from_q_to_wavelength(refl_dataset, q_data)
-                l_error = np.full(size, 0)
-                theta = refl_dataset.q_conversion_theta
             except RuntimeError as ex:
-                self.log().debug(f"{ex}")
-                l_data = np.full(size, np.nan)
-                l_error = np.full(size, np.nan)
-                theta = np.nan
+                self.log().warning(f"{ex} Additional data columns will be excluded.")
+                return data_columns
+
+            size = q_data.size
 
             data_columns.add_column("lambda", MantidORSODataColumns.Unit.Angstrom, "wavelength", l_data)
-            data_columns.add_error_column("lambda", MantidORSODataColumns.ErrorType.Resolution, None, l_error)
-            data_columns.add_column("incident theta", MantidORSODataColumns.Unit.Degrees, "incident theta", np.full(size, theta))
-            # d incident theta = dQ/Q * incident theta
-            d_theta = np.nan if resolution is None else resolution * theta
-            data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, np.full(size, d_theta))
+            data_columns.add_error_column("lambda", MantidORSODataColumns.ErrorType.Resolution, None, np.full(size, 0))
+            data_columns.add_column(
+                "incident theta", MantidORSODataColumns.Unit.Degrees, "incident theta", np.full(size, refl_dataset.q_conversion_theta)
+            )
+            if resolution is not None:
+                # d incident theta = dQ/Q * incident theta
+                d_theta = resolution * refl_dataset.q_conversion_theta
+                data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, np.full(size, d_theta))
 
         return data_columns
 

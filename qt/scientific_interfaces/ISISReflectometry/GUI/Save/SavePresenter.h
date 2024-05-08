@@ -31,7 +31,7 @@ public:
 
   // ISavePresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames, bool const isAutoSave = false) override;
   bool shouldAutosave() const override;
   bool shouldAutosaveGroupRows() const override;
   void notifyReductionPaused() override;
@@ -70,17 +70,19 @@ private:
   /// Save selected workspaces to a directory
   void saveSelectedWorkspaces();
   /// Save specified workspaces to a directory
-  void saveWorkspaces(std::vector<std::string> const &workspaceNames, std::vector<std::string> const &logParameters);
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames, std::vector<std::string> const &logParameters,
+                      bool const isAutoSave);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
   NamedFormat formatFromIndex(int formatIndex) const;
-  FileFormatOptions getSaveParametersFromView() const;
+  FileFormatOptions getSaveParametersFromView(bool const isAutoSave) const;
   void enableAutosave();
   void disableAutosave();
   void updateWidgetEnabledState() const;
   void updateWidgetStateBasedOnFileFormat() const;
   bool isProcessing() const;
   bool isAutoreducing() const;
+  bool hasSelectedORSOFormat() const;
 
   /// The view
   ISaveView *m_view;

@@ -62,7 +62,7 @@ For non-stitched datasets there will be the four columns described above plus an
 - *incident theta* - the value of theta used for the final conversion to Q.
 - *error of incident theta* - calculated as :math:`resolution * \theta`.
 
-If it is not possible to calculate the values for the additional columns then they are still included in the file but are populated with nan values.
+If it is not possible to calculate the values for the additional columns then a warning is logged and they are excluded from the file.
 
 Header Metadata
 ---------------

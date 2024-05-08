@@ -47,7 +47,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     _NUM_COLS_BASIC = 3
     _NUM_COLS_BASIC_WITH_RES = 4
-    _NUM_COLS_EXTENDED = 8
+    _NUM_COLS_EXTENDED = 7
+    _NUM_COLS_EXTENDED_WITH_RES = 8
 
     # Algorithm names
     _SAVE_ALG = "SaveISISReflectometryORSO"
@@ -58,6 +59,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _REF_ROI = "RefRoi"
     _CONVERT_UNITS = "ConvertUnits"
+    _REBIN_ALG = "Rebin"
 
     # Metadata headings
     _DATA_FILES_HEADING = "#     data_files:"
@@ -527,10 +529,21 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header([self._get_dataset_name_entry(ws_name) for ws_name in ws_names])
 
-    def test_additional_columns_included_if_requested_and_is_unstitched_data(self):
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_additional_columns_included_if_requested_and_is_unstitched_data_no_resolution(self, mock_alg_histories):
+        angle = "2.3"
         ws = self._create_sample_workspace()
-        self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_additional_columns_included_if_requested_and_is_unstitched_data_with_resolution(self, mock_alg_histories):
+        angle = "2.3"
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle}, True)
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_RES)
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories):
@@ -539,24 +552,19 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC_WITH_RES)
 
-    def test_all_columns_included_if_not_request_resolution_but_request_additional_columns(self):
-        ws = self._create_sample_workspace()
-        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
-        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
-
-    def test_additional_columns_contain_nan_if_no_conversion_history(self):
+    def test_additional_columns_excluded_if_no_conversion_history(self):
         ws = self._create_sample_workspace()
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
-        self._check_extra_columns_all_nan()
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_contain_nan_if_no_supported_conversion_alg_in_history(self, mock_alg_histories):
+    def test_additional_columns_excluded_if_no_supported_conversion_alg_in_history(self, mock_alg_histories):
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, "UnsupportedAlgorithm", {})
 
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
 
-        self._check_extra_columns_all_nan()
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
@@ -622,10 +630,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         history.getPropertyValue = Mock(side_effect=mock_get_property_value)
         return history
 
-    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values):
+    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False):
         convert_history = self._create_mock_alg_history(q_convert_alg_name, property_values)
         rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history])
-        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
+        if has_resolution:
+            rebin_history = self._create_mock_alg_history(self._REBIN_ALG, {"Params": "0.1,0.02,0.3"})
+            red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history, rebin_history])
+        else:
+            red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
         mock_alg_histories.return_value = [red_history]
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
@@ -677,11 +689,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         orso_data = np.loadtxt(self._output_filename)
         self.assertEqual(expected_num_columns, len(orso_data[0]))
         return orso_data
-
-    def _check_extra_columns_all_nan(self):
-        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
-        for i in range(self._NUM_COLS_BASIC_WITH_RES, self._NUM_COLS_EXTENDED):
-            self.assertTrue(np.isnan(orso_data[:, i]).all())
 
     def _get_theta_value(self, ws):
         spectrum_info = ws.spectrumInfo()
