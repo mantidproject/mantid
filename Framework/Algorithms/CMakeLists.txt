@@ -244,6 +244,7 @@ set(SRC_FILES
     src/PolarizationCorrectionWildes.cpp
     src/PolarizationEfficiencyCor.cpp
     src/PolarizationCorrections/DepolarizedAnalyserTransmission.cpp
+    src/PolarizationCorrections/FlipperEfficiency.cpp
     src/PolynomialCorrection.cpp
     src/Power.cpp
     src/PowerLawCorrection.cpp
@@ -596,6 +597,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h
     inc/MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h
     inc/MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h
+    inc/MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h
     inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
     inc/MantidAlgorithms/PolarizationCorrectionWildes.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
@@ -946,6 +948,7 @@ set(TEST_FILES
     PolarizationCorrections/HeliumAnalyserEfficiencyTest.h
     PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
     PolarizationCorrections/SpinStateValidatorTest.h
+    PolarizationCorrections/FlipperEfficiencyTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
     PolarizationEfficiencyCorTest.h
