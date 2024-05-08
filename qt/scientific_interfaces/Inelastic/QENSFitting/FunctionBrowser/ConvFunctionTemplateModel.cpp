@@ -333,7 +333,7 @@ std::optional<std::string> ConvFunctionTemplateModel::getPrefix(ParamID name) co
   } else {
     auto const prefixes = model()->peakPrefixes();
     auto const index = name > ParamID::LOR1_FWHM && name <= ParamID::LOR2_FWHM ? 1 : 0;
-    if (!prefixes || index >= prefixes->size())
+    if (!prefixes || index >= static_cast<int>(prefixes->size()))
       return std::optional<std::string>();
     return (*prefixes)[index];
   }
