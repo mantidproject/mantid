@@ -16,7 +16,7 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(BayesFitting)
 
 BayesFitting::BayesFitting(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
+    : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -42,7 +42,7 @@ void BayesFitting::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 /**

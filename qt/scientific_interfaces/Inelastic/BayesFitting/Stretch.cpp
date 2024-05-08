@@ -214,8 +214,8 @@ void Stretch::saveWorkspaces() {
   auto fitWorkspace = QString::fromStdString(m_fitWorkspaceName);
   auto contourWorkspace = QString::fromStdString(m_contourWorkspaceName);
   // Check workspaces exist
-  IndirectTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
-  IndirectTab::checkADSForPlotSaveWorkspace(m_contourWorkspaceName, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(m_contourWorkspaceName, false);
 
   const auto saveDir =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));

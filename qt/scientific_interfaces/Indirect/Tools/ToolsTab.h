@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "MantidKernel/System.h"
 #include <QSettings>
 #include <QWidget>
@@ -24,7 +24,7 @@ namespace CustomInterfaces {
     @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL ToolsTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL ToolsTab : public InelasticTab {
   Q_OBJECT
 
 public:

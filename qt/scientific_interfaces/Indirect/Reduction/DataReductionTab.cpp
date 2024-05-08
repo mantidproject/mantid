@@ -26,7 +26,7 @@ Mantid::Kernel::Logger g_log("DataReductionTab");
 namespace MantidQt::CustomInterfaces {
 
 DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
-    : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
+    : InelasticTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 

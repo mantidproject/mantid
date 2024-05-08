@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Settings.h"
-#include "IndirectInterface.h"
+#include "InelasticInterface.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "SettingsHelper.h"
@@ -28,8 +28,8 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 
 void Settings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows) {
   for (auto const &window : windows) {
-    if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data())) {
-      connect(this, SIGNAL(applySettings()), indirectInterface, SLOT(applySettings()));
+    if (auto inelasticInterface = dynamic_cast<InelasticInterface *>(window.data())) {
+      connect(this, SIGNAL(applySettings()), inelasticInterface, SLOT(applySettings()));
     }
   }
 }

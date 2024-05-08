@@ -40,7 +40,7 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(DataReduction)
 
 DataReduction::DataReduction(QWidget *parent)
-    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/DataReduction"),
+    : InelasticInterface(parent), m_settingsGroup("CustomInterfaces/DataReduction"),
       m_algRunner(new MantidQt::API::QtAlgorithmRunner(this)),
       m_changeObserver(*this, &DataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
@@ -105,7 +105,7 @@ void DataReduction::initLayout() {
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 void DataReduction::applySettings(std::map<std::string, QVariant> const &settings) {

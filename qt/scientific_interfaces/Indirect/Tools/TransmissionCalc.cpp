@@ -67,7 +67,7 @@ bool TransmissionCalc::validate() {
 }
 
 /**
- * Run the tab, invoking the Transmission algorithm.
+ * Run the tab, invoking the IndirectTransmission algorithm.
  */
 void TransmissionCalc::run() {
   setRunIsRunning(true);
@@ -75,7 +75,7 @@ void TransmissionCalc::run() {
   std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string outWsName = instrumentName + "_transmission";
 
-  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("Transmission");
+  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
   transAlg->initialize();
   try {
     transAlg->setProperty("Instrument", instrumentName);
@@ -125,7 +125,7 @@ void TransmissionCalc::algorithmComplete(bool error) {
       m_uiForm.tvResultsTable->addTopLevelItem(item);
     }
   } else
-    emit showMessageBox("Failed to execute Transmission "
+    emit showMessageBox("Failed to execute IndirectTransmission "
                         "algorithm.\nSee Results Log for details.");
 }
 

@@ -12,7 +12,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ToolsTab::ToolsTab(QWidget *parent) : IndirectTab(parent) {}
+ToolsTab::ToolsTab(QWidget *parent) : InelasticTab(parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

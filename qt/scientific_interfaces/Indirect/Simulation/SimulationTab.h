@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,7 +28,7 @@ namespace CustomInterfaces {
         @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL SimulationTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL SimulationTab : public InelasticTab {
   Q_OBJECT
 
 public:

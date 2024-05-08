@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_DataReduction.h"
 
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "DataReductionTab.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -45,7 +45,7 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 @author Michael Whitty
 */
 
-class DataReduction : public IndirectInterface, public IDataReduction {
+class DataReduction : public InelasticInterface, public IDataReduction {
   Q_OBJECT
 
 public:

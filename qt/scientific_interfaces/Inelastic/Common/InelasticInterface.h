@@ -14,11 +14,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IndirectInterface : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INELASTIC_DLL InelasticInterface : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
-  explicit IndirectInterface(QWidget *parent = nullptr);
+  explicit InelasticInterface(QWidget *parent = nullptr);
 
 public slots:
   void applySettings();

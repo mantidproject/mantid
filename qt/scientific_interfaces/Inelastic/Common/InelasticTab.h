@@ -51,19 +51,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** IndirectTab
+/** InelasticTab
 
 Provided common functionality of all indirect interface tabs.
 
 @author Dan Nixon
 @date 08/10/2014
 */
-class MANTIDQT_INELASTIC_DLL IndirectTab : public QObject {
+class MANTIDQT_INELASTIC_DLL InelasticTab : public QObject {
   Q_OBJECT
 
 public:
-  IndirectTab(QObject *parent = nullptr);
-  virtual ~IndirectTab() override = default;
+  InelasticTab(QObject *parent = nullptr);
+  virtual ~InelasticTab() override = default;
 
   void displayWarning(std::string const &message);
 

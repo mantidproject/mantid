@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
 #include "ui_DiffractionReduction.h"
@@ -22,7 +22,7 @@ namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
 
-class DiffractionReduction : public IndirectInterface {
+class DiffractionReduction : public InelasticInterface {
   Q_OBJECT
 
 public:

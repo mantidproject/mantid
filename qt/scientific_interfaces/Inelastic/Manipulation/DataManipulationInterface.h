@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_DataManipulationInterface.h"
 
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "DataManipulation.h"
 
 #include "MantidGeometry/IComponent.h"
@@ -28,7 +28,7 @@ instrument. The deltaE
 mode is defined in the instrument definition file using the "deltaE-mode".
 */
 
-class DataManipulationInterface : public IndirectInterface {
+class DataManipulationInterface : public InelasticInterface {
   Q_OBJECT
 
 public:

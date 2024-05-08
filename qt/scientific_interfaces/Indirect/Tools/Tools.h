@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_Tools.h"
 
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "ToolsTab.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -24,7 +24,7 @@ the interface window and
 @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL Tools : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL Tools : public InelasticInterface {
   Q_OBJECT
 
 public: // public constants and enums

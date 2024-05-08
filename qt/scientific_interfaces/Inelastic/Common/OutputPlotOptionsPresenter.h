@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectInterface.h"
-#include "Common/IndirectTab.h"
+#include "Common/InelasticInterface.h"
+#include "Common/InelasticTab.h"
 #include "Common/OutputPlotOptionsModel.h"
 #include "Common/OutputPlotOptionsView.h"
 

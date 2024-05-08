@@ -16,7 +16,7 @@ DECLARE_SUBWINDOW(Tools)
 
 using namespace MantidQt::CustomInterfaces;
 
-Tools::Tools(QWidget *parent) : IndirectInterface(parent), m_changeObserver(*this, &Tools::handleDirectoryChange) {}
+Tools::Tools(QWidget *parent) : InelasticInterface(parent), m_changeObserver(*this, &Tools::handleDirectoryChange) {}
 
 void Tools::initLayout() {
   m_uiForm.setupUi(this);

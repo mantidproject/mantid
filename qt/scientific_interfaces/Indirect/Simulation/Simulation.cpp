@@ -18,7 +18,7 @@ DECLARE_SUBWINDOW(Simulation)
 using namespace MantidQt::CustomInterfaces;
 
 Simulation::Simulation(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &Simulation::handleDirectoryChange) {}
+    : InelasticInterface(parent), m_changeObserver(*this, &Simulation::handleDirectoryChange) {}
 
 Simulation::~Simulation() = default;
 

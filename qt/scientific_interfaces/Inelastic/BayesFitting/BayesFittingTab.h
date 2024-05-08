@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "DllConfig.h"
 
 #include <QSettings>
@@ -45,7 +45,7 @@ static const unsigned int NUM_DECIMALS = 6;
 /// precision for integer properties in bayes tabs
 static const unsigned int INT_DECIMALS = 0;
 
-class MANTIDQT_INELASTIC_DLL BayesFittingTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL BayesFittingTab : public InelasticTab {
   Q_OBJECT
 
 public:

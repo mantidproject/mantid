@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectInterface.h"
+#include "InelasticInterface.h"
 #include "Settings.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -14,14 +14,14 @@ using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectInterface::IndirectInterface(QWidget *parent) : UserSubWindow(parent) {}
+InelasticInterface::InelasticInterface(QWidget *parent) : UserSubWindow(parent) {}
 
-void IndirectInterface::initLayout() {
+void InelasticInterface::initLayout() {
   // Needed to initially apply the settings loaded on the settings GUI
   applySettings();
 }
 
-void IndirectInterface::help() {
+void InelasticInterface::help() {
   auto const docPageName = QString::fromStdString(documentationPage());
   // Extract the category
   auto const category = docPageName.left(docPageName.indexOf(' ')).toLower();
@@ -29,7 +29,7 @@ void IndirectInterface::help() {
   HelpWindow::showCustomInterface(docPageName, category);
 }
 
-void IndirectInterface::settings() {
+void InelasticInterface::settings() {
   auto settingsWidget = new Settings(this);
   settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
@@ -40,12 +40,12 @@ void IndirectInterface::settings() {
   settingsWidget->show();
 }
 
-void IndirectInterface::applySettings() { applySettings(Settings::getSettings()); }
+void InelasticInterface::applySettings() { applySettings(Settings::getSettings()); }
 
-void IndirectInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
+void InelasticInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
 
-void IndirectInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
+void InelasticInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 
-void IndirectInterface::showMessageBox(QString const &message) { showInformationBox(message); }
+void InelasticInterface::showMessageBox(QString const &message) { showInformationBox(message); }
 
 } // namespace MantidQt::CustomInterfaces

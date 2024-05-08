@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectTab.h"
+#include "InelasticTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -34,7 +34,7 @@ using namespace MantidQt::MantidWidgets;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectTab");
+Mantid::Kernel::Logger g_log("InelasticTab");
 
 std::string castToString(int value) { return boost::lexical_cast<std::string>(value); }
 
@@ -48,7 +48,7 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectTab::IndirectTab(QObject *parent)
+InelasticTab::InelasticTab(QObject *parent)
     : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
       m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
@@ -70,7 +70,7 @@ IndirectTab::IndirectTab(QObject *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-void IndirectTab::runTab() {
+void InelasticTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     run();
@@ -79,14 +79,14 @@ void IndirectTab::runTab() {
   }
 }
 
-void IndirectTab::setupTab() { setup(); }
+void InelasticTab::setupTab() { setup(); }
 
-bool IndirectTab::validateTab() { return validate(); }
+bool InelasticTab::validateTab() { return validate(); }
 
 /**
  * Handles generating a Python script for the algorithms run on the current tab.
  */
-void IndirectTab::exportPythonScript() {
+void InelasticTab::exportPythonScript() {
   g_log.information() << "Python export for workspace: " << m_pythonExportWsName << ", between " << m_tabStartTime
                       << " and " << m_tabEndTime << '\n';
 
@@ -109,7 +109,7 @@ void IndirectTab::exportPythonScript() {
 
   // Set default properties
   QHash<QString, QString> props;
-  props["Filename"] = "IndirectInterfacePythonExport.py";
+  props["Filename"] = "InelasticInterfacePythonExport.py";
   props["InputWorkspace"] = QString::fromStdString(m_pythonExportWsName);
   props["SpecifyAlgorithmVersions"] = "Specify All";
   props["UnrollAll"] = "1";
@@ -136,8 +136,8 @@ void IndirectTab::exportPythonScript() {
  * @param specMax :: Upper spectra bound
  * @return If the algorithm was successful
  */
-bool IndirectTab::loadFile(const std::string &filename, const std::string &outputName, const int specMin,
-                           const int specMax, bool loadHistory) {
+bool InelasticTab::loadFile(const std::string &filename, const std::string &outputName, const int specMin,
+                            const int specMax, bool loadHistory) {
   const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
 
   auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
@@ -159,11 +159,11 @@ bool IndirectTab::loadFile(const std::string &filename, const std::string &outpu
  * @param wsName Name of workspace to save
  * @param filename Name of file to save as (including extension)
  */
-void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName, const QString &filename) {
+void InelasticTab::addSaveWorkspaceToQueue(const QString &wsName, const QString &filename) {
   addSaveWorkspaceToQueue(wsName.toStdString(), filename.toStdString());
 }
 
-void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename) {
+void InelasticTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename) {
   // Setup the input workspace property
   auto saveProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   saveProps->setPropertyValue("InputWorkspace", wsName);
@@ -190,8 +190,8 @@ void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::
  * @param max :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
  */
-void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtProperty *max,
-                                       const QPair<double, double> &bounds) {
+void InelasticTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtProperty *max,
+                                        const QPair<double, double> &bounds) {
   m_dblManager->setRange(min, bounds.first, bounds.second);
   m_dblManager->setRange(max, bounds.first, bounds.second);
   rs->setBounds(bounds.first, bounds.second);
@@ -206,9 +206,9 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPro
  * @param bounds :: The upper and lower bounds to be set
  * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                   const QPair<double, double> &range,
-                                   const boost::optional<QPair<double, double>> &bounds) {
+void InelasticTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+                                    const QPair<double, double> &range,
+                                    const boost::optional<QPair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);
@@ -227,8 +227,8 @@ void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtPrope
  * @param rangeSelector :: The range selector
  * @param newValue :: The new value for the minimum
  */
-void IndirectTab::setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
-                                      double newValue) {
+void InelasticTab::setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
+                                       double newValue) {
   if (newValue <= maxProperty->valueText().toDouble())
     rangeSelector->setMinimum(newValue);
   else
@@ -244,8 +244,8 @@ void IndirectTab::setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxPr
  * @param rangeSelector :: The range selector
  * @param newValue :: The new value for the maximum
  */
-void IndirectTab::setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
-                                      double newValue) {
+void InelasticTab::setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
+                                       double newValue) {
   if (newValue >= minProperty->valueText().toDouble())
     rangeSelector->setMaximum(newValue);
   else
@@ -257,7 +257,7 @@ void IndirectTab::setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxPr
  *
  * @param algorithm :: The algorithm to be run
  */
-void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm) {
+void InelasticTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm) {
   algorithm->setRethrows(true);
 
   // There should never really be unexecuted algorithms in the queue, but it is
@@ -275,7 +275,7 @@ void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm) {
  *
  * @param error :: True if execution failed, false otherwise
  */
-void IndirectTab::algorithmFinished(bool error) {
+void InelasticTab::algorithmFinished(bool error) {
   m_tabEndTime = DateAndTime::getCurrentTime();
 
   if (error) {
@@ -291,7 +291,8 @@ void IndirectTab::algorithmFinished(bool error) {
  *                      message
  * @return              False if no workspace found, True if workspace found
  */
-bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn) {
+bool InelasticTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting,
+                                                const bool warn) {
   const auto workspaceExists = AnalysisDataService::Instance().doesExist(workspaceName);
   if (warn && !workspaceExists) {
     const std::string plotSave = plotting ? "plotting" : "saving";
@@ -303,7 +304,7 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
   return workspaceExists;
 }
 
-void IndirectTab::displayWarning(std::string const &message) {
+void InelasticTab::displayWarning(std::string const &message) {
   QMessageBox::warning(nullptr, "Warning!", QString::fromStdString(message));
 }
 

@@ -2,7 +2,9 @@ get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
     DataValidationHelper.cpp
-    IndirectInterface.cpp
+    InelasticInterface.cpp
+    InelasticTab.cpp
+    InterfaceUtils.cpp
     OutputPlotOptionsModel.cpp
     OutputPlotOptionsPresenter.cpp
     OutputPlotOptionsView.cpp
@@ -11,23 +13,21 @@ set(SRC_FILES
     SettingsModel.cpp
     SettingsPresenter.cpp
     SettingsView.cpp
-    IndirectTab.cpp
-    InterfaceUtils.cpp
     ValidationUtils.cpp
 )
 
 set(INC_FILES
     DataValidationHelper.h
+    InterfaceUtils.h
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h
     SettingsHelper.h
     SettingsPresenter.h
-    InterfaceUtils.h
     ValidationUtils.h
 )
 
-set(MOC_FILES IndirectInterface.h OutputPlotOptionsView.h Settings.h SettingsView.h IndirectTab.h)
+set(MOC_FILES InelasticInterface.h InelasticTab.h OutputPlotOptionsView.h Settings.h SettingsView.h)
 
 set(UI_FILES InterfaceSettings.ui OutputPlotOptions.ui)
 

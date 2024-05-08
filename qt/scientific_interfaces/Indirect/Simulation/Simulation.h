@@ -8,7 +8,7 @@
 #include "ui_Simulation.h"
 
 #include "../DllConfig.h"
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "SimulationTab.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -25,7 +25,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson, STFC
   */
 
-class MANTIDQT_INDIRECT_DLL Simulation : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL Simulation : public InelasticInterface {
   Q_OBJECT
 
 public: // public constants and enums

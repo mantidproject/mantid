@@ -18,7 +18,7 @@ class MANTIDQT_INDIRECT_DLL MolDyn : public SimulationTab {
 public:
   MolDyn(QWidget *parent = nullptr);
 
-  // Inherited methods from IndirectTab
+  // Inherited methods from InelasticTab
   void setup() override;
   bool validate() override;
   void run() override;

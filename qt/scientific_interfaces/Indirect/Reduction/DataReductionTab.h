@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "Common/InstrumentConfig.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
@@ -41,7 +41,7 @@ class IDataReduction;
   @author Samuel Jackson
   @date 13/08/2013
 */
-class MANTIDQT_INDIRECT_DLL DataReductionTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL DataReductionTab : public InelasticTab {
   Q_OBJECT
 
 public:

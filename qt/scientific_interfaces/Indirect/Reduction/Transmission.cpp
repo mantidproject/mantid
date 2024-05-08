@@ -62,7 +62,7 @@ void Transmission::run() {
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
   QString outWsName = sampleWsName.toLower() + "_transmission_group";
 
-  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("TransmissionMonitor", -1);
+  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
   transAlg->initialize();
 
   transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());

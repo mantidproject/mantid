@@ -36,7 +36,7 @@ DECLARE_SUBWINDOW(DiffractionReduction)
 using MantidQt::API::BatchAlgorithmRunner;
 
 DiffractionReduction::DiffractionReduction(QWidget *parent)
-    : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
+    : InelasticInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 DiffractionReduction::~DiffractionReduction() { saveSettings(); }

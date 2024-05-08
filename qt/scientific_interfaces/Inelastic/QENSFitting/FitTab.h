@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -50,7 +50,7 @@ public:
   virtual void handleFunctionChanged() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL FitTab : public IndirectTab, public IFitTab {
+class MANTIDQT_INELASTIC_DLL FitTab : public InelasticTab, public IFitTab {
   Q_OBJECT
 
 public:

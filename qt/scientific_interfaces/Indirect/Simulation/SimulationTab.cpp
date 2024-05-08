@@ -10,7 +10,7 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-SimulationTab::SimulationTab(QWidget *parent) : IndirectTab(parent) {}
+SimulationTab::SimulationTab(QWidget *parent) : InelasticTab(parent) {}
 
 SimulationTab::~SimulationTab() = default;
 
