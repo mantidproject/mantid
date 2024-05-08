@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDiffractionReduction.h"
+#include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "Common/Settings.h"
 
@@ -24,27 +24,27 @@ using namespace Mantid::Geometry;
 namespace MantidQt::CustomInterfaces {
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
+Mantid::Kernel::Logger g_log("DiffractionReduction");
 
 // Helper function for use with std::transform.
 std::string toStdString(const QString &qString) { return qString.toStdString(); }
 
 } // namespace
 
-DECLARE_SUBWINDOW(IndirectDiffractionReduction)
+DECLARE_SUBWINDOW(DiffractionReduction)
 
 using MantidQt::API::BatchAlgorithmRunner;
 
-IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
+DiffractionReduction::DiffractionReduction(QWidget *parent)
     : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
-IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); }
+DiffractionReduction::~DiffractionReduction() { saveSettings(); }
 
 /**
  * Sets up UI components and Qt signal/slot connections.
  */
-void IndirectDiffractionReduction::initLayout() {
+void DiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -100,7 +100,7 @@ void IndirectDiffractionReduction::initLayout() {
 /**
  * Make file finding status display on the run button and enable/disable it
  */
-void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field) {
+void DiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field) {
   connect(file_field, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
   connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
   connect(file_field, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
@@ -109,7 +109,7 @@ void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::AP
 /**
  * Runs a diffraction reduction when the user clicks Run.
  */
-void IndirectDiffractionReduction::run() {
+void DiffractionReduction::run() {
   m_plotOptionsPresenter->clearWorkspaces();
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
@@ -156,7 +156,7 @@ void IndirectDiffractionReduction::run() {
  *
  * @param error True if the chain was stopped due to error
  */
-void IndirectDiffractionReduction::algorithmComplete(bool error) {
+void DiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
 
@@ -185,7 +185,7 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
 /**
  * Handles saving the reductions from the generic algorithm.
  */
-void IndirectDiffractionReduction::saveReductions() {
+void DiffractionReduction::saveReductions() {
   for (const auto &wsName : m_plotWorkspaces) {
     const auto workspaceExists = AnalysisDataService::Instance().doesExist(wsName);
     if (workspaceExists) {
@@ -228,7 +228,7 @@ void IndirectDiffractionReduction::saveReductions() {
  * @return            A SaveGSS Algorithm which saves in file with the
  *                    specified name.
  */
-IAlgorithm_sptr IndirectDiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
+IAlgorithm_sptr DiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
   auto alg = saveAlgorithm("SaveGSS", filename);
   alg->setProperty("Append", false);
   return alg;
@@ -243,8 +243,7 @@ IAlgorithm_sptr IndirectDiffractionReduction::saveGSSAlgorithm(const std::string
  * @return            A SaveASCII Algorithm which saves in file with the
  *                    specified name.
  */
-IAlgorithm_sptr IndirectDiffractionReduction::saveASCIIAlgorithm(const std::string &filename,
-                                                                 const std::string &inputWsName) {
+IAlgorithm_sptr DiffractionReduction::saveASCIIAlgorithm(const std::string &filename, const std::string &inputWsName) {
   return saveAlgorithm("SaveAscii", filename, inputWsName, 1);
 }
 
@@ -257,8 +256,8 @@ IAlgorithm_sptr IndirectDiffractionReduction::saveASCIIAlgorithm(const std::stri
  * @return            A NexusProcessed Algorithm which saves in file with
  *                    the specified name.
  */
-IAlgorithm_sptr IndirectDiffractionReduction::saveNexusProcessedAlgorithm(const std::string &filename,
-                                                                          const std::string &inputWsName) {
+IAlgorithm_sptr DiffractionReduction::saveNexusProcessedAlgorithm(const std::string &filename,
+                                                                  const std::string &inputWsName) {
   return saveAlgorithm("SaveNexusProcessed", filename, inputWsName);
 }
 
@@ -274,8 +273,8 @@ IAlgorithm_sptr IndirectDiffractionReduction::saveNexusProcessedAlgorithm(const 
  *                    the specified name into the file with the the
  *                    specified name.
  */
-IAlgorithm_sptr IndirectDiffractionReduction::saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
-                                                            const std::string &inputWsName, const int &version) {
+IAlgorithm_sptr DiffractionReduction::saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
+                                                    const std::string &inputWsName, const int &version) {
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(saveAlgName, version);
   saveAlg->initialize();
 
@@ -298,9 +297,9 @@ IAlgorithm_sptr IndirectDiffractionReduction::saveAlgorithm(const std::string &s
  * @param target        The target units of the conversion algorithm.
  * @return              A unit conversion algorithm.
  */
-IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::string &inputWsName,
-                                                                    const std::string &outputWsName,
-                                                                    const std::string &target) {
+IAlgorithm_sptr DiffractionReduction::convertUnitsAlgorithm(const std::string &inputWsName,
+                                                            const std::string &outputWsName,
+                                                            const std::string &target) {
   IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
   convertUnits->initialize();
   convertUnits->setProperty("InputWorkspace", inputWsName);
@@ -315,7 +314,7 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(const std::s
  * @param instName Name of the instrument
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
-void IndirectDiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
+void DiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
   setRunIsRunning(true);
 
   QString rebinStart = m_uiForm.leRebinStart->text();
@@ -332,7 +331,7 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
   detRange.emplace_back(static_cast<long>(m_uiForm.spSpecMax->value()));
 
   // Get generic reduction algorithm instance
-  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISIndirectDiffractionReduction");
+  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISDiffractionReduction");
   msgDiffReduction->initialize();
 
   // Set algorithm properties
@@ -378,7 +377,7 @@ void IndirectDiffractionReduction::runGenericReduction(const QString &instName, 
  * Runs a diffraction reduction for OSIRIS operating in diffonly mode using the
  * OSIRISDiffractionReduction algorithm.
  */
-void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
+void DiffractionReduction::runOSIRISdiffonlyReduction() {
   setRunIsRunning(true);
 
   // Get the files names from FileFinderWidget widget, and convert them from Qt
@@ -463,8 +462,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
  * @param reflection Reflection mode to load parameters for (diffspec or
  *diffonly)
  */
-MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(const std::string &instrumentName,
-                                                                  const std::string &reflection) {
+MatrixWorkspace_sptr DiffractionReduction::loadInstrument(const std::string &instrumentName,
+                                                          const std::string &reflection) {
   std::string idfPath = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
   std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
@@ -499,8 +498,8 @@ MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(const std::str
  *"diffraction")
  * @param reflectionName Name of diffraction mode selected
  */
-void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentName, const QString &analyserName,
-                                                      const QString &reflectionName) {
+void DiffractionReduction::instrumentSelected(const QString &instrumentName, const QString &analyserName,
+                                              const QString &reflectionName) {
   UNUSED_ARG(analyserName);
 
   // Set the search instrument for runs
@@ -561,7 +560,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
   }
 }
 
-void IndirectDiffractionReduction::validateSpectrumMin(int value) {
+void DiffractionReduction::validateSpectrumMin(int value) {
   QSignalBlocker blocker(m_uiForm.spSpecMin);
 
   auto const spectraMax = m_uiForm.spSpecMax->value();
@@ -569,7 +568,7 @@ void IndirectDiffractionReduction::validateSpectrumMin(int value) {
     m_uiForm.spSpecMin->setValue(spectraMax);
 }
 
-void IndirectDiffractionReduction::validateSpectrumMax(int value) {
+void DiffractionReduction::validateSpectrumMax(int value) {
   QSignalBlocker blocker(m_uiForm.spSpecMax);
 
   auto const spectraMin = m_uiForm.spSpecMin->value();
@@ -577,11 +576,11 @@ void IndirectDiffractionReduction::validateSpectrumMax(int value) {
     m_uiForm.spSpecMax->setValue(spectraMin);
 }
 
-std::string IndirectDiffractionReduction::documentationPage() const { return "Indirect Diffraction"; }
+std::string DiffractionReduction::documentationPage() const { return "Indirect Diffraction"; }
 
-void IndirectDiffractionReduction::initLocalPython() {}
+void DiffractionReduction::initLocalPython() {}
 
-void IndirectDiffractionReduction::loadSettings() {
+void DiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
@@ -595,7 +594,7 @@ void IndirectDiffractionReduction::loadSettings() {
   settings.endGroup();
 }
 
-void IndirectDiffractionReduction::saveSettings() {
+void DiffractionReduction::saveSettings() {
   QSettings settings;
 
   settings.beginGroup(m_settingsGroup);
@@ -609,7 +608,7 @@ void IndirectDiffractionReduction::saveSettings() {
  *
  * @returns True if reining options are valid, false otherwise
  */
-bool IndirectDiffractionReduction::validateRebin() {
+bool DiffractionReduction::validateRebin() {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
   QString rebStepTxt = m_uiForm.leRebinWidth->text();
   QString rebEndTxt = m_uiForm.leRebinEnd->text();
@@ -649,23 +648,23 @@ bool IndirectDiffractionReduction::validateRebin() {
  *
  * @returns A message if the file finder has a problem.
  */
-QString IndirectDiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
-                                                         bool const isChecked) const {
+QString DiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
+                                                 bool const isChecked) const {
   if (!fileFinder->isOptional() || isChecked) {
     return fileFinder->getFileProblem();
   }
   return "";
 }
 
-void IndirectDiffractionReduction::useVanadiumStateChanged(int state) { m_uiForm.rfVanFile->setEnabled(state != 0); }
+void DiffractionReduction::useVanadiumStateChanged(int state) { m_uiForm.rfVanFile->setEnabled(state != 0); }
 
-void IndirectDiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile->setEnabled(state != 0); }
+void DiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile->setEnabled(state != 0); }
 
 /**
  * Disables and shows message on run button indicating that run files have been
  * changed.
  */
-void IndirectDiffractionReduction::runFilesChanged() {
+void DiffractionReduction::runFilesChanged() {
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbRun->setText("Editing...");
 }
@@ -674,7 +673,7 @@ void IndirectDiffractionReduction::runFilesChanged() {
  * Disables and shows message on run button to indicate searching for data
  * files.
  */
-void IndirectDiffractionReduction::runFilesFinding() {
+void DiffractionReduction::runFilesFinding() {
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbRun->setText("Finding files...");
 }
@@ -682,7 +681,7 @@ void IndirectDiffractionReduction::runFilesFinding() {
 /**
  * Updates run button with result of file search.
  */
-void IndirectDiffractionReduction::runFilesFound() {
+void DiffractionReduction::runFilesFound() {
   bool valid = m_uiForm.rfSampleFiles->isValid();
   m_uiForm.pbRun->setEnabled(valid);
 
@@ -697,19 +696,19 @@ void IndirectDiffractionReduction::runFilesFound() {
     m_uiForm.ckSumFiles->setChecked(false);
 }
 
-void IndirectDiffractionReduction::setRunIsRunning(bool running) {
+void DiffractionReduction::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }
 
-void IndirectDiffractionReduction::setButtonsEnabled(bool enabled) {
+void DiffractionReduction::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
-void IndirectDiffractionReduction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void DiffractionReduction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectDiffractionReduction::setSaveEnabled(bool enabled) {
+void DiffractionReduction::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
   m_uiForm.ckAscii->setEnabled(enabled);
   m_uiForm.ckGSS->setEnabled(enabled);

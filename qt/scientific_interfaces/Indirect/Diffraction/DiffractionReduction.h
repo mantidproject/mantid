@@ -11,7 +11,7 @@
 #include "Common/IndirectInterface.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
-#include "ui_IndirectDiffractionReduction.h"
+#include "ui_DiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
@@ -22,13 +22,13 @@ namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
 
-class IndirectDiffractionReduction : public IndirectInterface {
+class DiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
 public:
   /// Default Constructor
-  explicit IndirectDiffractionReduction(QWidget *parent = nullptr);
-  ~IndirectDiffractionReduction() override;
+  explicit DiffractionReduction(QWidget *parent = nullptr);
+  ~DiffractionReduction() override;
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "Diffraction"; }
@@ -84,7 +84,7 @@ private:
 
 private:
   /// The settings dialog
-  Ui::IndirectDiffractionReduction m_uiForm; /// The form generated using Qt Designer
+  Ui::DiffractionReduction m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;

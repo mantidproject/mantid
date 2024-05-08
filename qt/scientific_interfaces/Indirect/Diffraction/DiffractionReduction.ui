@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDiffractionReduction</class>
- <widget class="QMainWindow" name="IndirectDiffractionReduction">
+ <class>DiffractionReduction</class>
+ <widget class="QMainWindow" name="DiffractionReduction">
   <property name="geometry">
    <rect>
     <x>0</x>
