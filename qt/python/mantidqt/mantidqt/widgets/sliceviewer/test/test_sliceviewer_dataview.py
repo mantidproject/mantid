@@ -384,6 +384,10 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.assertAlmostEqual(y_min, -1.5, 9)
         self.assertAlmostEqual(y_max, 2.0, 9)
 
+    def test_extents_not_created_if_not_requested(self):
+        view = SliceViewerDataView(presenter=self.presenter, dims_info=mock.MagicMock(), can_normalise=mock.Mock(), add_extents=False)
+        self.assertIsNone(view.extents)
+
 
 if __name__ == "__main__":
     unittest.main()
