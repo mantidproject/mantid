@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "ui_IndirectInstrumentConfig.h"
+#include "ui_InstrumentConfig.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
@@ -64,7 +64,7 @@ are populated by loading an empty instrument.
 @author Dan Nixon
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig : public API::MantidWidget, public IInstrumentConfig {
+class MANTIDQT_INDIRECT_DLL InstrumentConfig : public API::MantidWidget, public IInstrumentConfig {
   Q_OBJECT
 
   Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)
@@ -75,8 +75,8 @@ class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig : public API::MantidWidget,
   Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE setShowInstrumentLabel)
 
 public:
-  IndirectInstrumentConfig(QWidget *parent = nullptr);
-  ~IndirectInstrumentConfig() override;
+  InstrumentConfig(QWidget *parent = nullptr);
+  ~InstrumentConfig() override;
 
   /* Getters and setters for Qt properties */
   QStringList getTechniques() override;
@@ -136,7 +136,7 @@ private slots:
 
 private:
   /// Member containing the widgets child widgets.
-  Ui::IndirectInstrumentConfig m_uiForm;
+  Ui::InstrumentConfig m_uiForm;
   /// Instrument selector widget
   MantidQt::MantidWidgets::InstrumentSelector *m_instrumentSelector;
 

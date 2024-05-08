@@ -1,10 +1,10 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
-set(SRC_FILES DetectorGroupingOptions.cpp IndirectInstrumentConfig.cpp)
+set(SRC_FILES DetectorGroupingOptions.cpp InstrumentConfig.cpp)
 
-set(MOC_FILES DetectorGroupingOptions.h IndirectInstrumentConfig.h)
+set(MOC_FILES DetectorGroupingOptions.h InstrumentConfig.h)
 
-set(UI_FILES DetectorGroupingOptions.ui IndirectInstrumentConfig.ui)
+set(UI_FILES DetectorGroupingOptions.ui InstrumentConfig.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM MOC_FILES PREPEND ${SUB_DIRECTORY}/)

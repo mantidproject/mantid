@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/IndirectInstrumentConfig.h"
 #include "Common/IndirectTab.h"
+#include "Common/InstrumentConfig.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectInstrumentConfig.h"
+#include "InstrumentConfig.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -17,12 +17,12 @@ using namespace Mantid::Geometry;
 using MantidQt::MantidWidgets::InstrumentSelector;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectInstrumentConfig");
+Mantid::Kernel::Logger g_log("InstrumentConfig");
 }
 
 namespace MantidQt::MantidWidgets {
 
-IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent)
+InstrumentConfig::InstrumentConfig(QWidget *parent)
     : API::MantidWidget(parent), m_disabledInstruments(), m_removeDiffraction(false), m_forceDiffraction(false) {
   m_uiForm.setupUi(this);
 
@@ -41,37 +41,35 @@ IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent)
   m_instrumentSelector->fillWithInstrumentsFromFacility();
 }
 
-IndirectInstrumentConfig::~IndirectInstrumentConfig() = default;
+InstrumentConfig::~InstrumentConfig() = default;
 
 /**
  * Gets the list of techniques used to filter instruments by.
  *
  * @return List of techniques
  */
-QStringList IndirectInstrumentConfig::getTechniques() { return m_instrumentSelector->getTechniques(); }
+QStringList InstrumentConfig::getTechniques() { return m_instrumentSelector->getTechniques(); }
 
 /**
  * Set a list of techniques by which the list of instruments should be filtered.
  *
  * @param techniques List of techniques
  */
-void IndirectInstrumentConfig::setTechniques(const QStringList &techniques) {
-  m_instrumentSelector->setTechniques(techniques);
-}
+void InstrumentConfig::setTechniques(const QStringList &techniques) { m_instrumentSelector->setTechniques(techniques); }
 
 /**
  * Gets a list of instruments that have been removed from the instrument list.
  *
  * @return List of disabled instruments
  */
-QStringList IndirectInstrumentConfig::getDisabledInstruments() { return m_disabledInstruments; }
+QStringList InstrumentConfig::getDisabledInstruments() { return m_disabledInstruments; }
 
 /**
  * Removes a list of instruments from the instrument list.
  *
  * @param instrumentNames List of names of instruments to remove
  */
-void IndirectInstrumentConfig::setDisabledInstruments(const QStringList &instrumentNames) {
+void InstrumentConfig::setDisabledInstruments(const QStringList &instrumentNames) {
   m_disabledInstruments.append(instrumentNames);
 
   filterDisabledInstruments();
@@ -82,14 +80,14 @@ void IndirectInstrumentConfig::setDisabledInstruments(const QStringList &instrum
  *
  * @return Name of facility
  */
-QString IndirectInstrumentConfig::getFacility() { return m_instrumentSelector->getFacility(); }
+QString InstrumentConfig::getFacility() { return m_instrumentSelector->getFacility(); }
 
 /**
  * Sets a facility to lock the widget to.
  *
  * @param facilityName Name of facility
  */
-void IndirectInstrumentConfig::setFacility(const QString &facilityName) {
+void InstrumentConfig::setFacility(const QString &facilityName) {
   m_instrumentSelector->setAutoUpdate(false);
   m_instrumentSelector->setFacility(facilityName);
   filterDisabledInstruments();
@@ -100,14 +98,14 @@ void IndirectInstrumentConfig::setFacility(const QString &facilityName) {
  *
  * @return True if diffraction is an allowed analyser, false otherwise
  */
-bool IndirectInstrumentConfig::isDiffractionEnabled() { return !m_removeDiffraction; }
+bool InstrumentConfig::isDiffractionEnabled() { return !m_removeDiffraction; }
 
 /**
  * Sets if diffraction should bre removed from list of analyser banks.
  *
  * @param enabled Set to false to remove diffraction option
  */
-void IndirectInstrumentConfig::enableDiffraction(bool enabled) {
+void InstrumentConfig::enableDiffraction(bool enabled) {
   if (!enabled)
     forceDiffraction(false);
 
@@ -119,14 +117,14 @@ void IndirectInstrumentConfig::enableDiffraction(bool enabled) {
  *
  * @return True if diffraction is the only allowed analyser
  */
-bool IndirectInstrumentConfig::isDiffractionForced() { return m_forceDiffraction; }
+bool InstrumentConfig::isDiffractionForced() { return m_forceDiffraction; }
 
 /**
  * Sets if diffraction should be the only allowed analyser bank option.
  *
  * @param forced If diffraction is the only allowed analyser
  */
-void IndirectInstrumentConfig::forceDiffraction(bool forced) {
+void InstrumentConfig::forceDiffraction(bool forced) {
   if (forced)
     enableDiffraction(true);
 
@@ -138,14 +136,14 @@ void IndirectInstrumentConfig::forceDiffraction(bool forced) {
  *
  * @return If label is shown
  */
-bool IndirectInstrumentConfig::isInstrumentLabelShown() { return m_uiForm.lbInstrument->isVisible(); }
+bool InstrumentConfig::isInstrumentLabelShown() { return m_uiForm.lbInstrument->isVisible(); }
 
 /**
  * Sets if the "Instrument" label should be shown or now.
  *
  * @param visible If the label is visible
  */
-void IndirectInstrumentConfig::setShowInstrumentLabel(bool visible) { m_uiForm.lbInstrument->setVisible(visible); }
+void InstrumentConfig::setShowInstrumentLabel(bool visible) { m_uiForm.lbInstrument->setVisible(visible); }
 
 /**
  * Sets the currently displayed instrument, providing that the name given
@@ -153,7 +151,7 @@ void IndirectInstrumentConfig::setShowInstrumentLabel(bool visible) { m_uiForm.l
  *
  * @param instrumentName Name of instrument to display
  */
-void IndirectInstrumentConfig::setInstrument(const QString &instrumentName) {
+void InstrumentConfig::setInstrument(const QString &instrumentName) {
   int index = m_instrumentSelector->findText(instrumentName);
 
   if (index >= 0) {
@@ -169,7 +167,7 @@ void IndirectInstrumentConfig::setInstrument(const QString &instrumentName) {
  *
  * @return Name of instrument.
  */
-QString IndirectInstrumentConfig::getInstrumentName() { return m_instrumentSelector->currentText(); }
+QString InstrumentConfig::getInstrumentName() { return m_instrumentSelector->currentText(); }
 
 /**
  * Sets the currently displayed analyser, providing that the name given
@@ -177,7 +175,7 @@ QString IndirectInstrumentConfig::getInstrumentName() { return m_instrumentSelec
  *
  * @param analyserName Name of analyser to display
  */
-void IndirectInstrumentConfig::setAnalyser(const QString &analyserName) {
+void InstrumentConfig::setAnalyser(const QString &analyserName) {
   int index = m_uiForm.cbAnalyser->findText(analyserName);
 
   if (index >= 0) {
@@ -192,7 +190,7 @@ void IndirectInstrumentConfig::setAnalyser(const QString &analyserName) {
  *
  * @return Name of analyser bank
  */
-QString IndirectInstrumentConfig::getAnalyserName() { return m_uiForm.cbAnalyser->currentText(); }
+QString InstrumentConfig::getAnalyserName() { return m_uiForm.cbAnalyser->currentText(); }
 
 /**
  * Sets the currently displayed reflection, providing that the name given
@@ -200,7 +198,7 @@ QString IndirectInstrumentConfig::getAnalyserName() { return m_uiForm.cbAnalyser
  *
  * @param reflectionName Name of reflection to display
  */
-void IndirectInstrumentConfig::setReflection(const QString &reflectionName) {
+void InstrumentConfig::setReflection(const QString &reflectionName) {
   int index = m_uiForm.cbReflection->findText(reflectionName);
 
   if (index >= 0) {
@@ -216,7 +214,7 @@ void IndirectInstrumentConfig::setReflection(const QString &reflectionName) {
  *
  * @return Name of reflection mode
  */
-QString IndirectInstrumentConfig::getReflectionName() { return m_uiForm.cbReflection->currentText(); }
+QString InstrumentConfig::getReflectionName() { return m_uiForm.cbReflection->currentText(); }
 
 /**
  * Updates the analyser and reflection names in the UI when an instrument is
@@ -224,7 +222,7 @@ QString IndirectInstrumentConfig::getReflectionName() { return m_uiForm.cbReflec
  *
  * @param instrumentName Nmae of instrument
  */
-void IndirectInstrumentConfig::updateInstrumentConfigurations(const QString &instrumentName) {
+void InstrumentConfig::updateInstrumentConfigurations(const QString &instrumentName) {
   if (instrumentName.isEmpty())
     return;
 
@@ -269,7 +267,7 @@ void IndirectInstrumentConfig::updateInstrumentConfigurations(const QString &ins
  * @param ws Instrument workspace
  * @return If the workspace contained valid analysers
  */
-bool IndirectInstrumentConfig::updateAnalysersList(const MatrixWorkspace_sptr &ws) {
+bool InstrumentConfig::updateAnalysersList(const MatrixWorkspace_sptr &ws) {
   if (!ws)
     return false;
 
@@ -310,7 +308,7 @@ bool IndirectInstrumentConfig::updateAnalysersList(const MatrixWorkspace_sptr &w
  *
  * @param index Index of the analyser selected
  */
-void IndirectInstrumentConfig::updateReflectionsList(int index) {
+void InstrumentConfig::updateReflectionsList(int index) {
   bool reflectionPreviousBlocking = m_uiForm.cbReflection->signalsBlocked();
   m_uiForm.cbReflection->blockSignals(true);
 
@@ -340,7 +338,7 @@ void IndirectInstrumentConfig::updateReflectionsList(int index) {
  * Can be called manually to use instrumentConfigurationUpdated signal to init
  *UI elements.
  */
-void IndirectInstrumentConfig::newInstrumentConfiguration() {
+void InstrumentConfig::newInstrumentConfiguration() {
   g_log.debug() << "Instrument configuration: "
                 << "Instrument=" << getInstrumentName().toStdString()
                 << ", Analyser=" << getAnalyserName().toStdString()
@@ -352,7 +350,7 @@ void IndirectInstrumentConfig::newInstrumentConfiguration() {
 /**
  * Filters all disabled instruments out of the instrument list.
  */
-void IndirectInstrumentConfig::filterDisabledInstruments() {
+void InstrumentConfig::filterDisabledInstruments() {
   for (int i = 0; i < m_instrumentSelector->count();) {
     if (m_disabledInstruments.contains(m_instrumentSelector->itemText(i))) {
       m_instrumentSelector->removeItem(i);
@@ -367,7 +365,7 @@ void IndirectInstrumentConfig::filterDisabledInstruments() {
  *
  * @param visible whether to show the options or not
  */
-void IndirectInstrumentConfig::showAnalyserAndReflectionOptions(bool visible) {
+void InstrumentConfig::showAnalyserAndReflectionOptions(bool visible) {
   m_uiForm.lbAnalyser->setVisible(visible);
   m_uiForm.cbAnalyser->setVisible(visible);
   m_uiForm.lbReflection->setVisible(visible);

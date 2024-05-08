@@ -28,7 +28,7 @@
         <number>1</number>
        </property>
        <item>
-        <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+        <widget class="MantidQt::MantidWidgets::InstrumentConfig" name="iicInstrumentConfiguration">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -156,9 +156,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <class>MantidQt::MantidWidgets::InstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>Common/IndirectInstrumentConfig.h</header>
+   <header>Common/InstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

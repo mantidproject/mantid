@@ -23,7 +23,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+         <widget class="MantidQt::MantidWidgets::InstrumentConfig" name="iicInstrumentConfiguration">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -243,9 +243,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <class>MantidQt::MantidWidgets::InstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>Common/IndirectInstrumentConfig.h</header>
+   <header>Common/InstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
