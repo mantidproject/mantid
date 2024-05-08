@@ -403,7 +403,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   if (!(w % 2))
     ++w;
 
-  if (!m_dataWS->isRaggedWorkspace() && m_dataWS->blocksize() <= w) {
+  if (!m_dataWS->isRaggedWorkspace() && (m_dataWS->blocksize() <= static_cast<size_t>(w))) {
     std::stringstream errss;
     errss << "Block size of the workspace should be greater than:" << w;
     g_log.warning(errss.str());
