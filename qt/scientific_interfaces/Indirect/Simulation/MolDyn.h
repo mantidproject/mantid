@@ -8,15 +8,15 @@
 
 #include "../DllConfig.h"
 #include "IndirectSimulationTab.h"
-#include "ui_IndirectMolDyn.h"
+#include "ui_MolDyn.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL IndirectMolDyn : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL MolDyn : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
-  IndirectMolDyn(QWidget *parent = nullptr);
+  MolDyn(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectTab
   void setup() override;
@@ -40,7 +40,7 @@ private:
 
   std::string m_outputWsName;
   // The ui form
-  Ui::IndirectMolDyn m_uiForm;
+  Ui::MolDyn m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

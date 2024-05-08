@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectMolDyn.h"
+#include "MolDyn.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -16,7 +16,7 @@
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-IndirectMolDyn::IndirectMolDyn(QWidget *parent) : IndirectSimulationTab(parent) {
+MolDyn::MolDyn(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0"));
@@ -35,14 +35,14 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent) : IndirectSimulationTab(parent) 
   m_uiForm.dsResolution->isOptional(true);
 }
 
-void IndirectMolDyn::setup() {}
+void MolDyn::setup() {}
 
 /**
  * Validate the form to check the program can be run
  *
  * @return :: Whether the form was valid
  */
-bool IndirectMolDyn::validate() {
+bool MolDyn::validate() {
   UserInputValidator uiv;
 
   if (uiv.checkFileFinderWidgetIsValid("Data", m_uiForm.mwRun)) {
@@ -72,7 +72,7 @@ bool IndirectMolDyn::validate() {
 /**
  * Collect the settings on the GUI and run the MolDyn algorithm.
  */
-void IndirectMolDyn::run() {
+void MolDyn::run() {
   setRunIsRunning(true);
 
   // Get filename and base filename (for naming output workspace group)
@@ -106,7 +106,7 @@ void IndirectMolDyn::run() {
   runAlgorithm(molDynAlg);
 }
 
-void IndirectMolDyn::algorithmComplete(bool error) {
+void MolDyn::algorithmComplete(bool error) {
   setRunIsRunning(false);
   if (error)
     setSaveEnabled(false);
@@ -120,19 +120,19 @@ void IndirectMolDyn::algorithmComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void IndirectMolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
+void MolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
 
 /**
  * Handles the version of nMoldyn being selected.
  *
  * @param version The version as a string ("3" or "4")
  */
-void IndirectMolDyn::versionSelected(const QString &version) {
+void MolDyn::versionSelected(const QString &version) {
   bool version4(version == "4");
   m_uiForm.mwRun->isForDirectory(version4);
 }
 
-void IndirectMolDyn::runClicked() {
+void MolDyn::runClicked() {
   clearOutputPlotOptionsWorkspaces();
   runTab();
 }
@@ -140,7 +140,7 @@ void IndirectMolDyn::runClicked() {
 /**
  * Handle saving workspaces
  */
-void IndirectMolDyn::saveClicked() {
+void MolDyn::saveClicked() {
 
   QString filename = m_uiForm.mwRun->getFirstFilename();
   QFileInfo fi(filename);
@@ -151,18 +151,18 @@ void IndirectMolDyn::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectMolDyn::setRunIsRunning(bool running) {
+void MolDyn::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }
 
-void IndirectMolDyn::setButtonsEnabled(bool enabled) {
+void MolDyn::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
-void IndirectMolDyn::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void MolDyn::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectMolDyn::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void MolDyn::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 } // namespace MantidQt::CustomInterfaces

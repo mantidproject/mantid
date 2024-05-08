@@ -7,8 +7,8 @@
 #include "IndirectSimulation.h"
 #include "Common/Settings.h"
 #include "DensityOfStates.h"
-#include "IndirectMolDyn.h"
 #include "MantidKernel/ConfigService.h"
+#include "MolDyn.h"
 #include "Sassena.h"
 
 namespace MantidQt::CustomInterfaces {
@@ -30,7 +30,7 @@ void IndirectSimulation::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Insert each tab into the interface on creation
-  m_simulationTabs.emplace(MOLDYN, new IndirectMolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN)));
+  m_simulationTabs.emplace(MOLDYN, new MolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN)));
   m_simulationTabs.emplace(SASSENA, new Sassena(m_uiForm.IndirectSimulationTabs->widget(SASSENA)));
   m_simulationTabs.emplace(DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS)));
 
