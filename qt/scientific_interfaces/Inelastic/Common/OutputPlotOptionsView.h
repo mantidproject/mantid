@@ -8,7 +8,7 @@
 
 #include "ui_OutputPlotOptions.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -24,7 +24,7 @@ namespace CustomInterfaces {
 
 class IOutputPlotOptionsPresenter;
 
-enum PlotWidget { Spectra, SpectraBin, SpectraSlice, SpectraTiled, SpectraUnit, SpectraSliceUnit };
+enum PlotWidget { Spectra, SpectraBin, SpectraSliceSurface, SpectraTiled, SpectraUnit, SpectraSliceSurfaceUnit };
 
 class MANTIDQT_INELASTIC_DLL IOutputPlotOptionsView {
 public:
@@ -99,6 +99,7 @@ private slots:
   void notifyPlotBinsClicked();
   void notifyShowSliceViewerClicked();
   void notifyPlotTiledClicked();
+  void notifyPlot3DClicked();
 
 private:
   void setupView();

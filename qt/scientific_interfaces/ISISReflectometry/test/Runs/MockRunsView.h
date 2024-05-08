@@ -57,8 +57,8 @@ public:
   MOCK_CONST_METHOD0(getSearchCycle, std::string());
   MOCK_CONST_METHOD0(getLiveDataUpdateInterval, int());
 
-  MOCK_CONST_METHOD0(getAlgorithmRunner, std::shared_ptr<MantidQt::API::AlgorithmRunner>());
-  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner, std::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getAlgorithmRunner, std::shared_ptr<MantidQt::API::QtAlgorithmRunner>());
+  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner, std::shared_ptr<MantidQt::API::QtAlgorithmRunner>());
 
   MOCK_METHOD0(startMonitor, void());
   MOCK_METHOD0(stopMonitor, void());

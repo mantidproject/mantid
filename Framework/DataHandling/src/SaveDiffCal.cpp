@@ -120,13 +120,7 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group, const std::string 
 
   // if the field is optional, check if it is all zeros
   if (name != "difc") {
-    bool allZeros = true;
-    for (const auto &value : data) {
-      if (value != 0.) {
-        allZeros = false;
-        break;
-      }
-    }
+    bool allZeros = std::all_of(data.cbegin(), data.cend(), [](const auto &value) { return value == 0; });
     if (allZeros)
       return; // don't write the field
   }

@@ -1,0 +1,2 @@
+- Fixed a bug when you click 'Load Current Run' for the MUSR instrument.
+- Improved the warning message displayed when a file fails to load.

@@ -87,8 +87,19 @@ Focus
     :width: 900px
 
 6. Check that in your save location there is a Focus folder containing the following files:
-   - `ENGINX_305761_307521_bank_1_dSpacing.nxs`, `ENGINX_305761_307521_bank_2_dSpacing.nxs`, `ENGINX_305761_307521_bank_1_TOF.nxs` and `ENGINX_305761_307521_bank_2_TOF.nxs` (i.e. two files, for the xunits TOF and d-Spacing, per spectrum)
-   - `ENGINX_305761_307521_all_banks.gss` and `ENGINX_305761_307521_all_banks.abc` (i.e. two ASCII files per run - each file contains all the spectra for a focused run).
+
+    - ENGINX_305738_305721_all_banks_dSpacing.abc
+    - ENGINX_305738_305721_all_banks_dSpacing.gss
+    - ENGINX_305738_305721_all_banks_TOF.abc
+    - ENGINX_305738_305721_all_banks_TOF.gss
+    - ENGINX_305738_305721_bank_1_dSpacing.nxs
+    - ENGINX_305738_305721_bank_1_TOF.nxs
+    - ENGINX_305738_305721_bank_2_dSpacing.abc
+    - ENGINX_305738_305721_bank_2_dSpacing.gss
+    - ENGINX_305738_305721_bank_2_dSpacing.nxs
+    - ENGINX_305738_305721_bank_2_TOF.abc
+    - ENGINX_305738_305721_bank_2_TOF.gss
+    - ENGINX_305738_305721_bank_2_TOF.nxs
 
 Test 2
 ^^^^^^
@@ -121,10 +132,10 @@ This test covers the Cropping functionality in the Calibration tab.
 
 7. Change the RB number to `Custom`.
 
-8. Set the ``Region Of Interest`` to ``Crop to Spectra`` and using ``Custom Spectra`` ``1200-1400`` (these spectrum numbers correspond to the South Bank).
+8. Set the ``Region Of Interest`` to ``Crop to Spectra`` and using ``Custom Spectra`` ``1200-2400`` (these spectrum numbers correspond to the South Bank).
    Please note that some custom spectra values may cause the algorithms to fail. Click ``Calibrate`` and a similar plot to before should appear but with only 2 subplots.
 
-9. Set the ``Region of Interest`` to ``Texture (20 spec)`` - there should be 20 spectra per run (5 tiled plot windows, 4 spectra per window).
+9. Set the ``Region of Interest`` to ``Texture (20 spec)`` and click ``Calibrate`` - there should be 20 spectra per run (5 tiled plot windows, 4 spectra per window).
 
 
 Test 4
@@ -137,20 +148,29 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 1. In the fitting tab, load multiple of these newly focused TOF .nxs files in the `Load Focused Data` section. The path to the focused files should be auto populated
 
-2. Click the `Load` button. A row should be added to the UI table for each focused run.There should be a grouped workspace with the suffix `_logs` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI). Each row in these tables should correspond to the equivalent row in the UI table. There should be an additional table called `run_info` that provides some of the metadata for each run.
+2. Click the `Load` button. A row should be added to the UI table for each focused run.
+   There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI).
+   There should be an additional table called `run_info` that provides some of the metadata for each run.
+   Each row in these tables should correspond to the equivalent row in the UI table.
 
 3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
    Reopen settings to check these selected sample logs have been remembered. Note that any change to the selected logs won't take effect until the interface is reopened.
 
-4. Repeat steps 1-2 above but this time try checking the `Add To Plot` checkbox, when loading the run(s) the data should now be plotted and the checkbox in the `Plot` column of the UI table should be checked.
+4. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 above but this time try checking the `Add To Plot` checkbox, when loading the run(s) the data should now be plotted and the checkbox in the `Plot` column of the UI table should be checked.
 
-5. Repeat steps 1-2 again but load the d-spacing .nxs file(s) instead
+5. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 again but load the d-spacing .nxs file(s) instead
 
 6. Plot some data and un-dock the plot in the UI by dragging or double-clicking the bar at the top of the plot labelled `Fit Plot`. The plot can now be re-sized.
 
 7. To dock it double click the `Fit Plot` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
 
 Test 5
+^^^^^^
+
+1. On the Fitting tab, test the functionality of the Load Focused Data section at the top. The tests so far have enabled you to produce many different focussed data files,
+   so check that the Unit and region filters help you to find dSpacing data for Texture regions and TOF data for North bank.
+
+Test 6
 ^^^^^^
 
 This tests the removal of focused runs from the fitting tab.
@@ -165,18 +185,20 @@ This tests the removal of focused runs from the fitting tab.
 
 5. Try removing a workspace by deleting it in the ADS, the corresponding row in the log tables and the UI table should have been removed.
 
-Test 6
+6. Delete a ``_bgsub`` workspace in the ADS, the corresponding row will not be deleted, but the bgsub checkbox will be unchecked.
+
+Test 7
 ^^^^^^
 
 This tests that the background subtraction works.
 
-1. Load in a run - the `Subtract BG` box should be checked in the UI table by default. This should generate a workspace with suffix `_bg` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
+1. Load in a run - the `Subtract BG` box should be checked in the UI table by default. This should generate a workspace with suffix `_bgsub` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
 
 2. Select the row in the table and check the `Inspect Background` button should now be enabled regardless of whether the `Subtract BG` box is checked.
 
 3. Click  `Inspect Background` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell in the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
-Test 7
+Test 8
 ^^^^^^
 
 This tests the operation of the fit browser.
@@ -197,65 +219,57 @@ This tests the operation of the fit browser.
 
 6. Perform a fit by clicking ``Fit > Fit`` in the fit browser. On completion of the fit, a group workspace with suffix `_fits` should have appeared in the Workspaces Toolbox(ADS).
    In this group of workspaces there should be a matrix workspace for each parameter fitted (named by convention FunctionName_ParameterName), to view this right-click on the workspace
-   and `Show Data`. Any runs not fit will have a NaN value in the Y and E fields. In addition there is a workspace that has converted any peak centres from TOF to d-spacing (suffix `_d`).
+   and `Show Data`. Any runs not fit will have a NaN value in the Y and E fields. In addition there is a workspace that has converted any peak centres from TOF to d-spacing (suffix `_dSpacing`).
    There should be an additional table called `model` that summarises the chisq value and the function string including the best-fit parameters.
 
 7. In the Fit property browser, go to ``Setup > Custom Setup``. The function string, including the best-fit parameters, should also have been automatically saved
    as a custom setup. Select ``Setup > Clear Model``, then select this new custom setup model. Inspect the fit by clicking Fit > Evaluate Function.
 
-Test 8
+Test 9
 ^^^^^^
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
+This test uses data generated in Test 4.
 
 0. In the main workbench window, right-click on the Message log and set the Log Level to ``Notice``.
 
 1. Close and re-open the Engineering Diffraction interface.
 
-2. Create a new calibration, untick ``Crop calibration`` enter calibration sample # ``305738`` and click Calibrate.
-
-3. Enter the Engineering Diffraction settings menu by clicking the cog wheel in the bottom left. In the Fitting Settings section,
+2. Enter the Engineering Diffraction settings menu by clicking the cog wheel in the bottom left. In the Fitting Settings section,
    you can select which sample logs to output to table workspaces, the Primary Log for Sequential fit ordering, and whether this should be in ascending or descending order.
    In the primary log combobox, select ``ADC1_0`` and tick ``Ascending``.
 
-4. On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521`` and click ``Focus``.
+3. On the Fitting tab, Load in several focused runs e.g. 305793-305795 from Test 4.
 
-5. On the Fitting tab, Load in several focused runs (preferably some that differ by a log value, e.g. 305793-305795).
+4. Plot just one run, click ``Fit`` to open the fit property browser and input a valid fit function including a peak and a background.
 
-6. Plot just one run, click ``Fit`` to open the fit property browser and input a valid fit function including a peak and a background.
-
-7. Click the ``Sequential Fit`` button in the plot toolbar. A group of fit workspaces should appear in the Workspaces Toolbox (ADS),
+5. Click the ``Sequential Fit`` button in the plot toolbar. A group of fit workspaces should appear in the Workspaces Toolbox (ADS),
    each with a row for each of the runs in the table. All the runs should have been fitted.
 
-8. The order of the runs in the sequential fit should be obtainable from the log at notice level -
+6. The order of the runs in the sequential fit should be obtainable from the log at notice level -
    check that this corresponds to the order of the average value of the primary log - ``ADC1_0``
    You can check the value of this sample log for each run in the output GroupWorkspace with the suffix ``_logs``. Note this order down.
 
-9. Try changing the primary log to blank and re-run the ``Sequential Fit`` This should make the Sequential fit use the order of the runs in the central ``Run Selection`` table.
+7. Try changing the primary log to blank and re-run the ``Sequential Fit`` This should make the Sequential fit use the order of the runs in the central ``Run Selection`` table.
 
-10. In the Engineering Diffraction settings, set the primary log back to ``ADC1_0`` and tick ``Descending``.
-    Re-run the ``Sequential Fit`` and check that the order of runs in the output workspaces has reversed compared to step 8.
+8. In the Engineering Diffraction settings, set the primary log back to ``ADC1_0`` and tick ``Descending``.
+   Re-run the ``Sequential Fit`` and check that the order of runs in the output workspaces has reversed compared to step 8.
 
-11. Close and re-open the Engineering Diffraction interface. Reopen the Engineering Diffraction settings menu, it should remember the primary log and the order.
+9. Close and re-open the Engineering Diffraction interface. Reopen the Engineering Diffraction settings menu, it should remember the primary log and the order.
 
-Test 9
-^^^^^^
+Test 10
+^^^^^^^
 
 This tests the serial fitting capability of the UI (where all loaded workspaces are fitted from the same starting parameters).
+This test uses data generated in Test 4.
 
-1. Repeat steps 1-2 in the previous test (Test 8).
+1. Repeat steps 1-4 in the previous test (Test 9).
 
 2. Now click the ``Serial Fit`` button in the plot toolbar and the group of fit workspaces should appear in the ADS,
    each with a row for each of the runs in the table. All the runs should have been fitted.
 
 3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this
    corresponds to the order of the runs in the table.
-
-Test 10
-^^^^^^^
-
-1. On the Fitting tab, test the functionality of the Load Focused Data section at the top. The tests so far have enabled you to produce many different focussed data files,
-   so check that the Unit and region filters help you to find dSpacing data for Texture regions and TOF data for North bank.
 
 Test 11
 ^^^^^^^

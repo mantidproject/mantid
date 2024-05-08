@@ -1,0 +1,1 @@
+- Fixed a bug where changing the scale on a 3D plot would cause a crash.

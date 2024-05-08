@@ -146,6 +146,12 @@ class AbstractInst(object):
         """
         return True
 
+    def should_subtract_empty_inst_from_vanadium(self):
+        """
+        :return: Whether the empty run should be subtracted from a vandium run
+        """
+        return True
+
     def perform_abs_vanadium_norm(self):
         """
         :return: Whether the sample run should undergo an absolute normalisation to

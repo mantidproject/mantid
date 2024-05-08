@@ -40,6 +40,7 @@ private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);
   void emitAddData();
+  void handleAutoLoaded();
 
 private:
   void setWorkspace(const std::string &workspace);

@@ -891,7 +891,8 @@ Save ASCII Tab
 
 The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
-See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
+See :ref:`algm-SaveReflectometryAscii` and :ref:`algm-SaveISISReflectometryORSO`
+for a description of the supported formats.
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
   :class: screenshot
@@ -938,7 +939,7 @@ See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
 |                               | to contain multiple parameter notes.                 |
 +-------------------------------+------------------------------------------------------+
 | File format                   | This dialog can save to ANSTO, ILL cosmos, 3-column, |
-|                               | and a customisable format. It doesn't save from      |
+|                               | ORSO and a customisable format. It doesn't save from |
 |                               | the main interface's table, but from workspaces      |
 |                               | loaded into mantid. All algorithms are also          |
 |                               | available as save algorithms from mantid itself.     |
@@ -947,11 +948,27 @@ See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
 |                               | to specify if you want a Header and/or Q Resolution  |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
+| ORSO Format Options           | When saving in the ORSO format you can specify if you|
+|                               | want a Q Resolution column. You can also use the     |
+|                               | ``Additional columns (includes Q resolution)``       |
+|                               | option to request Q Resolution, Lambda, dLambda,     |
+|                               | Theta and dTheta columns (this is selected by        |
+|                               | default).                                            |
++-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |
 |                               | group output will be saved if there is one or, for   |
 |                               | a single-row group, the ``IvsQ_binned`` row output   |
 |                               | will be saved instead.                               |
+|                               | Use the ``Include individual row outputs for groups``|
+|                               | option to also save the individual row outputs for a |
+|                               | stitched group.                                      |
+|                               | When the reduction completes, if there are multiple  |
+|                               | workspaces to save automatically then the            |
+|                               | ``Save multiple datasets to a single file`` option   |
+|                               | can be used to save them all into a single file.     |
+|                               | This option is only available when auto-saving into  |
+|                               | the ORSO format, where it is selected by default.    |
 +-------------------------------+------------------------------------------------------+
 
 Troubleshooting

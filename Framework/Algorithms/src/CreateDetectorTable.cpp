@@ -40,22 +40,23 @@ void CreateDetectorTable::exec() {
   std::vector<int> indices = getProperty("WorkspaceIndices");
 
   ITableWorkspace_sptr detectorTable;
-  // Standard MatrixWorkspace
-  auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
-  if (matrix) {
+
+  if (auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    IComponent_const_sptr sample = matrix->getInstrument()->getSample();
+    if (sample == nullptr) {
+      throw std::runtime_error("Matrix workspace has no instrument information");
+    }
     detectorTable = createDetectorTableWorkspace(matrix, indices, includeData, g_log);
 
     if (detectorTable == nullptr) {
-      throw std::runtime_error("The instrument has no sample.");
+      throw std::runtime_error("Unknown error while creating detector table for matrix workspace");
+    }
+  } else if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWS)) {
+    detectorTable = peaks->createDetectorTable();
+    if (detectorTable == nullptr) {
+      throw std::runtime_error("Unknown error while creating detector table for peak workspace");
     }
   } else {
-    auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWS);
-    if (peaks) {
-      detectorTable = peaks->createDetectorTable();
-    }
-  }
-
-  if (detectorTable == nullptr) {
     throw std::runtime_error("Detector table can only be created for matrix and peaks workspaces.");
   }
 
@@ -103,11 +104,7 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
  */
 ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws, const std::vector<int> &indices,
                                                   const bool includeData, Logger &logger) {
-
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
-  if (!sample) {
-    return nullptr;
-  }
 
   // check if efixed value is available
   bool calcQ{true};
@@ -120,6 +117,8 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
     try {
       std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
       ws->getEFixed(detector);
+    } catch (std::invalid_argument &) {
+      calcQ = false;
     } catch (std::runtime_error &) {
       calcQ = false;
     }

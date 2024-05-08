@@ -49,6 +49,8 @@ DEFAULT_START_X = 0.0
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
     """Gets the function name to associate with a composite function when saving fit results."""
+    assert isinstance(composite, CompositeFunction), "Expected to get function name of a CompositeFunction."
+
     function_names = [composite.getFunction(i).name() for i in range(composite.nFunctions())]
 
     if len(function_names) > 3:
@@ -818,10 +820,9 @@ class BasicFittingModel:
         if function.getNumberDomains() > 1:
             function = function.getFunction(0)
 
-        try:
+        if isinstance(function, CompositeFunction):
             return get_function_name_for_composite(function)
-        except AttributeError:
-            return function.name()
+        return function.name()
 
     def _evaluate_plot_guess(self, plot_guess: bool) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""

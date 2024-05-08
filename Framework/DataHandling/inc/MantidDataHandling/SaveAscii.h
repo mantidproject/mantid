@@ -28,6 +28,7 @@ public:
   SaveAscii();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveAscii"; }
+  const std::string alias() const override { return "SaveAsciiTOSCA"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Saves a 2D workspace to a ascii file."; }
 

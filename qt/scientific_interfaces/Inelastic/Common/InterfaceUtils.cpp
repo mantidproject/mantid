@@ -4,7 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "InterfaceUtils.h"
+#include "Common/InterfaceUtils.h"
+#include "Common/SettingsHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <QDomDocument>
@@ -15,7 +16,9 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
-}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {
@@ -65,6 +68,11 @@ static std::string getInterfaceAttribute(QDomElement const &root, std::string co
   return "";
 }
 
+/// The function to use to check whether input data should be restricted based on its name.
+/// This is defined, rather than calling SettingsHelper::restrictInputDataByName() directly, to make it
+/// possible to override it in tests in order to mock out the SettingsHelper.
+std::function<bool()> restrictInputDataByName = SettingsHelper::restrictInputDataByName;
+
 std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,
                                  std::string const &attribute) {
   QFile file(":/interface-properties.xml");
@@ -85,52 +93,58 @@ QStringList getCalibrationExtensions(std::string const &interfaceName) {
   return toQStringList(getInterfaceProperty(interfaceName, "EXTENSIONS", "calibration"), ",");
 }
 
-QStringList getSampleFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "sample"), ",");
+QStringList getFBSuffixes(std::string const &interfaceName, std::string const &fileType) {
+  if (!restrictInputDataByName()) {
+    return getExtensions(interfaceName);
+  }
+  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", fileType), ",");
 }
 
-QStringList getSampleWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "sample"), ",");
+QStringList getWSSuffixes(std::string const &interfaceName, std::string const &fileType) {
+  if (!restrictInputDataByName()) {
+    return QStringList{""};
+  }
+  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", fileType), ",");
 }
 
-QStringList getVanadiumFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "vanadium"), ",");
-}
+QStringList getSampleFBSuffixes(std::string const &interfaceName) { return getFBSuffixes(interfaceName, "sample"); }
 
-QStringList getVanadiumWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "vanadium"), ",");
-}
+QStringList getSampleWSSuffixes(std::string const &interfaceName) { return getWSSuffixes(interfaceName, "sample"); }
+
+QStringList getVanadiumFBSuffixes(std::string const &interfaceName) { return getFBSuffixes(interfaceName, "vanadium"); }
+
+QStringList getVanadiumWSSuffixes(std::string const &interfaceName) { return getWSSuffixes(interfaceName, "vanadium"); }
 
 QStringList getResolutionFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "resolution"), ",");
+  return getFBSuffixes(interfaceName, "resolution");
 }
 
 QStringList getResolutionWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "resolution"), ",");
+  return getWSSuffixes(interfaceName, "resolution");
 }
 
 QStringList getCalibrationFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "calibration"), ",");
+  return getFBSuffixes(interfaceName, "calibration");
 }
 
 QStringList getCalibrationWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "calibration"), ",");
+  return getWSSuffixes(interfaceName, "calibration");
 }
 
 QStringList getContainerFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "container"), ",");
+  return getFBSuffixes(interfaceName, "container");
 }
 
 QStringList getContainerWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "container"), ",");
+  return getWSSuffixes(interfaceName, "container");
 }
 
 QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "corrections"), ",");
+  return getFBSuffixes(interfaceName, "corrections");
 }
 
 QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) {
-  return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "corrections"), ",");
+  return getWSSuffixes(interfaceName, "corrections");
 }
 
 QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple) {

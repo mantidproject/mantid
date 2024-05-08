@@ -7,11 +7,14 @@
 #include "Quasi.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Quasi");
@@ -97,12 +100,10 @@ void Quasi::loadSettings(const QSettings &settings) {
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Quasi");
-  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                          : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
-                                              : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Quasi::setup() {}
@@ -150,6 +151,12 @@ bool Quasi::validate() {
                           "a resolution file.");
       return false;
     }
+  }
+
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
+    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
+    return false;
   }
 
   return true;
@@ -208,25 +215,44 @@ void Quasi::run() {
   long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long const resBins = m_properties["ResBinning"]->valueText().toLong();
 
-  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
+  // Construct an output base name for the output workspaces
+  auto const resType = resName.substr(resName.length() - 3);
+  auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
+  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName;
+
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  std::string const algorithmName = useQuickBayes ? "BayesQuasi2" : "BayesQuasi";
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create(algorithmName);
   runAlg->initialize();
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);
   runAlg->setProperty("ResolutionWorkspace", resName);
-  runAlg->setProperty("ResNormWorkspace", resNormFile);
-  runAlg->setProperty("OutputWorkspaceFit", "fit");
-  runAlg->setProperty("OutputWorkspaceProb", "prob");
-  runAlg->setProperty("OutputWorkspaceResult", "result");
-  runAlg->setProperty("MinRange", eMin);
-  runAlg->setProperty("MaxRange", eMax);
-  runAlg->setProperty("SampleBins", sampleBins);
-  runAlg->setProperty("ResolutionBins", resBins);
+  runAlg->setProperty("OutputWorkspaceFit", m_outputBaseName + "_Fit");
+  runAlg->setProperty("OutputWorkspaceProb", m_outputBaseName + "_Prob");
+  runAlg->setProperty("OutputWorkspaceResult", m_outputBaseName + "_Result");
   runAlg->setProperty("Elastic", elasticPeak);
-  runAlg->setProperty("Background", background);
-  runAlg->setProperty("FixedWidth", fixedWidth);
-  runAlg->setProperty("UseResNorm", useResNorm);
-  runAlg->setProperty("WidthFile", fixedWidthFile);
-  runAlg->setProperty("Loop", sequence);
+  if (useQuickBayes) {
+    // Use quickBayes package in BayesQuasi2 algorithm
+    runAlg->setProperty("Background", background == "Flat" ? background : "None");
+    runAlg->setProperty("EMin", eMin);
+    runAlg->setProperty("EMax", eMax);
+  } else {
+    // Use quasielasticbayes package in BayesQuasi algorithm
+    runAlg->setProperty("ResNormWorkspace", resNormFile);
+    runAlg->setProperty("Background", background);
+    runAlg->setProperty("MinRange", eMin);
+    runAlg->setProperty("MaxRange", eMax);
+    runAlg->setProperty("SampleBins", sampleBins);
+    runAlg->setProperty("ResolutionBins", resBins);
+    runAlg->setProperty("Elastic", elasticPeak);
+    runAlg->setProperty("Background", background);
+    runAlg->setProperty("FixedWidth", fixedWidth);
+    runAlg->setProperty("UseResNorm", useResNorm);
+    runAlg->setProperty("WidthFile", fixedWidthFile);
+    runAlg->setProperty("Loop", sequence);
+  }
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
@@ -262,32 +288,17 @@ void Quasi::updateMiniPlot() {
     g_log.warning(ex.what());
   }
 
-  // Update fit plot
-  QString program = m_uiForm.cbProgram->currentText();
-  if (program == "Lorentzians")
-    program = "QL";
-  else
-    program = "QSe";
-
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-
-  // Should be either "red", "sqw" or "res"
-  QString resType = resName.right(3);
-
-  // Get the correct workspace name based on the type of resolution file
-  if (program == "QL") {
-    if (resType == "res")
-      program += "r";
-    else
-      program += "d";
-  }
-
-  QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
-  if (!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
+  auto const fitGroupName = m_outputBaseName + "_Fit";
+  if (!AnalysisDataService::Instance().doesExist(fitGroupName))
     return;
 
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+  auto const fitGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(fitGroupName);
+  if (!fitGroup || fitGroup->getNumberOfEntries() <= m_previewSpec) {
+    return;
+  }
+
+  auto const outputWorkspace =
+      std::dynamic_pointer_cast<MatrixWorkspace>(fitGroup->getItem(static_cast<std::size_t>(m_previewSpec)));
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
@@ -295,14 +306,14 @@ void Quasi::updateMiniPlot() {
     QString specName = QString::fromStdString(axis->label(histIndex));
     QColor curveColour;
 
-    if (specName.contains("fit.1"))
+    if (specName.contains("fit 1"))
       curveColour = Qt::red;
-    else if (specName.contains("fit.2"))
+    else if (specName.contains("fit 2"))
       curveColour = Qt::magenta;
 
-    else if (specName.contains("diff.1"))
+    else if (specName.contains("diff 1"))
       curveColour = Qt::blue;
-    else if (specName.contains("diff.2"))
+    else if (specName.contains("diff 2"))
       curveColour = Qt::cyan;
 
     else
@@ -328,7 +339,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
-  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
@@ -344,7 +355,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 void Quasi::plotCurrentPreview() {
   auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
-  if (m_uiForm.ppPlot->hasCurve("fit.1")) {
+  if (m_uiForm.ppPlot->hasCurve("fit 1")) {
     QString program = m_uiForm.cbProgram->currentText();
     auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
     checkADSForPlotSaveWorkspace(fitName, false);
@@ -505,10 +516,10 @@ void Quasi::plotClicked() {
   auto const errorBars = SettingsHelper::externalPlotErrorBars();
 
   // Output options
-  std::string const plot = m_uiForm.cbPlot->currentText().toStdString();
+  std::string const plot = m_uiForm.cbPlot->currentText().toLower().toStdString();
   QString const program = m_uiForm.cbProgram->currentText();
   auto const resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-  if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
+  if ((plot == "prob" || plot == "all") && (program == "Lorentzians")) {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
@@ -518,13 +529,16 @@ void Quasi::plotClicked() {
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
-  auto const paramNames = {"Amplitude", "FWHM", "Beta"};
+  auto const paramNames = {"amplitude", "fwhm", "beta"};
   for (std::string const &paramName : paramNames) {
 
-    if (plot == paramName || plot == "All") {
+    if (plot == paramName || plot == "all") {
       std::vector<std::size_t> spectraIndices = {};
       for (auto i = 0u; i < static_cast<std::size_t>(numSpectra); i++) {
         auto axisLabel = resultWS->getAxis(1)->label(i);
+        // Convert to lower case
+        std::transform(axisLabel.begin(), axisLabel.end(), axisLabel.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
 
         auto const found = axisLabel.find(paramName);
         if (found != std::string::npos) {

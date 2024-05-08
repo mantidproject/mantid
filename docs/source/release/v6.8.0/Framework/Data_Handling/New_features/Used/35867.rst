@@ -1,1 +1,0 @@
-- :ref:`SaveDiffCal <algm-SaveDiffCal>` now ensures that the input grouping workspace is fully initialized.

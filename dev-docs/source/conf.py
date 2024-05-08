@@ -100,6 +100,9 @@ html_show_sphinx = False
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = False
 
+# Hide the navigation sidebar, we use a table of contents instead.
+html_sidebars = {"**": []}
+
 # Theme-specific options to customize the look and feel of a theme.
 # We config the bootstrap settings here, and apply CSS changes in
 # custom.css rather than here.

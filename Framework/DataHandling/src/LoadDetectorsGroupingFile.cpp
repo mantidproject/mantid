@@ -113,12 +113,9 @@ void LoadDetectorsGroupingFile::exec() {
     progress.report("Checking detector IDs");
 
     // 2. Check if detector IDs are given
-    if (!m_instrument) {
-      std::map<int, std::vector<detid_t>>::iterator dit;
-      for (dit = m_groupDetectorsMap.begin(); dit != m_groupDetectorsMap.end(); ++dit) {
-        if (!dit->second.empty())
-          throw std::invalid_argument("Grouping file specifies detector ID without instrument name");
-      }
+    if (!m_instrument && std::any_of(m_groupDetectorsMap.cbegin(), m_groupDetectorsMap.cend(),
+                                     [](const auto &pair) { return !pair.second.empty(); })) {
+      throw std::invalid_argument("Grouping file specifies detector ID without instrument name");
     }
 
     m_groupComponentsMap = loader.getGroupComponentsMap();
@@ -193,19 +190,14 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
   // 0. Check
   if (!m_instrument) {
-    std::map<int, std::vector<std::string>>::iterator mapiter;
-    bool norecord = true;
-    for (mapiter = m_groupComponentsMap.begin(); mapiter != m_groupComponentsMap.end(); ++mapiter) {
-      if (!mapiter->second.empty()) {
-        g_log.error() << "Instrument is not specified in XML file.  "
-                      << "But tag 'component' is used in XML file for Group " << mapiter->first
-                      << " It is not allowed\n";
-        norecord = false;
-        break;
-      }
-    }
-    if (!norecord)
+    const auto it = std::find_if(m_groupComponentsMap.cbegin(), m_groupComponentsMap.cend(),
+                                 [](const auto &pair) { return !pair.second.empty(); });
+    if (it != m_groupComponentsMap.cend()) {
+      g_log.error() << "Instrument is not specified in XML file.  "
+                    << "But tag 'component' is used in XML file for Group " << it->first << " It is not allowed"
+                    << std::endl;
       throw std::invalid_argument("XML definition involving component causes error");
+    }
   }
 
   // 1. Prepare
@@ -258,26 +250,21 @@ void LoadDetectorsGroupingFile::setByDetectors() {
 
   // 0. Check
   if (!m_instrument && !m_groupDetectorsMap.empty()) {
-    std::map<int, std::vector<detid_t>>::iterator mapiter;
-    bool norecord = true;
-    for (mapiter = m_groupDetectorsMap.begin(); mapiter != m_groupDetectorsMap.end(); ++mapiter)
-      if (!mapiter->second.empty()) {
-        norecord = false;
-        g_log.error() << "Instrument is not specified in XML file. "
-                      << "But tag 'detid' is used in XML file for Group " << mapiter->first
-                      << ". It is not allowed. \n";
-        break;
-      }
-
-    if (!norecord)
-      throw std::invalid_argument("XML definition involving detectors causes error");
+    const auto it = std::find_if(m_groupDetectorsMap.cbegin(), m_groupDetectorsMap.cend(),
+                                 [](const auto &pair) { return !pair.second.empty(); });
+    if (it != m_groupDetectorsMap.cend()) {
+      g_log.error() << "Instrument is not specified in XML file.  "
+                    << "But tag 'detid' is used in XML file for Group " << it->first << " It is not allowed"
+                    << std::endl;
+      throw std::invalid_argument("XML definition involving component causes error");
+    }
   }
 
   // 1. Prepare
   const detid2index_map indexmap = m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Set GroupingWorkspace
-  for (auto &detectorMap : m_groupDetectorsMap) {
+  for (const auto &detectorMap : m_groupDetectorsMap) {
     g_log.debug() << "Group ID = " << detectorMap.first << '\n';
 
     for (auto detid : detectorMap.second) {

@@ -11,7 +11,7 @@ Overview
 
 The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
-Inelastic Data Analysis and Bayes Fitting interfaces.
+Inelastic QENS Fitting and Bayes Fitting interfaces.
 
 The tabs shown on this interface will vary depending on the current default
 facility such that only tabs that will work with data from the facility are
@@ -100,9 +100,9 @@ Spectra Min/Spectra Max
   Used to specify a range of spectra.
 
 Detector Grouping
-  Used to specify a method for grouping spectra. Possible grouping options include Individual, All,
-  File, Groups and Custom. The TOSCA instrument also has the Default grouping option which will use the grouping
-  specified in the IPF.
+  Used to specify a method for grouping detectors. Possible grouping options include 'Individual', 'All', 'IPF',
+  'File', 'Groups' and 'Custom'. The TOSCA instrument will default to grouping using 'IPF', and the other instruments
+  will default to 'Individual' grouping.
 
 Background Removal
   Allows removal of a background given a time-of-flight range.

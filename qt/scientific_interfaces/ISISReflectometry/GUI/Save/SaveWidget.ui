@@ -165,6 +165,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="multipleDatasetsCheckBox">
+            <property name="text">
+             <string>Save multiple datasets to a single file</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -185,7 +195,7 @@
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0,0">
         <property name="leftMargin">
          <number>6</number>
         </property>
@@ -209,6 +219,19 @@
          <widget class="QCheckBox" name="qResolutionCheckBox">
           <property name="text">
            <string>Q resolution</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="extraColumnsCheckBox">
+          <property name="toolTip">
+           <string>Include columns Q resolution, lambda, dlambda, theta and dtheta for non-stitched datasets.</string>
+          </property>
+          <property name="text">
+           <string>Additional columns (includes Q resolution)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

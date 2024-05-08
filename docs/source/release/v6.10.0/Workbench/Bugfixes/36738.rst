@@ -1,0 +1,1 @@
+- Fixed bug in the plot settings axes widget where setting an invalid axes limit and switching tabs could cause an error.

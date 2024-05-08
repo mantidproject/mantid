@@ -35,7 +35,7 @@ InstrumentViewer
 Bugfixes
 ############
 - Fix bug in instrument viewer that caused a crash if you tried to delete a peak after having selected that peak and dragged the peak workspace onto the viewer.
-
+- An exception caused when the colorbar on the "Render" tab is resized to a negative value has been fixed.
 
 SliceViewer
 -----------

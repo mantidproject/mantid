@@ -84,7 +84,7 @@ class ModelFittingModelTest(unittest.TestCase):
 
     def test_that_current_result_table_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_tables(self):
         self.model.result_table_names = self.result_table_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.current_result_table_index = 2
 
     def test_that_current_result_table_index_will_set_the_current_dataset_index_as_expected(self):

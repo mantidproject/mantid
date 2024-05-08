@@ -85,14 +85,15 @@ Scripting
 
 Click the generate a script button |GenerateAScript.png| on a 1D Plot:
 
-.. code-block:: python
+.. plot::
+   :include-source:
 
    # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
    import matplotlib.pyplot as plt
    from mantid.plots.utility import MantidAxType
-   from mantid.api import AnalysisDataService as ADS
 
-   MAR11060 = ADS.retrieve('MAR11060')
+   MAR11060 = Load('MAR11060')
 
    fig, axes = plt.subplots(edgecolor='#ffffff', num='MAR11060-1', subplot_kw={'projection': 'mantid'})
    axes.plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', wkspIndex=0)
@@ -105,29 +106,7 @@ Click the generate a script button |GenerateAScript.png| on a 1D Plot:
    axes.set_ylabel('Counts ($\\mu s$)$^{-1}$')
    legend = axes.legend(fontsize=8.0).set_draggable(True).legend
 
-   plt.show()
-
-.. plot::
-
-   # import mantid algorithms, numpy and matplotlib
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
-   from mantid.plots.utility import MantidAxType
-
-   MAR11060 = Load('MAR11060')
-
-   fig, axes = plt.subplots(edgecolor='#ffffff', num='MAR11060-1', subplot_kw={'projection': 'mantid'})
-   axes.plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', specNum=1)
-   axes.plot(MAR11060, color='#ff7f0e', label='MAR11060: spec 2', specNum=2)
-   axes.plot(MAR11060, color='#2ca02c', label='MAR11060: spec 3', specNum=3)
-   axes.tick_params(axis='x', which='major', **{'gridOn': False, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False, 'size': 6, 'tickdir': 'out', 'width': 1})
-   axes.tick_params(axis='y', which='major', **{'gridOn': False, 'tick1On': True, 'tick2On': False, 'label1On': True, 'label2On': False, 'size': 6, 'tickdir': 'out', 'width': 1})
-   axes.set_title('MAR11060')
-   axes.set_xlabel('Time-of-flight ($\\mu s$)')
-   axes.set_ylabel('Counts ($\\mu s$)$^{-1}$')
-   legend = axes.legend(fontsize=8.0) # .set_draggable(True).legend # uncomment to set the legend draggable
-
-   plt.show()
+   fig.show()
 
 For more advice: :ref:`02_scripting_plots`
 
@@ -199,40 +178,8 @@ Scripting
 
 An example script for a Tiled Plot:
 
-.. code-block:: python
-
-   # import mantid algorithms, numpy and matplotlib
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
-   from mantid.plots.utility import MantidAxType
-   from mantid.api import AnalysisDataService as ADS
-
-   MAR11060 = ADS.retrieve('MAR11060') #May replace with Load('MAR11060')
-
-   fig, axes = plt.subplots(edgecolor='#ffffff', ncols=2, nrows=2, num='MAR11060-1', subplot_kw={'projection': 'mantid'})
-   axes[0][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 1', wkspIndex=0)
-   axes[0][0].set_xlabel('Time-of-flight ($\\mu s$)')
-   axes[0][0].set_ylabel('Counts ($\\mu s$)$^{-1}$')
-   legend = axes[0][0].legend(fontsize=8.0).set_draggable(True).legend
-
-   axes[0][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 2', wkspIndex=1)
-   axes[0][1].set_xlabel('Time-of-flight ($\\mu s$)')
-   axes[0][1].set_ylabel('Counts ($\\mu s$)$^{-1}$')
-   legend = axes[0][1].legend(fontsize=8.0).set_draggable(True).legend
-
-   axes[1][0].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 3', wkspIndex=2)
-   axes[1][0].set_xlabel('Time-of-flight ($\\mu s$)')
-   axes[1][0].set_ylabel('Counts ($\\mu s$)$^{-1}$')
-   legend = axes[1][0].legend(fontsize=8.0).set_draggable(True).legend
-
-   axes[1][1].plot(MAR11060, color='#1f77b4', label='MAR11060: spec 4', wkspIndex=3)
-   axes[1][1].set_xlabel('Time-of-flight ($\\mu s$)')
-   axes[1][1].set_ylabel('Counts ($\\mu s$)$^{-1}$')
-   legend = axes[1][1].legend(fontsize=8.0).set_draggable(True).legend
-
-   plt.show()
-
 .. plot::
+   :include-source:
 
    # import mantid algorithms, numpy and matplotlib
    from mantid.simpleapi import *
@@ -262,7 +209,7 @@ An example script for a Tiled Plot:
    axes[1][1].set_ylabel('Counts ($\\mu s$)$^{-1}$')
    legend = axes[1][1].legend(fontsize=8.0) #.set_draggable(True).legend # uncomment to set the legend draggable
 
-   plt.show()
+   fig.show()
 
 For more advice: :ref:`02_scripting_plots`
 

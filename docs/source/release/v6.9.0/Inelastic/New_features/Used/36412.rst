@@ -1,1 +1,0 @@
-- Moved :ref:`Bayes fitting <interface-inelastic-bayes-fitting>` interface from the Indirect interface menu into the Inelastic interface category.

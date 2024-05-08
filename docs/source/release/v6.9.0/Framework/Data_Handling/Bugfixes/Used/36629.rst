@@ -1,1 +1,0 @@
-- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` can now load empty event based monitors. It will log messages to the user and set the time-of-flight range to 0-1 similar to :ref:`LoadEventNexus <algm-LoadEventNexus>`

@@ -1,1 +1,0 @@
-- Enables slice viewer's 'y' cut exports for event workspaces without giving errors in line plot and ROI modes.

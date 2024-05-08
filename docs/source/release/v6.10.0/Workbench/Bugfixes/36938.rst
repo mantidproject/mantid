@@ -1,0 +1,1 @@
+- Switch to using ``fig.show`` in the generated plot scripts to avoid hanging problem in Workbench.

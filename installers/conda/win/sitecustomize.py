@@ -9,13 +9,17 @@
 
 def _add_executable_path_to_path():
     """
-    Adds the sys.executable directory to the DLL load list of allowed directories
+    Adds the sys.executable and plugin directory to the DLL load list of allowed directories
     """
     import os
     import sys
 
-    os.environ["PATH"] = f'{os.path.dirname(sys.executable)};{os.environ["PATH"]}'
-    os.add_dll_directory(os.path.dirname(sys.executable))
+    executable_dir = os.path.dirname(sys.executable)
+    plugin_dir = os.path.join(executable_dir, os.pardir, "plugins", "qt5")
+
+    os.environ["PATH"] = f'{executable_dir};{plugin_dir};{os.environ["PATH"]}'
+    os.add_dll_directory(executable_dir)
+    os.add_dll_directory(plugin_dir)
 
 
 _add_executable_path_to_path()

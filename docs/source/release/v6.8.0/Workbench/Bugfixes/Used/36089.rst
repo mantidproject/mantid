@@ -1,1 +1,0 @@
-- An implicit conversion warning which sometimes appears when opening Sample logs has been fixed.

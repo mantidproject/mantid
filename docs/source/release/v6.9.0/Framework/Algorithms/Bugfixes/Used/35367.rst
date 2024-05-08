@@ -1,1 +1,0 @@
-- Fixed potential error if algorithms are still running in the background when a python script finishes.

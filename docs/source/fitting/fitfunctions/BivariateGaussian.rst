@@ -53,7 +53,7 @@ Here is an example of fitting a 2D histogram:
     x, y = np.mgrid[-0.5:0.5:.01, -0.5:0.5:.01]
     pos = np.dstack((x, y))
     Z = rv.pdf(pos)
-    Z += 0.1*(np.random.random(x.shape) - 0.5) # Noise
+    Z += 1.5*(np.random.random(x.shape) - 0.5) # Noise
 
     # Here we'll format it so we can fit this as a 1D function:
     ZForFitting = np.empty(Z.shape + (2,))
@@ -86,16 +86,12 @@ Here is an example of fitting a 2D histogram:
     ZFit = bvg.function2D(pos)
 
     #Plot the results
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(1,2,1)
-    plt.imshow(Z, origin='lower')
-    plt.title('Data')
-    plt.subplot(1,2,2)
-    plt.imshow(ZFit, origin='lower')
-    plt.title('Fit')
-    plt.show()
-
+    fig, axes = plt.subplots(nrows=1, ncols=2, subplot_kw={'projection': 'mantid'})
+    axes[0].imshow(Z, origin='lower')
+    axes[0].set_title('Data')
+    axes[1].imshow(ZFit, origin='lower')
+    axes[1].set_title('Fit')
+    fig.show()
 
 
 .. categories::

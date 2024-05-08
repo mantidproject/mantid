@@ -1,0 +1,1 @@
+- New option to apply ``LorentzCorrection`` to ``ConvertHFIRSCDtoMDE`` for monochromatic single crystal diffraction with rotation about the vertical axis.

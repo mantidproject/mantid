@@ -1,0 +1,2 @@
+- New algorithm :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` to integrate single-crystal Bragg peaks in a workspace with an x-unit of TOF adapted from an algorithm in SXD2001 by Gutmann, M. J. (2005)
+- Added option to use :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` in ``BaseSX`` class (for use in WISH and SXD reduction).

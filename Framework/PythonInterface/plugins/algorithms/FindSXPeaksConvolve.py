@@ -19,9 +19,11 @@ from mantid.kernel import (
     EnabledWhenProperty,
     PropertyCriterion,
     logger,
+    StringListValidator,
 )
 import numpy as np
-from scipy.ndimage import convolve, label, maximum_position, binary_closing, sum_labels
+from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d, uniform_filter
+from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 
 
@@ -109,26 +111,35 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             doc="Minimum peak size as a fraction of the kernel size.",
         )
         self.declareProperty(
-            name="RemoveOnEdge",
-            defaultValue=False,
+            name="PeakFindingStrategy",
+            defaultValue="IOverSigma",
             direction=Direction.Input,
-            doc="If RemoveOnEdge=True then peaks at the edge of the data (within roughly 1/4 of the kernel size) will "
-            "be removed. Convolution produces invalid results at the edges of the data. To some extent such edge "
-            "effects are reduced in this algorithm due to the choice of padding and by dividing the convolution "
-            "results of the signal and error. However, some artifacts remain because the kernel used in the "
-            "convolution of the signal has some negative values and the kernel used for the error does not.",
+            validator=StringListValidator(["VarianceOverMean", "IOverSigma"]),
+            doc="PeakFindingStrategy=IOverSigma will find peaks by integrating data using a shoebox kernel and looking"
+            " for peaks with I/sigma > ThresholdIoverSigma. PeakFindingStrategy=VarianceOverMean will look for "
+            "peaks with local variance/mean > ThresholdVarianceOverMean.",
         )
+        self.declareProperty(
+            name="ThresholdVarianceOverMean",
+            defaultValue=3.0,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=1.0),
+            doc="Threshold value for variance/mean used to identify peaks.",
+        )
+        use_variance_over_mean = EnabledWhenProperty("PeakFindingStrategy", PropertyCriterion.IsNotDefault)
+        self.setPropertySettings("ThresholdVarianceOverMean", use_variance_over_mean)
+        use_intens_over_sigma = EnabledWhenProperty("PeakFindingStrategy", PropertyCriterion.IsDefault)
+        self.setPropertySettings("ThresholdIoverSigma", use_intens_over_sigma)
 
     def PyExec(self):
         # get input
         ws = self.getProperty("InputWorkspace").value
-        threshold_i_over_sig = self.getProperty("ThresholdIoverSigma").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
         nfwhm = self.getProperty("NFWHM").value
         get_nbins_from_b2bexp_params = self.getProperty("GetNBinsFromBackToBackParams").value
         min_frac_size = self.getProperty("MinFracSize").value
-        remove_on_edge = self.getProperty("RemoveOnEdge").value
+        peak_finding_strategy = self.getProperty("PeakFindingStrategy").value
 
         # create output table workspace
         peaks = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="_peaks")
@@ -158,38 +169,51 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             # get data in detector coords
             peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
             _, y, esq, _ = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-            # perform convolutions to integrate kernel/shoebox
-            # pad with nearest so don't get peaks at edge when -ve values go outside data extent
-            kernel = make_kernel(nrows, ncols, nbins)
-            yconv = convolve(input=y, weights=kernel, mode="nearest")
-            econv = np.sqrt(convolve(input=esq, weights=kernel**2, mode="nearest"))
-            with np.errstate(divide="ignore", invalid="ignore"):
-                intens_over_sig = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
-
-            # find peaks above threshold I/sigma
-            pk_mask = intens_over_sig > threshold_i_over_sig
+            if peak_finding_strategy == "IOverSigma":
+                threshold = self.getProperty("ThresholdIoverSigma").value
+                ratio, yconv, econv, kernel_shape = calculate_intens_over_sigma(y, esq, nrows, ncols, nbins)
+            else:
+                threshold = self.getProperty("ThresholdVarianceOverMean").value
+                ratio, ycnts, avg_y, kernel_shape = calculate_variance_over_mean(y, esq, nrows, ncols, nbins)
+            # perform final smoothing
+            ratio[~np.isfinite(ratio)] = 0
+            ratio = uniform_filter1d(ratio, size=3, axis=2, mode="nearest")
+            # identify peaks above threshold
+            pk_mask = ratio > threshold
             pk_mask = binary_closing(pk_mask)  # removes holes - helps merge close peaks
             labels, nlabels = label(pk_mask)  # identify contiguous nearest-neighbour connected regions
             # identify labels of peaks above min size
-            min_size = int(min_frac_size * kernel.size)
+            min_size = int(min_frac_size * np.prod(kernel_shape))
             npixels = sum_labels(pk_mask, labels, range(1, nlabels + 1))
             ilabels = np.flatnonzero(npixels > min_size) + 1
 
             # find index of maximum in I/sigma for each valid peak (label index in ilabels)
-            imaxs = maximum_position(intens_over_sig, labels, ilabels)
+            imaxs = maximum_position(ratio, labels, ilabels)
 
             # add peaks to table
             for ipk in range(len(imaxs)):
                 irow, icol, itof = imaxs[ipk]
+
+                # map convolution output to the input
+                irow += (kernel_shape[0] - 1) // 2
+                icol += (kernel_shape[1] - 1) // 2
+                itof += (kernel_shape[2] - 1) // 2
+
                 # find peak position
                 # get data in kernel window around index with max I/sigma
-                irow_lo = np.clip(irow - kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
-                irow_hi = np.clip(irow + kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
-                icol_lo = np.clip(icol - kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
-                icol_hi = np.clip(icol + kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
-                itof_lo = np.clip(itof - kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
-                itof_hi = np.clip(itof + kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
+                irow_lo = np.clip(irow - kernel_shape[0] // 2, a_min=0, a_max=y.shape[0])
+                irow_hi = np.clip(irow + kernel_shape[0] // 2, a_min=0, a_max=y.shape[0])
+                icol_lo = np.clip(icol - kernel_shape[1] // 2, a_min=0, a_max=y.shape[1])
+                icol_hi = np.clip(icol + kernel_shape[1] // 2, a_min=0, a_max=y.shape[1])
+                itof_lo = np.clip(itof - kernel_shape[2] // 2, a_min=0, a_max=y.shape[2])
+                itof_hi = np.clip(itof + kernel_shape[2] // 2, a_min=0, a_max=y.shape[2])
                 ypk = y[irow_lo:irow_hi, icol_lo:icol_hi, itof_lo:itof_hi]
+                if peak_finding_strategy == "VarianceOverMean":
+                    # perform additional check as in Winter (2018) https://doi.org/10.1107/S2059798317017235
+                    background_cnts = avg_y[tuple(imaxs[ipk])]
+                    ypk_cnts = ycnts[irow_lo:irow_hi, icol_lo:icol_hi, itof_lo:itof_hi]
+                    if not np.any(ypk_cnts > background_cnts + np.sqrt(background_cnts)):
+                        continue  # skip peak
                 # integrate over TOF and select detector with max intensity
                 imax_det = np.argmax(ypk.sum(axis=2))
                 irow_max, icol_max = np.unravel_index(imax_det, ypk.shape[0:-1])
@@ -197,29 +221,22 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 icol_max += icol_lo
                 # find max in TOF dimension
                 itof_max = np.argmax(ypk.sum(axis=0).sum(axis=0)) + itof_lo
-                # remove peaks on edge if required
-                do_add_peak = True
-                if remove_on_edge:
-                    nrows_bg = kernel.shape[0] - nrows
-                    ncols_bg = kernel.shape[1] - ncols
-                    nbins_bg = kernel.shape[2] - nbins
-                    for idim, (index, nbg) in enumerate([(irow_max, nrows_bg), (icol_max, ncols_bg), (itof_max, nbins_bg)]):
-                        if not nbg <= index <= y.shape[idim] - nbg - 1:
-                            do_add_peak = False
-                            break
-                if do_add_peak:
-                    self.exec_child_alg(
-                        "AddPeak",
-                        PeaksWorkspace=peaks,
-                        RunWorkspace=ws,
-                        TOF=xspec[itof_max],
-                        DetectorID=int(peak_data.detids[irow_max, icol_max]),
-                    )
-                    # set intensity of peak (rough estimate)
+
+                self.exec_child_alg(
+                    "AddPeak",
+                    PeaksWorkspace=peaks,
+                    RunWorkspace=ws,
+                    TOF=xspec[itof_max],
+                    DetectorID=int(peak_data.detids[irow_max, icol_max]),
+                )
+                # set intensity of peak (rough estimate)
+                if peak_finding_strategy == "IOverSigma":
+                    peak_conv_intens = yconv[tuple(imaxs[ipk])]
+                    sig_conv_intens = econv[tuple(imaxs[ipk])]
                     pk = peaks.getPeak(peaks.getNumberPeaks() - 1)
                     bin_width = xspec[itof + 1] - xspec[itof]
-                    pk.setIntensity(yconv[irow, icol, itof] * bin_width)
-                    pk.setSigmaIntensity(econv[irow, icol, itof] * bin_width)
+                    pk.setIntensity(peak_conv_intens * bin_width)
+                    pk.setSigmaIntensity(sig_conv_intens * bin_width)
 
             # remove dummy peak
             self.exec_child_alg("DeleteTableRows", TableWorkspace=peaks, Rows=[irow_to_del])
@@ -240,6 +257,34 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             return alg.getProperty("OutputWorkspace").value
         else:
             return None
+
+
+def calculate_intens_over_sigma(y, esq, nrows, ncols, nbins):
+    kernel = make_kernel(nrows, ncols, nbins)  # integration shoebox kernel
+    yconv = convolve(y, kernel, mode="valid")
+    econv = np.sqrt(convolve(esq, kernel**2, mode="valid"))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        intens_over_sigma = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
+    return intens_over_sigma, yconv, econv, kernel.shape
+
+
+def calculate_variance_over_mean(y, esq, nrows, ncols, nbins):
+    # Evaluate ratio of Variance/mean (should be 1 for Poisson distribution if constant bg)
+    # Peak finding criterion used in DIALS, Winter (2018) https://doi.org/10.1107/S2059798317017235
+    with np.errstate(divide="ignore", invalid="ignore"):
+        # scale to raw counts
+        scale = y / esq
+        scale[~np.isfinite(scale)] = 0
+        ycnts = y * scale
+        # calculate variance = (E[X^2] - E[X]^2)
+        avg_y = uniform_filter(ycnts, size=(nrows, ncols, nbins), mode="nearest")
+        avg_ysq = uniform_filter(ycnts**2, size=(nrows, ncols, nbins), mode="nearest")
+        var_over_mean = (avg_ysq - avg_y**2) / avg_y
+    # crop to valid region
+    var_over_mean = var_over_mean[
+        (nrows - 1) // 2 : -(nrows - 1) // 2, (ncols - 1) // 2 : -(ncols - 1) // 2, (nbins - 1) // 2 : -(nbins - 1) // 2
+    ]
+    return var_over_mean, ycnts, avg_y, (nrows, ncols, nbins)
 
 
 def make_kernel(nrows, ncols, nbins):

@@ -9,6 +9,7 @@
 
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <vector>
@@ -294,6 +295,20 @@ std::vector<std::string> qListToStdVector(QList<std::string> const &qList) {
   std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
                  [](std::string const &element) { return element; });
   return vec;
+}
+
+/*
+ * Converts a standard vector of standard strings to a QVector of QStrings.
+ *
+ * @param stringVec The standard vector of standard strings to convert.
+ * @return          A QVector of QStrings.
+ */
+QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) {
+  QVector<QString> resultVec;
+  resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
+  std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
+                 [](const auto &str) { return QString::fromStdString(str); });
+  return resultVec;
 }
 
 } // namespace MantidQt::MantidWidgets

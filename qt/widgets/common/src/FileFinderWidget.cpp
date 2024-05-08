@@ -400,7 +400,7 @@ void FileFinderWidget::setFileProblem(const QString &message) {
  * Return the error.
  * @returns A string explaining the error.
  */
-QString FileFinderWidget::getFileProblem() { return m_fileProblem; }
+QString FileFinderWidget::getFileProblem() const { return m_fileProblem; }
 
 /**
  * Save settings to the given group

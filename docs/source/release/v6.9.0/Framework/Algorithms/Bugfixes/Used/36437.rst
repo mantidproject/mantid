@@ -1,1 +1,0 @@
-- Fixed an issue in :ref:`Quasi <algm-BayesQuasi2>` where when using the QSE option the algorithm won't accept red files as resolution files

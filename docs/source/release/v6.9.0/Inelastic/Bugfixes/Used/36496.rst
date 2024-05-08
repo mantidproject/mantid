@@ -1,1 +1,0 @@
-- Adding data to the IqtFit and ConvFit tabs in the :ref:`Data Analysis <interface-inelastic-data-analysis>` interface after selecting a fit function will no longer cause an error when changing the plotted spectrum.

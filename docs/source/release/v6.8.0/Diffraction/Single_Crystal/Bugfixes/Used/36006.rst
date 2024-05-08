@@ -1,3 +1,0 @@
-- ISIS single crystal reduction classes now set UB before attempting to transform data to HKL using ``convert_to_MD`` method
-- Fixed bug in ISIS single crystal reduction classes where UB was not set on combined peak table when saving using ``save_all_peaks`` method.
-- Fixed bug in ISIS single crystal reduction classes when defining goniometer angles in ``process_data`` method with a sequence (i.e. not using the motor name string)

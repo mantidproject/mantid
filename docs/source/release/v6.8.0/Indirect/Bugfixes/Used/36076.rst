@@ -1,1 +1,0 @@
-- Fix bug when choosing the EISFDiffSphereAlkyl algorithm in the F(Q) fit tab of the Indirect - Data Analysis window.

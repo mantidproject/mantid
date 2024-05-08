@@ -32,6 +32,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IIndirectDataReduction;
+
 /** ISISDiagnostics
   Handles time integration diagnostics for ISIS instruments.
 
@@ -42,7 +44,7 @@ class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ISISDiagnostics(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISDiagnostics() override;
 
   void setup() override;

@@ -40,13 +40,14 @@ class SaveOtherPresenter(object):
         selected_workspaces = self.get_workspaces()
         selected_filenames = self.get_filenames(selected_workspaces, self.filename)
         additional_run_numbers = {}
+        additional_metadata = {}
 
         self._view.progress_bar_minimum = 0
         self._view.progress_bar_maximum = len(selected_workspaces)
         self._view.progress_bar_value = 0
         for name_to_save, filename in zip(selected_workspaces, selected_filenames):
             try:
-                save_workspace_to_file(name_to_save, file_formats, filename, additional_run_numbers)
+                save_workspace_to_file(name_to_save, file_formats, filename, additional_run_numbers, additional_metadata)
             except RuntimeError:
                 logger.warning(
                     f"Cannot save {name_to_save} using SANSSave. "

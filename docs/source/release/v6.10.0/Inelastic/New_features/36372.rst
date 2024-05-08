@@ -1,0 +1,1 @@
+- On :ref:`Elwin Tab <elwin>` of  :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>`, it is now possible to display in the workspace table either one row per spectra, or just one row per workspace.

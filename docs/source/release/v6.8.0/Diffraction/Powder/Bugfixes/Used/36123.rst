@@ -1,2 +1,0 @@
-- Fixed way :ref:`FitPeaks <algm-FitPeaks>` uses workspace indices in ``PeakCentersWorkspace`` and ``FitPeakWindowWorkspace``, to correspond to the same spectrum workspace indices in the input workspace, even when using ``StartWorkspaceIndex`` and ``StopWorkspaceIndex``.  This fixes the issue with :ref:`PDCalibration <algm-PDCalibration>`.
-- Fixed bug in :ref:`FitPeaks <algm-FitPeaks>` which assumed the zeroeth workspace index defined the largest number of peaks to attempt to fit in all spectra.

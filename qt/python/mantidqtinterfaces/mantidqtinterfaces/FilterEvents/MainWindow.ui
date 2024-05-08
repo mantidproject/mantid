@@ -15,6 +15,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="leftMargin">
+     <number>15</number>
+    </property>
+    <property name="topMargin">
+     <number>15</number>
+    </property>
+    <property name="rightMargin">
+     <number>15</number>
+    </property>
+    <property name="bottomMargin">
+     <number>15</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
@@ -187,28 +199,28 @@
           </property>
          </widget>
         </item>
-        <item>
-         <spacer name="horizontalSpacer_25">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Preferred</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QFrame" name="graphicsView"/>
+         <widget class="QFrame" name="graphicsView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>329</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -249,19 +261,6 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QSlider" name="horizontalSlider_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -272,14 +271,17 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_11">
+         <spacer name="horizontalSpacer_10">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>27</width>
+            <height>27</height>
            </size>
           </property>
          </spacer>
@@ -296,17 +298,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_3"/>
+         <widget class="QLineEdit" name="leStartTime"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_setT0">
-          <property name="text">
-           <string>Set</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_12">
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -326,14 +321,20 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_4"/>
+         <widget class="QLineEdit" name="leStopTime"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_setTf">
-          <property name="text">
-           <string>Set</string>
+         <spacer name="horizontalSpacer_9">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -403,8 +404,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>688</width>
-               <height>270</height>
+               <width>674</width>
+               <height>288</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_5">
@@ -607,7 +608,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_5"/>
+                   <widget class="QLineEdit" name="leMinimumValue"/>
                   </item>
                   <item>
                    <spacer name="horizontalSpacer_15">
@@ -633,7 +634,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_6"/>
+                   <widget class="QLineEdit" name="leMaximumValue"/>
                   </item>
                  </layout>
                 </item>
@@ -653,7 +654,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_7">
+                   <widget class="QLineEdit" name="leStepSize">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -712,7 +713,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_8">
+                   <widget class="QLineEdit" name="leValueTolerance">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -771,7 +772,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_9">
+                   <widget class="QLineEdit" name="leTimeTolerance">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -939,8 +940,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>688</width>
-               <height>270</height>
+               <width>360</width>
+               <height>222</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_6">
@@ -1024,7 +1025,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_Ei">
+                   <widget class="QLineEdit" name="leIncidentEnergy">
                     <property name="maximumSize">
                      <size>
                       <width>400</width>
@@ -1306,16 +1307,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>732</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
  </widget>
  <tabstops>
   <tabstop>pushButton_browse</tabstop>
@@ -1328,27 +1319,25 @@
   <tabstop>verticalSlider_2</tabstop>
   <tabstop>horizontalSlider</tabstop>
   <tabstop>horizontalSlider_2</tabstop>
-  <tabstop>lineEdit_3</tabstop>
-  <tabstop>pushButton_setT0</tabstop>
-  <tabstop>lineEdit_4</tabstop>
-  <tabstop>pushButton_setTf</tabstop>
+  <tabstop>leStartTime</tabstop>
+  <tabstop>leStopTime</tabstop>
   <tabstop>lineEdit_outwsname</tabstop>
   <tabstop>lineEdit_title</tabstop>
   <tabstop>filterTab</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>comboBox_2</tabstop>
   <tabstop>pushButton_4</tabstop>
-  <tabstop>lineEdit_5</tabstop>
-  <tabstop>lineEdit_6</tabstop>
-  <tabstop>lineEdit_7</tabstop>
+  <tabstop>leMinimumValue</tabstop>
+  <tabstop>leMaximumValue</tabstop>
+  <tabstop>leStepSize</tabstop>
   <tabstop>comboBox_4</tabstop>
-  <tabstop>lineEdit_8</tabstop>
+  <tabstop>leValueTolerance</tabstop>
   <tabstop>comboBox_5</tabstop>
-  <tabstop>lineEdit_9</tabstop>
+  <tabstop>leTimeTolerance</tabstop>
   <tabstop>pushButton_filterLog</tabstop>
   <tabstop>scrollArea_2</tabstop>
   <tabstop>comboBox_tofCorr</tabstop>
-  <tabstop>lineEdit_Ei</tabstop>
+  <tabstop>leIncidentEnergy</tabstop>
   <tabstop>comboBox_corrWS</tabstop>
   <tabstop>pushButton_refreshCorrWSList</tabstop>
   <tabstop>checkBox_fastLog</tabstop>

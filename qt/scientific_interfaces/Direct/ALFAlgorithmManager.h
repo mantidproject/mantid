@@ -71,7 +71,7 @@ public:
   void notifyBatchCancelled() override{};
   void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &algorithm) override { (void)algorithm; };
   void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
-  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
+  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
 
 private:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,

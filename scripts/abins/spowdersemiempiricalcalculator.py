@@ -48,9 +48,6 @@ class SPowderSemiEmpiricalCalculator:
         if not (isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order):
             raise ValueError("Invalid number of quantum order events.")
 
-        if kwargs.get("autoconvolution") and abins.parameters.autoconvolution["max_order"] <= quantum_order_num:
-            raise ValueError("Autoconvolution max order should be greater than max order of semi-analytic spectra")
-
         if not isinstance(kwargs.get("instrument"), Instrument):
             raise ValueError("Unknown instrument %s" % kwargs.get("instrument"))
 
@@ -62,7 +59,7 @@ class SPowderSemiEmpiricalCalculator:
         abins_data: abins.AbinsData,
         instrument: Instrument,
         quantum_order_num: int,
-        autoconvolution: bool = False,
+        autoconvolution_max: int = 0,
     ) -> None:
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.
@@ -70,8 +67,8 @@ class SPowderSemiEmpiricalCalculator:
         :param abins_data: object of type AbinsData with data from phonon file
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
-        :param autoconvolution:
-            approximate spectra up to abins.parameters.autoconvolution['max_order'] using auto-convolution
+        :param autoconvolution_max:
+            approximate spectra up to this order using auto-convolution
         """
         from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
 
@@ -82,7 +79,7 @@ class SPowderSemiEmpiricalCalculator:
         self._temperature = float(temperature)
         self._abins_data = abins_data
         self._quantum_order_num = quantum_order_num
-        self._autoconvolution = autoconvolution
+        self._autoconvolution_max = autoconvolution_max
         self._instrument = instrument
 
         # This is only used as metadata for clerk, like filename
@@ -91,6 +88,7 @@ class SPowderSemiEmpiricalCalculator:
         # Get derived properties
         self._num_k = len(self._abins_data.get_kpoints_data())
         self._num_atoms = len(self._abins_data.get_atoms_data())
+        self._use_autoconvolution: bool = self._autoconvolution_max > 1
 
         # Initialise properties that are set elsewhere
         self._progress_reporter = None
@@ -102,7 +100,7 @@ class SPowderSemiEmpiricalCalculator:
         self._clerk = abins.IO(
             input_filename=filename,
             setting=self._instrument.get_setting(),
-            autoconvolution=self._autoconvolution,
+            autoconvolution=self._autoconvolution_max,
             group_name=("{s_data_group}/{instrument}/{sample_form}/{temperature}K").format(
                 s_data_group=abins.parameters.hdf_groups["s_data"],
                 instrument=self._instrument,
@@ -118,7 +116,7 @@ class SPowderSemiEmpiricalCalculator:
         self._bin_centres = (self._bins[:-1] + self._bins[1:]) / 2
         bin_width = instrument.get_energy_bin_width()
 
-        if self._autoconvolution:
+        if self._use_autoconvolution:
             self._fine_bin_factor = abins.parameters.autoconvolution["fine_bin_factor"]
             self._fine_bins = np.arange(
                 start=self._instrument.get_min_wavenumber(),
@@ -306,15 +304,15 @@ class SPowderSemiEmpiricalCalculator:
             self.progress_reporter.setNumSteps(
                 len(self._instrument.get_angles()) * (self._num_k * self._num_atoms + 1)
                 # Autoconvolution message if appropriate
-                + (1 if self._autoconvolution else 0)
+                + (1 if self._use_autoconvolution else 0)
                 # Isotropic DW message if appropriate
-                + (1 if (self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution) else 0)
+                + (1 if (self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution) else 0)
             )
 
         sdata_by_angle = []
         for angle in self._instrument.get_angles():
             self._report_progress(msg=f"Calculating S for angle: {angle:} degrees", reporter=self.progress_reporter)
-            sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle, autoconvolution=self._autoconvolution))
+            sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle))
 
         # Complete set of scattering intensity data including Debye-Waller factors and autocorrelation orders
         sdata_by_angle = SDataByAngle.from_sdata_series(sdata_by_angle, angles=self._instrument.get_angles())
@@ -331,7 +329,7 @@ class SPowderSemiEmpiricalCalculator:
         This is:
         - fundamentals (only if self._isotropic_fundamentals; otherwise left empty)
         - order 2 (if self._quantum_order_num > 1)
-        - orders 3-10 (if self._autoconvolution)
+        - orders 3-10 (if self._autoconvolution_max > 2)
 
         Args:
             q2: q^2 values for intensity and Debye-Waller calculation. This
@@ -353,20 +351,20 @@ class SPowderSemiEmpiricalCalculator:
         """
 
         # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
-        if self._quantum_order_num == 1 or self._autoconvolution:
+        if self._quantum_order_num == 1 or self._use_autoconvolution:
             min_order = 1  # Need fundamentals without DW
         else:
             min_order = 2  # Skip fundamentals to be calculated separately
 
         # Collect SData at q = 1/Å without DW factors
-        sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution, max_order=self._quantum_order_num, shape="1d")
+        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num, shape="1d")
 
-        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
+        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._use_autoconvolution:
             for k_index in range(self._num_k):
                 _ = self._calculate_s_powder_over_atoms(
                     k_index=k_index,
                     q2=1.0,
-                    bins=(self._fine_bins if self._autoconvolution else self._bins),
+                    bins=(self._fine_bins if self._use_autoconvolution else self._bins),
                     sdata=sdata,
                     min_order=min_order,
                 )
@@ -380,8 +378,8 @@ class SPowderSemiEmpiricalCalculator:
         else:
             raise IndexError("q2 should be 1-D or 2-D array")
 
-        if self._autoconvolution:
-            max_dw_order = abins.parameters.autoconvolution["max_order"]
+        if self._use_autoconvolution:
+            max_dw_order = self._autoconvolution_max
             self._report_progress(
                 f"Finished calculating SData to order {self._quantum_order_num} by "
                 f"analytic powder-averaging. "
@@ -389,7 +387,7 @@ class SPowderSemiEmpiricalCalculator:
                 reporter=self.progress_reporter,
             )
 
-            sdata.add_autoconvolution_spectra()
+            sdata.add_autoconvolution_spectra(max_order=self._autoconvolution_max)
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
         else:
@@ -409,7 +407,7 @@ class SPowderSemiEmpiricalCalculator:
         sdata *= q2_order_corrections
         sdata.set_q_bins(self._q_bins)
 
-        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
+        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution:
             self._report_progress(
                 f"Applying isotropic Debye-Waller factor to orders {min_order} and above.", reporter=self.progress_reporter
             )
@@ -448,7 +446,7 @@ class SPowderSemiEmpiricalCalculator:
         sdata.update(fundamentals_sdata_with_dw)
         return sdata
 
-    def _calculate_s_powder_over_k(self, *, angle: float, autoconvolution: bool = False) -> SData:
+    def _calculate_s_powder_over_k(self, *, angle: float) -> SData:
         """Calculate S for a given angle in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -456,16 +454,12 @@ class SPowderSemiEmpiricalCalculator:
 
         Args:
             angle: Scattering angle used to determine energy-q relationship
-            autoconvolution:
-                Estimate spectra for higher quantum orders by convolving the
-                highest computed spectrum with the fundamentals before applying
-                the isotropic Debye-Waller factor.
 
         Returns:
             SData
         """
         # Initialize the main data container
-        sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution, max_order=self._quantum_order_num)
+        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num)
         sdata.set_q_bins(self._q_bins)
 
         # Get q^2 series corresponding to energy bins

@@ -70,5 +70,5 @@ ArrayBoundedValidator<T> *createExclusiveArrayBoundedValidator(object lower = ob
 
 void export_ArrayBoundedValidator() {
   EXPORT_ARRAYBOUNDEDVALIDATOR(double, Float);
-  EXPORT_ARRAYBOUNDEDVALIDATOR(long, Int);
+  EXPORT_ARRAYBOUNDEDVALIDATOR(int, Int);
 }

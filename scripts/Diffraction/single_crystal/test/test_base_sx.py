@@ -5,14 +5,19 @@ from mantid.simpleapi import (
     LoadEmptyInstrument,
     AnalysisDataService,
     CreatePeaksWorkspace,
+    CreateMDWorkspace,
     SetUB,
     IndexPeaks,
     CreateSampleWorkspace,
     SetSample,
     TransformHKL,
+    IntegratePeaksMD,
+    FakeMDEventData,
 )
 from mantid.dataobjects import Workspace2D
 from Diffraction.single_crystal.base_sx import BaseSX
+import tempfile
+import shutil
 
 base_sx_path = "Diffraction.single_crystal.base_sx"
 
@@ -23,10 +28,12 @@ class BaseSXTest(unittest.TestCase):
         cls.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
+        cls._test_dir = tempfile.mkdtemp()
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
+        shutil.rmtree(cls._test_dir)
 
     def test_retrieve(self):
         self.assertTrue(isinstance(BaseSX.retrieve("empty"), Workspace2D))  # ADS name of self.ws is "empty"
@@ -150,6 +157,39 @@ class BaseSXTest(unittest.TestCase):
         self.assertTrue(
             allclose(peaks_ref.sample().getOrientedLattice().getUB().tolist(), peaks.sample().getOrientedLattice().getUB().tolist())
         )
+
+    def test_plot_integrated_peaks_MD(self):
+        # make fake dataset
+        ws = CreateMDWorkspace(
+            Dimensions="3",
+            Extents="-5,5,-5,5,-5,5",
+            Names="H,K,L",
+            Units="r.l.u.,r.l.u.,r.l.u.",
+            Frames="HKL,HKL,HKL",
+            SplitInto="2",
+            SplitThreshold="50",
+        )
+        # generate fake data at (0,1,0)
+        FakeMDEventData(ws, EllipsoidParams="1e+03,0,1,0,1,0,0,0,1,0,0,0,1,0.01,0.04,0.02,1", RandomSeed="3873875")
+        # create peak at (0,1,0) and integrate
+        peaks = self._make_peaks_HKL(hs=[0], ks=[1], ls=[0], wsname="peaks_md")
+        peaks_int = IntegratePeaksMD(
+            InputWorkspace=ws,
+            PeakRadius=0.6,
+            BackgroundInnerRadius=0.6,
+            BackgroundOuterRadius=0.8,
+            PeaksWorkspace=peaks,
+            OutputWorkspace="peaks_int_sphere",
+            Ellipsoid=False,
+            UseOnePercentBackgroundCorrection=False,
+        )
+
+        # plot
+        out_file = path.join(self._test_dir, "out_plot_MD.pdf")
+        BaseSX.plot_integrated_peaks_MD(ws, peaks_int, out_file, nbins_max=21, extent=1.5, log_norm=True)
+
+        # check output file saved
+        self.assertTrue(path.exists(out_file))
 
     # --- helper funcs ---
 

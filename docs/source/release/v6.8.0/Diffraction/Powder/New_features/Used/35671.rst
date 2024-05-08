@@ -1,1 +1,0 @@
-- Add parameters, ``LogAllowList`` and ``LogBlockList``, to :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`SNSPowderReduction <algm-SNSPowderReduction>` so users can select which logs are actually needed. The default is to block chopper logs in SNSPowderReduction

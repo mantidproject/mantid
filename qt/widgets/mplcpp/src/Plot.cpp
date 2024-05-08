@@ -167,6 +167,19 @@ Python::Object pcolormesh(const QStringList &workspaces, boost::optional<Python:
   }
 }
 
+Python::Object surface(const QStringList &workspaces, boost::optional<Python::Object> fig) {
+  GlobalInterpreterLock lock;
+  try {
+    const auto args = constructArgs(workspaces);
+    Python::Dict kwargs;
+    if (fig)
+      kwargs["fig"] = fig.get();
+    return functionsModule().attr("plot_surface")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
 Python::Object sliceviewer(const Workspace_sptr &workspace) {
   GlobalInterpreterLock lock;
   try {

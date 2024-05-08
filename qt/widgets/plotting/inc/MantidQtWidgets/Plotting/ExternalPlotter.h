@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-enum MantidAxis { Spectrum, Bin };
+enum MantidAxis { Spectrum, Bin, Both };
 
 /**
  @class ExternalPlotter
@@ -42,6 +42,7 @@ public:
   virtual void plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars);
   virtual void plotContour(std::string const &workspaceName);
   virtual void plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
+  virtual void plot3DSurface(std::string const &workspaceName);
   virtual void showSliceViewer(std::string const &workspaceName);
   bool validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices = boost::none,
                 boost::optional<MantidAxis> const &axisType = boost::none) const;

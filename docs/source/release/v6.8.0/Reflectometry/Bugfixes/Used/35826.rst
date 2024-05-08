@@ -1,1 +1,0 @@
-- The :ref:`Preview tab <refl_preview>` now matches rows in the :ref:`Experiment tab<refl_exp_instrument_settings>` lookup table by checking both run angle and title. Mantid will also no longer crash if a reduction is triggered on the :ref:`Preview tab <refl_preview>` when no run has been loaded.

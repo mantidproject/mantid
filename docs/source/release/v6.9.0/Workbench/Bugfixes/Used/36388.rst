@@ -1,1 +1,0 @@
-- Fixed bug where a 3D plot would shrink every time you changed a property of the colorbar.

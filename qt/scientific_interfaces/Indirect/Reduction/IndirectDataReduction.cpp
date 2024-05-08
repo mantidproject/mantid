@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 
 #include <QDir>
@@ -29,6 +30,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
@@ -39,7 +41,7 @@ DECLARE_SUBWINDOW(IndirectDataReduction)
 
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
-      m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
+      m_algRunner(new MantidQt::API::QtAlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
       m_instDetails() {
@@ -76,7 +78,7 @@ void IndirectDataReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
-  addTab<IETPresenter>("ISIS Energy Transfer");
+  addMVPTab<IETPresenter, IETView, IETModel>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");
@@ -209,6 +211,10 @@ void IndirectDataReduction::loadInstrumentIfNotExist(const std::string &instrume
   }
 }
 
+MantidWidgets::IInstrumentConfig *IndirectDataReduction::getInstrumentConfiguration() const {
+  return m_uiForm.iicInstrumentConfiguration;
+}
+
 /**
  * Gets the details for the current instrument configuration.
  *
@@ -237,9 +243,9 @@ void IndirectDataReduction::loadInstrumentDetails() {
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements{
-      "analysis-type",     "spectra-min",       "spectra-max",        "Efixed",        "peak-start",
-      "peak-end",          "back-start",        "back-end",           "rebin-default", "cm-1-convert-choice",
-      "save-nexus-choice", "save-ascii-choice", "fold-frames-choice", "resolution"};
+      "analysis-type",     "spectra-min",        "spectra-max",   "peak-start",          "peak-end",
+      "back-start",        "back-end",           "rebin-default", "cm-1-convert-choice", "save-nexus-choice",
+      "save-ascii-choice", "fold-frames-choice", "resolution"};
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
@@ -249,6 +255,11 @@ void IndirectDataReduction::loadInstrumentDetails() {
   auto const instWorkspace = instrumentWorkspace();
   if (!instWorkspace) {
     return;
+  }
+  if (auto const eFixed = getEFixed(instWorkspace)) {
+    m_instDetails["Efixed"] = QString::number(*eFixed);
+  } else {
+    m_instDetails["Efixed"] = "";
   }
 
   auto const instrument = instWorkspace->getInstrument();

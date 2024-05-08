@@ -1,0 +1,1 @@
+- It is now approximately 30% faster to load data into the F(Q)Fit tab in the :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>`.

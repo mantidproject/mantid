@@ -12,7 +12,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MockQtAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -334,14 +334,14 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searchResults));
   }
 
-  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+  std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
-    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
+    auto algRunner = std::make_shared<NiceMock<MockQtAlgorithmRunner>>();
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(AtLeast(1)).WillRepeatedly(Return(algRunner));
     return algRunner;
   }
 
-  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockAlgorithmRunner>> algRunner) {
+  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> algRunner) {
     EXPECT_CALL(*algRunner, startAlgorithmImpl(searchAlg)).Times(1);
   }
 

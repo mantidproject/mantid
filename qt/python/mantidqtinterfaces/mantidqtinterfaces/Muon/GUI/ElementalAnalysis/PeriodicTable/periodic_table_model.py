@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
 import json
 
-from mantidqtinterfaces.Muon.GUI import ElementalAnalysis
+from mantid.utils.muon import PEAK_DATA_JSON
 
 
 class PeriodicTableModel(object):
@@ -17,7 +16,7 @@ class PeriodicTableModel(object):
         self.load_peak_data()
 
     def get_default_peak_data_file(self):
-        return os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")
+        return PEAK_DATA_JSON
 
     def load_peak_data(self):
         # using os.path.isfile allows file modifications to take place before opening:

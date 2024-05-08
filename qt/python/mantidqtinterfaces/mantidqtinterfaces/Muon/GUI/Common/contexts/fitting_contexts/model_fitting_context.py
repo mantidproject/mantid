@@ -53,8 +53,7 @@ class ModelFittingContext(BasicFittingContext):
     @current_result_table_index.setter
     def current_result_table_index(self, index: int) -> None:
         """Sets the index of the currently selected result table."""
-        if index is not None and index >= self.number_of_result_tables():
-            raise RuntimeError(f"The provided result table index ({index}) is too large.")
+        assert index is None or index < self.number_of_result_tables(), f"The result table index ({index}) is too large."
 
         self._current_result_table_index = index
 

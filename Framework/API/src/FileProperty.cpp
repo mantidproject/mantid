@@ -287,16 +287,11 @@ bool FileProperty::extsMatchRunFiles() {
   try {
     Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
-    auto facilityExtsBegin = facilityExts.cbegin();
-    auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
+    match = std::any_of(allowedExts.cbegin(), allowedExts.cend(), [&facilityExts](const auto &ext) {
+      return std::find(facilityExts.cbegin(), facilityExts.cend(), ext) != facilityExts.cend();
+    });
 
-    for (const auto &ext : allowedExts) {
-      if (std::find(facilityExtsBegin, facilityExtsEnd, ext) != facilityExtsEnd) {
-        match = true;
-        break;
-      }
-    }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   } // facility could not be found, do nothing this will return the default
   // match of false

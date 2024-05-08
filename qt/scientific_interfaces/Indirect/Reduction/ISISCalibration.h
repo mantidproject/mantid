@@ -13,6 +13,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IIndirectDataReduction;
+
 /** ISISCalibration
   Handles vanadium run calibration for ISIS instruments.
 
@@ -23,7 +25,7 @@ class MANTIDQT_INDIRECT_DLL ISISCalibration : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISCalibration() override;
 
   void setup() override;

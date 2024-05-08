@@ -1,1 +1,0 @@
-- Fix bug that left a tab open with the old file name in the script editor when using 'Save Script as'

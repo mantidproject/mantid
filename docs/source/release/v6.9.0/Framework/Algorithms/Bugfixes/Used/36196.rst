@@ -1,1 +1,0 @@
-- Improve parameter validation to check for the case of the bin width being too large when specifying bins in the Sample Transmision Calculator.
