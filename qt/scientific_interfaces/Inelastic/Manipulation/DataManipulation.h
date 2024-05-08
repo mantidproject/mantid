@@ -30,7 +30,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDataReduction;
+class DataReduction;
 
 /** DataManipulation
 

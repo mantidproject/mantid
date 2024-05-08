@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDataReductionTab.h"
-#include "IndirectDataReduction.h"
+#include "DataReductionTab.h"
+#include "DataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,27 +20,27 @@ using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
+Mantid::Kernel::Logger g_log("DataReductionTab");
 }
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectDataReductionTab::IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent)
+DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
-IndirectDataReductionTab::~IndirectDataReductionTab() = default;
+DataReductionTab::~DataReductionTab() = default;
 
-void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
+void DataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectDataReductionTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
+void DataReductionTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void IndirectDataReductionTab::runTab() {
+void DataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
@@ -66,7 +66,7 @@ void IndirectDataReductionTab::runTab() {
  *
  * @param error Unused
  */
-void IndirectDataReductionTab::tabExecutionComplete(bool error) {
+void DataReductionTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
@@ -80,7 +80,7 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
  *
  * @returns Pointer to instrument workspace
  */
-Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::instrumentWorkspace() const {
+Mantid::API::MatrixWorkspace_sptr DataReductionTab::instrumentWorkspace() const {
   return m_idrUI->instrumentWorkspace();
 }
 
@@ -90,21 +90,19 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::instrumentWorkspace(
  *
  * @return Map of information ID to value
  */
-QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
-  return m_idrUI->getInstrumentDetails();
-}
+QMap<QString, QString> DataReductionTab::getInstrumentDetails() const { return m_idrUI->getInstrumentDetails(); }
 
-QString IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
+QString DataReductionTab::getInstrumentDetail(QString const &key) const {
   return getInstrumentDetail(getInstrumentDetails(), key);
 }
 
-QString IndirectDataReductionTab::getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
-                                                      QString const &key) const {
+QString DataReductionTab::getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                                              QString const &key) const {
   validateInstrumentDetail(key);
   return instrumentDetails[key];
 }
 
-void IndirectDataReductionTab::validateInstrumentDetail(QString const &key) const {
+void DataReductionTab::validateInstrumentDetail(QString const &key) const {
   auto const instrumentName = getInstrumentName().toStdString();
 
   if (instrumentName.empty())
@@ -114,12 +112,11 @@ void IndirectDataReductionTab::validateInstrumentDetail(QString const &key) cons
                              " instrument. Please select a valid instrument.");
 }
 
-bool IndirectDataReductionTab::hasInstrumentDetail(QString const &key) const {
+bool DataReductionTab::hasInstrumentDetail(QString const &key) const {
   return hasInstrumentDetail(getInstrumentDetails(), key);
 }
 
-bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
-                                                   QString const &key) const {
+bool DataReductionTab::hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails, QString const &key) const {
   return instrumentDetails.contains(key) && !instrumentDetails[key].isEmpty();
 }
 
@@ -128,19 +125,15 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const 
  *
  * @return Instrument config widget
  */
-MantidWidgets::IInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
+MantidWidgets::IInstrumentConfig *DataReductionTab::getInstrumentConfiguration() const {
   return m_idrUI->getInstrumentConfiguration();
 }
 
-QString IndirectDataReductionTab::getInstrumentName() const {
-  return getInstrumentConfiguration()->getInstrumentName();
-}
+QString DataReductionTab::getInstrumentName() const { return getInstrumentConfiguration()->getInstrumentName(); }
 
-QString IndirectDataReductionTab::getAnalyserName() const { return getInstrumentConfiguration()->getAnalyserName(); }
+QString DataReductionTab::getAnalyserName() const { return getInstrumentConfiguration()->getAnalyserName(); }
 
-QString IndirectDataReductionTab::getReflectionName() const {
-  return getInstrumentConfiguration()->getReflectionName();
-}
+QString DataReductionTab::getReflectionName() const { return getInstrumentConfiguration()->getReflectionName(); }
 
 /**
  * Gets default peak and background ranges for an instrument in time of flight.
@@ -151,8 +144,8 @@ QString IndirectDataReductionTab::getReflectionName() const {
  *
  * @returns A map of range ID to value
  */
-std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(QString instName, QString analyser,
-                                                                                QString reflection) {
+std::map<std::string, double> DataReductionTab::getRangesFromInstrument(QString instName, QString analyser,
+                                                                        QString reflection) {
   // Get any unset parameters
   if (instName.isEmpty())
     instName = getInstrumentName();
@@ -270,6 +263,6 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectDataReductionTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+void DataReductionTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 } // namespace MantidQt::CustomInterfaces

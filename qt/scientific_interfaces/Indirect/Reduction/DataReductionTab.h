@@ -31,9 +31,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectDataReduction;
+class IDataReduction;
 
-/** IndirectDataReductionTab
+/** DataReductionTab
 
   This class defines common functionality of tabs used in the Indirect Data
   Reduction interface.
@@ -41,12 +41,12 @@ class IIndirectDataReduction;
   @author Samuel Jackson
   @date 13/08/2013
 */
-class MANTIDQT_INDIRECT_DLL IndirectDataReductionTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL DataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataReductionTab(IIndirectDataReduction *idrUI, QObject *parent = nullptr);
-  ~IndirectDataReductionTab() override;
+  DataReductionTab(IDataReduction *idrUI, QObject *parent = nullptr);
+  ~DataReductionTab() override;
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
@@ -84,7 +84,7 @@ protected:
                                                         QString reflection = "");
 
 protected:
-  IIndirectDataReduction *m_idrUI;
+  IDataReduction *m_idrUI;
 
 private slots:
   void tabExecutionComplete(bool error);

@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISCalibration.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectDataReduction;
+class IDataReduction;
 
 /** ISISCalibration
   Handles vanadium run calibration for ISIS instruments.
@@ -21,11 +21,11 @@ class IIndirectDataReduction;
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INDIRECT_DLL ISISCalibration : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ISISCalibration : public DataReductionTab {
   Q_OBJECT
 
 public:
-  ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ISISCalibration(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISCalibration() override;
 
   void setup() override;

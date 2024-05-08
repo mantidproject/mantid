@@ -31,8 +31,8 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 
-IETPresenter::IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
-    : IndirectDataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
+IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model)
+    : DataReductionTab(idrUI), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 
   setOutputPlotOptionsPresenter(

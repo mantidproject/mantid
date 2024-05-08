@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "ui_ISISDiagnostics.h"
@@ -32,7 +32,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectDataReduction;
+class IDataReduction;
 
 /** ISISDiagnostics
   Handles time integration diagnostics for ISIS instruments.
@@ -40,11 +40,11 @@ class IIndirectDataReduction;
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public DataReductionTab {
   Q_OBJECT
 
 public:
-  ISISDiagnostics(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ISISDiagnostics(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISDiagnostics() override;
 
   void setup() override;

@@ -11,7 +11,7 @@
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
 
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,11 +25,11 @@ public:
   virtual void notifyRunFinished() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IETPresenter : public IndirectDataReductionTab, public IIETPresenter {
+class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab, public IIETPresenter {
   Q_OBJECT
 
 public:
-  IETPresenter(IIndirectDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model);
+  IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model);
 
   void setup() override;
   void run() override;

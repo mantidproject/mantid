@@ -1,8 +1,8 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    IndirectDataReduction.cpp
-    IndirectDataReductionTab.cpp
+    DataReduction.cpp
+    DataReductionTab.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
@@ -19,8 +19,8 @@ set(INC_FILES ISISEnergyTransferData.h ISISEnergyTransferValidator.h ISISEnergyT
 )
 
 set(MOC_FILES
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
+    DataReduction.h
+    DataReductionTab.h
     ILLEnergyTransfer.h
     ISISCalibration.h
     ISISDiagnostics.h
@@ -29,7 +29,7 @@ set(MOC_FILES
     Transmission.h
 )
 
-set(UI_FILES IndirectDataReduction.ui ILLEnergyTransfer.ui ISISCalibration.ui ISISDiagnostics.ui ISISEnergyTransfer.ui
+set(UI_FILES DataReduction.ui ILLEnergyTransfer.ui ISISCalibration.ui ISISDiagnostics.ui ISISEnergyTransfer.ui
              Transmission.ui
 )
 

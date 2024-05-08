@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DataReduction.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
-#include "IndirectDataReduction.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISEnergyTransfer.h"
 

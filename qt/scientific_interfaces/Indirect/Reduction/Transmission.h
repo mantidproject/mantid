@@ -7,19 +7,19 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 #include "MantidKernel/System.h"
 #include "ui_Transmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectDataReduction;
+class IDataReduction;
 
-class MANTIDQT_INDIRECT_DLL Transmission : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL Transmission : public DataReductionTab {
   Q_OBJECT
 
 public:
-  Transmission(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  Transmission(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~Transmission() override;
 
   void setup() override;
