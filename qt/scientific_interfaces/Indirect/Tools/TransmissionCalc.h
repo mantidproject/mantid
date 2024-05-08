@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "ui_IndirectTransmissionCalc.h"
+#include "ui_TransmissionCalc.h"
 
 #include <QComboBox>
 #include <QMap>
@@ -17,11 +17,11 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL IndirectTransmissionCalc : public IndirectToolsTab {
+class MANTIDQT_INDIRECT_DLL TransmissionCalc : public IndirectToolsTab {
   Q_OBJECT
 
 public:
-  IndirectTransmissionCalc(QWidget *parent = nullptr);
+  TransmissionCalc(QWidget *parent = nullptr);
 
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
@@ -41,7 +41,7 @@ private:
   void setRunEnabled(bool enabled);
 
   /// The UI form
-  Ui::IndirectTransmissionCalc m_uiForm;
+  Ui::TransmissionCalc m_uiForm;
   /// The name of the current instrument
   QString m_instrument;
 };

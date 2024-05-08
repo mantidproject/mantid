@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTools.h"
 #include "Common/Settings.h"
-#include "IndirectTransmissionCalc.h"
+#include "TransmissionCalc.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -27,7 +27,7 @@ void IndirectTools::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Insert each tab into the interface on creation
-  m_tabs.emplace(TRANSMISSION, new IndirectTransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION)));
+  m_tabs.emplace(TRANSMISSION, new TransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION)));
 
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectToolsTab *>::iterator iter;

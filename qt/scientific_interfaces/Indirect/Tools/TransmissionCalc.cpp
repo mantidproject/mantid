@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectTransmissionCalc.h"
+#include "TransmissionCalc.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -18,11 +18,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectTransmissionCalc");
+Mantid::Kernel::Logger g_log("TransmissionCalc");
 }
 
 namespace MantidQt::CustomInterfaces {
-IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent) : IndirectToolsTab(parent) {
+TransmissionCalc::TransmissionCalc(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
@@ -36,7 +36,7 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent) : IndirectTo
 /*
  * Run any tab setup code.
  */
-void IndirectTransmissionCalc::setup() {
+void TransmissionCalc::setup() {
   QRegExp chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
@@ -47,7 +47,7 @@ void IndirectTransmissionCalc::setup() {
  *
  * @return Whether the form was valid
  */
-bool IndirectTransmissionCalc::validate() {
+bool TransmissionCalc::validate() {
   UserInputValidator uiv;
 
   uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
@@ -67,15 +67,15 @@ bool IndirectTransmissionCalc::validate() {
 }
 
 /**
- * Run the tab, invoking the IndirectTransmission algorithm.
+ * Run the tab, invoking the Transmission algorithm.
  */
-void IndirectTransmissionCalc::run() {
+void TransmissionCalc::run() {
   setRunIsRunning(true);
 
   std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string outWsName = instrumentName + "_transmission";
 
-  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
+  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("Transmission");
   transAlg->initialize();
   try {
     transAlg->setProperty("Instrument", instrumentName);
@@ -100,11 +100,11 @@ void IndirectTransmissionCalc::run() {
 }
 
 /**
- * Handles completion of the IndirectTransmission algorithm.
+ * Handles completion of the Transmission algorithm.
  *
  * @param error If the algorithm encountered an error during execution
  */
-void IndirectTransmissionCalc::algorithmComplete(bool error) {
+void TransmissionCalc::algorithmComplete(bool error) {
   setRunIsRunning(false);
 
   if (!error) {
@@ -125,7 +125,7 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
       m_uiForm.tvResultsTable->addTopLevelItem(item);
     }
   } else
-    emit showMessageBox("Failed to execute IndirectTransmission "
+    emit showMessageBox("Failed to execute Transmission "
                         "algorithm.\nSee Results Log for details.");
 }
 
@@ -135,15 +135,15 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
  *
  * @param settings The settings to loading into the interface
  */
-void IndirectTransmissionCalc::loadSettings(const QSettings &settings) { UNUSED_ARG(settings); }
+void TransmissionCalc::loadSettings(const QSettings &settings) { UNUSED_ARG(settings); }
 
-void IndirectTransmissionCalc::runClicked() { runTab(); }
+void TransmissionCalc::runClicked() { runTab(); }
 
-void IndirectTransmissionCalc::setRunIsRunning(bool running) {
+void TransmissionCalc::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
 }
 
-void IndirectTransmissionCalc::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void TransmissionCalc::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 } // namespace MantidQt::CustomInterfaces

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectTransmission.h"
+#include "Transmission.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QFileInfo>
@@ -28,8 +28,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectTransmission::IndirectTransmission(IIndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+Transmission::Transmission(IIndirectDataReduction *idrUI, QWidget *parent) : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2"));
@@ -54,16 +53,16 @@ IndirectTransmission::IndirectTransmission(IIndirectDataReduction *idrUI, QWidge
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectTransmission::~IndirectTransmission() = default;
+Transmission::~Transmission() = default;
 
-void IndirectTransmission::setup() {}
+void Transmission::setup() {}
 
-void IndirectTransmission::run() {
+void Transmission::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
   QString outWsName = sampleWsName.toLower() + "_transmission_group";
 
-  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("TransmissionMonitor", -1);
   transAlg->initialize();
 
   transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
@@ -76,7 +75,7 @@ void IndirectTransmission::run() {
   m_pythonExportWsName = outWsName.toStdString();
 }
 
-bool IndirectTransmission::validate() {
+bool Transmission::validate() {
   // Check if we have an appropriate instrument
   QString currentInst = getInstrumentName();
   if (currentInst != "IRIS" && currentInst != "OSIRIS")
@@ -93,7 +92,7 @@ bool IndirectTransmission::validate() {
   return true;
 }
 
-void IndirectTransmission::transAlgDone(bool error) {
+void Transmission::transAlgDone(bool error) {
   if (error)
     return;
 
@@ -116,7 +115,7 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void IndirectTransmission::setInstrument() {
+void Transmission::setInstrument() {
   try {
     setInstrument(getInstrumentDetail("instrument"));
   } catch (std::exception const &ex) {
@@ -124,7 +123,7 @@ void IndirectTransmission::setInstrument() {
   }
 }
 
-void IndirectTransmission::setInstrument(QString const &instrumentName) {
+void Transmission::setInstrument(QString const &instrumentName) {
   m_uiForm.dsSampleInput->setInstrumentOverride(instrumentName);
   m_uiForm.dsCanInput->setInstrumentOverride(instrumentName);
 }
@@ -132,23 +131,23 @@ void IndirectTransmission::setInstrument(QString const &instrumentName) {
 /**
  * Handle when Run is clicked
  */
-void IndirectTransmission::runClicked() { runTab(); }
+void Transmission::runClicked() { runTab(); }
 
 /**
  * Handle saving of workspace
  */
-void IndirectTransmission::saveClicked() {
+void Transmission::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectTransmission::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void Transmission::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectTransmission::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void Transmission::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectTransmission::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                           QString const &tooltip) {
+void Transmission::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
+                                   QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

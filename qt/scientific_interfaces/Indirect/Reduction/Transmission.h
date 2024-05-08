@@ -9,18 +9,18 @@
 #include "../DllConfig.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
-#include "ui_IndirectTransmission.h"
+#include "ui_Transmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 class IIndirectDataReduction;
 
-class MANTIDQT_INDIRECT_DLL IndirectTransmission : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL Transmission : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  IndirectTransmission(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
-  ~IndirectTransmission() override;
+  Transmission(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ~Transmission() override;
 
   void setup() override;
   void run() override;
@@ -41,7 +41,7 @@ private slots:
 private:
   void setInstrument(QString const &instrumentName);
 
-  Ui::IndirectTransmission m_uiForm;
+  Ui::Transmission m_uiForm;
 };
 
 } // namespace CustomInterfaces

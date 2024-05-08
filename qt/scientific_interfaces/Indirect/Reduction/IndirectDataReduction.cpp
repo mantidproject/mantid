@@ -13,7 +13,6 @@
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
-#include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -23,6 +22,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
+#include "Transmission.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -81,7 +81,7 @@ void IndirectDataReduction::initLayout() {
   addMVPTab<IETPresenter, IETView, IETModel>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
-  addTab<IndirectTransmission>("Transmission");
+  addTab<Transmission>("Transmission");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
