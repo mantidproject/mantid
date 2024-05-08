@@ -28,12 +28,12 @@ namespace CustomInterfaces {
         @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectSimulationTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL SimulationTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectSimulationTab(QWidget *parent = nullptr);
-  ~IndirectSimulationTab() override;
+  SimulationTab(QWidget *parent = nullptr);
+  ~SimulationTab() override;
 
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);

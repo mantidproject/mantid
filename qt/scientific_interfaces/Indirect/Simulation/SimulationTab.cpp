@@ -4,24 +4,24 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSimulationTab.h"
+#include "SimulationTab.h"
 
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectSimulationTab::IndirectSimulationTab(QWidget *parent) : IndirectTab(parent) {}
+SimulationTab::SimulationTab(QWidget *parent) : IndirectTab(parent) {}
 
-IndirectSimulationTab::~IndirectSimulationTab() = default;
+SimulationTab::~SimulationTab() = default;
 
-void IndirectSimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
+void SimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectSimulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
+void SimulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void IndirectSimulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
+void SimulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
 } // namespace MantidQt::CustomInterfaces

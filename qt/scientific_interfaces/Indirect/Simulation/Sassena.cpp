@@ -12,7 +12,7 @@
 #include <QString>
 
 namespace MantidQt::CustomInterfaces {
-Sassena::Sassena(QWidget *parent) : IndirectSimulationTab(parent) {
+Sassena::Sassena(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));

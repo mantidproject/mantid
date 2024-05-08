@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSimulation.h"
+#include "Simulation.h"
 #include "Common/Settings.h"
 #include "DensityOfStates.h"
 #include "MantidKernel/ConfigService.h"
@@ -12,17 +12,17 @@
 #include "Sassena.h"
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectSimulation)
+DECLARE_SUBWINDOW(Simulation)
 } // namespace MantidQt::CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectSimulation::IndirectSimulation(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
+Simulation::Simulation(QWidget *parent)
+    : IndirectInterface(parent), m_changeObserver(*this, &Simulation::handleDirectoryChange) {}
 
-IndirectSimulation::~IndirectSimulation() = default;
+Simulation::~Simulation() = default;
 
-void IndirectSimulation::initLayout() {
+void Simulation::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -30,12 +30,12 @@ void IndirectSimulation::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Insert each tab into the interface on creation
-  m_simulationTabs.emplace(MOLDYN, new MolDyn(m_uiForm.IndirectSimulationTabs->widget(MOLDYN)));
-  m_simulationTabs.emplace(SASSENA, new Sassena(m_uiForm.IndirectSimulationTabs->widget(SASSENA)));
-  m_simulationTabs.emplace(DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS)));
+  m_simulationTabs.emplace(MOLDYN, new MolDyn(m_uiForm.SimulationTabs->widget(MOLDYN)));
+  m_simulationTabs.emplace(SASSENA, new Sassena(m_uiForm.SimulationTabs->widget(SASSENA)));
+  m_simulationTabs.emplace(DOS, new DensityOfStates(m_uiForm.SimulationTabs->widget(DOS)));
 
   // Connect each tab to the actions available in this GUI
-  std::map<unsigned int, IndirectSimulationTab *>::iterator iter;
+  std::map<unsigned int, SimulationTab *>::iterator iter;
   for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
@@ -52,7 +52,7 @@ void IndirectSimulation::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectSimulation::closeEvent(QCloseEvent * /*unused*/) {
+void Simulation::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -61,7 +61,7 @@ void IndirectSimulation::closeEvent(QCloseEvent * /*unused*/) {
  *
  * @param pNf :: notification
  */
-void IndirectSimulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void Simulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
   if (key == "defaultsave.directory") {
     loadSettings();
@@ -74,7 +74,7 @@ void IndirectSimulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNo
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void IndirectSimulation::loadSettings() {
+void Simulation::loadSettings() {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
   QString saveDir =
@@ -83,7 +83,7 @@ void IndirectSimulation::loadSettings() {
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-  std::map<unsigned int, IndirectSimulationTab *>::iterator iter;
+  std::map<unsigned int, SimulationTab *>::iterator iter;
   for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
     iter->second->loadSettings(settings);
   }
@@ -91,4 +91,4 @@ void IndirectSimulation::loadSettings() {
   settings.endGroup();
 }
 
-std::string IndirectSimulation::documentationPage() const { return "Indirect Simulation"; }
+std::string Simulation::documentationPage() const { return "Indirect Simulation"; }

@@ -7,12 +7,12 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "IndirectSimulationTab.h"
+#include "SimulationTab.h"
 #include "ui_MolDyn.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL MolDyn : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL MolDyn : public SimulationTab {
   Q_OBJECT
 
 public:

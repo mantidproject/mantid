@@ -16,7 +16,7 @@
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-MolDyn::MolDyn(QWidget *parent) : IndirectSimulationTab(parent) {
+MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0"));

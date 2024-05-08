@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectSimulation</class>
- <widget class="QMainWindow" name="IndirectSimulation">
+ <class>Simulation</class>
+ <widget class="QMainWindow" name="Simulation">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="IndirectSimulationTabs">
+     <widget class="QTabWidget" name="SimulationTabs">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>

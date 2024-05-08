@@ -5,11 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "ui_IndirectSimulation.h"
+#include "ui_Simulation.h"
 
 #include "../DllConfig.h"
 #include "Common/IndirectInterface.h"
-#include "IndirectSimulationTab.h"
+#include "SimulationTab.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -25,7 +25,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson, STFC
   */
 
-class MANTIDQT_INDIRECT_DLL IndirectSimulation : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL Simulation : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -34,9 +34,9 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectSimulation(QWidget *parent = nullptr);
+  Simulation(QWidget *parent = nullptr);
   /// Destructor
-  ~IndirectSimulation() override;
+  ~Simulation() override;
   /// Interface name
   static std::string name() { return "Simulation"; }
   /// This interface's categories.
@@ -55,11 +55,11 @@ private:
   void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// Map of tabs indexed by position on the window
-  std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
+  std::map<unsigned int, SimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectSimulation, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+  Poco::NObserver<Simulation, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
-  Ui::IndirectSimulation m_uiForm;
+  Ui::Simulation m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
