@@ -13,7 +13,7 @@ Calculates the efficiency of a single flipper  with regards to wavelength. The i
 containing four known spin states, which can be given by the ``SpinStates`` parameter. It then uses these four spin
 states to calculate the proportion of neutrons lost to the flipper with regards to wavelength.
 
-The polarisation of the flipper :math:`P_{F}` is given by:
+The polarization of the flipper :math:`P_{F}` is given by:
 
 .. math::
 

@@ -41,7 +41,7 @@ std::string const FlipperEfficiency::summary() const { return "Calculate the eff
 
 void FlipperEfficiency::init() {
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input),
-                  "Group workspace containing flipper transmissions for all 4 polarisation states.");
+                  "Group workspace containing flipper transmissions for all 4 polarization states.");
   auto const spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropNames::SPIN_STATES, INITIAL_SPIN, spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
