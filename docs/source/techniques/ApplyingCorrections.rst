@@ -11,35 +11,35 @@ Introduction
 ------------
 
 Neutron Data from spectrometers sometimes requires taking into consideration the contributions from Absorption and Multiple
-Scaterring processes from the sample and the container. This section gives an overview of considerations and techniques when applying corrections in Mantid with data obtained
-from an indirect spectrometer.
+Scattering processes from the sample and the container. This section gives an overview of considerations and techniques when applying corrections in Mantid with data obtained
+from an indirect geometry spectrometer.
 
-In the :ref:`Corrections <interface-inelastic-corrections>` interface of Mantid, it is possible to calculate and apply different absorption correction routines, such as the Paalman-Pings
+In the :ref:`Inelastic Corrections <interface-inelastic-corrections>` interface of Mantid Workbench, it is possible to calculate and apply different absorption correction routines, such as the Paalman-Pings
 formalism. The algorithm used for these corrections is :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`.
 To calculate corrections for multiple scattering events, the :ref:`Discus Multiple Scattering <algm-DiscusMultipleScatteringCorrection>` algorithm can be used.
-This algorithm is based on M.Johnson's DISCUS fortran program [1]_, which has been adapted and refactored to run within Mantid.
-For inelastic instruments, we can additionally use the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm, which is also based on DISCUS.
-More information about the theory and application of absorption and multiple scattering corrections can be found in the documentation: :ref:`Absorption and Scatering Corrections <Sample Corrections>`.
+This algorithm is based on M. Johnson's DISCUS fortran program [1]_, which has been adapted and refactored to run within Mantid.
+For Inelastic geometry instruments, we can additionally use the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm, which is also based on DISCUS.
+More information about the theory and application of absorption and multiple scattering corrections can be found in the :ref:`Absorption and Scatering Corrections <Sample Corrections>` documentation.
 
 There are some features of these algorithms to take in consideration when applying absorption and multiple scattering corrections in Mantid:
 
-1. They can be used for diffraction measurements and both with indirect and direct inelastic instruments.
+1. They can be used for diffraction measurements and both with Indirect and Direct Inelastic geometry instruments.
 
-2. An scheme for having more complicated sample environment may be defined in an XML file. For example: flat plates could include the outer frame, or different cylindrical geometries for
-   the containers can be stored within mantid.
+2. A scheme for having more complicated sample environment may be defined in an XML file. For example: flat plates could include the outer frame, or different cylindrical geometries for
+   the containers can be stored within Mantid Workbench.
 
 3. Calculating corrections requires knowledge of the scattering angle for each spectrum thus a reduced workspace must be used.
 
 4. There is an option to reduce computation time for multidetector instruments with large numbers of pixels using sparse instrument configurations.
 
-We are going to illustrate a process of performing absorption and multiple scattering corrections produced and analysed within Mantid with a liquid sample, in this case water, acquired with an indirect instrument.
+We are going to illustrate a process of performing absorption and multiple scattering corrections produced and analysed within Mantid Workbench with a liquid sample, in this case water, acquired with an Indirect geometry instrument.
 
 Absorption and Multiple Scattering Corrections on a Water sample
 ----------------------------------------------------------------
 Sample
 ^^^^^^
 A water sample acquired in the IRIS spectrometer `irs26176_graphite002_red.nsx` from the Mantid Usage Data set is used.
-Characteristic of this sample are:
+Characteristics of this sample are:
 
 - Sample: Liquid Water (:math:`H_2O`), with 1 mm thickness  and 3 cm height sample.
 
@@ -53,34 +53,34 @@ Absorption Corrections
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Firstly, we can calculate and apply neutron absorption corrections for the sample and container by using the  :ref:`Monte Carlo Absorption <algm-PaalmanPingsMonteCarloAbsorption>`
-algorithm in the :ref:`corrections interface <interface-inelastic-corrections>`. Opening the interface, we navigate to the
+algorithm in the :ref:`Inelastic Corrections <interface-inelastic-corrections>` interface. Opening the interface, we navigate to the
 `Calculate Monte Carlo Corrections` tab. Selecting the `irs26176_graphite002_red.nsx` sample dataset with an annulus sample shape of the aforementioned dimensions.
 For sample and container chemical formula, we type `H2-O` and `Al`, respectively. Leaving all other parameters as default.
 Running the algorithm we generate a corrections group workspace. This workspace can be used in the `Apply Absorption Corrections` tab of the interface
 to generate a corrected reduced workspace.
-The corrected reduced workspace can then be used to generate the :math:`S(Q,w)` profile from the `S(Q,w)` tab of the :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>`.
+The corrected reduced workspace can then be used to generate the :math:`S(Q, \omega)` profile from the `S(Q,w)` tab of the :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>`.
 A 3D plot of the generated workspace is shown below:
 
 .. figure:: ../images/water_sqw_corrected_for_absorption.png
    :alt: water_sqw_corrected_for_absorption.png
 
-The :math:`S(Q,w)` workspace will be used to generate multiple scattering corrections.
+The :math:`S(Q, \omega)` workspace will be used to generate multiple scattering corrections.
 
 Multiple Scattering Corrections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 We are going to calculate the multiple scattering corrections using the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm from the algorithms widget.
-On this algorithm, the input workspaces are :
+On this algorithm, the input workspaces are:
 
 1. The reduced absorption corrected workspaces to provide the scattering angles.
 
-2. The :math:`S(Q,w)` calculated from the reduced corrected workspace to calculate the scattering.
+2. The :math:`S(Q, \omega)` calculated from the reduced corrected workspace to calculate the scattering.
 
 The sample shape and container dimensions are similar to the ones used for absorption corrections.
 Additionally, we can also include the effect of multiple scattering of the container in the algorithm. Although, for ease and simplicity,
-the scattering from the container is assumed to be isotropic and a :math:`S(Q,w)` file is thus not required, only the container dimensions and material.
+the scattering from the container is assumed to be isotropic and a :math:`S(Q, \omega)` file is thus not required, only the container dimensions and material.
 
 For this example, we will use 4000 scattering paths to calculate up to 3 consecutive scattering events. The calculations of this algorithm, based on Monte Carlo sampling,
-are quite CPU intensive. Depending on the platfform, it can take a time between 10 and 30 minutes to finalize processing. This example was run
+are quite CPU intensive. Depending on the platform, it can take a time between 10 and 30 minutes to finalize processing. This example was run
 with a Cloud Computing rack equipped with 16CPU.
 
 Once the algorithm is finished, an output group workspace with several 2D Workspaces will be generated.
@@ -109,22 +109,22 @@ The reduced absorption workspace can then be corrected by multiplying it to the 
 Iterative multiple scattering corrections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In the calculation of the multiple scattering corrections using the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm, we have
-used a :math:`S(Q,w)` file which already contained multiple scattering terms, as we obtained from the workspace.
+used a :math:`S(Q, \omega)` file which already contained multiple scattering terms, as we obtained from the workspace.
 In this case, it would improve upon the multiple scattering results if we perform a second iteration on the :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` algorithm,
-but this time using the new :math:`S(Q,w)` calculated from the multiple scattering corrected reduced workspace.
+but this time using the new :math:`S(Q, \omega)` calculated from the multiple scattering corrected reduced workspace.
 
 .. figure:: ../images/Scatterings_for_iterations_1_2.png
    :alt: Scatterings_for_iterations_1_2.png.png
 
-Comparing the results of the scattering weight amplitudes on 2 scattering events form the first and second iteration we can obseve
-that the scattering for the second iteration is slightly smaller, this is the result of using the corrected :math:`S(Q,w)`.
-If we perform another iteration, correcting the reduced workspace with these results and recalculating the :math:`S(Q,w)`, we arrive
+Comparing the results of the scattering weight amplitudes on 2 scattering events from the first and second iteration we can observe
+that the scattering for the second iteration is slightly smaller, this is the result of using the corrected :math:`S(Q, \omega)`.
+If we perform another iteration, correcting the reduced workspace with these results and recalculating the :math:`S(Q, \omega)`, we arrive
 at the following results from the third iteration:
 
 .. figure:: ../images/Scatterings_for_iterations_2_3.png
    :alt: Scatterings_for_iterations_2_3.png
 
-This plot now shows that the difference between the scattering weigths in iterations 2 and 3 is negligible, and thus we are not
+This plot now shows that the difference between the scattering weights in iterations 2 and 3 is negligible, and thus we are not
 correcting further by continuing with the iteration procedure and can stop applying multiple scattering corrections.
 
 Effect of Multiple Scattering Corrections on Peak Widths
@@ -137,10 +137,10 @@ Plotting the FWHM obtained from convolutional fitting with and without applying 
 .. figure:: ../images/FWHM_for_Water_with_without_multiple_scattering_corrections.png
    :alt: FWHM_for_Water_with_without_multiple_scattering_corrections.png
 
-The corrected data shows smaller withs indicating that the multiple scattering increases the peak widths, which shows the effect of the extra wing scattering.
+The corrected data shows smaller widths indicating that the multiple scattering increases the peak widths, which shows the effect of the extra wing scattering.
 
 Another method to apply the multiple scattering corrections would be to scale the model function, e.g. Lorentzian, by the multiple scattering corrections
-and then fit the reduced workspace. In this case, we would disentagle the resolution broadening of the :math:`S(Q,w)` from the broadening occuring
+and then fit the reduced workspace. In this case, we would disentangle the resolution broadening of the :math:`S(Q, \omega)` from the broadening occurring
 from multiple scattering corrections.
 
 
