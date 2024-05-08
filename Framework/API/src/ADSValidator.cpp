@@ -32,6 +32,7 @@ bool ADSValidator::isOptional() const { return m_isOptional; }
 void ADSValidator::setOptional(const bool setOptional) { m_isOptional = setOptional; }
 
 /** Checks if the string passed is in the ADS, or if all members are in the ADS
+ *  @param test_for_warning :: This parameter does not exist, expect warning
  *  @param value :: The value to test
  *  @return "" if the value is on the list, or "The workspace is not in the
  * workspace list"
