@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -21,7 +21,7 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces;
@@ -67,13 +67,13 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectDataValidationHelperTest : public CxxTest::TestSuite {
+class DataValidationHelperTest : public CxxTest::TestSuite {
 public:
-  IndirectDataValidationHelperTest() : m_ads(AnalysisDataService::Instance()) { m_ads.clear(); }
+  DataValidationHelperTest() : m_ads(AnalysisDataService::Instance()) { m_ads.clear(); }
 
-  static IndirectDataValidationHelperTest *createSuite() { return new IndirectDataValidationHelperTest(); }
+  static DataValidationHelperTest *createSuite() { return new DataValidationHelperTest(); }
 
-  static void destroySuite(IndirectDataValidationHelperTest *suite) { delete suite; }
+  static void destroySuite(DataValidationHelperTest *suite) { delete suite; }
 
   void setUp() override {
     m_uiv = std::make_unique<UserInputValidator>();

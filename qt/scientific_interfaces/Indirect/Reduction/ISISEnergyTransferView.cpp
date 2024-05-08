@@ -6,15 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/DetectorGroupingOptions.h"
-#include "Common/IndirectDataValidationHelper.h"
 #include "ISISEnergyTransferPresenter.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 

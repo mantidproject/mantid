@@ -1,7 +1,7 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    IndirectDataValidationHelper.cpp
+    DataValidationHelper.cpp
     IndirectInterface.cpp
     OutputPlotOptionsModel.cpp
     OutputPlotOptionsPresenter.cpp
@@ -17,7 +17,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
-    IndirectDataValidationHelper.h
+    DataValidationHelper.h
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h

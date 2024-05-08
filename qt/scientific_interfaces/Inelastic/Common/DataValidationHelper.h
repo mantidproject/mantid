@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-namespace IndirectDataValidationHelper {
+namespace DataValidationHelper {
 
 enum DataType { Red, Sqw, Calib, Corrections };
 
@@ -39,4 +39,4 @@ MANTIDQT_INELASTIC_DLL bool validateDataIsACorrectionsFile(MantidQt::CustomInter
                                                            MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                            std::string const &inputType, bool silent = false);
 
-} // namespace IndirectDataValidationHelper
+} // namespace DataValidationHelper

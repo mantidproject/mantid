@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"

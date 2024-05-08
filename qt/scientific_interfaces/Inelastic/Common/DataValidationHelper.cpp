@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,7 +14,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 
-namespace IndirectDataValidationHelper {
+namespace DataValidationHelper {
 
 /**
  * Validates that the data selector contains data which is of one of the types
@@ -133,4 +133,4 @@ bool validateDataIsACorrectionsFile(UserInputValidator &uiv, DataSelector *dataS
   return uiv.isAllInputValid();
 }
 
-} // namespace IndirectDataValidationHelper
+} // namespace DataValidationHelper
