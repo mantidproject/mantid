@@ -14,7 +14,8 @@ Calculates how the efficiency of a polarizer varies with wavelength. The
 ordering of the workspaces in ``InputWorkspace`` is taken from the ``SpinStates`` parameter, and the analyser
 efficiency, :math:`\epsilon_{cell}`, is given by ``AnalyserEfficiency``.
 
-The polarization of the polarizer, :math:`P_{SM}`, is given by
+First the ``AnalyserEfficiency`` workspace is rebinned to match the binning of the input workspace that corresponds to the "00" spin state.
+Having done this, the polarization of the polarizer, :math:`P_{SM}`, is given by
 
 .. math::
     P_{SM} = \frac{T_{00} - T_{01}}{2P_{cell}(T_{00} + T_{01})}
