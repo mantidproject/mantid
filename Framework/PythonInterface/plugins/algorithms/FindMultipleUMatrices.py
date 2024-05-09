@@ -288,17 +288,20 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         # see which ubs index the most peaks most accurately (with minimum error)
         iub_min_er = np.argmin(hkl_ers, axis=0)
         # exclude reflections that are not indexed by any UB
-        i_indexed = np.any(np.isfinite(hkl_ers), axis=0)
-        iub, nindex = np.unique(iub_min_er[i_indexed], return_counts=True)
-        # sort by ubs that index most peaks
-        isort = np.argsort(-nindex)  # descending
+        hkl_ers_indexed = np.isfinite(hkl_ers)
+        ipks_indexed = np.any(hkl_ers_indexed, axis=0)
+        iub, nindex_best = np.unique(iub_min_er[ipks_indexed], return_counts=True)
+        nindex_total = hkl_ers_indexed[iub, :].sum(axis=1)  # total num peaks indexed by each UB within tol
+        # sort by ubs that index peaks most accurately
+        # if same num peaks indexed most accurately then additionally by total number peaks indexed
+        isort = np.lexsort((-nindex_total, -nindex_best))
         iub = iub[isort]
         # return peak tables with peaks best indexed by top nub
         nub = min(num_ubs, len(iub))
         peaks_out_list = []
         for itable in range(nub):
             # get peaks indexed best by this UB
-            ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], i_indexed))
+            ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], ipks_indexed))
             peaks_out = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0)
             ADS.addOrReplace(f"{peaks.name()}_ub{itable}", peaks_out)
             [peaks_out.addPeak(peaks.getPeak(int(ipk))) for ipk in ipks]
