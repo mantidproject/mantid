@@ -83,7 +83,10 @@ int FindGoniometerAngles::version() const { return 1; }
 const std::string FindGoniometerAngles::category() const { return "Crystal\\Corrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string FindGoniometerAngles::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string FindGoniometerAngles::summary() const {
+  return "Do a brute force search for the goniometer rotation angles that maximize the number of peaks indexed by the "
+         "specified UB.";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -91,8 +94,12 @@ const std::string FindGoniometerAngles::summary() const { return "TODO: FILL IN 
 void FindGoniometerAngles::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
-  declareProperty("MaxAngle", 5.0, "chi squared over dof", Direction::Input);
-  declareProperty("Tolerance", 0.15, "chi squared over dof", Direction::Input);
+  declareProperty(
+      "MaxAngle", 5.0,
+      "The maximum change in angle to try for any of the goniometer angles, phi, chi and omega, in degrees.",
+      Direction::Input);
+  declareProperty("Tolerance", 0.15, "The tolerance on Miller indices for a peak to be considered indexed",
+                  Direction::Input);
   declareProperty("Apply", false, "Update goniometer in peaks workspace");
   declareProperty("Phi", 0.0, "Phi found", Direction::Output);
   declareProperty("Chi", 0.0, "Chi found", Direction::Output);
@@ -129,6 +136,8 @@ void FindGoniometerAngles::exec() {
   double best_phi{0};
   double best_chi{0};
   double best_omega{0};
+
+  auto progress = std::make_unique<API::Progress>(this, 0.0, 1.0, N_TRIES);
 
   for (int range{1}; range <= N_TRIES; range++) {
     double max_quality{0};
@@ -168,6 +177,7 @@ void FindGoniometerAngles::exec() {
     g_log.information() << "Range Factor = " << range << "  "
                         << "Max Indexed = " << max_indexed << " Err = " << max_error << " Phi: " << best_phi
                         << " Chi: " << best_chi << " Omega: " << best_omega << "\n";
+    progress->report();
   }
 
   setProperty("Phi", best_phi);
