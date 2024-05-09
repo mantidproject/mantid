@@ -32,7 +32,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <filesystem>
-#include <json //value.h>
+#include <json/value.h>
 
 namespace {
 /// static logger object
@@ -684,11 +684,10 @@ FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSea
     for (const auto &ext : exts) {
       std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
 
-      try {
+      try { // Catches error for permission denied
         if (std::filesystem::exists(filePath)) {
           return API::Result<std::string>(filePath.string());
         }
-
       } catch (const std::filesystem::filesystem_error &e) {
         errors += "Data cache: " + std::string(e.what());
         return API::Result<std::string>("", errors);
