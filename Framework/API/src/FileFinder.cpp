@@ -664,32 +664,31 @@ FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSea
 
     try {
       parentDirPath = dataCache.getFileParentDirectoryPath(filename);
+
     } catch (const std::invalid_argument &e) {
       errors += "Data cache: " + std::string(e.what());
       return API::Result<std::string>("", errors);
     }
 
-    try {
-      // Check for permission by trying to access first file in folder
-      std::filesystem::exists(*begin(std::filesystem::directory_iterator(parentDirPath)));
-    } catch (const std::filesystem::filesystem_error &e) {
-      errors += "Data cache: Could not access " + e.path1().parent_path().string() + ". Permission denied.";
+    if (!std::filesystem::exists(parentDirPath)) {
+      errors += "Data cache: Directory not found: " + parentDirPath;
       return API::Result<std::string>("", errors);
     }
 
-    g_log.debug() << "Searching for file in data cache directory " << parentDirPath << std::endl;
+    for (const auto &ext : exts) {
+      std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
 
-    if (!parentDirPath.empty()) {
-
-      for (const auto &ext : exts) {
-        std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
-
+      try {
         if (std::filesystem::exists(filePath)) {
           return API::Result<std::string>(filePath.string());
         }
+
+      } catch (const std::filesystem::filesystem_error &e) {
+        errors += "Data cache: " + std::string(e.what());
+        return API::Result<std::string>("", errors);
       }
-      errors += "Data cache: Could not find matching extension for " + filename;
     }
+    errors += "Data cache: " + filename + " not found in " + parentDirPath;
   }
   return API::Result<std::string>("", errors);
 }
