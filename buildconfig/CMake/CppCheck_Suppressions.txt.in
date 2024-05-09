@@ -116,7 +116,7 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:664
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:665
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:96
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:280
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:863
