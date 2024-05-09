@@ -91,8 +91,8 @@ void LoadEventAsWorkspace2D::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   declareProperty("LoadNexusInstrumentXML", true,
-                  "If true, attempt to load the instrument from the NeXus file. "
-                  "If false, only attempt to load the local copy of the instrument XML.");
+                  "If true, load the instrument definition file (IDF) from the input NeXus file. "
+                  "If false, Mantid will load the most appropriate IDF from the instrument repository.");
 }
 
 std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
