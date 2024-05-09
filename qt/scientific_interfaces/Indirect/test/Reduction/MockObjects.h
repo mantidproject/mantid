@@ -11,9 +11,9 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
+#include "Reduction/DataReduction.h"
 #include "Reduction/ISISEnergyTransferModel.h"
 #include "Reduction/ISISEnergyTransferView.h"
-#include "Reduction/IndirectDataReduction.h"
 
 #include <string>
 #include <utility>
@@ -23,9 +23,9 @@ using namespace MantidQt::CustomInterfaces;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectDataReduction : public IIndirectDataReduction {
+class MockDataReduction : public IDataReduction {
 public:
-  virtual ~MockIndirectDataReduction() = default;
+  virtual ~MockDataReduction() = default;
 
   MOCK_METHOD0(instrumentWorkspace, Mantid::API::MatrixWorkspace_sptr());
 

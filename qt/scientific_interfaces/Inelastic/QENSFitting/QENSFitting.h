@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/IndirectInterface.h"
-#include "Common/IndirectTab.h"
+#include "Common/InelasticInterface.h"
+#include "Common/InelasticTab.h"
 #include "DllConfig.h"
 #include "ui_QENSFitting.h"
 
@@ -28,7 +28,7 @@ class FitTab;
  * The QENSFitting class is the main class that handles the interface
  *and controls its tabs.
  */
-class MANTIDQT_INELASTIC_DLL QENSFitting final : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL QENSFitting final : public InelasticInterface {
   Q_OBJECT
 
 public:

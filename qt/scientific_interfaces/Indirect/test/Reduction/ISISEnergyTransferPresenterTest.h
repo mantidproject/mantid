@@ -41,7 +41,7 @@ public:
     ON_CALL(*m_view, getPlotOptionsView()).WillByDefault(Return(m_outputOptionsView.get()));
 
     m_model = model.get();
-    m_idrUI = std::make_unique<NiceMock<MockIndirectDataReduction>>();
+    m_idrUI = std::make_unique<NiceMock<MockDataReduction>>();
     ON_CALL(*m_idrUI, getInstrumentConfiguration()).WillByDefault(Return(m_instrumentConfig.get()));
 
     m_presenter = std::make_unique<IETPresenter>(m_idrUI.get(), m_view.get(), std::move(model));
@@ -116,7 +116,7 @@ private:
 
   std::unique_ptr<NiceMock<MockIETView>> m_view;
   NiceMock<MockIETModel> *m_model;
-  std::unique_ptr<NiceMock<MockIndirectDataReduction>> m_idrUI;
+  std::unique_ptr<NiceMock<MockDataReduction>> m_idrUI;
 
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputOptionsView;
   std::unique_ptr<NiceMock<MockInstrumentConfig>> m_instrumentConfig;

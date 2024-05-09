@@ -20,7 +20,7 @@ namespace MantidQt::CustomInterfaces {
  *
  * @param parent :: the parent widget
  */
-CorrectionsTab::CorrectionsTab(QWidget *parent) : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
+CorrectionsTab::CorrectionsTab(QWidget *parent) : InelasticTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
   m_blnEdFac = new QtCheckBoxFactory(this);

@@ -85,7 +85,6 @@ std::map<std::string, std::string> customActions() {
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-/// Mock object to mock an IndirectTab
 class MockExternalPlotter : public ExternalPlotter {
 public:
   /// Public Methods

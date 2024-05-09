@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
-    : IndirectTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
+    : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingModel(), m_plotPresenter(),
       m_outOptionsPresenter(), m_fitPropertyBrowser(), m_fittingAlgorithm() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
@@ -217,7 +217,7 @@ bool FitTab::validate() {
 }
 
 /**
- * Called when the 'Run' button is called in the IndirectTab.
+ * Called when the 'Run' button is called in the InelasticTab.
  */
 void FitTab::run() {
   enableFitButtons(false);

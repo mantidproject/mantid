@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 #include "DllConfig.h"
 
@@ -30,14 +30,14 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDataReduction;
+class DataReduction;
 
 /** DataManipulation
 
   This class defines common functionality of tabs used in the Indirect Data
   Manipulation interface.
 */
-class MANTIDQT_INELASTIC_DLL DataManipulation : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL DataManipulation : public InelasticTab {
   Q_OBJECT
 
 public:

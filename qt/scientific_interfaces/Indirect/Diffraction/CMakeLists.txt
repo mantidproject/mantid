@@ -1,10 +1,10 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
-set(SRC_FILES IndirectDiffractionReduction.cpp)
+set(SRC_FILES DiffractionReduction.cpp)
 
-set(MOC_FILES IndirectDiffractionReduction.h)
+set(MOC_FILES DiffractionReduction.h)
 
-set(UI_FILES IndirectDiffractionReduction.ui)
+set(UI_FILES DiffractionReduction.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM MOC_FILES PREPEND ${SUB_DIRECTORY}/)

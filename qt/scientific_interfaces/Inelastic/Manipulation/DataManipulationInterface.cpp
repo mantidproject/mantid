@@ -37,7 +37,7 @@ Mantid::Kernel::Logger g_log("DataManipulationInterface");
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(DataManipulationInterface)
 
-DataManipulationInterface::DataManipulationInterface(QWidget *parent) : IndirectInterface(parent) {}
+DataManipulationInterface::DataManipulationInterface(QWidget *parent) : InelasticInterface(parent) {}
 
 DataManipulationInterface::~DataManipulationInterface() {}
 
@@ -76,7 +76,7 @@ void DataManipulationInterface::initLayout() {
   auto const &facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 void DataManipulationInterface::applySettings(std::map<std::string, QVariant> const &settings) {

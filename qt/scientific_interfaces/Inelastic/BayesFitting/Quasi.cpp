@@ -465,13 +465,13 @@ void Quasi::saveClicked() {
   QString saveDirectory =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   auto const fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-  IndirectTab::checkADSForPlotSaveWorkspace(fitWS, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(fitWS, false);
   QString const QfitWS = QString::fromStdString(fitWS);
   auto const fitPath = saveDirectory + QfitWS + ".nxs";
   addSaveWorkspaceToQueue(QfitWS, fitPath);
 
   auto const resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-  IndirectTab::checkADSForPlotSaveWorkspace(resultWS, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(resultWS, false);
   QString const QresultWS = QString::fromStdString(resultWS);
   auto const resultPath = saveDirectory + QresultWS + ".nxs";
   addSaveWorkspaceToQueue(QresultWS, resultPath);
@@ -522,13 +522,13 @@ void Quasi::plotClicked() {
   if ((plot == "prob" || plot == "all") && (program == "Lorentzians")) {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
-    IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
+    InelasticTab::checkADSForPlotSaveWorkspace(probWS, true);
     m_plotter->plotSpectra(probWS, "1-2", errorBars);
   }
 
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
-  IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
+  InelasticTab::checkADSForPlotSaveWorkspace(resultName, true);
   auto const paramNames = {"amplitude", "fwhm", "beta"};
   for (std::string const &paramName : paramNames) {
 

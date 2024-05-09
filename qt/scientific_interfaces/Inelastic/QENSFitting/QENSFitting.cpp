@@ -14,7 +14,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 DECLARE_SUBWINDOW(QENSFitting)
 
 QENSFitting::QENSFitting(QWidget *parent)
-    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
+    : InelasticInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -40,7 +40,7 @@ void QENSFitting::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 std::string QENSFitting::documentationPage() const { return "Inelastic QENS Fitting"; }
