@@ -38,6 +38,10 @@ static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
 static const std::string OUTPUT_FILE_PATH = "OutputFilePath";
 } // namespace PropertyNames
 
+namespace {
+static const std::string FILE_EXTENSION = ".nxs";
+} // unnamed namespace
+
 void PolarizerEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
@@ -74,13 +78,13 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   if (inputWorkspace->size() != 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
         "The input group workspace must have four periods corresponding to the four spin configurations.";
-  }
-
-  for (size_t i = 0; i < inputWorkspace->size(); ++i) {
-    const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
-    Unit_const_sptr unit = stateWs->getAxis(0)->unit();
-    if (unit->unitID() != "Wavelength") {
-      errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+  } else {
+    for (size_t i = 0; i < inputWorkspace->size(); ++i) {
+      const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
+      Unit_const_sptr unit = stateWs->getAxis(0)->unit();
+      if (unit->unitID() != "Wavelength") {
+        errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+      }
     }
   }
 
@@ -153,9 +157,8 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
 void PolarizerEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr) {
   std::filesystem::path filePath = filePathStr;
   // Add the nexus extension if it's not been applied already.
-  const std::string fileExtension = ".nxs";
-  if (filePath.extension() != fileExtension) {
-    filePath.replace_extension(fileExtension);
+  if (filePath.extension() != FILE_EXTENSION) {
+    filePath.replace_extension(FILE_EXTENSION);
   }
   auto saveAlg = createChildAlgorithm("SaveNexus");
   saveAlg->initialize();
