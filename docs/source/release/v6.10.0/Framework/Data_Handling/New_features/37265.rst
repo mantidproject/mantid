@@ -1,0 +1,1 @@
+- Added new boolean parameter ``LoadNexusInstrumentXML`` to :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>`. Default is *true*.
