@@ -53,6 +53,10 @@ public:
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii);
   }
 
+  void test_save_orso_algorithm_called_for_ORSONexus_format() {
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus);
+  }
+
   void test_saving_multiple_workspaces_to_separate_files_with_save_ascii_algorithm() {
     std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
     runTestSaveAsciiAlgorithmCalledForFileFormat(NamedFormat::ANSTO, workspacesToSave);
@@ -73,12 +77,12 @@ public:
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii, workspacesToSave, true, true);
   }
 
-  void test_save_to_ORSO_single_file_with_one_workspace_excludes_filename_suffix() {
+  void test_save_to_ORSOAscii_single_file_with_one_workspace_excludes_filename_suffix() {
     std::vector<std::string> const workspacesToSave = {"ws_1"};
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSOAscii, workspacesToSave, true);
   }
 
-  void test_save_to_ORSO_single_file_one_ws_group_with_multiple_child_workspaces_includes_filename_suffix() {
+  void test_save_to_ORSOAscii_single_file_one_ws_group_with_multiple_child_workspaces_includes_filename_suffix() {
     const auto workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1", "ws_2"};
     const auto expectedFileName = "ws_grp_1" + m_multiFileSuffix;
@@ -86,11 +90,42 @@ public:
                                                  expectedFileName);
   }
 
-  void test_save_to_ORSO_single_file_one_ws_group_with_one_child_workspace_excludes_filename_suffix() {
+  void test_save_to_ORSOAscii_single_file_one_ws_group_with_one_child_workspace_excludes_filename_suffix() {
     const auto workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1"};
     const auto expectedFileName = "ws_1";
     runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSOAscii, workspaceGrpToSave, childWorkspaces,
+                                                 expectedFileName);
+  }
+
+  void test_saving_multiple_workspaces_to_separate_files_for_ORSONexus_format() {
+    std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus, workspacesToSave);
+  }
+
+  void test_saving_multiple_workspaces_to_single_file_for_ORSONexus_format() {
+    std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus, workspacesToSave, true, true);
+  }
+
+  void test_save_to_ORSONexus_single_file_with_one_workspace_excludes_filename_suffix() {
+    std::vector<std::string> const workspacesToSave = {"ws_1"};
+    runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus, workspacesToSave, true);
+  }
+
+  void test_save_to_ORSONexus_single_file_one_ws_group_with_multiple_child_workspaces_includes_filename_suffix() {
+    const auto workspaceGrpToSave = "ws_grp_1";
+    std::vector<std::string> const childWorkspaces = {"ws_1", "ws_2"};
+    const auto expectedFileName = "ws_grp_1" + m_multiFileSuffix;
+    runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSONexus, workspaceGrpToSave, childWorkspaces,
+                                                 expectedFileName);
+  }
+
+  void test_save_to_ORSONexus_single_file_one_ws_group_with_one_child_workspace_excludes_filename_suffix() {
+    const auto workspaceGrpToSave = "ws_grp_1";
+    std::vector<std::string> const childWorkspaces = {"ws_1"};
+    const auto expectedFileName = "ws_1";
+    runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSONexus, workspaceGrpToSave, childWorkspaces,
                                                  expectedFileName);
   }
 
@@ -158,6 +193,8 @@ private:
       return ".mft";
     case NamedFormat::ORSOAscii:
       return ".ort";
+    case NamedFormat::ORSONexus:
+      return ".orb";
     default:
       throw std::runtime_error("Unknown save format.");
     }
@@ -166,10 +203,15 @@ private:
   std::string expectedSavePath(const std::string &wsName, const NamedFormat format) {
     auto savePath = Poco::Path(m_saveDirectory);
 
-    if (format == NamedFormat::Custom)
+    if (format == NamedFormat::Custom) {
       savePath.append(m_prefix + wsName + std::string(".dat"));
-    else
+    } else if (format == NamedFormat::ORSOAscii) {
+      savePath.append(m_prefix + wsName + std::string(".ort"));
+    } else if (format == NamedFormat::ORSONexus) {
+      savePath.append(m_prefix + wsName + std::string(".orb"));
+    } else {
       savePath.append(m_prefix + wsName);
+    }
 
     return savePath.toString();
   }

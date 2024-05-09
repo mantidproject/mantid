@@ -19,6 +19,15 @@ namespace {
 static constexpr auto MULTI_DATASET_FILE_SUFFIX = "_multi";
 } // unnamed namespace
 
+namespace FileExtensions {
+static constexpr auto CUSTOM = "custom";
+static constexpr auto DAT = ".dat";
+static constexpr auto TXT = ".txt";
+static constexpr auto MFT = ".mft";
+static constexpr auto ORT = ".ort";
+static constexpr auto ORB = ".orb";
+} // namespace FileExtensions
+
 AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
     : m_saveAlgRunner(std::move(saveAlgRunner)), m_fileHandler(fileHandler) {}
 
@@ -26,15 +35,17 @@ std::string AsciiSaver::extensionForFormat(NamedFormat format) {
   // For the custom format we need to pass just the word "custom" to the "extension" property of the save algorithm
   switch (format) {
   case NamedFormat::Custom:
-    return "custom";
+    return FileExtensions::CUSTOM;
   case NamedFormat::ThreeColumn:
-    return ".dat";
+    return FileExtensions::DAT;
   case NamedFormat::ANSTO:
-    return ".txt";
+    return FileExtensions::TXT;
   case NamedFormat::ILLCosmos:
-    return ".mft";
+    return FileExtensions::MFT;
   case NamedFormat::ORSOAscii:
-    return ".ort";
+    return FileExtensions::ORT;
+  case NamedFormat::ORSONexus:
+    return FileExtensions::ORB;
   default:
     throw std::runtime_error("Unknown save format.");
   }
@@ -45,12 +56,15 @@ bool AsciiSaver::isValidSaveDirectory(std::string const &path) const { return m_
 std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::string const &prefix,
                                          std::string const &name, std::string const &extension) const {
   auto path = Poco::Path(saveDirectory).makeDirectory();
-  // The extension is added automatically except where it is "custom"
-  if (extension == "custom")
-    path.append(prefix + name + std::string(".dat"));
-  else
-    path.append(prefix + name);
 
+  if (extension == FileExtensions::CUSTOM) {
+    path.append(prefix + name + std::string(FileExtensions::DAT));
+  } else if (extension == FileExtensions::ORT || extension == FileExtensions::ORB) {
+    path.append(prefix + name + extension);
+  } else {
+    // The extension is added automatically for the rest of the formats
+    path.append(prefix + name);
+  }
   return path.toString();
 }
 

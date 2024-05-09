@@ -36,7 +36,7 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
  * presenter
- * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
+ * @param savePresenter :: [input] A pointer to the 'Save' tab presenter
  */
 BatchPresenter::BatchPresenter(
     IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<API::IJobRunner> jobRunner,

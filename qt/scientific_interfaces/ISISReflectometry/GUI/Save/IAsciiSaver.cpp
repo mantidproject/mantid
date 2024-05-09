@@ -36,6 +36,8 @@ bool FileFormatOptions::isORSOFormat() const {
   switch (m_format) {
   case NamedFormat::ORSOAscii:
     return true;
+  case NamedFormat::ORSONexus:
+    return true;
   default:
     return false;
   }

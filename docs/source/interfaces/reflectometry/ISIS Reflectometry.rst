@@ -177,7 +177,7 @@ Batches
 
 The main window contains one or more "Batches", which are shown as vertical
 tabs on the left. Each Batch contains a group of settings tabs (Runs, Event
-Handling, Experiment, Instrument and Save ASCII). Together, these provide all
+Handling, Experiment, Instrument and Save). Together, these provide all
 of the settings for a particular reduction.
 
 .. figure:: /images/ISISReflectometryInterface/batches.png
@@ -885,12 +885,13 @@ exactly the **same reduction** as a normal batch reduction, aside from the regio
 using the graphical selection tool.
 
 .. _refl_save_ascii:
+.. _refl_save:
 
-Save ASCII Tab
-~~~~~~~~~~~~~~
+Save Tab
+~~~~~~~~
 
-The **Save ASCII** tab allows for processed workspaces to be saved in specific
-ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+The **Save** tab allows for processed workspaces to be saved in specific
+formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
 See :ref:`algm-SaveReflectometryAscii` and :ref:`algm-SaveISISReflectometryORSO`
 for a description of the supported formats.
 
@@ -898,9 +899,9 @@ for a description of the supported formats.
   :class: screenshot
   :width: 800px
   :align: center
-  :alt: The save ASCII tab
+  :alt: The save tab
 
-  *The save ASCII tab*
+  *The save tab*
 
 +-------------------------------+------------------------------------------------------+
 | Name                          | Description                                          |
@@ -939,17 +940,19 @@ for a description of the supported formats.
 |                               | to contain multiple parameter notes.                 |
 +-------------------------------+------------------------------------------------------+
 | File format                   | This dialog can save to ANSTO, ILL cosmos, 3-column, |
-|                               | ORSO and a customisable format. It doesn't save from |
-|                               | the main interface's table, but from workspaces      |
-|                               | loaded into mantid. All algorithms are also          |
-|                               | available as save algorithms from mantid itself.     |
+|                               | ORSO Ascii, ORSO Nexus and a customisable format. It |
+|                               | doesn't save from the main interface's table, but    |
+|                               | from workspaces loaded into mantid. All algorithms   |
+|                               | are also available as save algorithms from mantid    |
+|                               | itself.                                              |
 +-------------------------------+------------------------------------------------------+
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
 |                               | to specify if you want a Header and/or Q Resolution  |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
-| ORSO Format Options           | When saving in the ORSO format you can specify if you|
-|                               | want a Q Resolution column. You can also use the     |
+| ORSO Format Options           | You can save into either the ORSO Ascii or ORSO Nexus|
+|                               | format. For either format, you can specify whether to|
+|                               | include a Q Resolution column. You can also use the  |
 |                               | ``Additional columns (includes Q resolution)``       |
 |                               | option to request Q Resolution, Lambda, dLambda,     |
 |                               | Theta and dTheta columns (this is selected by        |
@@ -968,7 +971,8 @@ for a description of the supported formats.
 |                               | ``Save multiple datasets to a single file`` option   |
 |                               | can be used to save them all into a single file.     |
 |                               | This option is only available when auto-saving into  |
-|                               | the ORSO format, where it is selected by default.    |
+|                               | one of the ORSO formats, where it is selected by     |
+|                               | default.                                             |
 +-------------------------------+------------------------------------------------------+
 
 Troubleshooting
