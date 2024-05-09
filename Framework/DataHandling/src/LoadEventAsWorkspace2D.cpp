@@ -91,8 +91,8 @@ void LoadEventAsWorkspace2D::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   declareProperty("LoadNexusInstrumentXML", true,
-                  "If true, load the instrument XML file. If the instrument XML file is not needed, setting this to "
-                  "false may improve execution speed and memory usage.");
+                  "If true, attempt to load the instrument from the NeXus file. "
+                  "If false, only attempt to load the local copy of the instrument XML.");
 }
 
 std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
