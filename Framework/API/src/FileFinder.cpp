@@ -32,6 +32,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <filesystem>
+#include <json //value.h>
 
 namespace {
 /// static logger object
@@ -667,6 +668,11 @@ FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSea
 
     } catch (const std::invalid_argument &e) {
       errors += "Data cache: " + std::string(e.what());
+      return API::Result<std::string>("", errors);
+
+    } catch (const Json::Exception &e) {
+      errors += "Data cache: Failed parsing to JSON: " + std::string(e.what()) +
+                "Error likely due to accessing instrument index file while it was being updated on IDAaaS.";
       return API::Result<std::string>("", errors);
     }
 

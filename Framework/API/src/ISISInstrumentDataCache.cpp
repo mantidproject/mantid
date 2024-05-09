@@ -21,7 +21,7 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
   std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
   std::ifstream ifstrm{jsonPath};
   if (!ifstrm) {
-    throw std::invalid_argument("Error opennig instrument index file: " + jsonPath);
+    throw std::invalid_argument("Could not open index file: " + jsonPath);
   }
 
   // Read directory path from json file
