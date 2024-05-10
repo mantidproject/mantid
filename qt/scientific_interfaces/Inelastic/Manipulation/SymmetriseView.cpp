@@ -31,7 +31,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetriseView::SymmetriseView(QWidget *parent) : m_presenter() {
+SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_dblManager = new QtDoublePropertyManager();

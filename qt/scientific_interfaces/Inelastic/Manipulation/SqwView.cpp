@@ -33,7 +33,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SqwView::SqwView(QWidget *parent) : m_presenter() {
+SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
