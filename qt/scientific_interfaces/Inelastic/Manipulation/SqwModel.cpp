@@ -114,16 +114,16 @@ void SqwModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
 
 void SqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 
-std::string SqwModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
+std::string SqwModel::getOutputWorkspace() const { return m_baseName + "_sqw"; }
 
-MatrixWorkspace_sptr SqwModel::getRqwWorkspace() {
+MatrixWorkspace_sptr SqwModel::getRqwWorkspace() const {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
   return getADSWorkspace(outputName);
 }
 
 UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
-                                      std::tuple<double, double> const eRange) {
+                                      std::tuple<double, double> const eRange) const {
 
   double const tolerance = 1e-10;
 
@@ -145,7 +145,7 @@ UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
 }
 
 std::string SqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
-                                              std::string const &reflection) {
+                                              std::string const &reflection) const {
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
@@ -179,7 +179,7 @@ std::string SqwModel::getEFixedFromInstrument(std::string const &instrumentName,
  * @param reflection Relection being used (optional)
  */
 MatrixWorkspace_sptr SqwModel::loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
-                                                       const std::string &reflection) {
+                                                       const std::string &reflection) const {
   std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   auto const ipfFilename = idfdirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 

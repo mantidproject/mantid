@@ -35,13 +35,13 @@ public:
   virtual void setEFixed(const double eFixed) = 0;
   virtual void setRebinInEnergy(bool scale) = 0;
   virtual std::string getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
-                                              std::string const &reflection) = 0;
-  virtual std::string getOutputWorkspace() = 0;
-  virtual MatrixWorkspace_sptr getRqwWorkspace() = 0;
+                                              std::string const &reflection) const = 0;
+  virtual std::string getOutputWorkspace() const = 0;
+  virtual MatrixWorkspace_sptr getRqwWorkspace() const = 0;
   virtual UserInputValidator validate(std::tuple<double, double> const qRange,
-                                      std::tuple<double, double> const eRange) = 0;
+                                      std::tuple<double, double> const eRange) const = 0;
   virtual MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
-                                                       const std::string &reflection) = 0;
+                                                       const std::string &reflection) const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL SqwModel : public ISqwModel {
@@ -62,13 +62,13 @@ public:
   void setEFixed(const double eFixed) override;
   void setRebinInEnergy(bool scale) override;
   std::string getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
-                                      std::string const &reflection) override;
-  std::string getOutputWorkspace() override;
-  MatrixWorkspace_sptr getRqwWorkspace() override;
+                                      std::string const &reflection) const override;
+  std::string getOutputWorkspace() const override;
+  MatrixWorkspace_sptr getRqwWorkspace() const override;
   UserInputValidator validate(std::tuple<double, double> const qRange,
-                              std::tuple<double, double> const eRange) override;
+                              std::tuple<double, double> const eRange) const override;
   MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
-                                               const std::string &reflection) override;
+                                               const std::string &reflection) const override;
 
 private:
   std::string m_inputWorkspace;
