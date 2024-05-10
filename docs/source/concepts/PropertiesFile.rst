@@ -90,6 +90,8 @@ Directory Properties
 | ``datasearch.directories``           | A semi-colon(``;``) separated list of directories | ``../data;\\\\isis\\isis$\\ndxgem`` |
 |                                      | to use to search for data.                        |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``datacachesearch.directory``        | The directory where data cache is located         | ``/data/instrument``                |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.searcharchive``         | ``on`` (only the default facility), ``off``       | ``on`` or ``hfir,sns``              |
 |                                      | (none), ``all`` (all archives), or a list of      |                                     |
 |                                      | individual facilities to search for files in the  |                                     |
