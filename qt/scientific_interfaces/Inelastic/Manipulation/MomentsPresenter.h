@@ -40,7 +40,7 @@ public:
 class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataManipulation, public IMomentsPresenter {
 
 public:
-  MomentsPresenter(QWidget *parent, IMomentsView *view);
+  MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
   ~MomentsPresenter() = default;
 
   void setup() override;
@@ -62,8 +62,9 @@ protected:
 private:
   void plotNewData(std::string const &filename);
   void setFileExtensionsByName(bool filter) override;
-  std::unique_ptr<MomentsModel> m_model;
+
   IMomentsView *m_view;
+  std::unique_ptr<IMomentsModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
