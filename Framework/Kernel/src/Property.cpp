@@ -28,7 +28,7 @@ namespace Kernel {
  */
 Property::Property(std::string name, const std::type_info &type, const unsigned int &direction)
     : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type), m_direction(direction), m_units(""), m_group(""),
-      m_remember(true), m_autotrim(true) {
+      m_remember(true), m_autotrim(true), m_disableReplaceWSButton(false) {
   if (m_name.empty()) {
     throw std::invalid_argument("An empty property name is not permitted");
   }
@@ -43,7 +43,7 @@ Property::Property(std::string name, const std::type_info &type, const unsigned 
 Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation), m_typeinfo(right.m_typeinfo),
       m_direction(right.m_direction), m_units(right.m_units), m_group(right.m_group), m_remember(right.m_remember),
-      m_autotrim(right.m_autotrim) {
+      m_autotrim(right.m_autotrim), m_disableReplaceWSButton(right.m_disableReplaceWSButton) {
   if (m_name.empty()) {
     throw std::invalid_argument("An empty property name is not permitted");
   }
@@ -342,6 +342,18 @@ bool Property::autoTrim() const { return m_autotrim; }
  * @param setting The new setting value
  */
 void Property::setAutoTrim(const bool &setting) { m_autotrim = setting; }
+
+/**
+ * Returns if the property is set to disable the creation of the "Replace Workspace" button
+ * @returns True/False
+ */
+bool Property::disableReplaceWSButton() const { return m_disableReplaceWSButton; }
+
+/**
+ * Sets the property to disable the creation of the "Replace Workspace" button
+ * @param disable The option to disable or not
+ */
+void Property::setDisableReplaceWSButton(const bool &disable) { m_disableReplaceWSButton = disable; }
 } // namespace Kernel
 
 } // namespace Mantid
