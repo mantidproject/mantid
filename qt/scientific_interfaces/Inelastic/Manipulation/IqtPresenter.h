@@ -33,7 +33,7 @@ using namespace Mantid::API;
 class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataManipulation, public IIqtPresenter {
 
 public:
-  IqtPresenter(QWidget *parent, IIqtView *view);
+  IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model);
   ~IqtPresenter() = default;
 
   void setup() override;
@@ -67,7 +67,7 @@ private:
   void setRunIsRunning(bool running);
 
   IIqtView *m_view;
-  std::unique_ptr<IqtModel> m_model;
+  std::unique_ptr<IIqtModel> m_model;
 
   int m_selectedSpectrum;
 
