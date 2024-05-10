@@ -324,11 +324,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:2042
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:78
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:320
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/WeightedMean.h:38
-stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:142
-stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:154
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:161
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:169
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:308
+stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:148
+stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:160
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cpp:267
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDWorkspace.cpp:206
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitor.cpp:226
