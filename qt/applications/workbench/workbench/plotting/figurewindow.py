@@ -41,7 +41,7 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
             try:
                 result = ws.blocksize() > 1
             except RuntimeError:
-                # blocksize() implementation in Workspace2D and EventWorkspace can through an error if histograms are not equal
+                # blocksize() implementation in Workspace2D and EventWorkspace can throw an error if histograms are not equal
                 for i in ws.getNumberHistograms():
                     if ws.y(i).size() > 1:
                         result = True
