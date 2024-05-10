@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IArchiveSearch.h"
 #include <string>
 
 namespace Mantid {
@@ -19,11 +18,11 @@ namespace API {
 class MANTID_API_DLL ISISInstrumentDataCache {
 public:
   ISISInstrumentDataCache(const std::string &path) : m_dataCachePath(path) {}
-  std::string getFileParentDirectoryPath(std::string filename);
+  std::string getFileParentDirectoryPath(std::string filename) const;
 
 private:
-  std::pair<std::string, std::string> validateInstrumentAndNumber(std::string filename);
-  std::pair<std::string, std::string> splitIntoInstrumentAndNumber(std::string filename);
+  std::pair<std::string, std::string> validateInstrumentAndNumber(std::string filename) const;
+  std::pair<std::string, std::string> splitIntoInstrumentAndNumber(std::string filename) const;
   std::string m_dataCachePath;
 };
 } // namespace API

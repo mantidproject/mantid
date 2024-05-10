@@ -6,13 +6,12 @@
 #include "MantidKernel/Logger.h"
 #include <fstream>
 #include <json/reader.h>
-#include <json/value.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
 } // namespace
 
-std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std::string fileName) {
+std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std::string fileName) const {
   g_log.debug() << "ISISInstrumentDataCache::getFileParentDirectoryPath(" << fileName << ")" << std::endl;
 
   auto [instrName, runNumber] = validateInstrumentAndNumber(fileName);
@@ -41,7 +40,7 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
 }
 
 std::pair<std::string, std::string>
-Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(std::string fileName) {
+Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(std::string fileName) const {
 
   // Check if suffix eg. -add is present in filename
   std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
@@ -66,7 +65,7 @@ Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(std::string fi
 }
 
 std::pair<std::string, std::string>
-Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(std::string fileName) {
+Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(std::string fileName) const {
 
   // Find the last non-digit as the instrument name can contain numbers
   const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
