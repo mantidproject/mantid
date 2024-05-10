@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CorrectionsTab.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QSettings>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
 /**
@@ -19,7 +20,7 @@ namespace MantidQt::CustomInterfaces {
  *
  * @param parent :: the parent widget
  */
-CorrectionsTab::CorrectionsTab(QWidget *parent) : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
+CorrectionsTab::CorrectionsTab(QWidget *parent) : InelasticTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
   m_blnEdFac = new QtCheckBoxFactory(this);
@@ -107,14 +108,14 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
   convertAlg->setProperty("Target", unitID);
 
   if (eMode.empty())
-    eMode = WorkspaceUtils::getEMode(ws);
+    eMode = getEMode(ws);
 
   convertAlg->setProperty("EMode", eMode);
 
   if (eMode == "Indirect" && eFixed == 0.0) {
-    try {
-      eFixed = WorkspaceUtils::getEFixed(ws);
-    } catch (std::exception const &) {
+    if (auto const eFixedFromWs = getEFixed(ws)) {
+      eFixed = *eFixedFromWs;
+    } else {
       showMessageBox("Please enter an Efixed value.");
       return boost::none;
     }

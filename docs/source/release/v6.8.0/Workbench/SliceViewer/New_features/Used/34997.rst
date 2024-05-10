@@ -1,1 +1,0 @@
-- Entering an invalid value into either colour bar limit text box will cause the outline to change to red.

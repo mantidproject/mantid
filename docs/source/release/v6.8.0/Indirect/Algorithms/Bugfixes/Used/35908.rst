@@ -1,4 +1,0 @@
-- Support vasprun.xml files from Vasp 6 in Abins/Abins2D. The data
-  units have changed since Vasp 5 from atomic units to THz; this
-  format is now detected and an appropriate frequency conversion
-  factor is used.

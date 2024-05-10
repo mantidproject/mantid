@@ -9,7 +9,7 @@ Indirect Geometry Changes
 New Features
 ------------
 
-- In the Fitting tabs in :ref:`Inelastic Data analysis <interface-inelastic-data-analysis>` the button for fitting the currently plotted spectra has been renamed and rescaled to fit the interface.
+- In the Fitting tabs in :ref:`Inelastic Data analysis <interface-inelastic-qens-fitting>` the button for fitting the currently plotted spectra has been renamed and rescaled to fit the interface.
 - An option has been added to :ref:`ISIS Energy Transfer <ISISEnergyTransfer>` that will group outputs by the position of the sample changer using :ref:`GroupBySampleChangerPosition<algm-GroupBySampleChangerPosition>` .
 
 
@@ -17,7 +17,7 @@ Bugfixes
 --------
 
 - A bug has been fixed in the ``CASTEP .phonon`` file import for the :ref:`Density Of States interface<DensityOfStates_Interface>` and :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` algorithm. The bug was causing some q-points to be misidentified as duplicate Gamma-points and removed.
-- A bug has been fixed in :ref:`Inelastic Data analysis <interface-inelastic-data-analysis>` where the first value would be ignored when a fit was performed.
+- A bug has been fixed in :ref:`Inelastic Data analysis <interface-inelastic-qens-fitting>` where the first value would be ignored when a fit was performed.
 - Two bugs have been fixed in ``ISISCalibration`` in the :ref:`Indirect Data Reduction<interface-indirect-data-reduction>` interface. The first bug caused the resolution data to not be updated when the reflection was changed. The second bug sometimes caused a bad energy range selection for the resolution data.
 
 Algorithms

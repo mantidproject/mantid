@@ -8,7 +8,7 @@
 #include "ui_BayesFitting.h"
 
 #include "BayesFittingTab.h"
-#include "Common/IndirectInterface.h"
+#include "Common/InelasticInterface.h"
 #include "DllConfig.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -24,7 +24,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INELASTIC_DLL BayesFitting : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL BayesFitting : public InelasticInterface {
   Q_OBJECT
 
 public: // public constants and enums

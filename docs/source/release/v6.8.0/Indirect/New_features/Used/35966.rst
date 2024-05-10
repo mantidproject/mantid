@@ -1,1 +1,0 @@
-- Added the quasielasticbayes package to the Linux standalone tarball.

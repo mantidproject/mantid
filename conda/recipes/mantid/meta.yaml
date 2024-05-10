@@ -30,7 +30,7 @@ requirements:
     - {{ cdt('libxxf86vm') }}                # [linux]
     - {{ cdt('libx11-devel') }}              # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}      # [linux]
-    - libcxx                                 # [osx]
+    - libcxx  {{ libcxx }}                   # [osx]
 
   host:
     - boost {{ boost }}
@@ -73,6 +73,7 @@ requirements:
     - libglu  # [linux]
     - joblib
     - orsopy {{ orsopy }}
+    - quasielasticbayes
 
 about:
   home: https://github.com/mantidproject/mantid

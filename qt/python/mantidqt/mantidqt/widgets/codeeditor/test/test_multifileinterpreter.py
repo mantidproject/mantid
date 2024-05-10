@@ -145,6 +145,13 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
                 widget.open_file_in_new_tab(filename)
             self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
 
+    def test_open_file_in_new_tab_handles_missing_file(self):
+        widget = MultiPythonFileInterpreter()
+        missing_file = "fake/file/path.txt"
+        # Should catch the filenotfound and return early
+        widget.open_file_in_new_tab(missing_file)
+        self.assertEqual(1, widget.editor_count, msg="No new file should have been opened")
+
     def test_cancelled_save_does_not_add_file_to_watcher(self):
         widget = MultiPythonFileInterpreter()
         widget.current_editor = mock.MagicMock(autospec=True)

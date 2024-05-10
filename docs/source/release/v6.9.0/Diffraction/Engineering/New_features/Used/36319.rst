@@ -1,1 +1,0 @@
-- Output the peak FWHM parameters from fitting in :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` :ref:`Fitting tab <ui engineering fitting>` as a function of best fit parameters.

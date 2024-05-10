@@ -1,0 +1,1 @@
+- A :ref:`algm-FlipperEfficiency` algorithm has been created as part of the Polarised SANS workflow.

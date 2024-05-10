@@ -62,7 +62,7 @@ class GeneralFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.global_parameters, [])
 
     def test_that_simultaneous_fit_function_will_raise_if_there_are_no_datasets_loaded(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.simultaneous_fit_function = self.simultaneous_fit_function
 
     def test_that_simultaneous_fit_function_will_not_raise_if_there_are_no_datasets_and_none_is_provided(self):

@@ -1,1 +1,0 @@
-- Fixed a memory leak in the Slice Viewer colour bar.

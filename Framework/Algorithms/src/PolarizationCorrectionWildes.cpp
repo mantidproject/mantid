@@ -8,9 +8,10 @@
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -31,24 +32,14 @@ static const std::string OUTPUT_WS{"OutputWorkspace"};
 
 /// Flipper configurations.
 namespace Flippers {
-static const std::string Off{"0"};
-static const std::string OffOff{"00"};
-static const std::string OffOn{"01"};
-static const std::string On{"1"};
-static const std::string OnOff{"10"};
-static const std::string OnOn{"11"};
+using namespace Mantid::Algorithms;
+static const std::string Off{SpinStateValidator::ZERO};
+static const std::string OffOff{SpinStateValidator::ZERO_ZERO};
+static const std::string OffOn{SpinStateValidator::ZERO_ONE};
+static const std::string On{SpinStateValidator::ONE};
+static const std::string OnOff{SpinStateValidator::ONE_ZERO};
+static const std::string OnOn{SpinStateValidator::ONE_ONE};
 } // namespace Flippers
-
-/**
- * Parse a flipper configuration string.
- * @param setupString a configuration string
- * @return a vector of individual configurations
- */
-std::vector<std::string> parseFlipperSetup(const std::string &setupString) {
-  using Mantid::Kernel::StringTokenizer;
-  StringTokenizer tokens{setupString, ",", StringTokenizer::TOK_TRIM};
-  return std::vector<std::string>{tokens.begin(), tokens.end()};
-}
 
 /**
  * Throw if given ws is nullptr.
@@ -341,15 +332,11 @@ void PolarizationCorrectionWildes::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
-  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
-  const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
-  const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
-  const std::string directBeam = Flippers::Off;
-  const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(Prop::FLIPPERS, full, std::make_shared<Kernel::ListValidator<std::string>>(setups),
-                  "Flipper configurations of the input workspaces.");
+
+  const auto spinStateValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
+  declareProperty(Prop::FLIPPERS,
+                  Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn,
+                  spinStateValidator, "Flipper configurations of the input workspaces.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
@@ -361,8 +348,7 @@ void PolarizationCorrectionWildes::init() {
  */
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const auto flippers = parseFlipperSetup(flipperProperty);
-  const bool analyzer = flippers.front() != "0" && flippers.back() != "1";
+  const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
   const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
@@ -373,7 +359,8 @@ void PolarizationCorrectionWildes::exec() {
     outputs = directBeamCorrections(inputs, efficiencies);
     break;
   case 2:
-    if (analyzer) {
+    // Check if the input flipper configuration includes an analyser
+    if (flippers.front().size() > 1) {
       outputs = twoInputCorrections(inputs, efficiencies);
     } else {
       outputs = analyzerlessCorrections(inputs, efficiencies);
@@ -420,9 +407,9 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const auto flippers = parseFlipperSetup(flipperProperty);
-  if (inputs.size() != flippers.size()) {
-    issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flippers.size()) +
+  const auto flipperCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
+  if (inputs.size() != flipperCount) {
+    issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
                              ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
   }
   return issues;

@@ -15,8 +15,10 @@ These are summarised in the table and discussed below. Generally, it is recommen
 
 Further documentation for implementing algorithms:
 
-* :ref:`user tutorial for writing a python algorithm <emwp_intro>`
-* :ref:`developer docs for writing a C++ algorithm <WritingAnAlgorithm>`
+* :ref:`User tutorial for writing a python algorithm <emwp_intro>`
+* :ref:`Developer docs for writing a C++ algorithm <WritingAnAlgorithm>`
+* :ref:`PythonAlgorithmsInExternalProjects`
+
 
 Algorithm Language Comparison
 -----------------------------

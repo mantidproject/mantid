@@ -6,13 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../DllConfig.h"
-#include "QString"
-#include "QStringList"
+#include <QString>
+#include <QStringList>
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace InterfaceUtils {
+
+/// The function to use to check whether input data should be restricted based on its name.
+/// This is defined, rather than calling SettingsHelper::restrictInputDataByName() directly, to make it
+/// possible to override it in tests in order to mock out the SettingsHelper.
+MANTIDQT_INELASTIC_DLL extern std::function<bool()> restrictInputDataByName;
 
 MANTIDQT_INELASTIC_DLL std::string getInterfaceProperty(std::string const &interfaceName,
                                                         std::string const &propertyName, std::string const &attribute);
@@ -41,6 +46,7 @@ MANTIDQT_INELASTIC_DLL QStringList getCorrectionsWSSuffixes(std::string const &i
 MANTIDQT_INELASTIC_DLL QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple);
 MANTIDQT_INELASTIC_DLL QString makeQStringNumber(double value, int precision);
+
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt

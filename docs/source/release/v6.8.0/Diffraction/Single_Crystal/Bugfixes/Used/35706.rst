@@ -1,2 +1,0 @@
-- Fix bug saving empty peak tables in :ref:`SaveReflections <algm-SaveReflections>` using SHELX format
-- Peaks with zero sigma will have Signal/Noise set to zero in :ref:`FilterPeaks <algm-FilterPeaks>`

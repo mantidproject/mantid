@@ -1,2 +1,0 @@
-- Process metadata has been moved from ``sasnote`` to the parent ``sasprocess`` when saving using
-  :ref:`algm-SaveNXcanSAS`. This allows data analysis tools like SASView to read in this information correctly.

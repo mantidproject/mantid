@@ -1,72 +1,54 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "DllOption.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/IJobRunner.h"
 
-#include <Poco/NObserver.h>
-#include <QObject>
+#include <deque>
+#include <memory>
 
-namespace MantidQt {
-namespace API {
-/** The AlgorithmRunner is a QObject that encapsulates
- * methods for running an algorithm asynchronously (in the background)
- * and feeds-back to a GUI widget.
- *
- * The QObject keeps track of a running algorithm.
- * Any already-running algorithm is cancelled if it gets started again.
- * Signals are emitted when the algorithm progresses or finishes.
- *
- * TO USE:
- *  - Create the AlgorithmRunner object.
- *  - Connect the desired signal(s) to slots on your GUI.
- *  - Call startAlgorithm() to start.
+namespace MantidQt::API {
 
-  @date 2012-04-23
-*/
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmRunner : public QObject {
-  Q_OBJECT
+class IAlgorithmRunnerSubscriber;
+
+class EXPORT_OPT_MANTIDQT_COMMON IAlgorithmRunner {
 
 public:
-  explicit AlgorithmRunner(QObject *parent = nullptr);
-  ~AlgorithmRunner() override;
+  virtual ~IAlgorithmRunner() = default;
 
-  virtual void cancelRunningAlgorithm();
+  virtual void subscribe(IAlgorithmRunnerSubscriber *subscriber) = 0;
 
-  virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
-  virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const;
-
-signals:
-  /// Signal emitted when the algorithm has completed execution/encountered an
-  /// error
-  void algorithmComplete(bool error);
-
-  /// Signal emitted when the algorithm reports progress
-  void algorithmProgress(double p, const std::string &msg);
-
-protected:
-  /// Algorithm notification handlers
-  void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
-
-  void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
-
-  void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
-
-  /// For the asynchronous call in dynamic rebinning. Holds the result of
-  /// asyncExecute() algorithm call
-  Poco::ActiveResult<bool> *m_asyncResult;
-
-  /// Reference to the algorithm executing asynchronously.
-  Mantid::API::IAlgorithm_sptr m_asyncAlg;
+  virtual void execute(IConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void execute(std::deque<IConfiguredAlgorithm_sptr> algorithmQueue) = 0;
 };
 
-} // namespace API
-} // namespace MantidQt
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmRunner final : public IAlgorithmRunner, public JobRunnerSubscriber {
+
+public:
+  AlgorithmRunner(std::unique_ptr<IJobRunner> jobRunner);
+
+  void subscribe(IAlgorithmRunnerSubscriber *subscriber) override;
+
+  void execute(IConfiguredAlgorithm_sptr algorithm) override;
+  void execute(std::deque<IConfiguredAlgorithm_sptr> algorithmQueue) override;
+
+  void notifyBatchComplete(bool error) override;
+  void notifyBatchCancelled() override;
+  void notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) override;
+  void notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) override;
+  void notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;
+
+private:
+  std::unique_ptr<IJobRunner> m_jobRunner;
+  IAlgorithmRunnerSubscriber *m_subscriber;
+
+  IConfiguredAlgorithm_sptr m_lastAlgorithm;
+};
+
+} // namespace MantidQt::API

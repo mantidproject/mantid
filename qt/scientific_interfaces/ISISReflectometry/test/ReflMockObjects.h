@@ -192,7 +192,7 @@ public:
 class MockSavePresenter : public ISavePresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
+  MOCK_METHOD2(saveWorkspaces, void(std::vector<std::string> const &, bool const));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
   MOCK_CONST_METHOD0(shouldAutosaveGroupRows, bool());
   MOCK_METHOD0(notifyReductionPaused, void());

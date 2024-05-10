@@ -148,9 +148,6 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Pip install quasielasticbayes so it can be packaged alongside workbench
-# Version 0.2.0 is built for Python 3.10
-$bundle_conda_prefix/bin/python -m pip install quasielasticbayes==0.2.0
 # Pip install quickBayes until there's a conda package
 $bundle_conda_prefix/bin/python -m pip install quickBayes==1.0.0b15
 

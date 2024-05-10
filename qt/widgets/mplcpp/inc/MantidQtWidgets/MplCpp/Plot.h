@@ -163,6 +163,19 @@ MANTID_MPLCPP_DLL Common::Python::Object pcolormesh(const QStringList &workspace
                                                     boost::optional<Common::Python::Object> fig = boost::none);
 
 /**
+ * Makes a call to mantidqt.plotting.plot_surface.
+ *
+ * @param workspaces A vector of workspace names that are present in the ADS
+ *
+ * @param fig The python object that represents the matplotlib figure.
+ *
+ * @return Returns the figure that was created by the
+ * function in Python
+ */
+MANTID_MPLCPP_DLL Common::Python::Object surface(const QStringList &workspaces,
+                                                 boost::optional<Common::Python::Object> fig = boost::none);
+
+/**
  * Externall call to slice viewer GUI
  *
  * @param workspace A shared pointer to the target workspace

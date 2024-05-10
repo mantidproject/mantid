@@ -8,6 +8,7 @@
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
 import os
+from pathlib import Path
 import re
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
@@ -25,6 +26,7 @@ from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
+from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
 
 
@@ -85,7 +87,7 @@ class AbinsAlgorithm:
     def get_instrument(self) -> Union[Instrument, None]:
         return self._instrument
 
-    def declare_common_properties(self) -> None:
+    def declare_common_properties(self, version: int = 1) -> None:
         """Declare properties common to Abins 1D and 2D versions"""
         self.declareProperty(
             FileProperty(
@@ -98,7 +100,7 @@ class AbinsAlgorithm:
             name="AbInitioProgram",
             direction=Direction.Input,
             defaultValue="CASTEP",
-            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "VASP"]),
+            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "JSON", "VASP"]),
             doc="An ab initio program which was used for vibrational or phonon calculation.",
         )
 
@@ -121,7 +123,9 @@ class AbinsAlgorithm:
         )
 
         self.declareProperty(
-            name="SumContributions", defaultValue=False, doc="Sum the partial dynamical structure factors into a single workspace."
+            name="SumContributions",
+            defaultValue=(False if version == 1 else True),
+            doc="Sum the partial dynamical structure factors into a single workspace.",
         )
 
         self.declareProperty(name="SaveAscii", defaultValue=False, doc="Write workspaces to .ascii files after computing them.")
@@ -133,19 +137,28 @@ class AbinsAlgorithm:
             doc="Scale the partial dynamical structure factors by the scattering cross section.",
         )
 
-        # Abins is supposed to support excitations up to fourth-order. Order 3 and 4 are currently disabled while the
-        # weighting is being investigated; these intensities were unreasonably large in hydrogenous test cases
-        self.declareProperty(
-            name="QuantumOrderEventsNumber",
-            defaultValue="1",
-            validator=StringListValidator(["1", "2"]),
-            doc="Number of quantum order effects included in the calculation "
-            "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations",
-        )
+        if version == 1:
+            self.declareProperty(
+                name="QuantumOrderEventsNumber",
+                defaultValue="1",
+                validator=StringListValidator(["1", "2"]),
+                doc="Number of quantum order effects included in the calculation "
+                "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations",
+            )
 
-        self.declareProperty(
-            name="Autoconvolution", defaultValue=False, doc="Estimate higher quantum orders by convolution with fundamental spectrum."
-        )
+            self.declareProperty(
+                name="Autoconvolution", defaultValue=False, doc="Estimate higher quantum orders by convolution with fundamental spectrum."
+            )
+
+        else:
+            autoconvolution_max = str(abins.parameters.autoconvolution["max_order"])
+            self.declareProperty(
+                name="QuantumOrderEventsNumber",
+                defaultValue=autoconvolution_max,
+                validator=StringListValidator(["1", "2", autoconvolution_max]),
+                doc="Number of quantum order effects included in the calculation "
+                "(1 -> Fundamentals, 2-> add first overtone and 2nd order combinations, 10-> add 8 orders by self-convolution",
+            )
 
         self.declareProperty(
             name="EnergyUnits",
@@ -223,6 +236,7 @@ class AbinsAlgorithm:
             "DMOL3": self._validate_dmol3_input_file,
             "FORCECONSTANTS": self._validate_euphonic_input_file,
             "GAUSSIAN": self._validate_gaussian_input_file,
+            "JSON": self._validate_json_input_file,
             "VASP": self._validate_vasp_input_file,
         }
         ab_initio_program = self.getProperty("AbInitioProgram").value
@@ -790,21 +804,48 @@ class AbinsAlgorithm:
     def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
         logger.information("Validate force constants file for interpolation.")
 
-        from pathlib import Path
+        path = Path(filename_full_path)
 
-        if (suffix := Path(filename_full_path).suffix) == ".castep_bin":
+        if (suffix := path.suffix) == ".castep_bin":
             # Assume any .castep_bin file is valid choice
             pass
 
         elif suffix == ".yaml":
             # Check .yaml files have expected keys for Phonopy force constants
-            with open(filename, "r") as yaml_file:
+            with open(filename_full_path, "r") as yaml_file:
                 phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
-            if not {"phonopy", "force_constants"}.issubset(phonon_data):
-                return dict(Invalid=True, Comment=f"{filename_full_path} does not seem to be a valid phonopy.yaml with force constants")
+
+            if {"phonopy", "force_constants"}.issubset(phonon_data):
+                pass
+
+            elif "phonopy" in phonon_data:
+                # Phonon file without force constants included: they could be in
+                # a FORCE_CONSTANTS or force_constants.hdf5 file so check if one exists
+                fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
+                if not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
+                    return dict(
+                        Invalid=True,
+                        Comment=f"Could not find force constants in {filename_full_path}, or find data file {' or '.join(fc_filenames)}",
+                    )
 
         # Did not return already: No problems found
         return dict(Invalid=False, Comment="")
+
+    @classmethod
+    def _validate_json_input_file(cls, filename_full_path: str) -> dict:
+        logger.information("Validate JSON file with vibrational or phonon data.")
+        output = cls._validate_ab_initio_file_extension(
+            ab_initio_program="JSON", filename_full_path=filename_full_path, expected_file_extension=".json"
+        )
+        if output["Invalid"]:
+            output["Comment"] = ".json extension is expected for a JSON file"
+            return output
+
+        json_format = JSONLoader.check_json_format(filename_full_path)
+        if json_format in abins_supported_json_formats:
+            return dict(Invalid=False, Comment=f"Found JSON file format: {json_format.name}")
+
+        return dict(Invalid=True, Comment=f"Found unsupported JSON file format: {json_format.name}")
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:

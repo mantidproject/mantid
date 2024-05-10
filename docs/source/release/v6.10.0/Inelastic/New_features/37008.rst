@@ -1,0 +1,1 @@
+- Fix a crash happening when setting spectra limits on workspace dialogs using an string format of the sort: "SpectraStart-SpectraEnd" where Spectra Start is larger than Spectra End.

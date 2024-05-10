@@ -72,6 +72,8 @@ public:
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
 
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, true);
+    // The order of items in the vector of workspace names is important - the stitched workspace name must be the first
+    // one to ensure that it is picked up as the filename if saving all workspaces to a single file
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>({"stitched_test", "row_bin_test01", "row_bin_test02"}));
 
     verifyAndClear();

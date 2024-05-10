@@ -56,5 +56,9 @@ void ImageInfoWidgetMini::showInfo(const ImageInfoModel::ImageInfo &info) {
 void ImageInfoWidgetMini::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
 
 void ImageInfoWidgetMini::setRowCount(const int /*count*/) {}
+void ImageInfoWidgetMini::setColumnCount(const int /*count*/) {}
+void ImageInfoWidgetMini::setItem(const int /*rowIndex*/, const int /*columnIndex*/, QTableWidgetItem * /*item*/) {}
+void ImageInfoWidgetMini::hideColumn(const int /*index*/) {}
+void ImageInfoWidgetMini::showColumn(const int /*index*/) {}
 
 } // namespace MantidQt::MantidWidgets

@@ -147,11 +147,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_basic_reduction_works(self):
         workspace = self._run_algorithm_with_defaults()
         self.assertEqual(workspace.dataX(0).size, 55)
-        self._assert_delta(workspace.dataX(0)[0], 0.006462)
-        self._assert_delta(workspace.dataX(0)[33], 0.027376)
-        self._assert_delta(workspace.dataX(0)[54], 0.066421)
-        self._assert_delta(workspace.dataY(0)[4], 0.043630)
-        self._assert_delta(workspace.dataY(0)[33], 0.000029)
+        self._assert_delta(workspace.dataX(0)[0], 0.000523)
+        self._assert_delta(workspace.dataX(0)[33], 0.002217)
+        self._assert_delta(workspace.dataX(0)[54], 0.005379)
+        self._assert_delta(workspace.dataY(0)[4], 0.039447)
+        self._assert_delta(workspace.dataY(0)[33], 0.00003)
         self._assert_delta(workspace.dataY(0)[53], 0.0)
 
     def test_basic_reduction_history(self):

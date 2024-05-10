@@ -1,1 +1,0 @@
-- Constant wavelength HFIR DEMAND instrument has been added to DGSPlanner

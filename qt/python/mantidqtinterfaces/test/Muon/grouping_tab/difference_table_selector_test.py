@@ -190,14 +190,14 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.presenter.group_widget.handle_add_diff_button_clicked()
 
         self.assertEqual(2, self.get_group_1_selector_from_diff(0).count())
-        self.assertEqual(2, self.get_group_1_selector_from_diff(0).count())
+        self.assertEqual(2, self.get_group_2_selector_from_diff(0).count())
         self.assertEqual("group_0", self.get_group_1_selector_from_diff(0).currentText())
         self.assertEqual("group_1", self.get_group_2_selector_from_diff(0).currentText())
 
         self.get_group_1_selector_from_diff(0).setCurrentIndex(1)
 
         self.assertEqual(2, self.get_group_1_selector_from_diff(0).count())
-        self.assertEqual(2, self.get_group_1_selector_from_diff(0).count())
+        self.assertEqual(2, self.get_group_2_selector_from_diff(0).count())
         self.assertEqual("group_1", self.get_group_1_selector_from_diff(0).currentText())
         self.assertEqual("group_0", self.get_group_2_selector_from_diff(0).currentText())
 

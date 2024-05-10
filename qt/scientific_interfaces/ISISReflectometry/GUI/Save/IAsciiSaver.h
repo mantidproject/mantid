@@ -15,17 +15,20 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii };
+enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSONexus };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
-                    bool includeQResolution);
+                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
+  bool shouldIncludeAdditionalColumns() const;
+  bool shouldSaveToSingleFile() const;
   std::string const &separator() const;
   std::string const &prefix() const;
   NamedFormat format() const;
+  bool isORSOFormat() const;
 
 private:
   NamedFormat m_format;
@@ -33,6 +36,8 @@ private:
   bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
+  bool m_includeAdditionalCols;
+  bool m_saveToSingleFile;
 };
 
 class InvalidSavePath : public std::runtime_error {

@@ -1,1 +1,0 @@
-- Fix slow creation of ``CrystalStructure`` object when loading a CIF file with many atoms. A new method to add many scatterers at a time is added from ``CompositeBraggScatterer`` to ``CrystalStructure`` rather than one atom at a time.

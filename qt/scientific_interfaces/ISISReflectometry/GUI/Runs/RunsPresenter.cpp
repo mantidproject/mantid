@@ -13,8 +13,8 @@
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "QtCatalogSearcher.h"
 
 #include <algorithm>

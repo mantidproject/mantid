@@ -1,1 +1,0 @@
-- Entering particular values (i.e 0,111) into the colour bar limit text boxes, will no longer cause an error.

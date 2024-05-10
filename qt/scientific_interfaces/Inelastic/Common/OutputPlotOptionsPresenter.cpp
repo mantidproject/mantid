@@ -36,7 +36,7 @@ namespace MantidQt::CustomInterfaces {
 
 OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(
     IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
-    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    std::optional<std::map<std::string, std::string>> const &availableActions)
     : m_wsRemovedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
       m_model(std::make_unique<OutputPlotOptionsModel>(availableActions)) {
@@ -133,7 +133,7 @@ void OutputPlotOptionsPresenter::clearWorkspaces() {
 }
 
 void OutputPlotOptionsPresenter::setUnit(std::string const &unit) {
-  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceUnit) {
+  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceSurfaceUnit) {
     m_model->setUnit(unit);
   }
 }
@@ -141,7 +141,7 @@ void OutputPlotOptionsPresenter::setUnit(std::string const &unit) {
 void OutputPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
   if (auto const indices = m_model->indices())
-    handleSelectedIndicesChanged(indices.get());
+    handleSelectedIndicesChanged(indices.value());
   else if (!selectedIndices.empty())
     handleSelectedIndicesChanged(selectedIndices);
   else
@@ -185,9 +185,19 @@ void OutputPlotOptionsPresenter::handlePlotBinsClicked() {
 }
 
 void OutputPlotOptionsPresenter::handleShowSliceViewerClicked() {
-  setPlotting(true);
-  m_model->showSliceViewer();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::Both)) {
+    setPlotting(true);
+    m_model->showSliceViewer();
+    setPlotting(false);
+  }
+}
+
+void OutputPlotOptionsPresenter::handlePlot3DClicked() {
+  if (validateWorkspaceSize(MantidAxis::Both)) {
+    setPlotting(true);
+    m_model->plot3DSurface();
+    setPlotting(false);
+  }
 }
 
 void OutputPlotOptionsPresenter::handlePlotTiledClicked() {
@@ -201,7 +211,7 @@ void OutputPlotOptionsPresenter::handlePlotTiledClicked() {
 bool OutputPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisType) {
   auto const errorMessage = m_model->singleDataPoint(axisType);
   if (errorMessage) {
-    m_view->displayWarning(QString::fromStdString(errorMessage.get()));
+    m_view->displayWarning(QString::fromStdString(errorMessage.value()));
     return false;
   }
   return true;

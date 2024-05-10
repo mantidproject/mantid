@@ -205,7 +205,7 @@ achieved by running the algorithm below.
         axes.set_xlim([-0.0004,0.0004])
         axes.set_ylim([0,0.2])
 
-        plt.show()
+        fig.show()
 
     threadsafe_call(patch_plot, dump_vertexes)
 

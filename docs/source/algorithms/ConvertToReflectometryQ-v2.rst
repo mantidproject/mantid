@@ -82,11 +82,9 @@ coordinate transformations to be selected. The default method,
 *Centre*, takes center point of each input bin, and locates the
 corresponding output bin, adding the input bins value to it. Centre point rebinning is faster.
 
-*NormalisedPolygon* is a more sophisticated approach. It constructs
-a polygon using the boundaries of the input bin, then transforms that polygon
-into the output coordinates, and then searches for intersections with the
-output bins. The value added to each output bin is proportional to size of the
-overlap with the input bin. The normalised polygon approach gives better accuracy.
+*NormalisedPolygon* is a more sophisticated approach. It takes longer to run but gives better
+accuracy. Please consult the :ref:`FractionalRebinning <FractionalRebinning>`
+page for more information.
 
 Usage
 -----
@@ -205,7 +203,7 @@ achieved by running the algorithm below.
         axes.set_xlim([-0.0004,0.0004])
         axes.set_ylim([0,0.2])
 
-        plt.show()
+        fig.show()
 
     threadsafe_call(patch_plot, dump_vertexes)
 

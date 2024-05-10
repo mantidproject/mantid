@@ -111,17 +111,16 @@ IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
  */
 void AlgorithmManagerImpl::removeById(AlgorithmID id) {
   std::lock_guard<std::recursive_mutex> _lock(this->m_managedMutex);
-  auto itend = m_managed_algs.end();
-  for (auto it = m_managed_algs.begin(); it != itend; ++it) {
-    if ((**it).getAlgorithmID() == id) {
-      if (!(*it)->isRunning()) {
-        g_log.debug() << "Removing algorithm " << (*it)->name() << '\n';
-        m_managed_algs.erase(it);
-      } else {
-        g_log.debug() << "Unable to remove algorithm " << (*it)->name() << ". The algorithm is running.\n";
-      }
-      break;
-    }
+  const auto it = std::find_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+                               [&id](const auto &alg) { return alg->getAlgorithmID() == id; });
+  if (it == m_managed_algs.cend()) {
+    return;
+  }
+  if (!(*it)->isRunning()) {
+    g_log.debug() << "Removing algorithm " << (*it)->name() << '\n';
+    m_managed_algs.erase(it);
+  } else {
+    g_log.debug() << "Unable to remove algorithm " << (*it)->name() << ". The algorithm is running.\n";
   }
 }
 
@@ -174,12 +173,11 @@ size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theCompletedInstances),
                [](const auto &algorithm) { return (algorithm->isReadyForGarbageCollection()); });
   for (auto completedAlg : theCompletedInstances) {
-    auto itend = m_managed_algs.end();
-    for (auto it = m_managed_algs.begin(); it != itend; ++it) {
-      if ((**it).getAlgorithmID() == completedAlg->getAlgorithmID()) {
-        m_managed_algs.erase(it);
-        break;
-      }
+    const auto it = std::find_if(m_managed_algs.begin(), m_managed_algs.end(), [&completedAlg](const auto &alg) {
+      return alg->getAlgorithmID() == completedAlg->getAlgorithmID();
+    });
+    if (it != m_managed_algs.end()) {
+      m_managed_algs.erase(it);
     }
   }
   return theCompletedInstances.size();

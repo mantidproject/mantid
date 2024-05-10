@@ -1,0 +1,1 @@
+- Fixed a memory leak caused when loading nexus files from the disk.

@@ -1,1 +1,0 @@
-- Add a new option (AppendYAxisLabels) to :ref:`AppendSpectra <algm-AppendSpectra>` to append y-axis values from input workspaces to the output workspace

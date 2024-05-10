@@ -299,9 +299,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         if self.getProperty("GetNBinsFromBackToBackParams").value:
             # check at least first peak in workspace has back to back params
             if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
-                issues[
-                    "GetNBinsFromBackToBackParams"
-                ] = "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                issues["GetNBinsFromBackToBackParams"] = (
+                    "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                )
         return issues
 
     def PyExec(self):
@@ -366,7 +366,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
 
-                intens, sigma, status, ispecs, ipos, nrows, ncols, nbins = integrate_peak(
+                intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
                     ws,
                     peaks,
                     ipk,
@@ -383,7 +383,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
-
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
@@ -392,12 +391,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 else:
                     if status == PEAK_STATUS.STRONG:
                         ipks_strong.append(ipk)
-                    if output_file:
-                        # save result for plotting
-                        i_over_sig = intens / sigma if sigma > 0 else 0.0
-                        results[ipk] = ShoeboxResult(
-                            ipk, peak, x, y, [nrows, ncols, nbins], ipos, [peak_data.irow, peak_data.icol, ix], i_over_sig, status
-                        )
+                    results[ipk] = ShoeboxResult(
+                        ipk, peak, x, y, [nrows, ncols, nbins], ipos, [peak_data.irow, peak_data.icol, ix], i_over_sig, status
+                    )  # use this to get strong peak shoebox dimensions even if no plotting
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * bin_width
                 sigma = sigma * bin_width
@@ -437,14 +433,13 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 # integrate at previously found ipos
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * weak_pk.tof_bin_width
                 sigma = sigma * weak_pk.tof_bin_width
                 set_peak_intensity(peak, intens, sigma, do_lorz_cor)
                 if output_file:
                     # save result for plotting
-                    i_over_sig = intens / sigma if sigma > 0 else 0.0
                     peak_shape = [nrows, ncols, nbins]
                     ipos_predicted = [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))]
                     results[ipk] = ShoeboxResult(
@@ -500,21 +495,23 @@ def integrate_peak(
     ws, peaks, ipk, kernel, nrows, ncols, nbins, x, y, esq, ispecs, ipos_predicted, det_edges, weak_peak_threshold, do_optimise_shoebox
 ):
     # perform initial integration
-    intens_over_sig = convolve_shoebox(y, esq, kernel)
+    intens_over_sig = convolve_shoebox(y, esq, kernel)  # array of I/sigma same size as data
 
     # identify best shoebox position near peak
     ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, *ipos_predicted)
 
     # perform final integration if required
+    intens, sigma, i_over_sig = 0.0, 0.0, 0.0
+    status = PEAK_STATUS.NO_PEAK
     if ipos is not None:
         # integrate at that position (without smoothing I/sigma)
-        intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+        intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
         if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
             ipos, (nrows, ncols, nbins) = optimise_shoebox(y, esq, (nrows, ncols, nbins), ipos)
             kernel = make_kernel(nrows, ncols, nbins)
             # re-integrate but this time check for overlap with edge
-            intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
-    return intens, sigma, status, ispecs, ipos, nrows, ncols, nbins
+            intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+    return intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins
 
 
 def round_up_to_odd_number(number):
@@ -645,9 +642,9 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
     )
 
     status = PEAK_STATUS.NO_PEAK
+    intens, sigma, i_over_sig = 0.0, 0.0, 0.0
     if det_edges is not None and det_edges[slices[:-1]].any():
         status = PEAK_STATUS.ON_EDGE
-        intens, sigma = 0.0, 0.0
     else:
         if y[slices].size != kernel.size:
             # peak is partially on edge, but we continue to integrate with a partial kernel
@@ -659,7 +656,7 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
                 # get index in y where kernel starts
                 iy_start = ipos[idim] - kernel.shape[idim] // 2
                 if iy_start < 0:
-                    istart = -iy_start  # chop of ii elements at the begninning of the kernel along this dimension
+                    istart = -iy_start  # chop of ii elements at the beginning of the kernel along this dimension
                 elif iy_start > y.shape[idim] - kernel.shape[idim]:
                     iend = y.shape[idim] - iy_start  # include only up to number of elements remaining in y
                 kernel_slices.append(slice(istart, iend))
@@ -669,9 +666,10 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
             kernel[inegative] = -np.sum(kernel[~inegative]) / np.sum(inegative)
         intens = np.sum(y[slices] * kernel)
         sigma = np.sqrt(np.sum(esq[slices] * (kernel**2)))
+        i_over_sig = intens / sigma if sigma > 0 else 0.0
         if status == PEAK_STATUS.NO_PEAK:
-            status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
-    return intens, sigma, status
+            status = PEAK_STATUS.STRONG if i_over_sig > weak_peak_threshold else PEAK_STATUS.WEAK
+    return intens, sigma, i_over_sig, status
 
 
 def optimise_shoebox(y, esq, peak_shape, ipos, nfail_max=2):

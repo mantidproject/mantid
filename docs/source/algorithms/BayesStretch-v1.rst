@@ -24,16 +24,13 @@ Usage
 
 .. testcode:: BayesStretchExample
 
-    # Check OS support for F2Py (Windows only)
-    from mantid.utils.pip import package_installed
-    if package_installed("quasielasticbayes"):
-        # Load in test data
-        sample_ws = Load('irs26176_graphite002_red.nxs')
-        resolution_ws = Load('irs26173_graphite002_red.nxs')
+    # Load in test data
+    sample_ws = Load('irs26176_graphite002_red.nxs')
+    resolution_ws = Load('irs26173_graphite002_red.nxs')
 
-        # Run BayesStretch algorithm
-        fit_group, contour_group = BayesStretch(SampleWorkspace=sample_ws, ResolutionWorkspace=resolution_ws,
-                                                EMin=-0.2, EMax=0.2, Background='Sloping', Loop=True)
+    # Run BayesStretch algorithm
+    fit_group, contour_group = BayesStretch(SampleWorkspace=sample_ws, ResolutionWorkspace=resolution_ws,
+                                            EMin=-0.2, EMax=0.2, Background='Sloping', Loop=True)
 
 .. categories::
 

@@ -54,7 +54,8 @@ Mantid::API::MatrixWorkspace_sptr setWorkspaceProperties(Mantid::API::MatrixWork
                                                          int const &xLength, int const &yLength);
 Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength, int const &yLength);
 Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength);
-Mantid::API::MatrixWorkspace_sptr createWorkspaceWithIndirectInstrumentAndParameters();
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithIndirectInstrumentAndParameters(std::string const &analyser = "graphite");
 
 /// Simple struct used to access features of the ADS
 /// No destructor so ensure you tearDown the ADS

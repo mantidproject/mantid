@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
@@ -14,8 +15,6 @@
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
-
-#include <Poco/NObserver.h>
 
 #include <QHash>
 #include <QPair>
@@ -38,7 +37,7 @@ namespace MantidWidgets {
 /**
  * Displays several workpaces on a matplotlib figure
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
+class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget, public AnalysisDataServiceObserver {
   Q_OBJECT
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
@@ -47,7 +46,6 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
-  ~PreviewPlot();
 
   void watchADS(bool on);
 
@@ -122,8 +120,8 @@ private:
   void createLayout();
   void createActions();
 
-  void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override;
 
   void regenerateLegend();
   void removeLegend();
@@ -173,10 +171,6 @@ private:
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
-
-  // Observers for ADS Notifications
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
   // Tick label style
   char *m_axis;

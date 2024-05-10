@@ -351,7 +351,7 @@ public:
 
   UserSubWindow *createSubWindow(
       const QString &interface_name,
-      QWidget *parent = nullptr);
+      QWidget *parent = nullptr) throw(std::exception);
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());
@@ -770,7 +770,7 @@ public:
     void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-    void removeAllRows();
+    void removeAllRows() throw(std::exception);
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
@@ -911,10 +911,10 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i) throw(std::exception);
     int getCurrentDataset() const;
-    void setDatasets(const QStringList &datasetNames);
-    void addDatasets(const QStringList &names);
+    void setDatasets(const std::vector<std::string> &datasetNames);
+    void addDatasets(const std::vector<std::string> &names);
     void removeDatasets(QList<int> indices);
-    QStringList getDatasetNames() const;
+    std::vector<std::string> getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
     void hideGlobalCheckbox();
     void showGlobalCheckbox();
@@ -1029,6 +1029,7 @@ class ImageInfoWidget : public QTableWidget {
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
     void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
+    void setShowSignal(const bool showSignal);
     void setWorkspace(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
       using boost::python::extract;

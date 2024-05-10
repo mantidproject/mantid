@@ -1,0 +1,1 @@
+- Remove Fit and Superplot buttons from toolbar of non mantid axes and plots of 1D :ref:`MDHistoWorkspace <MDHistoWorkspace>` (for which the data have no workspace index).

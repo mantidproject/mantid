@@ -1,8 +1,0 @@
-- Abins now delegates parsing of CASTEP .phonon files to the Euphonic library.
-  This gives more robust handling of data files containing Gamma-points with
-  LO-TO splitting; the legacy parser skips past other q-points to find these points,
-  leading to an unpredictable loss of information. Whereas the previous parser favours
-  points with LO-TO splitting, this implementation instead favours non-split points
-  where available; these should give better statistics. Note that very problematic .phonon
-  files which were losing data away from Gamma are rare; typically CASTEP will include the
-  Gamma points at the top, as assumed by the current behaviour.

@@ -667,6 +667,26 @@ public:
     TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
   }
 
+  void test_lean_peaks_workspace_with_shape_format() {
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", "SingleCrystalLeanElasticPeakTable.nxs");
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+    loadAlg.execute();
+
+    Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+    auto peakWS = std::dynamic_pointer_cast<Mantid::DataObjects::LeanElasticPeaksWorkspace>(ws);
+    TS_ASSERT(peakWS);
+
+    TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
+    // In this peaks workspace one of the peaks has been marked as spherically
+    // integrated.
+    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(0).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("none", peakWS->getPeak(1).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
+  }
+
   /* The nexus format for this type of workspace has a legacy format with no
    * shape information
    * We should still be able to load that */

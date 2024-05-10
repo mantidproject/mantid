@@ -6,23 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 
 #include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** ILLEnergyTransfer
+class IDataReduction;
 
-  @author Dan Nixon
-  @date 23/07/2014
-*/
-class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public DataReductionTab {
   Q_OBJECT
 
 public:
-  ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
   void setup() override;

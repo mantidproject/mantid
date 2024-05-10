@@ -1,1 +1,0 @@
-- In the :ref:`QECoverage <QE Coverage>` tool, fixed crash and replaced multiple pop-up windows by warnings when invalid input is passed to Ei and Emin (and S2 in the case of HYSPEC).

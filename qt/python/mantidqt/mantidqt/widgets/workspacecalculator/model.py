@@ -206,9 +206,9 @@ class WorkspaceCalculatorModel:
         DeleteWorkspace(Workspace=scale_ws)
 
     def _scale_input_workspaces(self):
-        lhs_ws = self._lhs_ws + "_tmp"
+        lhs_ws = self._lhs_ws + "_tmp_lhs"
         CloneWorkspace(InputWorkspace=self._lhs_ws, OutputWorkspace=lhs_ws)
-        rhs_ws = self._rhs_ws + "_tmp"
+        rhs_ws = self._rhs_ws + "_tmp_rhs"
         CloneWorkspace(InputWorkspace=self._rhs_ws, OutputWorkspace=rhs_ws)
 
         if self._md_lhs:

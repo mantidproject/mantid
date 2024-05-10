@@ -42,19 +42,7 @@ void ImageInfoWidget::cursorAt(const double x, const double y, const double sign
  * @param info A reference to a collection of header/value pairs
  */
 void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
-  if (info.empty())
-    return;
-
-  const auto itemCount(info.size());
-  setColumnCount(itemCount);
-  for (int i = 0; i < itemCount; ++i) {
-    auto header = new QTableWidgetItem(info.name(i));
-    header->setFlags(header->flags() & ~Qt::ItemIsEditable);
-    setItem(0, i, header);
-    auto value = new QTableWidgetItem(info.value(i));
-    value->setFlags(header->flags() & ~Qt::ItemIsEditable);
-    setItem(1, i, value);
-  }
+  m_presenter->fillTableCells(info);
   horizontalHeader()->setMinimumSectionSize(50);
   resizeColumnsToContents();
 }
@@ -66,5 +54,18 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
 void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
 
 void ImageInfoWidget::setRowCount(const int count) { QTableWidget::setRowCount(count); }
+
+void ImageInfoWidget::setColumnCount(const int count) { QTableWidget::setColumnCount(count); }
+
+void ImageInfoWidget::setItem(const int rowIndex, const int columnIndex, QTableWidgetItem *item) {
+  QTableWidget::setItem(rowIndex, columnIndex, item);
+}
+
+void ImageInfoWidget::hideColumn(const int index) { QTableWidget::hideColumn(index); }
+
+void ImageInfoWidget::showColumn(const int index) { QTableWidget::showColumn(index); }
+
+// Set presenter flag for wether to show or hide the signal column
+void ImageInfoWidget::setShowSignal(const bool showSignal) { m_presenter->setShowSignal(showSignal); }
 
 } // namespace MantidQt::MantidWidgets

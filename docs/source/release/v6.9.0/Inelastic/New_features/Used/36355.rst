@@ -1,1 +1,0 @@
-- Moved the :ref:`Corrections <interface-inelastic-corrections>` interface from the Indirect interface menu into the Inelastic interface category.

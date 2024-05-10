@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferModelUtils.h"
 #include <boost/algorithm/string.hpp>
 #include <chrono>
@@ -17,10 +17,12 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 class ISISEnergyTransferModelUtilsTest : public CxxTest::TestSuite {
 public:
-  ISISEnergyTransferModelUtilsTest() = default;
+  static ISISEnergyTransferModelUtilsTest *createSuite() { return new ISISEnergyTransferModelUtilsTest(); }
+  static void destroySuite(ISISEnergyTransferModelUtilsTest *suite) { delete suite; }
 
   void testGetCustomGroupingNumbers() {
     auto result = getCustomGroupingNumbers("1,2,3-5,6");
@@ -34,7 +36,7 @@ public:
     auto loader = loadAlgorithm("iris26184_multi_graphite002_red", "iris26184");
     loader->execute();
 
-    MatrixWorkspace_sptr workspace = WorkspaceUtils::getADSWorkspace("iris26184");
+    MatrixWorkspace_sptr workspace = getADSWorkspace("iris26184");
 
     TS_ASSERT_EQUALS(getSampleLog(workspace, {"sample", "sample_top", "sample_bottom"}, 300.0), 300.0);
     TS_ASSERT_EQUALS(getSampleLog(workspace, {"nchannels", "nspectra", "sample"}, 300.0), 2000.0);

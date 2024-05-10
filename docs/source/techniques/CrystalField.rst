@@ -132,16 +132,17 @@ Fitting magnetic susceptibility
    calc_a = mtd['fit_susc_Workspaces'][0]
    calc_b = mtd['fit_susc_Workspaces'][1]
    calc_c = mtd['fit_susc_Workspaces'][2]
-   plt.plot(calc_a.readX(1),calc_a.readY(1),'-k',label='$\chi^a$ Fit')
-   plt.plot(mtd['sus_a'].readX(0),mtd['sus_a'].readY(0),'ok',label='$\chi^a$ Data')
-   plt.plot(calc_b.readX(1),calc_b.readY(1),'-b',label='$\chi^b$ Fit')
-   plt.plot(mtd['sus_b'].readX(0),mtd['sus_b'].readY(0),'ob',label='$\chi^b$ Data')
-   plt.plot(calc_c.readX(1),calc_c.readY(1),'-r',label='$\chi^c$ Fit')
-   plt.plot(mtd['sus_c'].readX(0),mtd['sus_c'].readY(0),'or',label='$\chi^c$ Data')
-   plt.legend(loc='upper left')
-   plt.xlabel('Temperature (K)')
-   plt.ylabel('Inverse Susceptibility (mol/emu)')
-   plt.show()
+   fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+   ax.plot(calc_a.readX(1),calc_a.readY(1),'-k',label='$\chi^a$ Fit')
+   ax.plot(mtd['sus_a'].readX(0),mtd['sus_a'].readY(0),'ok',label='$\chi^a$ Data')
+   ax.plot(calc_b.readX(1),calc_b.readY(1),'-b',label='$\chi^b$ Fit')
+   ax.plot(mtd['sus_b'].readX(0),mtd['sus_b'].readY(0),'ob',label='$\chi^b$ Data')
+   ax.plot(calc_c.readX(1),calc_c.readY(1),'-r',label='$\chi^c$ Fit')
+   ax.plot(mtd['sus_c'].readX(0),mtd['sus_c'].readY(0),'or',label='$\chi^c$ Data')
+   ax.legend(loc='upper left')
+   ax.set_xlabel('Temperature (K)')
+   ax.set_ylabel('Inverse Susceptibility (mol/emu)')
+   fig.show()
 
 
 |FittingMagneticSusceptibility.png|

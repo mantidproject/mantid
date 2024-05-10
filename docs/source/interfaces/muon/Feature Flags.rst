@@ -15,7 +15,7 @@ Muon Feature Flags provide advanced users with access to additional features suc
 How to set up
 --------------
 
-To access feature flags you need to make changes to your ``Mantd.user.properties file``. To do this, follow these instructions:
+To access feature flags you need to make changes to your ``Mantid.user.properties file``. To do this, follow these instructions:
 
 1. Navigate to the location of the ``Mantid.user.properties`` file
 

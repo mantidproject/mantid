@@ -1,0 +1,1 @@
+- Drop support for end-of-life numpy 1.22 and 1.23, and extend support to 1.25 and 1.26.

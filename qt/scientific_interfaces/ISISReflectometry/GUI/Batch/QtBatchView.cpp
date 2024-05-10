@@ -41,7 +41,7 @@ void QtBatchView::initLayout() {
   m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
 
   m_save = createSaveTab();
-  m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
+  m_ui.batchTabs->addTab(m_save.get(), "Save");
 }
 
 IExperimentView *QtBatchView::experiment() const { return m_experiment.get(); }

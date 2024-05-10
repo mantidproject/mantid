@@ -23,24 +23,29 @@ Elwin tab
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
 #. Go to the ``Elwin`` tab
-#. Enter ``MAR27691_red.nxs`` in ``Input file``
-#. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
-#. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files, ``MAR27691_red.nxs`` and ``MAR27698_red.nxs``, by using shift key
+#. Click on ``Add Workspaces``, a dialog window should prompt.
+#. Enter ``MAR27691_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``MAR2791_red`` workspace.
+#. Select the workspace from the table and click on ``Add Data``. Close the dialog.
+#. Back on ``Elwin`` tab, click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
+#. Open the ``Add Workspaces`` dialog again, and in ``Input file`` choose ``browse``. Navigate to the ISIS-Sample data and select the two files, ``MAR27691_red.nxs`` and ``MAR27698_red.nxs`` using shift key.
+#. Add the loaded workspaces
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``MAR27691-27698_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
 #. This should plot two lines of :math:`ln(Counts(microAmp.hour))^{-1}` vs :math:`Q2`
 
-.. _elwin_indirect_test:
+.. _elwin_inelastic_test:
 
 2. Indirect data
 ################
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
-#. Go to the ``Elwin`` tab
-#. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
-#. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
-#. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select ``irs26176_graphite002_red.nxs`` and ``irs26174_graphite002_red.nxs`` simultaneously, by using shift key
+#. Click on ``Add Workspaces``, a dialog window should prompt
+#. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``irs26176_graphite002_red`` workspace.
+#. Select the workspace from the table and click on ``Add Data``. Close the dialog.
+#. Back on ``Elwin`` tab, click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
+#. Open the ``Add Workspaces`` dialog again, and in ``Input file`` choose ``browse``. Navigate to the ISIS-Sample data and select the two files, ``irs26174_graphite002_red.nxs`` and ``irs26176_graphite002_red.nxs`` using shift key.
+#. Add the loaded workspaces
 #. Change the integration range from -0.2 to 0.2
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
@@ -68,7 +73,7 @@ I(Q, T) tab
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *MARI27691_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
-.. _iqt_indirect_test:
+.. _iqt_inelastic_test:
 
 2. Indirect data
 ################

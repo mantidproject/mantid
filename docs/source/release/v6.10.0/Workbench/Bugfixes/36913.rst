@@ -1,0 +1,1 @@
+- Fixed a bug where renaming a plot in the plots widget would redraw the plot title regardless of the Show Title setting.
