@@ -42,7 +42,7 @@ public:
 class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataManipulation, public ISqwPresenter {
 
 public:
-  SqwPresenter(QWidget *parent, ISqwView *view);
+  SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);
   ~SqwPresenter() = default;
 
   void setup() override;
@@ -70,8 +70,8 @@ private:
   void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
 
-  std::unique_ptr<SqwModel> m_model;
   ISqwView *m_view;
+  std::unique_ptr<ISqwModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
