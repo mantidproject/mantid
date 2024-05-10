@@ -24,7 +24,7 @@ public:
   virtual void setEMax(double eMax) = 0;
   virtual void setScale(bool scale) = 0;
   virtual void setScaleValue(double scaleValue) = 0;
-  virtual std::string getOutputWorkspace() = 0;
+  virtual std::string getOutputWorkspace() const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL MomentsModel : public IMomentsModel {
@@ -38,7 +38,7 @@ public:
   void setEMax(double eMax) override;
   void setScale(bool scale) override;
   void setScaleValue(double scaleValue) override;
-  std::string getOutputWorkspace() override;
+  std::string getOutputWorkspace() const override;
 
 private:
   std::string m_inputWorkspace;

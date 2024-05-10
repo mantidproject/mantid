@@ -52,6 +52,6 @@ void MomentsModel::setScale(bool scale) { m_scale = scale; }
 
 void MomentsModel::setScaleValue(double scaleValue) { m_scaleValue = scaleValue; }
 
-std::string MomentsModel::getOutputWorkspace() { return m_outputWorkspaceName; }
+std::string MomentsModel::getOutputWorkspace() const { return m_outputWorkspaceName; }
 
 } // namespace MantidQt::CustomInterfaces
