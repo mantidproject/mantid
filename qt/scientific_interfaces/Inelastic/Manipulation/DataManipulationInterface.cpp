@@ -10,8 +10,6 @@
 #include "DataManipulationInterface.h"
 
 #include "Common/Settings.h"
-#include "ElwinPresenter.h"
-#include "IqtPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -19,8 +17,16 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+
+#include "ElwinModel.h"
+#include "ElwinPresenter.h"
+#include "IqtModel.h"
+#include "IqtPresenter.h"
+#include "MomentsModel.h"
 #include "MomentsPresenter.h"
+#include "SqwModel.h"
 #include "SqwPresenter.h"
+#include "SymmetriseModel.h"
 #include "SymmetrisePresenter.h"
 
 #include <QDir>
@@ -59,11 +65,11 @@ void DataManipulationInterface::initLayout() {
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   // Create the tabs
-  addMVPTab<SymmetrisePresenter, SymmetriseView>("Symmetrise");
-  addMVPTab<SqwPresenter, SqwView>("S(Q, w)");
-  addMVPTab<MomentsPresenter, MomentsView>("Moments");
-  addMVPTab<ElwinPresenter, ElwinView>("Elwin");
-  addMVPTab<IqtPresenter, IqtView>("Iqt");
+  addMVPTab<SymmetrisePresenter, SymmetriseView, SymmetriseModel>("Symmetrise");
+  addMVPTab<SqwPresenter, SqwView, SqwModel>("S(Q, w)");
+  addMVPTab<MomentsPresenter, MomentsView, MomentsModel>("Moments");
+  addMVPTab<ElwinPresenter, ElwinView, ElwinModel>("Elwin");
+  addMVPTab<IqtPresenter, IqtView, IqtModel>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
