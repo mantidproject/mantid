@@ -33,7 +33,7 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     ads = AnalysisDataServiceImpl.Instance()
     has_multiple_bins = []
     for name in names:
-        result = False
+        result = None
         ws = ads.retrieve(name)
         if isinstance(ws, WorkspaceGroup):
             result = all(_validate_workspaces(ws.getNames()))
@@ -47,7 +47,8 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
                         result = True
                         break
 
-        has_multiple_bins.append(result)
+        if result is not None:
+            has_multiple_bins.append(result)
 
     return has_multiple_bins
 
