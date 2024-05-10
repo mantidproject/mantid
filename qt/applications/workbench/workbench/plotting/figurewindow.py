@@ -20,7 +20,7 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
-from mantid.api import AnalysisDataServiceImpl, WorkspaceGroup
+from mantid.api import AnalysisDataServiceImpl, WorkspaceGroup, MatrixWorkspace
 import mantid.kernel
 
 
@@ -36,17 +36,18 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
         result = False
         ws = ads.retrieve(name)
         if isinstance(ws, WorkspaceGroup):
-            return _validate_workspaces(ws.getNames())
-        try:
-            result = ws.blocksize() > 1
-        except RuntimeError:
-            # blocksize() implementation in Workspace2D and EventWorkspace can through an error if histograms are not equal
-            for i in ws.getNumberHistograms():
-                if ws.y(i).size() > 1:
-                    result = True
-                    break
-        finally:
-            has_multiple_bins.append(result)
+            result = all(_validate_workspaces(ws.getNames()))
+        elif isinstance(ws, MatrixWorkspace):
+            try:
+                result = ws.blocksize() > 1
+            except RuntimeError:
+                # blocksize() implementation in Workspace2D and EventWorkspace can through an error if histograms are not equal
+                for i in ws.getNumberHistograms():
+                    if ws.y(i).size() > 1:
+                        result = True
+                        break
+
+        has_multiple_bins.append(result)
 
     return has_multiple_bins
 
