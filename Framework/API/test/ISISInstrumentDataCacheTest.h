@@ -50,6 +50,12 @@ public:
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MARI/2019/RB1868000-1");
   }
 
+  void testLowerCaseInstrName() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getFileParentDirectoryPath("mar25054");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/MARI/2019/RB1868000-1");
+  }
+
   void testCorrectInstrRunSplit() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
     std::string actualPath = dc.getFileParentDirectoryPath("SANS2D101115");

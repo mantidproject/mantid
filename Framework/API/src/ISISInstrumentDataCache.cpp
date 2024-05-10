@@ -11,7 +11,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
 } // namespace
 
-std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std::string fileName) const {
+std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(const std::string &fileName) const {
   g_log.debug() << "ISISInstrumentDataCache::getFileParentDirectoryPath(" << fileName << ")" << std::endl;
 
   auto [instrName, runNumber] = validateInstrumentAndNumber(fileName);
@@ -40,10 +40,11 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(std
 }
 
 std::pair<std::string, std::string>
-Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(std::string fileName) const {
+Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName) const {
 
   // Check if suffix eg. -add is present in filename
-  std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileName);
+  std::string fileNameCopy = fileName;
+  std::string suffix = FileFinder::Instance().extractAllowedSuffix(fileNameCopy);
   if (!suffix.empty()) {
     throw std::invalid_argument("Unsuported format: Suffix detected: " + suffix);
   }
@@ -65,15 +66,16 @@ Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(std::string fi
 }
 
 std::pair<std::string, std::string>
-Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(std::string fileName) const {
+Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::string &fileName) const {
 
   // Find the last non-digit as the instrument name can contain numbers
   const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
   const auto nChars = std::distance(itRev, fileName.rend());
   std::string runNumber = fileName.substr(nChars);
 
-  std::transform(fileName.begin(), fileName.end(), fileName.begin(), toupper);
-  std::string instrName = fileName.substr(0, nChars);
+  std::string fileNameUpperCase = fileName;
+  std::transform(fileNameUpperCase.begin(), fileNameUpperCase.end(), fileNameUpperCase.begin(), toupper);
+  std::string instrName = fileNameUpperCase.substr(0, nChars);
 
   return std::pair(instrName, runNumber);
 }
