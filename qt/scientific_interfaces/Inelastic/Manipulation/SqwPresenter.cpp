@@ -34,8 +34,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view)
-    : DataManipulation(parent), m_model(std::make_unique<SqwModel>()), m_view(view) {
+SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
