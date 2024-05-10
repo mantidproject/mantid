@@ -243,31 +243,15 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                             )
                             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                                 # calculate hkl er in indexing
-                                this_hkl_ers = self.calculate_hkl_ers(peaks, spgr)
-                                # see if similar UBs have already been calculated
-                                iub_similar = np.array(
-                                    [
-                                        iub
-                                        for iub in range(len(ubs))
-                                        if self.are_ubs_equivalent_within_tolerance(this_ub, ubs[iub], ptgr, unit_cell, min_angle_ub)
-                                    ],
-                                    dtype=int,
-                                )
-                                if len(iub_similar) == 0:
-                                    ubs.append(this_ub)
-                                    hkl_ers.append(this_hkl_ers)
-                                else:
-                                    keep_new_ub, idel = self.find_similar_ubs_that_index_less_accurately(hkl_ers, iub_similar, this_hkl_ers)
-                                    # delete in reverse order so as to preserve indexing
-                                    for iub in idel[::-1]:
-                                        ubs.pop(iub)
-                                        hkl_ers.pop(iub)
-                                    if keep_new_ub:
-                                        ubs.append(this_ub)
-                                        hkl_ers.append(this_hkl_ers)
+                                ubs.append(this_ub)
+                                hkl_ers.append(self.calculate_hkl_ers(peaks, spgr))
         # categorise peaks belonging to each UB requested
         if not ubs:
             raise RuntimeError(f"No valid UBs found using {peaks_filtered.getNumberPeaks()} peaks in d-spacing range.")
+        # filter out similar UBs
+        hkl_ers = np.array(hkl_ers)
+        hkl_ers, ubs = self.remove_equiv_ubs_by_accuracy(hkl_ers, ubs, ptgr, unit_cell, min_angle_ub)
+        # get nub most accurate
         peaks_out_list = self.get_peak_tables_for_each_ub(peaks, ubs, hkl_ers, num_ubs, optimise_ubs) if ubs else []
         ws_out = self.exec_child_alg("GroupWorkspaces", InputWorkspaces=peaks_out_list)
         self.setProperty("OutputWorkspace", ws_out)
@@ -282,6 +266,24 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
+    def remove_equiv_ubs_by_accuracy(self, hkl_ers, ubs, pointgroup, unit_cell, min_angle_ub):
+        iub_keep = set()
+        for iub, ub in enumerate(ubs):
+            if iub in iub_keep:
+                continue
+            iub_similar = [
+                int(iub_other)
+                for iub_other in range(len(ubs))
+                if self.are_ubs_equivalent_within_tolerance(ub, ubs[iub_other], pointgroup, unit_cell, min_angle_ub) and iub_other != iub
+            ]
+            if iub_similar:
+                ibest, *_ = self.get_indices_of_nub_most_accurate_ubs(hkl_ers[tuple(iub_similar), :], num_ubs=1)
+                iub_keep.add(iub_similar[next(iter(ibest))])
+            else:
+                iub_keep.add(iub)
+        iub_keep = list(iub_keep)
+        return hkl_ers[iub_keep], [ubs[ii] for ii in iub_keep]
+
     @staticmethod
     def are_ubs_equivalent_within_tolerance(ub1, ub2, pointgroup, unit_cell, angle_tol):
         inv_ub1 = np.linalg.inv(ub1)
@@ -291,34 +293,39 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         for iqax in range(2):
             # loop over all equivalent HKL
             for hkl1 in pointgroup.getEquivalents(inv_ub1[iqax, :]):
-                if abs(unit_cell.recAngle(*hkl1, *inv_ub2[iqax, :])) < angle_tol:
+                if abs(unit_cell.recAngle(*hkl1, *inv_ub2[iqax, :], 1)) < angle_tol:
                     axes_equiv[iqax] = True
                     break
             if not axes_equiv[iqax]:
                 break
         return all(axes_equiv)
 
-    @staticmethod
-    def sort_ub_by_accuracy(hkl_ers):
+    def get_indices_of_nub_most_accurate_ubs(self, hkl_ers, num_ubs=1):
         # see which ubs index the most peaks most accurately (with minimum error)
         iub_min_er = np.argmin(hkl_ers, axis=0)
         # exclude reflections that are not indexed by any UB
         hkl_ers_indexed = np.isfinite(hkl_ers)
         ipks_indexed = np.any(hkl_ers_indexed, axis=0)
         iub, nindex_best = np.unique(iub_min_er[ipks_indexed], return_counts=True)
-        nindex_total = hkl_ers_indexed[iub, :].sum(axis=1)  # total num peaks indexed by each UB within tol
+        # remove ubs that don't index any peaks most accurately
+        ikeep = nindex_best > 0
+        iub = iub[ikeep]
+        nindex_best = nindex_best[ikeep]
         # sort by ubs that index peaks most accurately
         # if same num peaks indexed most accurately then additionally by total number peaks indexed
+        nindex_total = hkl_ers_indexed[iub, :].sum(axis=1)  # total num peaks indexed by each UB within tol
         isort = np.lexsort((-nindex_total, -nindex_best))
         iub = iub[isort].astype(int)
-        return iub, iub_min_er, ipks_indexed
+        if len(iub) <= num_ubs:
+            return iub, iub_min_er, ipks_indexed
+        else:
+            hkl_ers[iub[-1], :] = np.inf  # overwrite values as if didn't index any peaks
+            return self.get_indices_of_nub_most_accurate_ubs(hkl_ers, num_ubs)
 
     def get_peak_tables_for_each_ub(self, peaks, ubs, hkl_ers, num_ubs, optimise_ubs):
-        iub, iub_min_er, ipks_indexed = self.sort_ub_by_accuracy(hkl_ers)
-        # return peak tables with peaks best indexed by top nub
-        nub = min(num_ubs, len(iub))
+        iub, iub_min_er, ipks_indexed = self.get_indices_of_nub_most_accurate_ubs(hkl_ers, num_ubs)
         peaks_out_list = []
-        for itable in range(nub):
+        for itable in range(min(num_ubs, len(iub))):
             # get peaks indexed best by this UB
             ipks = np.flatnonzero(np.logical_and(iub_min_er == iub[itable], ipks_indexed))
             peaks_out = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=peaks, NumberOfPeaks=0)
@@ -353,17 +360,6 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             for ihkl_2, hkl2 in enumerate(hkls2):
                 angles[ihkl_1, ihkl_2] = unit_cell.recAngle(*hkl1, *hkl2, 1)  # final arg specifies radians
         return angles
-
-    def find_similar_ubs_that_index_less_accurately(self, hkl_ers, iub_similar, this_hkl_ers):
-        similar_hkl_ers = np.vstack((np.array(hkl_ers)[iub_similar, :], this_hkl_ers))
-        isort, *_ = self.sort_ub_by_accuracy(similar_hkl_ers)
-        keep_new_ub = isort[0] == similar_hkl_ers.shape[0] - 1  # last row is this_hkl_ers
-        if keep_new_ub:
-            # the new UB performs better
-            idel = iub_similar
-        else:
-            idel = np.delete(iub_similar, isort[0])  # remove best UB from iub_similar
-        return keep_new_ub, idel
 
     @staticmethod
     def calculate_hkl_ers(peaks, spacegroup):
