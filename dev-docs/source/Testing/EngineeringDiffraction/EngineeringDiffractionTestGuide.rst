@@ -150,7 +150,7 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 2. Click the `Load` button. A row should be added to the UI table for each focused run.
    There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI).
-   There should be an additional table called `run_info` that provides some of the metadata for each run.
+   In the same grouped workspace there should be an additional table called `run_info_Fitting` that provides some of the metadata for each run.
    Each row in these tables should correspond to the equivalent row in the UI table.
 
 3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
