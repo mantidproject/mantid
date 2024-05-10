@@ -403,6 +403,12 @@ void FindPeaks::findPeaksUsingMariscotti() {
   if (!(w % 2))
     ++w;
 
+  if (!m_dataWS->isRaggedWorkspace() && (m_dataWS->blocksize() <= static_cast<size_t>(w))) {
+    std::stringstream errss;
+    errss << "Block size of the workspace should be greater than:" << w;
+    throw std::runtime_error(errss.str());
+  }
+
   smoothData(smoothedData, w, g_z);
 
   // Now calculate the errors on the smoothed data
