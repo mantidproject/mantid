@@ -140,7 +140,7 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
  * @return This will return the default instrument if it cannot be determined.
  */
 const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
-                                                           const bool &returnDefaultIfNotFound) const {
+                                                           const bool returnDefaultIfNotFound) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     string instrName(hint);
     Poco::Path path(instrName);
