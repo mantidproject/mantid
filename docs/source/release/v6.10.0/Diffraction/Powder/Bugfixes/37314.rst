@@ -1,0 +1,1 @@
+- Remove the confusing "Replace input workspace" button in the :ref:`WANDPowderReduction <algm-WANDPowderReduction>` algorithm
