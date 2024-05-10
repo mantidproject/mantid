@@ -11,6 +11,7 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -29,6 +30,9 @@
 #include <cctype>
 
 #include <boost/algorithm/string.hpp>
+
+#include <filesystem>
+#include <json/value.h>
 
 namespace {
 /// static logger object
@@ -132,9 +136,11 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
  * Return the InstrumentInfo as determined from the hint.
  *
  * @param hint :: The name hint.
+ * @param returnDefaultIfNotFound :: Flag to control return. May throw exception if set to false.
  * @return This will return the default instrument if it cannot be determined.
  */
-const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) const {
+const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
+                                                           const bool returnDefaultIfNotFound) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     string instrName(hint);
     Poco::Path path(instrName);
@@ -158,7 +164,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
       {
         const auto it = std::find_if(instrName.begin(), instrName.end(), isdigit);
         const auto nChars = std::distance(instrName.begin(), it);
-        instrName = instrName.substr(0, nChars);
+        instrName.resize(nChars);
       }
 
       // go backwards looking for the instrument name to end - gets around
@@ -166,7 +172,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
       if (!instrName.empty()) {
         const auto it = std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
         const auto nChars = std::distance(it, instrName.rend());
-        instrName = instrName.substr(0, nChars);
+        instrName.resize(nChars);
       }
     }
     try {
@@ -174,6 +180,9 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
       return instrument;
     } catch (Kernel::Exception::NotFoundError &e) {
       g_log.debug() << e.what() << "\n";
+      if (!returnDefaultIfNotFound) {
+        throw e;
+      }
     }
   }
   return Kernel::ConfigService::Instance().getInstrument();
@@ -185,7 +194,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) c
  * @return A pair of instrument name and run number
  */
 std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
-  // g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
+  g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
   std::string instrPart;
   std::string runPart;
 
@@ -254,8 +263,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * too long
  */
 std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const {
-  // g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName()
-  // << ")\n";
   if (hint.empty())
     return "";
 
@@ -305,7 +312,7 @@ std::string FileFinderImpl::getExtension(const std::string &filename, const std:
     std::string extension = toUpper(ext);
     if (extension.rfind('*') == extension.size() - 1) // there is a wildcard at play
     {
-      extension = extension.substr(0, extension.rfind('*'));
+      extension.resize(extension.rfind('*'));
     }
 
     std::size_t found = toUpper(filename).rfind(extension);
@@ -645,6 +652,52 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   return res;
 }
 
+const API::Result<std::string>
+FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+                                               const std::set<std::string> &filenames,
+                                               const std::vector<std::string> &exts) const {
+  std::string errors;
+  auto dataCache = API::ISISInstrumentDataCache(cachePathToSearch);
+
+  for (const auto &filename : filenames) {
+
+    std::string parentDirPath;
+
+    try {
+      parentDirPath = dataCache.getFileParentDirectoryPath(filename);
+
+    } catch (const std::invalid_argument &e) {
+      errors += "Data cache: " + std::string(e.what());
+      return API::Result<std::string>("", errors);
+
+    } catch (const Json::Exception &e) {
+      errors += "Data cache: Failed parsing to JSON: " + std::string(e.what()) +
+                "Error likely due to accessing instrument index file while it was being updated on IDAaaS.";
+      return API::Result<std::string>("", errors);
+    }
+
+    if (!std::filesystem::exists(parentDirPath)) {
+      errors += "Data cache: Directory not found: " + parentDirPath;
+      return API::Result<std::string>("", errors);
+    }
+
+    for (const auto &ext : exts) {
+      std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
+
+      try { // Catches error for permission denied
+        if (std::filesystem::exists(filePath)) {
+          return API::Result<std::string>(filePath.string());
+        }
+      } catch (const std::filesystem::filesystem_error &e) {
+        errors += "Data cache: " + std::string(e.what());
+        return API::Result<std::string>("", errors);
+      }
+    }
+    errors += "Data cache: " + filename + " not found in " + parentDirPath;
+  }
+  return API::Result<std::string>("", errors);
+}
+
 /**
  * Return the path to the file found in archive
  * @param archs :: A list of archives to search
@@ -741,8 +794,25 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     }
   }
 
+  // Search data cache
+  string errors;
+  std::filesystem::path cachePathToSearch(Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  // Only expect to find path to data cache on IDAaaS
+  if (std::filesystem::exists(cachePathToSearch)) {
+
+    API::Result<std::string> cacheFilePath =
+        getISISInstrumentDataCachePath(cachePathToSearch.string(), filenames, exts);
+
+    if (cacheFilePath) {
+      return cacheFilePath;
+    }
+    errors += cacheFilePath.errors();
+
+  } else {
+    errors += "Could not find data cache directory: " + cachePathToSearch.string();
+  }
+
   // Search the archive
-  string errors = "";
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
     const auto archivePath = getArchivePath(archs, filenames, exts);
@@ -758,7 +828,6 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
       errors += archivePath.errors();
 
   } // archs
-
   return API::Result<std::string>("", errors);
 }
 

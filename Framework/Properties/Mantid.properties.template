@@ -79,6 +79,9 @@ pythonalgorithms.refresh.allowed = 0
 # Use forward slash / for all paths
 datasearch.directories = @DATADIRS@
 
+# Directory where data cache is stored, default IDaaS path
+datacachesearch.directory = /data/instrument
+
 # Root of html documentation (kept as unix-style path)
 docs.html.root = @HTML_ROOT@
 
