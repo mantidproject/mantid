@@ -302,6 +302,20 @@ public:
     AnalysisDataService::Instance().remove(WKSP_NAME_OUTPUT);
   }
 
+  void testWhenSingleBinWs() {
+    MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::create2DWorkspace(10, 1);
+    std::string wsName("SingleBinTestData");
+    AnalysisDataService::Instance().addOrReplace(wsName, dataws);
+    FindPeaks finder;
+    finder.setRethrows(true);
+
+    if (!finder.isInitialized())
+      finder.initialize();
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", "peakslist"));
+    TSM_ASSERT_THROWS("Block size is not sufficient to run FindSXPeaks", finder.execute(), std::runtime_error &);
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Parse a row in output parameter tableworkspace to a string/double
    * parameter name/value map
