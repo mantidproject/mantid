@@ -263,3 +263,5 @@ Display
    have clear tooltips.
 #. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.
+   *Note: The* ``Wavelength`` *section of the settings is missing its tooltips. We and the users are aware of this so an
+   issue should not be made when it is discovered.*
