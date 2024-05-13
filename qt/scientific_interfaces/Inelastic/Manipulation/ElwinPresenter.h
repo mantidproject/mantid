@@ -42,7 +42,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataManipulation, public IElwinPresenter {
 public:
-  ElwinPresenter(QWidget *parent, IElwinView *view);
+  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
                  std::unique_ptr<IFitDataModel> dataModel);
   ~ElwinPresenter();

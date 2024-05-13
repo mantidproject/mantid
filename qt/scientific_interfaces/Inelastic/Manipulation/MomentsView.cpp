@@ -24,7 +24,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MomentsView::MomentsView(QWidget *parent) : m_presenter() {
+MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
   m_dblManager = new QtDoublePropertyManager();
   m_dblEdFac = new DoubleEditorFactory(this);
