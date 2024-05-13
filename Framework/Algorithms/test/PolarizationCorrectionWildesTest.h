@@ -1683,80 +1683,15 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_DirectBeamPerformance() {
-    using namespace Mantid::API;
-    for (int i = 0; i < 3000; ++i) {
-      PolarizationCorrectionWildes correction;
-      correction.setChild(true);
-      correction.setRethrows(true);
-      correction.initialize();
-      correction.setProperty("InputWorkspaces", "00");
-      correction.setProperty("OutputWorkspace", "output");
-      correction.setProperty("Flippers", "0");
-      correction.setProperty("Efficiencies", m_effWS);
-      TS_ASSERT_THROWS_NOTHING(correction.execute())
-    }
-  }
+  void test_DirectBeamPerformance() { runPerformanceTest("00", "0"); }
 
-  void test_ThreeInputsPerformanceMissing01() {
-    using namespace Mantid::API;
-    for (int i = 0; i < 3000; ++i) {
-      PolarizationCorrectionWildes correction;
-      correction.setChild(true);
-      correction.setRethrows(true);
-      correction.initialize();
-      correction.setProperty("InputWorkspaces", "00, 10, 11");
-      correction.setProperty("OutputWorkspace", "output");
-      correction.setProperty("Flippers", "00, 10, 11");
-      correction.setProperty("Efficiencies", m_effWS);
-      TS_ASSERT_THROWS_NOTHING(correction.execute())
-    }
-  }
+  void test_ThreeInputsPerformanceMissing01() { runPerformanceTest("00, 10, 11", "00, 10, 11"); }
 
-  void test_ThreeInputsPerformanceMissing10() {
-    using namespace Mantid::API;
-    for (int i = 0; i < 3000; ++i) {
-      PolarizationCorrectionWildes correction;
-      correction.setChild(true);
-      correction.setRethrows(true);
-      correction.initialize();
-      correction.setProperty("InputWorkspaces", "00, 01, 11");
-      correction.setProperty("OutputWorkspace", "output");
-      correction.setProperty("Flippers", "00, 01, 11");
-      correction.setProperty("Efficiencies", m_effWS);
-      TS_ASSERT_THROWS_NOTHING(correction.execute())
-    }
-  }
+  void test_ThreeInputsPerformanceMissing10() { runPerformanceTest("00, 01, 11", "00, 01, 11"); }
 
-  void test_TwoInputsNoAnalyzerPerformance() {
-    using namespace Mantid::API;
-    for (int i = 0; i < 3000; ++i) {
-      PolarizationCorrectionWildes correction;
-      correction.setChild(true);
-      correction.setRethrows(true);
-      correction.initialize();
-      correction.setProperty("InputWorkspaces", "00, 11");
-      correction.setProperty("OutputWorkspace", "output");
-      correction.setProperty("Flippers", "0, 1");
-      correction.setProperty("Efficiencies", m_effWS);
-      TS_ASSERT_THROWS_NOTHING(correction.execute())
-    }
-  }
+  void test_TwoInputsNoAnalyzerPerformance() { runPerformanceTest("00, 11", "0, 1"); }
 
-  void test_TwoInputsPerformance() {
-    using namespace Mantid::API;
-    for (int i = 0; i < 3000; ++i) {
-      PolarizationCorrectionWildes correction;
-      correction.setChild(true);
-      correction.setRethrows(true);
-      correction.initialize();
-      correction.setProperty("InputWorkspaces", "00, 11");
-      correction.setProperty("OutputWorkspace", "output");
-      correction.setProperty("Flippers", "00, 11");
-      correction.setProperty("Efficiencies", m_effWS);
-      TS_ASSERT_THROWS_NOTHING(correction.execute())
-    }
-  }
+  void test_TwoInputsPerformance() { runPerformanceTest("00, 11", "00, 11"); }
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_effWS;
@@ -1764,4 +1699,19 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws01;
   Mantid::API::MatrixWorkspace_sptr m_ws10;
   Mantid::API::MatrixWorkspace_sptr m_ws11;
+
+  void runPerformanceTest(const std::string &inputWorkspaces, const std::string &flippers) {
+    using namespace Mantid::API;
+    for (int i = 0; i < 3000; ++i) {
+      PolarizationCorrectionWildes correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspaces", inputWorkspaces);
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", flippers);
+      correction.setProperty("Efficiencies", m_effWS);
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
+    }
+  }
 };
