@@ -44,7 +44,7 @@ Useage
     axis.setUnit("TOF")
 
     # create a peak tables of orthorhombic domains with lattice parameters a=4, b=5, c=10
-    alatt = {'a': 4, 'b': 5, 'c': 9, 'alpha': 90, 'beta': 90, 'gamma': 90}
+    alatt = {'a': 4, 'b': 5, 'c': 10, 'alpha': 90, 'beta': 90, 'gamma': 90}
     ubs = [np.diag([1/alatt['a'], 1/alatt['b'], 1/alatt['c']])]
     ubs.append(rot.from_rotvec([0,0,90], degrees=True).as_matrix()  @ ubs[0])
 
@@ -63,15 +63,15 @@ Useage
                                       NumberOfUBs=2)
 
     for ipk, pks in enumerate(peaks_out):
-        print("HKL along x-axis of QLab = ", np.round(pks.sample().getOrientedLattice().getvVector()))
+        print("HKL along x-axis of QLab = ", abs(np.round(pks.sample().getOrientedLattice().getvVector())))
 
 
 **Output:**
 
 .. testoutput:: exampleFindMultipleUMatrices
 
-    HKL along x-axis of QLab =  [ 4. -0.  0.]
-    HKL along x-axis of QLab =  [-0. -5.  0.]
+    HKL along x-axis of QLab =  [ 4.  0.  0.]
+    HKL along x-axis of QLab =  [ 0.  5.  0.]
 
 
 .. categories::
