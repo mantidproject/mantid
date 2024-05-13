@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "json/json.h"
-#include <iostream>
 #include <numeric>
 
 namespace {

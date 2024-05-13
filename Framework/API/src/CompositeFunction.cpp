@@ -19,7 +19,6 @@
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <numeric>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::API {

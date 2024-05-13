@@ -49,7 +49,6 @@
 #include "MantidKernel/make_cow.h"
 
 #include <cmath>
-#include <sstream>
 #include <utility>
 
 namespace WorkspaceCreationHelper {

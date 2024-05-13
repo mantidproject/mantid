@@ -19,7 +19,6 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 
 namespace Mantid::API {
 

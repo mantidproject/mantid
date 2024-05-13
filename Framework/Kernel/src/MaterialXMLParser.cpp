@@ -18,7 +18,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <sstream>
 #include <type_traits>
 #include <unordered_map>
 

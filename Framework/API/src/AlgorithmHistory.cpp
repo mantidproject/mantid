@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::API {

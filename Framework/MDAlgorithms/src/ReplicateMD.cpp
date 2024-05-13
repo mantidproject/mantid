@@ -14,7 +14,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Utils.h"
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 

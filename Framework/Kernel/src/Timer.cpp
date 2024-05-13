@@ -10,7 +10,6 @@
 #include "MantidKernel/Timer.h"
 #include <chrono>
 #include <ostream>
-#include <sstream>
 
 namespace Mantid::Kernel {
 

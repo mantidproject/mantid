@@ -25,7 +25,6 @@
 
 #include <algorithm>
 #include <fstream> // used to get ifstream
-#include <sstream>
 
 namespace Mantid::DataHandling {
 

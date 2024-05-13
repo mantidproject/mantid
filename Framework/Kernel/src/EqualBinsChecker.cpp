@@ -8,7 +8,6 @@
 #include "MantidKernel/Logger.h"
 #include <cmath>
 #include <ostream>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 

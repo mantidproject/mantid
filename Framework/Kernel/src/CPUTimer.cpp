@@ -7,7 +7,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include <ctime>
 #include <iomanip>
-#include <sstream>
 
 namespace Mantid::Kernel {
 

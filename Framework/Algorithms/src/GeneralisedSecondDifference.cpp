@@ -14,7 +14,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <numeric>
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

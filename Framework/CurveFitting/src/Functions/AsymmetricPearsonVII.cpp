@@ -12,7 +12,6 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include <cmath>
-#include <iostream>
 
 namespace Mantid::CurveFitting::Functions {
 

@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include <array>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::PhysicalConstants {

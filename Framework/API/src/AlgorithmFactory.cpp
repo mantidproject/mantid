@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <memory>
-#include <sstream>
 
 #include "MantidKernel/StringTokenizer.h"
 

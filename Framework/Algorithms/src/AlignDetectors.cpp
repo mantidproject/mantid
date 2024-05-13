@@ -22,7 +22,6 @@
 #include "MantidKernel/V3D.h"
 
 #include <fstream>
-#include <sstream>
 #include <utility>
 
 using namespace Mantid::Kernel;

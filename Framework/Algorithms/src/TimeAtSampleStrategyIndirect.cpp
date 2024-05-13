@@ -17,7 +17,6 @@
 #include "MantidKernel/V3D.h"
 #include <cmath>
 #include <memory>
-#include <sstream>
 #include <utility>
 
 using namespace Mantid::Kernel;

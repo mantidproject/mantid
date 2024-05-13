@@ -22,7 +22,6 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::Crystal {

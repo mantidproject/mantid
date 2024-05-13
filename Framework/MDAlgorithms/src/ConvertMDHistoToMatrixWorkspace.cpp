@@ -20,8 +20,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <sstream>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

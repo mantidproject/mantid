@@ -9,7 +9,6 @@
 #include "MantidKernel/System.h"
 
 #include <cstdio>
-#include <sstream>
 
 #ifdef __linux__
 #include <fstream>

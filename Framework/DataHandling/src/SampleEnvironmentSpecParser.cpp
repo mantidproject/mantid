@@ -30,7 +30,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <memory>
-#include <sstream>
 
 using namespace Poco::XML;
 

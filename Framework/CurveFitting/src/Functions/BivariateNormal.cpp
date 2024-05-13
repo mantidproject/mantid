@@ -21,7 +21,6 @@
 #include <cstdio>
 #include <fstream>
 #include <memory>
-#include <sstream>
 #include <string>
 
 using namespace Mantid::API;

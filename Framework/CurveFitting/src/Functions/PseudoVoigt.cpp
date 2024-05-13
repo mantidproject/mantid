@@ -8,8 +8,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
-#include <iostream>
-
 #include <cmath>
 
 namespace {

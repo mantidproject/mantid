@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <sstream>
 #include <utility>
 
 using namespace Mantid::Kernel;

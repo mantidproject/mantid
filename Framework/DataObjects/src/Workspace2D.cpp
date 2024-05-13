@@ -15,7 +15,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <algorithm>
-#include <sstream>
 
 using Mantid::API::MantidImage;
 

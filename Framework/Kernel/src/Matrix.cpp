@@ -15,7 +15,6 @@
 #include <climits>
 #include <cmath>
 #include <memory>
-#include <sstream>
 
 namespace Mantid::Kernel {
 //

@@ -14,7 +14,6 @@
 #include <boost/python/object.hpp>
 #include <frameobject.h>
 
-#include <sstream>
 #include <stdexcept>
 
 using boost::python::extract;

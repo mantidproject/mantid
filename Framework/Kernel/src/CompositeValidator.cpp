@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CompositeValidator.h"
 #include <algorithm>
-#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;

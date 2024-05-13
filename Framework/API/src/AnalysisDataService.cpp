@@ -8,7 +8,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iterator>
 #include <random>
-#include <sstream>
 
 namespace Mantid::API {
 

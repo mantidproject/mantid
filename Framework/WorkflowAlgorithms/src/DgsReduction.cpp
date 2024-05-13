@@ -23,7 +23,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string/erase.hpp>
-#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

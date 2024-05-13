@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <numeric>
-#include <sstream>
 
 using std::size_t;
 

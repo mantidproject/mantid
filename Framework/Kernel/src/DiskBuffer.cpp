@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/ISaveable.h"
-#include <sstream>
 #include <utility>
 
 using namespace Mantid::Kernel;

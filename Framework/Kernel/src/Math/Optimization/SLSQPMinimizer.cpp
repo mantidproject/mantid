@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <sstream>
 
 namespace Mantid::Kernel::Math {
 namespace {

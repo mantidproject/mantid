@@ -24,7 +24,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include <boost/iterator/counting_iterator.hpp>
 #include <numeric>
-#include <sstream>
 
 namespace {
 struct Variances {

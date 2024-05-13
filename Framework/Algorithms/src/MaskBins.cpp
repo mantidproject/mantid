@@ -11,7 +11,6 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <limits>
-#include <sstream>
 
 using Mantid::HistogramData::BinEdges;
 

@@ -30,7 +30,6 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <fstream>
-#include <sstream>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

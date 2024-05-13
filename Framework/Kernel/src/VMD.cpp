@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <sstream>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Exception.h"
-#include <sstream>
 #include <utility>
 
 namespace Mantid::Kernel::Exception {

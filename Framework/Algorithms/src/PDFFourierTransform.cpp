@@ -21,7 +21,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

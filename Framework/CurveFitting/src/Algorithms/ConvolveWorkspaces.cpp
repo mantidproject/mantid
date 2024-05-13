@@ -16,8 +16,6 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_fft_real.h>
 
-#include <sstream>
-
 namespace Mantid::CurveFitting::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory

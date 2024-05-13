@@ -20,7 +20,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <sstream>
 
 //
 namespace Mantid::Algorithms {

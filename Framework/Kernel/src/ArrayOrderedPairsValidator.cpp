@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <sstream>
 
 namespace Mantid::Kernel {
 

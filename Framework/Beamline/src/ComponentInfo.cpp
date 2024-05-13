@@ -12,7 +12,6 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::Beamline {

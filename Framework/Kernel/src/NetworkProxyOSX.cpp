@@ -12,7 +12,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <Security/Authorization.h>
 #include <SystemConfiguration/SystemConfiguration.h>
-#include <sstream>
 #include <vector>
 
 namespace Mantid {

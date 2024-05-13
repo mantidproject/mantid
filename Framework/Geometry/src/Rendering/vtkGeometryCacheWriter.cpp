@@ -21,7 +21,6 @@
 #include <Poco/XML/XMLWriter.h>
 
 #include <fstream>
-#include <sstream>
 #include <utility>
 
 using Poco::XML::AutoPtr;

@@ -28,7 +28,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <sstream>
 #include <string>
 
 namespace Mantid::Algorithms {

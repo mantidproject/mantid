@@ -15,7 +15,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

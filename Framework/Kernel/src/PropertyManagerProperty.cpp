@@ -11,8 +11,6 @@
 
 #include <json/value.h>
 
-#include <sstream>
-
 namespace Mantid::Kernel {
 
 // -----------------------------------------------------------------------------

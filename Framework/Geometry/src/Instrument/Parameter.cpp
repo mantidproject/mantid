@@ -10,7 +10,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/V3D.h"
-#include <sstream>
 
 /* Register classes into the factory
  *

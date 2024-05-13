@@ -10,7 +10,6 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"

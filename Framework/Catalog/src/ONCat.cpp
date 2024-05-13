@@ -13,7 +13,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
-#include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
 #include <utility>

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include <limits>
-#include <sstream>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"

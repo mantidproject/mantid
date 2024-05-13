@@ -22,7 +22,6 @@
 
 #include <fstream>
 #include <map>
-#include <sstream>
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>

@@ -13,7 +13,6 @@
 #include "MantidKernel/V2D.h"
 #include <algorithm>
 #include <cfloat>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::Geometry {

@@ -13,7 +13,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 
 namespace Mantid::CurveFitting::Constraints {
 namespace {

@@ -11,7 +11,6 @@
 
 #include <cmath>
 #include <iomanip>
-#include <sstream>
 #include <stdexcept>
 
 namespace Mantid::CurveFitting {

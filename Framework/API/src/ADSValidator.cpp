@@ -9,7 +9,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TypedValidator.h"
 #include <memory>
-#include <sstream>
 
 namespace Mantid::API {
 

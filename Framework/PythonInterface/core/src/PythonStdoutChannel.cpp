@@ -15,8 +15,6 @@
 #include <boost/iostreams/categories.hpp> // sink_tag
 #include <boost/iostreams/stream.hpp>
 
-#include <iostream> // streamsize
-
 namespace { // anonymous namespace
 
 class PyStdoutSink {

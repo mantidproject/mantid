@@ -10,11 +10,10 @@
  *  Created on: Nov 14, 2012
  *      Author: mark.koennecke@psi.ch
  */
-#include <sstream>
 
+#include "MantidSINQ/SINQHMListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidSINQ/SINQHMListener.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>

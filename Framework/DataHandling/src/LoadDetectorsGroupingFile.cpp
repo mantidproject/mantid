@@ -4,13 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <sstream>
 
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"

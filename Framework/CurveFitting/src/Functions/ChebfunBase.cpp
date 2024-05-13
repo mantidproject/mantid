@@ -22,7 +22,6 @@
 #include <functional>
 #include <limits>
 #include <numeric>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::CurveFitting::Functions {

@@ -17,7 +17,6 @@
 #include <boost/math/special_functions/hermite.hpp>
 
 #include <cmath>
-#include <sstream>
 
 namespace Mantid::CurveFitting::Functions {
 

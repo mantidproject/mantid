@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <chrono>
-#include <iostream>
 
 using separator_t = std::array<uint8_t, 8>;
 static constexpr separator_t header_sep{0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
