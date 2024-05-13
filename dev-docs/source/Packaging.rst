@@ -130,7 +130,7 @@ Developers can build packages to test branches using the ``build_packages_from_b
 - Publish the package(s) to a given Anaconda channel and label.
 - Publish the package(s) to a given Github repository under a specified tag.
 
-for a given branch of mantid. The branch can be form the main mantid repo or from a remote.
+for a given branch of mantid. The branch can be from the main mantid repo or from a remote.
 
 Options
 #######
@@ -146,7 +146,7 @@ Options
 - ``GITHUB_RELEASES_TAG``: Name of the tag for the release; only to be used for release candidate builds.
 - ``ANACONDA_TOKEN_CREDENTIAL_ID`` [``anaconda-cloud-token``, ``anaconda-token-ornl``]: One of two credentials to use for publishing to Anaconda.
 - ``GH_ORGANIZATION_OR_USERNAME``: Name of the organisation or Github user name who owns the repository with the code to build. By default this is ``mantidproject``, if you are building from a fork this will need to change to your username.
-- ``BRANCH_NAME``: Name of the branch to build to packages from.
+- ``BRANCH_NAME``: Name of the branch to build the packages from.
 
 Example
 #######
@@ -165,7 +165,7 @@ Say I've implemented a new file searching method on a branch ``1234_new_file_sea
    - ``ANACONDA_TOKEN_CREDENTIAL_ID`` = ``anaconda-cloud-token``
    - ``BRANCH_NAME`` = ``1234_new_file_search``
 
-5. Click ``Build``. This will take you back to the main job page, the build just set off will be the most recent (highest number) build on the left hand side.
+5. Click ``Build``. This will take you back to the main job page, the build just set off will be the most recent (highest number) build on the left hand side. It is a good idea to make note of the build number / copy the link somewhere safe. If the build is for testing a pr, make suer to add the link to the testing instructions.
 6. Once the job has successfully completed, check `the Mantid Anaconda page <mantid-conda-org_>`_ to make sure it has uploaded.
 7. Head to IDAaaS (or any linux system) and run ``mamba install -c mantid/label/new_file_system_test mantidworkbench`` in a new environment to install the test package.
 
