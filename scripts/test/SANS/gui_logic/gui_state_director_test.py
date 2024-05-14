@@ -11,6 +11,7 @@ from unittest import mock
 from sans.common.enums import SANSFacility
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.state.StateObjects.StateSave import StateSave
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
@@ -91,7 +92,10 @@ class GuiStateDirectorTest(unittest.TestCase):
 
     def test_save_settings_copied_from_gui(self):
         state_model = mock.Mock(spec=self._get_state_gui_model())
-        state_model.all_states.save = mock.NonCallableMock()
+        expected_output_name = "user_specified_name"
+        state_save = StateSave()
+        state_save.user_specified_output_name = expected_output_name
+        state_model.all_states.save = state_save
 
         # Copy the top level model and reset save rather than load a file
         copied_state = copy.deepcopy(state_model)
@@ -101,7 +105,7 @@ class GuiStateDirectorTest(unittest.TestCase):
         director._load_current_state = mock.Mock(return_value=copied_state)
         new_state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
 
-        self.assertEqual(state_model.all_states.save, new_state.all_states.save)
+        self.assertEqual(expected_output_name, new_state.all_states.save.user_specified_output_name)
 
 
 if __name__ == "__main__":
