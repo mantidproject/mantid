@@ -19,12 +19,13 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
-    def _get_row_entry(option_string="", sample_thickness=8.0, background_workspace="test", scale_factor=1.1):
+    def _get_row_entry(option_string="", sample_thickness=8.0, background_workspace="test", scale_factor=1.1, output_name=None):
         row_entry = RowEntries(
             sample_scatter="SANS2D00022024",
             sample_thickness=sample_thickness,
             background_ws=background_workspace,
             scale_factor=scale_factor,
+            output_name=output_name,
         )
         row_entry.options.set_user_options(option_string)
         return row_entry
@@ -106,6 +107,21 @@ class GuiStateDirectorTest(unittest.TestCase):
         new_state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
 
         self.assertEqual(expected_output_name, new_state.all_states.save.user_specified_output_name)
+
+    def test_output_name_set_correctly_on_row_state(self):
+        test_cases = [(None, None), (None, "row_output_name"), ("state_output_name", None), ("state_output_name", "row_output_name")]
+
+        for state_model_output_name, row_output_name in test_cases:
+            with self.subTest(state_model_output_name=state_model_output_name, row_output_name=row_output_name):
+                state_model = self._get_state_gui_model()
+                state_save = StateSave()
+                state_save.user_specified_output_name = state_model_output_name
+                state_model.all_states.save = state_save
+
+                director = GuiStateDirector(state_model, SANSFacility.ISIS)
+                new_state = director.create_state(self._get_row_entry(output_name=row_output_name))
+
+                self.assertEqual(row_output_name, new_state.all_states.save.user_specified_output_name)
 
 
 if __name__ == "__main__":

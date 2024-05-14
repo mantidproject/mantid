@@ -59,9 +59,7 @@ class GuiStateDirector(object):
             gui_state.all_states.save = copy.deepcopy(self._state_gui_model.all_states.save)
             gui_state.reduction_dimensionality = self._state_gui_model.reduction_dimensionality
 
-        output_name = row_entry.output_name
-        if output_name:
-            gui_state.output_name = output_name
+        gui_state.output_name = row_entry.output_name if row_entry.output_name else None
 
         if row_entry.sample_thickness:
             gui_state.sample_thickness = float(row_entry.sample_thickness)
