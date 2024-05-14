@@ -50,7 +50,6 @@ requirements:
     - versioningit
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - sip {{ sip }}                          # [build_platform != target_platform]
-    - libcxx  {{ libcxx }}                   # [osx]
 
   run:
     - matplotlib {{ matplotlib }}

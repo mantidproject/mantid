@@ -54,7 +54,7 @@ requirements:
     - pip
     - versioningit
     - libglu  # [linux]
-    - libcxx  {{ libcxx }}                   # [osx]
+
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
