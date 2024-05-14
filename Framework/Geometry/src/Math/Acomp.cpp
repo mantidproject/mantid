@@ -905,8 +905,8 @@ It is set on exit (to the EPI)
     }
   }
 
-  std::vector<int>::iterator dx, ddx; // DNF active iterator
-  std::vector<int>::iterator px;      // PIactive iterator
+  std::vector<int>::iterator dx, ddx;  // DNF active iterator
+  std::vector<int>::const_iterator px; // PIactive iterator
 
   //
   // First remove singlets:
@@ -914,7 +914,7 @@ It is set on exit (to the EPI)
   for (dx = DNFactive.begin(); dx != DNFactive.end(); ++dx) {
     if (*dx >= 0 && DNFscore[*dx] == 1) // EPI (definately)
     {
-      auto px = std::find_if(PIactive.cbegin(), PIactive.cend(), [&](const int pi) { return Grid[pi][*dx]; });
+      px = std::find_if(PIactive.cbegin(), PIactive.cend(), [&](const int pi) { return Grid[pi][*dx]; });
 
       if (PIactive.cend() == px)
         continue;

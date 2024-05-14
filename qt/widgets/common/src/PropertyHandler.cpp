@@ -665,8 +665,9 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
 
     // If the parameter is fixed, re-fix to update the subproperty.
     if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
-      if (std::any_of(prop->subProperties().cbegin(), prop->subProperties().cend(),
-                      [](const auto subProp) { return subProp->propertyName() == "Fix"; })) {
+      const auto subProps = prop->subProperties();
+      if (std::any_of(subProps.cbegin(), subProps.cend(),
+                      [](const auto &subProp) { return subProp->propertyName() == "Fix"; })) {
         fix(prop->propertyName());
       }
     }

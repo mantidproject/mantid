@@ -893,7 +893,7 @@ void RepoModel::downloadFinished(void) {
 }
 
 bool RepoModel::isDownloading(const QModelIndex &index) const {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == downloading_path;
   return false;
@@ -921,7 +921,7 @@ void RepoModel::uploadFinished(void) {
 }
 
 bool RepoModel::isUploading(const QModelIndex &index) const {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == uploading_path;
   return false;
@@ -963,7 +963,7 @@ RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent) :
   gpBox->addLayout(personalLayout);
   personalGroupBox->setLayout(gpBox);
 
-  QLabel *cmLabel = new QLabel("Comment");
+  const QLabel *cmLabel = new QLabel("Comment");
   auto *buttonBox = new QDialogButtonBox();
   buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
