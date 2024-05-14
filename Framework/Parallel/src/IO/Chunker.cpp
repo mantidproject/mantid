@@ -174,7 +174,7 @@ std::vector<std::pair<int, std::vector<size_t>>> Chunker::makeBalancedPartitioni
   // Indexed size vector such that we can sort it but still know original index.
   // Elements are <size, original index, done flag>
   std::vector<std::tuple<size_t, size_t, bool>> sortedSizes;
-  std::transform(sizes.cbegin(), sizes.cend(), sortedSizes.begin(),
+  std::transform(sizes.cbegin(), sizes.cend(), std::back_inserter(sortedSizes),
                  [&sortedSizes](const auto size) { return std::make_tuple(size, sortedSizes.size(), false); });
   std::sort(sortedSizes.begin(), sortedSizes.end(),
             [](const auto &a, const auto &b) { return std::get<0>(a) > std::get<0>(b); });
