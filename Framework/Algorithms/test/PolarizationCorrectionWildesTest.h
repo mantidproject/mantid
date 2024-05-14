@@ -81,19 +81,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00, 11"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "00, 11");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
     for (size_t i = 0; i != 4; ++i) {
@@ -156,19 +144,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0, 1"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
     const std::array<std::string, 2> POL_DIRS{{"++", "--"}};
     for (size_t i = 0; i != 2; ++i) {
@@ -206,19 +182,7 @@ public:
     const std::vector<std::string> wsNames{{"ws00"}};
     AnalysisDataService::Instance().addOrReplace(wsNames.front(), ws00);
     auto effWS = idealEfficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
     MatrixWorkspace_sptr ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
@@ -261,18 +225,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS);
   }
@@ -305,19 +258,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "00, 11"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "00, 11");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     solveMissingIntensities(ws00, ws01, ws10, ws11, effWS);
     using namespace Mantid::API;
@@ -414,19 +355,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0, 1"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
     const double F1 = effWS->y(0).front();
     const double F1e = effWS->e(0).front();
@@ -478,19 +407,7 @@ public:
     const std::string wsName{"ws00"};
     AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = efficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsName, effWS, "0");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
     const auto P1 = effWS->y(2).front();
     const auto P1e = effWS->e(2).front();
@@ -661,19 +578,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
 
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     const std::array<std::string, 4> OUTPUT_ORDER{{"++", "+-", "-+", "--"}};
     for (size_t i = 0; i != 4; ++i) {
@@ -698,6 +603,40 @@ private:
       }
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
+  }
+
+  Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::string &inputWorkspace,
+                                                       Mantid::API::MatrixWorkspace_sptr effWs,
+                                                       const std::string &flippers = "") {
+    return runCorrectionWildes(std::vector<std::string>{inputWorkspace}, effWs, flippers);
+  }
+
+  Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::vector<std::string> &inputWorkspaces,
+                                                       Mantid::API::MatrixWorkspace_sptr effWs,
+                                                       const std::string &flippers = "") {
+    PolarizationCorrectionWildes alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+
+    if (inputWorkspaces.size() == 1) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputWorkspaces[0]))
+    } else {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputWorkspaces))
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    if (!flippers.empty()) {
+      alg.setProperty("Flippers", flippers);
+    }
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWs))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    Mantid::API::WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    return outputWS;
   }
 
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
@@ -780,19 +719,7 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
 
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", flipperConfig))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     for (size_t i = 0; i != 4; ++i) {
       const std::string wsName = m_outputWSName + std::string("_") + outputSpinStates[i];
@@ -841,19 +768,8 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
 
     auto effWS = idealEfficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", flipperConfig))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
+
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = ouputWsOrder[i];
@@ -923,21 +839,9 @@ private:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
     const std::string flipperConf = "00, " + presentFlipperConf + ", 11";
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", flipperConf))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS)
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConf);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     solveMissingIntensity(ws00, ws01, ws10, ws11, effWS);
     fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS);
