@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StdoutChannel.h"
+#include <iostream>
 
 namespace Poco {
 StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {}

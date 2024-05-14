@@ -7,6 +7,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Timer.h"
 #include <algorithm>
+#include <sstream>
 #include <stdexcept>
 
 namespace Mantid::Kernel {
