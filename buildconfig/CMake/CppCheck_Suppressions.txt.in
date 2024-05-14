@@ -208,8 +208,8 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:619
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:303
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetDetectorOffsets.cpp:148
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:886
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:993
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:212
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp:107
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:662
@@ -333,7 +333,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDWorkspace.cpp:205
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitor.cpp:226
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDHistoWorkspace.cpp:54
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDHistoWorkspace.cpp:52
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
@@ -946,7 +946,7 @@ unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ISplittersWorkspace.cpp:25
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMaskWorkspace.cpp:45
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MatrixWorkspace.cpp:65
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMDHistoWorkspace.cpp:49
+cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMDHistoWorkspace.cpp:50
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Axis.cpp:44
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:251
