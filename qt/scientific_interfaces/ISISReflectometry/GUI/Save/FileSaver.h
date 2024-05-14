@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "GUI/Common/IFileHandler.h"
-#include "IAsciiSaver.h"
+#include "IFileSaver.h"
 #include "ISaveAlgorithmRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -16,10 +16,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-class MANTIDQT_ISISREFLECTOMETRY_DLL AsciiSaver : public IAsciiSaver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL FileSaver : public IFileSaver {
 
 public:
-  AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler);
+  FileSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler);
   static std::string extensionForFormat(NamedFormat format);
 
   bool isValidSaveDirectory(std::string const &filePath) const override;

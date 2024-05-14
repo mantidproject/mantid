@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "AsciiSaver.h"
+#include "FileSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
@@ -28,10 +28,10 @@ static constexpr auto ORT = ".ort";
 static constexpr auto ORB = ".orb";
 } // namespace FileExtensions
 
-AsciiSaver::AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
+FileSaver::FileSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
     : m_saveAlgRunner(std::move(saveAlgRunner)), m_fileHandler(fileHandler) {}
 
-std::string AsciiSaver::extensionForFormat(NamedFormat format) {
+std::string FileSaver::extensionForFormat(NamedFormat format) {
   // For the custom format we need to pass just the word "custom" to the "extension" property of the save algorithm
   switch (format) {
   case NamedFormat::Custom:
@@ -51,10 +51,10 @@ std::string AsciiSaver::extensionForFormat(NamedFormat format) {
   }
 }
 
-bool AsciiSaver::isValidSaveDirectory(std::string const &path) const { return m_fileHandler->fileExists(path); }
+bool FileSaver::isValidSaveDirectory(std::string const &path) const { return m_fileHandler->fileExists(path); }
 
-std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::string const &prefix,
-                                         std::string const &name, std::string const &extension) const {
+std::string FileSaver::assembleSavePath(std::string const &saveDirectory, std::string const &prefix,
+                                        std::string const &name, std::string const &extension) const {
   auto path = Poco::Path(saveDirectory).makeDirectory();
 
   if (extension == FileExtensions::CUSTOM) {
@@ -68,7 +68,7 @@ std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory, std::
   return path.toString();
 }
 
-Mantid::API::Workspace_sptr AsciiSaver::workspace(std::string const &workspaceName) const {
+Mantid::API::Workspace_sptr FileSaver::workspace(std::string const &workspaceName) const {
   auto const &ads = Mantid::API::AnalysisDataService::Instance();
 
   if (!ads.doesExist(workspaceName)) {
@@ -78,23 +78,23 @@ Mantid::API::Workspace_sptr AsciiSaver::workspace(std::string const &workspaceNa
   return ads.retrieveWS<Mantid::API::Workspace>(workspaceName);
 }
 
-void AsciiSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string const &extension,
-                                       const Mantid::API::Workspace_sptr &workspace,
-                                       std::vector<std::string> const &logParameters,
-                                       FileFormatOptions const &fileFormat) const {
+void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string const &extension,
+                                      const Mantid::API::Workspace_sptr &workspace,
+                                      std::vector<std::string> const &logParameters,
+                                      FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveAsciiAlgorithm(workspace, savePath, extension, logParameters,
                                          fileFormat.shouldIncludeHeader(), fileFormat.shouldIncludeQResolution(),
                                          fileFormat.separator());
 }
 
-void AsciiSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
-                                      FileFormatOptions const &fileFormat) const {
+void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
+                                     FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
                                         fileFormat.shouldIncludeAdditionalColumns());
 }
 
-void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
-                      std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+void FileSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
@@ -106,8 +106,8 @@ void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string 
   }
 }
 
-void AsciiSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
-                                  FileFormatOptions const &fileFormat) const {
+void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
+                                 FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
@@ -120,8 +120,8 @@ void AsciiSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames
   }
 }
 
-void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
-                      std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+void FileSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
   if (!isValidSaveDirectory(saveDirectory)) {
     throw InvalidSavePath(saveDirectory);
   }
@@ -145,8 +145,8 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
   }
 }
 
-bool AsciiSaver::shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
-                                        FileFormatOptions const &fileFormat) const {
+bool FileSaver::shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
+                                       FileFormatOptions const &fileFormat) const {
   if (!fileFormat.shouldSaveToSingleFile() || !fileFormat.isORSOFormat()) {
     return false;
   }
