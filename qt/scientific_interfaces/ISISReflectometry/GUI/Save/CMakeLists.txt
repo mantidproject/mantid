@@ -1,4 +1,4 @@
-set(SAVE_SRC_FILES SavePresenter.cpp QtSaveView.cpp FileSaver.cpp IAsciiSaver.cpp SaveAlgorithmRunner.cpp)
+set(SAVE_SRC_FILES SavePresenter.cpp QtSaveView.cpp FileSaver.cpp IFileSaver.cpp SaveAlgorithmRunner.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.

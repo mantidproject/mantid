@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../ReflMockObjects.h"
-#include "GUI/Save/IAsciiSaver.h"
+#include "GUI/Save/IFileSaver.h"
 #include "GUI/Save/SavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -525,16 +525,16 @@ public:
 
 private:
   SavePresenter makePresenter() {
-    auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();
-    m_asciiSaver = asciiSaver.get();
-    auto presenter = SavePresenter(&m_view, std::move(asciiSaver));
+    auto FileSaver = std::make_unique<NiceMock<MockFileSaver>>();
+    m_FileSaver = FileSaver.get();
+    auto presenter = SavePresenter(&m_view, std::move(FileSaver));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_asciiSaver));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_FileSaver));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
     AnalysisDataService::Instance().clear();
   }
@@ -591,12 +591,12 @@ private:
 
   void expectGetValidSaveDirectory() {
     EXPECT_CALL(m_view, getSavePath()).Times(1).WillOnce(Return(m_savePath));
-    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_FileSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(true));
   }
 
   void expectGetInvalidSaveDirectory() {
     EXPECT_CALL(m_view, getSavePath()).Times(1).WillOnce(Return(m_savePath));
-    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*m_FileSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(false));
   }
 
   void expectGetSaveParametersFromView(const bool saveToSingleFile, const bool isAutoSave) {
@@ -620,7 +620,7 @@ private:
     expectGetSaveParametersFromView(false, false);
     auto fileFormatOptions = FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
                                                m_includeQResolution, m_includeAdditionalColumns, false);
-    EXPECT_CALL(*m_asciiSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
+    EXPECT_CALL(*m_FileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
   void expectSaveWorkspacesNoLogs(const std::vector<std::string> &workspaceNames, const bool isSingleFileRequested,
@@ -630,7 +630,7 @@ private:
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
                           m_includeAdditionalColumns, expectedSingleFileOption);
-    EXPECT_CALL(*m_asciiSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
+    EXPECT_CALL(*m_FileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
   }
 
   void expectProcessing() { EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(true)); }
@@ -769,7 +769,7 @@ private:
 
   NiceMock<MockSaveView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
-  NiceMock<MockAsciiSaver> *m_asciiSaver;
+  NiceMock<MockFileSaver> *m_FileSaver;
   std::string m_savePath;
   // file format options for ascii saver
   NamedFormat m_fileFormat;
