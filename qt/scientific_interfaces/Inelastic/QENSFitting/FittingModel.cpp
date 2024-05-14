@@ -308,8 +308,11 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 FittingModel::FittingModel()
-    : m_fitDataModel(std::make_unique<FitDataModel>()), m_previousModelSelected(false),
-      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<FitOutput>()) {}
+    : m_fitType("FitType"), m_fitString("FitString"), m_fitDataModel(std::make_unique<FitDataModel>()),
+      m_fitPlotModel(), m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
+      m_fitOutput(std::make_unique<FitOutput>()), m_activeFunction(), m_fitFunction(), m_defaultParameters() {
+  m_fitPlotModel = std::make_unique<FitPlotModel>(m_fitDataModel->getFittingData(), m_fitOutput.get());
+}
 
 void FittingModel::validate(UserInputValidator &validator) const {
   if (auto const invalidFunction = isInvalidFunction())
@@ -382,14 +385,14 @@ bool FittingModel::isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spect
   return m_fitOutput->isSpectrumFit(domainIndex);
 }
 
-boost::optional<std::string> FittingModel::isInvalidFunction() const {
+std::optional<std::string> FittingModel::isInvalidFunction() const {
   if (!m_activeFunction)
     return std::string("No fit function has been defined");
 
   const auto composite = std::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
   if (composite && (composite->nFunctions() == 0 || composite->nParams() == 0))
     return std::string("No fitting functions have been defined.");
-  return boost::none;
+  return std::nullopt;
 }
 
 std::vector<std::string> FittingModel::getFitParameterNames() const {
@@ -430,19 +433,12 @@ void FittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
-  m_fitOutput->addOutput(group, parameters, result);
-  m_previousModelSelected = isPreviousModelSelected();
-}
-
-void FittingModel::addSingleFitOutput(const IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
-                                      WorkspaceIndex spectrum) {
-  auto group = getOutputGroup(fitAlgorithm);
-  auto parameters = getOutputParameters(fitAlgorithm);
-  auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = FunctionFactory::Instance().createInitialized(fitAlgorithm->getPropertyValue("Function"));
-  auto fitDomainIndex = m_fitDataModel->getDomainIndex(workspaceID, spectrum);
-  m_fitOutput->addSingleOutput(group, parameters, result, fitDomainIndex);
+  if (group->size() == 1u) {
+    m_fitFunction = FunctionFactory::Instance().createInitialized(fitAlgorithm->getPropertyValue("Function"));
+  } else {
+    m_fitFunction = extractFirstInnerFunction(fitAlgorithm->getPropertyValue("Function"));
+  }
+  m_fitOutput->addOutput(group, parameters, result, m_fitPlotModel->getActiveDomainIndex());
   m_previousModelSelected = isPreviousModelSelected();
 }
 
@@ -489,12 +485,12 @@ std::string FittingModel::getResultXAxisUnit() const { return "MomentumTransfer"
 
 std::string FittingModel::getResultLogName() const { return "axis-1"; }
 
-boost::optional<ResultLocationNew> FittingModel::getResultLocation(WorkspaceID workspaceID,
-                                                                   WorkspaceIndex spectrum) const {
+std::optional<ResultLocationNew> FittingModel::getResultLocation(WorkspaceID workspaceID,
+                                                                 WorkspaceIndex spectrum) const {
   auto fitDomainIndex = m_fitDataModel->getDomainIndex(workspaceID, spectrum);
   if (!m_fitOutput->isEmpty() && m_fitDataModel->getNumberOfWorkspaces() > workspaceID)
     return m_fitOutput->getResultLocation(fitDomainIndex);
-  return boost::none;
+  return std::nullopt;
 }
 
 WorkspaceGroup_sptr FittingModel::getResultWorkspace() const { return m_fitOutput->getLastResultWorkspace(); }
@@ -517,7 +513,9 @@ IAlgorithm_sptr FittingModel::getFittingAlgorithm(FittingMode mode) const {
     return createSimultaneousFit(getFitFunction());
 }
 
-IAlgorithm_sptr FittingModel::getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
+IAlgorithm_sptr FittingModel::getSingleFittingAlgorithm() const {
+  const auto workspaceID = m_fitPlotModel->getActiveWorkspaceID();
+  const auto spectrum = m_fitPlotModel->getActiveWorkspaceIndex();
   const auto ws = m_fitDataModel->getWorkspace(workspaceID);
   const auto range = m_fitDataModel->getFittingRange(workspaceID, spectrum);
   const auto exclude = m_fitDataModel->getExcludeRegionVector(workspaceID, spectrum);
@@ -603,6 +601,15 @@ std::string FittingModel::getOutputBasename() const { return cutLastOf(sequentia
 
 void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
+
+  auto group = getOutputGroup(fittingAlgorithm);
+  if (group->size() == 1u) {
+    const auto base = prefix + std::to_string(m_fitPlotModel->getActiveWorkspaceID().value + 1);
+    removeFromADSIfExists(base);
+    cleanTemporaries(base + "_0");
+    return;
+  }
+
   for (WorkspaceID datasetIndex = 0; datasetIndex < m_fitDataModel->getNumberOfWorkspaces(); ++datasetIndex) {
     const auto base = prefix + std::to_string(datasetIndex.value + 1);
     removeFromADSIfExists(base);
@@ -612,12 +619,8 @@ void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   }
 }
 
-void FittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) {
-  const auto base = "__" + fittingAlgorithm->name() + "_ws" + std::to_string(workspaceID.value + 1);
-  removeFromADSIfExists(base);
-  cleanTemporaries(base + "_0");
-}
+IFitDataModel *FittingModel::getFitDataModel() const { return m_fitDataModel.get(); }
 
-IFitDataModel *FittingModel::getFitDataModel() { return m_fitDataModel.get(); }
+IFitPlotModel *FittingModel::getFitPlotModel() const { return m_fitPlotModel.get(); }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

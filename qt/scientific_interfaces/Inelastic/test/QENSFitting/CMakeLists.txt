@@ -14,8 +14,9 @@ set(TEST_FILES
     FitOutputOptionsPresenterTest.h
     FitPlotModelTest.h
     FitPlotPresenterTest.h
-    InelasticFitPropertyBrowserTest.h
     FittingModelTest.h
+    FittingPresenterTest.h
+    InelasticFitPropertyBrowserTest.h
     IqtFitModelTest.h
     ParameterEstimationTest.h
 )

@@ -36,7 +36,6 @@ class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public
 public:
   FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view);
   ~FitDataPresenter();
-  std::vector<FitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
@@ -72,8 +71,6 @@ public:
     UNUSED_ARG(dataIndex);
     UNUSED_ARG(single);
   };
-
-  virtual void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
   std::string tabName() const override;
 

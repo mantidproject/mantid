@@ -22,8 +22,6 @@ FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataV
 
 FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
 
-std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFittingData(); }
-
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
 std::string FitDataPresenter::tabName() const { return m_tab->tabName(); }
