@@ -333,7 +333,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDWorkspace.cpp:205
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitor.cpp:226
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDHistoWorkspace.cpp:52
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDHistoWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
