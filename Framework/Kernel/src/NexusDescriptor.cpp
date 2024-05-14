@@ -14,6 +14,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 
