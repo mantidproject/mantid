@@ -82,8 +82,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cp
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:403
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:76
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:129
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:126
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:127
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyManager.h:106
@@ -692,11 +692,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexus
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1208
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1994
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:425
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:390
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:391
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:600
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:611
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveISISNexus.cpp:612
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:397
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
@@ -745,6 +740,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWor
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:379
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:380
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:410
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:574
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:999
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1095
@@ -1004,7 +1000,6 @@ returnDanglingLifetime:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiPeakSearch.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks1D2.cpp:205
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SliceMDHisto.cpp:95
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiPeakSearch.cpp:183
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiPeakSearch.cpp:368
 internalError:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MDEventsTestHelper.cpp:0
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/inc/MantidFrameworkTestHelpers/FakeObjects.h:598
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:787
@@ -1179,9 +1174,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:674
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:698
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:711
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:728
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:897
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:925
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:967
 unassignedVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:50
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:506
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:514
@@ -1195,8 +1187,8 @@ iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:17
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:191
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp:62
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h:35
-uninitvar:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:251
-uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:251
+uninitvar:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:248
+uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:248
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressPresenter.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/DoubleEditorFactory.cpp:18
 publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:143
@@ -1373,7 +1365,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflecto
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:349
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD.cpp:0
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.h:47
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:1484
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:177
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:185
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:186

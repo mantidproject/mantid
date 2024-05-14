@@ -75,7 +75,7 @@ std::size_t DetectorGroup::nDets() const { return m_detectors.size(); }
  */
 V3D DetectorGroup::getPos() const {
   V3D newPos = std::accumulate(m_detectors.cbegin(), m_detectors.cend(), V3D(),
-                               [](V3D pos, const auto &detector) { return pos + detector.second->getPos(); });
+                               [](const V3D &pos, const auto &detector) { return pos + detector.second->getPos(); });
 
   // We can have very small values (< Tolerance) of each component that should
   // be zero

@@ -33,7 +33,7 @@ bool MANTID_MDALGORITHMS_DLL dataExists(const std::string &data_name);
 /// Reduce the vector of input data to only data files and workspaces which are
 /// not found in the vector of data currently in the workspace
 std::string MANTID_MDALGORITHMS_DLL filterToNew(std::vector<std::string> &input_data,
-                                                std::vector<std::string> &current_data, std::vector<double> &psi,
+                                                const std::vector<std::string> &current_data, std::vector<double> &psi,
                                                 std::vector<double> &gl, std::vector<double> &gs,
                                                 std::vector<double> &efix);
 

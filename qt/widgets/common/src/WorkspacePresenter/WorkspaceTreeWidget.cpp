@@ -1478,7 +1478,7 @@ void WorkspaceTreeWidget::onClickShowDetectorTable() {
 void WorkspaceTreeWidget::showDetectorsTable() {
   // get selected workspace
   auto ws = QString::fromStdString(getSelectedWorkspaceNames()[0]);
-  const auto table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
+  const auto *table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
   if (!table) {
     QMessageBox::information(this, "Error", QString("Cannot create detectors tables for workspace ") + ws);
   }
