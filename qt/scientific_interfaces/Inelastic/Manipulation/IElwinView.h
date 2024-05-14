@@ -53,6 +53,7 @@ public:
   virtual void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) = 0;
 
   virtual QModelIndexList getSelectedData() = 0;
+  virtual void selectAllRows() = 0;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
   virtual bool isGroupInput() const = 0;
