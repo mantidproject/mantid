@@ -339,12 +339,7 @@ bool checkGroupDetectorsInWorkspace(const Grouping &grouping, const Workspace_sp
 // Checks that all of the entries of a vector are contained in a set, returns
 // true/false
 bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
-  for (const auto item : items) {
-    if (set.find(item) == set.end()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(items.cbegin(), items.cend(), [&set](const auto item) { return set.find(item) != set.cend(); });
 }
 
 /**

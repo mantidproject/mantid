@@ -74,11 +74,9 @@ std::size_t DetectorGroup::nDets() const { return m_detectors.size(); }
  *  @return a V3D object of the detector group position
  */
 V3D DetectorGroup::getPos() const {
-  V3D newPos;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    newPos += (*it).second->getPos();
-  }
+  V3D newPos = std::accumulate(m_detectors.cbegin(), m_detectors.cend(), V3D(),
+                               [](V3D pos, const auto &detector) { return pos + detector.second->getPos(); });
+
   // We can have very small values (< Tolerance) of each component that should
   // be zero
   if (std::abs(newPos[0]) < Mantid::Kernel::Tolerance)
@@ -96,11 +94,9 @@ std::optional<Kernel::V2D> DetectorGroup::getSideBySideViewPos() const { return 
 
 /// Gives the average distance of a group of detectors from the given component
 double DetectorGroup::getDistance(const IComponent &comp) const {
-  double result = 0.0;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result += (*it).second->getDistance(comp);
-  }
+  double result =
+      std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
+                      [&comp](double sum, const auto &detector) { return sum + detector.second->getDistance(comp); });
   return result / static_cast<double>(m_detectors.size());
 }
 

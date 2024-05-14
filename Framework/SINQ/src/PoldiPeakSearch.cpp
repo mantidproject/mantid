@@ -367,14 +367,9 @@ UncertainValue PoldiPeakSearch::getBackgroundWithSigma(const std::list<MantidVec
  */
 bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::const_iterator> peakPositions,
                                                         MantidVec::const_iterator point) const {
-  for (std::list<MantidVec::const_iterator>::const_iterator peakPosition = peakPositions.begin();
-       peakPosition != peakPositions.end(); ++peakPosition) {
-    if (std::abs(std::distance(point, *peakPosition)) <= m_minimumDistance) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::none_of(peakPositions.cbegin(), peakPositions.cend(), [&](const auto peakPosition) {
+    return std::abs(std::distance(point, peakPosition)) <= m_minimumDistance;
+  });
 }
 
 /** Returns the number of background points
