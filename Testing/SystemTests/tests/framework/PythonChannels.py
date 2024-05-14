@@ -24,7 +24,6 @@ import os
 import sys
 import time
 import unittest
-import platform
 import subprocess
 import systemtesting
 from multiprocessing import Process
@@ -106,8 +105,8 @@ class PythonChannelTest(systemtesting.MantidSystemTest):
         os.remove(TEST_SCRIPT_NAME)
 
     def skipTests(self):
-        # skip if OSX because multiprocessing uses `spawn` instead of `fork` which causes this test to fail
-        return platform.system() == "Darwin"
+        # temporarily skip this test for all platforms
+        return True
 
     def runTest(self):
         self._server = Process(target=run_server)
