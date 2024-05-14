@@ -786,12 +786,11 @@ RepoModel::RepoItem *RepoModel::getParent(const QString &folder, QList<RepoItem 
 
     if (try_to_find) {
       // this means that the previous folders were found
-      foreach (RepoItem *the_parent, parents) {
-        if (the_parent->path() == aux_folder) {
-          found = true;
-          father = the_parent;
-          break;
-        }
+      const auto it = std::find_if(parents.cbegin(), parents.cend(),
+                                   [&aux_folder](const auto &parent) { return parent->path() == aux_folder; });
+      if (it != parents.cend()) {
+        found = true;
+        father = *it;
       }
     }
     // there is not RepoItem related to the current folder,

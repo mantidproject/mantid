@@ -805,11 +805,8 @@ bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
-    foreach (QString oldName, renamed) {
-      if (m_selectedNames.contains(oldName)) {
-        return true;
-      }
-    }
+    return std::any_of(renamed.cbegin(), renamed.cend(),
+                       [&](const auto &oldName) { return m_selectedNames.contains(oldName); });
   } else if (m_selectedNames.contains(name)) {
     return true;
   }

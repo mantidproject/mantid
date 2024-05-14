@@ -125,13 +125,9 @@ std::string filterToNew(std::vector<std::string> &input_data, std::vector<std::s
  * workspace
  * @returns true if the named data source appears in the vector of current data
  */
-bool appearsInCurrentData(const std::string &data_source, std::vector<std::string> &current_data) {
-  for (auto reverse_iter = current_data.rbegin(); reverse_iter != current_data.rend(); ++reverse_iter) {
-    if (data_source == *reverse_iter) {
-      return true;
-    }
-  }
-  return false;
+bool appearsInCurrentData(const std::string &data_source, const std::vector<std::string> &current_data) {
+  return std::any_of(current_data.rbegin(), current_data.rend(),
+                     [&data_source](const auto source) { return data_source == source; });
 }
 
 /*
@@ -156,7 +152,7 @@ std::vector<std::string> getHistoricalDataSources(const WorkspaceHistory &ws_his
     auto alg_history = history_item.getAlgorithmHistory();
     if (alg_history->name() == create_alg_name || alg_history->name() == accumulate_alg_name) {
       auto props = alg_history->getProperties();
-      for (auto &prop : props) {
+      for (const auto &prop : props) {
         PropertyHistory_const_sptr prop_history = prop;
         if (prop_history->name() == "DataSources") {
           insertDataSources(prop_history->value(), historical_data_sources);

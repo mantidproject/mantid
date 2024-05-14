@@ -313,9 +313,10 @@ int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std:
   }
   int buff_size = max_str_size;
   if (buff_size <= 0) {
-    buff_size = std::max_element(str_vec.cbegin(), str_vec.cend(), [](const auto &a, const auto &b) {
-                  return a.size() < b.size();
-                })->size();
+    const auto maxSize =
+        std::accumulate(str_vec.cbegin(), str_vec.cend(), size_t(0),
+                        [](size_t currentMax, const auto &str) { return std::max(currentMax, str.size()); });
+    buff_size = boost::numeric_cast<int>(maxSize);
   }
   if (buff_size <= 0)
     buff_size = 1;
