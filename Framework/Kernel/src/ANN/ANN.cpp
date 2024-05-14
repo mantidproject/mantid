@@ -29,6 +29,7 @@
 #include "MantidKernel/ANN/ANNperf.h" // ANN Perf Header
 #include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 #include <cstdlib>                    // C standard lib defs
+#include <iostream>                   // I/O streams
 
 using namespace std; // make std:: accessible
 
