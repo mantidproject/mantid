@@ -26,9 +26,10 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view)
+SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
+                                         std::unique_ptr<ISymmetriseModel> model)
     : DataManipulation(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
-      m_model(std::make_unique<SymmetriseModel>()), m_isPreview(false) {
+      m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));

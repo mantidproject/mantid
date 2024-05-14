@@ -41,9 +41,9 @@ public:
 
 namespace MantidQt::CustomInterfaces {
 using namespace Inelastic;
-ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view)
-    : DataManipulation(parent), m_view(view), m_model(std::make_unique<ElwinModel>()),
-      m_dataModel(std::make_unique<FitDataModel>()), m_selectedSpectrum(0) {
+ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::make_unique<FitDataModel>()),
+      m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));

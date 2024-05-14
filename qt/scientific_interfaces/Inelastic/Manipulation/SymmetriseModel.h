@@ -17,20 +17,35 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL SymmetriseModel {
+class MANTIDQT_INELASTIC_DLL ISymmetriseModel {
+
+public:
+  virtual ~ISymmetriseModel() = default;
+  virtual void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                     std::vector<long> const &spectraRange) = 0;
+  virtual std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) = 0;
+  virtual void reflectNegativeToPositive() = 0;
+  virtual void setWorkspaceName(std::string const &workspaceName) = 0;
+  virtual void setEMin(double value) = 0;
+  virtual void setEMax(double value) = 0;
+  virtual void setIsPositiveReflect(bool value) = 0;
+  virtual bool getIsPositiveReflect() const = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL SymmetriseModel : public ISymmetriseModel {
 
 public:
   SymmetriseModel();
   ~SymmetriseModel() = default;
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                             std::vector<long> const &spectraRange);
-  std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
-  void reflectNegativeToPositive();
-  void setWorkspaceName(std::string const &workspaceName);
-  void setEMin(double value);
-  void setEMax(double value);
-  void setIsPositiveReflect(bool value);
-  bool getIsPositiveReflect() const;
+                             std::vector<long> const &spectraRange) override;
+  std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) override;
+  void reflectNegativeToPositive() override;
+  void setWorkspaceName(std::string const &workspaceName) override;
+  void setEMin(double value) override;
+  void setEMax(double value) override;
+  void setIsPositiveReflect(bool value) override;
+  bool getIsPositiveReflect() const override;
 
 private:
   std::string m_inputWorkspace;

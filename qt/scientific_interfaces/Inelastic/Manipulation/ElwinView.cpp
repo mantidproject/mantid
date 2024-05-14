@@ -27,7 +27,7 @@ Mantid::Kernel::Logger g_log("Elwin");
 
 namespace MantidQt::CustomInterfaces {
 using namespace Inelastic;
-ElwinView::ElwinView(QWidget *parent) : m_presenter(), m_elwTree(nullptr) {
+ElwinView::ElwinView(QWidget *parent) : QWidget(parent), m_presenter(), m_elwTree(nullptr) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);

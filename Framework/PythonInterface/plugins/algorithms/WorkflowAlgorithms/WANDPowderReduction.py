@@ -169,6 +169,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="Output Workspace",
         )
+        self.getProperty("OutputWorkspace").setDisableReplaceWSButton(True)
 
         self.declareProperty(
             "Sum",

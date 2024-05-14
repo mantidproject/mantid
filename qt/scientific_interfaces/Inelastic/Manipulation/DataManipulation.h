@@ -69,7 +69,7 @@ protected:
   virtual void runComplete(bool error) { (void)error; };
 
 private:
-  virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void setFileExtensionsByName(bool filter) { (void)filter; };
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   bool m_tabRunning;

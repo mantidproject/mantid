@@ -33,7 +33,6 @@ namespace MantidQt::CustomInterfaces {
 ILLEnergyTransfer::ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
@@ -334,7 +333,7 @@ void ILLEnergyTransfer::save() {
 /**
  * Called when the instrument has changed, used to update default values.
  */
-void ILLEnergyTransfer::setInstrumentDefault() {
+void ILLEnergyTransfer::updateInstrumentConfiguration() {
   auto const instrument = getInstrumentDetail("instrument");
 
   // Set instrument in run file widgets

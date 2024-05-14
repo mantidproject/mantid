@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/PolarizationCorrectionWildes.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -19,6 +20,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 
 #include <Eigen/Dense>
+#include <algorithm>
 
 using Mantid::Algorithms::PolarizationCorrectionWildes;
 
@@ -40,18 +42,23 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_IdealCaseFullCorrections() {
-    using namespace Mantid::HistogramData;
+  void test_IdealCaseFullCorrections() { runIdealCaseFullCorrections("00,01,10,11", {"++", "+-", "-+", "--"}); }
 
-    BinEdges edges{0.3, 0.6, 0.9, 1.2};
-    auto effWS = idealEfficiencies(edges);
-    const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
-    idealCaseFullCorrectionsTest(edges, effWS, POL_DIRS);
+  void test_IdealCaseFullCorrectionsReorderedInputs() {
+    runIdealCaseFullCorrections("11,00,10,01", {"++", "+-", "-+", "--"});
   }
 
-  void test_IdealCaseThreeInputs10Missing() { idealThreeInputsTest("10"); }
+  void test_IdealCaseThreeInputs10Missing() { idealThreeInputsTest("10", "00,01,11", {"++", "+-", "-+", "--"}); }
 
-  void test_IdealCaseThreeInputs01Missing() { idealThreeInputsTest("01"); }
+  void test_IdealCaseThreeInputs10MissingReorderedInput() {
+    idealThreeInputsTest("10", "01,00,11", {"++", "+-", "-+", "--"});
+  }
+
+  void test_IdealCaseThreeInputs01Missing() { idealThreeInputsTest("01", "00,10,11", {"++", "+-", "-+", "--"}); }
+
+  void test_IdealCaseThreeInputs01MissingReorderedInput() {
+    idealThreeInputsTest("01", "11,00,10", {"++", "+-", "-+", "--"});
+  }
 
   void test_IdealCaseTwoInputsWithAnalyzer() {
     using namespace Mantid::API;
@@ -680,6 +687,19 @@ public:
 private:
   const std::string m_outputWSName{"output"};
 
+  void setupWorkspaceData(std::vector<std::string> &wsNames,
+                          const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
+    using namespace Mantid::API;
+
+    for (size_t i = 0; i != wsNames.size(); ++i) {
+      for (size_t j = 0; j != nHist; ++j) {
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
+      }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
+  }
+
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
@@ -735,7 +755,8 @@ private:
 
   void idealCaseFullCorrectionsTest(const Mantid::HistogramData::BinEdges &edges,
                                     const Mantid::API::MatrixWorkspace_sptr &effWS,
-                                    const std::array<std::string, 4> &outputSpinStates) {
+                                    const std::array<std::string, 4> &outputSpinStates,
+                                    const std::string &flipperConfig = "00,01,10,11") {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
@@ -747,15 +768,18 @@ private:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
-    const std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
-    for (size_t i = 0; i != 4; ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
-        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
-        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
-      }
-      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
-    }
+
+    std::vector<std::string> wsNames{"ws00", "ws01", "ws10", "ws11"};
+    const std::vector<MatrixWorkspace_sptr> wsList{ws00, ws01, ws10, ws11};
+    setupWorkspaceData(wsNames, wsList, nHist);
+
+    // Re-order the input workspace names to match the input flipper configuration
+    using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -763,6 +787,7 @@ private:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", flipperConfig))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -789,7 +814,8 @@ private:
     }
   }
 
-  void idealThreeInputsTest(const std::string &missingFlipperConf) {
+  void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
+                            const std::vector<std::string> &ouputWsOrder) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
@@ -802,15 +828,18 @@ private:
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    const std::vector<std::string> wsNames{{"ws00", "wsXX", "ws11"}};
-    const std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, wsXX, ws11}};
-    for (size_t i = 0; i != 3; ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
-        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
-        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
-      }
-      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
-    }
+
+    const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
+    std::vector<std::string> wsNames{"ws00", "wsXX", "ws11"};
+    const std::vector<MatrixWorkspace_sptr> wsList{ws00, wsXX, ws11};
+    setupWorkspaceData(wsNames, wsList, nHist);
+
+    // Re-order the input workspace names to match the input flipper configuration
+    using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+
     auto effWS = idealEfficiencies(edges);
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
@@ -820,17 +849,14 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
-    const std::string flipperConf = "00, " + presentFlipperConf + ", 11";
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", flipperConf))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", flipperConfig))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
-    const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
     for (size_t i = 0; i != 4; ++i) {
-      const auto &dir = POL_DIRS[i];
+      const auto &dir = ouputWsOrder[i];
       const std::string wsName = m_outputWSName + std::string("_") + dir;
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
@@ -1588,6 +1614,14 @@ private:
         }
       }
     }
+  }
+
+  void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder) {
+    using namespace Mantid::HistogramData;
+
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    auto effWS = idealEfficiencies(edges);
+    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig);
   }
 };
 

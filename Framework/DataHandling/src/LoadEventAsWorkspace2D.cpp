@@ -90,6 +90,9 @@ void LoadEventAsWorkspace2D::init() {
                   "The name of the units to convert to (must be one of those registered in the Unit Factory)");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+  declareProperty("LoadNexusInstrumentXML", true,
+                  "If true, load the instrument definition file (IDF) from the input NeXus file. "
+                  "If false, Mantid will load the most appropriate IDF from the instrument repository.");
 }
 
 std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
