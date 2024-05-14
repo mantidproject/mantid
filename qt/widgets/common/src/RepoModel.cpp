@@ -963,7 +963,7 @@ RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent) :
   gpBox->addLayout(personalLayout);
   personalGroupBox->setLayout(gpBox);
 
-  const QLabel *cmLabel = new QLabel("Comment");
+  QLabel *cmLabel = new QLabel("Comment");
   auto *buttonBox = new QDialogButtonBox();
   buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 

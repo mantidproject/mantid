@@ -39,7 +39,7 @@ std::string MANTID_MDALGORITHMS_DLL filterToNew(std::vector<std::string> &input_
 
 /// Check if the named data source is in the vector of data currently in the
 /// workspace
-bool appearsInCurrentData(const std::string &data_source, std::vector<std::string> &current_data);
+bool appearsInCurrentData(const std::string &data_source, const std::vector<std::string> &current_data);
 
 /// Return a vector of the names of files and workspaces which have been
 /// previously added to the workspace

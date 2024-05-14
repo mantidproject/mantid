@@ -1174,6 +1174,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:674
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:698
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:711
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:728
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:966
 unassignedVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:50
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:506
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:514

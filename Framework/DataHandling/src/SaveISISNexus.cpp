@@ -29,6 +29,7 @@
 #include <iterator>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid::DataHandling {
