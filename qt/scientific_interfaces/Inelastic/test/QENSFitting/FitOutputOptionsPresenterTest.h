@@ -17,6 +17,7 @@
 #include "QENSFitting/IFitOutputOptionsView.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Plotting/MockExternalPlotter.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -40,8 +41,11 @@ public:
     m_view = std::make_unique<NiceMock<MockFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockFitOutputOptionsModel>>();
     m_model = model.get();
+    auto plotter = std::make_unique<NiceMock<MockExternalPlotter>>();
+    m_plotter = plotter.get();
 
-    m_presenter = std::make_unique<FitOutputOptionsPresenter>(m_tab.get(), m_view.get(), std::move(model));
+    m_presenter =
+        std::make_unique<FitOutputOptionsPresenter>(m_tab.get(), m_view.get(), std::move(model), std::move(plotter));
   }
 
   void tearDown() override {
@@ -315,5 +319,6 @@ private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitOutputOptionsView>> m_view;
   NiceMock<MockFitOutputOptionsModel> *m_model;
+  NiceMock<MockExternalPlotter> *m_plotter;
   std::unique_ptr<FitOutputOptionsPresenter> m_presenter;
 };

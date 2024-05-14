@@ -11,6 +11,7 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,7 +30,8 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitOutputOptionsPresenter final : public IFitOutputOptionsPresenter {
 public:
-  FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model);
+  FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model,
+                            std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
@@ -72,6 +74,7 @@ private:
   IFitTab *m_tab;
   IFitOutputOptionsView *m_view;
   std::unique_ptr<IFitOutputOptionsModel> m_model;
+  std::unique_ptr<Widgets::MplCpp::IExternalPlotter> m_plotter;
 };
 
 } // namespace Inelastic

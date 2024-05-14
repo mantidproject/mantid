@@ -50,9 +50,10 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
-    m_model = new NiceMock<MockOutputPlotOptionsModel>();
+    auto model = std::make_unique<NiceMock<MockOutputPlotOptionsModel>>();
+    m_model = model.get();
 
-    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), std::move(model));
   }
 
   void tearDown() override {
@@ -76,14 +77,15 @@ public:
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
     m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
-    m_model = new NiceMock<MockOutputPlotOptionsModel>();
+    auto model = std::make_unique<NiceMock<MockOutputPlotOptionsModel>>();
+    m_model = model.get();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
     EXPECT_CALL(*m_view, setIndices(QString(""))).Times(1);
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
-    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), std::move(model));
   }
 
   ///----------------------------------------------------------------------

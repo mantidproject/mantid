@@ -14,8 +14,9 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view,
-                                                     std::unique_ptr<IFitOutputOptionsModel> model)
-    : m_tab(tab), m_view(view), m_model(std::move(model)) {
+                                                     std::unique_ptr<IFitOutputOptionsModel> model,
+                                                     std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter)
+    : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::move(plotter)) {
   setMultiWorkspaceOptionsVisible(false);
   m_view->subscribePresenter(this);
 }
