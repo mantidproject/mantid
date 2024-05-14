@@ -15,7 +15,7 @@ dependencies:
   - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
   - h5py
   - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
-  - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
+  - jemalloc=5.3.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
   - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
