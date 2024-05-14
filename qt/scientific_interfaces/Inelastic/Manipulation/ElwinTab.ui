@@ -415,6 +415,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="pbSelAll">
+           <property name="text">
+            <string>Select All</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="wkspRemove">
            <property name="text">
             <string>Remove Selected</string>
