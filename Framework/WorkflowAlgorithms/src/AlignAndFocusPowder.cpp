@@ -22,6 +22,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
@@ -70,6 +71,7 @@ const std::string RESONANCE_UPPER_LIMITS("ResonanceFilterUpperLimits");
 const std::string COMPRESS_TOF_TOL("CompressTolerance");
 const std::string COMPRESS_WALL_TOL("CompressWallClockTolerance");
 const std::string COMPRESS_WALL_START("CompressStartTime");
+const std::string COMPRESS_MODE("CompressBinningMode");
 const std::string L1("PrimaryFlightPath");
 const std::string SPEC_IDS("SpectrumIDs");
 const std::string L2("L2");
@@ -89,6 +91,11 @@ void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &t
     wksp->getXMinMax(tmin, tmax);
   }
 }
+
+const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
 } // anonymous namespace
 
 // Register the class into the algorithm factory
@@ -186,17 +193,14 @@ void AlignAndFocusPowder::init() {
                   "Maximum values to filter absorption resonance. This must have same number of values as "
                   "ResonanceFilterLowerLimits. Default behavior is to not filter.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOF_TOL, 1e-5, mustBePositive,
-                                                              Direction::Input),
-                  "Compress events (in "
-                  "microseconds) within this "
-                  "tolerance. (Default 1e-5)");
+  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOF_TOL, 1e-5, Direction::Input),
+                  "Compress events (in microseconds) within this tolerance. (Default 1e-5). If negative then do "
+                  "logorithmic compression.");
   declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_WALL_TOL, EMPTY_DBL(),
                                                               mustBePositive, Direction::Input),
                   "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
                   "means compressing all wall-clock times together disabling pulsetime "
                   "resolution.");
-
   auto dateValidator = std::make_shared<DateTimeValidator>();
   dateValidator->allowEmpty(true);
   declareProperty(PropertyNames::COMPRESS_WALL_START, "", dateValidator,
@@ -204,6 +208,10 @@ void AlignAndFocusPowder::init() {
                   "starting filtering. Ignored if WallClockTolerance is not specified. "
                   "Default is start of run",
                   Direction::Input);
+  declareProperty(PropertyNames::COMPRESS_MODE, binningModeNames[size_t(BinningMode::DEFAULT)],
+                  std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+                  "Optional.  Binning behavior can be specified in the usual way through sign of tolerance "
+                  "('Default'); or can be set to one of the allowed binning modes. ");
   declareProperty(PropertyNames::LORENTZ, false,
                   "Multiply each spectrum by "
                   "sin(theta) where theta is "
@@ -382,8 +390,14 @@ void AlignAndFocusPowder::exec() {
   tmax = getProperty(PropertyNames::TOF_MAX);
   m_preserveEvents = getProperty(PropertyNames::PRESERVE_EVENTS);
   m_resampleX = getProperty(PropertyNames::RESAMPLEX);
-  const double compressEventsTolerance = getProperty(PropertyNames::COMPRESS_TOF_TOL);
+  double compressEventsTolerance = getProperty(PropertyNames::COMPRESS_TOF_TOL);
   const double wallClockTolerance = getProperty(PropertyNames::COMPRESS_WALL_TOL);
+  const BINMODE mode = getPropertyValue(PropertyNames::COMPRESS_MODE);
+  if (mode == BinningMode::LINEAR)
+    compressEventsTolerance = std::fabs(compressEventsTolerance);
+  else if (mode == BinningMode::LOGARITHMIC)
+    compressEventsTolerance = -1. * std::fabs(compressEventsTolerance);
+
   // determine some bits about d-space and binning
   if (m_resampleX != 0) {
     // ignore the normal rebin parameters
@@ -1223,7 +1237,7 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
   if (hasWallClockTolerance)
     return false;
   // compressing isn't an option
-  if (compressTolerance <= 0)
+  if (compressTolerance == 0)
     return false;
 
   if (const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_outputW)) {
@@ -1242,7 +1256,19 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
 
     // assume one frame although this is generically wrong
     // there are 3 fields in weighted events no time
-    const double sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_BYTE_SIZE * tofRange / compressTolerance;
+    double sizeWeightedEventsEstimate;
+    if (compressTolerance > 0) // linear
+      sizeWeightedEventsEstimate = WEIGHTED_NOTIME_EVENT_BYTE_SIZE * tofRange / compressTolerance;
+    else { // log
+      if (tofmin_wksp < 0)
+        return false; // log compression cannot have negative TOF values
+
+      if (tofmin_wksp == 0)
+        tofmin_wksp = compressTolerance;
+
+      sizeWeightedEventsEstimate =
+          WEIGHTED_NOTIME_EVENT_BYTE_SIZE * log(tofmax_wksp / tofmin_wksp) / log1p(abs(compressTolerance));
+    }
 
     double numEvents = static_cast<double>(eventWS->getNumberEvents());
     const auto eventType = eventWS->getEventType();
