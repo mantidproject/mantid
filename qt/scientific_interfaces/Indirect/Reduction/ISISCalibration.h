@@ -60,7 +60,6 @@ private slots:
   void calSetDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws);
   void resCheck(bool state); ///< handles checking/unchecking of "Create RES
   /// File" checkbox
-  void setDefaultInstDetails();
   void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
@@ -75,6 +74,8 @@ private slots:
                        QString const &message = "Run", QString const &tooltip = "");
 
 private:
+  void updateInstrumentConfiguration() override;
+
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
   void connectRangeSelectors();
   void disconnectRangeSelectors();

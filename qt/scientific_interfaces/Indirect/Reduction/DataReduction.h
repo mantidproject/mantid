@@ -12,7 +12,8 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QRegExp>
 #include <QScrollArea>
@@ -166,7 +167,10 @@ private:
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    DataReductionTab *tabIDRContent = new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>());
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+    DataReductionTab *tabIDRContent =
+        new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>(), std::move(algorithmRunner));
 
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -185,8 +189,6 @@ private:
   Ui::DataReduction m_uiForm;
   /// The settings group
   QString m_settingsGroup;
-  /// Runner for insturment load algorithm
-  MantidQt::API::QtAlgorithmRunner *m_algRunner;
 
   // All indirect tabs
   QMap<QString, QPair<QWidget *, DataReductionTab *>> m_tabs;

@@ -91,9 +91,6 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
 
   // SIGNAL/SLOT CONNECTIONS
 
-  // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
-
   // Update properties when a range selector is changed
   connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeSelectorDropped(double, double)));
@@ -245,7 +242,7 @@ void ISISDiagnostics::algorithmComplete(bool error) {
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISDiagnostics::setDefaultInstDetails() {
+void ISISDiagnostics::updateInstrumentConfiguration() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {

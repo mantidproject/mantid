@@ -28,6 +28,13 @@ namespace MantidQt::CustomInterfaces {
 DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
     : InelasticTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
+}
+
+DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : InelasticTab(), m_idrUI(idrUI), m_algorithmRunner(std::move(algorithmRunner)), m_tabRunning(false) {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
 DataReductionTab::~DataReductionTab() = default;
@@ -74,6 +81,8 @@ void DataReductionTab::tabExecutionComplete(bool error) {
     emit updateRunButton(true, enableOutputButtons);
   }
 }
+
+void DataReductionTab::handleNewInstrumentConfiguration() { updateInstrumentConfiguration(); }
 
 /**
  * Gets the current instrument workspace
