@@ -15,6 +15,8 @@ Due to the need of investigation of algorithms performance issues, the proper me
 It consists two to parts: special mantid build and analytical tool.
 Available for Linux only.
 
+this is a fake change to test the conda build script!!!!
+
 Mantid build
 ^^^^^^^^^^^^
 
