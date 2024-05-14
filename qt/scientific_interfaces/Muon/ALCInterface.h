@@ -62,10 +62,10 @@ private:
   void importPeakData(const std::string &workspaceName);
   void externallyPlotWorkspace(Mantid::API ::MatrixWorkspace_sptr &data, std::string const &workspaceName,
                                std::string const &workspaceIndices, bool errorBars,
-                               boost::optional<QHash<QString, QVariant>> const &kwargs);
+                               std::optional<QHash<QString, QVariant>> const &kwargs);
   void externallyPlotWorkspaces(Mantid::API::MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
                                 std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars,
-                                std::vector<boost::optional<QHash<QString, QVariant>>> const &spectraKwargs);
+                                std::vector<std::optional<QHash<QString, QVariant>>> const &spectraKwargs);
   void externalPlotDataLoading();
   void externalPlotBaselineModel();
   void externalPlotPeakFitting();
