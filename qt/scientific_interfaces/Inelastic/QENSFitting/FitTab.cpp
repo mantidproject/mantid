@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
 #include "FitPlotView.h"
 
 #include "MantidAPI/MultiDomainFunction.h"
@@ -88,18 +87,6 @@ void FitTab::handleEndXChanged(double endX) {
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
   m_dataPresenter->updateTableFromModel();
-}
-
-/**
- * Plots the spectra corresponding to the selected parameters
- */
-void FitTab::handlePlotSelectedSpectra() {
-  enableFitButtons(false);
-  for (auto const &spectrum : m_outOptionsPresenter->getSpectraToPlot())
-    m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), SettingsHelper::externalPlotErrorBars());
-  m_outOptionsPresenter->clearSpectraToPlot();
-  enableFitButtons(true);
-  m_outOptionsPresenter->setPlotting(false);
 }
 
 void FitTab::handleSingleFitClicked() {

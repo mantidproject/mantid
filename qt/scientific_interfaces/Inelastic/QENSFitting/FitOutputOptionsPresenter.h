@@ -49,9 +49,6 @@ public:
   void setEditResultEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
-  void clearSpectraToPlot();
-  std::vector<SpectrumToPlot> getSpectraToPlot() const;
-
   void setEditResultVisible(bool visible);
 
   void handleGroupWorkspaceChanged(std::string const &selectedGroup) override;

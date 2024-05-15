@@ -44,9 +44,6 @@ public:
   virtual void handleFwhmChanged(double fwhm) = 0;
   virtual void handleBackgroundChanged(double background) = 0;
 
-  // Used by FitOutputOptionsPresenter
-  virtual void handlePlotSelectedSpectra() = 0;
-
   // Used by FittingPresenter
   virtual void handleFunctionChanged() = 0;
   virtual void handleFitComplete(bool const error) = 0;
@@ -108,8 +105,6 @@ public:
   void handlePlotSpectrumChanged() override;
   void handleFwhmChanged(double fwhm) override;
   void handleBackgroundChanged(double background) override;
-
-  void handlePlotSelectedSpectra() override;
 
   void handleFunctionChanged() override;
   void handleFitComplete(bool const error) override;

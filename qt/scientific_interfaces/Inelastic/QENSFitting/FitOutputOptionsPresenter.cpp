@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitOutputOptionsPresenter.h"
+#include "Common/SettingsHelper.h"
 #include "FitTab.h"
 
 #include <utility>
@@ -66,10 +67,13 @@ void FitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
   try {
     plotResult(m_view->getSelectedGroupWorkspace());
-    m_tab->handlePlotSelectedSpectra();
+    for (auto const &spectrum : m_model->getSpectraToPlot())
+      m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), SettingsHelper::externalPlotErrorBars());
+    m_model->clearSpectraToPlot();
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
+  setPlotting(false);
 }
 
 void FitOutputOptionsPresenter::plotResult(std::string const &selectedGroup) {
@@ -115,10 +119,6 @@ void FitOutputOptionsPresenter::setPlotEnabled(bool enable) {
 void FitOutputOptionsPresenter::setEditResultEnabled(bool enable) { m_view->setEditResultEnabled(enable); }
 
 void FitOutputOptionsPresenter::setSaveEnabled(bool enable) { m_view->setSaveEnabled(enable); }
-
-void FitOutputOptionsPresenter::clearSpectraToPlot() { m_model->clearSpectraToPlot(); }
-
-std::vector<SpectrumToPlot> FitOutputOptionsPresenter::getSpectraToPlot() const { return m_model->getSpectraToPlot(); }
 
 void FitOutputOptionsPresenter::setEditResultVisible(bool visible) { m_view->setEditResultVisible(visible); }
 
