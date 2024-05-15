@@ -22,6 +22,7 @@ class IMomentsPresenter;
 class MANTIDQT_INELASTIC_DLL IMomentsView {
 
 public:
+  virtual ~IMomentsView() = default;
   virtual void subscribePresenter(IMomentsPresenter *presenter) = 0;
 
   virtual void setupProperties() = 0;

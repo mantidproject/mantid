@@ -29,6 +29,7 @@ class IElwinPresenter;
 class MANTIDQT_INELASTIC_DLL IElwinView {
 
 public:
+  virtual ~IElwinView() = default;
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
