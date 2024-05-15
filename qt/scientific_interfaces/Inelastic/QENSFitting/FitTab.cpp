@@ -29,7 +29,7 @@ FitTab::FitTab(QWidget *parent, std::string const &tabName)
 
 void FitTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
-  updateResultOptions();
+  updateOutputOptions(false);
 }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
@@ -93,7 +93,7 @@ void FitTab::handleSingleFitClicked() {
   if (validate()) {
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
-    enableOutputOptions(false);
+    updateOutputOptions(false);
     m_fittingPresenter->runSingleFit();
   }
 }
@@ -115,7 +115,7 @@ bool FitTab::validate() {
  */
 void FitTab::run() {
   enableFitButtons(false);
-  enableOutputOptions(false);
+  updateOutputOptions(false);
   m_fittingPresenter->runFit();
 }
 
@@ -131,53 +131,6 @@ void FitTab::enableFitButtons(bool enable) {
   m_fittingPresenter->setFitEnabled(enable);
 }
 
-/**
- * Enables or disables the output options. It also sets the current result and
- * PDF workspaces to be plotted
- * @param enable :: true to enable buttons
- */
-void FitTab::enableOutputOptions(bool enable) {
-  if (enable) {
-    m_outOptionsPresenter->setResultWorkspace(m_fittingPresenter->getResultWorkspace());
-    m_outOptionsPresenter->setPDFWorkspace(m_fittingPresenter->getOutputBasename() + "_PDFs",
-                                           m_fittingPresenter->minimizer());
-    m_outOptionsPresenter->setPlotTypes("Result Group");
-  } else
-    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
-
-  m_outOptionsPresenter->setPlotEnabled(enable && m_outOptionsPresenter->isSelectedGroupPlottable());
-  m_outOptionsPresenter->setEditResultEnabled(enable);
-  m_outOptionsPresenter->setSaveEnabled(enable);
-}
-
-void FitTab::updateParameterEstimationData() {
-  m_fittingPresenter->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(m_fittingPresenter->getEstimationDataSelector()));
-  m_fittingPresenter->estimateFunctionParameters(m_plotPresenter->getActiveWorkspaceID(),
-                                                 m_plotPresenter->getActiveWorkspaceIndex());
-}
-
-void FitTab::updateDataReferences() {
-  m_fittingPresenter->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
-                                                m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
-                                                m_dataPresenter->getResolutionsForFit());
-  setModelFitFunction();
-}
-
-/**
- * Updates whether the options for plotting and saving fit results are
- * enabled/disabled.
- */
-void FitTab::updateResultOptions() {
-  const bool isFit = m_fittingPresenter->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
-                                                         m_plotPresenter->getActiveWorkspaceIndex());
-  if (isFit)
-    m_outOptionsPresenter->setResultWorkspace(m_fittingPresenter->getResultWorkspace());
-  m_outOptionsPresenter->setPlotEnabled(isFit);
-  m_outOptionsPresenter->setEditResultEnabled(isFit);
-  m_outOptionsPresenter->setSaveEnabled(isFit);
-}
-
 std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
 
 void FitTab::handleDataChanged() {
@@ -187,7 +140,7 @@ void FitTab::handleDataChanged() {
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
-  updateResultOptions();
+  updateOutputOptions(true);
 }
 
 void FitTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
@@ -234,11 +187,32 @@ void FitTab::handleFunctionChanged() {
 void FitTab::handleFitComplete(bool const error) {
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
-  enableOutputOptions(!error);
+  updateOutputOptions(!error);
   if (!error) {
     m_plotPresenter->setFitFunction(m_fittingPresenter->fitFunction());
   }
   m_plotPresenter->updatePlots();
+}
+
+void FitTab::updateParameterEstimationData() {
+  m_fittingPresenter->updateParameterEstimationData(
+      m_dataPresenter->getDataForParameterEstimation(m_fittingPresenter->getEstimationDataSelector()));
+  m_fittingPresenter->estimateFunctionParameters(m_plotPresenter->getActiveWorkspaceID(),
+                                                 m_plotPresenter->getActiveWorkspaceIndex());
+}
+
+void FitTab::updateDataReferences() {
+  m_fittingPresenter->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
+                                                m_dataPresenter->getDatasets(), m_dataPresenter->getQValuesForData(),
+                                                m_dataPresenter->getResolutionsForFit());
+  setModelFitFunction();
+}
+
+void FitTab::updateOutputOptions(bool const enable) {
+  auto const enableOptions = enable && m_fittingPresenter->isPreviouslyFit(m_plotPresenter->getActiveWorkspaceID(),
+                                                                           m_plotPresenter->getActiveWorkspaceIndex());
+  m_outOptionsPresenter->enableOutputOptions(enableOptions, m_fittingPresenter->getResultWorkspace(),
+                                             m_fittingPresenter->getOutputBasename(), m_fittingPresenter->minimizer());
 }
 
 } // namespace Inelastic

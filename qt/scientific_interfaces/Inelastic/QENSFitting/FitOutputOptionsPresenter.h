@@ -33,18 +33,8 @@ public:
   FitOutputOptionsPresenter(IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model,
                             std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter);
 
-  void setMultiWorkspaceOptionsVisible(bool visible);
-
-  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
-  void setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer);
-  void setPlotTypes(std::string const &selectedGroup);
-
-  bool isSelectedGroupPlottable() const;
-
-  void setPlotting(bool plotting);
-  void setPlotEnabled(bool enable);
-  void setEditResultEnabled(bool enable);
-  void setSaveEnabled(bool enable);
+  void enableOutputOptions(bool const enable, Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                           std::string const &basename, std::string const &minimizer);
 
   void setEditResultVisible(bool visible);
 
@@ -55,7 +45,17 @@ public:
                                     std::string const &outputName) override;
 
 private:
+  bool isSelectedGroupPlottable() const;
+
+  void setMultiWorkspaceOptionsVisible(bool visible);
+  void setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer);
   void setPlotWorkspaces();
+  void setPlotTypes(std::string const &selectedGroup);
+
+  void setPlotting(bool plotting);
+  void setPlotEnabled(bool enable);
+  void setEditResultEnabled(bool enable);
+  void setSaveEnabled(bool enable);
 
   std::vector<SpectrumToPlot> getSpectraToPlot(std::string const &selectedGroup) const;
   void setSaving(bool saving);

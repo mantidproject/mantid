@@ -115,12 +115,11 @@ private:
   void run() override;
 
   void enableFitButtons(bool enable);
-  void enableOutputOptions(bool enable);
   void setModelFitFunction();
 
   void updateParameterEstimationData();
   void updateDataReferences();
-  void updateResultOptions();
+  void updateOutputOptions(bool const enable);
 
   std::unique_ptr<Ui::FitTab> m_uiForm;
 

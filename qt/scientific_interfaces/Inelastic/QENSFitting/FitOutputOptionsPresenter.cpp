@@ -38,8 +38,19 @@ void FitOutputOptionsPresenter::handleGroupWorkspaceChanged(std::string const &s
   m_view->setPlotEnabled(isSelectedGroupPlottable());
 }
 
-void FitOutputOptionsPresenter::setResultWorkspace(WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setResultWorkspace(std::move(groupWorkspace));
+void FitOutputOptionsPresenter::enableOutputOptions(bool const enable, WorkspaceGroup_sptr resultWorkspace,
+                                                    std::string const &basename, std::string const &minimizer) {
+  if (enable) {
+    m_model->setResultWorkspace(resultWorkspace);
+    setPDFWorkspace(basename + "_PDFs", minimizer);
+    setPlotTypes("Result Group");
+  } else {
+    setMultiWorkspaceOptionsVisible(enable);
+  }
+
+  setPlotEnabled(enable);
+  m_view->setEditResultEnabled(enable);
+  m_view->setSaveEnabled(enable);
 }
 
 void FitOutputOptionsPresenter::setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer) {
