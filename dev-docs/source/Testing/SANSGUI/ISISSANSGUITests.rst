@@ -124,8 +124,9 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 12 workspaces (6 CanSAS ``.xml`` and 6 NXcanSAS ``.h5``) saved. For each row and
-   file type there should be a reduced file (with no suffix), a sample, and a can workspace.
+   be saved. In total there should be 11 workspaces saved. For each row and file type there should be a reduced file
+   (with no suffix) and a ``sample`` file. The ``first_time`` line should also produce a ``can`` workspace. This is
+   because both workspaces have the same ``can`` output and so the reduction only produces it once.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
