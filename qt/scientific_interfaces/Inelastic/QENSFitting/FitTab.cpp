@@ -35,8 +35,8 @@ void FitTab::setup() {
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();
   auto plotter = std::make_unique<Widgets::MplCpp::ExternalPlotter>();
-  m_outOptionsPresenter = std::make_unique<FitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView,
-                                                                      std::move(model), std::move(plotter));
+  m_outOptionsPresenter =
+      std::make_unique<FitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView, std::move(model), std::move(plotter));
   m_outOptionsPresenter->setEditResultVisible(editResults);
 }
 

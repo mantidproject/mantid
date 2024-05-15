@@ -14,10 +14,10 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view,
+FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitOutputOptionsView *view,
                                                      std::unique_ptr<IFitOutputOptionsModel> model,
                                                      std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter)
-    : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::move(plotter)) {
+    : m_view(view), m_model(std::move(model)), m_plotter(std::move(plotter)) {
   setMultiWorkspaceOptionsVisible(false);
   m_view->subscribePresenter(this);
 }
@@ -65,22 +65,21 @@ void FitOutputOptionsPresenter::removePDFWorkspace() { m_model->removePDFWorkspa
 
 void FitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
   try {
-    plotResult(m_view->getSelectedGroupWorkspace());
-    for (auto const &spectrum : m_model->getSpectraToPlot())
-      m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), SettingsHelper::externalPlotErrorBars());
-    m_model->clearSpectraToPlot();
+    for (auto const &spectrum : getSpectraToPlot(m_view->getSelectedGroupWorkspace()))
+      m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), errorBars);
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
   setPlotting(false);
 }
 
-void FitOutputOptionsPresenter::plotResult(std::string const &selectedGroup) {
-  if (m_model->isResultGroupSelected(selectedGroup))
-    m_model->plotResult(m_view->getSelectedPlotType());
-  else
-    m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
+std::vector<SpectrumToPlot> FitOutputOptionsPresenter::getSpectraToPlot(std::string const &selectedGroup) const {
+  if (m_model->isResultGroupSelected(selectedGroup)) {
+    return m_model->plotResult(m_view->getSelectedPlotType());
+  }
+  return m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
 }
 
 void FitOutputOptionsPresenter::handleSaveClicked() {

@@ -30,7 +30,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitOutputOptionsPresenter final : public IFitOutputOptionsPresenter {
 public:
-  FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model,
+  FitOutputOptionsPresenter(IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model,
                             std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -58,7 +58,7 @@ public:
                                     std::string const &outputName) override;
 
 private:
-  void plotResult(std::string const &selectedGroup);
+  std::vector<SpectrumToPlot> getSpectraToPlot(std::string const &selectedGroup) const;
   void setSaving(bool saving);
 
   void setEditingResult(bool editing);
@@ -68,7 +68,6 @@ private:
 
   void displayWarning(std::string const &message);
 
-  IFitTab *m_tab;
   IFitOutputOptionsView *m_view;
   std::unique_ptr<IFitOutputOptionsModel> m_model;
   std::unique_ptr<Widgets::MplCpp::IExternalPlotter> m_plotter;
