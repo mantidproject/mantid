@@ -13,7 +13,6 @@
 #include "FitPlotPresenter.h"
 #include "FittingPresenter.h"
 #include "FunctionBrowser/TemplateSubType.h"
-#include "InelasticFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "ui_FitTab.h"
@@ -114,11 +113,10 @@ private:
   bool validate() override;
   void run() override;
 
-  void enableFitButtons(bool enable);
-  void setModelFitFunction();
-
   void updateParameterEstimationData();
   void updateDataReferences();
+  void updateFitFunction();
+  void updateFitButtons(bool const enable);
   void updateOutputOptions(bool const enable);
 
   std::unique_ptr<Ui::FitTab> m_uiForm;
