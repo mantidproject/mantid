@@ -36,11 +36,8 @@ public:
   void setMultiWorkspaceOptionsVisible(bool visible);
 
   void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
-  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
-  void setPlotWorkspaces();
+  void setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer);
   void setPlotTypes(std::string const &selectedGroup);
-
-  void removePDFWorkspace();
 
   bool isSelectedGroupPlottable() const;
 
@@ -58,6 +55,8 @@ public:
                                     std::string const &outputName) override;
 
 private:
+  void setPlotWorkspaces();
+
   std::vector<SpectrumToPlot> getSpectraToPlot(std::string const &selectedGroup) const;
   void setSaving(bool saving);
 

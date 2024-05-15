@@ -116,7 +116,6 @@ private:
 
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
-  void setPDFWorkspace(std::string const &workspaceName);
   void setModelFitFunction();
 
   void updateParameterEstimationData();

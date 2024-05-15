@@ -139,7 +139,8 @@ void FitTab::enableFitButtons(bool enable) {
 void FitTab::enableOutputOptions(bool enable) {
   if (enable) {
     m_outOptionsPresenter->setResultWorkspace(m_fittingPresenter->getResultWorkspace());
-    setPDFWorkspace(m_fittingPresenter->getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setPDFWorkspace(m_fittingPresenter->getOutputBasename() + "_PDFs",
+                                           m_fittingPresenter->minimizer());
     m_outOptionsPresenter->setPlotTypes("Result Group");
   } else
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
@@ -147,23 +148,6 @@ void FitTab::enableOutputOptions(bool enable) {
   m_outOptionsPresenter->setPlotEnabled(enable && m_outOptionsPresenter->isSelectedGroupPlottable());
   m_outOptionsPresenter->setEditResultEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
-}
-
-/**
- * Sets the active PDF workspace within the output options if one exists for the
- * current run
- * @param workspaceName :: the name of the PDF workspace if it exists
- */
-void FitTab::setPDFWorkspace(std::string const &workspaceName) {
-  auto const fabMinimizer = m_fittingPresenter->minimizer() == "FABADA";
-  auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && fabMinimizer;
-
-  if (enablePDFOptions) {
-    m_outOptionsPresenter->setPDFWorkspace(WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(workspaceName));
-    m_outOptionsPresenter->setPlotWorkspaces();
-  } else
-    m_outOptionsPresenter->removePDFWorkspace();
-  m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enablePDFOptions);
 }
 
 void FitTab::updateParameterEstimationData() {

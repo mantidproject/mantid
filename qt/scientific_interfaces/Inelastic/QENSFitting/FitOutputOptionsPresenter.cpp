@@ -5,8 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitOutputOptionsPresenter.h"
+
 #include "Common/SettingsHelper.h"
 #include "FitTab.h"
+
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <utility>
 
@@ -39,8 +42,16 @@ void FitOutputOptionsPresenter::setResultWorkspace(WorkspaceGroup_sptr groupWork
   m_model->setResultWorkspace(std::move(groupWorkspace));
 }
 
-void FitOutputOptionsPresenter::setPDFWorkspace(WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setPDFWorkspace(std::move(groupWorkspace));
+void FitOutputOptionsPresenter::setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer) {
+  auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && minimizer == "FABADA";
+
+  if (enablePDFOptions) {
+    m_model->setPDFWorkspace(WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(workspaceName));
+    setPlotWorkspaces();
+  } else {
+    m_model->removePDFWorkspace();
+  }
+  setMultiWorkspaceOptionsVisible(enablePDFOptions);
 }
 
 void FitOutputOptionsPresenter::setPlotWorkspaces() {
@@ -60,8 +71,6 @@ void FitOutputOptionsPresenter::setPlotTypes(std::string const &selectedGroup) {
     m_view->setPlotTypeIndex(0);
   }
 }
-
-void FitOutputOptionsPresenter::removePDFWorkspace() { m_model->removePDFWorkspace(); }
 
 void FitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
