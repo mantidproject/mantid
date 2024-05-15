@@ -23,6 +23,11 @@
 #include <algorithm>
 
 using Mantid::Algorithms::PolarizationCorrectionWildes;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
 
 class PolarizationCorrectionWildesTest : public CxxTest::TestSuite {
 public:
@@ -31,10 +36,7 @@ public:
   static PolarizationCorrectionWildesTest *createSuite() { return new PolarizationCorrectionWildesTest(); }
   static void destroySuite(PolarizationCorrectionWildesTest *suite) { delete suite; }
 
-  void tearDown() override {
-    using namespace Mantid::API;
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_Init() {
     PolarizationCorrectionWildes alg;
@@ -61,10 +63,6 @@ public:
   }
 
   void test_IdealCaseTwoInputsWithAnalyzer() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -124,10 +122,6 @@ public:
   }
 
   void test_IdealCaseTwoInputsNoAnalyzer() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -169,10 +163,6 @@ public:
   }
 
   void test_IdealCaseDirectBeamCorrections() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -203,10 +193,6 @@ public:
   }
 
   void test_FullCorrections() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
@@ -235,10 +221,6 @@ public:
   void test_ThreeInputsWithMissing10FlipperConfiguration() { threeInputsTest("10"); }
 
   void test_TwoInputsWithAnalyzer() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     constexpr size_t nBins{3};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -261,7 +243,6 @@ public:
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "00, 11");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     solveMissingIntensities(ws00, ws01, ws10, ws11, effWS);
-    using namespace Mantid::API;
     const double F1 = effWS->y(0).front();
     const double F1e = effWS->e(0).front();
     const double F2 = effWS->y(1).front();
@@ -334,10 +315,6 @@ public:
   }
 
   void test_TwoInputsWithoutAnalyzer() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     constexpr size_t nBins{3};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -394,10 +371,6 @@ public:
   }
 
   void test_directBeamOnlyInput() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     constexpr size_t nBins{3};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -439,10 +412,6 @@ public:
   }
 
   void test_FailureWhenEfficiencyHistogramIsMissing() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
@@ -470,10 +439,6 @@ public:
   }
 
   void test_FailureWhenEfficiencyXDataMismatches() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
@@ -497,10 +462,6 @@ public:
   }
 
   void test_FailureWhenNumberOfHistogramsInInputWorkspacesMismatch() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
@@ -527,10 +488,6 @@ public:
   }
 
   void test_FailureWhenAnInputWorkspaceIsMissing() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
@@ -549,8 +506,6 @@ public:
   }
 
   void test_IdealCrossPolarizationCaseFullCorrections() {
-    using namespace Mantid::HistogramData;
-
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto crossPolarizationEffWS = idealEfficiencies(edges, false);
     // Cross polarized ideal efficiencies should give us the same ouput as for ideal efficiencies but in the reverse
@@ -560,10 +515,6 @@ public:
   }
 
   void test_SpinStateOrderInOutputWorkspacegroup() {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto effWS = idealEfficiencies(edges);
     constexpr size_t nHist{2};
@@ -594,7 +545,6 @@ private:
 
   void setupWorkspaceData(std::vector<std::string> &wsNames,
                           const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
-    using namespace Mantid::API;
 
     for (size_t i = 0; i != wsNames.size(); ++i) {
       for (size_t j = 0; j != nHist; ++j) {
@@ -640,10 +590,6 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     const auto nBins = edges.size() - 1;
     constexpr size_t nHist{4};
     Counts counts(nBins, 0.0);
@@ -667,10 +613,6 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr idealEfficiencies(const Mantid::HistogramData::BinEdges &edges,
                                                       const bool isNormalPolarization = true) {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     const auto nBins = edges.size() - 1;
     constexpr size_t nHist{4};
     Counts counts(nBins, 0.0);
@@ -696,9 +638,6 @@ private:
                                     const Mantid::API::MatrixWorkspace_sptr &effWS,
                                     const std::array<std::string, 4> &outputSpinStates,
                                     const std::string &flipperConfig = "00,01,10,11") {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     const double yVal = 2.3;
@@ -713,7 +652,6 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10->getName();
@@ -743,10 +681,6 @@ private:
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
                             const std::vector<std::string> &ouputWsOrder) {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -762,7 +696,6 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
@@ -817,10 +750,6 @@ private:
   }
 
   void threeInputsTest(const std::string &missingFlipperConf) {
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
-    using namespace Mantid::Kernel;
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
@@ -850,7 +779,6 @@ private:
   void fullFourInputsResultsCheck(Mantid::API::WorkspaceGroup_sptr &outputWS, Mantid::API::MatrixWorkspace_sptr &ws00,
                                   Mantid::API::MatrixWorkspace_sptr &ws01, Mantid::API::MatrixWorkspace_sptr &ws10,
                                   Mantid::API::MatrixWorkspace_sptr &ws11, Mantid::API::MatrixWorkspace_sptr &effWS) {
-    using namespace Mantid::API;
     const auto nHist = ws00->getNumberHistograms();
     const auto nBins = ws00->y(0).size();
     const auto edges = ws00->binEdges(0);
@@ -1521,8 +1449,6 @@ private:
   }
 
   void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder) {
-    using namespace Mantid::HistogramData;
-
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto effWS = idealEfficiencies(edges);
     idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig);
@@ -1532,7 +1458,6 @@ private:
 class PolarizationCorrectionWildesTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    using namespace Mantid::API;
     auto loadWS = AlgorithmManager::Instance().createUnmanaged("LoadILLReflectometry");
     loadWS->setChild(true);
     loadWS->initialize();
@@ -1582,10 +1507,7 @@ public:
     m_effWS = loadEff->getProperty("OutputWorkspace");
   }
 
-  void tearDown() override {
-    using namespace Mantid::API;
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_DirectBeamPerformance() { runPerformanceTest("00", "0"); }
 
@@ -1605,7 +1527,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 
   void runPerformanceTest(const std::string &inputWorkspaces, const std::string &flippers) {
-    using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
       PolarizationCorrectionWildes correction;
       correction.setChild(true);
