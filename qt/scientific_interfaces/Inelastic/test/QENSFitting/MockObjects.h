@@ -214,11 +214,9 @@ public:
   MOCK_CONST_METHOD0(isResultGroupPlottable, bool());
   MOCK_CONST_METHOD0(isPDFGroupPlottable, bool());
 
-  MOCK_METHOD0(clearSpectraToPlot, void());
-  MOCK_CONST_METHOD0(getSpectraToPlot, std::vector<SpectrumToPlot>());
-
-  MOCK_METHOD1(plotResult, void(std::string const &plotType));
-  MOCK_METHOD2(plotPDF, void(std::string const &workspaceName, std::string const &plotType));
+  MOCK_CONST_METHOD1(plotResult, std::vector<SpectrumToPlot>(std::string const &plotType));
+  MOCK_CONST_METHOD2(plotPDF,
+                     std::vector<SpectrumToPlot>(std::string const &workspaceName, std::string const &plotType));
 
   MOCK_CONST_METHOD0(saveResult, void());
 

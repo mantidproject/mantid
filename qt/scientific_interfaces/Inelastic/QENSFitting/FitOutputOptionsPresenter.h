@@ -44,16 +44,18 @@ public:
   void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
                                     std::string const &outputName) override;
 
+  // Public for testing purposes
+  void setPlotting(bool plotting);
+  void setPlotWorkspaces();
+  void setPlotTypes(std::string const &selectedGroup);
+  void setPlotEnabled(bool enable);
+
 private:
   bool isSelectedGroupPlottable() const;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
   void setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer);
-  void setPlotWorkspaces();
-  void setPlotTypes(std::string const &selectedGroup);
 
-  void setPlotting(bool plotting);
-  void setPlotEnabled(bool enable);
   void setEditResultEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
