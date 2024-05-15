@@ -18,6 +18,7 @@
 #include <Poco/Thread.h>
 
 #include <algorithm>
+#include <sstream>
 #include <stdexcept>
 // needed on windows and any place missing openmp
 #if defined(_WIN32) || !defined(_OPENMP)

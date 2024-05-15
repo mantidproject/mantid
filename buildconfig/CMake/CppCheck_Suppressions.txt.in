@@ -42,12 +42,12 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:493
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Strings.h:170
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:72
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:362
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileDescriptor.cpp:85
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:351
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:372
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileValidator.cpp:132
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileValidator.cpp:133
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.h:93
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
@@ -117,7 +117,7 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:665
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:153
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:183
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:95
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:57
+variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:280
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:863
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1047

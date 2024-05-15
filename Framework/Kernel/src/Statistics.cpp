@@ -18,6 +18,7 @@
 #include <cfloat>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace Mantid::Kernel {
 namespace {

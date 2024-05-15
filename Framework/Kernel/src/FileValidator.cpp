@@ -11,6 +11,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <fstream>
 #include <memory>
+#include <sstream>
 
 namespace Mantid::Kernel {
 
