@@ -24,6 +24,7 @@ class ISqwPresenter;
 class MANTIDQT_INELASTIC_DLL ISqwView {
 
 public:
+  virtual ~ISqwView() = default;
   virtual void subscribePresenter(ISqwPresenter *presenter) = 0;
 
   virtual OutputPlotOptionsView *getPlotOptions() const = 0;
