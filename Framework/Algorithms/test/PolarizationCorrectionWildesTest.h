@@ -425,17 +425,7 @@ public:
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
     effWS->replaceAxis(1, std::move(axis));
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
-    TS_ASSERT(!alg.isExecuted())
+    runCorrectionWildes(wsName, effWS, "0", false);
   }
 
   void test_FailureWhenEfficiencyXDataMismatches() {
@@ -448,17 +438,7 @@ public:
     // Change a bin edge of one of the histograms.
     auto &xs = effWS->mutableX(0);
     xs[xs.size() / 2] *= 1.01;
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
-    TS_ASSERT(!alg.isExecuted())
+    runCorrectionWildes(wsName, effWS, "0", false);
   }
 
   void test_FailureWhenNumberOfHistogramsInInputWorkspacesMismatch() {
@@ -475,16 +455,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    PolarizationCorrectionWildes alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
-    TS_ASSERT(!alg.isExecuted())
+    runCorrectionWildes(wsNames, effWS, "", false);
   }
 
   void test_FailureWhenAnInputWorkspaceIsMissing() {
@@ -557,13 +528,15 @@ private:
 
   Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::string &inputWorkspace,
                                                        Mantid::API::MatrixWorkspace_sptr effWs,
-                                                       const std::string &flippers = "") {
-    return runCorrectionWildes(std::vector<std::string>{inputWorkspace}, effWs, flippers);
+                                                       const std::string &flippers = "",
+                                                       const bool expectedToWork = true) {
+    return runCorrectionWildes(std::vector<std::string>{inputWorkspace}, effWs, flippers, expectedToWork);
   }
 
   Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::vector<std::string> &inputWorkspaces,
                                                        Mantid::API::MatrixWorkspace_sptr effWs,
-                                                       const std::string &flippers = "") {
+                                                       const std::string &flippers = "",
+                                                       const bool expectedToWork = true) {
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -581,8 +554,14 @@ private:
       alg.setProperty("Flippers", flippers);
     }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWs))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
+    if (expectedToWork) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute())
+      TS_ASSERT(alg.isExecuted())
+    } else {
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
+      TS_ASSERT(!alg.isExecuted())
+      return nullptr;
+    }
 
     Mantid::API::WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
