@@ -24,6 +24,7 @@ class IIqtPresenter;
 class MANTIDQT_INELASTIC_DLL IIqtView {
 
 public:
+  virtual ~IIqtView() = default;
   virtual void subscribePresenter(IIqtPresenter *presenter) = 0;
 
   virtual OutputPlotOptionsView *getPlotOptions() const = 0;
