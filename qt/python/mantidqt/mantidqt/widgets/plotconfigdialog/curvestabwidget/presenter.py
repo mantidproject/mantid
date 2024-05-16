@@ -125,7 +125,7 @@ class CurvesTabWidgetPresenter:
             curve_index = ax.get_lines().index(curve)
             errorbar = False
         else:
-            curve_index = [artist for artist in ax.containers if isinstance(artist, ErrorbarContainer)].index(curve[0])
+            curve_index = [artist for artist in ax.containers if isinstance(artist, ErrorbarContainer)].index(curve)
             errorbar = True
 
         # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
