@@ -8,6 +8,7 @@
 
 
 from matplotlib.lines import Line2D
+from matplotlib.container import ErrorbarContainer
 
 from mantid.plots.legend import LegendProperties
 from mantid.plots import datafunctions, MantidAxes
@@ -124,7 +125,7 @@ class CurvesTabWidgetPresenter:
             curve_index = ax.get_lines().index(curve)
             errorbar = False
         else:
-            curve_index = ax.get_lines().index(curve[0])
+            curve_index = [artist for artist in ax.containers if isinstance(artist, ErrorbarContainer)].index(curve[0])
             errorbar = True
 
         # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
