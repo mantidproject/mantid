@@ -395,6 +395,7 @@ public:
   MOCK_METHOD3(addTableEntry, void(int row, std::string const &name, std::string const &wsIndexes));
 
   MOCK_METHOD0(getSelectedData, QModelIndexList());
+  MOCK_METHOD0(selectAllRows, void());
 
   MOCK_CONST_METHOD0(isGroupInput, bool());
   MOCK_CONST_METHOD0(isRowCollapsed, bool());
