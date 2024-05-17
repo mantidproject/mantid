@@ -10,6 +10,7 @@
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/WarningSuppressions.h"
 // std
+#include <sstream>
 // windows
 #include <Winhttp.h>
 #include <windows.h>
