@@ -77,7 +77,7 @@ public:
   void notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
-  std::string getOutputBasename() const;
+  std::optional<std::string> getOutputBasename() const;
 
   IFitDataModel *getFitDataModel() const;
   IFitPlotModel *getFitPlotModel() const;

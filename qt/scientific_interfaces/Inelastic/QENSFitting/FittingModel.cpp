@@ -370,14 +370,18 @@ std::string FittingModel::createOutputName(const std::string &fitMode, const std
   return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString + "_" + inputSpectra + "_Results";
 }
 
-std::string FittingModel::sequentialFitOutputName() const {
-  return createOutputName(SEQ_STRING, m_fitDataModel->getWorkspaceNames()[0],
-                          m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
+std::optional<std::string> FittingModel::sequentialFitOutputName() const {
+  auto workspaceNames = m_fitDataModel->getWorkspaceNames();
+  if (workspaceNames.empty())
+    return std::nullopt;
+  return createOutputName(SEQ_STRING, workspaceNames[0], m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
 }
 
-std::string FittingModel::simultaneousFitOutputName() const {
-  return createOutputName(SIM_STRING, m_fitDataModel->getWorkspaceNames()[0],
-                          m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
+std::optional<std::string> FittingModel::simultaneousFitOutputName() const {
+  auto workspaceNames = m_fitDataModel->getWorkspaceNames();
+  if (workspaceNames.empty())
+    return std::nullopt;
+  return createOutputName(SIM_STRING, workspaceNames[0], m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
 }
 
 bool FittingModel::isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
@@ -557,7 +561,7 @@ IAlgorithm_sptr FittingModel::createSequentialFit(const IFunction_sptr function,
   auto fitAlgorithm = sequentialFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
-  fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
+  fitAlgorithm->setProperty("OutputWorkspace", *sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());
   std::stringstream startX;
   std::stringstream endX;
@@ -587,7 +591,7 @@ IAlgorithm_sptr FittingModel::createSimultaneousFit(const MultiDomainFunction_sp
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fitDataModel.get());
-  fitAlgorithm->setProperty("OutputWorkspace", simultaneousFitOutputName());
+  fitAlgorithm->setProperty("OutputWorkspace", *simultaneousFitOutputName());
   return fitAlgorithm;
 }
 
@@ -597,7 +601,11 @@ std::string FittingModel::singleFitOutputName(std::string workspaceName, Workspa
   return inputWorkspace + "_" + m_fitType + "_" + m_fitString + "_" + spectra + "_Results";
 }
 
-std::string FittingModel::getOutputBasename() const { return cutLastOf(sequentialFitOutputName(), "_Results"); }
+std::optional<std::string> FittingModel::getOutputBasename() const {
+  if (auto const outputName = sequentialFitOutputName())
+    return cutLastOf(*outputName, "_Results");
+  return std::nullopt;
+}
 
 void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";

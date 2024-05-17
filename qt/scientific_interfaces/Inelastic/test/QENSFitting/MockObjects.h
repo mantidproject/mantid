@@ -268,7 +268,7 @@ public:
   MOCK_CONST_METHOD1(getFittingAlgorithm, Mantid::API::IAlgorithm_sptr(FittingMode mode));
   MOCK_CONST_METHOD0(getSingleFittingAlgorithm, Mantid::API::IAlgorithm_sptr());
   MOCK_CONST_METHOD2(getSingleFunction, Mantid::API::IFunction_sptr(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD0(getOutputBasename, std::string());
+  MOCK_CONST_METHOD0(getOutputBasename, std::optional<std::string>());
 
   MOCK_METHOD1(cleanFailedRun, void(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm));
   MOCK_METHOD0(removeFittingData, void());

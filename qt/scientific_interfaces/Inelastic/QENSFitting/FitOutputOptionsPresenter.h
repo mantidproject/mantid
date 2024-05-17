@@ -34,7 +34,7 @@ public:
                             std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter);
 
   void enableOutputOptions(bool const enable, Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                           std::string const &basename, std::string const &minimizer);
+                           std::optional<std::string> const &basename, std::string const &minimizer);
 
   void setEditResultVisible(bool visible);
 

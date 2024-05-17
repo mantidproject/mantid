@@ -39,10 +39,13 @@ void FitOutputOptionsPresenter::handleGroupWorkspaceChanged(std::string const &s
 }
 
 void FitOutputOptionsPresenter::enableOutputOptions(bool const enable, WorkspaceGroup_sptr resultWorkspace,
-                                                    std::string const &basename, std::string const &minimizer) {
+                                                    std::optional<std::string> const &basename,
+                                                    std::string const &minimizer) {
   if (enable) {
     m_model->setResultWorkspace(resultWorkspace);
-    setPDFWorkspace(basename + "_PDFs", minimizer);
+    if (basename) {
+      setPDFWorkspace(*basename + "_PDFs", minimizer);
+    }
     setPlotTypes("Result Group");
   } else {
     setMultiWorkspaceOptionsVisible(enable);
