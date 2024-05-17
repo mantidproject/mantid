@@ -21,5 +21,10 @@ void RunView::subscribePresenter(IRunPresenter *presenter) { m_presenter = prese
 
 void RunView::notifyRunClicked() { m_presenter->handleRunClicked(); }
 
+void RunView::setRunEnabled(bool const enable) {
+  m_uiForm.pbRun->setText(enable ? "Run" : "Running...");
+  m_uiForm.pbRun->setEnabled(enable);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

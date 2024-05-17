@@ -17,6 +17,8 @@ public:
   virtual ~IRunPresenter() = default;
 
   virtual void handleRunClicked() = 0;
+
+  virtual void setRunEnabled(bool const enable) = 0;
 };
 
 class RunPresenter final : public IRunPresenter {
@@ -25,6 +27,8 @@ public:
   RunPresenter(IRunSubscriber *subscriber, IRunView *view);
 
   void handleRunClicked() override;
+
+  void setRunEnabled(bool const enable) override;
 
 private:
   IRunSubscriber *m_subscriber;

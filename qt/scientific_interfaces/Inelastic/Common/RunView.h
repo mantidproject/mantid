@@ -21,6 +21,8 @@ public:
   virtual ~IRunView() = default;
 
   virtual void subscribePresenter(IRunPresenter *presenter) = 0;
+
+  virtual void setRunEnabled(bool const enable) = 0;
 };
 
 class RunView final : public QWidget, public IRunView {
@@ -30,6 +32,8 @@ public:
   RunView(QWidget *parent);
 
   void subscribePresenter(IRunPresenter *presenter) override;
+
+  void setRunEnabled(bool const enable) override;
 
 private slots:
   void notifyRunClicked();

@@ -16,7 +16,12 @@ RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subsc
   m_view->subscribePresenter(this);
 }
 
-void RunPresenter::handleRunClicked() { m_subscriber->handleRunClicked(); }
+void RunPresenter::handleRunClicked() {
+  m_view->setRunEnabled(false);
+  m_subscriber->handleRunClicked();
+}
+
+void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
