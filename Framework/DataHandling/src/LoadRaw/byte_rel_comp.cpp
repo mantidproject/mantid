@@ -16,6 +16,7 @@ C The final space used is (NIN-1)/4 +1 + NEXTRA longwords, where NEXTRA is the
 C number of extra longwords used in giving absolute values.
 C
 */
+#include <iostream>
 #include <stdexcept>
 
 #include "byte_rel_comp.h"
