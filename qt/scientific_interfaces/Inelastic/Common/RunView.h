@@ -23,13 +23,16 @@ public:
   virtual void subscribePresenter(IRunPresenter *presenter) = 0;
 };
 
-class RunView : public QWidget, public IRunView {
+class RunView final : public QWidget, public IRunView {
   Q_OBJECT
 
 public:
   RunView(QWidget *parent);
 
   void subscribePresenter(IRunPresenter *presenter) override;
+
+private slots:
+  void notifyRunClicked();
 
 private:
   IRunPresenter *m_presenter;

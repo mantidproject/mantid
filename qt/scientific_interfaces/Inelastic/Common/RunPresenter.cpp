@@ -12,5 +12,7 @@ namespace CustomInterfaces {
 
 RunPresenter::RunPresenter(IRunView *view) : m_view(view) { m_view->subscribePresenter(this); }
 
+void RunPresenter::handleRunClicked() {}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

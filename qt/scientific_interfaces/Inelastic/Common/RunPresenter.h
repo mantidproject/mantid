@@ -14,12 +14,16 @@ class IRunView;
 class IRunPresenter {
 public:
   virtual ~IRunPresenter() = default;
+
+  virtual void handleRunClicked() = 0;
 };
 
-class RunPresenter : public IRunPresenter {
+class RunPresenter final : public IRunPresenter {
 
 public:
   RunPresenter(IRunView *view);
+
+  void handleRunClicked() override;
 
 private:
   IRunView *m_view;
