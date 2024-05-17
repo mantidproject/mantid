@@ -124,7 +124,7 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 20 workspaces saved. For each row, file type, and bank there should be a
+   be saved. In total, there should be 20 workspaces saved. For each row, file type, and bank, there should be a
    reduced file (with no suffix) and a ``sample`` file. The ``first_time`` line should also produce a ``can`` workspace
    for each file type and bank. This is because both workspaces have the same ``can`` input run numbers and so the
    reduction only calculates it once.
