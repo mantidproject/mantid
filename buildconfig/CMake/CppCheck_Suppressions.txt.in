@@ -879,9 +879,9 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItem
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1229
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1244
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/test/NXcanSASTestHelper.cpp:51
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:123
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:281
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:450
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:125
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:283
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:452
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:268
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:592
