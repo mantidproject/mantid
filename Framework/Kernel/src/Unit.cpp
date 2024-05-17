@@ -15,6 +15,7 @@
 #include <cfloat>
 #include <limits>
 #include <math.h>
+#include <sstream>
 
 namespace Mantid::Kernel {
 
