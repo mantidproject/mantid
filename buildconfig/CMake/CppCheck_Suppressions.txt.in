@@ -37,8 +37,8 @@ checkersReport
 
 // ----------- New list of suppressions after updating to cppcheck 2.13.1 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:478
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:494
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:477
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:493
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Strings.h:170
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:72
@@ -114,8 +114,8 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:644
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:659
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:664
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:665
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:153
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:183
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:95
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:280
