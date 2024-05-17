@@ -296,7 +296,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:229
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:273
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1DMany.cpp:291
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:139
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:138
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:65
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:85
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:186
