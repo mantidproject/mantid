@@ -8,6 +8,8 @@ set(SRC_FILES
     OutputPlotOptionsModel.cpp
     OutputPlotOptionsPresenter.cpp
     OutputPlotOptionsView.cpp
+    RunPresenter.cpp
+    RunView.cpp
     Settings.cpp
     SettingsHelper.cpp
     SettingsModel.cpp
@@ -22,14 +24,15 @@ set(INC_FILES
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h
+    RunPresenter.h
     SettingsHelper.h
     SettingsPresenter.h
     ValidationUtils.h
 )
 
-set(MOC_FILES InelasticInterface.h InelasticTab.h OutputPlotOptionsView.h Settings.h SettingsView.h)
+set(MOC_FILES InelasticInterface.h InelasticTab.h OutputPlotOptionsView.h RunView.h Settings.h SettingsView.h)
 
-set(UI_FILES InterfaceSettings.ui OutputPlotOptions.ui)
+set(UI_FILES InterfaceSettings.ui OutputPlotOptions.ui RunView.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM INC_FILES PREPEND ${SUB_DIRECTORY}/)
