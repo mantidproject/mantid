@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace Mantid::API {
 namespace {
