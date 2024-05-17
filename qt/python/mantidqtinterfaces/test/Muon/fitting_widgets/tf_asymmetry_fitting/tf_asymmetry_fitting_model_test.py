@@ -698,6 +698,24 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         filtered_functions_fwd = self.model.get_all_fit_functions_for("fwd")
         self.assertEqual(str(filtered_functions_fwd[0]), str(self.tf_simultaneous_fit_function))
 
+    def test_get_normal_fit_function_from_does_not_error_if_the_function_has_an_unexpected_structure(self):
+        function_string = (
+            "composite=MultiDomainFunction,NumDeriv=true;(composite=CompositeFunction,NumDeriv=false,"
+            "$domains=i;(composite=ProductFunction,NumDeriv=false;name=FlatBackground,A0=0.859525;"
+            "(name=FlatBackground,A0=1,ties=(A0=1);name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0));"
+            "name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698));(composite=CompositeFunction,"
+            "NumDeriv=false,$domains=i;(composite=ProductFunction,NumDeriv=false;name=FlatBackground,"
+            "A0=1.22426;(name=FlatBackground,A0=1,ties=(A0=1);name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0));"
+            "name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698))"
+        )
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fitting_mode = True
+        self.model.tf_asymmetry_mode = True
+
+        func = FunctionFactory.createInitialized(function_string)
+
+        self.assertEqual(None, self.model._get_normal_fit_function_from(func))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import IFunction, MultiDomainFunction
+from mantid.api import CompositeFunction, IFunction, MultiDomainFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
@@ -302,10 +302,11 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def _get_normal_fit_function_from(self, tf_asymmetry_function: IFunction) -> IFunction:
         """Returns the ordinary fit function embedded within the TF Asymmetry fit function."""
-        if tf_asymmetry_function is not None:
-            return tf_asymmetry_function.getFunction(0).getFunction(1).getFunction(1)
-        else:
-            return tf_asymmetry_function
+        if isinstance(tf_asymmetry_function, CompositeFunction):
+            domain_function = tf_asymmetry_function.getFunction(0)
+            if isinstance(domain_function, CompositeFunction) and isinstance(domain_function.getFunction(1), CompositeFunction):
+                return domain_function.getFunction(1).getFunction(1)
+        return None
 
     def _update_tf_asymmetry_parameter_value(self, dataset_index: int, full_parameter: str, value: float) -> None:
         """Updates a parameters value within the current TF Asymmetry single function or simultaneous function."""
