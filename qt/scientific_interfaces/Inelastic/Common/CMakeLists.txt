@@ -8,6 +8,7 @@ set(SRC_FILES
     OutputPlotOptionsModel.cpp
     OutputPlotOptionsPresenter.cpp
     OutputPlotOptionsView.cpp
+    RunFactory.cpp
     RunPresenter.cpp
     RunView.cpp
     Settings.cpp
@@ -25,6 +26,7 @@ set(INC_FILES
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h
+    RunFactory.h
     RunPresenter.h
     SettingsHelper.h
     SettingsPresenter.h
