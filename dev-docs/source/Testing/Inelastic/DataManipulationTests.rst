@@ -31,7 +31,7 @@ Elwin tab
 #. Add the loaded workspaces
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
-#. In the main GUI right-click on ``MAR27691-27698_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
+#. In the main GUI right-click on ``MAR27691-27698_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
 #. This should plot two lines of :math:`ln(Counts(microAmp.hour))^{-1}` vs :math:`Q2`
 
 .. _elwin_inelastic_test:
