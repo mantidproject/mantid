@@ -4,19 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "RunPresenter.h"
-
-#include "IRunSubscriber.h"
-#include "RunView.h"
+#pragma once
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subscriber(subscriber), m_view(view) {
-  m_view->subscribePresenter(this);
-}
+class IRunSubscriber {
+public:
+  virtual ~IRunSubscriber() = default;
 
-void RunPresenter::handleRunClicked() { m_subscriber->handleRunClicked(); }
+  virtual void handleRunClicked() = 0;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

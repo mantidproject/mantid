@@ -9,6 +9,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IRunSubscriber;
 class IRunView;
 
 class IRunPresenter {
@@ -21,11 +22,12 @@ public:
 class RunPresenter final : public IRunPresenter {
 
 public:
-  RunPresenter(IRunView *view);
+  RunPresenter(IRunSubscriber *subscriber, IRunView *view);
 
   void handleRunClicked() override;
 
 private:
+  IRunSubscriber *m_subscriber;
   IRunView *m_view;
 };
 

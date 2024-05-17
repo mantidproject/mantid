@@ -21,6 +21,7 @@ set(SRC_FILES
 set(INC_FILES
     DataValidationHelper.h
     InterfaceUtils.h
+    IRunSubscriber.h
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h
