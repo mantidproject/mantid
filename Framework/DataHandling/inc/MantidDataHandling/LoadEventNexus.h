@@ -162,6 +162,9 @@ public:
   /// if wall-clock filtering was requested
   bool m_is_time_filtered{false};
 
+  bool filter_bad_pulses{false};
+  std::shared_ptr<Mantid::Kernel::TimeROI> bad_pulses_timeroi;
+
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;
 

@@ -201,6 +201,9 @@ void ProcessBankData::run() {
         auto &el = outputWS.getSpectrum(wi);
         // set the sort order based on what is known
         el.setSortOrder(pulseSortingType);
+        // filter bad pulses if requested
+        if (alg->filter_bad_pulses)
+          el.filterInPlace(alg->bad_pulses_timeroi.get());
         // compress events if requested
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
