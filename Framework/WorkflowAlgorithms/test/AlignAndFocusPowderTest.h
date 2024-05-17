@@ -93,6 +93,8 @@ public:
     AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_outWS);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 870622);
     // [99] 1920.2339999999983, 41
     TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
@@ -418,6 +420,38 @@ public:
     TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
     TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.);
+    AnalysisDataService::Instance().remove(m_outputWS);
+  }
+
+  void testEventWksp_preserveEvents_logCompressTolerance() {
+    // Setup the event workspace
+    setUp_EventWorkspace("EventWksp_preserveEvents_logCompressTolerance");
+
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_compressTolerance = "-1e-5";
+
+    // Run the main test function
+    doTestEventWksp();
+
+    // Reset inputs to default values
+    m_compressTolerance = "0";
+
+    // Test the input
+    docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
+
+    // Test the output: expected result shall be same as testEventWksp_preserveEvents but have fewer events
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_outWS);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 451436);
+    // [99] 1920.2339999999983, 41
+    TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
+    // [899] 673.0, 15013.033999999987
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.03400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.0);
     AnalysisDataService::Instance().remove(m_outputWS);
   }
 
