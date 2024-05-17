@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
+
 #include "ui_RunView.h"
 
 #include <QObject>
@@ -16,7 +18,7 @@ namespace CustomInterfaces {
 
 class IRunPresenter;
 
-class IRunView {
+class MANTIDQT_INELASTIC_DLL IRunView {
 public:
   virtual ~IRunView() = default;
 
@@ -25,7 +27,7 @@ public:
   virtual void setRunEnabled(bool const enable) = 0;
 };
 
-class RunView final : public QWidget, public IRunView {
+class MANTIDQT_INELASTIC_DLL RunView final : public QWidget, public IRunView {
   Q_OBJECT
 
 public:

@@ -13,6 +13,8 @@
 
 #include "Common/OutputPlotOptionsModel.h"
 #include "Common/OutputPlotOptionsView.h"
+#include "Common/Run/IRunSubscriber.h"
+#include "Common/Run/RunView.h"
 #include "Common/Settings.h"
 #include "Common/SettingsModel.h"
 #include "Common/SettingsView.h"
@@ -139,6 +141,22 @@ public:
 
   MOCK_METHOD0(notifyApplySettings, void());
   MOCK_METHOD0(notifyCloseSettings, void());
+};
+
+class MockRunView : public IRunView {
+public:
+  virtual ~MockRunView() = default;
+
+  MOCK_METHOD1(subscribePresenter, void(IRunPresenter *presenter));
+
+  MOCK_METHOD1(setRunEnabled, void(bool const enable));
+};
+
+class MockRunSubscriber : public IRunSubscriber {
+public:
+  virtual ~MockRunSubscriber() = default;
+
+  MOCK_METHOD0(handleRunClicked, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

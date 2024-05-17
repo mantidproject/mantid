@@ -6,13 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class IRunSubscriber;
 class IRunView;
 
-class IRunPresenter {
+class MANTIDQT_INELASTIC_DLL IRunPresenter {
 public:
   virtual ~IRunPresenter() = default;
 
@@ -21,7 +23,7 @@ public:
   virtual void setRunEnabled(bool const enable) = 0;
 };
 
-class RunPresenter final : public IRunPresenter {
+class MANTIDQT_INELASTIC_DLL RunPresenter final : public IRunPresenter {
 
 public:
   RunPresenter(IRunSubscriber *subscriber, IRunView *view);
