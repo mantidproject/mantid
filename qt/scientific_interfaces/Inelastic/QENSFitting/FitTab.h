@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IRunSubscriber.h"
 #include "Common/InelasticTab.h"
-#include "Common/RunPresenter.h"
+#include "Common/Run/IRunSubscriber.h"
+#include "Common/Run/RunPresenter.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
