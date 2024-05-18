@@ -71,20 +71,16 @@ void AddAbsorptionWeightedPathLengths::init() {
                       std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
   setPropertySettings("MaxScatterPtAttempts",
                       std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
+  declareProperty("ApplyCorrection", false,
+                  "Calculate the attenuation/transmission and apply it to the integrated intensity and uncertainty.");
+  declareProperty("RotateSampleWithGoniometer", false,
+                  "Use the peak goniometer to rotate the sample from its initial orientation");
 }
 
 std::map<std::string, std::string> AddAbsorptionWeightedPathLengths::validateInputs() {
   IPeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(inputWS);
-  LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(inputWS);
   std::map<std::string, std::string> issues;
   auto sample = inputWS->sample();
-  if (lpws && !pws) {
-    bool useSinglePath = getProperty("UseSinglePath");
-    if (!useSinglePath) {
-      issues["UseSinglePath"] = "Input lean peaks workspace must only use single path";
-    }
-  }
   if (!sample.hasShape()) {
     issues["InputWorkspace"] = "Input workspace does not have a sample shape";
   } else {
@@ -109,7 +105,32 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   const int seed = getProperty("SeedValue");
 
+  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(inputWS);
+  LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(inputWS);
+
+  if (lpws && !pws) {
+    Instrument_sptr inst(new Geometry::Instrument);
+    Detector *detector = new Detector("det1", -1, nullptr);
+    detector->setPos(0.0, 0.0, 0.0);
+    inst->add(detector); // This takes care of deletion
+    inst->markAsDetector(detector);
+    Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("Source");
+    source->setPos(0.0, 0.0, -1.0);
+    inst->add(source); // This takes care of deletion
+    inst->markAsSource(source);
+    inputWS->setInstrument(inst);
+  }
+
+  auto instrument = inputWS->getInstrument();
+
+  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
+  // Configure strategy
+  MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
+  MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts, true);
+
   bool useSinglePath = getProperty("UseSinglePath");
+  bool applyCorrection = getProperty("ApplyCorrection");
+  // bool rotateSample = getProperty("RotateSampleWithGoniometer");
   const auto npeaks = inputWS->getNumberPeaks();
 
   // Configure progress
@@ -143,14 +164,14 @@ void AddAbsorptionWeightedPathLengths::exec() {
       absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) * afterScatter.calculateAttenuation(lambdas[0]);
 
     } else {
-      auto instrument = inputWS->getInstrument();
-      auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
-      // Configure strategy
-      MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
-      MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts,
-                                    true);
       MersenneTwister rng(seed + int(i));
-      MCInteractionStatistics detStatistics(peak.getDetectorID(), inputWS->sample());
+      int detID;
+      try {
+        detID = peak.getDetectorID();
+      } catch (const Exception::NotImplementedError &e) {
+        detID = -1;
+      }
+      MCInteractionStatistics detStatistics(detID, inputWS->sample());
       std::vector<double> absFactorErrors(NLAMBDA);
       strategy.calculate(rng, detectorPos, lambdas, peakWavelength, absFactors, absFactorErrors, detStatistics);
 
@@ -162,6 +183,10 @@ void AddAbsorptionWeightedPathLengths::exec() {
     double mu = inputWS->sample().getMaterial().attenuationCoefficient(peakWavelength); // m-1
     double absWeightedPathLength = -log(absFactors[0]) / mu;                            // metres
     peak.setAbsorptionWeightedPathLength(absWeightedPathLength * 100);                  // cm
+    if (applyCorrection) {
+      peak.setIntensity(peak.getIntensity() / absFactors[0]);
+      peak.setSigmaIntensity(peak.getSigmaIntensity() / absFactors[0]);
+    }
 
     prog.report(reportMsg);
     PARALLEL_END_INTERRUPT_REGION

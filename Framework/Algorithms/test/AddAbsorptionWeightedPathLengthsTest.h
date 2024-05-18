@@ -108,12 +108,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", peaksWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseSinglePath", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EventsPerPoint", 1000));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
 
     Mantid::Geometry::IPeak &peak = peaksWS->getPeak(0);
-    const double delta(1e-06);
-    TS_ASSERT_DELTA(0.2, peak.getAbsorptionWeightedPathLength(), delta);
+    const double delta(1e-04);
+    // weighted path length will be less than 2mm because off centre scatter
+    // points that are near the detector will have significantly shorter paths
+    // than those on the opposite side of the sphere
+    TS_ASSERT_DELTA(0.1508, peak.getAbsorptionWeightedPathLength(), delta);
   }
 
   void test_no_sample() {
