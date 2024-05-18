@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -45,11 +46,12 @@ constexpr int NLAMBDA = 1;
 /** Initialize the algorithm's properties.
  */
 void AddAbsorptionWeightedPathLengths::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InputWorkspace", "", Direction::InOut),
+                  "An input/output peaks workspace that the path distances will be added "
+                  "to.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>("InputWorkspace", "", Direction::InOut),
-      "An input/output peaks workspace that the path distances will be added "
-      "to.");
-  declareProperty("UseSinglePath", false, "Use a single path with a scatter point at the sample position");
+      "UseSinglePath", false,
+      "Use a single path with a scatter point at the sample position. Must be true when using a lean peaks workspace.");
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
@@ -72,11 +74,19 @@ void AddAbsorptionWeightedPathLengths::init() {
 }
 
 std::map<std::string, std::string> AddAbsorptionWeightedPathLengths::validateInputs() {
-  PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  IPeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(inputWS);
+  LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(inputWS);
   std::map<std::string, std::string> issues;
-  Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
-  if (!sample) {
-    issues["InputWorkspace"] = "Input workspace does not have a Sample";
+  auto sample = inputWS->sample();
+  if (lpws && !pws) {
+    bool useSinglePath = getProperty("UseSinglePath");
+    if (!useSinglePath) {
+      issues["UseSinglePath"] = "Input lean peaks workspace must only use single path";
+    }
+  }
+  if (!sample.hasShape()) {
+    issues["InputWorkspace"] = "Input workspace does not have a sample shape";
   } else {
     if (inputWS->sample().hasEnvironment()) {
       issues["InputWorkspace"] = "Sample must not have a sample environment";
@@ -94,13 +104,12 @@ std::map<std::string, std::string> AddAbsorptionWeightedPathLengths::validateInp
  */
 void AddAbsorptionWeightedPathLengths::exec() {
 
-  const PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const API::IPeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const int nevents = getProperty("EventsPerPoint");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
+  const int seed = getProperty("SeedValue");
 
-  auto instrument = inputWS->getInstrument();
-  auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
-
+  bool useSinglePath = getProperty("UseSinglePath");
   const auto npeaks = inputWS->getNumberPeaks();
 
   // Configure progress
@@ -108,43 +117,42 @@ void AddAbsorptionWeightedPathLengths::exec() {
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing path lengths";
 
-  // Configure strategy
-  MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
-  MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts, true);
-
-  const int seed = getProperty("SeedValue");
-
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int i = 0; i < npeaks; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    Peak &peak = inputWS->getPeak(i);
+    IPeak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
     std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA);
 
-    bool useSinglePath = getProperty("UseSinglePath");
-    if (useSinglePath) {
-      auto inst = inputWS->getInstrument();
-      const auto sourcePos = inst->getSource()->getPos();
-      const auto samplePos = inst->getSample()->getPos();
-      const auto reverseBeamDir = normalize(samplePos - sourcePos);
+    const auto R = peak.getGoniometerMatrix();
+    const auto sourcePos = R * peak.getSourceDirectionSampleFrame();
+    const auto detectorPos = R * peak.getDetectorDirectionSampleFrame();
+    const auto samplePos = peak.getSamplePos();
 
+    if (useSinglePath) {
+      const auto reverseBeamDir = normalize(samplePos - sourcePos);
       const IObject *sampleShape = &(inputWS->sample().getShape());
 
       Track beforeScatter(samplePos, reverseBeamDir);
       sampleShape->interceptSurface(beforeScatter);
-      const auto detDir = normalize(peak.getDetPos() - samplePos);
+      const auto detDir = normalize(detectorPos - samplePos);
       Track afterScatter(samplePos, detDir);
       sampleShape->interceptSurface(afterScatter);
 
       absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) * afterScatter.calculateAttenuation(lambdas[0]);
 
     } else {
+      auto instrument = inputWS->getInstrument();
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
+      // Configure strategy
+      MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
+      MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts,
+                                    true);
       MersenneTwister rng(seed + int(i));
       MCInteractionStatistics detStatistics(peak.getDetectorID(), inputWS->sample());
       std::vector<double> absFactorErrors(NLAMBDA);
-      strategy.calculate(rng, peak.getDetectorPosition(), lambdas, peakWavelength, absFactors, absFactorErrors,
-                         detStatistics);
+      strategy.calculate(rng, detectorPos, lambdas, peakWavelength, absFactors, absFactorErrors, detStatistics);
 
       if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
         g_log.debug(detStatistics.generateScatterPointStats());
