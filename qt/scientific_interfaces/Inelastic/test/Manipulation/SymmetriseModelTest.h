@@ -29,7 +29,7 @@ private:
     declareProperty("OutputWorkspace", "OutputWorkspace");
     declareProperty("OutputPropertiesTable", "OutputPropertiesTable");
 
-    declareProperty("SpectraRange", std::vector<long>{0, 2});
+    declareProperty("SpectraRange", std::vector<int>{0, 2});
     declareProperty("XMin", 0.05);
     declareProperty("XMax", 0.6);
   };
@@ -80,7 +80,7 @@ public:
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(true);
 
-    std::vector<long> spectraRange(2, 4);
+    std::vector<int> spectraRange(2, 4);
     m_model->setupPreviewAlgorithm(&batch, spectraRange);
     batch.executeBatch();
 
@@ -107,7 +107,7 @@ public:
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(false);
 
-    std::vector<long> spectraRange(2, 4);
+    std::vector<int> spectraRange(2, 4);
     m_model->setupPreviewAlgorithm(&batch, spectraRange);
     batch.executeBatch();
 
