@@ -1,0 +1,1 @@
+- Fixed a bug crashing Mantid on the Fit Property Browser of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface when trying to set a fit function with a parameter having a tie to itself.

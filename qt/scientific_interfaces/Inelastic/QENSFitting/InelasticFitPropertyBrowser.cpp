@@ -211,6 +211,8 @@ MultiDomainFunction_sptr InelasticFitPropertyBrowser::getFitFunction() const {
     }
   } catch (const std::invalid_argument &) {
     return std::make_shared<MultiDomainFunction>();
+  } catch (const std::runtime_error &) {
+    return std::make_shared<MultiDomainFunction>();
   }
 }
 
