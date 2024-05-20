@@ -326,9 +326,9 @@ void DiffractionReduction::runGenericReduction(const QString &instName, const QS
     rebin = rebinStart + "," + rebinWidth + "," + rebinEnd;
 
   // Get detector range
-  std::vector<long> detRange;
-  detRange.emplace_back(static_cast<long>(m_uiForm.spSpecMin->value()));
-  detRange.emplace_back(static_cast<long>(m_uiForm.spSpecMax->value()));
+  std::vector<int> detRange;
+  detRange.emplace_back(static_cast<int>(m_uiForm.spSpecMin->value()));
+  detRange.emplace_back(static_cast<int>(m_uiForm.spSpecMax->value()));
 
   // Get generic reduction algorithm instance
   IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISDiffractionReduction");

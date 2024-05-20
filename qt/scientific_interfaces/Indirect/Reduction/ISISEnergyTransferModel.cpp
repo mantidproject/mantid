@@ -63,7 +63,7 @@ void IETModel::setInputProperties(IAlgorithmRuntimeProps &properties, IETInputDa
 
 void IETModel::setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                        std::string const &instrument) {
-  std::vector<long> detectorRange;
+  std::vector<int> detectorRange;
 
   if (instrument == "IRIS" || instrument == "OSIRIS") {
     Mantid::API::AlgorithmProperties::update("Efixed", conversionData.getEfixed(), properties);

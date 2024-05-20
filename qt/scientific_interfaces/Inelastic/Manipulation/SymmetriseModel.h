@@ -23,7 +23,7 @@ public:
   SymmetriseModel();
   ~SymmetriseModel() = default;
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                             std::vector<long> const &spectraRange);
+                             std::vector<int> const &spectraRange);
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void reflectNegativeToPositive();
   void setWorkspaceName(std::string const &workspaceName);
