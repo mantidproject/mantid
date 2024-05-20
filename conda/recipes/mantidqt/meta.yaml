@@ -37,7 +37,6 @@ requirements:
 
   host:
     - eigen
-    - jemalloc  # [unix]
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}
