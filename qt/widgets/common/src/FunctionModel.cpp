@@ -423,7 +423,6 @@ void FunctionModel::setLocalParameterTie(std::string const &parameterName, int i
     } catch (const std::invalid_argument &e) {
       logError(e.what());
     } catch (const std::runtime_error &e) {
-      fun->removeTie(fun->parameterIndex(name));
       logError(e.what());
     }
   }

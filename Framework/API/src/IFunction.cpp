@@ -301,7 +301,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
       const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
       *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
     } else {
-      removeTie(m_ties.size() - 1);
+      removeTie(iPar);
     }
     throw;
   }
