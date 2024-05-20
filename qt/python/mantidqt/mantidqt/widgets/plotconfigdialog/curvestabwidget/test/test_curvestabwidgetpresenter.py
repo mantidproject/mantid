@@ -239,6 +239,18 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter.apply_properties()
         self.assertFalse(ax.containers[0][2][0].get_visible())
 
+    def test_selecting_and_applying_errorbar_curves(self):
+        fig = figure()
+        ax = fig.add_subplot(111, projection="mantid")
+        ax.errorbar(self.ws, specNum=1, label="Workspace", marker=".", markersize=4.0, capsize=1.0)
+        ax.errorbar(self.ws, specNum=1, label="Workspace 2", marker=".", markersize=4.0, capsize=1.0)
+        mock_view_props = Mock(get_plot_kwargs=lambda: {}, __getitem__=lambda s, x: False)
+        mock_view = Mock(
+            get_selected_ax_name=lambda: "(0, 0)", get_current_curve_name=lambda: "Workspace 2", get_properties=lambda: mock_view_props
+        )
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        presenter.apply_properties()
+
     def make_figure_with_multiple_curves(self):
         fig = figure()
         ax = fig.add_subplot(111, projection="mantid")
