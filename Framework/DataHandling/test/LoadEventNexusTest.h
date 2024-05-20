@@ -915,6 +915,109 @@ public:
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
+  void test_Load_And_FilterBadPulses() {
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses after loading
+    std::string post_filtered_name = "cncs_post_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+    }
+
+    // create filtered during load
+    std::string filtered_name = "cncs_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered and filtering during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
+  }
+
+  void test_Load_And_FilterBadPulses_with_start_time_filter() {
+    // make sure the combination of bad pulse filter and start time filter work together
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses after loading
+    std::string post_filtered_name = "cncs_post_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterByTimeStart", 20.);
+      ld.setProperty("FilterByTimeStop", 50.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+    }
+
+    // create filtered during load
+    std::string filtered_name = "cncs_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterByTimeStart", 20.);
+      ld.setProperty("FilterByTimeStop", 50.);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered and filtering during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
+  }
+
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, const std::string &BankName = "bank36",
                         bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
