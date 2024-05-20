@@ -28,9 +28,6 @@ hdf5: # this is to move to libcurl>=8.4
 numpy:
   - 1.24.*
 
-libcxx:
-  - '<17'
-
 matplotlib:
   - 3.7.*
 
