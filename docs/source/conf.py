@@ -64,8 +64,8 @@ templates_path = ["_templates"]
 # The suffix of source filenames.
 source_suffix = ".rst"
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "MantidProject"
@@ -74,7 +74,6 @@ copyright = "2015, Mantid"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
 version_str = mantid.__version__
 # The short X.Y version.
 version = ".".join(version_str.split(".")[:2])

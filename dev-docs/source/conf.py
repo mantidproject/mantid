@@ -5,7 +5,7 @@
 
 import os
 
-from sphinx import __version__ as sphinx_version
+import mantid
 import sphinx_bootstrap_theme
 
 
@@ -32,8 +32,8 @@ templates_path = ["_templates"]
 # The suffix of source filenames.
 source_suffix = ".rst"
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "MantidProject"
@@ -42,11 +42,11 @@ copyright = "2007-2020, Mantid"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-
+version_str = mantid.__version__
 # The short X.Y version.
-version = "master"
+version = ".".join(version_str.split(".")[:2])
 # The full version, including alpha/beta/rc tags.
-release = version
+release = version_str
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -89,10 +89,7 @@ html_static_path = ["_static"]
 
 # If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
-if sphinx_version < "1.7":
-    html_use_smartypants = True
-else:
-    smartquotes = True
+smartquotes = True
 
 # Hide the Sphinx usage as we reference it on github instead.
 html_show_sphinx = False
