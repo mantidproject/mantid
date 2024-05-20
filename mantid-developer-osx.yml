@@ -51,7 +51,7 @@ dependencies:
   - black  # may be out of sync with pre-commit
   - cppcheck==2.13.1
   - pre-commit>=2.12.0
-  - libcxx
+  - libcxx # This should now work without a pin
   - joblib
   - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 
