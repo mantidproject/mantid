@@ -139,27 +139,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
-    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
-    const std::array<std::string, 2> POL_DIRS{{"++", "--"}};
-    for (size_t i = 0; i != 2; ++i) {
-      const auto &dir = POL_DIRS[i];
-      const std::string wsName = m_outputWSName + std::string("_") + dir;
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
-      TS_ASSERT(ws)
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-      for (size_t j = 0; j != nHist; ++j) {
-        const auto &xs = ws->x(j);
-        const auto &ys = ws->y(j);
-        const auto &es = ws->e(j);
-        TS_ASSERT_EQUALS(ys.size(), nBins)
-        for (size_t k = 0; k != nBins; ++k) {
-          const double y = counts[k];
-          TS_ASSERT_EQUALS(xs[k], edges[k])
-          TS_ASSERT_EQUALS(ys[k], y * static_cast<double>(i + 1))
-          TS_ASSERT_EQUALS(es[k], std::sqrt(y) * static_cast<double>(i + 1))
-        }
-      }
-    }
+    checkCorrectionResults(outputWS, 2, nHist, nBins, edges, {"++", "--"}, counts);
   }
 
   void test_IdealCaseDirectBeamCorrections() {
@@ -255,63 +235,14 @@ public:
     const auto expected = correction(y, F1, F2, P1, P2);
     const Eigen::Vector4d e{ws00->e(0).front(), ws01->e(0).front(), ws10->e(0).front(), ws11->e(0).front()};
     const auto expectedError = error(y, e, F1, F1e, F2, F2e, P1, P1e, P2, P2e);
-    MatrixWorkspace_sptr ppWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr pmWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_+-")));
-    MatrixWorkspace_sptr mpWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_-+")));
-    MatrixWorkspace_sptr mmWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_--")));
-    TS_ASSERT(ppWS)
-    TS_ASSERT(pmWS)
-    TS_ASSERT(mpWS)
-    TS_ASSERT(mmWS)
-    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(pmWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(mpWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(mmWS->getNumberHistograms(), nHist)
-    for (size_t j = 0; j != nHist; ++j) {
-      const auto &ppX = ppWS->x(j);
-      const auto &ppY = ppWS->y(j);
-      const auto &ppE = ppWS->e(j);
-      const auto &pmX = pmWS->x(j);
-      const auto &pmY = pmWS->y(j);
-      const auto &pmE = pmWS->e(j);
-      const auto &mpX = mpWS->x(j);
-      const auto &mpY = mpWS->y(j);
-      const auto &mpE = mpWS->e(j);
-      const auto &mmX = mmWS->x(j);
-      const auto &mmY = mmWS->y(j);
-      const auto &mmE = mmWS->e(j);
-      TS_ASSERT_EQUALS(ppY.size(), nBins)
-      TS_ASSERT_EQUALS(pmY.size(), nBins)
-      TS_ASSERT_EQUALS(mpY.size(), nBins)
-      TS_ASSERT_EQUALS(mmY.size(), nBins)
-      for (size_t k = 0; k != nBins; ++k) {
-        TS_ASSERT_EQUALS(ppX[k], edges[k])
-        TS_ASSERT_EQUALS(pmX[k], edges[k])
-        TS_ASSERT_EQUALS(mpX[k], edges[k])
-        TS_ASSERT_EQUALS(mmX[k], edges[k])
-        TS_ASSERT_DELTA(ppY[k], expected[0], 1e-12)
-        TS_ASSERT_DELTA(pmY[k], expected[1], 1e-12)
-        TS_ASSERT_DELTA(mpY[k], expected[2], 1e-12)
-        TS_ASSERT_DELTA(mmY[k], expected[3], 1e-12)
-        // This test constructs the expected missing I01 and I10 intensities
-        // slightly different from what the algorithm does: I10 is solved
-        // first and then I01 is solved using all I00, I10 and I11. This
-        // results in slightly larger errors estimates for I01 and thus for
-        // the final corrected expected intensities.
-        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-5)
-        TS_ASSERT_LESS_THAN(ppE[k], expectedError[0])
-        TS_ASSERT_DELTA(pmE[k], expectedError[1], 1e-2)
-        TS_ASSERT_LESS_THAN(pmE[k], expectedError[1])
-        TS_ASSERT_DELTA(mpE[k], expectedError[2], 1e-2)
-        TS_ASSERT_LESS_THAN(mpE[k], expectedError[2])
-        TS_ASSERT_DELTA(mmE[k], expectedError[3], 1e-5)
-        TS_ASSERT_LESS_THAN(mmE[k], expectedError[3])
-      }
-    }
+    // This test constructs the expected missing I01 and I10 intensities
+    // slightly different from what the algorithm does: I10 is solved
+    // first and then I01 is solved using all I00, I10 and I11. This
+    // results in slightly larger errors estimates for I01 and thus for
+    // the final corrected expected intensities.
+    std::vector<double> errorTolerances = {1e-5, 1e-2, 1e-2, 1e-5};
+    compareCorrectionResults(outputWS, {"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges, expected, expectedError,
+                             std::move(errorTolerances));
   }
 
   void test_TwoInputsWithoutAnalyzer() {
@@ -342,32 +273,7 @@ public:
     const auto expected = correctionWithoutAnalyzer(y, F1, P1);
     const Eigen::Vector2d e{ws00->e(0).front(), ws11->e(0).front()};
     const auto expectedError = errorWithoutAnalyzer(y, e, F1, F1e, P1, P1e);
-    MatrixWorkspace_sptr ppWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr mmWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_--")));
-    TS_ASSERT(ppWS)
-    TS_ASSERT(mmWS)
-    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(mmWS->getNumberHistograms(), nHist)
-    for (size_t j = 0; j != nHist; ++j) {
-      const auto &ppX = ppWS->x(j);
-      const auto &ppY = ppWS->y(j);
-      const auto &ppE = ppWS->e(j);
-      const auto &mmX = mmWS->x(j);
-      const auto &mmY = mmWS->y(j);
-      const auto &mmE = mmWS->e(j);
-      TS_ASSERT_EQUALS(ppY.size(), nBins)
-      TS_ASSERT_EQUALS(mmY.size(), nBins)
-      for (size_t k = 0; k != nBins; ++k) {
-        TS_ASSERT_EQUALS(ppX[k], edges[k])
-        TS_ASSERT_EQUALS(mmX[k], edges[k])
-        TS_ASSERT_DELTA(ppY[k], expected[0], 1e-12)
-        TS_ASSERT_DELTA(mmY[k], expected[1], 1e-12)
-        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-12)
-        TS_ASSERT_DELTA(mmE[k], expectedError[1], 1e-12)
-      }
-    }
+    compareCorrectionResults(outputWS, {"_++", "_--"}, nHist, nBins, edges, expected, expectedError);
   }
 
   void test_directBeamOnlyInput() {
@@ -394,21 +300,7 @@ public:
     const auto errorP2 = P2e * y * (2. * P2 - 1.) * inverted * inverted;
     const auto errorY = e * e * inverted * inverted;
     const auto expectedError = std::sqrt(errorP1 * errorP1 + errorP2 * errorP2 + errorY);
-    MatrixWorkspace_sptr ppWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
-    TS_ASSERT(ppWS)
-    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
-    for (size_t j = 0; j != nHist; ++j) {
-      const auto &ppX = ppWS->x(j);
-      const auto &ppY = ppWS->y(j);
-      const auto &ppE = ppWS->e(j);
-      TS_ASSERT_EQUALS(ppY.size(), nBins)
-      for (size_t k = 0; k != nBins; ++k) {
-        TS_ASSERT_EQUALS(ppX[k], edges[k])
-        TS_ASSERT_DELTA(ppY[k], expected, 1e-12)
-        TS_ASSERT_DELTA(ppE[k], expectedError, 1e-12)
-      }
-    }
+    compareCorrectionResults(outputWS, {"_++"}, nHist, nBins, edges, {expected}, {expectedError});
   }
 
   void test_FailureWhenEfficiencyHistogramIsMissing() {
@@ -568,6 +460,67 @@ private:
     return outputWS;
   }
 
+  void checkCorrectionResults(WorkspaceGroup_sptr output, const size_t numEntries, const size_t nHist,
+                              const size_t nBins, const BinEdges &edges, const std::vector<std::string> &polDirs,
+                              const Counts &counts) {
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(), numEntries)
+    TS_ASSERT_EQUALS(polDirs.size(), numEntries)
+    for (size_t wsIndex = 0; wsIndex != numEntries; ++wsIndex) {
+      const auto &dir = polDirs[wsIndex];
+      const std::string wsName = m_outputWSName + std::string("_") + dir;
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output->getItem(wsName));
+      TS_ASSERT(ws)
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+      for (size_t histIndex = 0; histIndex != nHist; ++histIndex) {
+        const auto &xs = ws->x(histIndex);
+        const auto &ys = ws->y(histIndex);
+        const auto &es = ws->e(histIndex);
+        TS_ASSERT_EQUALS(ys.size(), nBins)
+        for (size_t binIndex = 0; binIndex != nBins; ++binIndex) {
+          const double y = counts[binIndex];
+          TS_ASSERT_EQUALS(xs[binIndex], edges[binIndex])
+          TS_ASSERT_EQUALS(ys[binIndex], y * static_cast<double>(wsIndex + 1))
+          TS_ASSERT_EQUALS(es[binIndex], std::sqrt(y) * static_cast<double>(wsIndex + 1))
+        }
+      }
+    }
+  }
+
+  void compareCorrectionResults(const WorkspaceGroup_sptr wsGrp, const std::vector<std::string> &pols,
+                                const size_t nHist, const size_t nBins, const BinEdges &edges,
+                                const std::vector<double> &expectedY, const std::vector<double> &expectedError,
+                                std::vector<double> errorTolerances = std::vector<double>{1e-12}) {
+    bool checkErrorBound = errorTolerances.size() > 1;
+    if (expectedError.size() > 1) {
+      errorTolerances.resize(expectedError.size(), errorTolerances[0]);
+    }
+
+    for (size_t wsIndex = 0; wsIndex < wsGrp->size(); ++wsIndex) {
+      MatrixWorkspace_sptr ws =
+          std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(m_outputWSName + pols[wsIndex]));
+      TS_ASSERT(ws)
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+      for (size_t histIndex = 0; histIndex < nHist; ++histIndex) {
+        const auto &x = ws->x(histIndex);
+        const auto &y = ws->y(histIndex);
+        const auto &e = ws->e(histIndex);
+        TS_ASSERT_EQUALS(y.size(), nBins)
+        for (size_t binIndex = 0; binIndex < nBins; ++binIndex) {
+          TS_ASSERT_EQUALS(x[binIndex], edges[binIndex])
+          TS_ASSERT_DELTA(y[binIndex], expectedY[wsIndex], 1e-12)
+          TS_ASSERT_DELTA(e[binIndex], expectedError[wsIndex], errorTolerances[wsIndex])
+          if (checkErrorBound) {
+            TS_ASSERT_LESS_THAN(e[binIndex], expectedError[wsIndex])
+          }
+        }
+      }
+    }
+  }
+
+  std::vector<double> convertEigenToVector(const Eigen::Vector2d &v) { return {v[0], v[1]}; }
+
+  std::vector<double> convertEigenToVector(const Eigen::Vector4d &v) { return {v[0], v[1], v[2], v[3]}; }
+
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     const auto nBins = edges.size() - 1;
     constexpr size_t nHist{4};
@@ -637,25 +590,8 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
 
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
-    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
-    for (size_t i = 0; i != 4; ++i) {
-      const std::string wsName = m_outputWSName + std::string("_") + outputSpinStates[i];
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
-      TS_ASSERT(ws)
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-      for (size_t j = 0; j != nHist; ++j) {
-        const auto &xs = ws->x(j);
-        const auto &ys = ws->y(j);
-        const auto &es = ws->e(j);
-        TS_ASSERT_EQUALS(ys.size(), nBins)
-        for (size_t k = 0; k != nBins; ++k) {
-          const double y = counts[k];
-          TS_ASSERT_EQUALS(xs[k], edges[k])
-          TS_ASSERT_EQUALS(ys[k], y * static_cast<double>(i + 1))
-          TS_ASSERT_EQUALS(es[k], std::sqrt(y) * static_cast<double>(i + 1))
-        }
-      }
-    }
+    checkCorrectionResults(outputWS, 4, nHist, nBins, edges,
+                           std::vector<std::string>{outputSpinStates.cbegin(), outputSpinStates.cend()}, counts);
   }
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
@@ -773,55 +709,10 @@ private:
     const auto expected = correction(y, F1, F2, P1, P2);
     const Eigen::Vector4d e{ws00->e(0).front(), ws01->e(0).front(), ws10->e(0).front(), ws11->e(0).front()};
     const auto expectedError = error(y, e, F1, F1e, F2, F2e, P1, P1e, P2, P2e);
-    MatrixWorkspace_sptr ppWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
-    MatrixWorkspace_sptr pmWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_+-")));
-    MatrixWorkspace_sptr mpWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_-+")));
-    MatrixWorkspace_sptr mmWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_--")));
-    TS_ASSERT(ppWS)
-    TS_ASSERT(pmWS)
-    TS_ASSERT(mpWS)
-    TS_ASSERT(mmWS)
-    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(pmWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(mpWS->getNumberHistograms(), nHist)
-    TS_ASSERT_EQUALS(mmWS->getNumberHistograms(), nHist)
-    for (size_t j = 0; j != nHist; ++j) {
-      const auto &ppX = ppWS->x(j);
-      const auto &ppY = ppWS->y(j);
-      const auto &ppE = ppWS->e(j);
-      const auto &pmX = pmWS->x(j);
-      const auto &pmY = pmWS->y(j);
-      const auto &pmE = pmWS->e(j);
-      const auto &mpX = mpWS->x(j);
-      const auto &mpY = mpWS->y(j);
-      const auto &mpE = mpWS->e(j);
-      const auto &mmX = mmWS->x(j);
-      const auto &mmY = mmWS->y(j);
-      const auto &mmE = mmWS->e(j);
-      TS_ASSERT_EQUALS(ppY.size(), nBins)
-      TS_ASSERT_EQUALS(pmY.size(), nBins)
-      TS_ASSERT_EQUALS(mpY.size(), nBins)
-      TS_ASSERT_EQUALS(mmY.size(), nBins)
-      for (size_t k = 0; k != nBins; ++k) {
-        TS_ASSERT_EQUALS(ppX[k], edges[k])
-        TS_ASSERT_EQUALS(pmX[k], edges[k])
-        TS_ASSERT_EQUALS(mpX[k], edges[k])
-        TS_ASSERT_EQUALS(mmX[k], edges[k])
-        TS_ASSERT_DELTA(ppY[k], expected[0], 1e-12)
-        TS_ASSERT_DELTA(pmY[k], expected[1], 1e-12)
-        TS_ASSERT_DELTA(mpY[k], expected[2], 1e-12)
-        TS_ASSERT_DELTA(mmY[k], expected[3], 1e-12)
-        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-12)
-        TS_ASSERT_DELTA(pmE[k], expectedError[1], 1e-12)
-        TS_ASSERT_DELTA(mpE[k], expectedError[2], 1e-12)
-        TS_ASSERT_DELTA(mmE[k], expectedError[3], 1e-12)
-      }
-    }
+    compareCorrectionResults(outputWS, std::vector<std::string>{"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges,
+                             expected, expectedError);
   }
+
   Eigen::Matrix4d invertedF1(const double f1) {
     Eigen::Matrix4d m;
     m << f1, 0., 0., 0., 0., f1, 0., 0., f1 - 1., 0., 1., 0., 0., f1 - 1., 0., 1.;
@@ -878,19 +769,20 @@ private:
     return m;
   }
 
-  Eigen::Vector4d correction(const Eigen::Vector4d &y, const double f1, const double f2, const double p1,
-                             const double p2) {
+  std::vector<double> correction(const Eigen::Vector4d &y, const double f1, const double f2, const double p1,
+                                 const double p2) {
     const Eigen::Matrix4d F1 = invertedF1(f1);
     const Eigen::Matrix4d F2 = invertedF2(f2);
     const Eigen::Matrix4d P1 = invertedP1(p1);
     const Eigen::Matrix4d P2 = invertedP2(p2);
     const Eigen::Matrix4d inverted = (P2 * P1 * F2 * F1).matrix();
-    return (inverted * y).matrix();
+    const Eigen::Vector4d c = (inverted * y).matrix();
+    return convertEigenToVector(c);
   }
 
-  Eigen::Vector4d error(const Eigen::Vector4d &y, const Eigen::Vector4d &e, const double f1, const double f1e,
-                        const double f2, const double f2e, const double p1, const double p1e, const double p2,
-                        const double p2e) {
+  std::vector<double> error(const Eigen::Vector4d &y, const Eigen::Vector4d &e, const double f1, const double f1e,
+                            const double f2, const double f2e, const double p1, const double p1e, const double p2,
+                            const double p2e) {
     const Eigen::Matrix4d F1 = invertedF1(f1);
     const Eigen::Matrix4d dF1 = f1e * invertedF1Derivative(f1);
     const Eigen::Matrix4d F2 = invertedF2(f2);
@@ -905,22 +797,24 @@ private:
     const auto f1Error = (P2 * P1 * F2 * dF1 * y).array();
     const auto inverted = (P2 * P1 * F2 * F1).array();
     const auto yError = ((inverted * inverted).matrix() * (e.array() * e.array()).matrix()).array();
-    return (p2Error * p2Error + p1Error * p1Error + f2Error * f2Error + f1Error * f1Error + yError).sqrt().matrix();
+    const Eigen::Vector4d err =
+        (p2Error * p2Error + p1Error * p1Error + f2Error * f2Error + f1Error * f1Error + yError).sqrt().matrix();
+    return convertEigenToVector(err);
   }
 
-  Eigen::Vector2d correctionWithoutAnalyzer(const Eigen::Vector2d &y, const double f1, const double p1) {
+  std::vector<double> correctionWithoutAnalyzer(const Eigen::Vector2d &y, const double f1, const double p1) {
     Eigen::Matrix2d F1;
     F1 << f1, 0., f1 - 1., 1.;
     F1 *= 1. / f1;
     Eigen::Matrix2d P1;
     P1 << p1, p1 - 1., p1 - 1., p1;
     P1 *= 1. / (2. * p1 - 1.);
-    const Eigen::Matrix2d inverted = (P1 * F1).matrix();
-    return static_cast<Eigen::Vector2d>(inverted * y);
+    const Eigen::Vector2d c = (P1 * F1).matrix() * y;
+    return convertEigenToVector(c);
   }
 
-  Eigen::Vector2d errorWithoutAnalyzer(const Eigen::Vector2d &y, const Eigen::Vector2d &e, const double f1,
-                                       const double f1e, const double p1, const double p1e) {
+  std::vector<double> errorWithoutAnalyzer(const Eigen::Vector2d &y, const Eigen::Vector2d &e, const double f1,
+                                           const double f1e, const double p1, const double p1e) {
     Eigen::Matrix2d F1;
     F1 << f1, 0, f1 - 1., 1.;
     F1 *= 1. / f1;
@@ -937,7 +831,8 @@ private:
     const auto f1Error = (P1 * dF1 * y).array();
     const auto inverted = (P1 * F1).array();
     const auto yError = ((inverted * inverted).matrix() * (e.array() * e.array()).matrix()).array();
-    return (p1Error * p1Error + f1Error * f1Error + yError).sqrt().matrix();
+    const Eigen::Vector2d err = (p1Error * p1Error + f1Error * f1Error + yError).sqrt().matrix();
+    return convertEigenToVector(err);
   }
 
   void solveMissingIntensity(const Mantid::API::MatrixWorkspace_sptr &ppWS, Mantid::API::MatrixWorkspace_sptr &pmWS,
