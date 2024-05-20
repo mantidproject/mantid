@@ -80,12 +80,10 @@ public:
   void setUp() override {
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<FitPlotModel>();
     m_fittingData = std::make_unique<std::vector<FitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
     m_fitOutput = std::make_unique<FitOutput>();
-    m_model->setFittingData(m_fittingData.get());
-    m_model->setFitOutput(m_fitOutput.get());
+    m_model = std::make_unique<FitPlotModel>(m_fittingData.get(), m_fitOutput.get());
   }
 
   void tearDown() override {
@@ -115,7 +113,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(alg, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspace");
-    m_fitOutput->addOutput(group, parameters, result);
+    m_fitOutput->addOutput(group, parameters, result, FitDomainIndex{0});
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
 
@@ -195,7 +193,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(alg, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspace");
-    m_fitOutput->addOutput(group, parameters, result);
+    m_fitOutput->addOutput(group, parameters, result, FitDomainIndex{0});
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
 
@@ -227,12 +225,12 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(alg, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspace");
-    m_fitOutput->addOutput(group, parameters, result);
+    m_fitOutput->addOutput(group, parameters, result, FitDomainIndex{0});
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
 
     auto const hwhm = m_model->getFirstHWHM();
-    auto const peakCentre = m_model->getFirstPeakCentre().get_value_or(0.);
+    auto const peakCentre = m_model->getFirstPeakCentre().value_or(0.);
 
     auto const minimum = peakCentre + *hwhm;
     TS_ASSERT_EQUALS(m_model->calculateHWHMMaximum(minimum), 0.99125);
@@ -244,12 +242,12 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(alg, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(alg, "OutputWorkspace");
-    m_fitOutput->addOutput(group, parameters, result);
+    m_fitOutput->addOutput(group, parameters, result, FitDomainIndex{0});
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
 
     auto const hwhm = m_model->getFirstHWHM();
-    auto const peakCentre = m_model->getFirstPeakCentre().get_value_or(0.);
+    auto const peakCentre = m_model->getFirstPeakCentre().value_or(0.);
 
     auto const maximum = peakCentre - *hwhm;
     TS_ASSERT_EQUALS(m_model->calculateHWHMMinimum(maximum), 1.00875);
@@ -269,14 +267,14 @@ public:
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
     auto const fwhm = 0.0175;
-    TS_ASSERT_EQUALS(m_model->getFirstHWHM().get(), fwhm / 2);
+    TS_ASSERT_EQUALS(*m_model->getFirstHWHM(), fwhm / 2);
   }
 
   void test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
     m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
     m_model->setFitFunction(m_activeFunction);
     auto const background = 0.0;
-    TS_ASSERT_EQUALS(m_model->getFirstBackgroundLevel().get(), background);
+    TS_ASSERT_EQUALS(*m_model->getFirstBackgroundLevel(), background);
   }
 
   MatrixWorkspace_sptr m_workspace;

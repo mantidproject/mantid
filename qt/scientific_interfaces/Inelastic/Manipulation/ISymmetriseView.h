@@ -24,6 +24,7 @@ class ISymmetrisePresenter;
 class MANTIDQT_INELASTIC_DLL ISymmetriseView {
 
 public:
+  virtual ~ISymmetriseView() = default;
   virtual void subscribePresenter(ISymmetrisePresenter *presenter) = 0;
 
   virtual void setDefaults() = 0;

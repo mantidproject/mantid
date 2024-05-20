@@ -1,0 +1,2 @@
+- Fix a crash in the :ref:`Elwin Tab <elwin>` of the Data Manipulation Interface ocurring when all items of the table were selected with the keyboard and the clicked on `Remove Selected` button.
+- Add `Select All` push button on :ref:`Elwin Tab <elwin>` to select all rows when clicked.

@@ -29,6 +29,7 @@ class IElwinPresenter;
 class MANTIDQT_INELASTIC_DLL IElwinView {
 
 public:
+  virtual ~IElwinView() = default;
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
@@ -53,6 +54,7 @@ public:
   virtual void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) = 0;
 
   virtual QModelIndexList getSelectedData() = 0;
+  virtual void selectAllRows() = 0;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
   virtual bool isGroupInput() const = 0;

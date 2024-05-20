@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FitPlotModel.h"
 #include "IFitDataModel.h"
 #include "IFitOutput.h"
 #include "IFittingModel.h"
@@ -17,8 +18,7 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,7 +46,7 @@ public:
   FittingModel();
   virtual ~FittingModel() = default;
 
-  void validate(UserInputValidator &validator) const;
+  void validate(UserInputValidator &validator) const override;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;
@@ -57,7 +57,7 @@ public:
   // IFittingModel
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
-  virtual boost::optional<std::string> isInvalidFunction() const override;
+  virtual std::optional<std::string> isInvalidFunction() const override;
   std::vector<std::string> getFitParameterNames() const override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setFWHM(double fwhm, WorkspaceID WorkspaceID) override;
@@ -71,8 +71,6 @@ public:
   std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const override;
 
   // IFitOutput
-  void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
-                          WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   IFitOutput *getFitOutput() const override;
 
@@ -81,21 +79,21 @@ public:
   FittingMode getFittingMode() const override;
 
   void updateFitTypeString() override;
-  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  std::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const override;
-  Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  Mantid::API::IAlgorithm_sptr getSingleFittingAlgorithm() const override;
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::string getOutputBasename() const override;
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
-  void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) override;
   void removeFittingData() override;
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
 
-  IFitDataModel *getFitDataModel() override;
+  IFitDataModel *getFitDataModel() const override;
+  IFitPlotModel *getFitPlotModel() const override;
 
   // Used for testing purposes
   [[nodiscard]] inline std::string getFitString() const noexcept { return m_fitString; }
@@ -106,10 +104,11 @@ protected:
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
-  std::string m_fitType = "FitType";
-  std::string m_fitString = "FitString";
+  std::string m_fitType;
+  std::string m_fitString;
 
   std::unique_ptr<IFitDataModel> m_fitDataModel;
+  std::unique_ptr<IFitPlotModel> m_fitPlotModel;
 
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
