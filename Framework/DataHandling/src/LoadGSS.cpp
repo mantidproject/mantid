@@ -23,7 +23,6 @@
 #include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <fstream>
-#include <sstream>
 #include <string>
 
 using namespace Mantid::DataHandling;

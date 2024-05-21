@@ -14,7 +14,6 @@
 #include "MantidKernel/Strings.h"
 
 #include <numeric>
-#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>

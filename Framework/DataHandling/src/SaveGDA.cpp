@@ -19,7 +19,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <sstream>
 
 namespace Mantid::DataHandling {
 

@@ -9,7 +9,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/algorithm/string.hpp>
-#include <sstream>
 
 namespace Mantid::Geometry {
 

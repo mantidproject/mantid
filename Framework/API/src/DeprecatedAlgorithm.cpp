@@ -8,7 +8,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
-#include <sstream>
 
 namespace Mantid::API {
 namespace {

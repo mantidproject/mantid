@@ -16,8 +16,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <sstream>
-
 namespace Mantid::CurveFitting::CostFunctions {
 namespace {
 /// static logger

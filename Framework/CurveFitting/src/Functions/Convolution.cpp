@@ -24,7 +24,6 @@
 #include <gsl/gsl_fft_real.h>
 
 #include <fstream>
-#include <sstream>
 
 namespace {
 const double tolerance{0.02};

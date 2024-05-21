@@ -27,8 +27,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <sstream>
-
 namespace Mantid::API {
 using namespace Geometry;
 

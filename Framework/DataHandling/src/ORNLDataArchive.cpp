@@ -7,10 +7,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <sstream>
 
-#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidDataHandling/ORNLDataArchive.h"
+#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"

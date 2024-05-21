@@ -8,7 +8,6 @@
 #include "MantidCatalog/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <sstream>
 #include <utility>
 
 #include <Poco/Net/HTMLForm.h>

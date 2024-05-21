@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // NexusFileIO
 // @author Ronald Fowler
-#include <sstream>
 #include <vector>
 
 #ifdef _WIN32

@@ -18,7 +18,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include <fstream>
-#include <sstream>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadFlexiNexus)

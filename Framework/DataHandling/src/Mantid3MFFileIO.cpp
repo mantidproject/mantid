@@ -17,7 +17,6 @@
 #include "Poco/DOM/NodeList.h"
 #include <Poco/DOM/Element.h>
 #include <boost/algorithm/string/trim.hpp>
-#include <iostream>
 
 namespace {
 constexpr auto SAMPLE_OBJECT_NAME = "SAMPLE";

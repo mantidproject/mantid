@@ -28,7 +28,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <fstream>
 #include <numeric>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::DataHandling {

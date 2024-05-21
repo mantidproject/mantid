@@ -26,7 +26,6 @@
 
 #include <cmath>
 #include <numeric>
-#include <sstream>
 
 namespace Mantid::CurveFitting::Algorithms {
 

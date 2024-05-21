@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <fstream>
-#include <sstream>
 
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"

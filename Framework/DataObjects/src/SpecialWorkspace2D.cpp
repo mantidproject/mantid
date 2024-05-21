@@ -10,7 +10,6 @@
 #include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
-#include <sstream>
 
 using std::set;
 using std::size_t;

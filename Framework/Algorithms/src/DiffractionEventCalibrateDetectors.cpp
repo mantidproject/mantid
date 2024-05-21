@@ -29,7 +29,6 @@
 #include <cmath>
 #include <fstream>
 #include <numeric>
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

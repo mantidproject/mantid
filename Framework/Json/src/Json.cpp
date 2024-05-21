@@ -7,7 +7,6 @@
 
 #include "MantidJson/Json.h"
 #include <memory>
-#include <sstream>
 
 namespace Mantid::JsonHelpers {
 

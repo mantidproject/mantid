@@ -14,8 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
 
-#include <sstream>
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -13,8 +13,6 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/Unit.h"
 
-#include <sstream>
-
 namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractPolarizationEfficiencies)

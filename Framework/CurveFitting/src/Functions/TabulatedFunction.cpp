@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <utility>
 
 namespace Mantid::CurveFitting::Functions {

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventsListsShmemManager.h"
 #include <random>
-#include <sstream>
 #include <utility>
 
 #include "MantidParallel/IO/EventsListsShmemManager.h"

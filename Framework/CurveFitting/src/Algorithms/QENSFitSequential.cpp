@@ -21,7 +21,6 @@
 #include <boost/cast.hpp>
 #include <boost/regex.hpp>
 
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>

@@ -7,7 +7,6 @@
 
 #include "MantidDataHandling/PulseIndexer.h"
 #include "MantidKernel/TimeROI.h"
-#include <sstream>
 #include <utility>
 
 namespace Mantid::DataHandling {

@@ -9,7 +9,6 @@
 #include "MantidKernel/Quat.h"
 #include <algorithm>
 #include <boost/version.hpp>
-#include <sstream>
 
 #if BOOST_VERSION < 106700
 #include <boost/math/common_factor.hpp>

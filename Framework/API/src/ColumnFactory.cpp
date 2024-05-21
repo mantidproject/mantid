@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/Column.h"
-#include <sstream>
 
 namespace Mantid::API {
 

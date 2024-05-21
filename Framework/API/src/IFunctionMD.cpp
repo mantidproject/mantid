@@ -23,7 +23,6 @@
 #include <cfloat>
 #include <functional>
 #include <iterator>
-#include <sstream>
 
 namespace Mantid::API {
 using namespace Geometry;

@@ -16,7 +16,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <memory>
-#include <sstream>
 #include <stdexcept>
 
 namespace Mantid::CurveFitting {

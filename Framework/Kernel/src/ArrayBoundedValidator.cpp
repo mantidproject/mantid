@@ -7,7 +7,6 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 
 #include <memory>
-#include <sstream>
 
 namespace Mantid::Kernel {
 

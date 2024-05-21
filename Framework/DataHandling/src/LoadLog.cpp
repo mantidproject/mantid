@@ -28,7 +28,6 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
 #include <regex>
-#include <sstream>
 #include <utility>
 
 using Mantid::Types::Core::DateAndTime;

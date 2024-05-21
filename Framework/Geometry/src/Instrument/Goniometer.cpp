@@ -11,7 +11,6 @@
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility>

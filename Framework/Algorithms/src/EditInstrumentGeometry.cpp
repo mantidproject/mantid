@@ -12,8 +12,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include <sstream>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

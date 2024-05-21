@@ -14,7 +14,6 @@
 #include <cmath>
 #include <iomanip>
 #include <numeric>
-#include <sstream>
 #include <stdexcept>
 #include <utility>
 

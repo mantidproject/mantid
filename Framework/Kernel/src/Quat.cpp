@@ -11,7 +11,6 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
-#include <sstream>
 
 namespace Mantid::Kernel {
 namespace {

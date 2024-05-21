@@ -10,8 +10,6 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
-#include <sstream>
-
 namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;

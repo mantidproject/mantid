@@ -13,7 +13,6 @@
 #include "MantidKernel/Timer.h"
 
 #include "tbb/parallel_for.h"
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

@@ -16,7 +16,6 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <iterator>
-#include <sstream>
 
 namespace Mantid::DataHandling {
 

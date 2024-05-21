@@ -18,8 +18,6 @@
 
 #include <gsl/gsl_blas.h>
 
-#include <iostream>
-
 namespace Mantid::CurveFitting::FuncMinimisers {
 
 // clang-format off

@@ -16,7 +16,6 @@
 
 #include <cmath>
 #include <numeric>
-#include <sstream>
 
 namespace Mantid {
 using namespace HistogramData;

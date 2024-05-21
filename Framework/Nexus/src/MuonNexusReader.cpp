@@ -8,7 +8,6 @@
 #include "MantidKernel/System.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
-#include <sstream>
 #include <vector>
 
 using std::string;

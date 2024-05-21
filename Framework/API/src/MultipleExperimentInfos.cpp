@@ -10,7 +10,6 @@
 #include "MantidKernel/System.h"
 
 #include <memory>
-#include <sstream>
 #include <utility>
 
 using namespace Mantid::Kernel;

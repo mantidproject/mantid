@@ -38,7 +38,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <sstream>
 #include <utility>
 
 namespace {

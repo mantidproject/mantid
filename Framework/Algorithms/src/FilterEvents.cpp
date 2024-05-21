@@ -34,7 +34,6 @@
 #include <MantidKernel/InvisibleProperty.h>
 
 #include <memory>
-#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

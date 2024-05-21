@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <ctime>
 #include <exception>
-#include <sstream> // for ostringstream
 #include <string>
 
 #include "MantidAPI/AlgorithmManager.h"

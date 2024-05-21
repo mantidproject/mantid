@@ -36,7 +36,6 @@
 #include <climits>
 #include <cmath>
 #include <functional>
-#include <sstream>
 #include <vector>
 
 namespace {

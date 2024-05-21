@@ -8,7 +8,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/EigenMatrix.h"
-#include <iostream>
 
 namespace Mantid::CurveFitting {
 

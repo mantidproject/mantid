@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <fstream>
 #include <memory>
-#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

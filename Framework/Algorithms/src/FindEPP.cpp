@@ -9,7 +9,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include <cmath>
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

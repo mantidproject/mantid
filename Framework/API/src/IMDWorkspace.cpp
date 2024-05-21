@@ -11,7 +11,6 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/VMD.h"
 
-#include <sstream>
 #include <utility>
 
 using Mantid::Kernel::VMD;

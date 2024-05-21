@@ -21,7 +21,6 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
-#include <sstream>
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"

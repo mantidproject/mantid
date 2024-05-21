@@ -22,7 +22,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

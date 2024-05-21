@@ -11,8 +11,6 @@
 
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
-#include <sstream>
-
 namespace Mantid::CurveFitting {
 
 using Mantid::CurveFitting::ComplexFortranMatrix;

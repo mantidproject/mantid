@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 
 namespace Mantid::DataObjects {
 

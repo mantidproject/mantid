@@ -8,7 +8,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <sstream>
 
 namespace Mantid::Algorithms {
 

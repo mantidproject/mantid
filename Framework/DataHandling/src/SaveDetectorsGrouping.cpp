@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

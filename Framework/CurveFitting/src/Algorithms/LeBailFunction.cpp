@@ -13,7 +13,6 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/System.h"
 
-#include <sstream>
 #include <utility>
 
 #include <gsl/gsl_sf_erf.h>
