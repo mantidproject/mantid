@@ -78,7 +78,7 @@ void SymmetrisePresenter::run() {
     return;
 
   if (m_isPreview) {
-    long spectrumNumber = static_cast<int>(m_view->getPreviewSpec());
+    int spectrumNumber = static_cast<int>(m_view->getPreviewSpec());
     std::vector<int> spectraRange(2, spectrumNumber);
 
     m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
