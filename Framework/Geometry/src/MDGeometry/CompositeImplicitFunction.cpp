@@ -4,7 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <sstream>
 
 #include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
 
@@ -18,6 +17,7 @@
 #include <Poco/DOM/Text.h>
 
 #include <numeric>
+#include <sstream>
 
 namespace Mantid::Geometry {
 
