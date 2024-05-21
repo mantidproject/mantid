@@ -192,7 +192,8 @@ std::size_t getFirstExcludedIndex(const std::vector<Mantid::Types::Core::DateAnd
 } // namespace
 
 std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
-                                                    const Mantid::Types::Core::DateAndTime &stop) const {
+                                                    const Mantid::Types::Core::DateAndTime &stop,
+                                                    const bool include_last_pulse) const {
   std::vector<size_t> roi;
   if (this->arePulseTimesIncreasing()) {
     // sorted pulse times don't have to go through the whole vector, just look at the ends
@@ -214,7 +215,10 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
         // do a linear search with the assumption that the index will be near the beginning
         for (size_t index = this->pulseTimes.size() - 1; index > start_index; --index) {
           if (this->pulseTime(index) <= stop) {
-            roi.push_back(index + 1); // include this pulse
+            if (include_last_pulse)
+              roi.push_back(index + 1); // include this pulse
+            else
+              roi.push_back(index); // don't include this pulse
             break;
           }
         }
@@ -232,6 +236,8 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
       std::size_t firstInclude = getFirstIncludedIndex(this->pulseTimes, 0, start, stop);
       while (firstInclude < NUM_PULSES) {
         auto firstExclude = getFirstExcludedIndex(this->pulseTimes, firstInclude + 1, start, stop);
+        if (!include_last_pulse)
+          firstExclude--;
         if (firstInclude != firstExclude) {
           roi.push_back(firstInclude);
           roi.push_back(firstExclude);

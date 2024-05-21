@@ -54,7 +54,8 @@ public:
    * This will return an empty vector if all pulse indices are between the start and stop.
    */
   std::vector<size_t> getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
-                                      const Mantid::Types::Core::DateAndTime &stop) const;
+                                      const Mantid::Types::Core::DateAndTime &stop,
+                                      const bool include_last_pulse = true) const;
 
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
