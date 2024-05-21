@@ -18,7 +18,7 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
-    - ninja                                  # [unix]
+    - ninja                                  # [osx or linux]
     - cmake
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -38,7 +38,7 @@ requirements:
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
-    - jemalloc  {{ jemalloc }} # [unix]
+    - jemalloc  {{ jemalloc }} # [osx or linux]
     - jsoncpp
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
@@ -59,7 +59,7 @@ requirements:
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
-    - jemalloc  {{ jemalloc }} # [unix]
+    - jemalloc  {{ jemalloc }} # [os or linux]
     - lib3mf  # [win]
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.27") }}

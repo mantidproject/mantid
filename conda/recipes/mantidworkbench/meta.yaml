@@ -18,7 +18,7 @@ build:
 requirements:
   build:
     - {{ compiler("cxx") }}
-    - ninja  # [unix]
+    - ninja  # [osx or linux]
     - cmake
     - git
     - python {{ python }}                    # [build_platform != target_platform]
