@@ -18,7 +18,7 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp  # [osx]
     - libgomp  # [linux]
-    - ninja  # [unix]
+    - ninja  # [osx or linux]
     - cmake
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -37,7 +37,6 @@ requirements:
 
   host:
     - eigen
-    - jemalloc  # [unix]
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}
