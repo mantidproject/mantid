@@ -115,15 +115,8 @@ void ProcessBankCompressed::collectEvents() {
     }
 
     if (alg->filter_bad_pulses) {
-      // TODO this is very slow, fix it
-
-      std::vector<size_t> tempBad;
-      for (const auto &splitter : alg->bad_pulses_timeroi->toTimeIntervals()) {
-        const auto tmp = m_bankPulseTimes->getPulseIndices(splitter.start(), splitter.stop(), false);
-        std::move(tmp.begin(), tmp.end(), std::back_inserter(tempBad));
-      }
-
-      pulseROI = Mantid::Kernel::ROI::calculate_intersection(pulseROI, tempBad);
+      pulseROI = Mantid::Kernel::ROI::calculate_intersection(
+          pulseROI, m_bankPulseTimes->getPulseIndices(alg->bad_pulses_timeroi->toTimeIntervals()));
     }
 
     const PulseIndexer pulseIndexer(m_event_index, m_firstEventIndex, NUM_EVENTS, m_entry_name, pulseROI);
