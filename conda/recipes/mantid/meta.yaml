@@ -59,7 +59,7 @@ requirements:
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
-    - jemalloc  {{ jemalloc }} # [os or linux]
+    - jemalloc  {{ jemalloc }} # [osx or linux]
     - lib3mf  # [win]
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.27") }}
