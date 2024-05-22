@@ -1039,7 +1039,7 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.c
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:64
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:1194
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:1270
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/WorkspaceCreationHelper.cpp:141
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/WorkspaceCreationHelper.cpp:142
 internalError:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MDAlgorithmsTestHelper.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/DgsConvertToEnergyTransfer.cpp:99
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRInstrument.cpp:102
