@@ -73,8 +73,6 @@ void AddAbsorptionWeightedPathLengths::init() {
                       std::make_unique<EnabledWhenProperty>("UseSinglePath", ePropertyCriterion::IS_DEFAULT));
   declareProperty("ApplyCorrection", false,
                   "Calculate the attenuation/transmission and apply it to the integrated intensity and uncertainty.");
-  declareProperty("RotateSampleWithGoniometer", false,
-                  "Use the peak goniometer to rotate the sample from its initial orientation");
 }
 
 std::map<std::string, std::string> AddAbsorptionWeightedPathLengths::validateInputs() {
@@ -130,7 +128,6 @@ void AddAbsorptionWeightedPathLengths::exec() {
 
   bool useSinglePath = getProperty("UseSinglePath");
   bool applyCorrection = getProperty("ApplyCorrection");
-  // bool rotateSample = getProperty("RotateSampleWithGoniometer");
   const auto npeaks = inputWS->getNumberPeaks();
 
   // Configure progress
@@ -169,7 +166,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
       try {
         detID = peak.getDetectorID();
       } catch (const Exception::NotImplementedError &e) {
-        detID = -1;
+        detID = -1; // no detector ID in lean peaks
       }
       MCInteractionStatistics detStatistics(detID, inputWS->sample());
       std::vector<double> absFactorErrors(NLAMBDA);
