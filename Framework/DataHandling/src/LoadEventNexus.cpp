@@ -620,7 +620,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log =
+      const auto *log =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
@@ -1107,7 +1107,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     if (!m_ws->run().hasProperty(LOG_CHARGE_NAME)) {
       throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
     }
-    auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
+    const auto *pcharge_log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
     if (!pcharge_log) {
       throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
     }
