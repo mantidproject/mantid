@@ -14,6 +14,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
+#include <string>
 #include <unordered_map>
 
 #include <QRegExp>
