@@ -21,6 +21,7 @@
 
 #include <Eigen/Dense>
 #include <algorithm>
+#include <functional>
 
 using Mantid::Algorithms::PolarizationCorrectionWildes;
 using namespace Mantid::API;
@@ -139,7 +140,10 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
-    checkCorrectionResults(outputWS, 2, nHist, nBins, edges, {"++", "--"}, counts);
+    compareCorrectionResults(
+        outputWS, {"_++", "_--"}, nHist, nBins, edges, counts,
+        [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
+        [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
   }
 
   void test_IdealCaseDirectBeamCorrections() {
@@ -193,7 +197,7 @@ public:
     auto effWS = efficiencies(edges);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
-    fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS);
+    fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS, counts);
   }
 
   void test_ThreeInputsWithMissing01FlipperConfiguration() { threeInputsTest("01"); }
@@ -241,8 +245,10 @@ public:
     // results in slightly larger errors estimates for I01 and thus for
     // the final corrected expected intensities.
     std::vector<double> errorTolerances = {1e-5, 1e-2, 1e-2, 1e-5};
-    compareCorrectionResults(outputWS, {"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges, expected, expectedError,
-                             std::move(errorTolerances));
+    compareCorrectionResults(
+        outputWS, {"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges, counts,
+        [&expected](size_t i, double) { return expected[i]; },
+        [&expectedError](size_t i, double) { return expectedError[i]; }, std::move(errorTolerances));
   }
 
   void test_TwoInputsWithoutAnalyzer() {
@@ -273,7 +279,9 @@ public:
     const auto expected = correctionWithoutAnalyzer(y, F1, P1);
     const Eigen::Vector2d e{ws00->e(0).front(), ws11->e(0).front()};
     const auto expectedError = errorWithoutAnalyzer(y, e, F1, F1e, P1, P1e);
-    compareCorrectionResults(outputWS, {"_++", "_--"}, nHist, nBins, edges, expected, expectedError);
+    compareCorrectionResults(
+        outputWS, {"_++", "_--"}, nHist, nBins, edges, counts, [&expected](size_t i, double) { return expected[i]; },
+        [&expectedError](size_t i, double) { return expectedError[i]; });
   }
 
   void test_directBeamOnlyInput() {
@@ -300,7 +308,9 @@ public:
     const auto errorP2 = P2e * y * (2. * P2 - 1.) * inverted * inverted;
     const auto errorY = e * e * inverted * inverted;
     const auto expectedError = std::sqrt(errorP1 * errorP1 + errorP2 * errorP2 + errorY);
-    compareCorrectionResults(outputWS, {"_++"}, nHist, nBins, edges, {expected}, {expectedError});
+    compareCorrectionResults(
+        outputWS, {"_++"}, nHist, nBins, edges, counts, [&expected](size_t, double) { return expected; },
+        [&expectedError](size_t, double) { return expectedError; });
   }
 
   void test_FailureWhenEfficiencyHistogramIsMissing() {
@@ -460,39 +470,14 @@ private:
     return outputWS;
   }
 
-  void checkCorrectionResults(WorkspaceGroup_sptr output, const size_t numEntries, const size_t nHist,
-                              const size_t nBins, const BinEdges &edges, const std::vector<std::string> &polDirs,
-                              const Counts &counts) {
-    TS_ASSERT_EQUALS(output->getNumberOfEntries(), numEntries)
-    TS_ASSERT_EQUALS(polDirs.size(), numEntries)
-    for (size_t wsIndex = 0; wsIndex != numEntries; ++wsIndex) {
-      const auto &dir = polDirs[wsIndex];
-      const std::string wsName = m_outputWSName + std::string("_") + dir;
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(output->getItem(wsName));
-      TS_ASSERT(ws)
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-      for (size_t histIndex = 0; histIndex != nHist; ++histIndex) {
-        const auto &xs = ws->x(histIndex);
-        const auto &ys = ws->y(histIndex);
-        const auto &es = ws->e(histIndex);
-        TS_ASSERT_EQUALS(ys.size(), nBins)
-        for (size_t binIndex = 0; binIndex != nBins; ++binIndex) {
-          const double y = counts[binIndex];
-          TS_ASSERT_EQUALS(xs[binIndex], edges[binIndex])
-          TS_ASSERT_EQUALS(ys[binIndex], y * static_cast<double>(wsIndex + 1))
-          TS_ASSERT_EQUALS(es[binIndex], std::sqrt(y) * static_cast<double>(wsIndex + 1))
-        }
-      }
-    }
-  }
-
   void compareCorrectionResults(const WorkspaceGroup_sptr wsGrp, const std::vector<std::string> &pols,
-                                const size_t nHist, const size_t nBins, const BinEdges &edges,
-                                const std::vector<double> &expectedY, const std::vector<double> &expectedError,
+                                const size_t nHist, const size_t nBins, const BinEdges &edges, const Counts &counts,
+                                const std::function<double(size_t, double)> &expectedY,
+                                const std::function<double(size_t, double)> &expectedError,
                                 std::vector<double> errorTolerances = std::vector<double>{1e-12}) {
     bool checkErrorBound = errorTolerances.size() > 1;
-    if (expectedError.size() > 1) {
-      errorTolerances.resize(expectedError.size(), errorTolerances[0]);
+    if (wsGrp->size() > 1) {
+      errorTolerances.resize(wsGrp->size(), errorTolerances[0]);
     }
 
     for (size_t wsIndex = 0; wsIndex < wsGrp->size(); ++wsIndex) {
@@ -506,11 +491,12 @@ private:
         const auto &e = ws->e(histIndex);
         TS_ASSERT_EQUALS(y.size(), nBins)
         for (size_t binIndex = 0; binIndex < nBins; ++binIndex) {
+          const double c = counts[binIndex];
           TS_ASSERT_EQUALS(x[binIndex], edges[binIndex])
-          TS_ASSERT_DELTA(y[binIndex], expectedY[wsIndex], 1e-12)
-          TS_ASSERT_DELTA(e[binIndex], expectedError[wsIndex], errorTolerances[wsIndex])
+          TS_ASSERT_DELTA(y[binIndex], expectedY(wsIndex, c), 1e-12)
+          TS_ASSERT_DELTA(e[binIndex], expectedError(wsIndex, c), errorTolerances[wsIndex])
           if (checkErrorBound) {
-            TS_ASSERT_LESS_THAN(e[binIndex], expectedError[wsIndex])
+            TS_ASSERT_LESS_THAN(e[binIndex], expectedError(wsIndex, c))
           }
         }
       }
@@ -590,8 +576,13 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
 
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
-    checkCorrectionResults(outputWS, 4, nHist, nBins, edges,
-                           std::vector<std::string>{outputSpinStates.cbegin(), outputSpinStates.cend()}, counts);
+    auto pols = std::vector<std::string>(4);
+    std::transform(outputSpinStates.cbegin(), outputSpinStates.cend(), pols.begin(),
+                   [](const std::string &s) { return "_" + s; });
+    compareCorrectionResults(
+        outputWS, pols, nHist, nBins, edges, counts,
+        [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
+        [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
   }
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
@@ -688,12 +679,13 @@ private:
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConf);
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     solveMissingIntensity(ws00, ws01, ws10, ws11, effWS);
-    fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS);
+    fullFourInputsResultsCheck(outputWS, ws00, ws01, ws10, ws11, effWS, counts);
   }
 
   void fullFourInputsResultsCheck(Mantid::API::WorkspaceGroup_sptr &outputWS, Mantid::API::MatrixWorkspace_sptr &ws00,
                                   Mantid::API::MatrixWorkspace_sptr &ws01, Mantid::API::MatrixWorkspace_sptr &ws10,
-                                  Mantid::API::MatrixWorkspace_sptr &ws11, Mantid::API::MatrixWorkspace_sptr &effWS) {
+                                  Mantid::API::MatrixWorkspace_sptr &ws11, Mantid::API::MatrixWorkspace_sptr &effWS,
+                                  const Counts &counts) {
     const auto nHist = ws00->getNumberHistograms();
     const auto nBins = ws00->y(0).size();
     const auto edges = ws00->binEdges(0);
@@ -709,8 +701,10 @@ private:
     const auto expected = correction(y, F1, F2, P1, P2);
     const Eigen::Vector4d e{ws00->e(0).front(), ws01->e(0).front(), ws10->e(0).front(), ws11->e(0).front()};
     const auto expectedError = error(y, e, F1, F1e, F2, F2e, P1, P1e, P2, P2e);
-    compareCorrectionResults(outputWS, std::vector<std::string>{"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges,
-                             expected, expectedError);
+    compareCorrectionResults(
+        outputWS, std::vector<std::string>{"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges, counts,
+        [&expected](size_t i, double) { return expected[i]; },
+        [&expectedError](size_t i, double) { return expectedError[i]; });
   }
 
   Eigen::Matrix4d invertedF1(const double f1) {
