@@ -316,6 +316,18 @@ void LoadEventNexus::init() {
                   "separated by a space).");
 }
 
+std::map<std::string, std::string> LoadEventNexus::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault(PropertyNames::BAD_PULSES_CUTOFF)) {
+    const double cutoff = getProperty(PropertyNames::BAD_PULSES_CUTOFF);
+    if (cutoff < 0 || cutoff > 100)
+      result[PropertyNames::BAD_PULSES_CUTOFF] = "Must be empty or between 0 and 100";
+  }
+
+  return result;
+}
+
 //----------------------------------------------------------------------------------------------
 /** set the name of the top level NXentry m_top_entry_name
  */

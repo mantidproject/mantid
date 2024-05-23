@@ -200,6 +200,8 @@ private:
   /// Execution code
   void execLoader() override;
 
+  std::map<std::string, std::string> validateInputs() override;
+
   LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
                                               const std::string &classType) const;
 
