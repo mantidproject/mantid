@@ -1612,8 +1612,9 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
     if (tof_min < 0)
       throw std::runtime_error("compressEvents with log binning doesn't work with negative TOF");
 
+    // can't start at 0 as this will create an infinite loop
     if (tof_min == 0)
-      bin_end = fabs(tolerance);
+      bin_end = tof_min = fabs(tolerance);
 
   } else { // linear
     // for linear we do "less than or equals" because that is how it was originally implemented
