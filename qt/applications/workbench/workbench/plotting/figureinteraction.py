@@ -136,6 +136,15 @@ class FigureInteraction(object):
             and len(event.inaxes.lines) == 0
         ):
             return
+
+        """
+        Disable the legend's draggability when the scroll event is
+        enabled to prevent the legend from unintentionally moving,
+        which is the default behavior in Matplotlib.
+        """
+        legend = event.inaxes.axes.get_legend()
+        legend_set_draggable(legend, False)
+
         zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == "up":  # zoom in
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
@@ -143,6 +152,9 @@ class FigureInteraction(object):
             zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
         self.redraw_annotations()
         event.canvas.draw()
+
+        """Re-enable the legend's draggability after the scroll event finishes"""
+        legend_set_draggable(legend, True)
 
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
