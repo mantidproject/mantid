@@ -15,6 +15,9 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
+#include <string>
+#include <unordered_map>
+
 #include <QRegExp>
 #include <QScrollArea>
 
@@ -117,7 +120,7 @@ private:
    *
    * @param name Name to be displayed on tab
    */
-  template <typename T> void addTab(const QString &name) {
+  template <typename T> void addTab(const std::string &name) {
     QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
     QVBoxLayout *tabLayout = new QVBoxLayout(tabWidget);
     tabWidget->setLayout(tabLayout);
@@ -127,7 +130,7 @@ private:
     tabScrollArea->setWidgetResizable(true);
 
     QWidget *tabContent = new QWidget(tabScrollArea);
-    tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
+    tabContent->setObjectName("tab" + QString::fromStdString(name).remove(QRegExp("[ ,()]")));
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -141,7 +144,7 @@ private:
     m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
 
     // Add all tabs to UI initially
-    m_uiForm.twIDRTabs->addTab(tabWidget, name);
+    m_uiForm.twIDRTabs->addTab(tabWidget, QString::fromStdString(name));
   }
 
   /**
@@ -153,7 +156,7 @@ private:
    * @param name Name to be displayed on tab
    */
 
-  template <typename TabPresenter, typename TabView, typename TabModel> void addMVPTab(const QString &name) {
+  template <typename TabPresenter, typename TabView, typename TabModel> void addMVPTab(const std::string &name) {
     QWidget *tabWidget = new QWidget(m_uiForm.twIDRTabs);
     QVBoxLayout *tabLayout = new QVBoxLayout(tabWidget);
     tabWidget->setLayout(tabLayout);
@@ -163,25 +166,26 @@ private:
     tabScrollArea->setWidgetResizable(true);
 
     QWidget *tabContent = new QWidget(tabScrollArea);
-    tabContent->setObjectName("tab" + QString(name).remove(QRegExp("[ ,()]")));
+    tabContent->setObjectName("tab" + QString::fromStdString(name).remove(QRegExp("[ ,()]")));
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
-    DataReductionTab *tabIDRContent =
-        new TabPresenter(this, new TabView(tabContent), std::make_unique<TabModel>(), std::move(algorithmRunner));
+    auto presenter = std::make_unique<TabPresenter>(this, new TabView(tabContent), std::make_unique<TabModel>(),
+                                                    std::move(algorithmRunner));
 
-    tabIDRContent->setupTab();
+    presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(presenter.get(), SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
 
     // Add to the cache
-    m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
+    m_tabs[name] = qMakePair(tabWidget, presenter.get());
+    m_presenters[name] = std::move(presenter);
 
     // Add all tabs to UI initially
-    m_uiForm.twIDRTabs->addTab(tabWidget, name);
+    m_uiForm.twIDRTabs->addTab(tabWidget, QString::fromStdString(name));
   }
 
   friend class DataReductionTab;
@@ -190,8 +194,10 @@ private:
   /// The settings group
   QString m_settingsGroup;
 
-  // All indirect tabs
-  QMap<QString, QPair<QWidget *, DataReductionTab *>> m_tabs;
+  // All indirect tabs - this should be removed when the interface is in MVP
+  QMap<std::string, QPair<QWidget *, DataReductionTab *>> m_tabs;
+  /// A map to hold the presenter corresponding to each tab
+  std::unordered_map<std::string, std::unique_ptr<DataReductionTab>> m_presenters;
 
   /// Poco observer for changes in user directory settings
   Poco::NObserver<DataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
