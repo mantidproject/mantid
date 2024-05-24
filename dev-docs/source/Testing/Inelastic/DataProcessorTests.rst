@@ -9,6 +9,40 @@ Inelastic Data Processor Testing
 - Download the `ISIS Sample Data <http://download.mantidproject.org>`_
 - Make sure that the data set is on your list of search directories
 
+Symmetrise tab
+--------------
+
+**Time required 5-10 minutes**
+
+--------------
+
+
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Symmetrise`` tab
+#. On the File Input, click on ``Browse``, a dialog window should prompt.
+#. Find the file ``irs26176_graphite002_red.nxs`` from the ISIS Sample Data and Load it.
+#. The first spectrum should be rendered in the plot browser.
+#. On the plot, drag and move the rightmost vertical green dashed line to be approximately at 0.4 on the x-axis, the value of ``Ehigh`` should change accordingly.
+#. Move the other vertical green dashed line to be approximately at 0.2 on the x-axis, the value of ``Elow`` should change accordingly.
+#. Click on the ``Preview`` button. The symmetrised plot should be rendered on the preview graph.
+#. Click the ``Run`` button.
+#. A Workspace named ``irs26176_graphite002_sym_pn_red`` should be created on the ADS.
+#. On the Output widget, click on ``Plot Spectra`` button. A new plot window should appear with the same plot as the preview.
+#. On the Symmetrise Property Browser: Change the value of ``Elow`` and ``Ehigh`` properties and see that the vertical green dashed lines
+   respond accordingly, but only when the input values are within range. It shouldn't be possible to set ``Elow`` to the right of ``Ehigh`` and viceversa.
+   At the same time, it shouldn't be possible to enter negative numbers, or positive numbers larger than the maximum data range.
+#. Change the value of ``Spectrum No`` property to 5 and see that the spectra on the plot is updated.
+#. Change the ``ReflectType`` property from ``Positive to Negative`` to ``Negative to Positive``, the green dashed lines should move to the negative range of the spectra.
+#. Now ``Ehigh`` should be closer to 0 than ``Elow``. Repeat checks of step 12, noting that only negative inputs can be entered now.
+#. Set ``Ehigh`` to -0.1 and ``Elow`` to -0.3 and click on the ``Preview`` button. The symmetrise plot should be rendered on the preview graph.
+   The axis data range must go from -0.3 to 0.3.
+#. Click on the ``Run`` button.
+#. A Workspace named ``irs26176_graphite002_sym_np_red`` should be created on the ADS.
+#. On the ADS, select ``irs26176_graphite002_sym_np_red`` and right-click to select ``Plot -> Spectrum``. On ``Workspace Indices`` select 5.
+   Check that the spectrum is the same as the one in the ``Preview`` plot of the symmetrise interface.
+
+.. _symmetrise_inelastic_test:
+
 Elwin tab
 ---------
 
