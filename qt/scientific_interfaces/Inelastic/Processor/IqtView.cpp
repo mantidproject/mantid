@@ -296,10 +296,10 @@ bool IqtView::validate() {
     uiv.addErrorMessage("ELow must be less than EHigh.\n");
 
   auto const message = uiv.generateErrorMessage();
-  if (!message.isEmpty())
-    showMessageBox(message.toStdString());
+  if (!message.empty())
+    showMessageBox(message);
 
-  return message.isEmpty();
+  return message.empty();
 }
 
 void IqtView::setSampleFBSuffixes(const QStringList &suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }

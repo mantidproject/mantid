@@ -67,9 +67,9 @@ bool SqwPresenter::validate() {
   UserInputValidator uiv = m_model->validate(m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
   auto const errorMessage = uiv.generateErrorMessage();
   // Show an error message if needed
-  if (!errorMessage.isEmpty())
-    m_view->showMessageBox(errorMessage.toStdString());
-  return errorMessage.isEmpty();
+  if (!errorMessage.empty())
+    m_view->showMessageBox(errorMessage);
+  return errorMessage.empty();
 }
 
 void SqwPresenter::run() {

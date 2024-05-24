@@ -85,7 +85,7 @@ void ResNorm::setup() {}
  */
 bool ResNorm::validate() {
   UserInputValidator uiv;
-  QString errors("");
+  std::string errors("");
 
   bool const vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
   bool const resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
@@ -121,7 +121,7 @@ bool ResNorm::validate() {
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
-  if (!errors.isEmpty()) {
+  if (!errors.empty()) {
     emit showMessageBox(errors);
     return false;
   }

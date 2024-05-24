@@ -95,7 +95,8 @@ private:
     presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(presenter.get(), SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,
+            SLOT(showMessageBox(const std::string &)));
 
     m_presenters[name] = std::move(presenter);
 

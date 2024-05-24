@@ -203,11 +203,11 @@ bool ISISDiagnostics::validate() {
       std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
   uiv.checkValidRange("Spectra Range", specRange);
 
-  QString error = uiv.generateErrorMessage();
+  auto const error = uiv.generateErrorMessage();
   bool isError = error != "";
 
   if (isError)
-    g_log.warning(error.toStdString());
+    g_log.warning(error);
 
   return !isError;
 }

@@ -32,7 +32,7 @@ void QENSFitting::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
-    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));

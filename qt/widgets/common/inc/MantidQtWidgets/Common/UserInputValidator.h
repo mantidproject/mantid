@@ -84,7 +84,7 @@ public:
 
   /// Returns an error message which contains all the error messages raised by
   /// the check functions.
-  QString generateErrorMessage();
+  std::string generateErrorMessage();
   /// Checks to see if all input is valid
   bool isAllInputValid();
 

@@ -359,10 +359,10 @@ bool ISISCalibration::validate() {
     uiv.checkBins(eLow, eWidth, eHigh);
   }
 
-  QString error = uiv.generateErrorMessage();
+  auto const error = uiv.generateErrorMessage();
 
   if (error != "")
-    g_log.warning(error.toStdString());
+    g_log.warning(error);
 
   return (error == "");
 }

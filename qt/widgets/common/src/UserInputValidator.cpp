@@ -398,11 +398,11 @@ void UserInputValidator::addErrorMessage(const QString &message, bool silent) {
  * raised by
  * the check functions.
  */
-QString UserInputValidator::generateErrorMessage() {
+std::string UserInputValidator::generateErrorMessage() {
   if (m_errorMessages.isEmpty())
     return "";
 
-  return "Please correct the following:\n" + m_errorMessages.join("\n");
+  return "Please correct the following:\n" + m_errorMessages.join("\n").toStdString();
 }
 
 /**

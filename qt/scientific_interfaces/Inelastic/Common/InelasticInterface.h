@@ -27,7 +27,7 @@ protected slots:
   void help();
   void settings();
   void manageUserDirectories();
-  void showMessageBox(QString const &message);
+  void showMessageBox(std::string const &message);
 
 protected:
   virtual void initLayout() override;

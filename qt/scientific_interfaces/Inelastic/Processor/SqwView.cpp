@@ -76,9 +76,9 @@ bool SqwView::validate() {
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
 
   auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage.toStdString());
-  return errorMessage.isEmpty();
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
+  return errorMessage.empty();
 }
 
 void SqwView::notifyDataReady(QString const &dataName) { m_presenter->handleDataReady(dataName.toStdString()); }

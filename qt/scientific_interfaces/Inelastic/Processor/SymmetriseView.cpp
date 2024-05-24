@@ -389,9 +389,9 @@ bool SymmetriseView::validate() {
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
   auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage.toStdString());
-  return errorMessage.isEmpty();
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
+  return errorMessage.empty();
 }
 
 void SymmetriseView::setRawPlotWatchADS(bool watchADS) { m_uiForm.ppRawPlot->watchADS(watchADS); }

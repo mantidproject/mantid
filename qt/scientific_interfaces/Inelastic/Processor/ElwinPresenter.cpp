@@ -137,9 +137,9 @@ bool ElwinPresenter::validate() {
   }
 
   auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    m_view->showMessageBox(errorMessage.toStdString());
-  return errorMessage.isEmpty();
+  if (!errorMessage.empty())
+    m_view->showMessageBox(errorMessage);
+  return errorMessage.empty();
 }
 
 void ElwinPresenter::handleValueChanged(std::string const &propName, double value) {

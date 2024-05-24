@@ -180,9 +180,9 @@ bool IETPresenter::validate() {
       uiv.addErrorMessage(QString::fromStdString(error));
   }
 
-  QString error = uiv.generateErrorMessage();
-  if (!error.isEmpty())
-    m_view->showMessageBox(error.toStdString());
+  auto const error = uiv.generateErrorMessage();
+  if (!error.empty())
+    m_view->showMessageBox(error);
 
   return validateInstrumentDetails() && uiv.isAllInputValid();
 }
