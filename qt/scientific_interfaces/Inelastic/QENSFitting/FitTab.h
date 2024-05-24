@@ -111,7 +111,7 @@ public:
   void handleFitComplete(bool const error) override;
 
   void handleRunClicked() override;
-  void handleValidation(UserInputValidator &validator) const override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private:
   void setup() override;

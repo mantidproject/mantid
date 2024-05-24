@@ -159,7 +159,7 @@ public:
   virtual ~MockRunSubscriber() = default;
 
   MOCK_METHOD0(handleRunClicked, void());
-  MOCK_CONST_METHOD1(handleValidation, void(UserInputValidator &validator));
+  MOCK_CONST_METHOD1(handleValidation, void(IUserInputValidator *validator));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

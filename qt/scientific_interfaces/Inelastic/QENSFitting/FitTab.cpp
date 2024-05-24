@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
+
+#include "Common/Run/RunView.h"
 #include "FitPlotView.h"
 
 #include <QString>
@@ -17,15 +19,13 @@ namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
-      m_outOptionsPresenter() {
+      m_runPresenter(), m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
+  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm->runWidget));
 }
 
-void FitTab::setup() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
-  updateOutputOptions(false);
-}
+void FitTab::setup() { updateResultOptions(); }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();
@@ -54,6 +54,7 @@ bool FitTab::validate() {
   const auto error = validator->generateErrorMessage();
   if (!error.empty()) {
     displayWarning(error);
+    updateFitButtons(true);
   }
   return error.empty();
 }
@@ -158,6 +159,8 @@ void FitTab::handleFunctionChanged() {
   m_fittingPresenter->updateFitTypeString();
 }
 
+void FitTab::handleRunClicked() { runTab(); }
+
 void FitTab::handleFitComplete(bool const error) {
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   updateFitButtons(true);
@@ -189,8 +192,7 @@ void FitTab::updateFitFunction() {
 }
 
 void FitTab::updateFitButtons(bool const enable) {
-  m_uiForm->pbRun->setText(enable ? "Run" : "Running...");
-  m_uiForm->pbRun->setEnabled(enable);
+  m_runPresenter->setRunEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fittingPresenter->setFitEnabled(enable);
 }
