@@ -66,7 +66,7 @@ std::string DataReduction::documentationPage() const { return "Indirect Data Red
  * Called when the user clicks the Python export button.
  */
 void DataReduction::exportTabPython() {
-  QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
+  auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
   m_tabs[tabName].second->exportPythonScript();
 }
 
@@ -421,35 +421,35 @@ void DataReduction::saveSettings() {
  */
 void DataReduction::filterUiForFacility(const QString &facility) {
   g_log.information() << "Facility selected: " << facility.toStdString() << '\n';
-  QStringList enabledTabs;
+  std::vector<std::string> enabledTabs;
   QStringList disabledInstruments;
 
   // Add facility specific tabs and disable instruments
   if (facility == "ISIS") {
-    enabledTabs << "ISIS Energy Transfer"
-                << "ISIS Calibration"
-                << "ISIS Diagnostics";
+    enabledTabs.emplace_back("ISIS Energy Transfer");
+    enabledTabs.emplace_back("ISIS Calibration");
+    enabledTabs.emplace_back("ISIS Diagnostics");
   } else if (facility == "ILL") {
-    enabledTabs << "ILL Energy Transfer";
+    enabledTabs.emplace_back("ILL Energy Transfer");
     disabledInstruments << "IN10"
                         << "IN13"
                         << "IN16";
   }
 
   // These tabs work at any facility (always at end of tabs)
-  enabledTabs << "Transmission";
+  enabledTabs.emplace_back("Transmission");
 
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {
     // Disconnect the instrument changed signal
-    QString tabName = m_uiForm.twIDRTabs->tabText(0);
+    auto const &tabName = m_uiForm.twIDRTabs->tabText(0).toStdString();
     disconnect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[tabName].second,
                SIGNAL(newInstrumentConfiguration()));
 
     // Remove the tab
     m_uiForm.twIDRTabs->removeTab(0);
 
-    g_log.debug() << "Removing tab " << tabName.toStdString() << '\n';
+    g_log.debug() << "Removing tab " << tabName << '\n';
   }
 
   // Add the required tabs
@@ -459,9 +459,9 @@ void DataReduction::filterUiForFacility(const QString &facility) {
             SIGNAL(newInstrumentConfiguration()));
 
     // Add the tab
-    m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, enabledTab);
+    m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, QString::fromStdString(enabledTab));
 
-    g_log.debug() << "Adding tab " << enabledTab.toStdString() << '\n';
+    g_log.debug() << "Adding tab " << enabledTab << '\n';
   }
 
   // Disable instruments as required
