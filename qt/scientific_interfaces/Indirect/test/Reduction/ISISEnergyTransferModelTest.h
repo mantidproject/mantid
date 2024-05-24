@@ -54,7 +54,7 @@ private:
     declareProperty("CalibrationWorkspace", "");
 
     declareProperty("Efixed", 0.0);
-    declareProperty("SpectraRange", std::vector<long>{0, 2});
+    declareProperty("SpectraRange", std::vector<int>{0, 2});
     declareProperty("BackgroundRange", std::vector<double>{0.0, 0.0});
     declareProperty("RebinString", "");
 
