@@ -112,7 +112,7 @@ void FittingPresenter::executeFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   auto properties = m_fitPropertyBrowser->fitProperties(m_model->getFittingMode());
   MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
       std::make_shared<MantidQt::API::ConfiguredAlgorithm>(fitAlgorithm, std::move(properties));
-  m_algorithmRunner->execute(confAlg);
+  m_algorithmRunner->execute(std::move(confAlg));
 }
 
 void FittingPresenter::updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &params) {
