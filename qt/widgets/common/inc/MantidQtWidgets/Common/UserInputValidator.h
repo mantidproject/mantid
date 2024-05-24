@@ -25,6 +25,8 @@ namespace CustomInterfaces {
 
 class DLLExport IUserInputValidator {
 public:
+  virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
+
   virtual std::string generateErrorMessage() const = 0;
 };
 
@@ -83,7 +85,7 @@ public:
   bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false);
 
   /// Add a custom error message to the list.
-  void addErrorMessage(const QString &message, bool silent = false);
+  void addErrorMessage(const std::string &message, bool const silent = false) override;
 
   /// Sets a validation label
   void setErrorLabel(QLabel *errorLabel, bool valid);
@@ -119,7 +121,8 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName, QStrin
                                             QString const &validType, bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
     if (!getADSWorkspace<T>(workspaceName.toStdString())) {
-      addErrorMessage("The " + inputType + " workspace is not a " + validType + ".", silent);
+      addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
+                      silent);
       return false;
     } else
       return true;

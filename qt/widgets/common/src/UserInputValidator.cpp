@@ -64,7 +64,7 @@ UserInputValidator::UserInputValidator() : m_errorMessages(), m_error(false) {}
 bool UserInputValidator::checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel) {
   if (field->text().trimmed().isEmpty()) {
     setErrorLabel(errorLabel, false);
-    addErrorMessage(name + " has been left blank.");
+    addErrorMessage(name.toStdString() + " has been left blank.");
     return false;
   } else {
     setErrorLabel(errorLabel, true);
@@ -91,7 +91,7 @@ bool UserInputValidator::checkFieldIsValid(const QString &errorMessage, QLineEdi
     return true;
   } else {
     setErrorLabel(errorLabel, false);
-    addErrorMessage(errorMessage);
+    addErrorMessage(errorMessage.toStdString());
     return false;
   }
 }
@@ -107,7 +107,7 @@ bool UserInputValidator::checkFieldIsValid(const QString &errorMessage, QLineEdi
  */
 bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) {
   if (workspaceSelector->currentText() == "") {
-    addErrorMessage("No " + name + " workspace has been selected.");
+    addErrorMessage("No " + name.toStdString() + " workspace has been selected.");
     return false;
   }
 
@@ -123,7 +123,7 @@ bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(const QString &name, W
  */
 bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) {
   if (!widget->isValid()) {
-    addErrorMessage(name + " file error: " + widget->getFileProblem());
+    addErrorMessage(name.toStdString() + " file error: " + widget->getFileProblem().toStdString());
     return false;
   }
 
@@ -140,7 +140,7 @@ bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name, const
  */
 bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent) {
   if (!widget->isValid()) {
-    addErrorMessage(name + " error: " + widget->getProblem(), silent);
+    addErrorMessage(name.toStdString() + " error: " + widget->getProblem().toStdString(), silent);
     return false;
   }
 
@@ -156,12 +156,12 @@ bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelec
  */
 bool UserInputValidator::checkValidRange(const QString &name, std::pair<double, double> range) {
   if (range.second == range.first) {
-    addErrorMessage(name + " must have a non-zero width.");
+    addErrorMessage(name.toStdString() + " must have a non-zero width.");
     return false;
   }
 
   if (range.second < range.first) {
-    addErrorMessage("The start of " + name + " must be less than the end.");
+    addErrorMessage("The start of " + name.toStdString() + " must be less than the end.");
     return false;
   }
 
@@ -185,7 +185,7 @@ bool UserInputValidator::checkRangesDontOverlap(std::pair<double, double> rangeA
                           .arg(rangeA.second)
                           .arg(rangeB.first)
                           .arg(rangeB.second);
-    addErrorMessage(message);
+    addErrorMessage(message.toStdString());
     return false;
   }
 
@@ -208,7 +208,7 @@ bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName, std::pai
   sortPair(outer);
 
   if (inner.first < outer.first || inner.second > outer.second) {
-    addErrorMessage(outerName + " must completely enclose " + innerName + ".");
+    addErrorMessage(outerName.toStdString() + " must completely enclose " + innerName.toStdString() + ".");
     return false;
   }
 
@@ -273,8 +273,7 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y, 
     std::stringstream msg;
     msg << name.toStdString() << " (" << x << ")"
         << " should not be equal to " << y << ".";
-    QString msgStr = QString::fromStdString(msg.str());
-    addErrorMessage(msgStr);
+    addErrorMessage(msg.str());
     return false;
   }
 
@@ -293,7 +292,7 @@ bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName, bool
     return false;
 
   if (!doesExistInADS(workspaceName.toStdString())) {
-    addErrorMessage(workspaceName + " could not be found.", silent);
+    addErrorMessage(workspaceName.toStdString() + " could not be found.", silent);
     return false;
   }
   return true;
@@ -322,8 +321,7 @@ bool UserInputValidator::checkWorkspaceNumberOfHistograms(QString const &workspa
 bool UserInputValidator::checkWorkspaceNumberOfHistograms(const MatrixWorkspace_sptr &workspace,
                                                           std::size_t const &validSize) {
   if (workspace->getNumberHistograms() != validSize) {
-    addErrorMessage(QString::fromStdString(workspace->getName()) + " should contain " +
-                    QString::fromStdString(std::to_string(validSize)) + " spectra.");
+    addErrorMessage(workspace->getName() + " should contain " + std::to_string(validSize) + " spectra.");
     return false;
   }
   return true;
@@ -352,8 +350,7 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(QString const &workspaceName
 bool UserInputValidator::checkWorkspaceNumberOfBins(const MatrixWorkspace_sptr &workspace,
                                                     std::size_t const &validSize) {
   if (workspace->x(0).size() != validSize) {
-    addErrorMessage(QString::fromStdString(workspace->getName()) + " should contain " +
-                    QString::fromStdString(std::to_string(validSize)) + " bins.");
+    addErrorMessage(workspace->getName() + " should contain " + std::to_string(validSize) + " bins.");
     return false;
   }
   return true;
@@ -372,7 +369,7 @@ bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName, QS
   if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup", silent)) {
     if (auto const group = getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
       if (auto const error = containsInvalidWorkspace(group)) {
-        addErrorMessage(QString::fromStdString(error.get()), silent);
+        addErrorMessage(error.get(), silent);
         return false;
       }
       return true;
@@ -387,9 +384,9 @@ bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName, QS
  * @param message :: the message to add to the list
  * @param silent True if an error should not be added to the validator.
  */
-void UserInputValidator::addErrorMessage(const QString &message, bool silent) {
-  if (!silent && !m_errorMessages.contains(message))
-    m_errorMessages.append(message);
+void UserInputValidator::addErrorMessage(const std::string &message, bool const silent) {
+  if (!silent && !m_errorMessages.contains(QString::fromStdString(message)))
+    m_errorMessages.append(QString::fromStdString(message));
   m_error = true;
 }
 

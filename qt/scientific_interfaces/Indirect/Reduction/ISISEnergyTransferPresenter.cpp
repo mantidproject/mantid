@@ -177,7 +177,7 @@ bool IETPresenter::validate() {
 
   for (auto const &error : errors) {
     if (!error.empty())
-      uiv.addErrorMessage(QString::fromStdString(error));
+      uiv.addErrorMessage(error);
   }
 
   auto const error = uiv.generateErrorMessage();

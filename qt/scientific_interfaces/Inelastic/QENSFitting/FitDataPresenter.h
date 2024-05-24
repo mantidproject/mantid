@@ -53,7 +53,7 @@ public:
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;
-  void validate(UserInputValidator &validator);
+  void validate(IUserInputValidator *validator);
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
     UNUSED_ARG(workspaceName);

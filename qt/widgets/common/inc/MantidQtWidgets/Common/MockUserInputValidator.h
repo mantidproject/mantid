@@ -19,6 +19,8 @@ class MockUserInputValidator : public MantidQt::CustomInterfaces::IUserInputVali
 public:
   virtual ~MockUserInputValidator() = default;
 
+  MOCK_METHOD2(addErrorMessage, void(const std::string &message, bool const silent));
+
   MOCK_CONST_METHOD0(generateErrorMessage, std::string());
 };
 
