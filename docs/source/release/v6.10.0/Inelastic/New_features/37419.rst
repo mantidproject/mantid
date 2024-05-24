@@ -1,0 +1,1 @@
+- A deprecation warning has been added to the Calculate Paalman Pings tab of :ref:`Inelastic Corrections interface <interface-inelastic-corrections>`. This tab will be removed in two minor releases time if we are not informed otherwise.
