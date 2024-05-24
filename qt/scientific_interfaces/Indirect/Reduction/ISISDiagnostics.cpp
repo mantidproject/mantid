@@ -145,9 +145,9 @@ void ISISDiagnostics::run() {
   QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
-  std::vector<long> spectraRange;
-  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
+  std::vector<int> spectraRange;
+  spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMin"])));
+  spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMax"])));
 
   std::vector<double> peakRange;
   peakRange.emplace_back(m_dblManager->value(m_properties["PeakStart"]));
