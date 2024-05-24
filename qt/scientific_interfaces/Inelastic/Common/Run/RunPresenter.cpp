@@ -29,7 +29,7 @@ bool RunPresenter::validate() const {
   UserInputValidator validator;
   m_subscriber->handleValidation(validator);
 
-  const auto error = validator.generateErrorMessage().toStdString();
+  const auto error = validator.generateErrorMessage();
   if (!error.empty()) {
     m_view->displayWarning(error);
   }
