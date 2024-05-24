@@ -8,6 +8,8 @@
 
 #include "DllConfig.h"
 
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -16,6 +18,7 @@ public:
   virtual ~IRunSubscriber() = default;
 
   virtual void handleRunClicked() = 0;
+  virtual void handleValidation(UserInputValidator &validator) const = 0;
 };
 
 } // namespace CustomInterfaces

@@ -21,6 +21,8 @@ public:
   virtual void handleRunClicked() = 0;
 
   virtual void setRunEnabled(bool const enable) = 0;
+
+  virtual bool validate() const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL RunPresenter final : public IRunPresenter {
@@ -31,6 +33,8 @@ public:
   void handleRunClicked() override;
 
   void setRunEnabled(bool const enable) override;
+
+  bool validate() const override;
 
 private:
   IRunSubscriber *m_subscriber;

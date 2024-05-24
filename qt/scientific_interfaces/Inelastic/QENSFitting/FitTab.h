@@ -111,10 +111,10 @@ public:
   void handleFitComplete(bool const error) override;
 
   void handleRunClicked() override;
+  void handleValidation(UserInputValidator &validator) const override;
 
 private:
   void setup() override;
-  bool validate() override;
   void run() override;
 
   void updateParameterEstimationData();

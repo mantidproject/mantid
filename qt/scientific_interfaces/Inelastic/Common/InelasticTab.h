@@ -104,7 +104,7 @@ protected:
   /// Overidden by child class.
   virtual void run() = 0;
   /// Overidden by child class.
-  virtual bool validate() = 0;
+  virtual bool validate() { return true; }
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;

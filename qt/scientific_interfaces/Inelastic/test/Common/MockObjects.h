@@ -150,6 +150,8 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IRunPresenter *presenter));
 
   MOCK_METHOD1(setRunEnabled, void(bool const enable));
+
+  MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
 class MockRunSubscriber : public IRunSubscriber {
@@ -157,6 +159,7 @@ public:
   virtual ~MockRunSubscriber() = default;
 
   MOCK_METHOD0(handleRunClicked, void());
+  MOCK_CONST_METHOD1(handleValidation, void(UserInputValidator &validator));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

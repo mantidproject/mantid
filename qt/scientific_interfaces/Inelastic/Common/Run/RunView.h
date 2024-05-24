@@ -10,6 +10,8 @@
 
 #include "ui_RunView.h"
 
+#include <string>
+
 #include <QObject>
 #include <QWidget>
 
@@ -25,6 +27,8 @@ public:
   virtual void subscribePresenter(IRunPresenter *presenter) = 0;
 
   virtual void setRunEnabled(bool const enable) = 0;
+
+  virtual void displayWarning(std::string const &message) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL RunView final : public QWidget, public IRunView {
@@ -36,6 +40,8 @@ public:
   void subscribePresenter(IRunPresenter *presenter) override;
 
   void setRunEnabled(bool const enable) override;
+
+  void displayWarning(std::string const &message) override;
 
 private slots:
   void notifyRunClicked();

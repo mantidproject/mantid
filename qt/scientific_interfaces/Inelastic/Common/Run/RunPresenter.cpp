@@ -17,11 +17,24 @@ RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subsc
 }
 
 void RunPresenter::handleRunClicked() {
-  m_view->setRunEnabled(false);
-  m_subscriber->handleRunClicked();
+  if (validate()) {
+    m_view->setRunEnabled(false);
+    m_subscriber->handleRunClicked();
+  }
 }
 
 void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
+
+bool RunPresenter::validate() const {
+  UserInputValidator validator;
+  m_subscriber->handleValidation(validator);
+
+  const auto error = validator.generateErrorMessage().toStdString();
+  if (!error.empty()) {
+    m_view->displayWarning(error);
+  }
+  return error.empty();
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
