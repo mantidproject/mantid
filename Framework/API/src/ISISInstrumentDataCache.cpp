@@ -14,13 +14,19 @@ Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
 std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(const std::string &fileName) const {
   g_log.debug() << "ISISInstrumentDataCache::getFileParentDirectoryPath(" << fileName << ")" << std::endl;
 
-  auto [instrName, runNumber] = validateInstrumentAndNumber(fileName);
+  auto [instrumentInfo, runNumber] = validateInstrumentAndNumber(fileName);
+  std::string instrName = instrumentInfo.name();
 
   // Open index json file
-  std::string jsonPath = m_dataCachePath + "/" + instrName + "/" + instrName + "_index.json";
+  std::string jsonPath = makeIndexFilePath(instrName);
   std::ifstream ifstrm{jsonPath};
-  if (!ifstrm) {
-    throw std::invalid_argument("Could not open index file: " + jsonPath);
+  if (!ifstrm.is_open()) { // Try again with shortname
+    instrName = instrumentInfo.shortName();
+    jsonPath = makeIndexFilePath(instrName);
+    ifstrm.open(jsonPath);
+    if (!ifstrm.is_open()) {
+      throw std::invalid_argument("Could not open index file: " + jsonPath);
+    }
   }
 
   // Read directory path from json file
@@ -39,7 +45,7 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(con
   return dirPath;
 }
 
-std::pair<std::string, std::string>
+std::pair<Mantid::Kernel::InstrumentInfo, std::string>
 Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName) const {
 
   // Check if suffix eg. -add is present in filename
@@ -57,12 +63,18 @@ Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(const std::str
   runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
 
   try { // Expand instrument name
-    instrName = FileFinder::Instance().getInstrument(instrName, false).name();
+    auto instrumentInfo = FileFinder::Instance().getInstrument(instrName, false);
+    return std::pair(instrumentInfo, runNumber);
+
   } catch (const Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("Instrument name not recognized.");
   }
+}
 
-  return std::pair(instrName, runNumber);
+std::string Mantid::API::ISISInstrumentDataCache::makeIndexFilePath(const std::string &instrumentName) const {
+  g_log.debug() << "ISISInstrumentDataCache::makeIndexFilePath(" << instrumentName << ")" << std::endl;
+  std::string indexFilePath = m_dataCachePath + "/" + instrumentName + "/" + instrumentName + "_index.json";
+  return indexFilePath;
 }
 
 std::pair<std::string, std::string>

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/ConfigService.h"
 #include <string>
 
 namespace Mantid {
@@ -21,7 +22,8 @@ public:
   std::string getFileParentDirectoryPath(const std::string &filename) const;
 
 private:
-  std::pair<std::string, std::string> validateInstrumentAndNumber(const std::string &filename) const;
+  std::pair<Mantid::Kernel::InstrumentInfo, std::string> validateInstrumentAndNumber(const std::string &filename) const;
+  std::string makeIndexFilePath(const std::string &instrumentName) const;
   std::pair<std::string, std::string> splitIntoInstrumentAndNumber(const std::string &filename) const;
   std::string m_dataCachePath;
 };
