@@ -371,14 +371,14 @@ std::string FittingModel::createOutputName(const std::string &fitMode, const std
 }
 
 std::optional<std::string> FittingModel::sequentialFitOutputName() const {
-  auto workspaceNames = m_fitDataModel->getWorkspaceNames();
+  auto const workspaceNames = m_fitDataModel->getWorkspaceNames();
   if (workspaceNames.empty())
     return std::nullopt;
   return createOutputName(SEQ_STRING, workspaceNames[0], m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
 }
 
 std::optional<std::string> FittingModel::simultaneousFitOutputName() const {
-  auto workspaceNames = m_fitDataModel->getWorkspaceNames();
+  auto const workspaceNames = m_fitDataModel->getWorkspaceNames();
   if (workspaceNames.empty())
     return std::nullopt;
   return createOutputName(SIM_STRING, workspaceNames[0], m_fitDataModel->getSpectra(WorkspaceID{0}).getString());
@@ -558,10 +558,14 @@ IAlgorithm_sptr FittingModel::createSequentialFit(const IFunction_sptr function)
 }
 
 IAlgorithm_sptr FittingModel::createSequentialFit(const IFunction_sptr function, const std::string &input) const {
+  auto const outputName = sequentialFitOutputName();
+  if (!outputName) {
+    throw std::runtime_error("Data has not been loaded.");
+  }
   auto fitAlgorithm = sequentialFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
-  fitAlgorithm->setProperty("OutputWorkspace", *sequentialFitOutputName());
+  fitAlgorithm->setProperty("OutputWorkspace", *outputName);
   fitAlgorithm->setProperty("LogName", getResultLogName());
   std::stringstream startX;
   std::stringstream endX;
@@ -588,10 +592,14 @@ IAlgorithm_sptr FittingModel::createSequentialFit(const IFunction_sptr function,
 }
 
 IAlgorithm_sptr FittingModel::createSimultaneousFit(const MultiDomainFunction_sptr &function) const {
+  auto const outputName = simultaneousFitOutputName();
+  if (!outputName) {
+    throw std::runtime_error("Data has not been loaded.");
+  }
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fitDataModel.get());
-  fitAlgorithm->setProperty("OutputWorkspace", *simultaneousFitOutputName());
+  fitAlgorithm->setProperty("OutputWorkspace", *outputName);
   return fitAlgorithm;
 }
 
