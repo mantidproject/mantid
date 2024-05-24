@@ -44,7 +44,7 @@ std::string DataManipulationInterface::documentationPage() const { return "Inela
  * Called when the user clicks the Python export button.
  */
 void DataManipulationInterface::exportTabPython() {
-  auto const tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
+  auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
   m_presenters[tabName]->exportPythonScript();
 }
 

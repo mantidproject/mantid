@@ -66,7 +66,7 @@ std::string DataReduction::documentationPage() const { return "Indirect Data Red
  * Called when the user clicks the Python export button.
  */
 void DataReduction::exportTabPython() {
-  auto const tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
+  auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
   m_tabs[tabName].second->exportPythonScript();
 }
 
@@ -442,7 +442,7 @@ void DataReduction::filterUiForFacility(const QString &facility) {
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {
     // Disconnect the instrument changed signal
-    auto const tabName = m_uiForm.twIDRTabs->tabText(0).toStdString();
+    auto const &tabName = m_uiForm.twIDRTabs->tabText(0).toStdString();
     disconnect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[tabName].second,
                SIGNAL(newInstrumentConfiguration()));
 
