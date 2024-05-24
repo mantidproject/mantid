@@ -65,6 +65,9 @@ public:
   /// Integrate the proton charge over the whole run time - default log
   /// proton_charge
   void integrateProtonCharge(const std::string &logname = "proton_charge") const;
+  /// determine the range of bad pulses to filter
+  std::tuple<double, double, double> getBadPulseRange(const std::string &logname = "proton_charge",
+                                                      const double &cutoff = 95.) const;
 
   /// update property "duration" with the duration of the Run's TimeROI attribute
   void setDuration();

@@ -1115,31 +1115,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_bad_pulses = !isDefault(PropertyNames::BAD_PULSES_CUTOFF);
 
   if (filter_bad_pulses) {
-    // check the proton charge exists in the run object
-    if (!m_ws->run().hasProperty(LOG_CHARGE_NAME)) {
-      throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
-    }
+    double min_pcharge, max_pcharge;
+    std::tie(min_pcharge, max_pcharge, std::ignore) =
+        m_ws->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::BAD_PULSES_CUTOFF));
+
     const auto *pcharge_log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
-    if (!pcharge_log) {
-      throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
-    }
-    Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
-
-    // check that the maximum value is greater than zero
-    if (stats.maximum <= 0.) {
-      throw std::runtime_error("Maximum value of charge is not greater than zero (" + LOG_CHARGE_NAME + ")");
-    }
-
-    // set the range
-    double min_percent = getProperty(PropertyNames::BAD_PULSES_CUTOFF);
-    min_percent *= 0.01;
-    const double min_pcharge = stats.mean * min_percent;
-    const double max_pcharge = stats.maximum * 1.1; // make sure everything high is in
-    if (min_pcharge >= max_pcharge) {
-      throw std::runtime_error("proton_charge window filters out all of the data");
-    }
-
     bad_pulses_timeroi = std::make_shared<TimeROI>(
         pcharge_log->makeFilterByValue(min_pcharge, max_pcharge, false, TimeInterval(0, 1), 0., true));
   }
