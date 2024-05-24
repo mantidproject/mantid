@@ -22,7 +22,7 @@ class MANTIDQT_INELASTIC_DLL ISymmetriseModel {
 public:
   virtual ~ISymmetriseModel() = default;
   virtual void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                     std::vector<long> const &spectraRange) = 0;
+                                     std::vector<int> const &spectraRange) = 0;
   virtual std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) = 0;
   virtual void reflectNegativeToPositive() = 0;
   virtual void setWorkspaceName(std::string const &workspaceName) = 0;
@@ -38,7 +38,7 @@ public:
   SymmetriseModel();
   ~SymmetriseModel() = default;
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                             std::vector<long> const &spectraRange) override;
+                             std::vector<int> const &spectraRange) override;
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) override;
   void reflectNegativeToPositive() override;
   void setWorkspaceName(std::string const &workspaceName) override;

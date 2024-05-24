@@ -25,7 +25,7 @@ SymmetriseModel::SymmetriseModel()
       m_eMin(), m_eMax(), m_isPositiveReflect(), m_spectraRange() {}
 
 void SymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::vector<long> const &spectraRange) {
+                                            std::vector<int> const &spectraRange) {
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
