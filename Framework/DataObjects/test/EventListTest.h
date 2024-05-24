@@ -2384,6 +2384,7 @@ public:
     el += TofEvent(0.5, 1);
     el += TofEvent(1, 2);
     el += TofEvent(0, 3);
+    el += TofEvent(1, 15000000000); // 15 seconds, one event in second wall clock bin
 
     // Do compress events with log binning
     // Since there is a tof==0 then the first bin_end should be 1
@@ -2391,15 +2392,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(-1, DateAndTime{0}, 10, &el_output))
 
     // now check individual events
-    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 2)
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 3)
 
     TS_ASSERT_EQUALS(el_output.getEvent(0).weight(), 2)
     TS_ASSERT_EQUALS(el_output.getEvent(0).errorSquared(), 2)
     TS_ASSERT_DELTA(el_output.getEvent(0).tof(), 0.25, 1e-5)
+    TS_ASSERT_DELTA(el_output.getEvent(0).pulseTime().totalNanoseconds(), 2, 1e-5)
 
     TS_ASSERT_EQUALS(el_output.getEvent(1).weight(), 1)
     TS_ASSERT_EQUALS(el_output.getEvent(1).errorSquared(), 1)
     TS_ASSERT_DELTA(el_output.getEvent(1).tof(), 1, 1e-5)
+    TS_ASSERT_DELTA(el_output.getEvent(1).pulseTime().totalNanoseconds(), 2, 1e-5)
+
+    TS_ASSERT_EQUALS(el_output.getEvent(2).weight(), 1)
+    TS_ASSERT_EQUALS(el_output.getEvent(2).errorSquared(), 1)
+    TS_ASSERT_DELTA(el_output.getEvent(2).tof(), 1, 1e-5)
+    TS_ASSERT_DELTA(el_output.getEvent(2).pulseTime().totalNanoseconds(), 15000000000, 1e-5)
 
     // now add a negative TOF and it should throw
     el += TofEvent(-1, 0);
