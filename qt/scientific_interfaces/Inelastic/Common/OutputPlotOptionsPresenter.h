@@ -11,9 +11,9 @@
 #include "Common/OutputPlotOptionsModel.h"
 #include "Common/OutputPlotOptionsView.h"
 
-#include "DllConfig.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 
-#include <Poco/NObserver.h>
+#include "DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -30,7 +30,8 @@ public:
   virtual void handlePlot3DClicked() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL OutputPlotOptionsPresenter final : public IOutputPlotOptionsPresenter {
+class MANTIDQT_INELASTIC_DLL OutputPlotOptionsPresenter final : public IOutputPlotOptionsPresenter,
+                                                                public AnalysisDataServiceObserver {
 
 public:
   OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
@@ -39,7 +40,7 @@ public:
   /// Used by the unit tests so that the view and model can be mocked
   OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
                              PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
-  ~OutputPlotOptionsPresenter();
+  ~OutputPlotOptionsPresenter() = default;
 
   void handleWorkspaceChanged(std::string const &workspaceName) override;
   void handleSelectedUnitChanged(std::string const &unit) override;
@@ -62,18 +63,14 @@ private:
   void setPlotting(bool plotting);
   void setOptionsEnabled(bool enable);
 
-  void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &workspace) override;
 
   void setWorkspace(std::string const &plotWorkspace);
   void setUnit(std::string const &unit);
   void setIndices();
 
   bool validateWorkspaceSize(MantidAxis const &axisType);
-
-  // Observers for ADS Notifications
-  Poco::NObserver<OutputPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
-  Poco::NObserver<OutputPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
   IOutputPlotOptionsView *m_view;
   std::unique_ptr<OutputPlotOptionsModel> m_model;
