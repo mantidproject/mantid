@@ -22,6 +22,12 @@ class QStringList;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class DLLExport IUserInputValidator {
+public:
+  virtual std::string generateErrorMessage() const = 0;
+};
+
 /**
  * A class to try and get rid of some of the boiler-plate code surrounding input
  * validation, and hopefully as a result make it more readable.
@@ -31,7 +37,7 @@ namespace CustomInterfaces {
  *
  *
  */
-class DLLExport UserInputValidator {
+class DLLExport UserInputValidator : public IUserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
@@ -84,7 +90,7 @@ public:
 
   /// Returns an error message which contains all the error messages raised by
   /// the check functions.
-  std::string generateErrorMessage();
+  std::string generateErrorMessage() const override;
   /// Checks to see if all input is valid
   bool isAllInputValid();
 
