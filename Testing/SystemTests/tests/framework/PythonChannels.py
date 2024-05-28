@@ -26,6 +26,7 @@ import time
 import unittest
 import subprocess
 import systemtesting
+import platform
 from multiprocessing import Process
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
