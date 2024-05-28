@@ -90,7 +90,7 @@ void ShowPossibleCells::exec() {
 
     Json::Value root;
     root["Error"] = list[i].GetError();
-    root["FormNumber"] = list[i].GetFormNum();
+    root["FormNumber"] = static_cast<uint32_t>(list[i].GetFormNum());
     root["CellType"] = list[i].GetCellType();
     root["Centering"] = list[i].GetCentering();
     Json::Value outUB;
