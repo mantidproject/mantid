@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/Exception.h"
@@ -13,7 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
 } // namespace
 
-std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(const std::string &fileName) const {
+std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::string &fileName) const {
   g_log.debug() << "ISISInstrumentDataCache::getFileParentDirectoryPath(" << fileName << ")" << std::endl;
 
   auto [instrumentInfo, runNumber] = validateInstrumentAndNumber(fileName);
@@ -48,7 +54,7 @@ std::string Mantid::API::ISISInstrumentDataCache::getFileParentDirectoryPath(con
 }
 
 std::pair<Mantid::Kernel::InstrumentInfo, std::string>
-Mantid::API::ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName) const {
+ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName) const {
 
   // Check if suffix eg. -add is present in filename
   std::string fileNameCopy = fileName;
@@ -80,7 +86,7 @@ std::string Mantid::API::ISISInstrumentDataCache::makeIndexFilePath(const std::s
 }
 
 std::pair<std::string, std::string>
-Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::string &fileName) const {
+ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::string &fileName) const {
 
   // Find the last non-digit as the instrument name can contain numbers
   const auto itRev = std::find_if(fileName.rbegin(), fileName.rend(), std::not_fn(isdigit));
