@@ -45,8 +45,8 @@ void QtPlotView::setScaleLog(const AxisID axisID) {
 
 void QtPlotView::plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
                       const std::vector<int> &workspaceIndices, const bool plotErrorBars) {
-  Widgets::MplCpp::plot(workspaces, boost::none, workspaceIndices, m_canvas->gcf().pyobj(), boost::none,
-                        m_axisProperties, boost::none, plotErrorBars, false);
+  Widgets::MplCpp::plot(workspaces, std::nullopt, workspaceIndices, m_canvas->gcf().pyobj(), std::nullopt,
+                        m_axisProperties, std::nullopt, plotErrorBars, false);
 }
 
 void QtPlotView::createLayout() {

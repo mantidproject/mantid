@@ -13,7 +13,6 @@
 #include "FitPlotPresenter.h"
 #include "FittingPresenter.h"
 #include "FunctionBrowser/TemplateSubType.h"
-#include "InelasticFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "ui_FitTab.h"
@@ -43,9 +42,6 @@ public:
   virtual void handlePlotSpectrumChanged() = 0;
   virtual void handleFwhmChanged(double fwhm) = 0;
   virtual void handleBackgroundChanged(double background) = 0;
-
-  // Used by FitOutputOptionsPresenter
-  virtual void handlePlotSelectedSpectra() = 0;
 
   // Used by FittingPresenter
   virtual void handleFunctionChanged() = 0;
@@ -109,8 +105,6 @@ public:
   void handleFwhmChanged(double fwhm) override;
   void handleBackgroundChanged(double background) override;
 
-  void handlePlotSelectedSpectra() override;
-
   void handleFunctionChanged() override;
   void handleFitComplete(bool const error) override;
 
@@ -119,14 +113,11 @@ private:
   bool validate() override;
   void run() override;
 
-  void enableFitButtons(bool enable);
-  void enableOutputOptions(bool enable);
-  void setPDFWorkspace(std::string const &workspaceName);
-  void setModelFitFunction();
-
   void updateParameterEstimationData();
   void updateDataReferences();
-  void updateResultOptions();
+  void updateFitFunction();
+  void updateFitButtons(bool const enable);
+  void updateOutputOptions(bool const enable);
 
   std::unique_ptr<Ui::FitTab> m_uiForm;
 

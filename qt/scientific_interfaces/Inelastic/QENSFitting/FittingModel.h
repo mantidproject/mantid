@@ -85,7 +85,7 @@ public:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const override;
   Mantid::API::IAlgorithm_sptr getSingleFittingAlgorithm() const override;
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
-  std::string getOutputBasename() const override;
+  std::optional<std::string> getOutputBasename() const override;
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
   void removeFittingData() override;
@@ -118,8 +118,8 @@ private:
                                                    const std::string &input) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
-  virtual std::string sequentialFitOutputName() const;
-  virtual std::string simultaneousFitOutputName() const;
+  virtual std::optional<std::string> sequentialFitOutputName() const;
+  virtual std::optional<std::string> simultaneousFitOutputName() const;
   virtual std::string singleFitOutputName(std::string workspaceName, WorkspaceIndex spectrum) const;
   virtual std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const;
 

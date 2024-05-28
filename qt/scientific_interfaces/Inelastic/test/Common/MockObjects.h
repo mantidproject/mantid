@@ -58,7 +58,7 @@ public:
   MOCK_METHOD1(displayWarning, void(QString const &message));
 };
 
-class MockOutputPlotOptionsModel : public OutputPlotOptionsModel {
+class MockOutputPlotOptionsModel : public IOutputPlotOptionsModel {
 public:
   virtual ~MockOutputPlotOptionsModel() = default;
 
@@ -66,19 +66,27 @@ public:
   MOCK_METHOD0(removeWorkspace, void());
 
   MOCK_CONST_METHOD1(getAllWorkspaceNames, std::vector<std::string>(std::vector<std::string> const &workspaceNames));
+  MOCK_CONST_METHOD0(workspace, std::optional<std::string>());
 
   MOCK_METHOD1(setFixedIndices, void(std::string const &indices));
   MOCK_CONST_METHOD0(indicesFixed, bool());
 
+  MOCK_METHOD1(setUnit, void(std::string const &unit));
+  MOCK_METHOD0(unit, std::optional<std::string>());
+
   MOCK_CONST_METHOD1(formatIndices, std::string(std::string const &indices));
   MOCK_CONST_METHOD2(validateIndices, bool(std::string const &indices, MantidAxis const &axisType));
   MOCK_METHOD1(setIndices, bool(std::string const &indices));
+  MOCK_CONST_METHOD0(indices, std::optional<std::string>());
 
   MOCK_METHOD0(plotSpectra, void());
   MOCK_METHOD1(plotBins, void(std::string const &binIndices));
   MOCK_METHOD0(showSliceViewer, void());
   MOCK_METHOD0(plotTiled, void());
   MOCK_METHOD0(plot3DSurface, void());
+
+  MOCK_CONST_METHOD1(singleDataPoint, std::optional<std::string>(MantidAxis const &axisType));
+  MOCK_CONST_METHOD0(availableActions, std::map<std::string, std::string>());
 };
 
 class MockSettingsView : public ISettingsView {

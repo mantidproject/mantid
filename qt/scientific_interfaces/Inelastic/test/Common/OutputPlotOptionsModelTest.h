@@ -20,7 +20,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Plotting/MockExternalPlotter.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -83,23 +83,6 @@ std::map<std::string, std::string> customActions() {
 
 } // namespace
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-class MockExternalPlotter : public ExternalPlotter {
-public:
-  /// Public Methods
-  MOCK_METHOD4(plotSpectra, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                                 boost::optional<QHash<QString, QVariant>> const &kwargs));
-  MOCK_METHOD3(plotSpectra,
-               void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
-  MOCK_METHOD3(plotBins, void(std::string const &workspaceName, std::string const &binIndices, bool errorBars));
-  MOCK_METHOD1(showSliceViewer, void(std::string const &workspaceName));
-  MOCK_METHOD1(plot3DSurface, void(std::string const &workspaceName));
-  MOCK_METHOD3(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
 class OutputPlotOptionsModelTest : public CxxTest::TestSuite {
 public:
   OutputPlotOptionsModelTest() : m_ads(AnalysisDataService::Instance()) {
@@ -112,8 +95,10 @@ public:
   static void destroySuite(OutputPlotOptionsModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_plotter = new NiceMock<MockExternalPlotter>();
-    m_model = std::make_unique<OutputPlotOptionsModel>(m_plotter);
+    auto plotter = std::make_unique<NiceMock<MockExternalPlotter>>();
+    m_plotter = plotter.get();
+
+    m_model = std::make_unique<OutputPlotOptionsModel>(std::move(plotter));
   }
 
   void tearDown() override {
@@ -377,8 +362,8 @@ public:
     auto actions = customActions();
 
     tearDown();
-    m_plotter = new NiceMock<MockExternalPlotter>();
-    m_model = std::make_unique<OutputPlotOptionsModel>(m_plotter, actions);
+    auto plotter = std::make_unique<NiceMock<MockExternalPlotter>>();
+    m_model = std::make_unique<OutputPlotOptionsModel>(std::move(plotter), actions);
 
     actions["Open Slice Viewer"] = "Open Slice Viewer";
     actions["Plot 3D Surface"] = "Plot 3D Surface";
@@ -389,6 +374,6 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 
+  NiceMock<MockExternalPlotter> *m_plotter;
   std::unique_ptr<OutputPlotOptionsModel> m_model;
-  MockExternalPlotter *m_plotter;
 };

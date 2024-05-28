@@ -111,17 +111,10 @@ constructActions(std::optional<std::map<std::string, std::string>> const &availa
 namespace MantidQt::CustomInterfaces {
 
 OutputPlotOptionsModel::OutputPlotOptionsModel(
+    std::unique_ptr<IExternalPlotter> plotter,
     std::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(std::nullopt),
-      m_workspaceName(std::nullopt), m_plotter(std::make_unique<ExternalPlotter>()) {}
-
-/// Used by the unit tests so that m_plotter can be mocked
-OutputPlotOptionsModel::OutputPlotOptionsModel(
-    ExternalPlotter *plotter, std::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(std::nullopt),
-      m_workspaceName(std::nullopt), m_plotter(plotter) {}
-
-OutputPlotOptionsModel::~OutputPlotOptionsModel() = default;
+      m_workspaceName(std::nullopt), m_plotter(std::move(plotter)) {}
 
 bool OutputPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();

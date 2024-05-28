@@ -214,11 +214,9 @@ public:
   MOCK_CONST_METHOD0(isResultGroupPlottable, bool());
   MOCK_CONST_METHOD0(isPDFGroupPlottable, bool());
 
-  MOCK_METHOD0(clearSpectraToPlot, void());
-  MOCK_CONST_METHOD0(getSpectraToPlot, std::vector<SpectrumToPlot>());
-
-  MOCK_METHOD1(plotResult, void(std::string const &plotType));
-  MOCK_METHOD2(plotPDF, void(std::string const &workspaceName, std::string const &plotType));
+  MOCK_CONST_METHOD1(plotResult, std::vector<SpectrumToPlot>(std::string const &plotType));
+  MOCK_CONST_METHOD2(plotPDF,
+                     std::vector<SpectrumToPlot>(std::string const &workspaceName, std::string const &plotType));
 
   MOCK_CONST_METHOD0(saveResult, void());
 
@@ -270,7 +268,7 @@ public:
   MOCK_CONST_METHOD1(getFittingAlgorithm, Mantid::API::IAlgorithm_sptr(FittingMode mode));
   MOCK_CONST_METHOD0(getSingleFittingAlgorithm, Mantid::API::IAlgorithm_sptr());
   MOCK_CONST_METHOD2(getSingleFunction, Mantid::API::IFunction_sptr(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD0(getOutputBasename, std::string());
+  MOCK_CONST_METHOD0(getOutputBasename, std::optional<std::string>());
 
   MOCK_METHOD1(cleanFailedRun, void(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm));
   MOCK_METHOD0(removeFittingData, void());
