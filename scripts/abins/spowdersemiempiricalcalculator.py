@@ -495,11 +495,12 @@ class SPowderSemiEmpiricalCalculator:
 
         fundamentals_spectra_with_dw = self._broaden_spectra(fundamentals_spectra_with_dw, broadening_scheme=broadening_scheme)
 
-        spectra = (
-            AbinsSpectrum2DCollection.from_spectra([spectrum for spectrum in isotropic_spectra if spectrum.metadata["quantum_order"] > 1])
-            + fundamentals_spectra_with_dw
-        )
-        return spectra
+        if multiphonon_orders := [spectrum for spectrum in isotropic_spectra if spectrum.metadata["quantum_order"] > 1]:
+            result = AbinsSpectrum2DCollection.from_spectra(multiphonon_orders) + fundamentals_spectra_with_dw
+            return result
+
+        else:
+            return fundamentals_spectra_with_dw
 
     def _calculate_s_powder_over_k(self, *, angle: float) -> SpectrumCollection:
         """Calculate S for a given angle in semi-analytic powder-averaging approximation
