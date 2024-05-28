@@ -308,7 +308,7 @@ Beta Testing Begins
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
-     Another possibility is to conduct testing on IDAaaS. Please be aware that it typically takes one day for the current nightly version of Mantid to be installed on IDAaaS.
+     Another possibility is to conduct testing on IDAaaS. Please be aware that the version on IDAaaS is typically one day behind the nightly version available on Conda.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
 
