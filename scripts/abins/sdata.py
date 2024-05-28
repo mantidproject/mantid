@@ -113,6 +113,38 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
             # No remaining keys to split on: return collection with single sum
             return self.from_spectra([self.sum()])
 
+    def select(self, **select_key_values: Union[str, int, Sequence[str], Sequence[int]]) -> Self:
+        """
+        Modify select() to allow keys that are common to all items
+
+        metadata dict is of form {"key1": "value1", "key2": "value2",
+                                   line_data: [{"key3": "value3"}, ...]}
+        and select() is a query over all rows corresponding to line_data.
+
+        We should treat top level-keys as equivalent to a key in all line_data
+        rows, but Spectrum1DCollection select() method currently only looks at
+        line_data. We remove common keys that are found, and ValueError if they
+        don't match the data.
+
+        """
+        select_items = {}
+
+        for key, value in select_key_values.items():
+            if key in self.metadata:
+                # Top-level metadata: either all rows pass or none do
+                if isinstance(value, Sequence) and self.metadata[key] in value:
+                    pass
+                elif self.metadata[key] == value:
+                    pass
+                else:
+                    raise ValueError(
+                        f"No data matched the select() criterion {key}={value}, " f"as rows have common metadata {key}={self.metadata[key]}"
+                    )
+            else:
+                select_items[key] = value
+
+        return Spectrum1DCollection.select(self, **select_items)
+
     def _get_line_data_vals(self, *line_data_keys: str) -> List[tuple]:
         """
         Get value of the key(s) for each element in
@@ -454,7 +486,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
     # be moved to a common parent class
 
     def select(self, **select_key_values: Union[str, int, Sequence[str], Sequence[int]]) -> Self:
-        return Spectrum1DCollection.select(self, **select_key_values)
+        return AbinsSpectrum1DCollection.select(self, **select_key_values)
 
     @staticmethod
     def _combine_metadata(all_metadata: Sequence[Dict[str, Union[int, str]]]) -> Dict[str, Union[int, str, LineData]]:
