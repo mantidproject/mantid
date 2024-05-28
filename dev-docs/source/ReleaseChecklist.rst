@@ -291,7 +291,7 @@ Beta Testing Begins
 
    ``swg<AT>mantidproject.org``
 
-   using the template as a guide:
+   using the following templates as a guide (the first template is for users at ISIS, the second one for everyone else):
 
    * Dear all,
 
@@ -302,12 +302,42 @@ Beta Testing Begins
 
      Packages
 
-     The nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
+     Another possibility is to conduct testing on IDAaaS. Please be aware that the version on IDAaaS is typically one day behind the nightly version available on Conda.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
+     Please report any bugs to ``mantid-help@mantidproject.org`` and
+     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     It would be most helpful for the team if bugs are communicated back to us as soon as possible.
+
+     Thank you all for your help.
+
+     Regards,
+
+     Mantid Team
+
+   * Dear all,
+
+     We are busy making preparations for the release of version *<version>* of Mantid.
+     We have completed our first round of developer testing and are now ready for beta-testing feedback.
+     The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
+     We then hope to release the following week.
+
+     Packages
+
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
+     The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
+
+     We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
      Please report any bugs to ``mantid-help@mantidproject.org`` and
      if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
      It would be most helpful for the team if bugs are communicated back to us as soon as possible.
