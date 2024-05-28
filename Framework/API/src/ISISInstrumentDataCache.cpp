@@ -1,11 +1,13 @@
 #include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
+#include <filesystem>
 #include <fstream>
 #include <json/reader.h>
+
+using Mantid::API::ISISInstrumentDataCache;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
@@ -90,4 +92,10 @@ Mantid::API::ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::st
   std::string instrName = fileNameUpperCase.substr(0, nChars);
 
   return std::pair(instrName, runNumber);
+}
+
+bool ISISInstrumentDataCache::isIndexFileAvailable(std::string const &instrument) const {
+  std::filesystem::path const indexPath =
+      std::filesystem::path(m_dataCachePath) / instrument / (instrument + "_index.json");
+  return std::filesystem::exists(indexPath);
 }

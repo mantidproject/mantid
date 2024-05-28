@@ -20,6 +20,7 @@ class MANTID_API_DLL ISISInstrumentDataCache {
 public:
   ISISInstrumentDataCache(const std::string &path) : m_dataCachePath(path) {}
   std::string getFileParentDirectoryPath(const std::string &filename) const;
+  bool isIndexFileAvailable(std::string const &instrument) const;
 
 private:
   std::pair<Mantid::Kernel::InstrumentInfo, std::string> validateInstrumentAndNumber(const std::string &filename) const;

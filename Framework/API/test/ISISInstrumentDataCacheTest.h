@@ -100,6 +100,16 @@ public:
                             std::string(e.what()), "Run number 1234 not found for instrument SANS2D.");
   }
 
+  void testIndexFileExistsWhenExists() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT(dc.isIndexFileAvailable("MARI"));
+  }
+
+  void testIndexFileExistsWhenDoesNotExist() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT(!dc.isIndexFileAvailable("MARO"));
+  }
+
 private:
   std::string m_dataCacheDir;
 };
