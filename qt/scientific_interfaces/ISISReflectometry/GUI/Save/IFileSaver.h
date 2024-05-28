@@ -66,12 +66,12 @@ private:
   std::string m_name;
 };
 
-class IAsciiSaver {
+class IFileSaver {
 public:
   virtual bool isValidSaveDirectory(std::string const &filePath) const = 0;
   virtual void save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
                     std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters) const = 0;
-  virtual ~IAsciiSaver() = default;
+  virtual ~IFileSaver() = default;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

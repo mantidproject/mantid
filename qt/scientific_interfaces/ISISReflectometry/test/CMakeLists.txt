@@ -19,7 +19,7 @@ set(TEST_FILES
     RunsTable/RunsTablePresenterDisplayTest.h
     RunsTable/RunsTablePresenterGroupDeletionTest.h
     RunsTable/RunsTablePresenterMergeJobsTest.h
-    Save/AsciiSaverTest.h
+    Save/FileSaverTest.h
     Save/SavePresenterTest.h
     Runs/RunsPresenterTest.h
     Runs/CatalogRunNotifierTest.h

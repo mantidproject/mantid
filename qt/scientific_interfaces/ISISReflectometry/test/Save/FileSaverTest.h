@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../ReflMockObjects.h"
-#include "GUI/Save/AsciiSaver.h"
+#include "GUI/Save/FileSaver.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -24,12 +24,12 @@ using Mantid::DataObjects::Workspace2D_sptr;
 using ::testing::_;
 using ::testing::Return;
 
-class AsciiSaverTest : public CxxTest::TestSuite {
+class FileSaverTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AsciiSaverTest *createSuite() { return new AsciiSaverTest(); }
-  static void destroySuite(AsciiSaverTest *suite) { delete suite; }
+  static FileSaverTest *createSuite() { return new FileSaverTest(); }
+  static void destroySuite(FileSaverTest *suite) { delete suite; }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
@@ -151,8 +151,8 @@ private:
   const std::string m_saveDirectory = "Test";
   const std::string m_multiFileSuffix = "_multi";
 
-  AsciiSaver createSaver(std::unique_ptr<MockSaveAlgorithmRunner> saveAlgRunner, MockFileHandler &mockFileHandler) {
-    return AsciiSaver(std::move(saveAlgRunner), &mockFileHandler);
+  FileSaver createSaver(std::unique_ptr<MockSaveAlgorithmRunner> saveAlgRunner, MockFileHandler &mockFileHandler) {
+    return FileSaver(std::move(saveAlgRunner), &mockFileHandler);
   }
 
   Workspace2D_sptr createWorkspace(const std::string &name) {

@@ -26,7 +26,7 @@ using namespace Mantid::API;
  * @param saver :: The model to use to save the files
  * @param view :: The view we are handling
  */
-SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver)
+SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver)
     : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
       m_shouldSaveIndividualRows(false) {
 
