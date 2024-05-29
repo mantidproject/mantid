@@ -33,7 +33,7 @@ public:
     InterfaceUtils::restrictInputDataByName = mockRestrictInputDataByName;
 
     // There are many similar functions in the interface, this test will try only one pair of such functions
-    TS_ASSERT_EQUALS(getResolutionWSSuffixes("Iqt"), QStringList({""}));
+    TS_ASSERT_EQUALS(getResolutionWSSuffixes("Iqt"), QStringList());
     TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({".nxs"}));
   }
 
