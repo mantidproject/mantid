@@ -57,6 +57,8 @@ AXES_SCALE_MENU_OPTS = OrderedDict(
         ("Log x/Lin y", ("log", "linear")),
     ]
 )
+# Options to quickly switch axes scales with key shortcuts
+AXES_SCALE_DEFAULT_SWITCH = ["linear", "log"]
 COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm)])
 
 
@@ -101,6 +103,7 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect("resize_event", self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect("figure_leave_event", self.on_leave))
         self._cids.append(canvas.mpl_connect("scroll_event", self.on_scroll))
+        self._cids.append(canvas.mpl_connect("key_press_event", self.on_key_press))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
@@ -143,6 +146,28 @@ class FigureInteraction(object):
             zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
         self.redraw_annotations()
         event.canvas.draw()
+
+    def on_key_press(self, event):
+
+        ax = event.inaxes
+        if ax is None or isinstance(ax, Axes3D) or len(ax.images) == 0 and len(ax.lines) == 0:
+            return
+
+        if event.key == "k":
+            current_xscale = ax.get_xscale()
+            next_xscale = self._get_next_axis_scale(current_xscale)
+            self._quick_change_axes((next_xscale, ax.get_yscale()), ax)
+
+        if event.key == "l":
+            current_yscale = ax.get_yscale()
+            next_yscale = self._get_next_axis_scale(current_yscale)
+            self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
+
+    def _get_next_axis_scale(self, current_scale):
+        available_scales = AXES_SCALE_DEFAULT_SWITCH
+        scale_index = available_scales.index(current_scale) if current_scale in available_scales else 0
+        next_scale = available_scales[(scale_index + 1) % len(available_scales)]
+        return next_scale
 
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
