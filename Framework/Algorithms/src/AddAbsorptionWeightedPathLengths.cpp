@@ -165,7 +165,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
       int detID;
       try {
         detID = peak.getDetectorID();
-      } catch (const Exception::NotImplementedError &e) {
+      } catch (const Exception::NotImplementedError &) {
         detID = -1; // no detector ID in lean peaks
       }
       MCInteractionStatistics detStatistics(detID, inputWS->sample());
