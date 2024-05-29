@@ -65,9 +65,12 @@ const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmi
 enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
 
+const std::string LOG_CHARGE_NAME("proton_charge");
+
 namespace PropertyNames {
 const std::string COMPRESS_TOL("CompressTolerance");
 const std::string COMPRESS_MODE("CompressBinningMode");
+const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
 } // namespace PropertyNames
 } // namespace
 
@@ -154,11 +157,16 @@ void LoadEventNexus::init() {
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::BAD_PULSES_CUTOFF, EMPTY_DBL(), Direction::Input),
+      "Optional: To filter bad pulses set the Lower Cutoff percentage to use.");
+
   std::string grp1 = "Filter Events";
   setPropertyGroup("FilterByTofMin", grp1);
   setPropertyGroup("FilterByTofMax", grp1);
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
+  setPropertyGroup("FilterBadPulsesLowerCutoff", grp1);
 
   declareProperty(std::make_unique<ArrayProperty<string>>("BankName", Direction::Input),
                   "Optional: To only include events from one bank. Any bank "
@@ -306,6 +314,18 @@ void LoadEventNexus::init() {
                                                                                 Direction::Input),
                   "If specified, these logs will NOT be loaded from the file (each "
                   "separated by a space).");
+}
+
+std::map<std::string, std::string> LoadEventNexus::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault(PropertyNames::BAD_PULSES_CUTOFF)) {
+    const double cutoff = getProperty(PropertyNames::BAD_PULSES_CUTOFF);
+    if (cutoff < 0 || cutoff > 100)
+      result[PropertyNames::BAD_PULSES_CUTOFF] = "Must be empty or between 0 and 100";
+  }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -612,7 +632,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log =
+      const auto *log =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
@@ -1091,6 +1111,20 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     }
   }
 
+  // setup filter bad pulses
+  filter_bad_pulses = !isDefault(PropertyNames::BAD_PULSES_CUTOFF);
+
+  if (filter_bad_pulses) {
+    double min_pcharge, max_pcharge;
+    std::tie(min_pcharge, max_pcharge, std::ignore) =
+        m_ws->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::BAD_PULSES_CUTOFF));
+
+    const auto *pcharge_log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
+    bad_pulses_timeroi = std::make_shared<TimeROI>(
+        pcharge_log->makeFilterByValue(min_pcharge, max_pcharge, false, TimeInterval(0, 1), 0., true));
+  }
+
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
     auto axis = HistogramData::BinEdges{1, static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1};
@@ -1259,9 +1293,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       // events were filtered during read
       // filter the logs the same way FilterByTime does
       TimeROI timeroi(filter_time_start, filter_time_stop);
+      if (filter_bad_pulses)
+        timeroi.update_intersection(*bad_pulses_timeroi);
       m_ws->mutableRun().setTimeROI(timeroi);
       m_ws->mutableRun().removeDataOutsideTimeROI();
     }
+  } else if (filter_bad_pulses) {
+    m_ws->mutableRun().setTimeROI(*bad_pulses_timeroi);
+    m_ws->mutableRun().removeDataOutsideTimeROI();
   }
 }
 
