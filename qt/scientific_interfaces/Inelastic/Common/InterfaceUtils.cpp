@@ -102,7 +102,7 @@ QStringList getFBSuffixes(std::string const &interfaceName, std::string const &f
 
 QStringList getWSSuffixes(std::string const &interfaceName, std::string const &fileType) {
   if (!restrictInputDataByName()) {
-    return QStringList{""};
+    return QStringList{};
   }
   return toQStringList(getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", fileType), ",");
 }
