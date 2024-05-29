@@ -9,7 +9,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
@@ -17,6 +19,10 @@
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Catalog Searcher");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -74,10 +80,25 @@ ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorith
 }
 
 SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITableWorkspace_sptr &resultsTable) {
-  if (requiresICat())
-    return convertICatResultsTableToSearchResults(resultsTable);
-  else
-    return convertJournalResultsTableToSearchResults(resultsTable);
+  auto results = requiresICat() ? convertICatResultsTableToSearchResults(resultsTable)
+                                : convertJournalResultsTableToSearchResults(resultsTable);
+  auto const &dataCache = Mantid::API::ISISInstrumentDataCache(
+      Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  if (!dataCache.isIndexFileAvailable(searchCriteria().instrument)) {
+    return results;
+  }
+  for (auto result = results.begin(); result != results.end(); ++result) {
+    try {
+      dataCache.getFileParentDirectoryPath(result->runNumber());
+    } catch (...) {
+      g_log.information() << "Did not find run number " << result->runNumber()
+                          << " in the Instrument Data Cache. Skipping...\n";
+      results.erase(result);
+      --result;
+      continue;
+    }
+  }
+  return results;
 }
 
 SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(const ITableWorkspace_sptr &tableWorkspace) {
