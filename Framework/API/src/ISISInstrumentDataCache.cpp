@@ -25,21 +25,8 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
   auto [instrumentInfo, runNumber] = validateInstrumentAndNumber(fileName);
   std::string instrName = instrumentInfo.name();
 
-  // Open index json file
-  std::string jsonPath = makeIndexFilePath(instrName);
-  std::ifstream ifstrm{jsonPath};
-  if (!ifstrm.is_open()) { // Try again with shortname
-    instrName = instrumentInfo.shortName();
-    jsonPath = makeIndexFilePath(instrName);
-    ifstrm.open(jsonPath);
-    if (!ifstrm.is_open()) {
-      throw std::invalid_argument("Could not open index file: " + jsonPath);
-    }
-  }
+  auto const [jsonPath, json] = openCacheJsonFile(instrName);
 
-  // Read directory path from json file
-  Json::Value json;
-  ifstrm >> json;
   std::string relativePath = json[runNumber].asString();
 
   if (relativePath.empty()) {
@@ -51,6 +38,27 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
   g_log.debug() << "Opened instrument index file: " << jsonPath << ". Found path to search: " << dirPath << "."
                 << std::endl;
   return dirPath;
+}
+
+/**
+ * Open the Json file and return the path and the opened file object.
+ * @param instrumentName The name of the instrument to open the index file for.
+ * @return A pair containing the path and the contents of the json file.
+ * @throws std::invalid_argument if the file could not be found.
+ */
+std::pair<std::string, Json::Value>
+ISISInstrumentDataCache::openCacheJsonFile(std::string const &instrumentName) const {
+  // Open index json file
+  std::string const &jsonPath = m_dataCachePath + "/" + instrumentName + "/" + instrumentName + "_index.json";
+  std::ifstream ifstrm{jsonPath};
+  if (!ifstrm) {
+    throw std::invalid_argument("Could not open index file: " + jsonPath);
+  }
+
+  // Read directory path from json file
+  Json::Value json;
+  ifstrm >> json;
+  return std::pair(jsonPath, json);
 }
 
 std::pair<Mantid::Kernel::InstrumentInfo, std::string>

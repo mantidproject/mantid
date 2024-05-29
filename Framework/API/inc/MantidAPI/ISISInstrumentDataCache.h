@@ -11,7 +11,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ConfigService.h"
+#include <json/value.h>
 #include <string>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -26,6 +28,7 @@ private:
   std::pair<Mantid::Kernel::InstrumentInfo, std::string> validateInstrumentAndNumber(const std::string &filename) const;
   std::string makeIndexFilePath(const std::string &instrumentName) const;
   std::pair<std::string, std::string> splitIntoInstrumentAndNumber(const std::string &filename) const;
+  [[nodiscard]] std::pair<std::string, Json::Value> openCacheJsonFile(std::string const &instrumentName) const;
   std::string m_dataCachePath;
 };
 } // namespace API
