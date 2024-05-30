@@ -65,3 +65,5 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(peak_lean.getIntensity(), peak_corr.getIntensity(), 1)
             self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_corr.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_corr.getAbsorptionWeightedPathLength(), 3)
+
+        self.assertEqual(peaks_lean.getInstrument().getName(), "TOPAZ")
