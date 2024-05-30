@@ -155,9 +155,9 @@ void ElwinPresenter::handleValueChanged(std::string const &propName, double valu
 }
 
 void ElwinPresenter::handleValueChanged(std::string const &propName, bool value) {
-  if (propName == "BackgroundSubtraction") {
+  if (propName == "Background Subtraction") {
     m_model->setBackgroundSubtraction(value);
-  } else if (propName == "Normalise") {
+  } else if (propName == "Normalise to Lowest Temp") {
     m_model->setNormalise(value);
   }
 }
