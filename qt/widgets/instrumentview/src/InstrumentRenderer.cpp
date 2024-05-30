@@ -50,12 +50,18 @@ void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t
 InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
     : m_actor(actor), m_isUsingLayers(false), m_HighlightDetsWithZeroCount(false) {
 
-  m_displayListId[0] = 0;
-  m_displayListId[1] = 0;
-  m_useDisplayList[0] = false;
-  m_useDisplayList[1] = false;
-
   const auto &componentInfo = actor.componentInfo();
+
+  m_useNonPickingDisplayList = false;
+  m_usePickingDisplayList = false;
+
+  m_pickingDisplayListId.resize(componentInfo.size());
+  m_nonPickingDisplayListId.resize(componentInfo.size());
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    m_nonPickingDisplayListId[i] = 0;
+    m_pickingDisplayListId[i] = 0;
+  }
+
   size_t textureIndex = 0;
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
@@ -68,7 +74,12 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
 }
 
 InstrumentRenderer::~InstrumentRenderer() {
-  for (unsigned int i : m_displayListId) {
+  for (unsigned int i : m_nonPickingDisplayListId) {
+    if (i != 0) {
+      glDeleteLists(i, 1);
+    }
+  }
+  for (unsigned int i : m_pickingDisplayListId) {
     if (i != 0) {
       glDeleteLists(i, 1);
     }
@@ -84,19 +95,15 @@ void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
   }
 
   OpenGLError::check("InstrumentActor::draw()");
-  size_t i = picking ? 1 : 0;
-  if (m_useDisplayList[i]) {
-    glCallList(m_displayListId[i]);
+  const auto &displayListIds = picking ? m_pickingDisplayListId : m_nonPickingDisplayListId;
+  auto &useDisplayList = picking ? m_usePickingDisplayList : m_useNonPickingDisplayList;
+  if (useDisplayList) {
+    for (size_t componentIndex = 0; componentIndex < m_actor.componentInfo().size(); ++componentIndex) {
+      glCallList(displayListIds[componentIndex]);
+    }
   } else {
-    m_displayListId[i] = glGenLists(1);
-    m_useDisplayList[i] = true;
-    glNewList(m_displayListId[i],
-              GL_COMPILE); // Construct display list for object representation
+    useDisplayList = true;
     draw(visibleComps, showGuides, picking);
-    glEndList();
-    if (glGetError() == GL_OUT_OF_MEMORY) // Throw an exception
-      throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
-    glCallList(m_displayListId[i]);
   }
   OpenGLError::check("InstrumentActor::draw()");
 }
@@ -105,51 +112,55 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps, bool showGu
   const auto &compInfo = m_actor.componentInfo();
   std::vector<bool> visited(compInfo.size(), false);
 
-  for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max(); --i) {
-    auto type = compInfo.componentType(i);
-    if (type == ComponentType::Infinite)
-      continue;
+  auto &displayListIds = picking ? m_pickingDisplayListId : m_nonPickingDisplayListId;
+  for (size_t componentIndex = compInfo.root(); componentIndex != std::numeric_limits<size_t>::max();
+       --componentIndex) {
+    displayListIds[componentIndex] = glGenLists(1);
+    glNewList(displayListIds[componentIndex],
+              GL_COMPILE); // Construct display list for object representation
+    auto type = compInfo.componentType(componentIndex);
 
     if (type == ComponentType::Grid) {
-      if (visibleComps[i]) {
-        drawGridBank(i, picking);
-        updateVisited(compInfo, i, visited);
+      if (visibleComps[componentIndex]) {
+        drawGridBank(componentIndex, picking);
+        updateVisited(compInfo, componentIndex, visited);
       }
-      continue;
     }
+
     if (type == ComponentType::Rectangular) {
-      if (visibleComps[i]) {
-        drawRectangularBank(i, picking);
-        updateVisited(compInfo, i, visited);
+      if (visibleComps[componentIndex]) {
+        drawRectangularBank(componentIndex, picking);
+        updateVisited(compInfo, componentIndex, visited);
       }
-      continue;
     }
 
     if (type == ComponentType::OutlineComposite) {
-      if (visibleComps[i]) {
-        drawTube(i, picking);
-        updateVisited(compInfo, i, visited);
+      if (visibleComps[componentIndex]) {
+        drawTube(componentIndex, picking);
+        updateVisited(compInfo, componentIndex, visited);
       }
-      continue;
     }
 
     if (type == ComponentType::Structured) {
-      if (visibleComps[i]) {
-        drawStructuredBank(i, picking);
-        updateVisited(compInfo, i, visited);
+      if (visibleComps[componentIndex]) {
+        drawStructuredBank(componentIndex, picking);
+        updateVisited(compInfo, componentIndex, visited);
       }
-      continue;
     }
 
-    if (!compInfo.isDetector(i) && !showGuides) {
-      visited[i] = true;
-      continue;
+    if (!compInfo.isDetector(componentIndex) && !showGuides) {
+      visited[componentIndex] = true;
     }
 
-    if (compInfo.hasValidShape(i) && visibleComps[i] && !visited[i]) {
-      visited[i] = true;
-      drawSingleDetector(i, picking);
+    if (compInfo.hasValidShape(componentIndex) && visibleComps[componentIndex] && !visited[componentIndex]) {
+      visited[componentIndex] = true;
+      drawSingleDetector(componentIndex, picking);
     }
+
+    glEndList();
+    if (glGetError() == GL_OUT_OF_MEMORY)
+      throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
+    glCallList(displayListIds[componentIndex]);
   }
 }
 
@@ -308,11 +319,16 @@ void InstrumentRenderer::reset() {
 
   /// Invalidate the OpenGL display lists to force full re-drawing of the
   /// instrument and creation of new lists.
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
-      m_displayListId[i] = 0;
-      m_useDisplayList[i] = false;
+  m_usePickingDisplayList = false;
+  m_useNonPickingDisplayList = false;
+  for (size_t i = 0; i < m_actor.componentInfo().size(); ++i) {
+    if (m_nonPickingDisplayListId[i] != 0) {
+      glDeleteLists(m_nonPickingDisplayListId[i], 1);
+      m_nonPickingDisplayListId[i] = 0;
+    }
+    if (m_pickingDisplayListId[i] != 0) {
+      glDeleteLists(m_pickingDisplayListId[i], 1);
+      m_pickingDisplayListId[i] = 0;
     }
   }
 }
