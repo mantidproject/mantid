@@ -51,7 +51,7 @@ void AddAbsorptionWeightedPathLengths::init() {
                   "to.");
   declareProperty(
       "UseSinglePath", false,
-      "Use a single path with a scatter point at the sample position. Must be true when using a lean peaks workspace.");
+      "Use a single path with a scatter point at the sample position.");
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
