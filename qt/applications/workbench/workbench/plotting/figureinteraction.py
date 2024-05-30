@@ -150,7 +150,7 @@ class FigureInteraction(object):
     def on_key_press(self, event):
 
         ax = event.inaxes
-        if ax is None or isinstance(ax, Axes3D) or len(ax.images) == 0 and len(ax.lines) == 0:
+        if ax is None or isinstance(ax, Axes3D) or len(ax.get_images()) == 0 and len(ax.get_lines()) == 0:
             return
 
         if event.key == "k":
