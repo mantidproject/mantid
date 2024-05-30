@@ -16,7 +16,9 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
+#include <algorithm>
 #include <boost/regex.hpp>
+#include <vector>
 
 using namespace Mantid::API;
 
@@ -82,22 +84,21 @@ ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorith
 SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITableWorkspace_sptr &resultsTable) {
   auto results = requiresICat() ? convertICatResultsTableToSearchResults(resultsTable)
                                 : convertJournalResultsTableToSearchResults(resultsTable);
+
+  // Simply put, check if we're on IDAaaS.
   auto const &dataCache = Mantid::API::ISISInstrumentDataCache(
       Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
   if (!dataCache.isIndexFileAvailable(searchCriteria().instrument)) {
     return results;
   }
-  for (auto result = results.begin(); result != results.end(); ++result) {
-    try {
-      dataCache.getFileParentDirectoryPath(result->runNumber());
-    } catch (...) {
-      g_log.information() << "Did not find run number " << result->runNumber()
-                          << " in the Instrument Data Cache. Skipping...\n";
-      results.erase(result);
-      --result;
-      continue;
-    }
-  }
+  // If so, only show the runs available in the instrument data cache.
+  std::vector<std::string> runNumbers = dataCache.getRunNumbersInCache(searchCriteria().instrument);
+  results.erase(std::remove_if(results.begin(), results.end(),
+                               [&](auto &result) {
+                                 return std::find(runNumbers.cbegin(), runNumbers.cend(), result.runNumber()) ==
+                                        std::end(runNumbers);
+                               }),
+                results.end());
   return results;
 }
 

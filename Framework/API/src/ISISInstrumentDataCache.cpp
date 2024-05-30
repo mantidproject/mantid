@@ -41,13 +41,14 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
   return dirPath;
 }
 
-std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std::string &instrument,
-                                                                       std::vector<std::string> runNumbers) const {
+/**
+ * Get a vector of the run numbers' files present in the given instrument's data cache.
+ * @param instrumentName The instrument to get run numbers for.
+ * @return A vector containing the run numbers that can be accessed from the data cache.
+ */
+std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std::string &instrument) const {
   const auto &json = openCacheJsonFile(instrument).second;
-  runNumbers.erase(std::remove_if(runNumbers.begin(), runNumbers.end(),
-                                  [&](const std::string &runNumber) { return json[runNumber].asString().empty(); }),
-                   runNumbers.end());
-  return runNumbers;
+  return json.getMemberNames();
 }
 
 /**
