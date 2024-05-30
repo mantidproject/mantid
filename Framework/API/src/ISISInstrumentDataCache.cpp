@@ -59,10 +59,11 @@ std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std
 std::pair<std::string, Json::Value>
 ISISInstrumentDataCache::openCacheJsonFile(std::string const &instrumentName) const {
   // Open index json file
-  std::string const &jsonPath = m_dataCachePath + "/" + instrumentName + "/" + instrumentName + "_index.json";
+  std::filesystem::path const &jsonPath =
+      std::filesystem::path(m_dataCachePath) / instrumentName / (instrumentName + "_index.json");
   std::ifstream ifstrm{jsonPath};
   if (!ifstrm) {
-    throw std::invalid_argument("Could not open index file: " + jsonPath);
+    throw std::invalid_argument("Could not open index file: " + jsonPath.string());
   }
 
   // Read directory path from json file
