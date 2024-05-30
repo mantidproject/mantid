@@ -319,16 +319,16 @@ void InstrumentRenderer::reset() {
 
   /// Invalidate the OpenGL display lists to force full re-drawing of the
   /// instrument and creation of new lists.
-  m_usePickingDisplayList = false;
-  m_useNonPickingDisplayList = false;
+  invalidateAndDeleteDisplayList(m_pickingDisplayListId, m_usePickingDisplayList);
+  invalidateAndDeleteDisplayList(m_nonPickingDisplayListId, m_useNonPickingDisplayList);
+}
+
+void InstrumentRenderer::invalidateAndDeleteDisplayList(std::vector<GLuint> &displayList, bool &useList) {
+  useList = false;
   for (size_t i = 0; i < m_actor.componentInfo().size(); ++i) {
-    if (m_nonPickingDisplayListId[i] != 0) {
-      glDeleteLists(m_nonPickingDisplayListId[i], 1);
-      m_nonPickingDisplayListId[i] = 0;
-    }
-    if (m_pickingDisplayListId[i] != 0) {
-      glDeleteLists(m_pickingDisplayListId[i], 1);
-      m_pickingDisplayListId[i] = 0;
+    if (displayList[i] != 0) {
+      glDeleteLists(displayList[i], 1);
+      displayList[i] = 0;
     }
   }
 }

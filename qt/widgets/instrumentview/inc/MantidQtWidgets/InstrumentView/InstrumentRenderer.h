@@ -75,6 +75,7 @@ private:
   void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);
   void drawSingleDetector(size_t detIndex, bool picking);
+  void invalidateAndDeleteDisplayList(std::vector<GLuint> &displayList, bool &useList);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
