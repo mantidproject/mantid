@@ -10,6 +10,7 @@ from mantid.simpleapi import (
     SetSample,
     FilterPeaks,
     ConvertPeaksWorkspace,
+    CreatePeaksWorkspace,
     LoadNexus,
     AnalysisDataService,
 )
@@ -46,9 +47,16 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
         R = peaks_orig.getPeak(0).getGoniometerMatrix()
         peaks_orig.run().getGoniometer().setR(R)
 
-        SetSample(InputWorkspace=peaks_orig, Geometry=shape_dict, Material=mat_dict)
+        # create lean peaks workspace without instrument
+        peaks_lean_no_inst = CreatePeaksWorkspace(NumberOfPeaks=0)
+        for peak_orig in peaks_orig:
+            peaks_lean_no_inst.addPeak(peak_orig)
+        peaks_lean_no_inst.run().getGoniometer().setR(R)
 
-        # lean peaks workspace
+        SetSample(InputWorkspace=peaks_orig, Geometry=shape_dict, Material=mat_dict)
+        SetSample(InputWorkspace=peaks_lean_no_inst, Geometry=shape_dict, Material=mat_dict)
+
+        # convert lean peaks workspace
         peaks_lean = ConvertPeaksWorkspace(PeakWorkspace=peaks_orig)
 
         AddAbsorptionWeightedPathLengths(InputWorkspace=peaks_lean, ApplyCorrection=True)
@@ -67,3 +75,14 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_corr.getAbsorptionWeightedPathLength(), 3)
 
         self.assertEqual(peaks_lean.getInstrument().getName(), "TOPAZ")
+
+        # create lean peaks workspace without instrument
+        AddAbsorptionWeightedPathLengths(InputWorkspace=peaks_lean_no_inst, ApplyCorrection=True)
+
+        for peak_lean, peak_lean_no_inst in zip(peaks_lean, peaks_lean_no_inst):
+
+            self.assertAlmostEqual(peak_lean.getIntensity(), peak_lean_no_inst.getIntensity(), 1)
+            self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_lean_no_inst.getSigmaIntensity(), 3)
+            self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_lean_no_inst.getAbsorptionWeightedPathLength(), 3)
+
+        self.assertEqual(peaks_lean_no_inst.getInstrument().getName(), "")

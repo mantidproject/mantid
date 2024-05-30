@@ -49,9 +49,7 @@ void AddAbsorptionWeightedPathLengths::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("InputWorkspace", "", Direction::InOut),
                   "An input/output peaks workspace that the path distances will be added "
                   "to.");
-  declareProperty(
-      "UseSinglePath", false,
-      "Use a single path with a scatter point at the sample position.");
+  declareProperty("UseSinglePath", false, "Use a single path with a scatter point at the sample position.");
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
@@ -103,10 +101,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   const int seed = getProperty("SeedValue");
 
-  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(inputWS);
-  LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(inputWS);
-
-  if (lpws && !pws) {
+  if (!inputWS->getInstrument()->hasSource()) {
     Instrument_sptr inst(new Geometry::Instrument);
     Detector *detector = new Detector("det1", -1, nullptr);
     detector->setPos(0.0, 0.0, 0.0);
