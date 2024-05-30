@@ -117,6 +117,14 @@ public:
     TS_ASSERT(!dc.isIndexFileAvailable("MARO"));
   }
 
+  void testRunNumberInCacheTrimming() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::vector<std::string> runNumbers{"25054", "25055"};
+    std::vector<std::string> expectedResult{"25054"};
+    auto const &result = dc.getRunNumbersInCache("MARI", runNumbers);
+    TS_ASSERT_EQUALS(result, expectedResult);
+  }
+
 private:
   std::string m_dataCacheDir;
 };
