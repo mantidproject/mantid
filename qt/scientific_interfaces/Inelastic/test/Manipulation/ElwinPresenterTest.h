@@ -68,10 +68,10 @@ public:
   void test_handleValueChanged_sets_correct_bool_property() {
 
     EXPECT_CALL(*m_model, setNormalise(true)).Times((Exactly(1)));
-    m_presenter->handleValueChanged("Normalise", true);
+    m_presenter->handleValueChanged("Normalise to Lowest Temp", true);
 
     EXPECT_CALL(*m_model, setBackgroundSubtraction(true)).Times((Exactly(1)));
-    m_presenter->handleValueChanged("BackgroundSubtraction", true);
+    m_presenter->handleValueChanged("Background Subtraction", true);
   }
 
   void test_handleValueChanged_sets_correct_double_property() {
