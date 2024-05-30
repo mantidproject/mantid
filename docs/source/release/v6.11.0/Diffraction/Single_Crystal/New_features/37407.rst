@@ -1,1 +1,1 @@
-- Update to algorithm `AddAbsorptionWeightedPathLengths` that now allows lean peaks to be used. There is also an otption to apply the correction.
+- Update to algorithm :ref:`AddAbsorptionWeightedPathLengths <algm-AddAbsorptionWeightedPathLengths>` that now allows lean peaks to be used. There is also an option to apply the correction.
