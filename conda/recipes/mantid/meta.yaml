@@ -64,7 +64,7 @@ requirements:
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.27") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}
-    - pycifrw {{ pycifrw }}
+    - pycifrw
     - python
     - python-dateutil
     - pyyaml
