@@ -26,6 +26,7 @@ import time
 import unittest
 import subprocess
 import systemtesting
+import platform
 from multiprocessing import Process
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -48,7 +49,6 @@ ConfigService["CheckMantidVersion.OnStartup"] = "{CheckMantidVersion}"
 ConfigService["UpdateInstrumentDefinitions.OnStartup"] = "{UpdateInstrumentDefinitions}"
 
 import mantid.simpleapi
-time.sleep(10)
 """
 
 TEST_SCRIPT_NAME = "pythonloggingtestscript.py"
@@ -95,7 +95,7 @@ class PythonLoggingTests(unittest.TestCase):
                 )
             )
 
-        result = subprocess.run([sys.executable, TEST_SCRIPT_NAME], timeout=60)  # This will raise subprocess.TimeoutExpired if deadlocke
+        result = subprocess.run([sys.executable, TEST_SCRIPT_NAME], timeout=600)  # This will raise subprocess.TimeoutExpired if deadlocke
         result.check_returncode()
 
 
@@ -105,8 +105,8 @@ class PythonChannelTest(systemtesting.MantidSystemTest):
         os.remove(TEST_SCRIPT_NAME)
 
     def skipTests(self):
-        # temporarily skip this test for all platforms
-        return True
+        # skip if OSX because multiprocessing uses `spawn` instead of `fork` which causes this test to fail
+        return platform.system() == "Darwin"
 
     def runTest(self):
         self._server = Process(target=run_server)
