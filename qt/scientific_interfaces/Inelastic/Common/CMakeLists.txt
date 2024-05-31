@@ -22,6 +22,7 @@ set(INC_FILES
     DataModel.h
     DataValidationHelper.h
     FitData.h
+    IDataModel.h
     InterfaceUtils.h
     ISettingsView.h
     OutputPlotOptionsModel.h

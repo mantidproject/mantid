@@ -73,7 +73,6 @@ set(INC_FILES
     FunctionBrowser/MultiFunctionTemplateModel.h
     FunctionBrowser/MultiFunctionTemplatePresenter.h
     FunctionBrowser/TemplateSubType.h
-    IFitDataModel.h
     IFitDataView.h
     IFitOutput.h
     IFitOutputOptionsModel.h
