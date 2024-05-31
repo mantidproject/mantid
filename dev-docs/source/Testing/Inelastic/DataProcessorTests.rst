@@ -46,13 +46,13 @@ Symmetrise tab
 :math:`S(Q, \omega)` tab
 ------------------------
 
-**Time required 3-5 minutes**
+**Time required 5-10 minutes**
 
 --------------
 
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
-#. Go to the :math:`S(Q, \omega)` tab
+#. Go to the ``S(Q,w)`` tab
 #. On the File Input, click on ``Browse``, a dialog window should prompt.
 #. Find the file ``irs26176_graphite002_red.nxs`` from the ISIS Sample Data and Load it.
 #. The data will be plot as a contour plot in the interface.
@@ -66,6 +66,7 @@ Symmetrise tab
 #. On `Output` options of the interface. Select from the drop-down menu on the right of the ``Plot Spectra`` button the option to ``Plot 3D Surface`` and click.
 #. The resulting 3D plot should range in the Energy Transfer axis from -0.2 to 0.2 :math:`meV`.
 #. Don't remove yet the workspace with suffix ``_sqw`` from the ADS as you will use it for the Moments interface test.
+#. Repeat instructions 4 to 10, but loading instead the ``MAR27691_red.nxs`` file from the ISIS Sample Data set.
 
 .. _sqw_inelastic_test:
 
@@ -78,7 +79,7 @@ Moments tab
 
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
-#. Go to the :math:`Moments` tab
+#. Go to the ``Moments`` tab
 #. On the File Input, change the drop-down selector from ``File`` to ``Workspace``.
 #. Select the previously generated workspace ``irs26176_graphite002_sqw`` from the selector.
 #. First spectrum should be rendered on the plot widget, with two vertical sliders placed on the integration limits,
