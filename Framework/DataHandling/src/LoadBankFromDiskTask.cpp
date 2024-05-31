@@ -335,8 +335,8 @@ void LoadBankFromDiskTask::run() {
     // Open the bankN_event group
     file.openGroup(entry_name, entry_type);
 
-    const bool needPulseInfo =
-        (!m_loader.alg->compressEvents) || m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered;
+    const bool needPulseInfo = (!m_loader.alg->compressEvents) || m_loader.alg->compressTolerance == 0 ||
+                               m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered;
 
     // Load the event_index field.
     if (needPulseInfo)
@@ -346,7 +346,7 @@ void LoadBankFromDiskTask::run() {
 
     if (!m_loadError) {
       // Load and validate the pulse times
-      if (m_loader.alg->compressEvents)
+      if (m_loader.alg->compressEvents && m_loader.alg->compressTolerance != 0)
         thisBankPulseTimes = nullptr;
       else
         this->loadPulseTimes(file);
