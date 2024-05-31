@@ -14,11 +14,11 @@ The flowchart diagrams are created by writing ``graphviz`` .dot files that descr
 
    .. diagram:: AlgorithmName-v1_wkflw.dot
 
-Examples of this can be found in `ReflectometryReductionOne1.rst <https://raw.githubusercontent.com/mantidproject/mantid/master/docs/source/algorithms/ReflectometryReductionOne-v1.rst>`__ and `ReflectometryReductionOneAuto-v1.rst <https://raw.githubusercontent.com/mantidproject/mantid/master/docs/source/algorithms/ReflectometryReductionOneAuto-v1.rst>`__.
+Examples of this can be found in `ReflectometryReductionOne-v2.rst <https://raw.githubusercontent.com/mantidproject/mantid/main/docs/source/algorithms/ReflectometryReductionOne-v2.rst>`__ and `ReflectometryReductionOneAuto-v2.rst <https://raw.githubusercontent.com/mantidproject/mantid/main/docs/source/algorithms/ReflectometryReductionOneAuto-v2.rst>`__.
 
 The .dot format is quite simple¸ but very powerful for describing graphs. The approach we use is to describe all the nodes (shapes) we want first, grouping them into their types, and then defining how they're connected.
 
-To provide a uniform look to all the workflow diagrams, templated keywords are provided which are swapped out with the correct styling options when the documentation is built. They are of the form ``${context}_style``. They're defined by the `diagram directive <https://raw.githubusercontent.com/mantidproject/mantid/master/docs/sphinxext/mantiddoc/directives/diagram.py>`__.
+To provide a uniform look to all the workflow diagrams, templated keywords are provided which are swapped out with the correct styling options when the documentation is built. They are of the form ``${context}_style``. They're defined by the `diagram directive <https://github.com/mantidproject/mantid/blob/main/docs/sphinxext/mantiddoc/directives/diagram.py>`__.
 
 An algorithm that takes one input workspace and scales it by a given parameter/property if it was given, may look like this:
 
