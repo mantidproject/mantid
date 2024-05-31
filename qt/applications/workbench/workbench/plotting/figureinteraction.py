@@ -57,8 +57,6 @@ AXES_SCALE_MENU_OPTS = OrderedDict(
         ("Log x/Lin y", ("log", "linear")),
     ]
 )
-# Options to quickly switch axes scales with key shortcuts
-AXES_SCALE_DEFAULT_SWITCH = ["linear", "log"]
 COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm)])
 
 
@@ -148,7 +146,6 @@ class FigureInteraction(object):
         event.canvas.draw()
 
     def on_key_press(self, event):
-
         ax = event.inaxes
         if ax is None or isinstance(ax, Axes3D) or len(ax.get_images()) == 0 and len(ax.get_lines()) == 0:
             return
@@ -164,10 +161,9 @@ class FigureInteraction(object):
             self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
 
     def _get_next_axis_scale(self, current_scale):
-        available_scales = AXES_SCALE_DEFAULT_SWITCH
-        scale_index = available_scales.index(current_scale) if current_scale in available_scales else 0
-        next_scale = available_scales[(scale_index + 1) % len(available_scales)]
-        return next_scale
+        if current_scale == "linear":
+            return "log"
+        return "linear"
 
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
