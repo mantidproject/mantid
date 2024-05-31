@@ -724,7 +724,7 @@ class FigureInteractionTest(unittest.TestCase):
 
         mock_y_editor.assert_called_once()
 
-    def test_keyboard_shortcuts_switch_axes_scale(self):
+    def test_keyboard_shortcut_switch_x_scale(self):
         key_press_event = self._create_mock_key_press_event("k")
         key_press_event.inaxes.get_xscale.return_value = "linear"
         key_press_event.inaxes.get_yscale.return_value = "log"
@@ -737,6 +737,22 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.on_key_press(key_press_event)
         key_press_event.inaxes.set_xscale.assert_called_once_with("log")
         key_press_event.inaxes.set_yscale.assert_called_once_with("log")
+        key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
+        key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
+
+    def test_keyboard_shortcut_switch_y_scale(self):
+        key_press_event = self._create_mock_key_press_event("l")
+        key_press_event.inaxes.get_xscale.return_value = "linear"
+        key_press_event.inaxes.get_yscale.return_value = "log"
+        key_press_event.inaxes.get_xlim.return_value = (0, 100)
+        key_press_event.inaxes.get_ylim.return_value = (5, 10)
+        key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+        fig_manager = MagicMock()
+        fig_manager.canvas = MagicMock()
+        interactor = FigureInteraction(fig_manager)
+        interactor.on_key_press(key_press_event)
+        key_press_event.inaxes.set_xscale.assert_called_once_with("linear")
+        key_press_event.inaxes.set_yscale.assert_called_once_with("linear")
         key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
         key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
 
