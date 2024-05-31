@@ -46,8 +46,9 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
  * @param instrumentName The instrument to get run numbers for.
  * @return A vector containing the run numbers that can be accessed from the data cache.
  */
-std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std::string &instrument) const {
-  const auto &json = openCacheJsonFile(instrument).second;
+std::vector<std::string>
+ISISInstrumentDataCache::getRunNumbersInCache(const Mantid::Kernel::InstrumentInfo &instrument) const {
+  const auto &json = openCacheJsonFile(instrument.name()).second;
   return json.getMemberNames();
 }
 

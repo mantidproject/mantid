@@ -13,7 +13,9 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ISISInstrumentDataCache.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 
@@ -119,9 +121,9 @@ public:
 
   void testRunNumberInCacheTrimming() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
-    std::vector<std::string> runNumbers{"25054", "25055"};
+    auto const &instrumentInfo = FileFinder::Instance().getInstrument("MARI", false);
     std::vector<std::string> expectedResult{"25054"};
-    auto const &result = dc.getRunNumbersInCache("MARI", runNumbers);
+    auto const &result = dc.getRunNumbersInCache(instrumentInfo);
     TS_ASSERT_EQUALS(result, expectedResult);
   }
 

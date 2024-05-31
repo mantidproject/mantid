@@ -23,7 +23,7 @@ public:
   ISISInstrumentDataCache(const std::string &path) : m_dataCachePath(path) {}
   std::string getFileParentDirectoryPath(const std::string &filename) const;
   bool isIndexFileAvailable(std::string const &instrument) const;
-  std::vector<std::string> getRunNumbersInCache(const std::string &instrument) const;
+  std::vector<std::string> getRunNumbersInCache(const Kernel::InstrumentInfo &instrument) const;
 
 private:
   std::pair<Mantid::Kernel::InstrumentInfo, std::string> validateInstrumentAndNumber(const std::string &filename) const;
