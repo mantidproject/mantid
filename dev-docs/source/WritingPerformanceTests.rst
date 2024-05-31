@@ -174,7 +174,7 @@ easily monitor timings. The job runs a set of `performance tests on the
 main branch of
 Mantid <http://builds.mantidproject.org/job/main_performancetests2/>`__.
 This job runs on a machine at the ESS, everytime that changes are merged
-into the Mantid master branch, and stores the timing information in a
+into the Mantid main branch, and stores the timing information in a
 database, also generating HTML output via a `set of python
 scripts <https://github.com/mantidproject/mantid/tree/main/Testing/PerformanceTests>`__.
 
