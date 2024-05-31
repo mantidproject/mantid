@@ -723,6 +723,17 @@ class FigureInteractionTest(unittest.TestCase):
 
         mock_y_editor.assert_called_once()
 
+    def test_legend_not_picked_up_from_scroll_event(self):
+        event = self._create_mock_scroll_event(button="up")
+        type(event.inaxes).lines = PropertyMock(return_value=["fake_line"])
+        legend = MagicMock()
+        legend.get_draggable.return_value = True
+        legend.contains.return_value = True
+        event.inaxes.axes.get_legend.return_value = legend
+        self.interactor.on_scroll(event)
+        calls = [call(False, False, "loc"), call(True, False, "loc")]
+        legend.set_draggable.assert_has_calls(calls)
+
     # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
         fig_manager = MagicMock()
@@ -731,7 +742,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = canvas
         return fig_manager
 
-    def _create_mock_fig_manager_to_accept_middle_click(self):
+    def _create_mock_fig_manager_to_accept_middle_click(self) -> object:
         fig_manager = MagicMock()
         canvas = MagicMock()
         type(canvas).buttond = PropertyMock(return_value={Qt.MiddleButton: 4})
@@ -755,11 +766,16 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=4)
         return mouse_event
 
-    def _create_mock_double_left_click(self):
+    def _create_mock_double_left_click(self) -> object:
         mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
         type(mouse_event).button = PropertyMock(return_value=1)
         type(mouse_event).dblclick = PropertyMock(return_value=True)
         return mouse_event
+
+    def _create_mock_scroll_event(self, button):
+        event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
+        type(event).button = MagicMock(return_value=button)
+        return event
 
     def _create_axes_for_axes_editor_test(self, mouse_over: str):
         ax = MagicMock()
