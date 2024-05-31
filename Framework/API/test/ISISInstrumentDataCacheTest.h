@@ -121,9 +121,8 @@ public:
 
   void testRunNumberInCacheTrimming() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
-    auto const &instrumentInfo = FileFinder::Instance().getInstrument("MARI", false);
     std::vector<std::string> expectedResult{"25054"};
-    auto const &result = dc.getRunNumbersInCache(instrumentInfo);
+    auto const &result = dc.getRunNumbersInCache("MARI");
     TS_ASSERT_EQUALS(result, expectedResult);
   }
 
