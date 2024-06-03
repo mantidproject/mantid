@@ -915,6 +915,36 @@ public:
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
+  void test_Load_And_CompressEvents_tolerance_0() {
+    // the is to verify that the compresssion works when the CompressTolerance=0
+    // create compressed
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    std::string compressed_name = "cncs_compressed0";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the compressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    /// CNCS_7860_event.nxs has 112266 so we expect slightly fewer events when compressed
+    TS_ASSERT_EQUALS(ws_compressed->getNumberEvents(), 111274)
+    // cleanup
+    AnalysisDataService::Instance().remove(compressed_name);
+  }
+
   void test_Load_And_FilterBadPulses() {
     // This will use ProcessBankData
     const std::string filename{"CNCS_7860_event.nxs"};
