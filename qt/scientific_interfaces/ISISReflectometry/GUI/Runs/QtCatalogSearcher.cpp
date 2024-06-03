@@ -92,9 +92,9 @@ SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITable
     return searchResults;
   }
   // If so, only show the runs available in the instrument data cache.
-  std::vector<std::string> runNumbers = dataCache.getRunNumbersInCache(searchCriteria().instrument);
+  auto const &runNumbers = dataCache.getRunNumbersInCache(searchCriteria().instrument);
   searchResults.erase(std::remove_if(searchResults.begin(), searchResults.end(),
-                                     [&](auto &result) {
+                                     [&](auto const &result) {
                                        return std::find(runNumbers.cbegin(), runNumbers.cend(), result.runNumber()) ==
                                               std::end(runNumbers);
                                      }),
