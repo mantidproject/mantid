@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsModel.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,15 +15,12 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MomentsModel::MomentsModel() { m_scale = false; }
+MomentsModel::MomentsModel() : m_inputWorkspace(), m_outputWorkspaceName(), m_eMin(), m_eMax(), m_scale(false) {}
 
 IAlgorithm_sptr MomentsModel::setupAlgorithm() {
   IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
@@ -55,6 +52,6 @@ void MomentsModel::setScale(bool scale) { m_scale = scale; }
 
 void MomentsModel::setScaleValue(double scaleValue) { m_scaleValue = scaleValue; }
 
-std::string MomentsModel::getOutputWorkspace() { return m_outputWorkspaceName; }
+std::string MomentsModel::getOutputWorkspace() const { return m_outputWorkspaceName; }
 
 } // namespace MantidQt::CustomInterfaces

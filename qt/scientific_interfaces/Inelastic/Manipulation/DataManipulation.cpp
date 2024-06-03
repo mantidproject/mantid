@@ -23,7 +23,7 @@ Mantid::Kernel::Logger g_log("DataManipulation");
 
 namespace MantidQt::CustomInterfaces {
 
-DataManipulation::DataManipulation(QObject *parent) : IndirectTab(parent), m_tabRunning(false) {
+DataManipulation::DataManipulation(QObject *parent) : InelasticTab(parent), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 

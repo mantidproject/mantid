@@ -60,7 +60,7 @@ few examples on how to use it:
 
   python dependency_spotter.py -f 593 -s 598
   python dependency_spotter.py -f 593 -s 598 -os win-64
-  python dependency_spotter.py -f 593 -s 598 --pipeline main_nightly_deployment_prototype
+  python dependency_spotter.py -f 593 -s 598 --pipeline main_nightly_deployment
 
 Another useful command for investigating the dependencies of specific packages is `conda search <https://docs.conda.io/projects/conda/en/latest/commands/search.html>`_. To find the dependencies of a package:
 

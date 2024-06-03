@@ -28,8 +28,8 @@ Mantid::Kernel::Logger g_log("Iqt");
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view)
-    : DataManipulation(parent), m_view(view), m_model(std::make_unique<IqtModel>()), m_selectedSpectrum(0) {
+IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
@@ -38,10 +38,9 @@ IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view)
 void IqtPresenter::setup() { m_view->setup(); }
 
 void IqtPresenter::handleSampDataReady(const std::string &wsname) {
-  MatrixWorkspace_sptr workspace;
   try {
-    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
-    setInputWorkspace(workspace);
+    auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    setInputWorkspace(std::move(workspace));
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     m_view->showMessageBox("Unable to retrieve workspace: " + wsname);
     m_view->setPreviewSpectrumMaximum(0);

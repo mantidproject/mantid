@@ -12,10 +12,12 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
+#include <string>
+#include <vector>
+
 #include <QList>
 #include <QPair>
 #include <QString>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -34,7 +36,7 @@ public:
   virtual void clearErrors() = 0;
   virtual void setFunction(std::string const &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
-  virtual void setDatasets(const QStringList &datasetNames) = 0;
+  virtual void setDatasets(const std::vector<std::string> &datasetNames) = 0;
   virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
@@ -43,8 +45,8 @@ public:
   virtual double getLocalParameterValue(std::string const &parameterName, int i) const = 0;
   virtual std::string getLocalParameterTie(std::string const &parameterName, int i) const = 0;
   virtual int getNumberOfDatasets() const = 0;
-  virtual QStringList getDatasetNames() const = 0;
-  virtual QStringList getDatasetDomainNames() const = 0;
+  virtual std::vector<std::string> getDatasetNames() const = 0;
+  virtual std::vector<std::string> getDatasetDomainNames() const = 0;
   virtual void setLocalParameterValue(std::string const &parameterName, int i, double value) = 0;
   virtual void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) = 0;
   virtual void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) = 0;

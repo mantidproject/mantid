@@ -22,9 +22,9 @@ FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataV
 
 FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
 
-std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFittingData(); }
-
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
+
+std::string FitDataPresenter::tabName() const { return m_tab->tabName(); }
 
 bool FitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
@@ -43,18 +43,6 @@ void FitDataPresenter::setResolution(const std::string &name) {
     m_model->removeSpecialValues(name);
     displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
   }
-}
-
-void FitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_view->setSampleWSSuffices(suffixes); }
-
-void FitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_view->setSampleFBSuffices(suffixes); }
-
-void FitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
-  m_view->setResolutionWSSuffices(suffixes);
-}
-
-void FitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
-  m_view->setResolutionFBSuffices(suffixes);
 }
 
 void FitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
@@ -85,7 +73,7 @@ std::vector<std::pair<std::string, size_t>> FitDataPresenter::getResolutionsForF
   return m_model->getResolutionsForFit();
 }
 
-UserInputValidator &FitDataPresenter::validate(UserInputValidator &validator) { return m_view->validate(validator); }
+void FitDataPresenter::validate(UserInputValidator &validator) { m_view->validate(validator); }
 
 void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {
@@ -110,8 +98,14 @@ WorkspaceID FitDataPresenter::getNumberOfWorkspaces() const { return m_model->ge
 
 size_t FitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
 
-FunctionModelSpectra FitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
-  return m_model->getSpectra(workspaceID);
+QList<FunctionModelDataset> FitDataPresenter::getDatasets() const {
+  QList<FunctionModelDataset> datasets;
+
+  for (auto i = 0u; i < m_model->getNumberOfWorkspaces().value; ++i) {
+    WorkspaceID workspaceID{i};
+    datasets.append(m_model->getDataset(workspaceID));
+  }
+  return datasets;
 }
 
 DataForParameterEstimationCollection

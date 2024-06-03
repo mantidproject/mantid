@@ -150,7 +150,7 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 2. Click the `Load` button. A row should be added to the UI table for each focused run.
    There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI).
-   There should be an additional table called `run_info` that provides some of the metadata for each run.
+   In the same grouped workspace there should be an additional table called `run_info_Fitting` that provides some of the metadata for each run.
    Each row in these tables should correspond to the equivalent row in the UI table.
 
 3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
@@ -248,12 +248,12 @@ This test uses data generated in Test 4.
 
 6. The order of the runs in the sequential fit should be obtainable from the log at notice level -
    check that this corresponds to the order of the average value of the primary log - ``ADC1_0``
-   You can check the value of this sample log for each run in the output GroupWorkspace with the suffix ``_logs``. Note this order down.
+   You can check the value of this sample log for each run in the output GroupWorkspace with the suffix ``_logs_Fitting``. Note this order down.
 
 7. Try changing the primary log to blank and re-run the ``Sequential Fit`` This should make the Sequential fit use the order of the runs in the central ``Run Selection`` table.
 
 8. In the Engineering Diffraction settings, set the primary log back to ``ADC1_0`` and tick ``Descending``.
-   Re-run the ``Sequential Fit`` and check that the order of runs in the output workspaces has reversed compared to step 8.
+   Re-run the ``Sequential Fit`` and check that the order of runs in the output workspaces has reversed compared to step 6.
 
 9. Close and re-open the Engineering Diffraction interface. Reopen the Engineering Diffraction settings menu, it should remember the primary log and the order.
 

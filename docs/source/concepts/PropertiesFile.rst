@@ -90,6 +90,8 @@ Directory Properties
 | ``datasearch.directories``           | A semi-colon(``;``) separated list of directories | ``../data;\\\\isis\\isis$\\ndxgem`` |
 |                                      | to use to search for data.                        |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``datacachesearch.directory``        | The directory where data cache is located         | ``/data/instrument``                |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.searcharchive``         | ``on`` (only the default facility), ``off``       | ``on`` or ``hfir,sns``              |
 |                                      | (none), ``all`` (all archives), or a list of      |                                     |
 |                                      | individual facilities to search for files in the  |                                     |
@@ -176,6 +178,7 @@ The logging priority levels for the file logging and console logging can also be
   # Set the log to information and do not log that it was changed
   ConfigService.setLogLevel("information", True)
 
+More details on logging can be found in the :ref:`developer docs <mantid-dev:Logging>` .
 
 
 Mantid Graphical User Interface Properties

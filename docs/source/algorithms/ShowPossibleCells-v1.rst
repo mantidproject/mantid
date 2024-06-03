@@ -31,18 +31,31 @@ Usage
 
 .. testcode:: ExShowPossibleCells
 
+   import json
    ws = LoadIsawPeaks("TOPAZ_3007.peaks")
    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-   ShowPossibleCells(PeaksWorkspace=ws)
-   alg = ws.getHistory().lastAlgorithm()
-   print("Num Cells :  {}".format(alg.getPropertyValue("NumberOfCells")))
+   number_of_cells, cells = ShowPossibleCells(PeaksWorkspace=ws)
+   print(f"Num Cells: {number_of_cells}")
+   cell1 = json.loads(cells[0])
+   cell2 = json.loads(cells[1])
+   print(f"First cell: Error={cell1['Error']:.3f} FormNumber={cell1['FormNumber']}, CellType={cell1['CellType']}, Centering={cell1['Centering']}")
+   print(f"Second cell: Error={cell2['Error']:.3f} FormNumber={cell2['FormNumber']}, CellType={cell2['CellType']}, Centering={cell2['Centering']}")
+
+   # the output can then be used by SelectCellOfType
+   SelectCellOfType(ws, CellType=cell1['CellType'], Centering=cell1['Centering'], Apply=True)
+   # or SelectCellWithForm
+   SelectCellWithForm(ws, FormNumber=cell1['FormNumber'], Apply=True)
+   # or SetUB
+   SetUB(ws, UB=cell1["UB"])
 
 
 Output:
 
 .. testoutput:: ExShowPossibleCells
 
-   Num Cells :  2
+   Num Cells: 2
+   First cell: Error=0.022 FormNumber=25, CellType=Monoclinic, Centering=C
+   Second cell: Error=0.000 FormNumber=44, CellType=Triclinic, Centering=P
 
 
 .. categories::

@@ -23,6 +23,7 @@ static const auto FUNCTION_STRINGS =
                                                   {"Lorentzian", "L"},
                                                   {"StretchedExpFT", "SFT"},
                                                   {"TeixeiraWater", "TxWater"},
+                                                  {"TeixeiraWaterIqt", "TxWater"},
                                                   {"TeixeiraWaterSQE", "TxWater"},
                                                   {"FickDiffusionSQE", "FickDiff"},
                                                   {"ChudleyElliotSQE", "ChudElliot"},
@@ -48,7 +49,6 @@ static const auto FUNCTION_STRINGS =
 
 namespace MSDFit {
 static const auto TAB_NAME = "MSDFit";
-static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -64,7 +64,6 @@ static const auto ALL_FITS =
 
 namespace IqtFit {
 static const auto TAB_NAME = "IqtFit";
-static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -79,7 +78,6 @@ inline auto templateSubTypes() {
 
 namespace ConvFit {
 static const auto TAB_NAME = "ConvFit";
-static const auto HAS_RESOLUTION = true;
 static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
@@ -94,7 +92,6 @@ inline auto templateSubTypes() {
 
 namespace FqFit {
 static const auto TAB_NAME = "FQFit";
-static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});

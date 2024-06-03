@@ -21,7 +21,7 @@ Mantid::Kernel::Logger g_log("DensityOfStates");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-DensityOfStates::DensityOfStates(QWidget *parent) : IndirectSimulationTab(parent) {
+DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));

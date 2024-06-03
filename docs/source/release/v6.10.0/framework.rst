@@ -28,6 +28,18 @@ Bugfixes
 .. amalgamate:: Framework/Fit_Functions/Bugfixes
 
 
+Data Handling
+-------------
+
+New features
+############
+.. amalgamate:: Framework/Data_Handling/New_features
+
+Bugfixes
+############
+.. amalgamate:: Framework/Data_Handling/Bugfixes
+
+
 Data Objects
 ------------
 

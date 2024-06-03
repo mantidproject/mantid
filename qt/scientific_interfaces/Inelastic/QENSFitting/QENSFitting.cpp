@@ -14,7 +14,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 DECLARE_SUBWINDOW(QENSFitting)
 
 QENSFitting::QENSFitting(QWidget *parent)
-    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
+    : InelasticInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -23,12 +23,6 @@ QENSFitting::QENSFitting(QWidget *parent)
   m_tabs.emplace(IQT_FIT, tabFactory->makeIqtFitTab(IQT_FIT));
   m_tabs.emplace(CONV_FIT, tabFactory->makeConvFitTab(CONV_FIT));
   m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
-}
-
-void QENSFitting::applySettings(std::map<std::string, QVariant> const &settings) {
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setFileExtensionsByName(settings.at("RestrictInput").toBool());
-  }
 }
 
 /**
@@ -46,7 +40,7 @@ void QENSFitting::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 std::string QENSFitting::documentationPage() const { return "Inelastic QENS Fitting"; }

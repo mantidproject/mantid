@@ -27,8 +27,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISDiagnostics::ISISDiagnostics(IIndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
@@ -92,9 +91,6 @@ ISISDiagnostics::ISISDiagnostics(IIndirectDataReduction *idrUI, QWidget *parent)
 
   // SIGNAL/SLOT CONNECTIONS
 
-  // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
-
   // Update properties when a range selector is changed
   connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeSelectorDropped(double, double)));
@@ -146,9 +142,9 @@ void ISISDiagnostics::run() {
   QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
-  std::vector<long> spectraRange;
-  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
+  std::vector<int> spectraRange;
+  spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMin"])));
+  spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMax"])));
 
   std::vector<double> peakRange;
   peakRange.emplace_back(m_dblManager->value(m_properties["PeakStart"]));
@@ -246,7 +242,7 @@ void ISISDiagnostics::algorithmComplete(bool error) {
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISDiagnostics::setDefaultInstDetails() {
+void ISISDiagnostics::updateInstrumentConfiguration() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {

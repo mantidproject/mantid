@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwModel.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -19,7 +19,7 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -39,10 +39,9 @@ void convertToSpectrumAxis(std::string const &inputName, std::string const &outp
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SqwModel::SqwModel() { m_rebinInEnergy = false; }
+SqwModel::SqwModel()
+    : m_inputWorkspace(), m_baseName(), m_eFixed(), m_qLow(), m_qWidth(0.05), m_qHigh(), m_eLow(), m_eWidth(0.005),
+      m_eHigh(), m_rebinInEnergy(false) {}
 
 void SqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   if (m_rebinInEnergy) {
@@ -115,16 +114,16 @@ void SqwModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
 
 void SqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 
-std::string SqwModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
+std::string SqwModel::getOutputWorkspace() const { return m_baseName + "_sqw"; }
 
-MatrixWorkspace_sptr SqwModel::getRqwWorkspace() {
+MatrixWorkspace_sptr SqwModel::getRqwWorkspace() const {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
   return getADSWorkspace(outputName);
 }
 
 UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
-                                      std::tuple<double, double> const eRange) {
+                                      std::tuple<double, double> const eRange) const {
 
   double const tolerance = 1e-10;
 
@@ -146,7 +145,7 @@ UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
 }
 
 std::string SqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
-                                              std::string const &reflection) {
+                                              std::string const &reflection) const {
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
@@ -180,7 +179,7 @@ std::string SqwModel::getEFixedFromInstrument(std::string const &instrumentName,
  * @param reflection Relection being used (optional)
  */
 MatrixWorkspace_sptr SqwModel::loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
-                                                       const std::string &reflection) {
+                                                       const std::string &reflection) const {
   std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   auto const ipfFilename = idfdirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 

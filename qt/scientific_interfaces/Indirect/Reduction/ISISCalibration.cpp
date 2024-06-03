@@ -41,8 +41,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISCalibration::ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
+ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
+    : DataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin));
@@ -128,9 +128,6 @@ ISISCalibration::ISISCalibration(IIndirectDataReduction *idrUI, QWidget *parent)
   resBackground->setColour(Qt::blue);
   auto resPeak = m_uiForm.ppResolution->addRangeSelector("ResPeak");
   resPeak->setColour(Qt::red);
-
-  // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
 
   // Update property map when a range selector is moved
   connectRangeSelectors();
@@ -373,7 +370,7 @@ bool ISISCalibration::validate() {
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISCalibration::setDefaultInstDetails() {
+void ISISCalibration::updateInstrumentConfiguration() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
@@ -466,7 +463,7 @@ void ISISCalibration::calPlotRaw() {
   setPeakRangeLimits(dataX.front(), dataX.back());
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
-  setDefaultInstDetails();
+  updateInstrumentConfiguration();
 
   m_uiForm.ppCalibration->replot();
 

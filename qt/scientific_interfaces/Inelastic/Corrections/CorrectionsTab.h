@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectTab.h"
+#include "Common/InelasticTab.h"
 #include "Common/OutputPlotOptionsPresenter.h"
 
 #include "DllConfig.h"
@@ -61,7 +61,7 @@ private:
   double m_numberDensity;
 };
 
-class MANTIDQT_INELASTIC_DLL CorrectionsTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL CorrectionsTab : public InelasticTab {
   Q_OBJECT
 
 public:

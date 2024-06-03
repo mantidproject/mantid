@@ -34,12 +34,12 @@ private:
 
 class EXPORT_OPT_MANTIDQT_COMMON NumericInputDelegate : public QStyledItemDelegate {
 public:
-  NumericInputDelegate(QWidget *parent = nullptr, double = DEFAULT_NUMERICAL_PRECISION);
+  NumericInputDelegate(QWidget *parent = nullptr, int = DEFAULT_NUMERICAL_PRECISION);
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
 
 private:
-  double m_precision;
+  int m_precision;
 };
 
 } // namespace MantidWidgets

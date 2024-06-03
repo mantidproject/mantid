@@ -45,7 +45,14 @@ class ProjectRecoveryModel(QObject):
         if os.path.exists(rec_file):
             rec_file_dict = {}
             with open(rec_file) as reader:
-                rec_file_dict = json.load(reader)
+                try:
+                    rec_file_dict = json.load(reader)
+                except json.decoder.JSONDecodeError:
+                    logger.warning(
+                        f"Project Recovery Model: Recovery file {rec_file} is corrupted, open plots and interfaces will "
+                        "fail to recover, but workspaces may reload."
+                    )
+                    return 0
 
             return len(rec_file_dict.get("workspaces", 0))
         else:

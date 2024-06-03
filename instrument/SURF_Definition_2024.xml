@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="SURF"
+            valid-from="2024-04-28 00:00:00"
+            valid-to="2100-01-30 23:59:59"
+            last-modified="2024-05-10 00:00:00">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+    <default-view axis-view="z+"/>
+  </defaults>
+
+<!-- source and sample-position components START============================= -->
+
+  <component type="source">
+    <location z="-8.869" />
+  </component>
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
+
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
+
+<!-- source and sample-position components END=============================== -->
+
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
+
+<!-- ================MONITOR 1 START========================================= -->
+  <component type="monitor1" idlist="monitor1">
+    <location z="-1.853"/>
+  </component>
+
+  <type name="monitor1" is="monitor">
+    <!-- Shape specified at least big enough to cover the beam which
+         is 10mm high and 40mm wide. Note it is described as tube, hence
+	 the choice of a cylinder shape.
+    -->
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" />
+      <radius val="0.01" />
+      <height val="0.04" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+<!-- ================MONITOR 1 END=========================================== -->
+
+<!-- ================MONITOR 2 START========================================= -->
+  <component type="monitor2" idlist="monitor2">
+    <location z="-0.053" />
+  </component>
+
+  <type name="monitor2" is="monitor">
+    <!-- Original shape included a Sphere attached to the cuboid
+	but that was cosmetic only as it is not in the beam,
+	and was causing problems with opencascade on windows 8.
+	Therefore it has been removed. -->
+    <percent-transparency val="95" />
+    <cuboid id="base">
+      <left-front-bottom-point x="0.02" y="-0.005" z="0.0"  />
+      <left-front-top-point  x="0.02" y="0.005" z="0.0"  />
+      <left-back-bottom-point  x="0.02" y="-0.005" z="-0.01"  />
+      <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />
+    </cuboid>
+  </type>
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================POINT DETECTOR START==================================== -->
+  <component type="point-detector" idlist="point-detector">
+    <location z="2.567" />
+    <parameter name="y">
+      <logfile id="THETA" eq="2.561*sin(2*value*0.0174533)" extract-single-value-as="last_value"/>
+    </parameter>
+
+  </component>
+
+  <type name="point-detector" is="detector">
+    <!-- Not exactly sure about the dimensions of this one. But pretty sure
+    it at least covers the beam. Also, just in front of it is a slit which
+    at the end of day will determine which neutrons get through to this
+    detector I believe.
+    -->
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.02" y="-0.005" z="0.0"  />
+      <left-front-top-point  x="0.02" y="0.005" z="0.0"  />
+      <left-back-bottom-point  x="0.02" y="-0.005" z="-0.01"  />
+      <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+<!-- ================POINT DETECTOR END====================================== -->
+
+<!-- ================AREA DETECTOR START=================================== -->
+  <component type="panel" idstart="10001" idfillbyfirst="y" idstep="1" idstepbyrow="64">
+    <location z="3.061" name="multi-detector"/>
+  </component>
+
+  <type name="panel" is="rectangular_detector" type="multi-detector-pixel"
+    xpixels="40" xstart="-0.044" xstep="+0.0022"
+    ypixels="46" ystart="0.0" ystep="+0.0022" >
+    <properties/>
+  </type>
+
+  <type name="multi-detector-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.01" y="-0.0011" z="-0.0011"  />
+      <left-front-top-point  x="0.01" y="-0.0011" z="0.0011"  />
+      <left-back-bottom-point  x="-0.01" y="-0.0011" z="-0.0011"  />
+      <right-front-bottom-point  x="0.01" y="0.0011" z="-0.0011"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+
+  <!-- other components -->
+
+  <component type="slit" name="slit1">
+    <location z="-1.873"/>
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap">
+      <logfile id="S1VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit2">
+    <location z="-0.254"/>
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap">
+      <logfile id="S2VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit3">
+    <location z="0.298"/>
+    <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap">
+      <logfile id="S3VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <component type="slit" name="slit4">
+    <location z="2.431"/>
+    <!-- This log file stores the vertical opening of slit. Note this slit
+     is fixed to the point detector. -->
+    <parameter name="vertical gap">
+      <logfile id="S4VG" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+
+
+
+  <component type="supermirror">
+    <!-- Worry about linking relevant logfiles for z,theta up later -->
+    <location z="-1.103"/>
+  </component>
+
+  <type name="supermirror" />
+
+
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="20001" />
+  </idlist>
+
+  <idlist idname="monitor2">
+    <id val="20002" />
+  </idlist>
+
+  <idlist idname="point-detector">
+    <id val="30001" />
+  </idlist>
+
+</instrument>

@@ -36,11 +36,11 @@ public:
   std::map<std::size_t, int> getSubTypes() const override;
   std::string setBackgroundA0(double value) override;
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
-  void setQValues(const std::vector<double> &qValues) override;
 
   int numberOfExponentials() const;
   bool hasExponential() const;
-  bool hasStretchExponential() const;
+  bool hasFitType() const;
+  bool hasFitType(IqtTypes::FitType fitType) const;
   void removeBackground();
   bool hasBackground() const;
   void tieIntensities(bool on);
@@ -52,18 +52,19 @@ private:
   void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const override;
 
   void clearData();
-  void setModel();
+  void setModel() override;
 
   void tieIntensities();
 
   std::optional<std::string> getExp1Prefix() const;
   std::optional<std::string> getExp2Prefix() const;
-  std::optional<std::string> getStretchPrefix() const;
+  std::optional<std::string> getFitTypePrefix(IqtTypes::FitType fitType) const;
   std::optional<std::string> getBackgroundPrefix() const;
 
-  std::string buildFunctionString() const;
+  std::string buildFunctionString(int const domainIndex) const override;
   std::string buildExpDecayFunctionString() const;
   std::string buildStretchExpFunctionString() const;
+  std::string buildTeixeiraWaterIqtFunctionString(int const domainIndex) const;
   std::string buildBackgroundFunctionString() const;
 
   IqtTypes::ExponentialType m_exponentialType = IqtTypes::ExponentialType::None;

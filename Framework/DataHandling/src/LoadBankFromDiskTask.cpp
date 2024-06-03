@@ -133,8 +133,8 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(::Ne
  * @param file :: File handle for the NeXus file
  * @param start_event :: set to the index of the first event
  * @param stop_event :: set to the index of the last event + 1
- * @param event_index ::  (a list of size of # of pulses giving the index in
- *the event list for that pulse)
+ * @param start_event_index ::  (a list of size of # of pulses giving the index in
+ * the event list for that pulse)
  */
 void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
                                           const uint64_t &start_event_index) {
@@ -335,8 +335,8 @@ void LoadBankFromDiskTask::run() {
     // Open the bankN_event group
     file.openGroup(entry_name, entry_type);
 
-    const bool needPulseInfo =
-        (!m_loader.alg->compressEvents) || m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered;
+    const bool needPulseInfo = (!m_loader.alg->compressEvents) || m_loader.m_ws.nPeriods() > 1 ||
+                               m_loader.alg->m_is_time_filtered || m_loader.alg->filter_bad_pulses;
 
     // Load the event_index field.
     if (needPulseInfo)
@@ -346,7 +346,7 @@ void LoadBankFromDiskTask::run() {
 
     if (!m_loadError) {
       // Load and validate the pulse times
-      if (m_loader.alg->compressEvents)
+      if (m_loader.alg->compressEvents && !m_loader.alg->filter_bad_pulses)
         thisBankPulseTimes = nullptr;
       else
         this->loadPulseTimes(file);
@@ -356,7 +356,6 @@ void LoadBankFromDiskTask::run() {
         m_loader.alg->getLogger().warning() << "Bank " << entry_name
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";
-
       // Open and validate event_id field.
       int64_t start_event = 0;
       int64_t stop_event = 0;

@@ -39,10 +39,10 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 TabFactory::TabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
 FitTab *TabFactory::makeMSDFitTab(int const index) const {
-  auto tab = new FitTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
-  tab->setupFittingModel<MSDFitModel>();
+  auto tab = new FitTab(m_tabWidget->widget(index), MSDFit::TAB_NAME);
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
       MSDFit::HIDDEN_PROPS);
+  tab->setupFittingPresenter<MSDFitModel>();
   tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter();
   tab->setUpFitDataPresenter<FitDataPresenter>();
@@ -51,11 +51,11 @@ FitTab *TabFactory::makeMSDFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeIqtFitTab(int const index) const {
-  auto tab = new FitTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
-  tab->setupFittingModel<IqtFitModel>();
+  auto tab = new FitTab(m_tabWidget->widget(index), IqtFit::TAB_NAME);
   auto browserCustomizations = packBrowserCustomizations(IqtFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, IqtFunctionTemplateModel>(
       IqtFit::HIDDEN_PROPS, false, std::move(browserCustomizations));
+  tab->setupFittingPresenter<IqtFitModel>();
   tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<FitDataPresenter>();
@@ -64,11 +64,11 @@ FitTab *TabFactory::makeIqtFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeConvFitTab(int const index) const {
-  auto tab = new FitTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
-  tab->setupFittingModel<ConvFitModel>();
+  auto tab = new FitTab(m_tabWidget->widget(index), ConvFit::TAB_NAME);
   auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, ConvFunctionTemplateModel>(
       ConvFit::HIDDEN_PROPS, true, std::move(browserCustomizations));
+  tab->setupFittingPresenter<ConvFitModel>();
   tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();
@@ -77,14 +77,13 @@ FitTab *TabFactory::makeConvFitTab(int const index) const {
 }
 
 FitTab *TabFactory::makeFqFitTab(int const index) const {
-  auto tab = new FitTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
-  tab->setupFittingModel<FqFitModel>();
+  auto tab = new FitTab(m_tabWidget->widget(index), FqFit::TAB_NAME);
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(
       FqFit::HIDDEN_PROPS);
+  tab->setupFittingPresenter<FqFitModel>();
   tab->setupFitDataView<FqFitDataView>();
   tab->setupOutputOptionsPresenter();
   tab->setUpFitDataPresenter<FqFitDataPresenter>();
-  tab->subscribeFitBrowserToDataPresenter();
   tab->setupPlotView(FqFit::X_BOUNDS);
   return tab;
 }

@@ -68,6 +68,11 @@ appear in the ``OutputWorkspace``. If it is not specified, then the
 format for the ``StartTime`` is ``2010-09-14T04:20:12``. Normally this
 parameter can be left unset.
 
+Logarithmic binning
+###################
+
+If you provide a negative tolerance or select ``Logarithmic`` as the ``BinningMode`` then the events will be combined together in increase large tolerances starting from the smallest TOF value. This follows the same method as the logarithmic binning of :ref:`algm-Rebin`. This mode will fail if any of the TOF values are negative.
+
 Usage
 -----
 

@@ -5,8 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.api import IFunction1D, IFunction, FunctionFactory
-from mantid.kernel import StringListValidator, StringContainsValidator, FloatArrayBoundedValidator, FloatBoundedValidator
+from mantid.api import IFunction1D
+from mantid.kernel import (
+    FloatArrayBoundedValidator,
+    FloatBoundedValidator,
+    IntBoundedValidator,
+    StringContainsValidator,
+    StringListValidator,
+)
 
 
 class SimpleFuncWValidator(IFunction1D):
@@ -16,6 +22,8 @@ class SimpleFuncWValidator(IFunction1D):
     def init(self, input_case):
         if input_case == "String List":
             self.declareAttribute("StringAtt", "filename", StringListValidator(["filename", "test"]))
+        elif input_case == "Int Bounded":
+            self.declareAttribute("IntAtt", 3, IntBoundedValidator(lower=0, upper=3))
         elif input_case == "Float Bounded":
             self.declareAttribute("FloatAtt", 3.0, FloatBoundedValidator(0.0, 5.0))
         elif input_case == "Array Bounded":
@@ -26,6 +34,8 @@ class SimpleFuncWValidator(IFunction1D):
     def invalid_init(self, input_case):
         if input_case == "String List":
             self.declareAttribute("StringAtt", "error", StringListValidator(["filename", "test"]))
+        elif input_case == "Int Bounded":
+            self.declareAttribute("IntAtt", 4, IntBoundedValidator(lower=0, upper=3))
         elif input_case == "Float Bounded":
             self.declareAttribute("FloatAtt", 10.0, FloatBoundedValidator(0.0, 5.0))
         elif input_case == "Array Bounded":
@@ -38,6 +48,14 @@ class SimpleFuncWValidator(IFunction1D):
 
 
 class IFunction1DValidatorTest(unittest.TestCase):
+    def test_int_bounded_validator(self):
+        func = SimpleFuncWValidator()
+
+        self.assertRaises(Exception, func.invalid_init, "Int Bounded")
+        func.init("Int Bounded")
+
+        self.assertRaises(Exception, func.setAttributeValue, "IntAtt", 4)
+
     def test_float_bounded_validator(self):
         func = SimpleFuncWValidator()
 

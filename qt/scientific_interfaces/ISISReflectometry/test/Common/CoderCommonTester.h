@@ -267,6 +267,8 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.prefixEdit->text(), map[QString("prefixEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.headerCheckBox->isChecked(), map[QString("headerCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.qResolutionCheckBox->isChecked(), map[QString("qResolutionCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.extraColumnsCheckBox->isChecked(), map[QString("extraColumnsCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.multipleDatasetsCheckBox->isChecked(), map[QString("multipleDatasetsCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.commaRadioButton->isChecked(), map[QString("commaRadioButton")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.spaceRadioButton->isChecked(), map[QString("spaceRadioButton")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.tabRadioButton->isChecked(), map[QString("tabRadioButton")].toBool())

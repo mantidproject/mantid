@@ -9,8 +9,8 @@
 Description
 -----------
 
-This algorithm saves the data and relevant metadata from a reduced ISIS Reflectometry workspace into the ASCII implementation of the ORSO data standard [#ORSO]_.
-The orsopy library [#orsopy]_ is used to format and write out the ``.ort`` file.
+This algorithm saves the data and relevant metadata from a reduced ISIS Reflectometry workspace into either the ASCII (``.ort``) or Nexus (``.orb``) implementation of the ORSO data standard [#ORSO]_.
+The orsopy library [#orsopy]_ is used to format and write out the file.
 Currently this algorithm is unable to collect all of the mandatory information required by the ORSO standard so it produces a file that is not fully ORSO compliant.
 A comment is included at the top of the file to reflect this. This algorithm is only suitable for use with Reflectometry data collected at the ISIS Neutron and Muon facility.
 
@@ -19,11 +19,12 @@ For each individual workspace, the algorithm attempts to find metadata for the f
 As a result, this algorithm may produce a file that is missing information if it is passed a workspace that wasn't reduced via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
 See below for further information about where the metadata and resolution are searched for in the workspace.
 
-If more than one workspace name is passed in then the algorithm will save all the data and metadata to a single ``.ort`` file as a series of datasets. The final file will contain the usual
-header followed by the first set of data columns. Subsequent datasets will have a smaller header, containing only metadata that differs from the main one, plus the dataset name and data columns.
-Dataset names must be unique, so an error will be thrown if duplicate dataset names are generated from the workspaces in the list. See more information below about how these are generated.
+If more than one workspace name is passed in then the algorithm will save all the data and metadata to a single ORSO file as a series of datasets.
+Dataset names must be unique, so an error will be thrown if duplicate dataset names are generated from the workspaces in the list. See below for more information about how these are generated.
 
 When passed a workspace group, the algorithm will save each workspace in the group as an individual dataset within the same file, as described above.
+
+The ``Filename`` property is used to provide the save location and name for the file. The save path must end with a valid ORSO file extension - use ``.ort`` to save into the ORSO ASCII format or ``.orb`` to save into the ORSO Nexus format.
 
 Dataset names
 -------------
@@ -43,7 +44,7 @@ fail to save out a file.
 Data values
 -----------
 
-The saved ``.ort`` file contains at least three columns of data: the normal wavevector transfer (Qz), the reflectivity (R) and the error of the reflectivity.
+The saved ORSO file contains at least three columns of data: the normal wavevector transfer (Qz), the reflectivity (R) and the error of the reflectivity.
 The data is converted to point data using algorithm :ref:`algm-ConvertToPointData` before being saved to file.
 
 If parameter ``WriteResolution`` is set to ``True`` then the algorithm will also attempt to include a fourth column that calculates the resolution of the normal wavevector transfer as: :math:`resolution * Qz`.
@@ -62,7 +63,7 @@ For non-stitched datasets there will be the four columns described above plus an
 - *incident theta* - the value of theta used for the final conversion to Q.
 - *error of incident theta* - calculated as :math:`resolution * \theta`.
 
-If it is not possible to calculate the values for the additional columns then they are still included in the file but are populated with nan values.
+If it is not possible to calculate the values for the additional columns then a warning is logged and they are excluded from the file.
 
 Header Metadata
 ---------------
@@ -102,7 +103,7 @@ the file is saved without this metadata included.
 Usage
 -----
 
-**Example - Save a workspace in ISIS reflectometry ORSO ASCII format**
+**Example - Save a workspace in ISIS Reflectometry ORSO ASCII format**
 
 .. testcode:: SaveISISReflectometryORSO_general_usage
 
@@ -113,7 +114,8 @@ Usage
 
     # Create an absolute path by joining the proposed filename to a directory
     # os.path.expanduser("~") used in this case returns the home directory of the current user
-    file = os.path.join(os.path.expanduser("~"), "ws")
+    # Specify the .ort extension to save to the ORSO ASCII format
+    file = os.path.join(os.path.expanduser("~"), "ws.ort")
 
     # Add Sample Log entries
     AddSampleLog(Workspace=ws, LogName='rb_proposal', LogText='1234', LogType='Number')
@@ -122,8 +124,8 @@ Usage
     SaveISISReflectometryORSO(WorkspaceList=ws, Filename=file, WriteResolution=False)
 
     # Open the file and read the first line
-    if os.path.exists(file + ".ort"):
-      with open((file + ".ort"), 'r') as myFile:
+    if os.path.exists(file):
+      with open((file), 'r') as myFile:
         print(myFile.readline())
 
 .. testoutput:: SaveISISReflectometryORSO_general_usage
@@ -133,9 +135,9 @@ Usage
 
 .. testcleanup:: SaveISISReflectometryORSO_general_usage
 
-   if os.path.exists(file + ".ort"):
+   if os.path.exists(file):
      # Delete file
-     os.remove(file + ".ort")
+     os.remove(file)
 
 References
 ----------

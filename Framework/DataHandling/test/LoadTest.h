@@ -256,7 +256,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "084446+084447.nxs");
 
-    std::string outputWS = "LoadTest_out";
+    std::string outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -279,7 +279,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "084446-084447");
 
-    std::string outputWS = "LoadTest_out";
+    std::string outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -310,6 +310,33 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "argus0026287.nxs");
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
+  }
+
+  void test_must_set_loadername() {
+    std::string const outputWS = AnalysisDataService::Instance().uniqueName(5, "LoadTest_");
+    std::string const incorrectLoader = "NotALoader";
+    int const incorrectVersion = -2;
+
+    Load loader;
+    // run Load with the LoaderName set to something
+    // verify that at the end, it is correctly set back according to the output
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    // the loader namer will be set: grab it an ensure it is not the bad cvalue
+    std::string const correctLoader = loader.getPropertyValue("LoaderName");
+    int const correctVersion = loader.getProperty("LoaderVersion");
+    TS_ASSERT_DIFFERS(correctLoader, incorrectLoader);
+    TS_ASSERT_DIFFERS(correctVersion, incorrectVersion);
+    // now SET the loader to a bad value, and execute
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("LoaderName", incorrectLoader));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoaderVersion", incorrectVersion));
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), incorrectLoader);
+    TS_ASSERT_EQUALS((int)loader.getProperty("LoaderVersion"), incorrectVersion);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    // make sure the loader name has been correctly set
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), correctLoader);
+    TS_ASSERT_EQUALS((int)loader.getProperty("LoaderVersion"), correctVersion);
   }
 };
 

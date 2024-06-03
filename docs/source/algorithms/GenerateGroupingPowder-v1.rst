@@ -72,7 +72,7 @@ Usage
     if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
         print("Found file powder.par")
     wsg=GroupDetectors(ws,outputFilename)
-    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
+    print("The grouping workspace has {} histograms".format(wsg.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingPowder_default
 
@@ -90,7 +90,7 @@ Output:
 
     Found file powder.xml
     Found file powder.par
-    The grouped workspace has 14 histograms
+    The grouping workspace has 14 histograms
 
 ----
 

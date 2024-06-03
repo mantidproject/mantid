@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetriseModel.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,18 +15,17 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SymmetriseModel::SymmetriseModel() {}
+SymmetriseModel::SymmetriseModel()
+    : m_inputWorkspace(), m_reflectedInputWorkspace(), m_negativeOutputWorkspace(), m_positiveOutputWorkspace(),
+      m_eMin(), m_eMax(), m_isPositiveReflect(), m_spectraRange() {}
 
 void SymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::vector<long> spectraRange) {
+                                            std::vector<int> const &spectraRange) {
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();

@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwPresenter.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,7 +18,7 @@
 
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -34,8 +34,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view)
-    : DataManipulation(parent), m_model(std::make_unique<SqwModel>()), m_view(view) {
+SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));

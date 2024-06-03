@@ -291,7 +291,7 @@ Beta Testing Begins
 
    ``swg<AT>mantidproject.org``
 
-   using the template as a guide:
+   using the following templates as a guide (the first template is for users at ISIS, the second one for everyone else):
 
    * Dear all,
 
@@ -302,12 +302,42 @@ Beta Testing Begins
 
      Packages
 
-     The nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
+     Another possibility is to conduct testing on IDAaaS. Please be aware that the version on IDAaaS is typically one day behind the nightly version available on Conda.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
+     Please report any bugs to ``mantid-help@mantidproject.org`` and
+     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     It would be most helpful for the team if bugs are communicated back to us as soon as possible.
+
+     Thank you all for your help.
+
+     Regards,
+
+     Mantid Team
+
+   * Dear all,
+
+     We are busy making preparations for the release of version *<version>* of Mantid.
+     We have completed our first round of developer testing and are now ready for beta-testing feedback.
+     The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
+     We then hope to release the following week.
+
+     Packages
+
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
+     The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
+
+     We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
      Please report any bugs to ``mantid-help@mantidproject.org`` and
      if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
      It would be most helpful for the team if bugs are communicated back to us as soon as possible.
@@ -383,19 +413,24 @@ Code Freeze
 **Create the Release Branch (once most PRs are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
+* Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
+  date with the ``main`` branch, pushing the changes directly to GitHub:
+
+.. code-block:: bash
+
+    git checkout release-next
+    git fetch origin main
+    git reset --hard origin/main
+    git push origin release-next --force
+
+* Verify that the latest commit on ``release-next`` is correct before moving to the next step.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
-  which will perform the following actions:
-
-  * Create or update the ``release-next`` branch.
-  * Enable the job to periodically merge ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
-    This will turn off publishing for the ``main`` branch pipeline and switch it on for the
-    ``release-next`` pipeline.
-
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__. This will
+  set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``,
+  which will re-enable package publishing for the ``release-next`` nightly pipeline.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change

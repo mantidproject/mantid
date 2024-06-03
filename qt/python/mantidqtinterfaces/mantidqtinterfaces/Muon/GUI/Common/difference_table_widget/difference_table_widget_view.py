@@ -33,7 +33,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         # Table entry validation
         self._validate_diff_name_entry = lambda text: True
 
-        self._on_table_data_changed = lambda: 0
+        self._on_table_data_changed = lambda row, column: 0
 
         # The active groups that can be selected from the group combo box
         self._group_selections = []
@@ -205,9 +205,13 @@ class DifferenceTableView(QtWidgets.QWidget):
         if not self._updating:
             pass
 
-    def on_cell_changed(self, _row, _col):
+    def on_cell_changed(self, row, column):
         if not self._updating:
-            self._on_table_data_changed(_row, _col)
+            if not (isinstance(self.sender(), QtWidgets.QTableWidget) or self.sender().pos().isNull()):
+                pos_index = self.diff_table.indexAt(self.sender().pos())
+                row = pos_index.row()
+                column = pos_index.column()
+            self._on_table_data_changed(row, column)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Context Menu

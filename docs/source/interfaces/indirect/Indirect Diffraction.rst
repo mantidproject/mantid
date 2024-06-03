@@ -107,9 +107,6 @@ order of files should not be problematic either.
 
 Multiple data files with the same dRanges will be "averaged" together.
 
-.. interface:: Diffraction
-  :widget: pageCalibration
-
 IRIS, OSIRIS diffspec, TOSCA & VESUVIO
 --------------------------------------
 
@@ -118,7 +115,7 @@ All other instruments are supported through the
 algorithm and share the same set of options:
 
 .. interface:: Diffraction
-  :widget: pageDSpaceRebin
+  :widget: gbDspaceRebinCalibOnly
 
 Sum Files
   If selected the raw files will be summed after they are loaded and the

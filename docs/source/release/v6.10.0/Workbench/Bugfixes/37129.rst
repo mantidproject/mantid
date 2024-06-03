@@ -1,0 +1,1 @@
+- Fixed a bug in the fitting property browser, where removing a function from a nested composite function could cause a crash.

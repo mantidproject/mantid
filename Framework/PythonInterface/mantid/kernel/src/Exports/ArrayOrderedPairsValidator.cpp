@@ -25,5 +25,5 @@ template <typename TYPE> ArrayOrderedPairsValidator<TYPE> *createArrayOrderedPai
 } // namespace
 void export_ArrayOrderedPairsValidator() {
   EXPORT_PAIRSVALIDATOR(double, Float);
-  EXPORT_PAIRSVALIDATOR(long, Int);
+  EXPORT_PAIRSVALIDATOR(int, Int);
 }

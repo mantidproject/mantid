@@ -188,6 +188,9 @@ html_show_copyright = False
 # Do not show last updated information in the HTML footer.
 html_last_updated_fmt = None
 
+# Hide the navigation sidebar, we use a table of contents instead.
+html_sidebars = {"**": []}
+
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
 # This allows easier navigation to the top of a chapter, but can be confusing because it mixes entries of different depth in one list.

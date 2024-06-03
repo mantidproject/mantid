@@ -47,8 +47,8 @@ public:
   void setNumberDomains(int) override;
   int getNumberDomains() const override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
-  QStringList getDatasetNames() const override;
-  QStringList getDatasetDomainNames() const override;
+  std::vector<std::string> getDatasetNames() const override;
+  std::vector<std::string> getDatasetDomainNames() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
 
@@ -76,6 +76,8 @@ public:
   virtual void setSubType(std::size_t subTypeIndex, int typeIndex) = 0;
   virtual std::map<std::size_t, int> getSubTypes() const = 0;
 
+  void setQValues(const std::vector<double> &qValues) override;
+
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
@@ -85,6 +87,9 @@ public:
   std::map<int, std::string> getParameterNameMap() const;
 
 protected:
+  virtual void setModel();
+  virtual std::string buildFunctionString(int const domainIndex) const = 0;
+
   void setParameter(ParamID name, double value);
   std::optional<std::string> getParameterName(ParamID name) const;
   void setCurrentValues(const std::map<ParamID, double> &);
@@ -92,6 +97,8 @@ protected:
 
   std::unique_ptr<FunctionModel> m_model;
   QList<ParamID> m_globals;
+
+  std::vector<double> m_qValues;
 
 private:
   double getParameter(ParamID name) const;

@@ -26,6 +26,7 @@ Guides
    DoxygenSetup
    NewStarterC++
    NewStarterPython
+   PythonAlgorithmsInExternalProjects
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.

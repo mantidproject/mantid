@@ -30,9 +30,6 @@ const std::string NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 // final lists
 const std::string MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 const std::string SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
-
-constexpr auto NUMERICAL_PRECISION = 6;
-
 } // namespace
 
 namespace MantidQt {
@@ -52,7 +49,7 @@ std::string getRegexValidatorString(const RegexValidatorStrings &validatorMask) 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
 
 RegexInputDelegate::RegexInputDelegate(QWidget *parent, const std::string &validator)
-    : QStyledItemDelegate(parent), m_validator(QRegExp(QString::fromStdString(validator))){};
+    : QStyledItemDelegate(parent), m_validator(QRegExp(QString::fromStdString(validator))) {}
 
 QWidget *RegexInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
                                           const QModelIndex & /*index*/) const {
@@ -62,8 +59,8 @@ QWidget *RegexInputDelegate::createEditor(QWidget *parent, const QStyleOptionVie
   return lineEdit;
 }
 
-NumericInputDelegate::NumericInputDelegate(QWidget *parent, double precision)
-    : QStyledItemDelegate(parent), m_precision(precision){};
+NumericInputDelegate::NumericInputDelegate(QWidget *parent, int precision)
+    : QStyledItemDelegate(parent), m_precision(precision) {}
 
 QWidget *NumericInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
 

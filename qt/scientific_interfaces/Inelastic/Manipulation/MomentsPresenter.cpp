@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsPresenter.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -15,7 +15,7 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -26,8 +26,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view)
-    : DataManipulation(parent), m_model(std::make_unique<MomentsModel>()), m_view(view) {
+MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));

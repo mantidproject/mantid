@@ -1133,6 +1133,35 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
         }
         peakWS->getPeak(r).setGoniometerMatrix(gm);
       }
+    } else if (str == "column_14") {
+      // Read shape information
+      using namespace Mantid::DataObjects;
+
+      PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
+      PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
+
+      peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
+      peakFactorySphere->setSuccessor(peakFactoryNone);
+
+      NXInfo info = nx_tw.getDataSetInfo(str);
+      NXChar data = nx_tw.openNXChar(str);
+
+      const int maxShapeJSONLength = info.dims[1];
+      data.load();
+      for (int i = 0; i < numberPeaks; ++i) {
+
+        // iR = peak row number
+        auto startPoint = data() + (maxShapeJSONLength * i);
+        std::string shapeJSON(startPoint, startPoint + maxShapeJSONLength);
+        boost::trim_right(shapeJSON);
+
+        // Make the shape
+        Mantid::Geometry::PeakShape *peakShape = peakFactoryEllipsoid->create(shapeJSON);
+
+        // Set the shape
+        peakWS->getPeak(i).setPeakShape(peakShape);
+      }
     } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();

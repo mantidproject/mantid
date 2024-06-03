@@ -11,6 +11,7 @@
 #include "DllConfig.h"
 #include "FitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -33,6 +34,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
+  virtual FunctionModelDataset getDataset(WorkspaceID workspaceID) const = 0;
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(WorkspaceID workspaceID) const = 0;
   virtual size_t getNumberOfDomains() const = 0;

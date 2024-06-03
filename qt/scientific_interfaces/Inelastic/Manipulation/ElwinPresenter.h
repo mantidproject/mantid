@@ -42,7 +42,9 @@ public:
 
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataManipulation, public IElwinPresenter {
 public:
-  ElwinPresenter(QWidget *parent, IElwinView *view);
+  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
+  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
+                 std::unique_ptr<IFitDataModel> dataModel);
   ~ElwinPresenter();
 
   // base Manipulation tab methods
@@ -63,6 +65,13 @@ public:
   void handleRowModeChanged() override;
   void updateAvailableSpectra() override;
 
+  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
+  virtual void setSelectedSpectrum(int spectrum);
+  int getSelectedSpectrum() const;
+  MatrixWorkspace_sptr getInputWorkspace() const;
+  MatrixWorkspace_sptr getPreviewPlotWorkspace();
+  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
+
 protected:
   void runComplete(bool error) override;
   void newInputDataFromDialog();
@@ -72,23 +81,16 @@ private:
   void updateTableFromModel();
   void updateIntegrationRange();
 
-  int getSelectedSpectrum() const;
-  virtual void setSelectedSpectrum(int spectrum);
-
   std::vector<std::string> getOutputWorkspaceNames();
   std::string getOutputBasename();
-  MatrixWorkspace_sptr getInputWorkspace() const;
-  MatrixWorkspace_sptr getPreviewPlotWorkspace();
   bool checkForELTWorkspace();
-  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
-  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
   void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
   void newPreviewWorkspaceSelected(const std::string &workspaceName);
   size_t findWorkspaceID();
 
   IElwinView *m_view;
-  std::unique_ptr<ElwinModel> m_model;
-  std::unique_ptr<FitDataModel> m_dataModel;
+  std::unique_ptr<IElwinModel> m_model;
+  std::unique_ptr<IFitDataModel> m_dataModel;
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;

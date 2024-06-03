@@ -165,7 +165,8 @@ void FunctionTemplateView::updateMultiDatasetParameters(const ITableWorkspace &t
 void FunctionTemplateView::updateParameters(const IFunction &fun) { m_presenter->updateParameters(fun); }
 
 void FunctionTemplateView::openEditLocalParameterDialog(std::string const &parameterName,
-                                                        QStringList const &datasetNames, QStringList const &domainNames,
+                                                        std::vector<std::string> const &datasetNames,
+                                                        std::vector<std::string> const &domainNames,
                                                         QList<double> const &values, QList<bool> const &fixes,
                                                         QStringList const &ties, QStringList const &constraints) {
   auto dialog =

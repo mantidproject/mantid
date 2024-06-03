@@ -6,20 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
 
 #include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IIndirectDataReduction;
+class IDataReduction;
 
-class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public DataReductionTab {
   Q_OBJECT
 
 public:
-  ILLEnergyTransfer(IIndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
   void setup() override;
@@ -30,7 +30,6 @@ public slots:
 
 private slots:
   void algorithmComplete(bool error);
-  void setInstrumentDefault();
 
   void runClicked();
   void setRunEnabled(bool enabled);
@@ -38,6 +37,8 @@ private slots:
                        QString const &message = "Run", QString const &tooltip = "");
 
 private:
+  void updateInstrumentConfiguration() override;
+
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
   double m_backCalibScaling = 1.;

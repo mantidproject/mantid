@@ -91,6 +91,7 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/InelasticEMUauReduction.py
+    algorithms/IntegratePeaks1DProfile.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
     algorithms/IntegratePeaksShoeboxTOF.py

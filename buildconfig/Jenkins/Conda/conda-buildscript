@@ -117,10 +117,15 @@ create_and_activate_mantid_developer_env
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
-    if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+    if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
       ENABLE_BUILD_CODE=false
       ENABLE_UNIT_TESTS=false
       ENABLE_SYSTEM_TESTS=false
+    elif ${SCRIPT_DIR}/../check_for_changes dev-docs-only; then
+      ENABLE_BUILD_CODE=false
+      ENABLE_UNIT_TESTS=false
+      ENABLE_SYSTEM_TESTS=false
+      ENABLE_DOC_TESTS=false
     fi
     rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
     find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete

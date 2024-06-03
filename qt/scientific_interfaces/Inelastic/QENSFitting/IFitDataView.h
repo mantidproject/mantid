@@ -36,7 +36,7 @@ public:
   virtual QTableWidget *getDataTable() const = 0;
   virtual bool isTableEmpty() const = 0;
 
-  virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
+  virtual void validate(UserInputValidator &validator) = 0;
   virtual void addTableEntry(size_t row, FitDataRow newRow) = 0;
   virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) = 0;
   virtual int getColumnIndexFromName(std::string const &ColName) = 0;
@@ -44,11 +44,6 @@ public:
   virtual QString getText(int row, int column) const = 0;
   virtual QModelIndexList getSelectedIndexes() const = 0;
   virtual bool dataColumnContainsText(std::string const &columnText) const = 0;
-
-  virtual void setSampleWSSuffices(const QStringList &suffices) = 0;
-  virtual void setSampleFBSuffices(const QStringList &suffices) = 0;
-  virtual void setResolutionWSSuffices(const QStringList &suffices) = 0;
-  virtual void setResolutionFBSuffices(const QStringList &suffices) = 0;
 
   virtual void displayWarning(std::string const &warning) = 0;
 };

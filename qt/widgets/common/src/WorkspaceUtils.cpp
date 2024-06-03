@@ -172,7 +172,7 @@ bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double
  * Checks the workspace's instrument for a resolution parameter to use as
  * a default for the energy range on the mini plot
  *
- * @param ws :: Name of the workspace to use
+ * @param workspace :: Name of the workspace to use
  * @param res :: The retrieved values for the resolution parameter (if one was
  *found)
  */
@@ -207,7 +207,7 @@ QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName, d
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                                              double precision) {
-  auto const xValues = workspace->x(0);
+  auto const &xValues = workspace->x(0);
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
@@ -220,9 +220,9 @@ std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, s
 }
 
 /**
- * Checks the name of the input workspace against a regexp for prefixes in the form `instrName#runNumber_...`, where
- * #runNumber is a number indicating the specific instrument run number that the workspace refers to.
- * As output, it returns a single string with format 'instrName#firstRunNumber-#finalRunNumber_...', if run numbers are
+ * Checks the name of the input workspace against a regexp for prefixes in the form `instrName\#runNumber_...`, where
+ * \#runNumber is a number indicating the specific instrument run number that the workspace refers to.
+ * As output, it returns a single string with format instrName\#firstRunNumber-\#finalRunNumber_..., if run numbers are
  * found.
  *
  * @param workspaceNames :: a vector of strings containing a series of workspace names

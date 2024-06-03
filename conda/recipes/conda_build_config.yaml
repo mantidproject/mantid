@@ -24,9 +24,16 @@ boost:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
+# this must match the version in the developer dependencies
+jemalloc:
+  - 5.2.0
+
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
   - 1.24.*
+
+libcxx:
+  - '<17'
 
 matplotlib:
   - 3.7.*

@@ -1,36 +1,35 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    IndirectDataReduction.cpp
-    IndirectDataReductionTab.cpp
-    IndirectTransmission.cpp
+    DataReduction.cpp
+    DataReductionTab.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
-    ISISEnergyTransferValidator.cpp
     ISISEnergyTransferModel.cpp
-    ISISEnergyTransferView.cpp
     ISISEnergyTransferPresenter.cpp
+    ISISEnergyTransferValidator.cpp
+    ISISEnergyTransferView.cpp
     ReductionAlgorithmUtils.cpp
+    Transmission.cpp
 )
 
 set(INC_FILES ISISEnergyTransferData.h ISISEnergyTransferValidator.h ISISEnergyTransferModelUtils.h
-              ISISEnergyTransferModel.h ReductionAlgorithmUtils.h
+              ISISEnergyTransferModel.h ISISEnergyTransferPresenter.h ReductionAlgorithmUtils.h
 )
 
 set(MOC_FILES
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
-    IndirectTransmission.h
+    DataReduction.h
+    DataReductionTab.h
     ILLEnergyTransfer.h
     ISISCalibration.h
     ISISDiagnostics.h
     ISISEnergyTransferView.h
-    ISISEnergyTransferPresenter.h
+    Transmission.h
 )
 
-set(UI_FILES IndirectDataReduction.ui IndirectTransmission.ui ILLEnergyTransfer.ui ISISCalibration.ui
-             ISISDiagnostics.ui ISISEnergyTransfer.ui
+set(UI_FILES DataReduction.ui ILLEnergyTransfer.ui ISISCalibration.ui ISISDiagnostics.ui ISISEnergyTransfer.ui
+             Transmission.ui
 )
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)

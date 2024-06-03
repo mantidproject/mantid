@@ -41,9 +41,18 @@ public:
 
 namespace MantidQt::CustomInterfaces {
 using namespace Inelastic;
-ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view)
-    : DataManipulation(parent), m_view(view), m_model(std::make_unique<ElwinModel>()),
-      m_dataModel(std::make_unique<FitDataModel>()), m_selectedSpectrum(0) {
+ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::make_unique<FitDataModel>()),
+      m_selectedSpectrum(0) {
+  m_view->subscribePresenter(this);
+  setOutputPlotOptionsPresenter(
+      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+}
+
+ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
+                               std::unique_ptr<IFitDataModel> dataModel)
+    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::move(dataModel)),
+      m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
@@ -146,9 +155,9 @@ void ElwinPresenter::handleValueChanged(std::string const &propName, double valu
 }
 
 void ElwinPresenter::handleValueChanged(std::string const &propName, bool value) {
-  if (propName == "BackgroundSubtraction") {
+  if (propName == "Background Subtraction") {
     m_model->setBackgroundSubtraction(value);
-  } else if (propName == "Normalise") {
+  } else if (propName == "Normalise to Lowest Temp") {
     m_model->setNormalise(value);
   }
 }

@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -20,7 +20,7 @@
 #include <QStringList>
 #include <utility>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;

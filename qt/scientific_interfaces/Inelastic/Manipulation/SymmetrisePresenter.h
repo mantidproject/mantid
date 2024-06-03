@@ -51,7 +51,7 @@ public:
 */
 class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataManipulation, public ISymmetrisePresenter {
 public:
-  SymmetrisePresenter(QWidget *parent, ISymmetriseView *view);
+  SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;
 
   void setup() override;
@@ -74,7 +74,7 @@ private:
 
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   ISymmetriseView *m_view;
-  std::unique_ptr<SymmetriseModel> m_model;
+  std::unique_ptr<ISymmetriseModel> m_model;
   // wether batch algorunner is running preview or run buttons
   bool m_isPreview;
 };

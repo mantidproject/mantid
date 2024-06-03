@@ -31,7 +31,7 @@ public:
   void subscribePresenter(IElwinPresenter *presenter) override;
   void setup() override;
 
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
   void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
@@ -51,6 +51,7 @@ public:
   void clearDataTable() override;
   void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) override;
   QModelIndexList getSelectedData() override;
+  void selectAllRows() override;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
   bool isGroupInput() const override;
@@ -88,6 +89,7 @@ private slots:
   void notifyAddWorkspaceDialog();
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
   void notifyRemoveDataClicked();
+  void notifySelectAllClicked();
 
 private:
   void setHorizontalHeaders();

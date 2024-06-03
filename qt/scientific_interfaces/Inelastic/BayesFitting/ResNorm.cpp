@@ -456,7 +456,7 @@ void ResNorm::saveClicked() {
 
   m_pythonExportWsName = outputWsName;
   // Check workspace exists
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
 
   addSaveWorkspaceToQueue(outputWsName);
   m_batchAlgoRunner->executeBatchAsync();

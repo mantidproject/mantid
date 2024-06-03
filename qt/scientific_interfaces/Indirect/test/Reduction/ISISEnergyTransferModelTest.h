@@ -54,7 +54,7 @@ private:
     declareProperty("CalibrationWorkspace", "");
 
     declareProperty("Efixed", 0.0);
-    declareProperty("SpectraRange", std::vector<long>{0, 2});
+    declareProperty("SpectraRange", std::vector<int>{0, 2});
     declareProperty("BackgroundRange", std::vector<double>{0.0, 0.0});
     declareProperty("RebinString", "");
 
@@ -310,9 +310,7 @@ public:
     TS_ASSERT_EQUALS(outputName, "instrument1234, 1235_analyser_reflection_Reduced");
   }
 
-  void testRunIETAlgorithm() {
-    MantidQt::API::BatchAlgorithmRunner *batch = new MantidQt::API::BatchAlgorithmRunner(nullptr);
-
+  void test_energyTransferAlgorithm() {
     IETInputData inputData("input_workspace1, input_workspace2", "input_workspace1, input_workspace2", true, false,
                            true, "calibration_workspace");
     IETConversionData conversionData(1.0, 1, 2);
@@ -327,43 +325,18 @@ public:
 
     InstrumentData instData("instrument", "analyser", "reflection");
 
-    m_model->runIETAlgorithm(batch, instData, runData);
+    auto configuredAlg = m_model->energyTransferAlgorithm(instData, runData);
+    auto &runtimeProps = configuredAlg->getAlgorithmRuntimeProps();
+    TS_ASSERT_EQUALS("instrument", runtimeProps.getPropertyValue("Instrument"));
+    TS_ASSERT_EQUALS("analyser", runtimeProps.getPropertyValue("Analyser"));
+    TS_ASSERT_EQUALS("reflection", runtimeProps.getPropertyValue("Reflection"));
 
-    // Wait for the algorithm to finish
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    TS_ASSERT_EQUALS("input_workspace1, input_workspace2", runtimeProps.getPropertyValue("InputFiles"));
+    TS_ASSERT_EQUALS("1", runtimeProps.getPropertyValue("SumFiles"));
+    TS_ASSERT_EQUALS("0", runtimeProps.getPropertyValue("LoadLogFiles"));
 
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist("outputWS"), true);
-    if (AnalysisDataService::Instance().doesExist("outputWS")) {
-      ITableWorkspace_sptr outputWS =
-          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("outputWS");
-
-      TS_ASSERT_EQUALS(outputWS->rowCount(), 1);
-      TS_ASSERT_EQUALS(outputWS->columnCount(), 18);
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(0)->name(), "Instrument");
-      TS_ASSERT_EQUALS(outputWS->getColumn(1)->name(), "Analyser");
-      TS_ASSERT_EQUALS(outputWS->getColumn(2)->name(), "Reflection");
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(3)->name(), "InputFiles");
-      TS_ASSERT_EQUALS(outputWS->getColumn(4)->name(), "SumFiles");
-      TS_ASSERT_EQUALS(outputWS->getColumn(5)->name(), "LoadLogFiles");
-      TS_ASSERT_EQUALS(outputWS->getColumn(6)->name(), "CalibrationWorkspace");
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(7)->name(), "Efixed");
-      TS_ASSERT_EQUALS(outputWS->getColumn(8)->name(), "SpectraRange");
-      TS_ASSERT_EQUALS(outputWS->getColumn(9)->name(), "BackgroundRange");
-      TS_ASSERT_EQUALS(outputWS->getColumn(10)->name(), "RebinString");
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(11)->name(), "DetailedBalance");
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(12)->name(), "UnitX");
-      TS_ASSERT_EQUALS(outputWS->getColumn(13)->name(), "FoldMultipleFrames");
-      TS_ASSERT_EQUALS(outputWS->getColumn(14)->name(), "OutputWorkspace");
-
-      TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "GroupingMethod");
-      TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingString");
-      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "GroupingFile");
-    }
+    TS_ASSERT_EQUALS("1, 2", runtimeProps.getPropertyValue("SpectraRange"));
+    TS_ASSERT_EQUALS("0, 1", runtimeProps.getPropertyValue("BackgroundRange"));
   }
 
   void testValidateRunDetailedBalanceInvalid() {

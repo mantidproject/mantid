@@ -124,8 +124,10 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 12 workspaces (6 CanSAS ``.xml`` and 6 NXcanSAS ``.h5``) saved. For each row and
-   file type there should be a reduced file (with no suffix), a sample, and a can workspace.
+   be saved. In total, there should be 20 workspaces saved. For each row, file type, and bank, there should be a
+   reduced file (with no suffix) and a ``sample`` file. The ``first_time`` line should also produce a ``can`` workspace
+   for each file type and bank. This is because both workspaces have the same ``can`` input run numbers and so the
+   reduction only calculates it once.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
@@ -194,6 +196,26 @@ Processing
 #. Check that your save location contains files for both the background subtracted workspace and the normal reduction
    output.
 
+Save Other
+##########
+
+*Single Workspace*
+
+#. Navigate to the ``Runs`` tab, making sure there are some reduced workspaces present in the ADS. Follow one of the
+   "Processing" instruction sets above if you need to create some.
+#. Click the ``Save Other`` button.
+#. Select one of the workspaces from the list.
+#. Provide a path to a new save directory, and provide a file name.
+#. Click ``Save``.
+#. Check the file was saved to the correct location on your system.
+
+*Multiple Workspaces*
+
+#. Select multiple workspaces with Shift or Ctrl/Cmd.
+#. Provide a suffix for the files.
+#. Click ``Save``.
+#. Check that the files were saved with their workspace's names, but with the provided suffix appended.
+
 Beam centre finder
 ##################
 
@@ -243,3 +265,5 @@ Display
    have clear tooltips.
 #. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.
+   *Note: The* ``Wavelength`` *section of the settings is missing its tooltips. We and the users are aware of this so an
+   issue should not be made when it is discovered.*

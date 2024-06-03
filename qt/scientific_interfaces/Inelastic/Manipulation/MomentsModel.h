@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "DllConfig.h"
 #include <typeinfo>
 
@@ -14,18 +14,31 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL MomentsModel {
+class MANTIDQT_INELASTIC_DLL IMomentsModel {
+
+public:
+  virtual ~IMomentsModel() = default;
+  virtual IAlgorithm_sptr setupAlgorithm() = 0;
+  virtual void setInputWorkspace(const std::string &workspace) = 0;
+  virtual void setEMin(double eMin) = 0;
+  virtual void setEMax(double eMax) = 0;
+  virtual void setScale(bool scale) = 0;
+  virtual void setScaleValue(double scaleValue) = 0;
+  virtual std::string getOutputWorkspace() const = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL MomentsModel : public IMomentsModel {
 
 public:
   MomentsModel();
   ~MomentsModel() = default;
-  IAlgorithm_sptr setupAlgorithm();
-  void setInputWorkspace(const std::string &workspace);
-  void setEMin(double eMin);
-  void setEMax(double eMax);
-  void setScale(bool scale);
-  void setScaleValue(double scaleValue);
-  std::string getOutputWorkspace();
+  IAlgorithm_sptr setupAlgorithm() override;
+  void setInputWorkspace(const std::string &workspace) override;
+  void setEMin(double eMin) override;
+  void setEMax(double eMax) override;
+  void setScale(bool scale) override;
+  void setScaleValue(double scaleValue) override;
+  std::string getOutputWorkspace() const override;
 
 private:
   std::string m_inputWorkspace;

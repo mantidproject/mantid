@@ -37,21 +37,18 @@ namespace MantidQt::CustomInterfaces {
 OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(
     IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
     std::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_wsRemovedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
-      m_model(std::make_unique<OutputPlotOptionsModel>(availableActions)) {
+    : m_view(view),
+      m_model(std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>(), availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
 /// Used by the unit tests so that m_plotter can be mocked
-OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
+OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view,
+                                                       std::unique_ptr<IOutputPlotOptionsModel> model,
                                                        PlotWidget const &plotType, std::string const &fixedIndices)
-    : m_wsRemovedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &OutputPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
+    : m_view(view), m_model(std::move(model)) {
   setupPresenter(plotType, fixedIndices);
 }
-
-OutputPlotOptionsPresenter::~OutputPlotOptionsPresenter() { watchADS(false); }
 
 void OutputPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
@@ -66,14 +63,8 @@ void OutputPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std:
 }
 
 void OutputPlotOptionsPresenter::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
-  if (on) {
-    notificationCenter.addObserver(m_wsRemovedObserver);
-    notificationCenter.addObserver(m_wsReplacedObserver);
-  } else {
-    notificationCenter.removeObserver(m_wsReplacedObserver);
-    notificationCenter.removeObserver(m_wsRemovedObserver);
-  }
+  this->observeReplace(on);
+  this->observeDelete(on);
 }
 
 void OutputPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
@@ -94,19 +85,17 @@ void OutputPlotOptionsPresenter::setOptionsEnabled(bool enable) {
   m_view->setUnitComboBoxEnabled(enable);
 }
 
-void OutputPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotification_ptr nf) {
-  // Ignore non matrix workspaces
-  if (auto const removedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
-    auto const removedName = removedWorkspace->getName();
-    if (removedName == m_view->selectedWorkspace().toStdString())
-      m_model->removeWorkspace();
-    m_view->removeWorkspace(QString::fromStdString(removedName));
-  }
+void OutputPlotOptionsPresenter::deleteHandle(const std::string &wsName, const Workspace_sptr &workspace) {
+  (void)workspace;
+  if (wsName == m_view->selectedWorkspace().toStdString())
+    m_model->removeWorkspace();
+  m_view->removeWorkspace(QString::fromStdString(wsName));
 }
 
-void OutputPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNotification_ptr nf) {
+void OutputPlotOptionsPresenter::replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) {
+  (void)wsName;
   // Ignore non matrix workspaces
-  if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+  if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
     auto const newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
       handleWorkspaceChanged(newName);

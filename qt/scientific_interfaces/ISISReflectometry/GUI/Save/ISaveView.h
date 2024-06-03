@@ -52,7 +52,9 @@ public:
   virtual int getFileFormatIndex() const = 0;
   virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
+  virtual bool getAdditionalColumnsCheck() const = 0;
   virtual std::string getSeparator() const = 0;
+  virtual bool getSaveToSingleFileCheck() const = 0;
 
   virtual void clearWorkspaceList() const = 0;
   virtual void clearParametersList() const = 0;
@@ -74,8 +76,12 @@ public:
   virtual void disableHeaderCheckBox() = 0;
   virtual void enableQResolutionCheckBox() = 0;
   virtual void disableQResolutionCheckBox() = 0;
+  virtual void enableAdditionalColumnsCheckBox() = 0;
+  virtual void disableAdditionalColumnsCheckBox() = 0;
   virtual void enableSeparatorButtonGroup() = 0;
   virtual void disableSeparatorButtonGroup() = 0;
+  virtual void enableSaveToSingleFileCheckBox() = 0;
+  virtual void disableSaveToSingleFileCheckBox() = 0;
   virtual void enableSaveIndividualRowsCheckbox() = 0;
   virtual void disableSaveIndividualRowsCheckbox() = 0;
 

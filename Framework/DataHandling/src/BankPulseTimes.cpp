@@ -250,6 +250,20 @@ std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::D
   return roi;
 }
 
+std::vector<size_t> BankPulseTimes::getPulseIndices(const std::vector<Mantid::Kernel::TimeInterval> &splitters) const {
+  std::vector<size_t> roi;
+  size_t start_index{0};
+  for (const auto &splitter : splitters) {
+    // do a linear search using the previous index as the starting point
+    roi.push_back(start_index =
+                      getFirstIncludedIndex(this->pulseTimes, start_index, splitter.start(), splitter.stop()));
+    // we need the one before the first excluded index so do -1
+    roi.push_back(start_index =
+                      getFirstExcludedIndex(this->pulseTimes, start_index, splitter.start(), splitter.stop()) - 1);
+  }
+  return roi;
+}
+
 //----------------------------------------------------------------------------------------------
 
 /** Comparison. Is this bank's pulse times array the same as another one.

@@ -83,7 +83,8 @@ void FindSXPeaks::init() {
                   "spectrum. This is slower than StrongestPeakOnly. Note that the "
                   "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n"
                   "3. AllPeaksNSigma: This stratergy will look for peaks by bins that are"
-                  " more than nsigma different in intensity.");
+                  " more than nsigma different in intensity. Note that the "
+                  "recommended ResolutionStrategy in this mode is AbsoluteResolution.\n");
 
   // Declare
   declareProperty("SignalBackground", 10.0, mustBePositiveDouble,
@@ -178,10 +179,6 @@ void FindSXPeaks::init() {
                                                 "ResolutionStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                                                 absoluteResolutionPeaksStrategy));
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name of the PeaksWorkspace in which to store the list "
-                  "of peaks found");
-
   // Group
   const std::string resolutionGroup = "Resolution Settings";
   setPropertyGroup("ResolutionStrategy", resolutionGroup);
@@ -189,6 +186,26 @@ void FindSXPeaks::init() {
   setPropertyGroup("XResolution", resolutionGroup);
   setPropertyGroup("PhiResolution", resolutionGroup);
   setPropertyGroup("TwoThetaResolution", resolutionGroup);
+
+  // Declare
+  declareProperty("MinNBinsPerPeak", EMPTY_INT(), mustBePositive,
+                  "Minimum number of bins contributing to a peak in an individual spectrum");
+
+  declareProperty("MinNSpectraPerPeak", EMPTY_INT(), mustBePositive,
+                  "Minimum number of spectra contributing to a peak after they are grouped");
+
+  declareProperty("MaxNSpectraPerPeak", EMPTY_INT(), mustBePositive,
+                  "Maximum number of spectra contributing to a peak after they are grouped");
+
+  // Group
+  const std::string peakValidationGroup = "Peak Validation Settings";
+  setPropertyGroup("MinNBinsPerPeak", peakValidationGroup);
+  setPropertyGroup("MinNSpectraPerPeak", peakValidationGroup);
+  setPropertyGroup("MaxNSpectraPerPeak", peakValidationGroup);
+
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the PeaksWorkspace in which to store the list "
+                  "of peaks found");
 
   // Create the output peaks workspace
   m_peaks.reset(new PeaksWorkspace);
@@ -209,6 +226,47 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
   // in absolute resolution mode.
   if (resolutionStrategy == FindSXPeaks::absoluteResolutionPeaksStrategy && xResolutionProperty->isDefault()) {
     validationOutput["XResolution"] = "XResolution must be set to a value greater than 0";
+  }
+
+  const int minNSpectraPerPeak = getProperty("MinNSpectraPerPeak");
+  const int maxNSpectraPerPeak = getProperty("MaxNSpectraPerPeak");
+  if (!isEmpty(minNSpectraPerPeak) && !isEmpty(maxNSpectraPerPeak)) {
+    if (maxNSpectraPerPeak < minNSpectraPerPeak) {
+      validationOutput["MaxNSpectraPerPeak"] = "MaxNSpectraPerPeak must be greater than MinNSpectraPerPeak";
+      validationOutput["MinNSpectraPerPeak"] = "MinNSpectraPerPeak must be lower than MaxNSpectraPerPeak";
+    }
+  }
+
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  if (inputWorkspace) {
+    const int minWsIndex = getProperty("StartWorkspaceIndex");
+    const int maxWsIndex = getProperty("EndWorkspaceIndex");
+    size_t numberOfSpectraToConsider =
+        !isEmpty(minWsIndex) ? (!isEmpty(maxWsIndex) ? (maxWsIndex - minWsIndex + 1)
+                                                     : (inputWorkspace->getNumberHistograms() - minWsIndex))
+                             : (!isEmpty(maxWsIndex) ? (maxWsIndex + 1) : (inputWorkspace->getNumberHistograms()));
+
+    if (!isEmpty(minNSpectraPerPeak)) {
+      if (static_cast<int>(numberOfSpectraToConsider) < minNSpectraPerPeak) {
+        validationOutput["MinNSpectraPerPeak"] =
+            "MinNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
+      }
+    }
+
+    if (!isEmpty(maxNSpectraPerPeak)) {
+      if (static_cast<int>(numberOfSpectraToConsider) < maxNSpectraPerPeak) {
+        validationOutput["MaxNSpectraPerPeak"] =
+            "MaxNSpectraPerPeak must be less than the number of spectrums considered in InputWorkspace";
+      }
+    }
+
+    const int minNBinsPerPeak = getProperty("MinNBinsPerPeak");
+    if (!isEmpty(minNBinsPerPeak)) {
+      if (minNBinsPerPeak > static_cast<int>(inputWorkspace->getMaxNumberBins())) {
+        validationOutput["MinNBinsPerPeak"] =
+            "MinNBinsPerPeak must be less than the number of bins in the InputWorkspace";
+      }
+    }
   }
 
   return validationOutput;
@@ -248,7 +306,7 @@ void FindSXPeaks::exec() {
     m_MaxWsIndex = numberOfSpectra - 1;
   if (m_MaxWsIndex > numberOfSpectra - 1 || m_MaxWsIndex < m_MinWsIndex) {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
-    m_MaxWsIndex = numberOfSpectra;
+    m_MaxWsIndex = numberOfSpectra - 1;
   }
   if (m_MinRange > m_MaxRange) {
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to "
@@ -268,6 +326,11 @@ void FindSXPeaks::exec() {
   const auto xUnit = getWorkspaceXAxisUnit(localworkspace);
   auto peakFindingStrategy =
       getPeakFindingStrategy(backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange, xUnit);
+
+  const int minNBinsPerPeak = getProperty("MinNBinsPerPeak");
+  if (!isEmpty(minNBinsPerPeak)) {
+    peakFindingStrategy->setMinNBinsPerPeak(minNBinsPerPeak);
+  }
 
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
@@ -318,6 +381,17 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   auto &goniometerMatrix = localworkspace->run().getGoniometer().getR();
   auto compareStrategy = getCompareStrategy();
   auto reductionStrategy = getReducePeakListStrategy(compareStrategy.get());
+
+  const int minNSpectraPerPeak = getProperty("MinNSpectraPerPeak");
+  if (!isEmpty(minNSpectraPerPeak)) {
+    reductionStrategy->setMinNSpectraPerPeak(minNSpectraPerPeak);
+  }
+
+  const int maxNSpectraPerPeak = getProperty("MaxNSpectraPerPeak");
+  if (!isEmpty(maxNSpectraPerPeak)) {
+    reductionStrategy->setMaxNSpectraPerPeak(maxNSpectraPerPeak);
+  }
+
   auto finalv = reductionStrategy->reduce(pcv, progress);
 
   for (auto &finalPeak : finalv) {

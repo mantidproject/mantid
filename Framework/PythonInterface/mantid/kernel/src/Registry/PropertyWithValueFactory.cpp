@@ -48,9 +48,7 @@ void initTypeLookup(PyTypeIndex &index) {
   using BoolHandler = TypedPropertyValueHandler<bool>;
   index.emplace(&PyBool_Type, std::make_shared<BoolHandler>());
 
-  // Python 2/3 have an arbitrary-sized long type. The handler
-  // will raise an error if the input value overflows a C long
-  using IntHandler = TypedPropertyValueHandler<long>;
+  using IntHandler = TypedPropertyValueHandler<int>;
   index.emplace(&PyLong_Type, std::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
@@ -89,8 +87,8 @@ void initArrayLookup(PyArrayIndex &index) {
   using StringArrayHandler = SequenceTypeHandler<std::vector<std::string>>;
   index.emplace("StringArray", std::make_shared<StringArrayHandler>());
 
-  using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
-  index.emplace("LongIntArray", std::make_shared<LongIntArrayHandler>());
+  using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
+  index.emplace("IntArray", std::make_shared<IntArrayHandler>());
 }
 
 /**
@@ -222,7 +220,7 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
       throw std::runtime_error("Unable to support extracting arrays of booleans.");
     }
     if (PyLong_Check(item)) {
-      return std::string("LongIntArray");
+      return std::string("IntArray");
     }
     GNU_DIAG_ON("parentheses-equality")
     if (PyFloat_Check(item)) {

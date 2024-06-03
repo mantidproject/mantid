@@ -23,15 +23,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IOutputPlotOptionsView;
 class IElwinPresenter;
 
 class MANTIDQT_INELASTIC_DLL IElwinView {
 
 public:
+  virtual ~IElwinView() = default;
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &from,
@@ -53,6 +54,7 @@ public:
   virtual void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) = 0;
 
   virtual QModelIndexList getSelectedData() = 0;
+  virtual void selectAllRows() = 0;
 
   // boolean flags for LoadHistory/GroupInput Checkboxes
   virtual bool isGroupInput() const = 0;

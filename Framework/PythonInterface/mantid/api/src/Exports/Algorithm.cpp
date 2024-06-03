@@ -113,13 +113,13 @@ public:
       : m_alg(alg), m_propName(propName) {}
 
   void operator()(bool value) const override { setProp(value); }
-  void operator()(long value) const override { setProp(static_cast<int>(value)); }
+  void operator()(int value) const override { setProp(value); }
   void operator()(double value) const override { setProp(value); }
   void operator()(std::string value) const override { m_alg->setPropertyValue(m_propName, value); }
   void operator()(Mantid::API::Workspace_sptr ws) const override { m_alg->setProperty(m_propName, std::move(ws)); }
 
   void operator()(std::vector<bool> value) const override { setProp(value); }
-  void operator()(std::vector<long> value) const override { setProp(value); }
+  void operator()(std::vector<int> value) const override { setProp(value); }
   void operator()(std::vector<double> value) const override { setProp(value); }
   void operator()(std::vector<std::string> value) const override { setProp(value); }
 

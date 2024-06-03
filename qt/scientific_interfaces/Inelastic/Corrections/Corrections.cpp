@@ -15,7 +15,7 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)
 
 Corrections::Corrections(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &Corrections::handleDirectoryChange) {
+    : InelasticInterface(parent), m_changeObserver(*this, &Corrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
   // Allows us to get a handle on a tab using an enum, for example
@@ -67,7 +67,7 @@ void Corrections::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  IndirectInterface::initLayout();
+  InelasticInterface::initLayout();
 }
 
 /**

@@ -1450,7 +1450,7 @@ inline double calcNorm(const double errorSquared) {
  * @param events :: input event list.
  * @param out :: output WeightedEventNoTime vector.
  * @param tolerance :: how close do two event's TOF have to be to be considered
- *the same.
+ *the same. Negative implies log grouping.
  */
 
 template <class T>
@@ -1462,7 +1462,7 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = std::numeric_limits<double>::lowest();
+  double lastTof = events.front().m_tof;
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
@@ -1471,8 +1471,36 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
   double errorSquared = 0;
   double normalization = 0.;
 
+  double bin_end = lastTof;
+  std::function<bool(const double, const double)> compareTof;
+  std::function<double(const double, double)> next_bin;
+
+  if (tolerance < 0) { // log
+    if (lastTof < 0)
+      throw std::runtime_error("compressEvents with log binning doesn't work with negative TOF");
+
+    if (lastTof == 0)
+      bin_end = fabs(tolerance);
+
+    // for log we do "less than" so that is matches the log binning of the Rebin algorithm
+    compareTof = [](const double lhs, const double rhs) { return lhs < rhs; };
+    next_bin = [tolerance](const double lastTof, double bin_end) {
+      // advance the bin_end until we find the one that this next event falls into
+      while (lastTof >= bin_end)
+        bin_end = bin_end * (1 - tolerance);
+      return bin_end;
+    };
+  } else { // linear
+    // for linear we do "less than or equals" because that is how it was originally implemented
+    compareTof = [](const double lhs, const double rhs) { return lhs <= rhs; };
+    next_bin = [tolerance](const double lastTof, double) { return lastTof + tolerance; };
+  }
+
+  // get first bin_end
+  bin_end = next_bin(lastTof, bin_end);
+
   for (auto it = events.cbegin(); it != events.cend(); it++) {
-    if ((it->m_tof - lastTof) <= tolerance) {
+    if (compareTof(it->m_tof, bin_end)) {
       // Carry the error and weight
       weight += it->weight();
       errorSquared += it->errorSquared();
@@ -1499,6 +1527,8 @@ inline void EventList::compressEventsHelper(const std::vector<T> &events, std::v
       weight = it->weight();
       errorSquared = it->errorSquared();
       lastTof = it->m_tof;
+
+      bin_end = next_bin(lastTof, bin_end);
     }
   }
 
@@ -1528,7 +1558,7 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = std::numeric_limits<double>::lowest();
+  double lastTof = events.front().m_tof;
   // For getting an accurate average TOF
   double totalTof = 0;
 
@@ -1558,10 +1588,47 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
 
   // bin if the pulses are histogrammed
   int64_t lastPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
+
+  double bin_end = lastTof;
+  double tof_min{0};
+  std::function<bool(const double, const double)> compareTof;
+  std::function<double(const double, double)> next_bin;
+
+  if (tolerance < 0) { // log
+    // for log we do "less than" so that is matches the log binning of the Rebin algorithm
+    compareTof = [](const double lhs, const double rhs) { return lhs < rhs; };
+    next_bin = [tolerance](const double lastTof, double bin_end) {
+      // advance the bin_end until we find the one that this next event falls into
+      while (lastTof >= bin_end)
+        bin_end = bin_end * (1 - tolerance);
+      return bin_end;
+    };
+
+    // get minimum Tof so that binning is consistent across all pulses
+    const auto event_min = std::min_element(
+        events.cbegin(), events.cend(), [](const auto &left, const auto &right) { return left.tof() < right.tof(); });
+    bin_end = tof_min = event_min->tof();
+
+    if (tof_min < 0)
+      throw std::runtime_error("compressEvents with log binning doesn't work with negative TOF");
+
+    // can't start at 0 as this will create an infinite loop
+    if (tof_min == 0)
+      bin_end = tof_min = fabs(tolerance);
+
+  } else { // linear
+    // for linear we do "less than or equals" because that is how it was originally implemented
+    compareTof = [](const double lhs, const double rhs) { return lhs <= rhs; };
+    next_bin = [tolerance](const double lastTof, double) { return lastTof + tolerance; };
+  }
+
+  // get first bin_end
+  bin_end = next_bin(lastTof, bin_end);
+
   // loop through events and accumulate weight
   for (; it != events.cend(); ++it) {
     const int64_t eventPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
-    if ((eventPulseBin <= lastPulseBin) && (std::fabs(it->m_tof - lastTof) <= tolerance)) {
+    if ((eventPulseBin <= lastPulseBin) && compareTof(it->m_tof, bin_end)) {
       // Carry the error and weight
       weight += it->weight();
       errorSquared += it->errorSquared();
@@ -1585,6 +1652,10 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
                            errorSquared);
         }
       }
+      if (tolerance < 0 && eventPulseBin != lastPulseBin)
+        // reset the bin_end for the new pulse bin
+        bin_end = tof_min;
+
       // Start a new combined object
       double norm = calcNorm(it->errorSquared());
       totalTof = it->m_tof * norm;
@@ -1597,6 +1668,8 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
       pulsetimes.emplace_back(it->m_pulsetime);
       pulsetimeWeights.clear();
       pulsetimeWeights.emplace_back(norm);
+
+      bin_end = next_bin(lastTof, bin_end);
     }
   }
 

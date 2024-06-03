@@ -6,11 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticFitPropertyBrowser.h"
 #include "FitStatusWidget.h"
+#include "FittingPresenter.h"
 #include "FunctionBrowser/FunctionTemplateView.h"
 #include "FunctionBrowser/ITemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -54,10 +56,12 @@ struct ScopedSignalBlocker {
  */
 InelasticFitPropertyBrowser::InelasticFitPropertyBrowser(QWidget *parent)
     : QDockWidget(parent), m_mainLayout(), m_functionBrowser(), m_fitOptionsBrowser(), m_templatePresenter(),
-      m_fitStatusWidget(), m_functionWidget(), m_browserSwitcher(), m_fitStatus(), m_fitChiSquared() {
+      m_fitStatusWidget(), m_functionWidget(), m_browserSwitcher(), m_fitStatus(), m_fitChiSquared(), m_presenter() {
   setFeatures(QDockWidget::DockWidgetFloatable);
   setWindowTitle("Fit Function");
 }
+
+void InelasticFitPropertyBrowser::subscribePresenter(IFittingPresenter *presenter) { m_presenter = presenter; }
 
 void InelasticFitPropertyBrowser::initFunctionBrowser() {
   // this object is added as a child to the stacked widget m_templateBrowser
@@ -68,10 +72,10 @@ void InelasticFitPropertyBrowser::initFunctionBrowser() {
   // Process internally
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
   // Re-emit
-  connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
+  connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this, SLOT(notifyFunctionChanged()));
   connect(m_functionBrowser, SIGNAL(parameterChanged(std::string const &, std::string const &)), this,
-          SIGNAL(functionChanged()));
-  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SIGNAL(functionChanged()));
+          SLOT(notifyFunctionChanged()));
+  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(notifyFunctionChanged()));
   connect(m_functionBrowser, SIGNAL(localParameterButtonClicked(std::string const &)), this,
           SIGNAL(localParameterEditRequested(std::string const &)));
 }
@@ -129,6 +133,8 @@ void InelasticFitPropertyBrowser::syncFullBrowserWithTemplate() {
     m_functionBrowser->updateMultiDatasetParameters(*m_templatePresenter->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(m_templatePresenter->getGlobalParameters());
     m_functionBrowser->setCurrentDataset(m_templatePresenter->getCurrentDataset());
+  } else {
+    m_functionBrowser->clear();
   }
   m_functionBrowser->blockSignals(false);
 }
@@ -141,6 +147,8 @@ void InelasticFitPropertyBrowser::syncTemplateBrowserWithFull() {
     m_templatePresenter->updateMultiDatasetParameters(*fun);
     m_templatePresenter->setGlobalParameters(m_functionBrowser->getGlobalParameters());
     m_templatePresenter->setCurrentDataset(m_functionBrowser->getCurrentDataset());
+  } else {
+    m_templatePresenter->setFunction("");
   }
   m_templatePresenter->browser()->blockSignals(false);
 }
@@ -180,7 +188,12 @@ void InelasticFitPropertyBrowser::setFunctionTemplatePresenter(std::unique_ptr<I
   }
   m_templatePresenter = std::move(templatePresenter);
   m_templatePresenter->init();
-  connect(m_templatePresenter->browser(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionChanged()));
+  connect(m_templatePresenter->browser(), SIGNAL(functionStructureChanged()), this, SLOT(notifyFunctionChanged()));
+}
+
+void InelasticFitPropertyBrowser::notifyFunctionChanged() {
+  m_presenter->notifyFunctionChanged();
+  emit functionChanged();
 }
 
 void InelasticFitPropertyBrowser::setFunction(std::string const &funStr) {
@@ -205,6 +218,8 @@ MultiDomainFunction_sptr InelasticFitPropertyBrowser::getFitFunction() const {
       return multiDomainFunction;
     }
   } catch (const std::invalid_argument &) {
+    return std::make_shared<MultiDomainFunction>();
+  } catch (const std::runtime_error &) {
     return std::make_shared<MultiDomainFunction>();
   }
 }
@@ -249,16 +264,42 @@ std::string InelasticFitPropertyBrowser::fitType() const {
   return m_fitOptionsBrowser->getProperty("FitType").toStdString();
 }
 
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+InelasticFitPropertyBrowser::fitProperties(FittingMode const &fittingMode) const {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  Mantid::API::AlgorithmProperties::update("Minimizer", minimizer(true), *properties);
+  Mantid::API::AlgorithmProperties::update("MaxIterations", maxIterations(), *properties);
+  Mantid::API::AlgorithmProperties::update("PeakRadius", getPeakRadius(), *properties);
+  Mantid::API::AlgorithmProperties::update("CostFunction", costFunction(), *properties);
+  Mantid::API::AlgorithmProperties::update("IgnoreInvalidData", ignoreInvalidData(), *properties);
+  Mantid::API::AlgorithmProperties::update("EvaluationType", fitEvaluationType(), *properties);
+  Mantid::API::AlgorithmProperties::update("PeakRadius", getPeakRadius(), *properties);
+  Mantid::API::AlgorithmProperties::update("CostFunction", costFunction(), *properties);
+  Mantid::API::AlgorithmProperties::update("ConvolveMembers", convolveMembers(), *properties);
+  if (convolveMembers()) {
+    Mantid::API::AlgorithmProperties::update("OutputCompositeMembers", true, *properties);
+  } else {
+    Mantid::API::AlgorithmProperties::update("OutputCompositeMembers", outputCompositeMembers(), *properties);
+  }
+  if (fittingMode == FittingMode::SEQUENTIAL) {
+    Mantid::API::AlgorithmProperties::update("FitType", fitType(), *properties);
+  }
+  Mantid::API::AlgorithmProperties::update("OutputFitStatus", true, *properties);
+  return properties;
+}
+
 int InelasticFitPropertyBrowser::getNumberOfDatasets() const {
   return isFullFunctionBrowserActive() ? m_functionBrowser->getNumberOfDatasets()
                                        : m_templatePresenter->getNumberOfDatasets();
 }
 
 void InelasticFitPropertyBrowser::updateParameters(const IFunction &fun) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateParameters(fun);
   else
     m_templatePresenter->updateParameters(fun);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateFunctionListInBrowser(
@@ -267,17 +308,21 @@ void InelasticFitPropertyBrowser::updateFunctionListInBrowser(
 }
 
 void InelasticFitPropertyBrowser::updateMultiDatasetParameters(const IFunction &fun) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateMultiDatasetParameters(fun);
   else
     m_templatePresenter->updateMultiDatasetParameters(fun);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
+  this->blockSignals(true);
   if (isFullFunctionBrowserActive())
     m_functionBrowser->updateMultiDatasetParameters(paramTable);
   else
     m_templatePresenter->updateMultiDatasetParameters(paramTable);
+  this->blockSignals(false);
 }
 
 void InelasticFitPropertyBrowser::updateFitStatusData(const std::vector<std::string> &status,

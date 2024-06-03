@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtModel.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,15 +15,14 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IqtModel::IqtModel() {}
+IqtModel::IqtModel()
+    : m_sampleWorkspace(), m_resWorkspace(), m_nIterations(), m_energyMin(), m_energyMax(), m_numBins(),
+      m_calculateErrors(), m_enforceNormalization() {}
 
 void IqtModel::setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                                    std::string const &outputWorkspace) {

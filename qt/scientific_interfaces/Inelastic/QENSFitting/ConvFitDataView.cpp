@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataView.h"
+#include "Common/InterfaceUtils.h"
 #include "ConvFitAddWorkspaceDialog.h"
+#include "FitDataPresenter.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -38,11 +40,12 @@ void ConvFitDataView::showAddWorkspaceDialog() {
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
+  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(m_wsSampleSuffixes);
-  dialog->setFBSuffices(m_fbSampleSuffixes);
-  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
-  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
+  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(tabName));
   dialog->updateSelectedSpectra();
   dialog->show();
 }

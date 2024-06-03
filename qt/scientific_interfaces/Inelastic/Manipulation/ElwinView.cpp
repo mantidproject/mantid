@@ -27,7 +27,7 @@ Mantid::Kernel::Logger g_log("Elwin");
 
 namespace MantidQt::CustomInterfaces {
 using namespace Inelastic;
-ElwinView::ElwinView(QWidget *parent) : m_presenter(), m_elwTree(nullptr) {
+ElwinView::ElwinView(QWidget *parent) : QWidget(parent), m_presenter(), m_elwTree(nullptr) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -104,6 +104,7 @@ void ElwinView::setup() {
 
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(notifyAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveDataClicked()));
+  connect(m_uiForm.pbSelAll, SIGNAL(clicked()), this, SLOT(notifySelectAllClicked()));
 
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
@@ -141,6 +142,8 @@ void ElwinView::notifyRowModeChanged() { m_presenter->handleRowModeChanged(); }
 
 void ElwinView::notifyRemoveDataClicked() { m_presenter->handleRemoveSelectedData(); }
 
+void ElwinView::notifySelectAllClicked() { selectAllRows(); }
+
 void ElwinView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void ElwinView::showAddWorkspaceDialog() {
@@ -174,7 +177,7 @@ void ElwinView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   }
 }
 
-OutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void ElwinView::setHorizontalHeaders() {
   QStringList headers;
@@ -185,6 +188,7 @@ void ElwinView::setHorizontalHeaders() {
   auto header = m_uiForm.tbElwinData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
   m_uiForm.tbElwinData->verticalHeader()->setVisible(false);
+  m_uiForm.tbElwinData->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 void ElwinView::clearDataTable() { m_uiForm.tbElwinData->setRowCount(0); }
@@ -206,7 +210,9 @@ void ElwinView::setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int col
   m_uiForm.tbElwinData->setItem(static_cast<int>(row), column, cell.release());
 }
 
-QModelIndexList ElwinView::getSelectedData() { return m_uiForm.tbElwinData->selectionModel()->selectedIndexes(); }
+QModelIndexList ElwinView::getSelectedData() { return m_uiForm.tbElwinData->selectionModel()->selectedRows(); }
+
+void ElwinView::selectAllRows() { m_uiForm.tbElwinData->selectAll(); }
 
 void ElwinView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   auto inst = ws->getInstrument();

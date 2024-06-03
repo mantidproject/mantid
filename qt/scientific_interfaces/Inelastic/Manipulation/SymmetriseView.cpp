@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetriseView.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "SymmetrisePresenter.h"
@@ -17,7 +17,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -31,7 +31,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetriseView::SymmetriseView(QWidget *parent) : m_presenter() {
+SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_dblManager = new QtDoublePropertyManager();

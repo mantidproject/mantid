@@ -11,9 +11,9 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
+#include "Reduction/DataReduction.h"
 #include "Reduction/ISISEnergyTransferModel.h"
 #include "Reduction/ISISEnergyTransferView.h"
-#include "Reduction/IndirectDataReduction.h"
 
 #include <string>
 #include <utility>
@@ -23,9 +23,9 @@ using namespace MantidQt::CustomInterfaces;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectDataReduction : public IIndirectDataReduction {
+class MockDataReduction : public IDataReduction {
 public:
-  virtual ~MockIndirectDataReduction() = default;
+  virtual ~MockDataReduction() = default;
 
   MOCK_METHOD0(instrumentWorkspace, Mantid::API::MatrixWorkspace_sptr());
 
@@ -44,8 +44,8 @@ public:
   MOCK_METHOD1(validateRunData, std::vector<std::string>(IETRunData const &runData));
   MOCK_METHOD1(validatePlotData, std::vector<std::string>(IETPlotData const &plotData));
 
-  MOCK_METHOD3(runIETAlgorithm, std::string(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            InstrumentData const &instData, IETRunData &runParams));
+  MOCK_METHOD2(energyTransferAlgorithm,
+               MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams));
   MOCK_CONST_METHOD2(plotRawAlgorithmQueue,
                      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>(InstrumentData const &instData,
                                                                           IETPlotData const &plotData));
@@ -60,6 +60,7 @@ public:
   MOCK_METHOD4(groupWorkspaces, std::vector<std::string>(std::string const &groupName, std::string const &instrument,
                                                          std::string const &groupOption, bool const shouldGroup));
 
+  MOCK_CONST_METHOD0(outputGroupName, std::string());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
 };
 

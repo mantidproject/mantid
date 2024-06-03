@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ElwinModel.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -17,16 +17,15 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt::CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ElwinModel::ElwinModel() {}
+ElwinModel::ElwinModel()
+    : m_integrationStart(), m_integrationEnd(), m_backgroundStart(), m_backgroundEnd(), m_backgroundSubtraction(),
+      m_normalise(), m_outputWorkspaceNames() {}
 
 void ElwinModel::setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
                                     std::string const &outputName) {
@@ -130,7 +129,7 @@ std::string ElwinModel::getOutputWorkspaceNames() const {
   std::vector<std::string> keys = {"qWorkspace", "qSquaredWorkspace", "elfWorkspace", "eltWorkspace"};
   std::ostringstream oss;
   std::transform(keys.cbegin(), keys.cend(), std::ostream_iterator<std::string>(oss, ","),
-                 [&outNames = m_outputWorkspaceNames](const auto &key) { return outNames.at(key); });
+                 [&](const auto &key) { return m_outputWorkspaceNames.at(key); });
   std::string outputWorkspaceNames = oss.str();
   outputWorkspaceNames.resize(outputWorkspaceNames.size() - 1);
   return outputWorkspaceNames;

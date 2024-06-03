@@ -427,26 +427,66 @@ class MantidORSOSaverTest(unittest.TestCase):
         mock_dataset = self._add_mock_dataset(saver)
 
         saver.save_orso_ascii()
-        self._assert_save_orso_called(mock_save_orso, mock_dataset, file_name=f"{file_name}{MantidORSOSaver.FILE_EXT}")
+        self._assert_save_method_called(mock_save_orso, mock_dataset, file_name=f"{file_name}{MantidORSOSaver.ASCII_FILE_EXT}")
 
     @mock.patch("mantid.utils.reflectometry.orso_helper.save_orso")
     def test_save_orso_ascii_with_filename_extension(self, mock_save_orso):
-        file_name = "Test file.ort"
+        file_name = f"Test file{MantidORSOSaver.ASCII_FILE_EXT}"
         saver = MantidORSOSaver(file_name)
         mock_dataset = self._add_mock_dataset(saver)
 
         saver.save_orso_ascii()
-        self._assert_save_orso_called(mock_save_orso, mock_dataset, file_name)
+        self._assert_save_method_called(mock_save_orso, mock_dataset, file_name)
 
     @mock.patch("mantid.utils.reflectometry.orso_helper.save_orso")
     def test_save_orso_ascii_with_comment(self, mock_save_orso):
-        file_name = "Test file.ort"
+        file_name = f"Test file{MantidORSOSaver.ASCII_FILE_EXT}"
         comment = "Test comment at top of file"
         saver = MantidORSOSaver(file_name, comment)
         mock_dataset = self._add_mock_dataset(saver)
 
         saver.save_orso_ascii()
-        self._assert_save_orso_called(mock_save_orso, mock_dataset, file_name, comment)
+        self._assert_save_method_called(mock_save_orso, mock_dataset, file_name, comment)
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.save_nexus")
+    def test_save_orso_nexus_with_no_filename_extension(self, mock_save_nexus):
+        file_name = "Test file"
+        saver = MantidORSOSaver(file_name)
+        mock_dataset = self._add_mock_dataset(saver)
+
+        saver.save_orso_nexus()
+        self._assert_save_method_called(mock_save_nexus, mock_dataset, file_name=f"{file_name}{MantidORSOSaver.NEXUS_FILE_EXT}")
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.save_nexus")
+    def test_save_orso_nexus_with_filename_extension(self, mock_save_nexus):
+        file_name = f"Test file{MantidORSOSaver.NEXUS_FILE_EXT}"
+        saver = MantidORSOSaver(file_name)
+        mock_dataset = self._add_mock_dataset(saver)
+
+        saver.save_orso_nexus()
+        self._assert_save_method_called(mock_save_nexus, mock_dataset, file_name)
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.save_nexus")
+    def test_save_orso_nexus_with_comment(self, mock_save_nexus):
+        file_name = f"Test file{MantidORSOSaver.NEXUS_FILE_EXT}"
+        comment = "Test comment at top of file"
+        saver = MantidORSOSaver(file_name, comment)
+        mock_dataset = self._add_mock_dataset(saver)
+
+        saver.save_orso_nexus()
+        self._assert_save_method_called(mock_save_nexus, mock_dataset, file_name, comment)
+
+    def test_is_supported_extension(self):
+        test_cases = [
+            (f"filename{MantidORSOSaver.ASCII_FILE_EXT}", True),
+            (f"filename{MantidORSOSaver.NEXUS_FILE_EXT}", True),
+            ("filename.unsupported", False),
+            ("filename", False),
+            ("", False),
+        ]
+        for extension, expected_result in test_cases:
+            with self.subTest(extension=extension, expected_result=expected_result):
+                self.assertEqual(MantidORSOSaver.is_supported_extension(extension), expected_result)
 
     @staticmethod
     def _add_mock_dataset(saver):
@@ -457,8 +497,8 @@ class MantidORSOSaverTest(unittest.TestCase):
         return mock_dataset
 
     @staticmethod
-    def _assert_save_orso_called(mock_save_orso, mock_dataset, file_name, comment=None):
-        mock_save_orso.assert_called_once_with(datasets=[mock_dataset.dataset], fname=file_name, comment=comment)
+    def _assert_save_method_called(mock_save_method, mock_dataset, file_name, comment=None):
+        mock_save_method.assert_called_once_with(datasets=[mock_dataset.dataset], fname=file_name, comment=comment)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "Common/IndirectInstrumentConfig.h"
+#include "Common/InstrumentConfig.h"
 
 #include <QString>
 #include <QStringList>

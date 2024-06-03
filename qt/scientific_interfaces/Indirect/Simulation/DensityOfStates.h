@@ -7,12 +7,12 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "IndirectSimulationTab.h"
+#include "SimulationTab.h"
 #include "ui_DensityOfStates.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL DensityOfStates : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL DensityOfStates : public SimulationTab {
   Q_OBJECT
 
 public:

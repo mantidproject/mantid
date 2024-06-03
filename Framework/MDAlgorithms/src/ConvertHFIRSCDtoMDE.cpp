@@ -168,7 +168,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::string instrument = expInfo.getInstrument()->getName();
 
   std::vector<double> twotheta, azimuthal;
-  if (instrument == "HB3A") {
+  if (instrument == "HB3A" && !expInfo.run().hasProperty("azimuthal")) { // HB3A Load MD
     const auto &di = expInfo.detectorInfo();
     for (size_t x = 0; x < 512; x++) {
       for (size_t y = 0; y < 512 * 3; y++) {
@@ -179,7 +179,7 @@ void ConvertHFIRSCDtoMDE::exec() {
         }
       }
     }
-  } else { // HB2C
+  } else { // HB2C LoadWAND or HB3A HB3AAdjustSampleNorm
     azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
     twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
   }
@@ -245,7 +245,7 @@ void ConvertHFIRSCDtoMDE::exec() {
         if (lorentz) {
           factor = lorentz_pre[m];
         }
-        inserter.insertMDEvent(signal * factor, signal * factor, 0, goniometerIndex, 0, q_sample.data());
+        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, 0, q_sample.data());
       }
     }
   }

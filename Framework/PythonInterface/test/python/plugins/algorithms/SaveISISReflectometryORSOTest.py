@@ -23,7 +23,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime
-from mantid.utils.reflectometry.orso_helper import MantidORSODataset
+from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -47,7 +47,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     _NUM_COLS_BASIC = 3
     _NUM_COLS_BASIC_WITH_RES = 4
-    _NUM_COLS_EXTENDED = 8
+    _NUM_COLS_EXTENDED = 7
+    _NUM_COLS_EXTENDED_WITH_RES = 8
 
     # Algorithm names
     _SAVE_ALG = "SaveISISReflectometryORSO"
@@ -58,6 +59,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _REF_ROI = "RefRoi"
     _CONVERT_UNITS = "ConvertUnits"
+    _REBIN_ALG = "Rebin"
 
     # Metadata headings
     _DATA_FILES_HEADING = "#     data_files:"
@@ -70,6 +72,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _WS_UNITS_ERROR = "must have units of"
     _WS_NUM_SPECTRA_ERROR = "must contain only one spectrum"
     _WS_NOT_FOUND_ERROR = "Cannot find workspace"
+    _FILE_EXT_ERROR = "must end with a supported ORSO extension"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -80,7 +83,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         config["default.instrument"] = "INTER"
 
         self._rb_number = str(123456)
-        self._filename = "ORSO_save_test.ort"
+        self._filename = f"ORSO_save_test{MantidORSOSaver.ASCII_FILE_EXT}"
         self._temp_dir = tempfile.TemporaryDirectory()
         self._output_filename = os.path.join(self._temp_dir.name, self._filename)
         # The optional ISIS header entries that are not taken from the ws history
@@ -527,10 +530,21 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header([self._get_dataset_name_entry(ws_name) for ws_name in ws_names])
 
-    def test_additional_columns_included_if_requested_and_is_unstitched_data(self):
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_additional_columns_included_if_requested_and_is_unstitched_data_no_resolution(self, mock_alg_histories):
+        angle = "2.3"
         ws = self._create_sample_workspace()
-        self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_additional_columns_included_if_requested_and_is_unstitched_data_with_resolution(self, mock_alg_histories):
+        angle = "2.3"
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle}, True)
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_RES)
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories):
@@ -539,24 +553,32 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC_WITH_RES)
 
-    def test_all_columns_included_if_not_request_resolution_but_request_additional_columns(self):
-        ws = self._create_sample_workspace()
-        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
-        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
-
-    def test_additional_columns_contain_nan_if_no_conversion_history(self):
+    def test_additional_columns_excluded_if_no_conversion_history(self):
         ws = self._create_sample_workspace()
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
-        self._check_extra_columns_all_nan()
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_contain_nan_if_no_supported_conversion_alg_in_history(self, mock_alg_histories):
+    def test_additional_columns_excluded_if_no_supported_conversion_alg_in_history(self, mock_alg_histories):
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, "UnsupportedAlgorithm", {})
 
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
 
-        self._check_extra_columns_all_nan()
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+
+    def test_filename_must_have_supported_extension(self):
+        ws = self._create_sample_workspace()
+        with self.assertRaisesRegex(RuntimeError, self._FILE_EXT_ERROR):
+            self._run_save_alg([ws], write_resolution=False, filename="file_extension.invalid")
+
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.MantidORSOSaver.save_orso_ascii")
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.MantidORSOSaver.save_orso_nexus")
+    def test_saved_as_nexus_if_relevant_filename_extension(self, mock_save_orso_nexus, mock_save_orso_ascii):
+        ws = self._create_sample_workspace()
+        self._run_save_alg(ws, filename=f"test_nexus_save{MantidORSOSaver.NEXUS_FILE_EXT}")
+        mock_save_orso_nexus.assert_called_once()
+        mock_save_orso_ascii.assert_not_called()
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
@@ -622,10 +644,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         history.getPropertyValue = Mock(side_effect=mock_get_property_value)
         return history
 
-    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values):
+    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False):
         convert_history = self._create_mock_alg_history(q_convert_alg_name, property_values)
         rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history])
-        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
+        if has_resolution:
+            rebin_history = self._create_mock_alg_history(self._REBIN_ALG, {"Params": "0.1,0.02,0.3"})
+            red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history, rebin_history])
+        else:
+            red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
         mock_alg_histories.return_value = [red_history]
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
@@ -678,22 +704,17 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertEqual(expected_num_columns, len(orso_data[0]))
         return orso_data
 
-    def _check_extra_columns_all_nan(self):
-        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
-        for i in range(self._NUM_COLS_BASIC_WITH_RES, self._NUM_COLS_EXTENDED):
-            self.assertTrue(np.isnan(orso_data[:, i]).all())
-
     def _get_theta_value(self, ws):
         spectrum_info = ws.spectrumInfo()
         self.assertEqual(1, spectrum_info.size())
         return float(np.rad2deg(spectrum_info.signedTwoTheta(0))) / 2.0
 
-    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False):
+    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None):
         SaveISISReflectometryORSO(
             WorkspaceList=ws_list,
             WriteResolution=write_resolution,
             IncludeAdditionalColumns=include_extra_cols,
-            Filename=self._output_filename,
+            Filename=self._output_filename if filename is None else os.path.join(self._temp_dir.name, filename),
         )
 
 

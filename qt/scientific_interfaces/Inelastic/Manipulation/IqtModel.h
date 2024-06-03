@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -17,20 +17,37 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL IqtModel {
+class MANTIDQT_INELASTIC_DLL IIqtModel {
+
+public:
+  virtual ~IIqtModel() = default;
+  virtual void setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                   std::string const &outputWorkspace) = 0;
+  virtual void setSampleWorkspace(std::string const &sampleWorkspace) = 0;
+  virtual void setResWorkspace(std::string const &resWorkspace) = 0;
+  virtual void setNIterations(std::string const &nIterations) = 0;
+  virtual void setEnergyMin(double energyMin) = 0;
+  virtual void setEnergyMax(double energyMax) = 0;
+  virtual void setNumBins(double numBins) = 0;
+  virtual void setCalculateErrors(bool calculateErrors) = 0;
+  virtual void setEnforceNormalization(bool enforceNormalization) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IqtModel : public IIqtModel {
 
 public:
   IqtModel();
   ~IqtModel() = default;
-  void setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &outputWorkspace);
-  void setSampleWorkspace(std::string const &sampleWorkspace);
-  void setResWorkspace(std::string const &resWorkspace);
-  void setNIterations(std::string const &nIterations);
-  void setEnergyMin(double energyMin);
-  void setEnergyMax(double energyMax);
-  void setNumBins(double numBins);
-  void setCalculateErrors(bool calculateErrors);
-  void setEnforceNormalization(bool enforceNormalization);
+  void setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                           std::string const &outputWorkspace) override;
+  void setSampleWorkspace(std::string const &sampleWorkspace) override;
+  void setResWorkspace(std::string const &resWorkspace) override;
+  void setNIterations(std::string const &nIterations) override;
+  void setEnergyMin(double energyMin) override;
+  void setEnergyMax(double energyMax) override;
+  void setNumBins(double numBins) override;
+  void setCalculateErrors(bool calculateErrors) override;
+  void setEnforceNormalization(bool enforceNormalization) override;
 
 private:
   std::string m_sampleWorkspace;

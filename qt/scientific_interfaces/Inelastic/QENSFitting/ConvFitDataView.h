@@ -22,11 +22,11 @@ Presenter for a table of convolution fitting data.
 class MANTIDQT_INELASTIC_DLL ConvFitDataView : public FitDataView {
   Q_OBJECT
 public:
-  ConvFitDataView(QWidget *parent = nullptr);
+  ConvFitDataView(QWidget *parent);
   void addTableEntry(size_t row, FitDataRow newRow) override;
 
 protected:
-  ConvFitDataView(const QStringList &headers, QWidget *parent = nullptr);
+  ConvFitDataView(const QStringList &headers, QWidget *parent);
 
 protected slots:
   void showAddWorkspaceDialog() override;

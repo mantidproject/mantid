@@ -5,14 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetrisePresenter.h"
-#include "Common/IndirectDataValidationHelper.h"
+#include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
@@ -26,9 +26,10 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view)
+SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
+                                         std::unique_ptr<ISymmetriseModel> model)
     : DataManipulation(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
-      m_model(std::make_unique<SymmetriseModel>()), m_isPreview(false) {
+      m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
@@ -78,8 +79,8 @@ void SymmetrisePresenter::run() {
     return;
 
   if (m_isPreview) {
-    long spectrumNumber = static_cast<long>(m_view->getPreviewSpec());
-    std::vector<long> spectraRange(2, spectrumNumber);
+    int spectrumNumber = static_cast<int>(m_view->getPreviewSpec());
+    std::vector<int> spectraRange(2, spectrumNumber);
 
     m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
   } else {

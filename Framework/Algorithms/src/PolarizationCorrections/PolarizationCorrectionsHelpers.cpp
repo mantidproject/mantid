@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidKernel/StringTokenizer.h"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <vector>
@@ -19,17 +21,16 @@ state in the spin state order as the index of the workspace in the group.
 */
 API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                                 const std::string &targetSpinState) {
-  const auto wsIndex = indexOfWorkspaceForSpinState(group, spinStateOrder, targetSpinState);
+  const auto wsIndex = indexOfWorkspaceForSpinState(spinStateOrder, targetSpinState);
   return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
 }
 
 /*
 For a given workspace group, spin state order, and desired spin state, this method will
-return the index of the specified workspace from the group, using the position of the desired spin
+return the index of the specified workspace in the group, using the position of the desired spin
 state in the spin state order.
 */
-size_t indexOfWorkspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
-                                    const std::string &targetSpinState) {
+size_t indexOfWorkspaceForSpinState(const std::string &spinStateOrder, const std::string &targetSpinState) {
   std::vector<std::string> spinStateVector = splitSpinStateString(spinStateOrder);
   auto trimmedTargetSpinState = targetSpinState;
   boost::trim(trimmedTargetSpinState);
@@ -42,11 +43,8 @@ into a vector of individual spin states. This will also trim any leading/trailin
 whitespace in the individual spin states.
 */
 std::vector<std::string> splitSpinStateString(const std::string &spinStates) {
-  std::vector<std::string> spinStateVector;
-  boost::split(spinStateVector, spinStates, boost::is_any_of(","));
-  for (auto &spinState : spinStateVector) {
-    boost::trim(spinState);
-  }
-  return spinStateVector;
+  using Mantid::Kernel::StringTokenizer;
+  StringTokenizer tokens{spinStates, ",", StringTokenizer::TOK_TRIM};
+  return std::vector<std::string>{tokens.begin(), tokens.end()};
 }
 } // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers

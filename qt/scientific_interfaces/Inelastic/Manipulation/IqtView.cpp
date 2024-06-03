@@ -79,7 +79,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 
 namespace MantidQt::CustomInterfaces {
 
-IqtView::IqtView(QWidget *parent) : m_presenter(), m_iqtTree(nullptr) {
+IqtView::IqtView(QWidget *parent) : QWidget(parent), m_presenter(), m_iqtTree(nullptr) {
   m_uiForm.setupUi(parent);
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
