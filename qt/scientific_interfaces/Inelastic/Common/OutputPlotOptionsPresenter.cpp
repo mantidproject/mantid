@@ -96,7 +96,7 @@ void OutputPlotOptionsPresenter::replaceHandle(const std::string &wsName, const 
   (void)wsName;
   // Ignore non matrix workspaces
   if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
-    auto const newName = newWorkspace->getName();
+    auto const &newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
       handleWorkspaceChanged(newName);
   }
