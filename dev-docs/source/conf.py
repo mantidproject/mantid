@@ -5,7 +5,6 @@
 
 import os
 
-import mantid
 import sphinx_bootstrap_theme
 
 
@@ -40,9 +39,9 @@ project = "MantidProject"
 copyright = "2007-2020, Mantid"
 
 # The full version, including alpha/beta/rc tags.
-release = mantid.__version__
+release = "main"
 # The short X.Y version.
-version = ".".join(release.split(".")[:2])
+version = "main"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
