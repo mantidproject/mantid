@@ -12,12 +12,16 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MockQtAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using Mantid::Kernel::ConfigService;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -25,14 +29,15 @@ using testing::NiceMock;
 using testing::ReturnRef;
 
 namespace {
-static constexpr const char *RUN1_NAME = "run1";
-static constexpr const char *RUN1_FILE = "INTER00012345.raw";
-static constexpr const char *RUN1_NUMBER = "12345";
-static constexpr const char *RUN1_TITLE = "run 1 title";
-static constexpr const char *RUN2_NAME = "run2";
-static constexpr const char *RUN2_FILE = "INTER00022345.raw";
-static constexpr const char *RUN2_NUMBER = "22345";
-static constexpr const char *RUN2_TITLE = "run 2 title";
+static auto constexpr INSTRUMENT = "INTER";
+static auto constexpr RUN1_NAME = "run1";
+static auto constexpr RUN1_FILE = "INTER00012345.raw";
+static auto constexpr RUN1_NUMBER = "12345";
+static auto constexpr RUN1_TITLE = "run 1 title";
+static auto constexpr RUN2_NAME = "run2";
+static auto constexpr RUN2_FILE = "INTER00022345.raw";
+static auto constexpr RUN2_NUMBER = "22345";
+static auto constexpr RUN2_TITLE = "run 2 title";
 } // namespace
 
 class MockSearchAlgorithm : public Algorithm {
@@ -309,6 +314,26 @@ public:
     verifyAndClear();
   }
 
+  void test_search_results_in_data_cache() {
+    auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
+    auto const tempCache = std::filesystem::temp_directory_path() /= "fakeCache";
+    std::filesystem::create_directories(tempCache / INSTRUMENT);
+    std::ofstream indexFile(tempCache / INSTRUMENT / (std::string(INSTRUMENT) + "_index.json"));
+    indexFile << "{\n"
+              << "\t\"22345\": \"fake/path/to/file\"\n"
+              << "}\n";
+    indexFile.close();
+
+    ConfigService::Instance().setString("datacachesearch.directory", tempCache.string());
+
+    auto searcher = makeCatalogSearcher();
+    searcher.subscribe(&m_notifyee);
+    auto results = doJournalSearch(searcher);
+    checkFilteredSearchResults(results);
+    ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockRunsView> m_view;
   NiceMock<MockSearcherSubscriber> m_notifyee;
@@ -322,6 +347,14 @@ private:
 
   void checkSearchResults(SearchResults const &actual) {
     auto const expected = SearchResults{SearchResult(RUN1_NUMBER, RUN1_TITLE), SearchResult(RUN2_NUMBER, RUN2_TITLE)};
+    TS_ASSERT_EQUALS(actual.size(), expected.size());
+    for (size_t i = 0; i < actual.size(); ++i) {
+      TS_ASSERT_EQUALS(actual[i], expected[i]);
+    }
+  }
+
+  void checkFilteredSearchResults(SearchResults const &actual) {
+    auto const expected = SearchResults{SearchResult(RUN2_NUMBER, RUN2_TITLE)};
     TS_ASSERT_EQUALS(actual.size(), expected.size());
     for (size_t i = 0; i < actual.size(); ++i) {
       TS_ASSERT_EQUALS(actual[i], expected[i]);
