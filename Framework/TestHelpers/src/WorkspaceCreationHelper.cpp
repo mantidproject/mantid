@@ -26,6 +26,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -1249,6 +1250,33 @@ Mantid::DataObjects::PeaksWorkspace_sptr createPeaksWorkspace(const int numPeaks
   }
 
   auto peaksWS = createPeaksWorkspace(numPeaks, true);
+  peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
+  return peaksWS;
+}
+
+Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr createLeanPeaksWorkspace(const int numPeaks,
+                                                                             const bool createOrientedLattice) {
+  auto peaksWS = std::make_shared<LeanElasticPeaksWorkspace>();
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  for (int i = 0; i < numPeaks; ++i) {
+    Peak peak(inst, i, i + 0.5);
+    LeanElasticPeak lpeak(peak);
+    peaksWS->addPeak(lpeak);
+  }
+
+  if (createOrientedLattice) {
+    peaksWS->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>());
+  }
+  return peaksWS;
+}
+
+Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr createLeanPeaksWorkspace(const int numPeaks,
+                                                                             const Mantid::Kernel::DblMatrix &ubMat) {
+  if (ubMat.numRows() != 3 || ubMat.numCols() != 3) {
+    throw std::invalid_argument("UB matrix is not 3x3");
+  }
+
+  auto peaksWS = createLeanPeaksWorkspace(numPeaks, true);
   peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
   return peaksWS;
 }

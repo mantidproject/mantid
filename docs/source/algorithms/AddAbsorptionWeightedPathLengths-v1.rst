@@ -28,6 +28,8 @@ the width and height of the sample. This can be overridden using :ref:`SetBeam <
 
 The algorithm generates some statistics on the scattering angle for the simulated tracks when the log level is set to debug.
 
+There is an option to apply the absorption correction (`ApplyCorrection=True`) to the peak intensities.
+
 Method
 ######
 
@@ -91,7 +93,7 @@ Output:
 
 .. testoutput:: ExSimpleCylinder
 
-    Tbar for first peak 1.57247690371 cm
+    Tbar for first peak 1.56626404089 cm
 
 References
 ----------
