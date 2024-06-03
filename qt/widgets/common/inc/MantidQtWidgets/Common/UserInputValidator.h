@@ -25,6 +25,8 @@ namespace CustomInterfaces {
 
 class DLLExport IUserInputValidator {
 public:
+  virtual ~IUserInputValidator() = default;
+
   virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
 
   virtual std::string generateErrorMessage() const = 0;
@@ -39,7 +41,7 @@ public:
  *
  *
  */
-class DLLExport UserInputValidator : public IUserInputValidator {
+class DLLExport UserInputValidator final : public IUserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
