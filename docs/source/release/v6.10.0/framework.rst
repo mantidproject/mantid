@@ -10,72 +10,72 @@ Algorithms
 
 New features
 ############
-- Add support for 1D MDHisto workspace to SaveASCII
-- Add the ability for :ref:`algm-CompressEvents` to combine events together in a logarithmic increasing size groups.
-- Add ability to specify input workspace order in `PolarizationCorrectionWildes` algorithm.
-- Abins/Abins2D can now import phonopy .yaml data where the force
-  constants are stored in a file named ``FORCE_CONSTANTS`` or
+- Algorithm :ref:`algm-SaveASCII` now supports 1D :ref:`MDHistoWorkspace`.
+- Algorithm :ref:`algm-CompressEvents` is now able to combine events together in logarithmic increasing size groups.
+- Algorithm `PolarizationCorrectionWildes` now accepts input workspace order.
+- Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` can now import phonopy .yaml data.
+  The force constants are stored in a file named ``FORCE_CONSTANTS`` or
   ``force_constants.hdf5`` in the same directory as the YAML file.
   This is recommended when using large force constants arrays as the
   YAML loader can be very slow.
-- Abins and Abins2D algorithms now support frozen atoms in data from GAUSSIAN
+- Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` now support frozen atoms in data from GAUSSIAN.
 
   - Similarly to the frozen-atoms ("selective dynamics") support for
     VASP outputs, frozen atoms will be disregarded in the calculation
     of inelastic scattering structure factor.
-- Abins and Abins2D now support JSON file import. Supported formats are:
 
-  - AbinsData (dump of internal object, intended for development and testing)
-  - euphonic.QpointPhononModes (an equivalent set of data dumped from
-    the Euphonic library)
-  - euphonic.ForceConstants (force constants which may be manipulated
+- Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` now support JSON file import. Supported formats are:
+
+  - ``AbinsData``: dump of internal object, intended for development and testing.
+  - ``euphonic.QpointPhononModes``: an equivalent set of data dumped from
+    the Euphonic library.
+  - ``euphonic.ForceConstants``: force constants which may be manipulated
     in Euphonic, and will be converted to phonon modes on a q-point
-    mesh when Abins(2D) is run)
+    mesh when Abins(2D) is run.
 
   The Euphonic JSON formats are convenient to create with Python
   scripts, and recommended for users who wish to somehow customise or
   manipulate their data before using it with Abins(2D).
-- New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the `bank_error_events` bank of a NeXus file
-- Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall. However, the execution time of ``LoadEventNexus`` itself is generally longer; workflows that benefit from ``CompressEvents`` generally run faster.
-- Added a new peak finding strategy named AllPeaksNSigma to FindSXPeaks :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` algorithm. Credits to the author of SXD2001 for the idea of using NSigma as a threshold (albeit in SXD2001 the peak finding is done in 3D).
+
+- New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the `bank_error_events` bank of a NeXus file.
+- Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall.
+  However, the execution time of ``LoadEventNexus`` itself is generally longer; workflows that benefit from ``CompressEvents`` generally run faster.
+- Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` supports new peak finding strategy ``AllPeaksNSigma``.
+  Credits to the author of SXD2001 for the idea of using NSigma as a threshold (albeit in SXD2001 the peak finding is done in 3D).
   Gutmann, M. J. (2005). SXD2001. ISIS Facility, Rutherford Appleton Laboratory, Oxfordshire, England.
-- Validation rules added to FindSXPeaks :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` algorithm to remove spurious peaks due to noise by allowing user to provide additional arguements as below
-- `MinNBinsPerPeak`, the Minimum number of bins contributing to a peak in an individual spectrum
-- `MinNSpectraPerPeak`, `MaxNSpectraPerPeak` Minimum & Maximum number of spectra contributing to a peak after they are grouped
+- Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now includes validation rules to remove spurious peaks due to noise,
+  by allowing user to provide additional arguements as below:
+  - ``MinNBinsPerPeak``, the Minimum number of bins contributing to a peak in an individual spectrum
+  - ``MinNSpectraPerPeak``, ``MaxNSpectraPerPeak`` Minimum & Maximum number of spectra contributing to a peak after they are grouped.
 
 Bugfixes
 ############
-- A performance improvement when using the :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` algorithm to load a NeXus file has been achieved.
-- Algorithm DSFinterp, which was deprecated, has been removed
-- Remove unwanted interaction between Abins and Abins2D
+- Algorithm :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` is now faster to load a NeXus file.
+- Algorithm ``DSFinterp``, which was deprecated, has been removed
+- :ref:`algm-Abins` and :ref:`algm-Abins2D` no longer influence each other:
 
-  - Abins algorithm sets the value
-    ``abins.parameters.sampling["bin_width"]`` while running. This
-    would override the default sampling of Abins2D instruments if set.
-
-  - This would not cause results to be incorrect, but would sample
+  - :ref:`algm-Abins` algorithm sets the value
+    ``abins.parameters.sampling["bin_width"]`` while running. Previously this
+    overrided the default sampling of :ref:`algm-Abins2D` instruments if set.
+  - This did not cause results to be incorrect, but sampled
     them on a different mesh to the expected one and could limit
     resolution.
-
-  - The value is now saved and restored after use by Abins; it can
-    still be modified by users who wish to fiddle with the Abins2D
+  - Now the value is saved and restored after use by :ref:`algm-Abins`; it can
+    still be modified by users who wish to fiddle with the :ref:`algm-Abins2D`
     behaviour.
-- A performance improvement when using the :ref:`Load <algm-Load>` algorithm to load a single file has been achieved.
-- Fix doctest strings for :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`
-- Fixed a crash in :ref:`FindPeaks <algm-FindPeaks>` when the number of bins in the workspace are not sufficient to run SmoothData:ref:`algm-SmoothData` algorithm and raise the error instead.
+
+- Algortihm :ref:`Load <algm-Load>` now loads a single file faster.
+- Fixed doctest strings for :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`.
+- Algorithm :ref:`FindPeaks <algm-FindPeaks>` no longer crashes when the number of bins in the workspace are not sufficient to run :ref:`algm-SmoothData` algorithm.
 
 Fit Functions
 -------------
 
-New features
-############
-
-
 Bugfixes
 ############
-- Updated search box for fitting functions so that function suggestions do not show repeated functions
-- Fit Function DSFinterp1DFit, which deprecated, has been removed
-- CompositeFunction will now throw an exception if getNumberDomains() is called and there is an inconsistent number of domains in any of the member functions.
+- Search box for fitting functions in Fit interface no longer shows duplicate functions.
+- Fit Function DSFinterp1DFit, which was deprecated, has been removed.
+- Function :ref:`func-CompositeFunction` will now throw an exception if ``getNumberDomains()`` is called and there is an inconsistent number of domains in any of the member functions.
 
 
 Data Handling
@@ -83,17 +83,22 @@ Data Handling
 
 New features
 ############
-- Introduced file search/loading from instrument data cache on IDAaaS.
+- Algorithm :ref:`algm-LoadEventAsWorkspace2D` accepts new boolean parameter ``LoadNexusInstrumentXML``. Default is *true*.
+- File search/loading will now look in instrument data cache **on IDAaaS**.
   The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains a local copy of the data archive.
-  The instrument data cache is used to search for files before looking in the data archive.
-  This new feature fixes the problem of loading files for users who do not have access to the data archive on IDAaaS.
-  Please note that if you are not on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.
-- Added new boolean parameter ``LoadNexusInstrumentXML`` to :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>`. Default is *true*.
+  This new feature will speed up file loading times for external users that do not have access to the data archive.
+  Please note that if you are **not** on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.
+  Here is a demonstration on IDAaaS showing that an instrument file can now be loaded even when the archive is turned off:
+
+  .. figure::  ../../images/6_10_release/data-cache.gif
+    :align: center
+    :width: 950px
+
 
 Bugfixes
 ############
-- The properties ``LoaderName`` and ``LoaderVersion`` of :ref:`Load <algm-Load>` are now guaranteed to be set by end of algorithm.
-- The properties ``GroupingWorkspace`` and ``GroupingFilename`` are now optional in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`. At least one must be specified.
+- Algorithm :ref:`algm-Load-v1` now guarantees that properties ``LoaderName`` and ``LoaderVersion`` are set by end of algorithm.
+- Algorithm :ref:`algm-GenerateGroupingPowder` now allows that just one of the properties ``GroupingWorkspace`` and ``GroupingFilename`` be set.
 
 
 Data Objects
@@ -101,11 +106,7 @@ Data Objects
 
 New features
 ############
-- Speedup processing of IDF XML during loading when side-by-side-view-location parameter is not used
-
-Bugfixes
-############
-
+- Speedup processing of IDF XML during loading when side-by-side-view-location parameter is not used.
 
 
 Python
@@ -113,13 +114,16 @@ Python
 
 New features
 ############
-- The :ref:`Peak Shapes <the-peak-shape>` (NoShape, PeakShapeSpherical, PeakShapeEllipsoid) and :meth:`mantid.api.IPeak.setPeakShape` have been exposed to Python allowing you to manually create and set the peak shapes.
+- :ref:`Peak Shapes <the-peak-shape>` (NoShape, PeakShapeSpherical, PeakShapeEllipsoid) and :meth:`mantid.api.IPeak.setPeakShape` are now exposed to Python allowing you to manually create and set the peak shapes.
 
 Bugfixes
 ############
-- Input validation errors have been corrected for numerical line edits of the Filter Events interface.
-- Fix crash occurring when an incorrect `TOF Correction To Sample` value is selected for the input workspace. Now error message is displayed instead of crash.
-- Fix bug that allowed the two sliders to cross each other for certain values of the line edits controlling the sliders.
+- :ref:`Filter_Events_Interface` is now stricter with inputs and no longer crashes due to invalid value of `TOF Correction To Sample`.
+
+  - The two sliders of the interface are now prevented from crossing each other and are automatically updated from the user input, no longer requiring a `Set` button:
+
+  .. figure::  ../../images/6_10_release/filter-events-gui.png
+     :width: 600px
 
 
 Dependencies
@@ -127,11 +131,7 @@ Dependencies
 
 New features
 ############
-- Drop support for end-of-life numpy 1.22 and 1.23, and extend support to 1.25 and 1.26.
-
-Bugfixes
-############
-
+- Droped support for end-of-life numpy 1.22 and 1.23, and extended support to 1.25 and 1.26.
 
 
 MantidWorkbench
