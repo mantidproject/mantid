@@ -7,13 +7,16 @@ SANS Changes
 
 New Features
 ------------
-- A :ref:`algm-FlipperEfficiency` algorithm has been created as part of the Polarised SANS workflow.
+- New algorithm :ref:`algm-FlipperEfficiency` for the Polarised SANS workflow.
 - Added algorithm for calculating the efficiency of a helium-3 analyser.
-- Algorithm :ref:`algm-DepolarizedAnalyserTransmission` has been created.
+- New algorithm :ref:`algm-DepolarizedAnalyserTransmission`:
+
+.. figure::  ../../images/6_10_release/depolarized-analyser-transmission-algo.png
+   :width: 400px
 
 Bugfixes
 --------
-- Fixed a bug where rows in the table on the :ref:`ISIS_SANS_Runs_Tab-ref` would sometimes pick up an output name from a different row and then overwrite the data in that output workspace.
-- An error is no longer produced when saving from the ``Save Other`` dialog in the :ref:`ISIS_SANS_Runs_Tab-ref`.
+- Rows in the table on the :ref:`ISIS_SANS_Runs_Tab-ref` no longer ocasionally pick up an output name from a different row and then overwrite the data in that output workspace.
+- Saving from the ``Save Other`` dialog in the :ref:`ISIS_SANS_Runs_Tab-ref` no longer throws an error.
 
 :ref:`Release 6.10.0 <v6.10.0>`
