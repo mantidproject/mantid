@@ -21,6 +21,7 @@
 #include <vector>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Catalog Searcher");
@@ -86,8 +87,7 @@ SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITable
                                       : convertJournalResultsTableToSearchResults(resultsTable);
 
   // Check if we're on IDAaaS with the Data Cache available.
-  auto const &dataCache = Mantid::API::ISISInstrumentDataCache(
-      Mantid::Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  auto const &dataCache = ISISInstrumentDataCache(ConfigService::Instance().getString("datacachesearch.directory"));
   if (!dataCache.isIndexFileAvailable(searchCriteria().instrument)) {
     return searchResults;
   }
