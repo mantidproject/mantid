@@ -70,7 +70,7 @@ ISISInstrumentDataCache::openCacheJsonFile(std::string const &instrumentName) co
   // Read directory path from json file
   Json::Value json;
   ifstrm >> json;
-  return std::pair(jsonPath, json);
+  return {jsonPath.string(), json};
 }
 
 std::pair<Mantid::Kernel::InstrumentInfo, std::string>
