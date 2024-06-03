@@ -55,7 +55,7 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
         a, alpha = 5.6402, 90
         CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha)
         # load an empty workspace as MoveCOmpoennt etc. only work on Matrix workspaces
-        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
+        self.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty")
 
         self.xml_path = SXD.calibrate_sxd_panels(self.ws, self.peaks, self._temp_dir, tol=0.25, SearchRadiusTransBank=0.025)
 
