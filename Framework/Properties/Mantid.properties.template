@@ -134,6 +134,12 @@ MantidOptions.InvisibleWorkspaces=0
 # Change to Off to disable OpenGL and use normal windows graphics.
 MantidOptions.InstrumentView.UseOpenGL = On
 
+# This will reduce the size of the OpenGL display lists used when drawing the
+# Instrument View. By doing this we reduce the chance that we will hit
+# a memory allocation bug in the Mesa graphics library that has been
+# fixed in version 24.1
+MantidOptions.InstrumentView.MesaBugWorkaround = Off
+
 # Controls the default normalization mode for graph plotting
 # Allowed values are:
 #   On: Normalize to the bin width for 1d and 2d plots
