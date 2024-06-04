@@ -1,7 +1,7 @@
 .. _interface-inelastic-data-manipulation:
 
-Inelastic Data Manipulation
-===========================
+Inelastic Data Processor
+========================
 
 .. contents:: Table of Contents
   :local:
@@ -9,13 +9,13 @@ Inelastic Data Manipulation
 Overview
 --------
 
-The Inelastic Data Manipulation interface provides Processes for manipulating
+The Inelastic Data Processor interface provides processes for transforming
 reduced data from, for example, :ref:`Indirect Data Reduction <interface-indirect-data-reduction>`
 and Direct Reduction routines or S(Q, w). The output data can then be used for analysis by
 processes in, for example, the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` and
 :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interfaces.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :align: right
   :width: 750
 
@@ -62,7 +62,7 @@ while in the negative side :math:`E_{low}` will be farther from the centre. The 
    is reflected about the Y axis and replaces the corresponding values in the positive side of the spectra.
    The curve which ranges between :math:`\pm|E_{high}|` is not modified.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :widget: tabSymmetrise
 
 Symmetrise Options
@@ -153,7 +153,7 @@ S(Q, w)
 Provides an interface for running the :ref:`SofQW <algm-SofQW>` algorithm
 :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :widget: tabSQw
 
 S(Q, w) Options
@@ -230,7 +230,7 @@ This interface uses the :ref:`SofQWMoments <algm-SofQWMoments>` algorithm to
 calculate the :math:`n^{th}` moment of an :math:`S(Q, \omega)` workspace created
 by the SofQW tab.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :widget: tabMoments
 
 Moments Options
@@ -287,7 +287,7 @@ Mantid data search paths that contains the sample environment information the
 ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :widget: tabElwin
 
 Elwin Options
@@ -401,7 +401,7 @@ I(Q, t)
 Given sample and resolution inputs, carries out a fit as per the theory detailed
 in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
 
-.. interface:: Data Manipulation
+.. interface:: Data Processor
   :widget: tabIqt
 
 I(Q, t) Options
