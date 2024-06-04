@@ -134,9 +134,9 @@ void Stretch::run() {
   // Collect input from the properties browser
   auto const eMin = m_properties["EMin"]->valueText().toDouble();
   auto const eMax = m_properties["EMax"]->valueText().toDouble();
-  auto const beta = m_properties["Beta"]->valueText().toLong();
-  auto const sigma = m_properties["Sigma"]->valueText().toLong();
-  auto const nBins = m_properties["SampleBinning"]->valueText().toLong();
+  auto const beta = m_properties["Beta"]->valueText().toInt();
+  auto const sigma = m_properties["Sigma"]->valueText().toInt();
+  auto const nBins = m_properties["SampleBinning"]->valueText().toInt();
 
   // Bool options
   auto const elasticPeak = m_uiForm.chkElasticPeak->isChecked();
