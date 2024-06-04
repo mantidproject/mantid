@@ -98,9 +98,9 @@ public:
 
   void testMissingIndexFile() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("WISH12345"), const std::invalid_argument &e,
-                            std::string(e.what()),
-                            "Could not open index file: " + m_dataCacheDir + "/WISH/WISH_index.json");
+    TS_ASSERT_THROWS_EQUALS(
+        dc.getFileParentDirectoryPath("WISH12345"), const std::invalid_argument &e, std::string(e.what()),
+        "Could not open index file: " + (std::filesystem::path(m_dataCacheDir) / "WISH" / "WISH_index.json").string());
   }
 
   void testRunNumberNotFound() {
