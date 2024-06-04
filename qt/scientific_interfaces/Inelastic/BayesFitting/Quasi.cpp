@@ -212,8 +212,8 @@ void Quasi::run() {
   double const eMin = m_properties["EMin"]->valueText().toDouble();
   double const eMax = m_properties["EMax"]->valueText().toDouble();
 
-  long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
-  long const resBins = m_properties["ResBinning"]->valueText().toLong();
+  auto const sampleBins = m_properties["SampleBinning"]->valueText().toInt();
+  auto const resBins = m_properties["ResBinning"]->valueText().toInt();
 
   // Construct an output base name for the output workspaces
   auto const resType = resName.substr(resName.length() - 3);
