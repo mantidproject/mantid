@@ -9,13 +9,11 @@
 from mantid.api import WorkspaceGroup
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
-from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel
 from collections import defaultdict
 
 
-class GroupTableWorkspaceDisplayModel:
-    SPECTRUM_PLOT_LEGEND_STRING = "{}-{}"
-    BIN_PLOT_LEGEND_STRING = "{}-bin-{}"
+class GroupTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
     EDITABLE_COLUMN_NAMES = ["h", "k", "l"]
 
     ALLOWED_WORKSPACE_TYPES = [WorkspaceGroup]
@@ -53,6 +51,9 @@ class GroupTableWorkspaceDisplayModel:
             self._load_col_types()
 
     def _make_row_mapping(self):
+        """
+        Create mapping between table row index and workspace group and spectrum index
+        """
         row_index = 0
         row_mapping = []
         for group_index, peaksWs in enumerate(self.ws):
@@ -73,9 +74,6 @@ class GroupTableWorkspaceDisplayModel:
                 err_for_column = self.ws[0].getLinkedYCol(col - 2)
                 if err_for_column >= 0:
                     self.marked_columns.add_y_err(ErrorColumn(col, err_for_column + 2))
-
-    def original_column_headers(self):
-        return self._original_column_headers[:]
 
     def build_current_labels(self):
         return self.marked_columns.build_labels()
@@ -104,23 +102,11 @@ class GroupTableWorkspaceDisplayModel:
 
         return column_data
 
-    def get_number_of_rows(self):
-        return self.ws_num_rows
-
-    def get_number_of_columns(self):
-        return self.ws_num_cols
-
-    def get_column_header(self, index):
-        return self.get_column_headers()[index]
-
     def is_editable_column(self, icol):
         return self.get_column_headers()[icol] in self.EDITABLE_COLUMN_NAMES
 
     def set_column_type(self, col, type, linked_col_index=-1):
         self.ws[0].setPlotType(col - 2, type, linked_col_index - 2 if linked_col_index != -1 else linked_col_index)
-
-    def workspace_equals(self, workspace_name):
-        return self.ws.name() == workspace_name
 
     def get_cell(self, row, column):
         group_index, ws_index = self._row_mapping[row]

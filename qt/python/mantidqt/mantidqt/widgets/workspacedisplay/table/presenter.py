@@ -102,7 +102,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.plot = plot
         self.group = group
 
-        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self, observe_group_update=self.group)
 
         self.presenter.refresh()
 
@@ -160,18 +160,45 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             except ValueError:
                 raise ValueError("The workspace type is not supported: {0}".format(ws))
 
+    def _update_group_model(self, group_name):
+        self.presenter.view.blockSignals(True)
+        ws = mtd[group_name]
+        self.presenter.model = GroupTableWorkspaceDisplayModel(ws)
+        self.presenter.load_data(self.presenter.view)
+        self.presenter.view.blockSignals(False)
+
     def replace_workspace(self, workspace_name, workspace):
-        if not self.group and self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
+        model = self.presenter.model
+        if not self.group and model.workspace_equals(workspace_name) and not model.block_model_replace:
             self.presenter.view.blockSignals(True)
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
 
-        if self.group and workspace_name in self.model.get_child_names() and not self.presenter.model.block_model_replace:
-            self.presenter.view.blockSignals(True)
-            self.presenter.model = GroupTableWorkspaceDisplayModel(mtd[self.model.get_name()])
-            self.presenter.load_data(self.presenter.view)
-            self.presenter.view.blockSignals(False)
+        if (
+            self.group
+            and not model.block_model_replace
+            and (model.workspace_equals(workspace_name) or workspace_name in model.get_child_names())
+        ):
+            self._update_group_model(model.get_name())
+
+    def group_update(self, workspace_name, workspace):
+        model = self.presenter.model
+        if (
+            self.group
+            and not model.block_model_replace
+            and (model.workspace_equals(workspace_name) or workspace_name in model.get_child_names())
+        ):
+            self._update_group_model(model.get_name())
+
+    def close(self, workspace_name):
+        if self.current_workspace_equals(workspace_name):
+            self.clear_observer()
+            self.container.emit_close()
+
+        if self.group and workspace_name in self.presenter.model.get_child_names():
+            self.clear_observer()
+            self.container.emit_close()
 
     def action_copy_cells(self):
         self.copy_cells(self.presenter.view)
@@ -306,7 +333,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.presenter.model.sort(selected_column, sort_ascending)
 
         if self.group:
-            self.presenter.sort(selected_column, sort_ascending)
+            self.presenter.model.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
         try:
