@@ -6,10 +6,6 @@ CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
 pipeline {
   agent { label 'linux-64' }
   options { checkoutToSubdirectory(CHECKOUT_DIR) }
-  parameters {
-      choice(name: 'BUILD_DEVEL', choices: ['none', 'all', 'linux-64', 'win-64', 'osx-64'],
-              description: 'Choose a platform to build & test the developer configuration.')
-  }
   stages {
     stage('Store git commit') {
       steps {
@@ -55,7 +51,7 @@ pipeline {
 // ------------------- Functions -------------------
 
 def git_branch_name() {
-  name = scm.branches[0].name
+  def name = scm.branches[0].name
   // Some jobs define a BRANCH_NAME parameter to allow customisable builds.
   // In this case the value of scm.branches[0].name will literally be
   // $BRANCH_NAME and instead we have to get it from the environment.
