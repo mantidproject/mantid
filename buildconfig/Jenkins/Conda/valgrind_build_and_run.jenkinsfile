@@ -20,10 +20,6 @@ pipeline {
       }
     }
     stage('build and test: linux-64') {
-      when {
-        beforeAgent true
-        beforeOptions true
-      }
       agent { label 'linux-64' }
       options { timestamps () }
       steps {
@@ -38,19 +34,13 @@ pipeline {
       }
     }
     stage ('Copy artifacts') {
-      when {
-        beforeAgent true
-        beforeOptions true
-      }
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      agent { label 'linux-64' }
       options {
         timestamps ()
         retry(3)
       }
       steps {
         checkoutSource("${GIT_SHA}")
-        // Conda first
-        // sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
@@ -75,6 +65,7 @@ def git_branch_name() {
   else if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
+  println 'This is the branch name:$name'
   return name
 }
 
