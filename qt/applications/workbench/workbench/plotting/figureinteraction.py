@@ -137,6 +137,9 @@ class FigureInteraction(object):
             and len(event.inaxes.lines) == 0
         ):
             return
+
+        self._correct_for_scroll_event_on_legend(event)
+
         zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == "up":  # zoom in
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
@@ -164,6 +167,13 @@ class FigureInteraction(object):
         if current_scale == "linear":
             return "log"
         return "linear"
+
+    def _correct_for_scroll_event_on_legend(self, event):
+        # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
+        legend = event.inaxes.axes.get_legend()
+        if legend.get_draggable() and legend.contains(event):
+            legend_set_draggable(legend, False)
+            legend_set_draggable(legend, True)
 
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
