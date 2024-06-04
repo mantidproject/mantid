@@ -198,7 +198,9 @@ Mantid Graphical User Interface Properties
 | ``MantidOptions.InstrumentView.MesaBugWorkaround`` |Will reduce the size of the OpenGL display lists    | ``On``, ``Off`` |
 |                                                    |used when drawing the Instrument View. By doing     |                 |
 |                                                    |this we reduce the chance that we will hit a memory |                 |
-|                                                    |allocation bug in the Mesa graphics library.        |                 |
+|                                                    |allocation bug in the Mesa graphics library. This   |                 |
+|                                                    |is only relevant if you using both Linux and a      |                 |
+|                                                    |broken version of Mesa.                             |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+

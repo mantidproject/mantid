@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
+#include <array>
 
 namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentRendererClassic : public InstrumentRenderer {
@@ -20,7 +21,7 @@ protected:
   void resetDisplayLists() override;
 
 private:
-  GLuint m_displayListId[2];
-  bool m_useDisplayList[2];
+  std::array<GLuint, 2> m_displayListId;
+  std::array<bool, 2> m_useDisplayList;
 };
 } // namespace MantidQt::MantidWidgets

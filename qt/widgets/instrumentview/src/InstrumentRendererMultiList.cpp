@@ -10,6 +10,8 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
+#include <algorithm>
+
 using Mantid::Beamline::ComponentType;
 
 namespace MantidQt::MantidWidgets {
@@ -21,10 +23,8 @@ InstrumentRendererMultiList::InstrumentRendererMultiList(const InstrumentActor &
 
   m_pickingDisplayListId.resize(componentInfo.size());
   m_nonPickingDisplayListId.resize(componentInfo.size());
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
-    m_nonPickingDisplayListId[i] = 0;
-    m_pickingDisplayListId[i] = 0;
-  }
+  std::fill(m_nonPickingDisplayListId.begin(), m_nonPickingDisplayListId.end(), 0);
+  std::fill(m_pickingDisplayListId.begin(), m_pickingDisplayListId.end(), 0);
 }
 
 InstrumentRendererMultiList::~InstrumentRendererMultiList() {

@@ -10,14 +10,14 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
+#include <algorithm>
+
 using Mantid::Beamline::ComponentType;
 
 namespace MantidQt::MantidWidgets {
 InstrumentRendererClassic::InstrumentRendererClassic(const InstrumentActor &actor) : InstrumentRenderer(actor) {
-  m_displayListId[0] = 0;
-  m_displayListId[1] = 0;
-  m_useDisplayList[0] = false;
-  m_useDisplayList[1] = false;
+  m_displayListId = {0, 0};
+  m_useDisplayList = {false, false};
 }
 
 InstrumentRendererClassic::~InstrumentRendererClassic() {
