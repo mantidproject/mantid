@@ -19,23 +19,21 @@ pipeline {
         echo "Git SHA is:${env.GIT_SHA}"
       }
     }
-    stage('Build and test') {
-      stage('build and test: linux-64') {
-        when {
-          beforeAgent true
-          beforeOptions true
-        }
-        agent { label 'linux-64' }
-        options { timestamps () }
-        steps {
-          checkoutSource("${GIT_SHA}")
-          build_and_run_valgrind()
-        }
-        post {
-          always {
-            archive_test_logs()
-            publish_test_reports()
-          }
+    stage('build and test: linux-64') {
+      when {
+        beforeAgent true
+        beforeOptions true
+      }
+      agent { label 'linux-64' }
+      options { timestamps () }
+      steps {
+        checkoutSource("${GIT_SHA}")
+        build_and_run_valgrind()
+      }
+      post {
+        always {
+          archive_test_logs()
+          publish_test_reports()
         }
       }
     }
