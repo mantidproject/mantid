@@ -138,6 +138,11 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   alg->setProperty<double>("FilterMonByTofMax", getProperty("FilterMonByTofMax"));
   alg->setProperty<double>("FilterMonByTimeStart", getProperty("FilterMonByTimeStart"));
   alg->setProperty<double>("FilterMonByTimeStop", getProperty("FilterMonByTimeStop"));
+  alg->setProperty<double>("CompressTolerance", getProperty("CompressTOFTolerance"));
+  alg->setProperty<int>("NumberOfBins", 1);
+
+  if (m_filterBadPulses > 0.)
+    alg->setProperty<double>("FilterBadPulsesLowerCutoff", m_filterBadPulses);
 
   // determine if loading logs - always load logs for first chunk or
   // `FilterBadPulses` which will change delete some of the proton_charge log
@@ -167,31 +172,6 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(wksp);
 }
 
-/**
- * Process a chunk in-place
- */
-API::MatrixWorkspace_sptr LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
-  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
-
-  if (m_filterBadPulses > 0.) {
-    auto filterBadPulsesAlgo = createChildAlgorithm("FilterBadPulses");
-    filterBadPulsesAlgo->setProperty("InputWorkspace", eventWS);
-    filterBadPulsesAlgo->setProperty("OutputWorkspace", eventWS);
-    filterBadPulsesAlgo->setProperty("LowerCutoff", m_filterBadPulses);
-    filterBadPulsesAlgo->executeAsChildAlg();
-    eventWS = filterBadPulsesAlgo->getProperty("OutputWorkspace");
-  }
-
-  auto compressEvents = createChildAlgorithm("CompressEvents");
-  compressEvents->setProperty("InputWorkspace", eventWS);
-  compressEvents->setProperty("OutputWorkspace", eventWS);
-  compressEvents->setProperty<double>("Tolerance", getProperty("CompressTOFTolerance"));
-  compressEvents->executeAsChildAlg();
-  eventWS = compressEvents->getProperty("OutputWorkspace");
-
-  return eventWS;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -206,8 +186,6 @@ void LoadEventAndCompress::exec() {
   // first run is free
   progress.report("Loading Chunk");
   MatrixWorkspace_sptr resultWS = loadChunk(0);
-  progress.report("Process Chunk");
-  resultWS = processChunk(resultWS);
 
   // load the other chunks
   const size_t numRows = m_chunkingTable->rowCount();
@@ -216,7 +194,6 @@ void LoadEventAndCompress::exec() {
 
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
-    temp = processChunk(temp);
 
     // remove logs
     auto removeLogsAlg = createChildAlgorithm("RemoveLogs");
