@@ -137,7 +137,7 @@ class FigureInteraction(object):
         ):
             return
 
-        self.correct_for_scroll_event_on_legend(event)
+        self._correct_for_scroll_event_on_legend(event)
 
         zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == "up":  # zoom in
@@ -147,8 +147,8 @@ class FigureInteraction(object):
         self.redraw_annotations()
         event.canvas.draw()
 
-    def correct_for_scroll_event_on_legend(self, event):
-        # Corrects bug in Matplotlib where legend is picked up by scroll event
+    def _correct_for_scroll_event_on_legend(self, event):
+        # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
         legend = event.inaxes.axes.get_legend()
         if legend.get_draggable() and legend.contains(event):
             legend_set_draggable(legend, False)
