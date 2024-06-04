@@ -742,7 +742,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = canvas
         return fig_manager
 
-    def _create_mock_fig_manager_to_accept_middle_click(self) -> object:
+    def _create_mock_fig_manager_to_accept_middle_click(self):
         fig_manager = MagicMock()
         canvas = MagicMock()
         type(canvas).buttond = PropertyMock(return_value={Qt.MiddleButton: 4})
