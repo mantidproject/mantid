@@ -336,7 +336,7 @@ void LoadBankFromDiskTask::run() {
     file.openGroup(entry_name, entry_type);
 
     const bool needPulseInfo = (!m_loader.alg->compressEvents) || m_loader.alg->compressTolerance == 0 ||
-                               m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered;
+                               m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered || m_have_weight;
 
     // Load the event_index field.
     if (needPulseInfo)
@@ -346,10 +346,10 @@ void LoadBankFromDiskTask::run() {
 
     if (!m_loadError) {
       // Load and validate the pulse times
-      if (m_loader.alg->compressEvents && m_loader.alg->compressTolerance != 0)
-        thisBankPulseTimes = nullptr;
-      else
+      if (needPulseInfo)
         this->loadPulseTimes(file);
+      else
+        thisBankPulseTimes = nullptr;
       // The event_index should be the same length as the pulse times from DAS
       // logs.
       if (event_index && event_index->size() != thisBankPulseTimes->numberOfPulses())
