@@ -24,7 +24,11 @@ New features
     VASP outputs, frozen atoms will be disregarded in the calculation
     of inelastic scattering structure factor.
 
-- Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` now support JSON file import. Supported formats are:
+- Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` now support JSON file import.
+  The Euphonic JSON formats are convenient to create with Python
+  scripts, and recommended for users who wish to somehow customise or
+  manipulate their data before using it with Abins(2D).
+  Supported formats are:
 
   - ``AbinsData``: dump of internal object, intended for development and testing.
   - ``euphonic.QpointPhononModes``: an equivalent set of data dumped from
@@ -33,9 +37,6 @@ New features
     in Euphonic, and will be converted to phonon modes on a q-point
     mesh when Abins(2D) is run.
 
-  The Euphonic JSON formats are convenient to create with Python
-  scripts, and recommended for users who wish to somehow customise or
-  manipulate their data before using it with Abins(2D).
 
 - New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the ``bank_error_events`` bank of a NeXus file.
 - Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall.

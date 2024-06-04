@@ -25,8 +25,8 @@ Bugfixes
 - Workspace scalling is no longer incorrect when operating on the same workspace on both sides.
 - Toolbar of Matplotlib plots (non-mantid axes) and plots of 1D :ref:`MDHistoWorkspace <MDHistoWorkspace>` (for which the data have no workspace index) no longer display Fit and Superplot buttons:
 
-  .. figure::  ../../images/6_10_release/remove-toolbar-buttons.png
-     :width: 600px
+.. figure::  ../../images/6_10_release/remove-toolbar-buttons.png
+   :width: 600px
 
 
 InstrumentViewer
