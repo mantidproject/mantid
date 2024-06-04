@@ -11,8 +11,8 @@ Algorithms
 New features
 ############
 - Algorithm :ref:`algm-SaveASCII` now supports 1D :ref:`MDHistoWorkspace`.
-- Algorithm :ref:`algm-CompressEvents` is now able to combine events together in logarithmic increasing size groups.
-- Algorithm `PolarizationCorrectionWildes` now accepts input workspace order.
+- Algorithm :ref:`algm-CompressEvents` is now able to combine events together in logarithmically increasing size groups.
+- Algorithm :ref:`algm-PolarizationCorrectionWildes` now accepts input workspace order.
 - Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` can now import phonopy .yaml data.
   The force constants are stored in a file named ``FORCE_CONSTANTS`` or
   ``force_constants.hdf5`` in the same directory as the YAML file.
@@ -37,7 +37,7 @@ New features
   scripts, and recommended for users who wish to somehow customise or
   manipulate their data before using it with Abins(2D).
 
-- New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the `bank_error_events` bank of a NeXus file.
+- New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the ``bank_error_events`` bank of a NeXus file.
 - Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall.
   However, the execution time of ``LoadEventNexus`` itself is generally longer; workflows that benefit from ``CompressEvents`` generally run faster.
 - Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` supports new peak finding strategy ``AllPeaksNSigma``.
@@ -45,13 +45,14 @@ New features
   Gutmann, M. J. (2005). SXD2001. ISIS Facility, Rutherford Appleton Laboratory, Oxfordshire, England.
 - Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now includes validation rules to remove spurious peaks due to noise,
   by allowing user to provide additional arguements as below:
+
   - ``MinNBinsPerPeak``, the Minimum number of bins contributing to a peak in an individual spectrum
   - ``MinNSpectraPerPeak``, ``MaxNSpectraPerPeak`` Minimum & Maximum number of spectra contributing to a peak after they are grouped.
 
 Bugfixes
 ############
 - Algorithm :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` is now faster to load a NeXus file.
-- Algorithm ``DSFinterp``, which was deprecated, has been removed
+- Algorithm ``DSFinterp``, which was deprecated, has been removed.
 - :ref:`algm-Abins` and :ref:`algm-Abins2D` no longer influence each other:
 
   - :ref:`algm-Abins` algorithm sets the value
@@ -74,8 +75,8 @@ Fit Functions
 Bugfixes
 ############
 - Search box for fitting functions in Fit interface no longer shows duplicate functions.
-- Fit Function DSFinterp1DFit, which was deprecated, has been removed.
-- Function :ref:`func-CompositeFunction` will now throw an exception if ``getNumberDomains()`` is called and there is an inconsistent number of domains in any of the member functions.
+- Fit Function ``DSFinterp1DFit``, which was deprecated, has been removed.
+- :ref:`func-CompositeFunction` will now throw an exception if ``getNumberDomains()`` is called and there is an inconsistent number of domains in any of the member functions.
 
 
 Data Handling
@@ -98,7 +99,7 @@ New features
 Bugfixes
 ############
 - Algorithm :ref:`algm-Load-v1` now guarantees that properties ``LoaderName`` and ``LoaderVersion`` are set by end of algorithm.
-- Algorithm :ref:`algm-GenerateGroupingPowder` now allows that just one of the properties ``GroupingWorkspace`` and ``GroupingFilename`` be set.
+- Algorithm :ref:`algm-GenerateGroupingPowder` now allows just one of the properties ``GroupingWorkspace`` and ``GroupingFilename`` be set.
 
 
 Data Objects
@@ -106,7 +107,7 @@ Data Objects
 
 New features
 ############
-- Speedup processing of IDF XML during loading when side-by-side-view-location parameter is not used.
+- Sped up processing of IDF XML during loading when ``side-by-side-view-location`` parameter is not used.
 
 
 Python

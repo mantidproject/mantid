@@ -53,7 +53,7 @@ Algorithms
 
 New features
 ############
-- Algorithm `TransformToIqt` and `CalculateIqt` has checkbox with title ``EnfoceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
+- Algorithm :ref:`algm-TransformToIqt` and :ref:`algm-CalculateIqt` has checkbox with title ``EnfoceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
 
 Bugfixes
 ############

@@ -15,7 +15,7 @@ New features
 
 Bugfixes
 ############
-- HRPD reduction :ref:`isis-powder-diffraction-hrpd-ref` now only subtracts empty run from the vanadium when it is subtracted from the sample run (i.e. when ``subtract_empty_instrument=True``) - note other ISIS instrument will always subtract an empty run from the vanadium.
+- :ref:`HRPD reduction script <isis-powder-diffraction-hrpd-ref>` now only subtracts empty run from the vanadium when it is subtracted from the sample run (i.e. when ``subtract_empty_instrument=True``) - note other ISIS instrument will always subtract an empty run from the vanadium.
 - Remove the confusing button in the Algorithm :ref:`WANDPowderReduction <algm-WANDPowderReduction>` no longer displays "Replace input workspace", which was considered confusing.
 
 

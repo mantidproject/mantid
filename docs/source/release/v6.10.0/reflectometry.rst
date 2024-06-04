@@ -14,7 +14,7 @@ New Features
    :width: 300px
 
 - Algorithm :ref:`algm-SaveISISReflectometryORSO` now outputs the individual angle and transmission files, flood correction files, calibration files and the reduction script in the ORSO file metadata.
-- Algorithm :ref:`algm-SaveISISReflectometryORSO` is now able to save multiple datasets to a single file. Note that as part of this change the InputWorkspace parameter has been renamed to WorkspaceList and takes a comma separated list of workspace names. Existing scripts that call the algorithm will need to be updated to use this new parameter name. The :ref:`Save ASCII tab<refl_save_ascii>` has been updated with additional checkbox options to support this new functionality when saving in the ORSO format.
+- Algorithm :ref:`algm-SaveISISReflectometryORSO` is now able to save multiple datasets to a single file. Note that as part of this change the InputWorkspace parameter has been renamed to WorkspaceList and takes a comma separated list of workspace names. Existing scripts that call the algorithm will need to be updated to use this new parameter name. The :ref:`Save tab<refl_save>` has been updated with additional checkbox options to support this new functionality when saving in the ORSO format.
 
 Bugfixes
 --------

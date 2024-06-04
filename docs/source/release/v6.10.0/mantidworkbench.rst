@@ -15,8 +15,8 @@ Bugfixes
 - Loading files from disk no longer causes a memory leak.
 - Previously hidden plots are no longer unhidden from some plot scripts.
 - Plot scripts in documentation now use ``fig.show()`` instead of ``plt.show()`` to avoid hanging Workbench.
-- Fitting property browser no longer crashesk when removing a function from a nested composite function.
-- Renaming a plot in the plots widget no longer redraws the plot title regardless of the Show Title setting.
+- Fit property browser no longer crashes when removing a function from a nested composite function.
+- Renaming a plot in the plots widget no longer redraws the plot title regardless of the ``Show Title`` workbench setting.
 - Opening a file to edit where that file/directory had been deleted no longer causes a crash.
 - Corrupted recovery files no longer stop workbench from opening.
 - Changing scale on a 3D plot no longer causes a crash.
