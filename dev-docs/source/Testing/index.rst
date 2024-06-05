@@ -26,6 +26,7 @@ creation is outlined in :ref:`issue_tracking`.
    SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    ElementalAnalysis/ElementalAnalysisTests
+   Indirect/DiffractionTests
    Indirect/DataReductionTests
    Inelastic/DataProcessorTests
    Inelastic/QENSFittingTests
