@@ -9,22 +9,23 @@
 Description
 -----------
 
-Calculates the efficiency of a single flipper  with regards to wavelength. The input workspace must be a group workspace
-containing four known spin states, which can be given by the ``SpinStates`` parameter. It then uses these four spin
-states to calculate the proportion of neutrons lost to the flipper with regards to wavelength.
+Calculates the efficiency of a single flipper as a function of wavelength, as described by Wildes [#WILDES]_ and by Krycka et al. [#KRYCKA]_.
+The input workspace must be a group of four single spectrum workspaces,
+each representing the transmission of a known spin state as specified by the ``SpinStates`` parameter. These four spin
+state transmissions are used to calculate the proportion of neutrons lost to the flipper as a function of wavelength.
 
 The polarization of the flipper :math:`P_{F}` is given by:
 
 .. math::
 
-   P_F = \frac{T_{11} - T_{10}}{T_{00} - T_{01}}
+   P_F = \frac{(\frac{T_{11} - T_{10}}{T_{11} + T_{10}})}{(\frac{T_{00} - T_{01}}{T_{00} + T_{01}})}
 
 Since the efficiency :math:`\epsilon_{F}` is equal to :math:`\frac{1 + P_{F}}{2}`, we can calculate the efficiency of
 the flipper directly using:
 
 .. math::
 
-   \epsilon_{F} = \frac{T_{00} - T_{01} + T_{11} - T_{10}}{2(T_{00} - T_{01})}
+   \epsilon_{F} = \frac{T_{11}T_{00} - T_{10}T_{01}}{(T_{11} + T_{10})(T_{00} - T_{01})}
 
 
 Outputs
@@ -65,6 +66,14 @@ Output:
     :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     Flipper efficiency at a wavelength of 0.3 Å is ...
+
+References
+----------
+
+.. [#WILDES] A. R. Wildes, *Neutron News*, **17** 17 (2006)
+             `doi: 10.1080/10448630600668738 <https://doi.org/10.1080/10448630600668738>`_
+.. [#KRYCKA] K. Krycka et al., *J. Appl. Crystallogr.*, **45** (2012)
+             `doi: 10.1107/S0021889812003445 <https://doi.org/10.1107/S0021889812003445>`_
 
 .. categories::
 
