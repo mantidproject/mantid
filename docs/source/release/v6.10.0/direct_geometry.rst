@@ -10,35 +10,11 @@ General
 
 New features
 ############
-.. amalgamate:: Direct_Geometry/General/New_features
+- In :ref:`PyChop`, the phase offset for the disk chopper controller on MERLIN can now be modified through the yaml file for MERLIN. Furthermore, the default value has been changed from `1500` to `17000`.
 
 Bugfixes
 ############
-.. amalgamate:: Direct_Geometry/General/Bugfixes
-
-
-CrystalField
--------------
-
-New features
-############
-.. amalgamate:: Direct_Geometry/CrystalField/New_features
-
-Bugfixes
-############
-.. amalgamate:: Direct_Geometry/CrystalField/Bugfixes
-
-
-MSlice
-------
-
-New features
-############
-.. amalgamate:: Direct_Geometry/MSlice/New_features
-
-Bugfixes
-############
-.. amalgamate:: Direct_Geometry/MSlice/Bugfixes
+- Fixed a bug that prevented being able to `show detectors` for Let data.
 
 
 :ref:`Release 6.10.0 <v6.10.0>`
