@@ -173,7 +173,7 @@ private:
    * number of events.
    */
   void validateUncompressedCompressed(EventWorkspace_sptr ws_uncompressed, EventWorkspace_sptr ws_compressed,
-                                      const std::size_t NUM_HIST) {
+                                      const std::size_t NUM_HIST, const EventType uncompressed_type = EventType::TOF) {
     TS_ASSERT_EQUALS(ws_uncompressed->getNumberHistograms(), NUM_HIST);
     TS_ASSERT_EQUALS(ws_compressed->getNumberHistograms(), NUM_HIST);
 
@@ -185,7 +185,7 @@ private:
       TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
 
       // all uncompressed spectra should be raw events
-      TS_ASSERT_EQUALS(ws_uncompressed->getSpectrum(wi).getEventType(), EventType::TOF);
+      TS_ASSERT_EQUALS(ws_uncompressed->getSpectrum(wi).getEventType(), uncompressed_type);
 
       // pixels with at least one event will have switched to weighted
       if (ws_compressed->getSpectrum(wi).getNumberEvents() > 0)
@@ -913,6 +913,110 @@ public:
 
     // Check monitor workspace pointer held in main workspace
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
+  }
+
+  void test_Load_And_CompressEvents_weighted() {
+    constexpr std::size_t NUM_HIST{117760};
+    const std::string filename{"ARCS_sim_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string uncompressed_name = "arcs_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string compressed_name = "arcs_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST, EventType::WEIGHTED);
+
+    // cleanup
+    AnalysisDataService::Instance().remove(uncompressed_name);
+    AnalysisDataService::Instance().remove(compressed_name);
+  }
+
+  void test_Load_And_CompressEvents_with_nperiod_data() {
+    constexpr std::size_t NUM_HIST{40960};
+    const std::string filename{"LARMOR00003368.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string uncompressed_name = "larmor_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace, first workspace only
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name + "_1"));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string compressed_name = "larmor_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace, first workspace only
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name + "_1"));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST);
+
+    // cleanup
+    AnalysisDataService::Instance().remove(uncompressed_name);
+    AnalysisDataService::Instance().remove(compressed_name);
   }
 
   void test_Load_And_CompressEvents_tolerance_0() {
