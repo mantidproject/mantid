@@ -332,7 +332,7 @@ void DiffractionReduction::runGenericReduction(const QString &instName, const QS
   detRange.emplace_back(m_uiForm.spSpecMax->value());
 
   // Get generic reduction algorithm instance
-  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISDiffractionReduction");
+  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISIndirectDiffractionReduction");
   msgDiffReduction->initialize();
 
   // Set algorithm properties
