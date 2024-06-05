@@ -122,6 +122,14 @@ public:
                             std::string(e.what()), "Enter a name for the Input/InOut workspace")
   }
 
+  void test_invalid_workspace_length_is_captured() {
+    auto const &group = createTestingWorkspace("testWs", 1.0, false, 2);
+    auto alg = initialize_alg(group);
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain only a single spectrum.")
+  }
+
   /// Calculation Tests
 
   void test_normal_perfect_calculation_occurs() {
@@ -153,7 +161,7 @@ private:
 
   Mantid::API::WorkspaceGroup_sptr createTestingWorkspace(std::string const &outName,
                                                           double const flipAmplitudeMultiplier = 1.0,
-                                                          bool const TOFWs = false) {
+                                                          bool const TOFWs = false, int const numBanks = 1) {
 
     CreateSampleWorkspace makeWsAlg;
     makeWsAlg.initialize();
@@ -163,7 +171,7 @@ private:
     } else {
       makeWsAlg.setPropertyValue("XUnit", "wavelength");
     }
-    makeWsAlg.setProperty("NumBanks", 1);
+    makeWsAlg.setProperty("NumBanks", numBanks);
     makeWsAlg.setProperty("BankPixelWidth", 1);
     makeWsAlg.setProperty("XMin", 1.45);
     makeWsAlg.setProperty("XMax", 9.50);
