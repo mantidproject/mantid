@@ -830,7 +830,7 @@ const std::vector<WeightedEvent> &EventList::getWeightedEvents() const {
  * */
 std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() {
   if (eventType != WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::getWeightedEvents() called for an "
+    throw std::runtime_error("EventList::getWeightedEventsNoTime() called for an "
                              "EventList not of type WeightedEventNoTime. Use "
                              "getEvents() or getWeightedEvents().");
   return this->weightedEventsNoTime;
