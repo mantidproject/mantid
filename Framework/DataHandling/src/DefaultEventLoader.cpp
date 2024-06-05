@@ -62,7 +62,9 @@ DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollec
     if (alg->compressEvents && alg->compressTolerance != 0) {
       // Convert to weighted events
       for (size_t i = 0; i < m_ws.getNumberHistograms(); i++) {
-        m_ws.getSpectrum(i).switchTo(API::WEIGHTED_NOTIME);
+        for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
+          m_ws.getSpectrum(i, period).switchTo(API::WEIGHTED_NOTIME);
+        }
       }
       makeMapToEventLists(weightedNoTimeEventVectors);
     } else {
@@ -71,7 +73,9 @@ DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollec
   } else {
     // Convert to weighted events
     for (size_t i = 0; i < m_ws.getNumberHistograms(); i++) {
-      m_ws.getSpectrum(i).switchTo(API::WEIGHTED);
+      for (size_t period = 0; period < m_ws.nPeriods(); ++period) {
+        m_ws.getSpectrum(i, period).switchTo(API::WEIGHTED);
+      }
     }
     makeMapToEventLists(weightedEventVectors);
   }
