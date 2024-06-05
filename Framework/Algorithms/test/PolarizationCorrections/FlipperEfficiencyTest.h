@@ -144,7 +144,7 @@ public:
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
     for (const double &eff : outWs->dataY(0)) {
-      TS_ASSERT_DELTA(0.9333333333, eff, 1e-8);
+      TS_ASSERT_DELTA(0.9710144925, eff, 1e-8);
     }
   }
 

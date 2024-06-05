@@ -105,8 +105,8 @@ MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr 
   auto const &t01Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ONE);
   auto const &t00Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ZERO);
 
-  auto const &numerator = t00Ws - t01Ws + t11Ws - t10Ws;
-  auto const &denominator = 2 * (t00Ws - t01Ws);
+  auto const &numerator = (t11Ws * t00Ws) - (t10Ws * t01Ws);
+  auto const &denominator = (t11Ws + t10Ws) * (t00Ws - t01Ws);
   auto const &efficiency = numerator / denominator;
   return efficiency;
 }
