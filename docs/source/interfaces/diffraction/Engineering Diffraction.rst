@@ -212,6 +212,8 @@ File Filters
     :width: 600px
     :align: center
 
+.. _ui engineering gsas:
+
 GSAS-II Refinement
 ------------------
 
