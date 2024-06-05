@@ -94,7 +94,7 @@ ISIS Diagnostics
 #. With ``Instrument`` set to ``IRIS``, navigate to the ``ISIS Diagnostic`` tab
 #. On ``Input Runs``, type ``26176`` and press the Enter key
 #. The plot widget should render a spectrum with two black sliders indicating integration limits
-#. On the property browser, change the value of the  ``Preview Spectrum`` property, the plot should update with the appropiate spectrum
+#. On the property browser, change the value of the  ``Preview Spectrum`` property, the plot should update with the appropriate spectrum
    whenever the number is changed, unless is outside the range of allowed spectra
 #. Move the integration sliders, and check that the values of ``Start`` and ``End`` under the ``Peak`` property on the property browser are accordingly updated
 #. Change the values of ``Start`` and ``End`` on the property browser and check that the slider position is updated on the plot
@@ -108,7 +108,7 @@ ISIS Diagnostics
 #. Move the green sliders and check that the ``Start`` and ``End`` properties under the
    ``Background`` property are updated accordingly
 #. Selecting a non-overlapping background range, click on the ``Run`` button
-#. The preview plot and the workspace ending in `_slice` should update with the new integrated time slice
+#. The preview plot and the workspace ending in ``_slice`` should update with the new integrated time slice
 
 Transmission
 -------------
