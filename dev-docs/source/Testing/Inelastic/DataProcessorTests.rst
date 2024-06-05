@@ -1,7 +1,5 @@
-.. _inelastic_data_manipulation_testing:
-
-Inelastic Data Manipulation Testing
-===================================
+Inelastic Data Processor Testing
+================================
 
 .. contents::
    :local:
@@ -21,7 +19,7 @@ Elwin tab
 1. Direct data
 ##############
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Elwin`` tab
 #. Click on ``Add Workspaces``, a dialog window should prompt.
 #. Enter ``MAR27691_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``MAR2791_red`` workspace.
@@ -39,7 +37,7 @@ Elwin tab
 2. Indirect data
 ################
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Click on ``Add Workspaces``, a dialog window should prompt
 #. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``irs26176_graphite002_red`` workspace.
 #. Select the workspace from the table and click on ``Add Data``. Close the dialog.
@@ -63,7 +61,7 @@ I(Q, T) tab
 1. Direct data
 ##############
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Iqt`` tab
 #. Load the ``MARI27691_sqw.nxs`` file from the sample data
 #. Load the resolution file ``MARI27698_sqw.nxs`` from the sample data
@@ -78,7 +76,7 @@ I(Q, T) tab
 2. Indirect data
 ################
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Iqt`` tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
