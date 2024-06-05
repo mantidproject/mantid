@@ -10,6 +10,7 @@
 #include "DllOption.h"
 #include "GLColor.h"
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 #include "MantidQtWidgets/InstrumentView/ColorMap.h"
@@ -26,10 +27,8 @@ private:
   const InstrumentActor &m_actor;
   std::vector<GLColor> m_colors;
   std::vector<GLColor> m_pickColors;
-  mutable GLuint m_displayListId[2];
-  mutable bool m_useDisplayList[2];
-  mutable std::vector<detail::BankTextureBuilder> m_textures;
-  mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
+  std::vector<detail::BankTextureBuilder> m_textures;
+  std::map<size_t, size_t> m_reverseTextureIndexMap;
   ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;
@@ -38,9 +37,9 @@ private:
 public:
   InstrumentRenderer(const InstrumentActor &actor);
 
-  ~InstrumentRenderer();
+  virtual ~InstrumentRenderer() = default;
 
-  void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides, bool picking = false);
+  virtual void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides, bool picking = false) = 0;
 
   void reset();
 
@@ -64,15 +63,24 @@ public:
 
   size_t selectedLayer() const { return m_layer; }
 
-private:
-  void resetColors();
-  void resetPickColors();
-  void draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking);
+protected:
+  virtual void draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking) = 0;
   void drawGridBank(size_t bankIndex, bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
   void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);
   void drawSingleDetector(size_t detIndex, bool picking);
+  void invalidateAndDeleteDisplayList(std::vector<GLuint> &displayList, bool &useList);
+  void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t bankIndex,
+                     std::vector<bool> &visited);
+  virtual void resetDisplayLists() = 0;
+  const InstrumentActor &instrActor() const { return m_actor; };
+  void drawComponent(const size_t index, const std::vector<bool> &visibleComps, bool showGuides, bool picking,
+                     const Mantid::Geometry::ComponentInfo &compInfo, std::vector<bool> &visited);
+
+private:
+  void resetColors();
+  void resetPickColors();
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
