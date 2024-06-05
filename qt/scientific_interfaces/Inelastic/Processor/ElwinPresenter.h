@@ -47,7 +47,6 @@ public:
                  std::unique_ptr<IFitDataModel> dataModel);
   ~ElwinPresenter();
 
-  // base Manipulation tab methods
   void run() override;
   void setup() override;
   bool validate() override;

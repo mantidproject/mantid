@@ -34,8 +34,8 @@ class DataReduction;
 
 /** DataProcessor
 
-  This class defines common functionality of tabs used in the Indirect Data
-  Manipulation interface.
+  This class defines common functionality of tabs used in the Inelastic Data
+  Processor interface.
 */
 class MANTIDQT_INELASTIC_DLL DataProcessor : public InelasticTab {
   Q_OBJECT

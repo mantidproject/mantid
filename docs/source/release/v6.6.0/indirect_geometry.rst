@@ -8,7 +8,7 @@ Indirect Geometry Changes
 New Features
 ------------
 
-.. figure:: ../../images/6_6_release/Indirect/ManipulationTab.png
+.. figure:: ../../images/6_6_release/Indirect/ProcessorTab.png
    :align: center
    :width: 600
 
