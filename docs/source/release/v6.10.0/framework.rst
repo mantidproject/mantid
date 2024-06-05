@@ -87,14 +87,14 @@ New features
 ############
 - Algorithm :ref:`algm-LoadEventAsWorkspace2D` accepts new boolean parameter ``LoadNexusInstrumentXML``. Default is *true*.
 - File search/loading will now look in instrument data cache **on IDAaaS**.
-  The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains a local copy of the data archive.
-  This new feature will speed up file loading times for external users that do not have access to the data archive.
+  The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains the same raw data as the data archive from the past 3 years.
+  This new feature will speed up file loading times for external users on **on IDAaaS** that do not have access to the data archive.
   Please note that if you are **not** on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.
   Here is a demonstration on IDAaaS showing that an instrument file can now be loaded even when the archive is turned off:
 
-  .. figure::  ../../images/6_10_release/data-cache.gif
-    :align: center
-    :width: 950px
+.. figure::  ../../images/6_10_release/data-cache.gif
+  :align: center
+  :width: 950px
 
 
 Bugfixes
@@ -124,8 +124,8 @@ Bugfixes
 
   - The two sliders of the interface are now prevented from crossing each other and are automatically updated from the user input, no longer requiring a `Set` button:
 
-  .. figure::  ../../images/6_10_release/filter-events-gui.png
-     :width: 600px
+.. figure::  ../../images/6_10_release/filter-events-gui.png
+   :width: 600px
 
 
 Dependencies
