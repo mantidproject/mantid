@@ -1,1 +1,1 @@
-- The files tab of the :ref:`Elwin Tab <elwin>` of  :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>` has been removed. Workspaces can still be added from files in the multifile dialog of the workspaces tab.
+- The files tab of the :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>` has been removed. Workspaces can still be added from files in the multifile dialog of the workspaces tab.

@@ -90,11 +90,11 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in Elwin                                           |
+| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Processor <interface-inelastic-data-manipulation>` in Elwin                                              |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in Elwin                                           |
+| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Processor <interface-inelastic-data-manipulation>` in Elwin                                              |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Manipulation <interface-inelastic-data-manipulation>` in I(Q,t)                                          |
+| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Processor <interface-inelastic-data-manipulation>` in I(Q,t)                                             |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                        |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
@@ -228,8 +228,8 @@ Transmission
 ############
 No restrictions.
 
-Data Manipulation Suffixes
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data Processor Suffixes
+~~~~~~~~~~~~~~~~~~~~~~~
 Symmetrise
 ##########
 

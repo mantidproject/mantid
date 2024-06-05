@@ -1,1 +1,1 @@
-- The :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` algorithm will add the integration range to the output workspaces sample logs, calling it either from script or from the :ref:`Elwin Tab <elwin>` of :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>`.
+- The :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` algorithm will add the integration range to the output workspaces sample logs, calling it either from script or from the :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`.

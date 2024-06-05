@@ -40,7 +40,7 @@ public:
   /// Destructor
   ~DataManipulationInterface() override;
   /// Interface name
-  static std::string name() { return "Data Manipulation"; }
+  static std::string name() { return "Data Processor"; }
   // This interface's categories.
   static QString categoryInfo() { return "Inelastic"; }
 
