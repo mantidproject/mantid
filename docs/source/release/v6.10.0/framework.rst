@@ -67,7 +67,6 @@ Bugfixes
     behaviour.
 
 - Algortihm :ref:`Load <algm-Load>` now loads a single file faster.
-- Fixed doctest strings for :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`.
 - Algorithm :ref:`FindPeaks <algm-FindPeaks>` no longer crashes when the number of bins in the workspace are not sufficient to run :ref:`algm-SmoothData` algorithm.
 
 Fit Functions
