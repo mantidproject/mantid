@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Processor/DataManipulation.h"
+#include "Processor/DataProcessor.h"
 #include "Processor/ElwinModel.h"
 #include "Processor/ElwinPresenter.h"
 #include "Processor/ElwinView.h"

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "DataManipulationInterface.h"
+#include "DataProcessorInterface.h"
 
 #include "Common/Settings.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -34,22 +34,22 @@ using namespace Mantid::Geometry;
 using namespace MantidQt;
 
 namespace {
-Mantid::Kernel::Logger g_log("DataManipulationInterface");
+Mantid::Kernel::Logger g_log("DataProcessorInterface");
 }
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(DataManipulationInterface)
+DECLARE_SUBWINDOW(DataProcessorInterface)
 
-DataManipulationInterface::DataManipulationInterface(QWidget *parent) : InelasticInterface(parent) {}
+DataProcessorInterface::DataProcessorInterface(QWidget *parent) : InelasticInterface(parent) {}
 
-DataManipulationInterface::~DataManipulationInterface() = default;
+DataProcessorInterface::~DataProcessorInterface() = default;
 
-std::string DataManipulationInterface::documentationPage() const { return "Inelastic Data Processor"; }
+std::string DataProcessorInterface::documentationPage() const { return "Inelastic Data Processor"; }
 
 /**
  * Called when the user clicks the Python export button.
  */
-void DataManipulationInterface::exportTabPython() {
+void DataProcessorInterface::exportTabPython() {
   auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
   m_presenters[tabName]->exportPythonScript();
 }
@@ -57,7 +57,7 @@ void DataManipulationInterface::exportTabPython() {
 /**
  * Sets up Qt UI file and connects signals, slots.
  */
-void DataManipulationInterface::initLayout() {
+void DataProcessorInterface::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -79,7 +79,7 @@ void DataManipulationInterface::initLayout() {
   InelasticInterface::initLayout();
 }
 
-void DataManipulationInterface::applySettings(std::map<std::string, QVariant> const &settings) {
+void DataProcessorInterface::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_presenters.begin(); tab != m_presenters.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
   }
@@ -92,8 +92,8 @@ void DataManipulationInterface::applySettings(std::map<std::string, QVariant> co
  * @param param Parameter name
  * @return Value as QString
  */
-QString DataManipulationInterface::getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp,
-                                                              const std::string &param) {
+QString DataProcessorInterface::getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp,
+                                                           const std::string &param) {
   QString value;
 
   if (!comp->hasParameter(param)) {
@@ -116,7 +116,7 @@ QString DataManipulationInterface::getInstrumentParameterFrom(const Mantid::Geom
 /**
  * Tasks to be carried out after an empty instument has finished loading
  */
-void DataManipulationInterface::instrumentLoadingDone(bool error) {
+void DataProcessorInterface::instrumentLoadingDone(bool error) {
   if (error) {
     g_log.warning("Instument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "

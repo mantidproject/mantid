@@ -29,7 +29,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model)
-    : DataManipulation(parent), m_view(view), m_model(std::move(model)), m_selectedSpectrum(0) {
+    : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));

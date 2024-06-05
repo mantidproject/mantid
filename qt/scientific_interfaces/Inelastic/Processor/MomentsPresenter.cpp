@@ -27,7 +27,7 @@ namespace MantidQt::CustomInterfaces {
 /** Constructor
  */
 MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model)
-    : DataManipulation(parent), m_view(view), m_model(std::move(model)) {
+    : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
