@@ -2,7 +2,7 @@ set(ALL_TEST_FILES)
 set(ALL_TEST_HELPERS)
 
 add_subdirectory(Common)
-add_subdirectory(Manipulation)
+add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)

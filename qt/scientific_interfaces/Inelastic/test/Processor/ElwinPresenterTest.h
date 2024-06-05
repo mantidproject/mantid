@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Manipulation/ElwinModel.h"
-#include "Manipulation/ElwinPresenter.h"
-#include "Manipulation/ElwinView.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "Processor/ElwinModel.h"
+#include "Processor/ElwinPresenter.h"
+#include "Processor/ElwinView.h"
 
 #include "../Common/MockObjects.h"
 #include "../QENSFitting/MockObjects.h"

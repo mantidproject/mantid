@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Manipulation/SqwModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "Processor/SqwModel.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
