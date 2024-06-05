@@ -67,7 +67,7 @@ Data reduction
 #. In the main GUI right-click on the ``iris26184-26185_multi_graphite002_red`` workspace
 #. Choose ``Plot spectrum``, note the number of spectra, should be 6
 #. Choose ``Plot All``, this should result in a plot of all 6 spectra
-#. Open ``Interfaces`` > ``Inelastic`` > ``Data Manipulation`` and go to the ``S(Q, W)`` tab
+#. Open ``Interfaces`` > ``Inelastic`` > ``Data Processor`` and go to the ``S(Q, W)`` tab
 #. Change ``File`` to ``Workspace`` and load the ``_red`` workspace just created
 #. ``Q-Low`` and ``Q-High`` should be automatically updated to the y axis range of the contour plot.
 #. ``E-Low`` and ``E-High`` should be automatically updated to the x axis range of the contour plot.

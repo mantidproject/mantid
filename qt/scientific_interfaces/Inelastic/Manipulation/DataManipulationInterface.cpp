@@ -44,7 +44,7 @@ DataManipulationInterface::DataManipulationInterface(QWidget *parent) : Inelasti
 
 DataManipulationInterface::~DataManipulationInterface() = default;
 
-std::string DataManipulationInterface::documentationPage() const { return "Inelastic Data Manipulation"; }
+std::string DataManipulationInterface::documentationPage() const { return "Inelastic Data Processor"; }
 
 /**
  * Called when the user clicks the Python export button.

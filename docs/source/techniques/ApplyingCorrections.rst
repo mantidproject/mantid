@@ -58,7 +58,7 @@ algorithm in the :ref:`Inelastic Corrections <interface-inelastic-corrections>` 
 For sample and container chemical formula, we type `H2-O` and `Al`, respectively. Leaving all other parameters as default.
 Running the algorithm we generate a corrections group workspace. This workspace can be used in the `Apply Absorption Corrections` tab of the interface
 to generate a corrected reduced workspace.
-The corrected reduced workspace can then be used to generate the :math:`S(Q, \omega)` profile from the `S(Q,w)` tab of the :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>`.
+The corrected reduced workspace can then be used to generate the :math:`S(Q, \omega)` profile from the `S(Q,w)` tab of the :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`.
 A 3D plot of the generated workspace is shown below:
 
 .. figure:: ../images/water_sqw_corrected_for_absorption.png
