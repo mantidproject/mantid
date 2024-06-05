@@ -1362,7 +1362,7 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowse
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:5116
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1628
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MultiplyMD.cpp:0
-unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentActor.h:256
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentActor.h:257
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h:46
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspaceSelector.cpp:174
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300

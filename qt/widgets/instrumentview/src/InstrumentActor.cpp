@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRendererClassic.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRendererMultiList.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -14,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -84,7 +86,7 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
 
   m_isCompVisible.assign(componentInfo().size(), true);
 
-  m_renderer.reset(new InstrumentRenderer(*this));
+  resetInstrumentRenderer();
   m_renderer->changeScaleType(m_scaleType);
 }
 
@@ -112,7 +114,7 @@ void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
 
   m_isCompVisible.assign(componentInfo().size(), true);
 
-  m_renderer.reset(new InstrumentRenderer(*this));
+  resetInstrumentRenderer();
   m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
@@ -136,6 +138,16 @@ void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
   // send signal back to the InstrumentWidget to finish setting up
   emit initWidget(resetGeometry, setDefaultView);
   emit refreshView();
+}
+
+void InstrumentActor::resetInstrumentRenderer() {
+  const auto mesaSetting =
+      Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.MesaBugWorkaround");
+  if (mesaSetting == "On") {
+    m_renderer.reset(new InstrumentRendererMultiList(*this));
+    return;
+  }
+  m_renderer.reset(new InstrumentRendererClassic(*this));
 }
 
 void InstrumentActor::cancel() {
