@@ -166,6 +166,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxChunkSize", 0.001)); // results in loading by 6 chunks
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", cncs_result));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CompressTOFTolerance", -0.01));        // log but should be overruled by
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CompressBinningMode", "Linear")); // the binning mode
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

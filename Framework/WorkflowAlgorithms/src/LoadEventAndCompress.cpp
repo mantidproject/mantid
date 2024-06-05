@@ -54,6 +54,8 @@ void LoadEventAndCompress::init() {
   copyProperty(algLoadEventNexus, "OutputWorkspace");
   copyProperty(algDetermineChunking, "MaxChunkSize");
   declareProperty("CompressTOFTolerance", .01);
+  copyProperty(algLoadEventNexus, "CompressBinningMode");
+  setPropertyGroup("CompressBinningMode", ""); // unset the group from LoadEventNexus
 
   copyProperty(algLoadEventNexus, "FilterByTofMin");
   copyProperty(algLoadEventNexus, "FilterByTofMax");
@@ -139,6 +141,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   alg->setProperty<double>("FilterMonByTimeStart", getProperty("FilterMonByTimeStart"));
   alg->setProperty<double>("FilterMonByTimeStop", getProperty("FilterMonByTimeStop"));
   alg->setProperty<double>("CompressTolerance", getProperty("CompressTOFTolerance"));
+  alg->setProperty<string>("CompressBinningMode", getProperty("CompressBinningMode"));
   alg->setProperty<int>("NumberOfBins", 1);
 
   if (m_filterBadPulses > 0.)
