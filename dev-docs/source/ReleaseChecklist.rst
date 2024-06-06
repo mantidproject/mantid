@@ -563,7 +563,7 @@ Anaconda channel.
    <https://github.com/ral-facilities/daaas-ansible-workspace>`__ (a member of the ISIS core team or IDAaaS support)
    to add the new release to IDAaaS. They can do this by creating a PR targeting the ``preprod`` branch, adding
    the new release version to the list of versions installed on IDAaaS `here
-   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/master/roles/software/analysis/mantid/defaults/main.yml>`__.
+   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml>`__.
    Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
    The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
 
