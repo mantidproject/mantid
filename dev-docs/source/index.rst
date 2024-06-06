@@ -278,7 +278,7 @@ Component Overviews
    IndexProperty
    IndirectDataAnalysisAddingFitType
    IndirectDataAnalysisFileStructure
-   InelasticDataManipulationFileStructure
+   InelasticDataProcessorFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend
