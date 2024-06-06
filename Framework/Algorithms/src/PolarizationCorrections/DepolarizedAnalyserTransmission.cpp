@@ -16,7 +16,6 @@ namespace {
 namespace PropNames {
 std::string_view constexpr DEP_WORKSPACE{"DepolarizedWorkspace"};
 std::string_view constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
-std::string_view constexpr EMPTY_CELL_TRANS_START{"TEStartingValue"};
 std::string_view constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 std::string_view constexpr START_X = "StartX";
 std::string_view constexpr END_X = "EndX";
@@ -33,19 +32,17 @@ namespace FitValues {
 using namespace Mantid::API;
 
 double constexpr LAMBDA_CONVERSION_FACTOR = -0.0733;
-double constexpr EMPTY_CELL_TRANS_START = 0.9;
 double constexpr DEPOL_OPACITY_START = 12.6;
-std::string_view constexpr EMPTY_CELL_TRANS_NAME = "T_E";
 std::string_view constexpr DEPOL_OPACITY_NAME = "pxd";
 double constexpr START_X_START = 1.75;
 double constexpr END_X_START = 14;
 std::string_view constexpr FIT_SUCCESS{"success"};
 
-std::shared_ptr<IFunction> createFunction(std::string const &mtTransStart, std::string const &depolOpacStart) {
+std::shared_ptr<IFunction> createFunction(std::string const &depolOpacStart) {
   std::ostringstream funcSS;
-  funcSS << "name=UserFunction, Formula=" << EMPTY_CELL_TRANS_NAME << "*exp(" << LAMBDA_CONVERSION_FACTOR << "*"
-         << DEPOL_OPACITY_NAME << "*x)";
-  funcSS << "," << EMPTY_CELL_TRANS_NAME << "=" << mtTransStart;
+  funcSS << "name=UserFunction, Formula="
+            "exp("
+         << LAMBDA_CONVERSION_FACTOR << "*" << DEPOL_OPACITY_NAME << "*x)";
   funcSS << "," << DEPOL_OPACITY_NAME << "=" << depolOpacStart;
   return FunctionFactory::Instance().createInitialized(funcSS.str());
 }
@@ -84,9 +81,6 @@ void DepolarizedAnalyserTransmission::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropNames::MT_WORKSPACE), "",
                                                                        Kernel::Direction::Input, wsValidator),
                   "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
-  declareProperty(std::string(PropNames::EMPTY_CELL_TRANS_START), FitValues::EMPTY_CELL_TRANS_START,
-                  "Starting value for the empty analyser cell transmission fit property " +
-                      std::string(FitValues::EMPTY_CELL_TRANS_NAME) + ".");
   declareProperty(std::string(PropNames::DEPOL_OPACITY_START), FitValues::DEPOL_OPACITY_START,
                   "Starting value for the depolarized cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
@@ -106,7 +100,6 @@ void DepolarizedAnalyserTransmission::init() {
   setPropertyGroup(std::string(PropNames::DEP_WORKSPACE), inputGroup);
   setPropertyGroup(std::string(PropNames::MT_WORKSPACE), inputGroup);
   auto const &fitGroup = std::string(PropNames::GROUP_FIT);
-  setPropertyGroup(std::string(PropNames::EMPTY_CELL_TRANS_START), fitGroup);
   setPropertyGroup(std::string(PropNames::DEPOL_OPACITY_START), fitGroup);
   auto const &outputGroup = std::string(PropNames::GROUP_OUTPUT);
   setPropertyGroup(std::string(PropNames::OUTPUT_WORKSPACE), outputGroup);
@@ -154,8 +147,7 @@ MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarizedProportion(
 
 void DepolarizedAnalyserTransmission::calcWavelengthDependentTransmission(MatrixWorkspace_sptr const &inputWs,
                                                                           std::string const &outputWsName) {
-  auto func = FitValues::createFunction(getPropertyValue(std::string(PropNames::EMPTY_CELL_TRANS_START)),
-                                        getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START)));
+  auto func = FitValues::createFunction(getPropertyValue(std::string(PropNames::DEPOL_OPACITY_START)));
   auto fitAlg = createChildAlgorithm("Fit");
   double const &startX = getProperty(std::string(PropNames::START_X));
   double const &endX = getProperty(std::string(PropNames::END_X));
