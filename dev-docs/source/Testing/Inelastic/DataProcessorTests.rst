@@ -17,7 +17,7 @@ Symmetrise tab
 --------------
 
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Symmetrise`` tab
 #. On the File Input, click on ``Browse``, a dialog window should prompt.
 #. Find the file ``irs26176_graphite002_red.nxs`` from the ISIS Sample Data and Load it.
@@ -51,7 +51,7 @@ Symmetrise tab
 --------------
 
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``S(Q,w)`` tab
 #. On the File Input, click on ``Browse``, a dialog window should prompt.
 #. Find the file ``irs26176_graphite002_red.nxs`` from the ISIS Sample Data and Load it.
@@ -78,7 +78,7 @@ Moments tab
 --------------
 
 
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Moments`` tab
 #. On the File Input, change the drop-down selector from ``File`` to ``Workspace``.
 #. Select the previously generated workspace ``irs26176_graphite002_sqw`` from the selector.
