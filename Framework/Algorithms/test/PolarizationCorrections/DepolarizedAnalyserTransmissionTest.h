@@ -12,11 +12,9 @@
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
 
 namespace {
-constexpr double T_E_VALUE = 82593.9;
-constexpr double PXD_VALUE = 14.9860;
-constexpr double T_E_ERROR = 26088049.0;
-constexpr double PXD_ERROR = 467.994241;
-constexpr double COST_FUNC_MAX = 5e-15;
+constexpr double PXD_VALUE = 9.32564;
+constexpr double PXD_ERROR = 7.92860;
+constexpr double COST_FUNC_MAX = 3.3e-5;
 
 constexpr double FIT_DELTA = 1e-6;
 } // namespace
@@ -40,8 +38,7 @@ public:
 
   void test_normal_exec() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+    auto const &[mtWs, depWs] = createDefaultWorkspaces();
 
     auto alg = createAlgorithm(mtWs, depWs);
     alg->execute();
@@ -56,8 +53,7 @@ public:
 
   void test_fit_ws_is_output_when_optional_prop_set() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+    auto const &[mtWs, depWs] = createDefaultWorkspaces();
     auto alg = createAlgorithm(mtWs, depWs);
 
     // WHEN
@@ -74,11 +70,9 @@ public:
 
   void test_different_start_end_x() {
     // GIVEN
-    auto constexpr T_E_ERROR_DIFX = 25693283.9;
-    auto constexpr PXD_ERROR_DIFX = 458.447482;
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
-
+    auto constexpr PXD_VALUE_DIFX = 9.3256240143;
+    auto constexpr PXD_ERROR_DIFX = 7.9249356146;
+    auto const &[mtWs, depWs] = createDefaultWorkspaces();
     auto alg = createAlgorithm(mtWs, depWs);
     alg->setProperty("StartX", 1.5);
     alg->setProperty("EndX", 14.5);
@@ -88,20 +82,16 @@ public:
     TS_ASSERT(alg->isExecuted());
     ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), T_E_ERROR_DIFX, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(1), PXD_ERROR_DIFX, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT_DELTA(outputWs->getColumn("Value")->toDouble(0), PXD_VALUE_DIFX, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(outputWs->getColumn("Error")->toDouble(0), PXD_ERROR_DIFX, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_LESS_THAN(outputWs->getColumn("Value")->toDouble(1), COST_FUNC_MAX);
     TS_ASSERT_EQUALS(fitWs, nullptr)
   }
 
   void test_failed_fit() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)");
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+    auto const &[mtWs, depWs] = createDefaultWorkspaces();
     auto alg = createAlgorithm(mtWs, depWs);
-    alg->setProperty("TEStartingValue", 1e50);
     alg->setProperty("PxDStartingValue", 1e50);
 
     // THEN
@@ -112,8 +102,8 @@ public:
 
   void test_apparently_successful_fit() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "0*x");
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)");
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "name=UserFunction, Formula=0*x");
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -126,8 +116,9 @@ public:
 
   void test_invalid_workspace_lengths() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 12);
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 2);
+    MatrixWorkspace_sptr const &mtWs =
+        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 12);
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 2);
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -140,8 +131,9 @@ public:
 
   void test_non_matching_workspace_bins() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "1.465e-07*exp(0.0733*4.76*x)", 1, true, 0.2);
-    auto const &depWs = createTestingWorkspace("__dep", "0.0121*exp(-0.0733*10.226*x)", 1);
+    MatrixWorkspace_sptr const &mtWs =
+        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 1, true, 0.2);
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 1);
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -152,7 +144,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &formula,
+  MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &function,
                                               int const numSpectra = 1, bool const isMonitor = true,
                                               double const binWidth = 0.1) {
     CreateSampleWorkspace makeWsAlg;
@@ -160,7 +152,7 @@ private:
     makeWsAlg.setChild(true);
     makeWsAlg.setPropertyValue("OutputWorkspace", outName);
     makeWsAlg.setPropertyValue("Function", "User Defined");
-    makeWsAlg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=" + formula);
+    makeWsAlg.setPropertyValue("UserDefinedFunction", function);
     makeWsAlg.setPropertyValue("XUnit", "wavelength");
     if (isMonitor) {
       makeWsAlg.setProperty("NumBanks", 0);
@@ -176,6 +168,12 @@ private:
     return makeWsAlg.getProperty("OutputWorkspace");
   }
 
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> createDefaultWorkspaces() {
+    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397");
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
+    return std::pair{mtWs, depWs};
+  }
+
   std::shared_ptr<DepolarizedAnalyserTransmission> createAlgorithm(MatrixWorkspace_sptr const &mtWs,
                                                                    MatrixWorkspace_sptr const &depWs) {
     auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
@@ -189,10 +187,8 @@ private:
   }
 
   void validateOutputParameters(ITableWorkspace_sptr const &paramsWs) {
-    TS_ASSERT_DELTA(paramsWs->getColumn("Value")->toDouble(0), T_E_VALUE, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(paramsWs->getColumn("Value")->toDouble(1), PXD_VALUE, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(paramsWs->getColumn("Error")->toDouble(0), T_E_ERROR, T_E_VALUE * FIT_DELTA);
-    TS_ASSERT_DELTA(paramsWs->getColumn("Error")->toDouble(1), PXD_ERROR, PXD_VALUE * FIT_DELTA);
-    TS_ASSERT_LESS_THAN(paramsWs->getColumn("Value")->toDouble(2), COST_FUNC_MAX);
+    TS_ASSERT_DELTA(paramsWs->getColumn("Value")->toDouble(0), PXD_VALUE, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_DELTA(paramsWs->getColumn("Error")->toDouble(0), PXD_ERROR, PXD_VALUE * FIT_DELTA);
+    TS_ASSERT_LESS_THAN(paramsWs->getColumn("Value")->toDouble(1), COST_FUNC_MAX);
   }
 };
