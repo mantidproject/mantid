@@ -32,7 +32,14 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
     // new roi is the intersection of these two
     auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, pulse_roi);
     m_roi.clear();
-    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+    if (roi_combined.empty()) {
+      // if roi_combined is empty then no pulses should be included, just set range to 0
+      m_roi.push_back(0);
+      m_roi.push_back(0);
+      m_roi_complex = false;
+      return;
+    } else
+      m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
     m_roi_complex = bool(m_roi.size() > 2);
   }
 
@@ -56,7 +63,12 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   if ((firstPulseIndex != m_roi.front()) || (lastPulseIndex != m_roi.back())) {
     auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, {firstPulseIndex, lastPulseIndex});
     m_roi.clear();
-    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+    if (roi_combined.empty()) {
+      // if roi_combined is empty then no pulses should be included, just set range to 0
+      m_roi.push_back(0);
+      m_roi.push_back(0);
+    } else
+      m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
   }
 
   // after the updates, recalculate if the roi is more than a single region
