@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-
-#include "DataProcessor.h"
-#include "DataProcessorInterface.h"
 #include "Common/DataModel.h"
 #include "Common/IDataModel.h"
+#include "DataProcessor.h"
+#include "DataProcessorInterface.h"
 
 #include "ElwinModel.h"
 #include "ElwinView.h"
