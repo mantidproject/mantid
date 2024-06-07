@@ -143,28 +143,30 @@ Test 4
 
 This test covers the loading and plotting focused data in the fitting tab.
 
-.. note:: Sometimes it will be tricky to load ENGINX files from the archive and the red ``*`` next to the ``Browse`` button won't disappear and will raise an error saying ``Check run numbers/path is valid.`` or ``Mantid is searching for data files. Please wait``. Try re-entering the Calibration Sample number and wait till the red ``*`` is cleared before clicking ``Calibrate`` button. If the log level is set to Information, found path = 1 will be visible when the runs are found from the archive.
+.. note:: Sometimes it will be tricky to load ENGINX files from the archive and the red ``*`` next to the ``Browse`` button won't disappear. Proceeding with the red ``*`` will raise an error saying ``Check run numbers/path is valid.`` or ``Mantid is searching for data files. Please wait``. In such cases, please try re-entering the text and wait till the red ``*`` is cleared before proceeding. If the log level is set to Information, found path = 1 will be visible in the message log when the runs are found from the archive.
 
-0. Ensure you can access the ISIS data archive. In the ``Calibration`` tab, select ``Create New Calibration`` and enter ``Calibration sample`` # ``305738``. Before proceeding, make sure the red ``*`` next to the ``Browse`` button is disappeared when clicked somewhere outside that text box.
-   Untick ``Crop Calibration`` option and click on ``Calibrate`` button. On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521``. These sample runs have different stress and strain log values. Make sure the red ``*`` s next to the two ``Browse`` buttons are cleared when clicked outside the text boxes or wait otherwise. Then click ``Focus``.
+1. Ensure you can access the ISIS data archive. In the ``Calibration`` tab, select ``Create New Calibration`` and enter ``Calibration sample`` # ``305738``. Before proceeding, make sure the red ``*`` next to the ``Browse`` button is disappeared when clicked somewhere outside that text box.
+   Untick ``Crop Calibration`` option and click on ``Calibrate`` button.
 
-1. In the ``Fitting`` tab, load multiple of these newly focused TOF `.nxs` files in the ``Load Focused Data`` section. The path to the focused files should be auto populated
+2.  On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521``. These sample runs have different stress and strain log values. Make sure the red ``*`` s next to the two ``Browse`` buttons are cleared when clicked outside the text boxes or wait otherwise. Then click ``Focus``.
 
-2. Click the ``Load`` button. A row should be added to the UI table for each focused run.
+3. In the ``Fitting`` tab, load multiple of these newly focused TOF `.nxs` files in the ``Load Focused Data`` section. The path to the focused files should be auto populated.
+
+4. Click the ``Load`` button. A row should be added to the UI table for each focused run.
    There should be a grouped workspace with the suffix `_logs_Fitting` in the ADS with tables corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI).
    In the same grouped workspace there should be an additional table called `run_info_Fitting` that provides some of the metadata for each run.
    Each row in these tables should correspond to the equivalent row in the UI table.
 
-3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
+5. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change which sample log checkboxes are selected. Close settings and then close and re-open the Engineering Diffraction interface.
    Reopen settings to check these selected sample logs have been remembered. Note that any change to the selected logs won't take effect until the interface is reopened.
 
-4. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 above but this time try checking the ``Add To Plot`` checkbox, when loading the run(s) the data should now be plotted and the checkbox in the ``Plot`` column of the UI table should be checked.
+6. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 above but this time try checking the ``Add To Plot`` checkbox, when loading the run(s) the data should now be plotted and the checkbox in the ``Plot`` column of the UI table should be checked.
 
-5. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 again but load the d-spacing .nxs file(s) instead
+7. Clear the runs by clicking ``Remove All`` below the table. Repeat steps 1-2 again but load the d-spacing .nxs file(s) instead.
 
-6. Plot some data and un-dock the plot in the UI by dragging or double-clicking the bar at the top of the plot labelled ``Fit Plot``. The plot can now be re-sized.
+8. Plot some data and un-dock the plot in the UI by dragging or double-clicking the bar at the top of the plot labelled ``Fit Plot``. The plot can now be re-sized.
 
-7. To dock it double click the ``Fit Plot`` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
+9. To dock it double click the ``Fit Plot`` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
 
 Test 5
 ^^^^^^
