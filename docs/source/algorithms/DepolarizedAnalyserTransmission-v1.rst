@@ -10,7 +10,7 @@ Description
 -----------
 
 Takes a pair of monitor-normalised, single-spectra workspaces representing a depolarized helium cell and the empty cell to
-calculate the transmission of the depolarized cell.
+calculate the transmission of the depolarized cell, as described by Wildes [#WILDES]_ and by Krycka et al. [#KRYCKA]_.
 
 .. math::
 
@@ -61,6 +61,16 @@ Output:
 
    PXD Value = ...
    T_E Value = ...
+
+
+References
+----------
+
+.. [#WILDES] A. R. Wildes, *Neutron News*, **17** 17 (2006)
+             `doi: 10.1080/10448630600668738 <https://doi.org/10.1080/10448630600668738>`_
+.. [#KRYCKA] K. Krycka et al., *J. Appl. Crystallogr.*, **45** (2012)
+             `doi: 10.1107/S0021889812003445 <https://doi.org/10.1107/S0021889812003445>`_
+
 
 .. categories::
 
