@@ -17,7 +17,7 @@ namespace Inelastic {
 class ConvFitAddWorkspaceDialog;
 class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public FitDataPresenter {
 public:
-  ConvFitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view);
+  ConvFitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
 
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 

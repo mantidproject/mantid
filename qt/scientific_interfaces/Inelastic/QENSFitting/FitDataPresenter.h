@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitDataModel.h"
+#include "Common/DataModel.h"
 #include "FitDataView.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ParameterEstimation.h"
@@ -34,7 +34,7 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
-  FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view);
+  FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
   ~FitDataPresenter();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
@@ -85,7 +85,7 @@ protected:
   virtual void addTableEntry(FitDomainIndex row);
 
   IFitTab *m_tab;
-  IFitDataModel *m_model;
+  IDataModel *m_model;
   IFitDataView *m_view;
 
 private:

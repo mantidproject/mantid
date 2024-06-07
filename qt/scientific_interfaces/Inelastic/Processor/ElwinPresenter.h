@@ -6,8 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+
 #include "DataProcessor.h"
 #include "DataProcessorInterface.h"
+#include "Common/DataModel.h"
+#include "Common/IDataModel.h"
+
 #include "ElwinModel.h"
 #include "ElwinView.h"
 #include "IElwinView.h"
@@ -15,7 +19,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "QENSFitting/FitDataModel.h"
 #include "ui_ElwinTab.h"
 
 namespace MantidQt {
@@ -44,7 +47,7 @@ class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwi
 public:
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
-                 std::unique_ptr<IFitDataModel> dataModel);
+                 std::unique_ptr<IDataModel> dataModel);
   ~ElwinPresenter();
 
   void run() override;
@@ -89,7 +92,7 @@ private:
 
   IElwinView *m_view;
   std::unique_ptr<IElwinModel> m_model;
-  std::unique_ptr<IFitDataModel> m_dataModel;
+  std::unique_ptr<IDataModel> m_dataModel;
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;

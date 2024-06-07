@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/IDataModel.h"
 #include "FitPlotModel.h"
-#include "IFitDataModel.h"
 #include "IFitOutput.h"
 #include "IFittingModel.h"
 #include "ParameterEstimation.h"
@@ -92,7 +92,7 @@ public:
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
 
-  IFitDataModel *getFitDataModel() const override;
+  IDataModel *getFitDataModel() const override;
   IFitPlotModel *getFitPlotModel() const override;
 
   // Used for testing purposes
@@ -107,7 +107,7 @@ protected:
   std::string m_fitType;
   std::string m_fitString;
 
-  std::unique_ptr<IFitDataModel> m_fitDataModel;
+  std::unique_ptr<IDataModel> m_fitDataModel;
   std::unique_ptr<IFitPlotModel> m_fitPlotModel;
 
 private:

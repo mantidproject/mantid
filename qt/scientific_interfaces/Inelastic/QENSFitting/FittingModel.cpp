@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FittingModel.h"
-#include "FitDataModel.h"
+#include "Common/DataModel.h"
 #include "FitOutput.h"
 #include "FitTabConstants.h"
 
@@ -120,7 +120,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const Ma
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
 }
 
-void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IFitDataModel *fittingData) {
+void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IDataModel *fittingData) {
   for (auto index = FitDomainIndex{0}; index < FitDomainIndex{fittingData->getNumberOfDomains()}; ++index) {
     std::string suffix = index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(fitAlgorithm, fittingData->getWorkspace(index), fittingData->getSpectrum(index),
@@ -183,7 +183,7 @@ std::ostringstream &addInputString(const std::string &workspaceName, size_t work
     throw std::runtime_error("Workspace name is empty. The sample workspace may not be loaded.");
 }
 
-std::string constructInputString(const IFitDataModel *fittingData) {
+std::string constructInputString(const IDataModel *fittingData) {
   std::ostringstream input;
   for (auto index = FitDomainIndex{0}; index < fittingData->getNumberOfDomains(); ++index) {
     addInputString(fittingData->getWorkspace(index)->getName(), fittingData->getSpectrum(index), input);
@@ -308,8 +308,8 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 FittingModel::FittingModel()
-    : m_fitType("FitType"), m_fitString("FitString"), m_fitDataModel(std::make_unique<FitDataModel>()),
-      m_fitPlotModel(), m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
+    : m_fitType("FitType"), m_fitString("FitString"), m_fitDataModel(std::make_unique<DataModel>()), m_fitPlotModel(),
+      m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
       m_fitOutput(std::make_unique<FitOutput>()), m_activeFunction(), m_fitFunction(), m_defaultParameters() {
   m_fitPlotModel = std::make_unique<FitPlotModel>(m_fitDataModel->getFittingData(), m_fitOutput.get());
 }
@@ -635,7 +635,7 @@ void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   }
 }
 
-IFitDataModel *FittingModel::getFitDataModel() const { return m_fitDataModel.get(); }
+IDataModel *FittingModel::getFitDataModel() const { return m_fitDataModel.get(); }
 
 IFitPlotModel *FittingModel::getFitPlotModel() const { return m_fitPlotModel.get(); }
 
