@@ -52,6 +52,22 @@ void FlipperEfficiency::init() {
                   "File name or path for the output to be saved to.");
 }
 
+namespace {
+void validateInputWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                            std::map<std::string, std::string> &problems) {
+  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
+  if (unit->unitID() != "Wavelength") {
+    problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
+    return;
+  }
+
+  if (workspace->getNumberHistograms() != 1) {
+    problems[PropNames::INPUT_WS] = "All input workspaces must contain only a single spectrum.";
+    return;
+  }
+}
+} // namespace
+
 std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
   std::map<std::string, std::string> problems;
   // Check input.
@@ -66,10 +82,7 @@ std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
   } else {
     for (size_t i = 0; i < groupWs->size(); ++i) {
       MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
-      Unit_const_sptr unit = stateWs->getAxis(0)->unit();
-      if (unit->unitID() != "Wavelength") {
-        problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
-      }
+      validateInputWorkspace(stateWs, problems);
     }
   }
 
@@ -105,8 +118,8 @@ MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr 
   auto const &t01Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ONE);
   auto const &t00Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ZERO);
 
-  auto const &numerator = t00Ws - t01Ws + t11Ws - t10Ws;
-  auto const &denominator = 2 * (t00Ws - t01Ws);
+  auto const &numerator = (t11Ws * t00Ws) - (t10Ws * t01Ws);
+  auto const &denominator = (t11Ws + t10Ws) * (t00Ws - t01Ws);
   auto const &efficiency = numerator / denominator;
   return efficiency;
 }
