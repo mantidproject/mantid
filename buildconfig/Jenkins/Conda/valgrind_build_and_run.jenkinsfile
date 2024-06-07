@@ -28,21 +28,21 @@ pipeline {
         }
       }
     }
-    stage ('Copy artifacts') {
-      options {
-        timestamps ()
-        retry(3)
-      }
-      steps {
-        checkoutSource("${GIT_SHA}")
-        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
-          fingerprintArtifacts: true,
-          projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}'),
-          target: 'conda-packages',
-          flatten: true
-      }
-    }
+    // stage ('Copy artifacts') {
+    //   options {
+    //     timestamps ()
+    //     retry(3)
+    //   }
+    //   steps {
+    //     checkoutSource("${GIT_SHA}")
+    //     copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
+    //       fingerprintArtifacts: true,
+    //       projectName: '${JOB_NAME}',
+    //       selector: specific('${BUILD_NUMBER}'),
+    //       target: 'conda-packages',
+    //       flatten: true
+    //   }
+    // }
   }
 }
 
