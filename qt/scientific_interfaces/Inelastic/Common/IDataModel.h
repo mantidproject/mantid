@@ -23,13 +23,13 @@ using namespace MantidWidgets;
 using FitDataCollectionType = IndexCollectionType<WorkspaceID, std::unique_ptr<FitData>>;
 
 /*
-   IFitDataModel - Specifies an interface for updating, querying and
+   IDataModel - Specifies an interface for updating, querying and
    accessing the raw data in Tabs
 */
 
-class MANTIDQT_INELASTIC_DLL IFitDataModel {
+class MANTIDQT_INELASTIC_DLL IDataModel {
 public:
-  virtual ~IFitDataModel() = default;
+  virtual ~IDataModel() = default;
   virtual std::vector<FitData> *getFittingData() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
@@ -41,6 +41,7 @@ public:
   virtual FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual std::vector<double> getQValuesForData() const = 0;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
+
   virtual std::vector<std::string> getWorkspaceNames() const = 0;
   virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
 
@@ -65,7 +66,6 @@ public:
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual bool setResolution(const std::string &name) = 0;
   virtual bool setResolution(const std::string &name, WorkspaceID workspaceID) = 0;
-
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const = 0;
   virtual std::pair<double, double> getFittingRange(FitDomainIndex index) const = 0;
   virtual size_t getSpectrum(FitDomainIndex index) const = 0;
