@@ -59,7 +59,7 @@ def git_branch_name() {
   else if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
-  println 'This is the branch name:$name'
+  println 'This is the branch name: $name'
   return name
 }
 
@@ -80,7 +80,7 @@ def checkoutSource(sha) {
 def build_and_run_valgrind() {
   platform = 'linux-64'
   buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
-  common_args = '--clean-build --clean-external-projects --disable-systemtests --disable-unittests --extra-cmake-flags -DCMAKE_BUILD_TYPE=RelWithDebInfo'
+  common_args = '--clean-build --clean-external-projects --disable-unittests --extra-cmake-flags -DCMAKE_BUILD_TYPE=RelWithDebInfo'
   cmake_preset = "${platform}-ci"
   doctests = ""
   sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
