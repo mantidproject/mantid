@@ -84,6 +84,9 @@ def build_and_run_valgrind() {
   cmake_preset = "${platform}-ci"
   doctests = ""
   sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
+  run_valgrind_path = "${CISCRIPT_DIR}/run-valgrind"
+  valgrind_common_args = "--log-file ${WORKSPACE}/${CHECKOUT_DIR}/build/test_logs/valgrind.log"
+  sh "${run_valgrind_path} ${WORKSPACE}/${CHECKOUT_DIR} ${valgrind_common_args}"
 }
 
 def publish_test_reports() {

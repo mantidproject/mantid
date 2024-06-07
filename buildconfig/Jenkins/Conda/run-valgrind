@@ -1,0 +1,89 @@
+#!/bin/bash -ex
+
+# This script expects to be in a POSIX environment, it will run our CI workflow on a POSIX environment depending
+# on the flags and args passed. This script will always compile the code, and run the unit tests if a change was
+# made to something other than a .rst file.
+#
+# Script usage:
+# buildscript <path-to-workspace> <cmake-preset-name> [options]
+#
+# Example command to run a PR build on ubuntu:
+# buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
+#                 this argument do not use \\ or \ in the path.
+#   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
+#
+# Possible flags:
+#   --disable-unittests: Disable the unit tests. Otherwise they're run by default.
+#   --enable-systemtests: Build and run the system tests
+#   --enable-docs: Build the docs
+#   --enable-dev-docs: Build the developer docs
+#   --enable-doctests: Run the documentation tests
+#   --enable-coverity: Run coverity and submit results; ignores all other options and does not run unit tests
+#   --clean-build: Clear the build folder and build from scratch
+#   --clean-external-projects: Clear the external projects from the build folder
+#
+# Possible parameters:
+#   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
+#   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
+start_time=$(date +%s)
+
+# # Check arguments passed are 2 or higher, and aren't optional flags.
+# if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
+#     echo "Pass 2 arguments followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+#     exit 1
+# fi
+
+WORKSPACE=$1
+shift
+
+if [[ -z "$BUILD_THREADS" ]]; then
+    if [[ $OSTYPE == 'darwin'* ]]; then
+        BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
+    else
+        BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
+    fi
+fi
+
+VALGRIND_LOG="valgrind.log"
+ENABLE_UNIT_TESTS=true
+ENABLE_SYSTEM_TESTS=false
+ENABLE_DOCS=false
+ENABLE_DOC_TESTS=false
+
+# Handle flag inputs
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --log-file)
+            VALGRIND_LOG="$2"
+            shift;;
+        --disable-unittests) ENABLE_UNIT_TESTS=false ;;
+        --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
+        --build-threads)
+            BUILD_THREADS="$2"
+            shift
+            ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+# # Mamba
+# setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
+# create_and_activate_mantid_developer_env
+
+# Run unit and system tests
+valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
+
+# elapsed time with second resolution
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Valgrind run took $elapsed seconds."
