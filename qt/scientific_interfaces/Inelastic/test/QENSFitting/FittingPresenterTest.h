@@ -162,7 +162,7 @@ public:
   }
 
   void test_getFitDataModel_calls_model_and_returns_fit_data_model() {
-    IFitDataModel *expectedFitDataModel = nullptr;
+    IDataModel *expectedFitDataModel = nullptr;
 
     EXPECT_CALL(*m_model, getFitDataModel()).Times(1).WillOnce(Return(expectedFitDataModel));
 

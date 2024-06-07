@@ -11,6 +11,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
+#include "Common/IDataModel.h"
 #include "Common/OutputPlotOptionsModel.h"
 #include "Common/OutputPlotOptionsView.h"
 #include "Common/Settings.h"
@@ -22,6 +23,8 @@
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::Inelastic;
+using namespace Mantid::API;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -121,6 +124,59 @@ public:
   MOCK_METHOD1(setApplyEnabled, void(bool enable));
   MOCK_METHOD1(setOkEnabled, void(bool enable));
   MOCK_METHOD1(setCancelEnabled, void(bool enable));
+};
+
+class MockDataModel : public IDataModel {
+public:
+  virtual ~MockDataModel() = default;
+
+  MOCK_METHOD0(getFittingData, std::vector<FitData> *());
+  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
+  MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
+  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(FitDomainIndex index));
+  MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getNumberOfWorkspaces, WorkspaceID());
+  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
+
+  MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getDataset, FunctionModelDataset(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getSpectrum, size_t(FitDomainIndex index));
+  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
+
+  MOCK_METHOD0(clear, void());
+
+  MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
+  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD1(getSubIndices, std::pair<WorkspaceID, WorkspaceIndex>(FitDomainIndex));
+
+  MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
+  MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
+  MOCK_CONST_METHOD1(createDisplayName, std::string(WorkspaceID workspaceID));
+
+  MOCK_METHOD1(removeWorkspace, void(WorkspaceID workspaceID));
+  MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
+
+  MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
+  MOCK_METHOD2(setStartX, void(double startX, FitDomainIndex fitDomainIndex));
+  MOCK_METHOD3(setEndX, void(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setEndX, void(double endX, WorkspaceID workspaceID));
+  MOCK_METHOD2(setEndX, void(double endX, FitDomainIndex fitDomainIndex));
+  MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
+  MOCK_METHOD1(removeSpecialValues, void(const std::string &name));
+  MOCK_METHOD1(setResolution, bool(const std::string &name));
+  MOCK_METHOD2(setResolution, bool(const std::string &name, WorkspaceID workspaceID));
+  MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD1(getFittingRange, std::pair<double, double>(FitDomainIndex index));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));
+  MOCK_CONST_METHOD2(getExcludeRegionVector, std::vector<double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
 class MockSettingsModel : public SettingsModel {
