@@ -54,6 +54,7 @@ ENABLE_UNIT_TESTS=true
 ENABLE_SYSTEM_TESTS=false
 ENABLE_DOCS=false
 ENABLE_DOC_TESTS=false
+CLEAN_BUILD=false
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -76,9 +77,10 @@ do
   shift
 done
 
-# # Mamba
-# setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
+# Mamba
+setup_mamba $WORKSPACE/mambaforge "mantid-developer" $CLEAN_BUILD
 # create_and_activate_mantid_developer_env
+# mamba activate "mantid-developer"
 
 # Run unit and system tests
 # valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
