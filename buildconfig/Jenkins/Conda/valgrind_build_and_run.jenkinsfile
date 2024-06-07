@@ -79,15 +79,18 @@ def checkoutSource(sha) {
 
 def build_and_run_valgrind() {
   platform = 'linux-64'
-  buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
-  common_args = '--clean-build --clean-external-projects --disable-unittests --extra-cmake-flags -DCMAKE_BUILD_TYPE=RelWithDebInfo'
+  buildscript_path = "${CISCRIPT_DIR}/valgrind-build-and-run-script"
+  common_args = '--clean-build --clean-external-projects --extra-cmake-flags -DCMAKE_BUILD_TYPE=RelWithDebInfo --log-file ${WORKSPACE}/${CHECKOUT_DIR}/build/test_logs/valgrind.log'
   cmake_preset = "${platform}-ci"
   doctests = ""
   sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
-  run_valgrind_path = "${CISCRIPT_DIR}/run-valgrind"
-  valgrind_common_args = "--log-file ${WORKSPACE}/${CHECKOUT_DIR}/build/test_logs/valgrind.log"
-  sh "chmod +x ${run_valgrind_path}"
-  sh "${run_valgrind_path} ${WORKSPACE}/${CHECKOUT_DIR} ${valgrind_common_args}"
+
+
+
+  // run_valgrind_path = "${CISCRIPT_DIR}/run-valgrind"
+  // valgrind_common_args = "--log-file ${WORKSPACE}/${CHECKOUT_DIR}/build/test_logs/valgrind.log"
+  // sh "chmod +x ${run_valgrind_path}"
+  // sh "${run_valgrind_path} ${WORKSPACE}/${CHECKOUT_DIR} ${valgrind_common_args}"
 }
 
 def publish_test_reports() {
