@@ -8,7 +8,6 @@ set(SRC_FILES
     DockWidgetArea.cpp
     EditResultsDialog.cpp
     FitStatusWidget.cpp
-    FitDataModel.cpp
     FitDataPresenter.cpp
     FitDataView.cpp
     FitOutput.cpp
@@ -49,7 +48,6 @@ set(SRC_FILES
 set(INC_FILES
     ConvFitDataPresenter.h
     ConvFitModel.h
-    FitDataModel.h
     FitDataPresenter.h
     FitOutput.h
     FitOutputOptionsModel.h
