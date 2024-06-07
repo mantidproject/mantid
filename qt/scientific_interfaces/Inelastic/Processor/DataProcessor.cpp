@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,28 +18,28 @@ using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-Mantid::Kernel::Logger g_log("DataManipulation");
+Mantid::Kernel::Logger g_log("DataProcessor");
 }
 
 namespace MantidQt::CustomInterfaces {
 
-DataManipulation::DataManipulation(QObject *parent) : InelasticTab(parent), m_tabRunning(false) {
+DataProcessor::DataProcessor(QObject *parent) : InelasticTab(parent), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
-DataManipulation::~DataManipulation() = default;
+DataProcessor::~DataProcessor() = default;
 
-void DataManipulation::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
+void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void DataManipulation::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
+void DataProcessor::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
-void DataManipulation::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
+void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void DataManipulation::runTab() {
+void DataProcessor::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
@@ -65,7 +65,7 @@ void DataManipulation::runTab() {
  *
  * @param error Unused
  */
-void DataManipulation::tabExecutionComplete(bool error) {
+void DataProcessor::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
@@ -80,6 +80,6 @@ void DataManipulation::tabExecutionComplete(bool error) {
  *
  * @param filter :: true if you want to allow filtering
  */
-void DataManipulation::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+void DataProcessor::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 } // namespace MantidQt::CustomInterfaces

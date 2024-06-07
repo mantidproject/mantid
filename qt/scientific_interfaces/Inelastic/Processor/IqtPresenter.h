@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 #include "IIqtView.h"
 #include "IqtModel.h"
 #include "IqtView.h"
@@ -30,7 +30,7 @@ public:
 };
 
 using namespace Mantid::API;
-class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataManipulation, public IIqtPresenter {
+class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataProcessor, public IIqtPresenter {
 
 public:
   IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model);

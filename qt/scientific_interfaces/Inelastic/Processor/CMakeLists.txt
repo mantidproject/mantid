@@ -1,7 +1,8 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    DataManipulationInterface.cpp
+    DataProcessor.cpp
+    DataProcessorInterface.cpp
     ElwinPresenter.cpp
     ElwinModel.cpp
     ElwinView.cpp
@@ -11,7 +12,6 @@ set(SRC_FILES
     MomentsPresenter.cpp
     MomentsModel.cpp
     MomentsView.cpp
-    DataManipulation.cpp
     SqwPresenter.cpp
     SqwModel.cpp
     SqwView.cpp
@@ -39,16 +39,16 @@ set(INC_FILES
 )
 
 set(MOC_FILES
-    DataManipulationInterface.h
+    DataProcessor.h
+    DataProcessorInterface.h
     ElwinView.h
     IqtView.h
     MomentsView.h
     SqwView.h
     SymmetriseView.h
-    DataManipulation.h
 )
 
-set(UI_FILES DataManipulationInterface.ui ElwinTab.ui IqtTab.ui MomentsTab.ui SqwTab.ui SymmetriseTab.ui)
+set(UI_FILES DataProcessorInterface.ui ElwinTab.ui IqtTab.ui MomentsTab.ui SqwTab.ui SymmetriseTab.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM INC_FILES PREPEND ${SUB_DIRECTORY}/)

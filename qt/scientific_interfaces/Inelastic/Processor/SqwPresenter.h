@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 #include "ISqwView.h"
 #include "SqwModel.h"
 #include "SqwView.h"
@@ -39,7 +39,7 @@ public:
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataManipulation, public ISqwPresenter {
+class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataProcessor, public ISqwPresenter {
 
 public:
   SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);

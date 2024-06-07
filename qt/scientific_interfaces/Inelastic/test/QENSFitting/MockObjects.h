@@ -9,11 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Manipulation/DataManipulation.h"
-#include "Manipulation/ElwinModel.h"
-#include "Manipulation/ElwinPresenter.h"
-#include "Manipulation/ElwinView.h"
-#include "Manipulation/IElwinView.h"
+#include "Processor/DataProcessor.h"
+#include "Processor/ElwinModel.h"
+#include "Processor/ElwinPresenter.h"
+#include "Processor/ElwinView.h"
+#include "Processor/IElwinView.h"
 #include "QENSFitting/FitOutput.h"
 #include "QENSFitting/FitPlotModel.h"
 #include "QENSFitting/FitTab.h"

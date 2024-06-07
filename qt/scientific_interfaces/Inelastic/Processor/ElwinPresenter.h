@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
-#include "DataManipulationInterface.h"
+#include "DataProcessor.h"
+#include "DataProcessorInterface.h"
 #include "ElwinModel.h"
 #include "ElwinView.h"
 #include "IElwinView.h"
@@ -40,14 +40,13 @@ public:
   virtual void updateAvailableSpectra() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataManipulation, public IElwinPresenter {
+class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter {
 public:
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
                  std::unique_ptr<IFitDataModel> dataModel);
   ~ElwinPresenter();
 
-  // base Manipulation tab methods
   void run() override;
   void setup() override;
   bool validate() override;

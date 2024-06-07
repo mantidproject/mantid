@@ -10,7 +10,7 @@
       <w>100</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>Indirect Tab</panel_attributes>
+    <panel_attributes>Inelastic Tab</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -43,7 +43,7 @@
       <w>270</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationTab</panel_attributes>
+    <panel_attributes>DataProcessor</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -98,7 +98,7 @@
       <w>390</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationSymmetriseTabView</panel_attributes>
+    <panel_attributes>SymmetriseView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -109,7 +109,7 @@
       <w>390</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationSymmetriseTabModel</panel_attributes>
+    <panel_attributes>SymmetriseModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -142,7 +142,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationSqwTabModel</panel_attributes>
+    <panel_attributes>SqwModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -153,7 +153,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationSqwTabView</panel_attributes>
+    <panel_attributes>SqwView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -186,7 +186,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationMomentsTabModel</panel_attributes>
+    <panel_attributes>MomentsModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -197,7 +197,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationMomentsTabView</panel_attributes>
+    <panel_attributes>MomentsView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -230,7 +230,7 @@
       <w>410</w>
       <h>300</h>
     </coordinates>
-    <panel_attributes>_InelasticDataManipulationMomentsTab_
+    <panel_attributes>_MomentsPresenter_
 --
 
 </panel_attributes>
@@ -244,7 +244,7 @@
       <w>410</w>
       <h>290</h>
     </coordinates>
-    <panel_attributes>_InelasticDataManipulationSqwTab_
+    <panel_attributes>_SqwPresenter_
 --
 
 </panel_attributes>
@@ -258,7 +258,7 @@
       <w>450</w>
       <h>290</h>
     </coordinates>
-    <panel_attributes>_InelasticDataManipulationSymmetriseTab_
+    <panel_attributes>_SymmetrisePresenter_
 --
 
 </panel_attributes>
@@ -283,7 +283,7 @@
       <w>410</w>
       <h>300</h>
     </coordinates>
-    <panel_attributes>_InelasticDataManipulationIqtTab_
+    <panel_attributes>_IqtPresenter_
 --
 
 </panel_attributes>
@@ -319,7 +319,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationIqtTabView</panel_attributes>
+    <panel_attributes>IqtView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -330,7 +330,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationIqtTabModel</panel_attributes>
+    <panel_attributes>IqtModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -352,7 +352,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationElwinTabModel</panel_attributes>
+    <panel_attributes>ElwinModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -363,7 +363,7 @@
       <w>410</w>
       <h>300</h>
     </coordinates>
-    <panel_attributes>_InelasticDataManipulationElwinTab_
+    <panel_attributes>_ElwinPresenter_
 --
 
 </panel_attributes>
@@ -377,7 +377,7 @@
       <w>350</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>InelasticDataManipulationElwinTabView</panel_attributes>
+    <panel_attributes>ElwinView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

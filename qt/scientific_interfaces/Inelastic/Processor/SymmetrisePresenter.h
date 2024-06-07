@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -49,7 +49,7 @@ public:
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataManipulation, public ISymmetrisePresenter {
+class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataProcessor, public ISymmetrisePresenter {
 public:
   SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;

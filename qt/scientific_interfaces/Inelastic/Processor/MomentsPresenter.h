@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 #include "IMomentsView.h"
 #include "MomentsModel.h"
 #include "MomentsView.h"
@@ -37,7 +37,7 @@ public:
   @author Samuel Jackson
   @date 13/08/2013
 */
-class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataManipulation, public IMomentsPresenter {
+class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataProcessor, public IMomentsPresenter {
 
 public:
   MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
