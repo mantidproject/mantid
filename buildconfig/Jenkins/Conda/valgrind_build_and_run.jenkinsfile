@@ -15,7 +15,7 @@ pipeline {
         echo "Git SHA is:${env.GIT_SHA}"
       }
     }
-    stage('build and test: linux-64') {
+    stage('Build and run Valgrind: linux-64') {
       options { timestamps () }
       steps {
         checkoutSource("${GIT_SHA}")
