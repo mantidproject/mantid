@@ -30,16 +30,16 @@ using namespace API;
 constexpr double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
 
 namespace PropertyNames {
-static const std::string INPUT_WORKSPACE = "InputWorkspace";
-static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
-static const std::string SPIN_STATES = "SpinStates";
-static const std::string PD = "GasPressureTimesCellLength";
-static const std::string PD_ERROR = "GasPressureTimesCellLengthError";
-static const std::string START_LAMBDA = "StartLambda";
-static const std::string END_LAMBDA = "EndLambda";
-static const std::string IGNORE_FIT_QUALITY_ERROR = "IgnoreFitQualityError";
-static const std::string GROUP_INPUTS = "Inputs";
-static const std::string GROUP_FIT_OPTIONS = "Fit Options";
+auto constexpr INPUT_WORKSPACE{"InputWorkspace"};
+auto constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
+auto constexpr SPIN_STATES{"SpinStates"};
+auto constexpr PD{"GasPressureTimesCellLength"};
+auto constexpr PD_ERROR{"GasPressureTimesCellLengthError"};
+auto constexpr START_LAMBDA{"StartLambda"};
+auto constexpr END_LAMBDA{"EndLambda"};
+auto constexpr IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
+auto constexpr GROUP_INPUTS{"Inputs"};
+auto constexpr GROUP_FIT_OPTIONS{"Fit Options"};
 } // namespace PropertyNames
 
 void HeliumAnalyserEfficiency::init() {
