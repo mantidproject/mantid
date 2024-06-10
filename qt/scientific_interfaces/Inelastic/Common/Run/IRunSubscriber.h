@@ -8,10 +8,9 @@
 
 #include "DllConfig.h"
 
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
+class IUserInputValidator;
 
 class MANTIDQT_INELASTIC_DLL IRunSubscriber {
 public:

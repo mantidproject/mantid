@@ -8,6 +8,8 @@
 
 #include "DllConfig.h"
 
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

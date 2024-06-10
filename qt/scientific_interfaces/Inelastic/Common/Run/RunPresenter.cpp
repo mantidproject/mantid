@@ -9,6 +9,8 @@
 #include "IRunSubscriber.h"
 #include "RunView.h"
 
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
