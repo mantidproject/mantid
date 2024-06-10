@@ -114,6 +114,25 @@ public:
     TS_ASSERT_EQUALS(originalXPoints.size(), xPoints.size());
   }
 
+  void testFitCurvesOutputWhenOptionalPropertySet() {
+    // GIVEN
+    MantidVec e;
+    const WorkspaceGroup_sptr &wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
+    auto alg = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
+
+    // WHEN
+    alg->setPropertyValue("OutputFitCurves", "__unused_for_child");
+    alg->setChild(true);
+    alg->execute();
+
+    // THEN
+    TS_ASSERT(alg->isExecuted());
+    const MatrixWorkspace_sptr &outputWs = alg->getProperty("OutputWorkspace");
+    const MatrixWorkspace_sptr &fitWs = alg->getProperty("OutputFitCurves");
+    TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(fitWs->getNumberHistograms(), 3);
+  }
+
 private:
   IAlgorithm_sptr createHeliumAnalyserEfficiencyAlgorithm(WorkspaceGroup_sptr inputWs,
                                                           const std::string &outputWsName) {
