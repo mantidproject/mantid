@@ -451,7 +451,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
             group_i_metadata = self._combine_line_metadata(idxs)
             group_metadata["line_data"][i] = group_i_metadata
             new_z_data[i] = np.sum(self._z_data[idxs], axis=0)
-        new_z_data = new_z_data * ureg(self._internal_z_data_unit).to(self.z_data_unit)
+        new_z_data = Quantity(new_z_data, units=self._internal_z_data_unit).to(self.z_data_unit)
 
         new_data = self.copy()
         new_data.z_data = new_z_data
@@ -473,7 +473,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         metadata = deepcopy(self.metadata)
         metadata.pop("line_data", None)
         metadata.update(self._combine_line_metadata())
-        summed_z_data = np.sum(self._z_data, axis=0) * ureg(self._internal_z_data_unit).to(self.z_data_unit)
+        summed_z_data = Quantity(np.sum(self._z_data, axis=0), units=self._internal_z_data_unit).to(self.z_data_unit)
         return Spectrum2D(
             np.copy(self.x_data),
             np.copy(self.y_data),
@@ -503,7 +503,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
 
     @property
     def z_data(self) -> Quantity:
-        return self._z_data * ureg(self._internal_z_data_unit).to(self.z_data_unit)
+        return Quantity(self._z_data, units=self._internal_z_data_unit).to(self.z_data_unit)
 
     @z_data.setter
     def z_data(self, value: Quantity) -> None:
@@ -614,42 +614,70 @@ def add_autoconvolution_spectra(
     # create new spectra using first and last spectra in initial group, iterating until order = max_order
 
     output_spectra = []
+    x_data = spectra.x_data
     for _, atom_spectra in spectra_by_atom:
-        autoconvolved_atom_spectra: Spectrum1DCollection = _autoconvolve_atom_spectra(list(atom_spectra), max_order=max_order)
+        autoconvolved_atom_spectra: Spectrum1DCollection = _autoconvolve_atom_spectra(list(atom_spectra), x_data, max_order=max_order)
 
         if output_bins is not None:
-            autoconvolved_atom_spectra = _resample_spectra(autoconvolved_atom_spectra, output_bins)
+            autoconvolved_atom_spectra = _resample_spectra(autoconvolved_atom_spectra, x_data, output_bins)
 
         output_spectra.append(autoconvolved_atom_spectra)
 
-    return AbinsSpectrum1DCollection.from_spectra(list(chain(*output_spectra)))
+    return _fast_1d_from_spectra(chain(*output_spectra))
 
 
-def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], *, max_order: int) -> AbinsSpectrum1DCollection:
+def _fast_1d_from_spectra(spectra: Iterable[Spectrum1D]) -> AbinsSpectrum1DCollection:
+    """Quickly produce a Spectrum1DCollection, trusting that data is consistent"""
+    first_spectrum = next(spectra)
+    x_data = first_spectrum.x_data
+    y_data_list = [first_spectrum._y_data]
+    metadata_list = [first_spectrum.metadata]
+
+    for spectrum in spectra:
+        y_data_list.append(spectrum._y_data)
+        metadata_list.append(spectrum.metadata)
+
+    metadata = AbinsSpectrum1DCollection._combine_metadata(metadata_list)
+
+    return AbinsSpectrum1DCollection(
+        x_data=x_data, y_data=Quantity(np.asarray(y_data_list), units=first_spectrum._internal_y_data_unit), metadata=metadata
+    )
+
+
+def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, *, max_order: int) -> AbinsSpectrum1DCollection:
     """
     Autoconvolve pre-sorted list of spectra; convolve first element with last until order reaches max_order
+
+    Args:
+        atom_spectra: a list of spectra belonging to the same atom, pre-sorted by quantum_order
+
+        x_data: Corresponding x-values to atom_spectra. This is required as an
+            optimisation to prevent too many calls to spectrum.x_data.
+
+        max_order: Highest quantum order for autoconvolution
     """
 
     assert atom_spectra[0].metadata["quantum_order"] == 1
-    fundamentals = atom_spectra[0].y_data.magnitude
-    y_units = atom_spectra[0].y_data.units
+    fundamentals = atom_spectra[0]._y_data
+    y_units = atom_spectra[0]._internal_y_data_unit
 
     highest_initial_order = atom_spectra[-1].metadata["quantum_order"]
+
+    new_y_data = [spectrum._y_data for spectrum in atom_spectra]
+    new_line_data = [spectrum.metadata for spectrum in atom_spectra]
     for order in range(highest_initial_order, max_order):
-        autoconv_spectrum = convolve(atom_spectra[-1].y_data.magnitude, fundamentals, mode="full")[: fundamentals.size]
+        autoconv_spectrum = convolve(new_y_data[-1], fundamentals, mode="full")[: fundamentals.size]
 
-        atom_spectra.append(
-            Spectrum1D(
-                x_data=atom_spectra[0].x_data,
-                y_data=(autoconv_spectrum * y_units),
-                metadata=(atom_spectra[0].metadata | {"quantum_order": order + 1}),
-            )
-        )
+        new_y_data.append(autoconv_spectrum)
+        new_line_data.append({"quantum_order": order + 1})
 
-    return AbinsSpectrum1DCollection.from_spectra(atom_spectra)
+    y_data = Quantity(np.asarray(new_y_data), units=y_units)
+    metadata = atom_spectra[0].metadata | {"line_data": new_line_data}
+
+    return AbinsSpectrum1DCollection(x_data=x_data, y_data=y_data, metadata=metadata)
 
 
-def _resample_spectra(spectra: AbinsSpectrum1DCollection, bins: Quantity) -> AbinsSpectrum1DCollection:
+def _resample_spectra(spectra: AbinsSpectrum1DCollection, input_bins: Quantity, output_bins: Quantity) -> AbinsSpectrum1DCollection:
     """
     Naive resampling by rebuilding histogram on new bins
 
@@ -659,14 +687,16 @@ def _resample_spectra(spectra: AbinsSpectrum1DCollection, bins: Quantity) -> Abi
     - for good performance when downsampling by an integer factor, consider reshaping array and summing over new axis
     - for more accurate final shape, apply some antialiasing filtering (at simplest level, linear binning)
     """
+    assert input_bins.units == output_bins.units
 
     output_ydata = [
-        np.histogram(spectra.x_data.to(bins.units).magnitude, bins=bins.magnitude, weights=weights, density=0)[0]
-        for weights in spectra.y_data.magnitude
+        np.histogram(input_bins.magnitude, bins=output_bins.magnitude, weights=weights, density=0)[0] for weights in spectra._y_data
     ]
 
     return Spectrum1DCollection(
-        x_data=bins,
-        y_data=(np.asarray(output_ydata, dtype=FLOAT_TYPE) * spectra.y_data.units * spectra.x_data.units / bins.units),
+        x_data=output_bins,
+        y_data=Quantity(
+            np.asarray(output_ydata, dtype=FLOAT_TYPE), units=(ureg(f"{spectra.y_data_unit} {spectra.x_data_unit}") / output_bins.units)
+        ),
         metadata=spectra.metadata,
     )
