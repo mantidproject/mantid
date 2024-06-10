@@ -110,12 +110,11 @@ public:
   void handleFunctionChanged() override;
   void handleFitComplete(bool const error) override;
 
-  void handleRunClicked() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private:
   void setup() override;
-  void run() override;
 
   void updateParameterEstimationData();
   void updateDataReferences();

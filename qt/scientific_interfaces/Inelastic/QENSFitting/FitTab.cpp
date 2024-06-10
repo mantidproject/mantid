@@ -25,7 +25,7 @@ FitTab::FitTab(QWidget *parent, std::string const &tabName)
   m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm->runWidget));
 }
 
-void FitTab::setup() { updateResultOptions(); }
+void FitTab::setup() { updateOutputOptions(false); }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();
@@ -45,25 +45,6 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
 }
 
 std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
-
-bool FitTab::validate() {
-  auto validator = std::make_unique<UserInputValidator>();
-  m_dataPresenter->validate(validator.get());
-  m_fittingPresenter->validate(validator.get());
-
-  const auto error = validator->generateErrorMessage();
-  if (!error.empty()) {
-    displayWarning(error);
-    updateFitButtons(true);
-  }
-  return error.empty();
-}
-
-void FitTab::run() {
-  updateFitButtons(false);
-  updateOutputOptions(false);
-  m_fittingPresenter->runFit();
-}
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
@@ -159,7 +140,16 @@ void FitTab::handleFunctionChanged() {
   m_fittingPresenter->updateFitTypeString();
 }
 
-void FitTab::handleRunClicked() { runTab(); }
+void FitTab::handleValidation(IUserInputValidator *validator) const {
+  m_dataPresenter->validate(validator);
+  m_fittingPresenter->validate(validator);
+}
+
+void FitTab::handleRun() {
+  updateFitButtons(false);
+  updateOutputOptions(false);
+  m_fittingPresenter->runFit();
+}
 
 void FitTab::handleFitComplete(bool const error) {
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);

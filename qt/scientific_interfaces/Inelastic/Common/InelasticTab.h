@@ -102,9 +102,9 @@ protected:
   /// Overidden by child class.
   virtual void setup() = 0;
   /// Overidden by child class.
-  virtual void run() = 0;
+  virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
   /// Overidden by child class.
-  virtual bool validate() { return true; }
+  virtual bool validate() { throw std::logic_error("InelasticTab::validate() called but is not implemented."); }
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;

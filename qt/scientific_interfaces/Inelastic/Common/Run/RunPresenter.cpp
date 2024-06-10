@@ -19,17 +19,17 @@ RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subsc
 void RunPresenter::handleRunClicked() {
   if (validate()) {
     m_view->setRunEnabled(false);
-    m_subscriber->handleRunClicked();
+    m_subscriber->handleRun();
   }
 }
 
 void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
 
 bool RunPresenter::validate() const {
-  UserInputValidator validator;
-  m_subscriber->handleValidation(validator);
+  auto validator = std::make_unique<UserInputValidator>();
+  m_subscriber->handleValidation(validator.get());
 
-  const auto error = validator.generateErrorMessage();
+  const auto error = validator->generateErrorMessage();
   if (!error.empty()) {
     m_view->displayWarning(error);
   }

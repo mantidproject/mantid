@@ -17,8 +17,8 @@ class MANTIDQT_INELASTIC_DLL IRunSubscriber {
 public:
   virtual ~IRunSubscriber() = default;
 
-  virtual void handleRunClicked() = 0;
-  virtual void handleValidation(UserInputValidator &validator) const = 0;
+  virtual void handleValidation(IUserInputValidator *validator) const = 0;
+  virtual void handleRun() = 0;
 };
 
 } // namespace CustomInterfaces
