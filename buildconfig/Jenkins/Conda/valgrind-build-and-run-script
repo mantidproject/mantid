@@ -71,6 +71,7 @@ do
     case "$1" in
         --log-file)
             VALGRIND_LOG="$2"
+            echo "valgring log file ${VALGRIND_LOG}"
             shift;;
         --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
