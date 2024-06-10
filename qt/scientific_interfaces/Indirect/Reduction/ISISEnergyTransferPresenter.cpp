@@ -177,12 +177,12 @@ bool IETPresenter::validate() {
 
   for (auto const &error : errors) {
     if (!error.empty())
-      uiv.addErrorMessage(QString::fromStdString(error));
+      uiv.addErrorMessage(error);
   }
 
-  QString error = uiv.generateErrorMessage();
-  if (!error.isEmpty())
-    m_view->showMessageBox(error.toStdString());
+  auto const error = uiv.generateErrorMessage();
+  if (!error.empty())
+    m_view->showMessageBox(error);
 
   return validateInstrumentDetails() && uiv.isAllInputValid();
 }

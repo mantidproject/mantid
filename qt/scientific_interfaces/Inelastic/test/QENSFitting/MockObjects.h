@@ -247,7 +247,7 @@ public:
                      std::unordered_map<std::string, ParameterValue>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getDefaultParameters, std::unordered_map<std::string, ParameterValue>(WorkspaceID workspaceID));
 
-  MOCK_CONST_METHOD1(validate, void(MantidQt::CustomInterfaces::UserInputValidator &validator));
+  MOCK_CONST_METHOD1(validate, void(MantidQt::CustomInterfaces::IUserInputValidator *validator));
 
   MOCK_METHOD0(clearWorkspaces, void());
   MOCK_CONST_METHOD1(getWorkspace, Mantid::API::MatrixWorkspace_sptr(WorkspaceID workspaceID));
@@ -339,7 +339,7 @@ public:
 
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());
-  MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::UserInputValidator &validator));
+  MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::IUserInputValidator *validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
   MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));

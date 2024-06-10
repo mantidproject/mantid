@@ -47,11 +47,11 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
 std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
 
 bool FitTab::validate() {
-  UserInputValidator validator;
-  m_dataPresenter->validate(validator);
-  m_fittingPresenter->validate(validator);
+  auto validator = std::make_unique<UserInputValidator>();
+  m_dataPresenter->validate(validator.get());
+  m_fittingPresenter->validate(validator.get());
 
-  const auto error = validator.generateErrorMessage().toStdString();
+  const auto error = validator->generateErrorMessage();
   if (!error.empty()) {
     displayWarning(error);
   }

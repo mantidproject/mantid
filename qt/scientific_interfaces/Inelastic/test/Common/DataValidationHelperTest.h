@@ -221,7 +221,7 @@ private:
     ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
 
     TS_ASSERT(functor(*m_uiv, m_dataSelector.get(), errorLabel, false));
-    TS_ASSERT(m_uiv->generateErrorMessage().isEmpty());
+    TS_ASSERT(m_uiv->generateErrorMessage().empty());
   }
 
   template <typename Functor>
@@ -231,7 +231,7 @@ private:
     ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
 
     TS_ASSERT(!functor(*m_uiv, m_dataSelector.get(), errorLabel, false));
-    TS_ASSERT(!m_uiv->generateErrorMessage().isEmpty());
+    TS_ASSERT(!m_uiv->generateErrorMessage().empty());
   }
 
   template <typename Functor>
@@ -242,7 +242,7 @@ private:
 
     (void)functor(*m_uiv, m_dataSelector.get(), errorLabel, false);
 
-    TS_ASSERT_EQUALS(m_uiv->generateErrorMessage().toStdString(), errorMessage);
+    TS_ASSERT_EQUALS(m_uiv->generateErrorMessage(), errorMessage);
   }
 
   AnalysisDataServiceImpl &m_ads;

@@ -50,7 +50,7 @@ public:
 
   void notifyFunctionChanged() override;
 
-  void validate(UserInputValidator &validator);
+  void validate(IUserInputValidator *validator);
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
 

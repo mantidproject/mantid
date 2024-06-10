@@ -23,7 +23,7 @@ FittingPresenter::FittingPresenter(IFitTab *tab, IInelasticFitPropertyBrowser *b
 
 void FittingPresenter::notifyFunctionChanged() { m_tab->handleFunctionChanged(); }
 
-void FittingPresenter::validate(UserInputValidator &validator) { m_model->validate(validator); }
+void FittingPresenter::validate(IUserInputValidator *validator) { m_model->validate(validator); }
 
 void FittingPresenter::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   m_model->setFitFunction(std::move(function));

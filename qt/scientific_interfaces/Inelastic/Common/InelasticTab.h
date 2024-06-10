@@ -160,7 +160,7 @@ private slots:
 
 signals:
   /// Send signal to parent window to show a message box to user
-  void showMessageBox(const QString &message);
+  void showMessageBox(const std::string &message);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

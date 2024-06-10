@@ -10,6 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/MockUserInputValidator.h"
 #include "MockObjects.h"
 #include "QENSFitting/FittingPresenter.h"
 
@@ -52,10 +53,10 @@ public:
   }
 
   void test_validate_calls_the_model_validate() {
-    UserInputValidator validator;
+    auto validator = std::make_unique<NiceMock<MockUserInputValidator>>();
     EXPECT_CALL(*m_model, validate(_)).Times(1);
 
-    m_presenter->validate(validator);
+    m_presenter->validate(validator.get());
   }
 
   void test_setFitFunction_calls_the_model() {

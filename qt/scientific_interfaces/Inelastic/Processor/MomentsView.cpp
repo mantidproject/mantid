@@ -119,9 +119,9 @@ bool MomentsView::validate() {
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
 
   auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage.toStdString());
-  return errorMessage.isEmpty();
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
+  return errorMessage.empty();
 }
 
 /**

@@ -48,7 +48,7 @@ public:
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
 
-  virtual void validate(MantidQt::CustomInterfaces::UserInputValidator &validator) const = 0;
+  virtual void validate(MantidQt::CustomInterfaces::IUserInputValidator *validator) const = 0;
 
   // Functions that interact with FitDataModel
   virtual void clearWorkspaces() = 0;

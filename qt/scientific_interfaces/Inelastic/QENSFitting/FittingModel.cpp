@@ -314,9 +314,9 @@ FittingModel::FittingModel()
   m_fitPlotModel = std::make_unique<FitPlotModel>(m_fitDataModel->getFittingData(), m_fitOutput.get());
 }
 
-void FittingModel::validate(UserInputValidator &validator) const {
+void FittingModel::validate(IUserInputValidator *validator) const {
   if (auto const invalidFunction = isInvalidFunction())
-    validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+    validator->addErrorMessage(*invalidFunction);
 }
 
 // Functions that interact with FitDataModel

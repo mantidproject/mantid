@@ -46,7 +46,7 @@ public:
   FittingModel();
   virtual ~FittingModel() = default;
 
-  void validate(UserInputValidator &validator) const override;
+  void validate(IUserInputValidator *validator) const override;
 
   // Functions that interact with FitDataModel
   void clearWorkspaces() override;

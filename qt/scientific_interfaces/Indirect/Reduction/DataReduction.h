@@ -138,7 +138,8 @@ private:
     tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(tabIDRContent, SIGNAL(showMessageBox(const std::string &)), this,
+            SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
@@ -178,7 +179,8 @@ private:
     presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(presenter.get(), SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,
+            SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, presenter.get());

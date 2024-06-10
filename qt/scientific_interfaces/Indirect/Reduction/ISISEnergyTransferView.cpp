@@ -305,8 +305,8 @@ void IETView::handleDataReady() {
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 
   auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage.toStdString());
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
 }
 
 void IETView::pbRunEditing() { setRunButtonText("Editing..."); }
