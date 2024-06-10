@@ -915,6 +915,27 @@ public:
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
+  void test_Load_And_Filter_Everything() {
+    // This test set the FilterByTimeStart value so that everything should be filtered
+    // So we should end up with 0 events
+    const std::string filename{"ARCS_sim_event.nxs"};
+    std::string ws_name = "arcs_filtered0";
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", filename);
+    ld.setPropertyValue("OutputWorkspace", ws_name);
+    ld.setPropertyValue("FilterByTimeStart", "1000");
+    ld.setProperty("NumberOfBins", 1);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws_name));
+    TS_ASSERT(ws); // it is an EventWorkspace
+
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
+  }
+
   void test_Load_And_CompressEvents_weighted() {
     constexpr std::size_t NUM_HIST{117760};
     const std::string filename{"ARCS_sim_event.nxs"};
