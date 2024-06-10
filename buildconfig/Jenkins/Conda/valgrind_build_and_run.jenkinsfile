@@ -59,7 +59,7 @@ def git_branch_name() {
   else if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
-  println 'This is the branch name: $name'
+  println "This is the branch name: $name"
   return name
 }
 
