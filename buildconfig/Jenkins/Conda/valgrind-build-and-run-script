@@ -160,7 +160,7 @@ $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE
 
 # Run unit and system tests
 # valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
-valgrind --verbose --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
+valgrind --verbose --trace-children=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
 
 # elapsed time with second resolution
 end_time=$(date +%s)
