@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "FitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
@@ -21,7 +21,6 @@ namespace Inelastic {
 using namespace MantidWidgets;
 
 using FitDataCollectionType = IndexCollectionType<WorkspaceID, std::unique_ptr<FitData>>;
-
 /*
    IDataModel - Specifies an interface for updating, querying and
    accessing the raw data in Tabs
