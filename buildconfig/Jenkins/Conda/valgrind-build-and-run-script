@@ -71,7 +71,6 @@ do
     case "$1" in
         --log-file)
             VALGRIND_LOG="$2"
-            echo "valgring log file ${VALGRIND_LOG}"
             shift;;
         --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
@@ -158,7 +157,8 @@ $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE
 
 # Run unit and system tests
 # $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
-valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
+# valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
+valgrind --verbose --gen-suppressions=all --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no --log-file=$VALGRIND_LOG $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS 1
 
 
 # elapsed time with second resolution

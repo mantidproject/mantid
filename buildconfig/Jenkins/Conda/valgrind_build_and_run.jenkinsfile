@@ -24,7 +24,7 @@ pipeline {
       post {
         always {
           archive_test_logs()
-          publish_test_reports()
+          // publish_test_reports()
         }
       }
     }
