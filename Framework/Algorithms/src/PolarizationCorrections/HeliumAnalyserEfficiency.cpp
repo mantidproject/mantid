@@ -205,6 +205,13 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
   MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
 
+  if (!getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS).empty()) {
+    setProperty(PropertyNames::OUTPUT_FIT_PARAMS, fitParameters);
+  }
+  if (!API::Algorithm::getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES).empty()) {
+    setProperty(PropertyNames::OUTPUT_FIT_CURVES, fitWorkspace);
+  }
+
   pHe = fitParameters->getRef<double>("Value", 0);
   pHeError = fitParameters->getRef<double>("Error", 0);
   eCalc = MantidVec(wavelengthValues.size());
