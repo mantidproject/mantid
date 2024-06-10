@@ -25,8 +25,7 @@ void RunPresenter::handleRunClicked() {
 
 void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
 
-bool RunPresenter::validate() const {
-  auto validator = std::make_unique<UserInputValidator>();
+bool RunPresenter::validate(std::unique_ptr<IUserInputValidator> validator) const {
   m_subscriber->handleValidation(validator.get());
 
   const auto error = validator->generateErrorMessage();

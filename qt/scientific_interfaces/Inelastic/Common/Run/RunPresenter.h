@@ -22,7 +22,7 @@ public:
 
   virtual void setRunEnabled(bool const enable) = 0;
 
-  virtual bool validate() const = 0;
+  virtual bool validate(std::unique_ptr<IUserInputValidator> validator) const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL RunPresenter final : public IRunPresenter {
@@ -34,7 +34,7 @@ public:
 
   void setRunEnabled(bool const enable) override;
 
-  bool validate() const override;
+  bool validate(std::unique_ptr<IUserInputValidator> validator = std::make_unique<UserInputValidator>()) const override;
 
 private:
   IRunSubscriber *m_subscriber;

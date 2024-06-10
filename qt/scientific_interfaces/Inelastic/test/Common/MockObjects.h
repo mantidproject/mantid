@@ -158,8 +158,8 @@ class MockRunSubscriber : public IRunSubscriber {
 public:
   virtual ~MockRunSubscriber() = default;
 
-  MOCK_METHOD0(handleRunClicked, void());
   MOCK_CONST_METHOD1(handleValidation, void(IUserInputValidator *validator));
+  MOCK_METHOD0(handleRun, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

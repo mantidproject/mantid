@@ -11,6 +11,7 @@
 
 #include "../MockObjects.h"
 #include "Common/Run/RunPresenter.h"
+#include "MantidQtWidgets/Common/MockUserInputValidator.h"
 
 #include <memory>
 
@@ -40,8 +41,9 @@ public:
   }
 
   void test_handleRunClicked_calls_the_expected_subscriber_function() {
+    EXPECT_CALL(*m_subscriber, handleValidation(_)).Times(1);
     EXPECT_CALL(*m_view, setRunEnabled(false)).Times(1);
-    EXPECT_CALL(*m_subscriber, handleRunClicked()).Times(1);
+    EXPECT_CALL(*m_subscriber, handleRun()).Times(1);
 
     m_presenter->handleRunClicked();
   }
@@ -49,6 +51,33 @@ public:
   void test_setRunEnabled_calls_the_appropriate_view_function() {
     EXPECT_CALL(*m_view, setRunEnabled(true)).Times(1);
     m_presenter->setRunEnabled(true);
+  }
+
+  void test_validate_when_no_error_returned() {
+    auto validator = std::make_unique<NiceMock<MockUserInputValidator>>();
+    auto validatorRaw = validator.get();
+
+    EXPECT_CALL(*m_subscriber, handleValidation(validatorRaw)).Times(1);
+    ON_CALL(*validatorRaw, generateErrorMessage).WillByDefault(Return(""));
+
+    // This should not be called
+    EXPECT_CALL(*m_view, displayWarning(_)).Times(0);
+
+    ASSERT_TRUE(m_presenter->validate(std::move(validator)));
+  }
+
+  void test_validate_when_an_error_message_is_returned() {
+    auto const message = "This is an error message";
+
+    auto validator = std::make_unique<NiceMock<MockUserInputValidator>>();
+    auto validatorRaw = validator.get();
+
+    EXPECT_CALL(*m_subscriber, handleValidation(validatorRaw)).Times(1);
+    ON_CALL(*validatorRaw, generateErrorMessage).WillByDefault(Return(message));
+
+    EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
+
+    ASSERT_FALSE(m_presenter->validate(std::move(validator)));
   }
 
 private:
