@@ -133,6 +133,26 @@ public:
     TS_ASSERT_EQUALS(fitWs->getNumberHistograms(), 3);
   }
 
+  void testParametersTableOutputWhenOptionalPropertySet() {
+    // GIVEN
+    MantidVec e;
+    const WorkspaceGroup_sptr &wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
+    auto alg = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
+
+    // WHEN
+    alg->setPropertyValue("OutputFitParameters", "__unused_for_child");
+    alg->setChild(true);
+    alg->execute();
+
+    // THEN
+    TS_ASSERT(alg->isExecuted());
+    const MatrixWorkspace_sptr &outputWs = alg->getProperty("OutputWorkspace");
+    const ITableWorkspace_sptr &paramsWs = alg->getProperty("OutputFitParameters");
+    TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 1);
+    const std::vector<std::string> &expectedColumns = {"Name", "Value", "Error"};
+    TS_ASSERT_EQUALS(paramsWs->getColumnNames(), expectedColumns);
+  }
+
 private:
   IAlgorithm_sptr createHeliumAnalyserEfficiencyAlgorithm(WorkspaceGroup_sptr inputWs,
                                                           const std::string &outputWsName) {
