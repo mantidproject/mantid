@@ -84,7 +84,7 @@ def build_and_run_valgrind() {
   cmake_preset = "${platform}-ci"
   doctests = ""
   sh "echo 'Test log file name'"
-  sh "echo ${WORKSPACE}/${CHECKOUT_DIR}/build/test_logs/Valgrind_${env.JOB_NAME}_${env.BUILD_NUMBER}.log"
+  sh "echo ${common_args}"
 
   sh "chmod +x ${buildscript_path}"
   sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
