@@ -42,7 +42,6 @@ public:
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);
-  void run();
   void saveReductions();
   void runFilesChanged();
   void runFilesFinding();
@@ -72,8 +71,8 @@ private:
   Mantid::API::IAlgorithm_sptr convertUnitsAlgorithm(const std::string &inputWsName, const std::string &outputWsName,
                                                      const std::string &target);
 
-  bool validateRebin();
-  QString validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder, bool const isChecked = true) const;
+  bool validateRebin() const;
+  std::string validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder, bool const isChecked = true) const;
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
                                                    const std::string &reflection = "");

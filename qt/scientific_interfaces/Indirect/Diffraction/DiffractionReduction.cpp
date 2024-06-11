@@ -109,51 +109,47 @@ void DiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileF
   connect(file_field, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
 }
 
-void DiffractionReduction::handleValidation(IUserInputValidator *validator) const {}
-
-void DiffractionReduction::handleRun() {}
-
-/**
- * Runs a diffraction reduction when the user clicks Run.
- */
-void DiffractionReduction::run() {
-  m_plotOptionsPresenter->clearWorkspaces();
-
-  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
+void DiffractionReduction::handleValidation(IUserInputValidator *validator) const {
   auto const sampleProblem = validateFileFinder(m_uiForm.rfSampleFiles);
-  if (!sampleProblem.isEmpty()) {
-    showInformationBox("Sample: " + sampleProblem);
-    return;
+  if (!sampleProblem.empty()) {
+    validator->addErrorMessage("Sample: " + sampleProblem);
   }
 
   auto const vanadiumProblem = validateFileFinder(m_uiForm.rfVanFile, m_uiForm.ckUseVanadium->isChecked());
-  if (!vanadiumProblem.isEmpty()) {
-    showInformationBox("Vanadium: " + vanadiumProblem);
-    return;
+  if (!vanadiumProblem.empty()) {
+    validator->addErrorMessage("Vanadium: " + vanadiumProblem);
   }
 
   auto const calibrationProblem = validateFileFinder(m_uiForm.rfCalFile, m_uiForm.ckUseCalib->isChecked());
-  if (!calibrationProblem.isEmpty()) {
-    showInformationBox("Calibration: " + calibrationProblem);
-    return;
+  if (!calibrationProblem.empty()) {
+    validator->addErrorMessage("Calibration: " + calibrationProblem);
   }
 
   auto const spectraMin = static_cast<std::size_t>(m_uiForm.spSpecMin->value());
   auto const spectraMax = static_cast<std::size_t>(m_uiForm.spSpecMax->value());
   if (auto const message = m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax)) {
-    showInformationBox(QString::fromStdString(*message));
-    return;
+    validator->addErrorMessage(*message);
   }
+
+  auto const instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+
+  if (instName != "OSIRIS" || mode != "diffonly") {
+    if (!validateRebin()) {
+      validator->addErrorMessage("Rebinning parameters are incorrect.");
+    }
+  }
+}
+
+void DiffractionReduction::handleRun() {
+  m_plotOptionsPresenter->clearWorkspaces();
+
+  auto const instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (instName == "OSIRIS" && mode == "diffonly") {
     runOSIRISdiffonlyReduction();
   } else {
-    if (!validateRebin()) {
-      showInformationBox("Rebinning parameters are incorrect.");
-      return;
-    }
     runGenericReduction(instName, mode);
   }
 }
@@ -615,7 +611,7 @@ void DiffractionReduction::saveSettings() {
  *
  * @returns True if reining options are valid, false otherwise
  */
-bool DiffractionReduction::validateRebin() {
+bool DiffractionReduction::validateRebin() const {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
   QString rebStepTxt = m_uiForm.leRebinWidth->text();
   QString rebEndTxt = m_uiForm.leRebinEnd->text();
@@ -655,10 +651,10 @@ bool DiffractionReduction::validateRebin() {
  *
  * @returns A message if the file finder has a problem.
  */
-QString DiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
-                                                 bool const isChecked) const {
+std::string DiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
+                                                     bool const isChecked) const {
   if (!fileFinder->isOptional() || isChecked) {
-    return fileFinder->getFileProblem();
+    return fileFinder->getFileProblem().toStdString();
   }
   return "";
 }
