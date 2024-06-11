@@ -13,8 +13,8 @@
 
 #include "Common/OutputPlotOptionsModel.h"
 #include "Common/OutputPlotOptionsView.h"
-#include "Common/Run/IRunSubscriber.h"
-#include "Common/Run/RunView.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunView.h"
 #include "Common/Settings.h"
 #include "Common/SettingsModel.h"
 #include "Common/SettingsView.h"

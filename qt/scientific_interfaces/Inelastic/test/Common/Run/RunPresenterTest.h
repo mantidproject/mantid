@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "../MockObjects.h"
-#include "Common/Run/RunPresenter.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "MantidQtWidgets/Common/MockUserInputValidator.h"
 
 #include <memory>

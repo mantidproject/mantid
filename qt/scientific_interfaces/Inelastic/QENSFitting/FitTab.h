@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Common/InelasticTab.h"
-#include "Common/Run/IRunSubscriber.h"
-#include "Common/Run/RunPresenter.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"

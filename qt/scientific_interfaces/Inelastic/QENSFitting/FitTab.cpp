@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
 
-#include "Common/Run/RunView.h"
+#include "Common/RunWidget/RunView.h"
 #include "FitPlotView.h"
 
 #include <QString>
