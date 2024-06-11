@@ -54,7 +54,9 @@ class SimplestCompare(systemtesting.MantidSystemTest):
         self.wksp_mem, self.wksp_file = self.wksp_mem + "_mem", self.wksp_mem + "_file"
 
         # load then process
-        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
+        LoadEventAndCompress(
+            Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0, CompressTOFTolerance=0
+        )
         LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName="PG3")
         PDDetermineCharacterizations(
             InputWorkspace=self.wksp_mem, Characterizations="characterizations", ReductionProperties="__snspowderreduction_inner"
@@ -291,7 +293,9 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         self.wksp_mem, self.wksp_file = self.wksp_mem + "_mem", self.wksp_mem + "_file"
 
         # load then process
-        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
+        LoadEventAndCompress(
+            Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0, CompressTOFTolerance=0
+        )
         LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName="PG3")
         PDDetermineCharacterizations(
             InputWorkspace=self.wksp_mem, Characterizations="characterizations", ReductionProperties="__snspowderreduction_inner"
