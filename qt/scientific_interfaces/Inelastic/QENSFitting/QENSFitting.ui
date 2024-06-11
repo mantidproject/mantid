@@ -50,30 +50,33 @@
         <height>0</height>
        </size>
       </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;MSD: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Mean Square Displacements for different fit models.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;I(Q,t): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit models to I(Q,t) curves, including stretch exponentials.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Convolution: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit models (typically lorentzians) based on the convolution of S(Q,w) and R(Q,w) curves, requires resolution file.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Function(Q): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fits the FWHM or the EISF vs. Q resulting from convolution fitting analysis to different diffusion models.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabMSD">
        <attribute name="title">
-        <string>MSD Fit</string>
+        <string>MSD </string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabIqtFit">
        <attribute name="title">
-        <string>I(Q, t) Fit</string>
+        <string>I(Q, t) </string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabConvFit">
        <attribute name="title">
-        <string>ConvFit</string>
+        <string>Convolution</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabJumpFit">
        <attribute name="title">
-        <string>F(Q) Fit</string>
+        <string>Function (Q)</string>
        </attribute>
       </widget>
      </widget>
