@@ -152,17 +152,79 @@ PYTHONHOME=${_python_home}"
   add_dependencies(check ${_cxxtest_testname})
 
   # add each separate test to ctest
-  foreach(part ${ARGN})
-    # The filename without extension = The suite name.
-    get_filename_component(_suitename ${part} NAME_WE)
-    set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
-
-    if(NOT DEFINED TEST_VALGRIND)
+  if(NOT DEFINED TEST_VALGRIND)
+    foreach(part ${ARGN})
+      # The filename without extension = The suite name.
+      get_filename_component(_suitename ${part} NAME_WE)
+      set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
       add_test(NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
                                                       $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
       )
-    else()
-      # TODO check!
+
+      set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+      if(WIN32)
+        set_property(
+          TEST ${_cxxtest_separate_name}
+          APPEND
+          PROPERTY ENVIRONMENT "QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}"
+        )
+        set_property(
+          TEST ${_cxxtest_separate_name}
+          APPEND
+          PROPERTY ENVIRONMENT "PYTHONHOME=${_python_home}"
+        )
+        set(_new_path ${_misc_bin} ${_qt5_bin} ${_python_home} ${_python_home}/Scripts $ENV{PATH})
+        # the value used for PATH has to have explicit semi colons for some reason
+        string(REPLACE ";" "\;" _new_path "${_new_path}")
+        set_property(
+          TEST ${_cxxtest_separate_name}
+          APPEND
+          PROPERTY ENVIRONMENT "PATH=${_new_path}"
+        )
+      endif()
+      if(CXXTEST_ADD_PERFORMANCE)
+        # ------ Performance test version -------
+        # Name of the possibly-existing Performance test suite
+        set(_performance_suite_name "${_suitename}Performance")
+        # Read the contents of the header file
+        file(READ ${part} _file_contents)
+        # Is that suite defined in there at all?
+        string(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents})
+        if(NOT "${_search_res}" STREQUAL "")
+          set(_cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
+          add_test(NAME ${_cxxtest_separate_name}
+                   COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+                           $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name}
+          )
+          set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+        endif()
+      endif()
+
+      set(SUPPRESSIONS_DIR "${CMAKE_SOURCE_DIR}/tools/Sanitizer")
+      if(USE_SANITIZERS_LOWER STREQUAL "address")
+        # See dev docs on sanitizers for details on why verify_asan_link is false Trying to quote these options causes
+        # the quotation to be forwarded
+        set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true")
+        set_property(
+          TEST ${_cxxtest_separate_name}
+          APPEND
+          PROPERTY ENVIRONMENT ASAN_OPTIONS=${_ASAN_OPTS}
+        )
+
+        set(_LSAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Leak.supp")
+        set_property(
+          TEST ${_cxxtest_separate_name}
+          APPEND
+          PROPERTY ENVIRONMENT LSAN_OPTIONS=${_LSAN_OPTS}
+        )
+
+      endif()
+    endforeach(part ${ARGN})
+  else()
+    # TODO check!
+    foreach(part ${ARGN})
+      get_filename_component(_suitename ${part} NAME_WE)
+      set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
       add_test(
         NAME ${_cxxtest_separate_name}_valgrind_test
         COMMAND
@@ -171,67 +233,10 @@ PYTHONHOME=${_python_home}"
           $<TARGET_FILE:${_cxxtest_testname}>
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
       )
-    endif()
+      set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+    endforeach(part ${ARGN})
+  endif()
 
-    set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
-    if(WIN32)
-      set_property(
-        TEST ${_cxxtest_separate_name}
-        APPEND
-        PROPERTY ENVIRONMENT "QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}"
-      )
-      set_property(
-        TEST ${_cxxtest_separate_name}
-        APPEND
-        PROPERTY ENVIRONMENT "PYTHONHOME=${_python_home}"
-      )
-      set(_new_path ${_misc_bin} ${_qt5_bin} ${_python_home} ${_python_home}/Scripts $ENV{PATH})
-      # the value used for PATH has to have explicit semi colons for some reason
-      string(REPLACE ";" "\;" _new_path "${_new_path}")
-      set_property(
-        TEST ${_cxxtest_separate_name}
-        APPEND
-        PROPERTY ENVIRONMENT "PATH=${_new_path}"
-      )
-    endif()
-    if(CXXTEST_ADD_PERFORMANCE)
-      # ------ Performance test version -------
-      # Name of the possibly-existing Performance test suite
-      set(_performance_suite_name "${_suitename}Performance")
-      # Read the contents of the header file
-      file(READ ${part} _file_contents)
-      # Is that suite defined in there at all?
-      string(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents})
-      if(NOT "${_search_res}" STREQUAL "")
-        set(_cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
-        add_test(NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
-                                                        $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name}
-        )
-        set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
-      endif()
-    endif()
-
-    set(SUPPRESSIONS_DIR "${CMAKE_SOURCE_DIR}/tools/Sanitizer")
-    if(USE_SANITIZERS_LOWER STREQUAL "address")
-      # See dev docs on sanitizers for details on why verify_asan_link is false Trying to quote these options causes the
-      # quotation to be forwarded
-      set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true")
-      set_property(
-        TEST ${_cxxtest_separate_name}
-        APPEND
-        PROPERTY ENVIRONMENT ASAN_OPTIONS=${_ASAN_OPTS}
-      )
-
-      set(_LSAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Leak.supp")
-      set_property(
-        TEST ${_cxxtest_separate_name}
-        APPEND
-        PROPERTY ENVIRONMENT LSAN_OPTIONS=${_LSAN_OPTS}
-      )
-
-    endif()
-
-  endforeach(part ${ARGN})
 endmacro(CXXTEST_ADD_TEST)
 
 # =============================================================
