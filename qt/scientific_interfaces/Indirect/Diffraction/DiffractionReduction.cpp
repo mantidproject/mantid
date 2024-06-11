@@ -163,6 +163,7 @@ void DiffractionReduction::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
 
   m_runPresenter->setRunEnabled(true);
+  setSaveEnabled(!error);
 
   if (!error) {
     // Ungroup the output workspace if generic reducer was used
@@ -179,7 +180,6 @@ void DiffractionReduction::algorithmComplete(bool error) {
       m_plotOptionsPresenter->setWorkspaces(m_plotWorkspaces);
     }
   } else {
-    setSaveEnabled(false);
     showInformationBox("Error running diffraction reduction.\nSee Results Log for details.");
   }
 }
@@ -681,11 +681,6 @@ void DiffractionReduction::runFilesFound() {
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
-}
-
-void DiffractionReduction::setButtonsEnabled(bool enabled) {
-  m_runPresenter->setRunEnabled(enabled);
-  setSaveEnabled(enabled);
 }
 
 void DiffractionReduction::setSaveEnabled(bool enabled) {

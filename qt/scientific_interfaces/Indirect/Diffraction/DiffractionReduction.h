@@ -81,7 +81,6 @@ private:
   void connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field);
   void runOSIRISdiffonlyReduction();
 
-  void setButtonsEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
 private:
