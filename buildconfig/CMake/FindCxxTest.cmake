@@ -222,6 +222,7 @@ PYTHONHOME=${_python_home}"
     endforeach(part ${ARGN})
   else()
     # TODO check!
+    set(ignoreMe "${TEST_VALGRIND}")
     foreach(part ${ARGN})
       get_filename_component(_suitename ${part} NAME_WE)
       set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
