@@ -213,6 +213,18 @@
         "COVERAGE": "OFF",
         "TESTING_TIMEOUT": "1200"
       }
+    },
+    {
+      "name": "linux-64-valgrind",
+      "description": "Build options for a valgrind test run on Linux",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TESTING_TIMEOUT": "4000"
+      }
     }
   ]
 }
