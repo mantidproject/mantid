@@ -27,6 +27,8 @@ void RunPresenter::handleRunClicked() {
 
 void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
 
+void RunPresenter::setRunText(std::string const &text) { m_view->setRunText(text); }
+
 bool RunPresenter::validate(std::unique_ptr<IUserInputValidator> validator) const {
   m_subscriber->handleValidation(validator.get());
 

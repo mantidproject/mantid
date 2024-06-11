@@ -64,7 +64,6 @@ void DiffractionReduction::initLayout() {
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-  // connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
@@ -163,7 +162,7 @@ void DiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
 
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
 
   if (!error) {
     // Ungroup the output workspace if generic reducer was used
@@ -318,8 +317,6 @@ IAlgorithm_sptr DiffractionReduction::convertUnitsAlgorithm(const std::string &i
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
 void DiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
-  setRunIsRunning(true);
-
   QString rebinStart = m_uiForm.leRebinStart->text();
   QString rebinWidth = m_uiForm.leRebinWidth->text();
   QString rebinEnd = m_uiForm.leRebinEnd->text();
@@ -381,8 +378,6 @@ void DiffractionReduction::runGenericReduction(const QString &instName, const QS
  * OSIRISDiffractionReduction algorithm.
  */
 void DiffractionReduction::runOSIRISdiffonlyReduction() {
-  setRunIsRunning(true);
-
   // Get the files names from FileFinderWidget widget, and convert them from Qt
   // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
@@ -667,31 +662,20 @@ void DiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile-
  * Disables and shows message on run button indicating that run files have been
  * changed.
  */
-void DiffractionReduction::runFilesChanged() {
-  // m_uiForm.pbRun->setEnabled(false);
-  // m_uiForm.pbRun->setText("Editing...");
-}
+void DiffractionReduction::runFilesChanged() { m_runPresenter->setRunText("Editing..."); }
 
 /**
  * Disables and shows message on run button to indicate searching for data
  * files.
  */
-void DiffractionReduction::runFilesFinding() {
-  // m_uiForm.pbRun->setEnabled(false);
-  // m_uiForm.pbRun->setText("Finding files...");
-}
+void DiffractionReduction::runFilesFinding() { m_runPresenter->setRunText("Finding files..."); }
 
 /**
  * Updates run button with result of file search.
  */
 void DiffractionReduction::runFilesFound() {
   bool valid = m_uiForm.rfSampleFiles->isValid();
-  // m_uiForm.pbRun->setEnabled(valid);
-
-  // if (valid)
-  //  m_uiForm.pbRun->setText("Run");
-  // else
-  //  m_uiForm.pbRun->setText("Invalid Run");
+  m_runPresenter->setRunText(valid ? "Run" : "Invalid Run");
 
   // Disable sum files if only one file is given
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
@@ -699,17 +683,10 @@ void DiffractionReduction::runFilesFound() {
     m_uiForm.ckSumFiles->setChecked(false);
 }
 
-void DiffractionReduction::setRunIsRunning(bool running) {
-  // m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
 void DiffractionReduction::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
+  m_runPresenter->setRunEnabled(enabled);
   setSaveEnabled(enabled);
 }
-
-void DiffractionReduction::setRunEnabled(bool enabled) {} // m_uiForm.pbRun->setEnabled(enabled); }
 
 void DiffractionReduction::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
