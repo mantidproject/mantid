@@ -233,7 +233,7 @@ PYTHONHOME=${_python_home}"
           $<TARGET_FILE:${_cxxtest_testname}>
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
       )
-      set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+      set_tests_properties(${_cxxtest_separate_name}_valgrind_test PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
     endforeach(part ${ARGN})
   endif()
 
