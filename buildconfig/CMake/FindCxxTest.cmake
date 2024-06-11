@@ -163,12 +163,11 @@ PYTHONHOME=${_python_home}"
       )
     else()
       # TODO check!
-      get_env(VALGRIND_LOG_FILE $ENV{VALGRIND_LOG_FILE})
       add_test(
         NAME ${_cxxtest_separate_name}_valgrind_test
         COMMAND
           valgrind --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full
-          --errors-for-leak-kinds=definite --show-leak-kinds=definite --log-file=${VALGRIND_LOG_FILE}
+          --errors-for-leak-kinds=definite --show-leak-kinds=definite --log-file=$ENV{VALGRIND_LOG_FILE}
           $<TARGET_FILE:${_cxxtest_testname}>
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
       )
