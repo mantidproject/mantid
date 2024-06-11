@@ -55,16 +55,17 @@ It is very convenient to be able to access the data archive directly.
 At ISIS, this is automatically done on the Windows machines, however OSX and Linux
 require some extra setup.
 
-OSX
----
+macOS
+-----
 
-* In Finder "command"+k opens a mounting dialogue
-* For `Server address` enter `smb://isisdatar80/inst$/` hit Connect
-* This should prompt you for federal ID `clrc\....` and password
-* After completing this the drive is now mounted
-* It can be found at `/Volumes/inst$`
-
-**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.
+* While in Finder, hit ``Command+K`` to open the "Connect to Server" dialog box.
+* For ``Server address`` enter the below and hit ``Connect``:
+   * ``smb://isisdatar80/inst$/`` if you are on site.
+   * ``smb://isisdatar80.isis.cclrc.ac.uk/inst$/`` if you are working remotely through the VPN.
+   * *Note: ``isisdatar80``, ``isisdatar55``, and ``isisdatar3`` can all be used interchangably. We've just used the R80 option in these examples. If one goes down you may be able to connect to one of the others.*
+* This should prompt you for federal ID (You'll need to prefix it with ``clrc\...``) and password.
+* After completing this the archive drive is now mounted.
+* It can be found at ``/Volumes/inst$/``.
 
 Linux
 ------
