@@ -478,7 +478,6 @@ void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vect
   const int nb_monitors = static_cast<int>(monitorNames.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
   if (!xVals.empty()) {
-    HistogramData::BinEdges binEdges(xVals);
     // first, load data
     LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xVals, 0);
     progress.report();
