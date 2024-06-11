@@ -10,6 +10,8 @@
 
 #include "Common/InelasticInterface.h"
 #include "Common/OutputPlotOptionsPresenter.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 
 #include "ui_DiffractionReduction.h"
 
@@ -22,7 +24,7 @@ namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
 
-class DiffractionReduction : public InelasticInterface {
+class DiffractionReduction : public InelasticInterface, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -34,6 +36,9 @@ public:
   static std::string name() { return "Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);
@@ -90,6 +95,7 @@ private:
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
 
+  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   DetectorGroupingOptions *m_groupingWidget;
 };

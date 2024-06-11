@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
+#include "Common/RunWidget/RunView.h"
 #include "Common/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -37,8 +38,8 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 DiffractionReduction::DiffractionReduction(QWidget *parent)
     : InelasticInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_plotWorkspaces(), m_plotOptionsPresenter(),
-      m_groupingWidget() {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_plotWorkspaces(), m_runPresenter(),
+      m_plotOptionsPresenter(), m_groupingWidget() {}
 
 DiffractionReduction::~DiffractionReduction() { saveSettings(); }
 
@@ -49,6 +50,7 @@ void DiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
+  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 
@@ -62,7 +64,7 @@ void DiffractionReduction::initLayout() {
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
+  // connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
@@ -106,6 +108,10 @@ void DiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileF
   connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
   connect(file_field, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
 }
+
+void DiffractionReduction::handleValidation(IUserInputValidator *validator) const {}
+
+void DiffractionReduction::handleRun() {}
 
 /**
  * Runs a diffraction reduction when the user clicks Run.
@@ -666,8 +672,8 @@ void DiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile-
  * changed.
  */
 void DiffractionReduction::runFilesChanged() {
-  m_uiForm.pbRun->setEnabled(false);
-  m_uiForm.pbRun->setText("Editing...");
+  // m_uiForm.pbRun->setEnabled(false);
+  // m_uiForm.pbRun->setText("Editing...");
 }
 
 /**
@@ -675,8 +681,8 @@ void DiffractionReduction::runFilesChanged() {
  * files.
  */
 void DiffractionReduction::runFilesFinding() {
-  m_uiForm.pbRun->setEnabled(false);
-  m_uiForm.pbRun->setText("Finding files...");
+  // m_uiForm.pbRun->setEnabled(false);
+  // m_uiForm.pbRun->setText("Finding files...");
 }
 
 /**
@@ -684,12 +690,12 @@ void DiffractionReduction::runFilesFinding() {
  */
 void DiffractionReduction::runFilesFound() {
   bool valid = m_uiForm.rfSampleFiles->isValid();
-  m_uiForm.pbRun->setEnabled(valid);
+  // m_uiForm.pbRun->setEnabled(valid);
 
-  if (valid)
-    m_uiForm.pbRun->setText("Run");
-  else
-    m_uiForm.pbRun->setText("Invalid Run");
+  // if (valid)
+  //  m_uiForm.pbRun->setText("Run");
+  // else
+  //  m_uiForm.pbRun->setText("Invalid Run");
 
   // Disable sum files if only one file is given
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
@@ -698,7 +704,7 @@ void DiffractionReduction::runFilesFound() {
 }
 
 void DiffractionReduction::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  // m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }
 
@@ -707,7 +713,7 @@ void DiffractionReduction::setButtonsEnabled(bool enabled) {
   setSaveEnabled(enabled);
 }
 
-void DiffractionReduction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void DiffractionReduction::setRunEnabled(bool enabled) {} // m_uiForm.pbRun->setEnabled(enabled); }
 
 void DiffractionReduction::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
