@@ -45,7 +45,7 @@ New features
   Credits to the author of SXD2001 for the idea of using NSigma as a threshold (albeit in SXD2001 the peak finding is done in 3D).
   Gutmann, M. J. (2005). SXD2001. ISIS Facility, Rutherford Appleton Laboratory, Oxfordshire, England.
 - Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now includes validation rules to remove spurious peaks due to noise,
-  by allowing user to provide additional arguements as below:
+  by allowing user to provide additional arguments as below:
 
   - ``MinNBinsPerPeak``, the Minimum number of bins contributing to a peak in an individual spectrum
   - ``MinNSpectraPerPeak``, ``MaxNSpectraPerPeak`` Minimum & Maximum number of spectra contributing to a peak after they are grouped.
@@ -66,7 +66,7 @@ Bugfixes
     still be modified by users who wish to fiddle with the :ref:`algm-Abins2D`
     behaviour.
 
-- Algortihm :ref:`Load <algm-Load>` now loads a single file faster.
+- Algorithm :ref:`Load <algm-Load>` now loads a single file faster.
 - Algorithm :ref:`FindPeaks <algm-FindPeaks>` no longer crashes when the number of bins in the workspace are not sufficient to run :ref:`algm-SmoothData` algorithm.
 
 Fit Functions
@@ -87,7 +87,7 @@ New features
 - Algorithm :ref:`algm-LoadEventAsWorkspace2D` accepts new boolean parameter ``LoadNexusInstrumentXML``. Default is *true*.
 - File search/loading will now look in instrument data cache **on IDAaaS**.
   The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains the same raw data as the data archive from the past 3 years.
-  This new feature will speed up file loading times for external users on **on IDAaaS** that do not have access to the data archive.
+  This new feature will speed up file loading times for external users **on IDAaaS** that do not have access to the data archive.
   Please note that if you are **not** on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.
   Here is a demonstration on IDAaaS showing that an instrument file can now be loaded even when the archive is turned off:
 

@@ -18,7 +18,7 @@ Bugfixes
 - Fixed a bug when you click `Load Current Run` for the MUSR instrument.
 - Improved the warning message displayed when a file fails to load.
 - Fixed an error that would occur during simultaneous fitting on the :ref:`Muon Analysis interface <Muon_Analysis-ref>`.
-- Fixed a freeze in the Muon Analysis interface after deleting a workspace which is not loaded into the interface.
+- Fixed a freeze in the :ref:`Muon Analysis interface <Muon_Analysis-ref>` after deleting a workspace which is not loaded into the interface.
 - Fixed a crash caused by unselecting all loaded data in the Grouping tab before adding a Fit Function.
 
 :ref:`Release 6.10.0 <v6.10.0>`
