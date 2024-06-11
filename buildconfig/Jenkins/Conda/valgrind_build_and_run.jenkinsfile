@@ -5,6 +5,9 @@ CHECKOUT_DIR = 'source'
 CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
 pipeline {
   agent { label 'linux-64' }
+  environment  {
+    VALGRIND_LOG_FILE = "${WORKSPACE}/${CHECKOUT_DIR}/build/Valgrind_${env.JOB_NAME}_${env.BUILD_NUMBER}.log"
+  }
   options { checkoutToSubdirectory(CHECKOUT_DIR) }
   stages {
     stage('Store git commit') {

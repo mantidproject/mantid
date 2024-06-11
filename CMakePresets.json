@@ -223,7 +223,8 @@
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "TESTING_TIMEOUT": "4000"
+        "TESTING_TIMEOUT": "4000",
+        "TEST_VALGRIND": "ON"
       }
     }
   ]
