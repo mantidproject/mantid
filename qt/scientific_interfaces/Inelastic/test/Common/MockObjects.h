@@ -150,6 +150,7 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IRunPresenter *presenter));
 
   MOCK_METHOD1(setRunEnabled, void(bool const enable));
+  MOCK_METHOD1(setRunText, void(std::string const &text));
 
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };

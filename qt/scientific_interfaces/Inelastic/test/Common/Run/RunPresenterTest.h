@@ -53,6 +53,11 @@ public:
     m_presenter->setRunEnabled(true);
   }
 
+  void test_setRunText_calls_the_appropriate_view_function() {
+    EXPECT_CALL(*m_view, setRunText("Finding file...")).Times(1);
+    m_presenter->setRunText("Finding file...");
+  }
+
   void test_validate_when_no_error_returned() {
     auto validator = std::make_unique<NiceMock<MockUserInputValidator>>();
     auto validatorRaw = validator.get();
