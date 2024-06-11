@@ -15,6 +15,7 @@
 #include <json/reader.h>
 
 using Mantid::API::ISISInstrumentDataCache;
+using Mantid::Kernel::InstrumentInfo;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISInstrumentDataCache");
@@ -26,7 +27,7 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
   auto [instrumentInfo, runNumber] = validateInstrumentAndNumber(fileName);
   std::string instrName = instrumentInfo.name();
 
-  auto const [jsonPath, json] = openCacheJsonFile(instrName);
+  auto const [jsonPath, json] = openCacheJsonFile(instrumentInfo);
 
   std::string relativePath = json[runNumber].asString();
 
@@ -47,7 +48,7 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
  * @return A vector containing the run numbers that can be accessed from the data cache.
  */
 std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std::string &instrumentName) const {
-  const auto &json = openCacheJsonFile(instrumentName).second;
+  const auto &json = openCacheJsonFile(getInstrumentFromName(instrumentName)).second;
   return json.getMemberNames();
 }
 
@@ -57,23 +58,24 @@ std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std
  * @return A pair containing the path and the contents of the json file.
  * @throws std::invalid_argument if the file could not be found.
  */
-std::pair<std::string, Json::Value>
-ISISInstrumentDataCache::openCacheJsonFile(std::string const &instrumentName) const {
+std::pair<std::string, Json::Value> ISISInstrumentDataCache::openCacheJsonFile(const InstrumentInfo &instrument) const {
   // Open index json file
-  std::filesystem::path const &jsonPath =
-      std::filesystem::path(m_dataCachePath) / instrumentName / (instrumentName + "_index.json");
+  std::filesystem::path jsonPath = makeIndexFilePath(instrument.name());
   std::ifstream ifstrm{jsonPath};
-  if (!ifstrm) {
-    throw std::invalid_argument("Could not open index file: " + jsonPath.string());
+  if (!ifstrm.is_open()) { // Try again with shortname
+    jsonPath = makeIndexFilePath(instrument.shortName());
+    ifstrm.open(jsonPath);
+    if (!ifstrm.is_open()) {
+      throw std::invalid_argument("Could not open index file: " + jsonPath.string());
+    }
   }
-
   // Read directory path from json file
   Json::Value json;
   ifstrm >> json;
   return {jsonPath.string(), json};
 }
 
-std::pair<Mantid::Kernel::InstrumentInfo, std::string>
+std::pair<InstrumentInfo, std::string>
 ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName) const {
 
   // Check if suffix eg. -add is present in filename
@@ -90,18 +92,22 @@ ISISInstrumentDataCache::validateInstrumentAndNumber(const std::string &fileName
   }
   runNumber.erase(0, runNumber.find_first_not_of('0')); // Remove padding zeros
 
-  try { // Expand instrument name
-    auto instrumentInfo = FileFinder::Instance().getInstrument(instrName, false);
-    return std::pair(instrumentInfo, runNumber);
+  return std::pair(getInstrumentFromName(instrName), runNumber);
+}
 
+InstrumentInfo ISISInstrumentDataCache::getInstrumentFromName(const std::string &instName) const {
+  try { // Expand instrument name
+    auto instrumentInfo = FileFinder::Instance().getInstrument(instName, false);
+    return instrumentInfo;
   } catch (const Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("Instrument name not recognized.");
   }
 }
 
-std::string Mantid::API::ISISInstrumentDataCache::makeIndexFilePath(const std::string &instrumentName) const {
+std::string ISISInstrumentDataCache::makeIndexFilePath(const std::string &instrumentName) const {
   g_log.debug() << "ISISInstrumentDataCache::makeIndexFilePath(" << instrumentName << ")" << std::endl;
-  std::string indexFilePath = m_dataCachePath + "/" + instrumentName + "/" + instrumentName + "_index.json";
+  auto const &indexFilePath =
+      std::filesystem::path(m_dataCachePath) / instrumentName / (instrumentName + "_index.json");
   return indexFilePath;
 }
 
@@ -125,8 +131,6 @@ ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::string &fileNam
  * @param instrument The instrument to find the index file for.
  * @return if there is an index file (and therefore instrument data cache) on the system.
  */
-bool ISISInstrumentDataCache::isIndexFileAvailable(std::string const &instrument) const {
-  std::filesystem::path const indexPath =
-      std::filesystem::path(m_dataCachePath) / instrument / (instrument + "_index.json");
-  return std::filesystem::exists(indexPath);
+bool ISISInstrumentDataCache::isIndexFileAvailable(std::string const &instrumentName) const {
+  return std::filesystem::exists(makeIndexFilePath(instrumentName));
 }

@@ -29,7 +29,9 @@ private:
   std::pair<Mantid::Kernel::InstrumentInfo, std::string> validateInstrumentAndNumber(const std::string &filename) const;
   std::string makeIndexFilePath(const std::string &instrumentName) const;
   std::pair<std::string, std::string> splitIntoInstrumentAndNumber(const std::string &filename) const;
-  [[nodiscard]] std::pair<std::string, Json::Value> openCacheJsonFile(std::string const &instrumentName) const;
+  [[nodiscard]] std::pair<std::string, Json::Value>
+  openCacheJsonFile(const Mantid::Kernel::InstrumentInfo &instrumentName) const;
+  [[nodiscard]] Mantid::Kernel::InstrumentInfo getInstrumentFromName(const std::string &instName) const;
   std::string m_dataCachePath;
 };
 } // namespace API
