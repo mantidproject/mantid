@@ -10,7 +10,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <json/reader.h>
 
@@ -54,7 +53,7 @@ std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std
 
 /**
  * Open the Json file and return the path and the opened file object.
- * @param instrumentName The name of the instrument to open the index file for.
+ * @param instrument The instrument to open the index file for.
  * @return A pair containing the path and the contents of the json file.
  * @throws std::invalid_argument if the file could not be found.
  */
@@ -104,7 +103,7 @@ InstrumentInfo ISISInstrumentDataCache::getInstrumentFromName(const std::string 
   }
 }
 
-std::string ISISInstrumentDataCache::makeIndexFilePath(const std::string &instrumentName) const {
+std::filesystem::path ISISInstrumentDataCache::makeIndexFilePath(const std::string &instrumentName) const {
   g_log.debug() << "ISISInstrumentDataCache::makeIndexFilePath(" << instrumentName << ")" << std::endl;
   auto const &indexFilePath =
       std::filesystem::path(m_dataCachePath) / instrumentName / (instrumentName + "_index.json");
@@ -128,7 +127,7 @@ ISISInstrumentDataCache::splitIntoInstrumentAndNumber(const std::string &fileNam
 
 /**
  * Check if the data cache index file is available on the current system for a given instrument.
- * @param instrument The instrument to find the index file for.
+ * @param instrumentName The instrument to find the index file for.
  * @return if there is an index file (and therefore instrument data cache) on the system.
  */
 bool ISISInstrumentDataCache::isIndexFileAvailable(std::string const &instrumentName) const {
