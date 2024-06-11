@@ -123,8 +123,12 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   g_log.debug() << "loadChunk(" << rowIndex << ")\n";
 
   auto rowCount = static_cast<double>(m_chunkingTable->rowCount());
-  double progStart = static_cast<double>(rowIndex) / rowCount;
-  double progStop = static_cast<double>(rowIndex + 1) / rowCount;
+  double progStart{0};
+  double progStop{1};
+  if (rowCount != 0) {
+    progStart = static_cast<double>(rowIndex) / rowCount;
+    progStop = static_cast<double>(rowIndex + 1) / rowCount;
+  }
 
   auto alg = createChildAlgorithm("LoadEventNexus", progStart, progStop, true);
   alg->setProperty<string>("Filename", getProperty("Filename"));
