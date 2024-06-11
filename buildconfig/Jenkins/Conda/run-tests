@@ -89,8 +89,8 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
     # VALGRIND_CMD="valgrind --verbose --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no"
     # VALGRIND_LOG_FILE="Valgrind.log"
     # > $VALGRIND_LOG_FILE
-    VALGRIND_CMD="valgrind --verbose --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no"
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS --test-action "${VALGRIND_CMD} %s 2>&1 | tee -a Valgrind.log" --verbose
+    # VALGRIND_CMD="valgrind --verbose --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=yes --error-limit=no"
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS --test-action memcheck --verbose
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
