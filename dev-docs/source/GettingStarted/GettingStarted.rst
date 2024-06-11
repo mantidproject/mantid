@@ -58,14 +58,17 @@ require some extra setup.
 macOS
 -----
 
-* While in Finder, hit ``Command+K`` to open the "Connect to Server" dialog box.
-* For ``Server address`` enter the below and hit ``Connect``:
-   * ``smb://isisdatar80/inst$/`` if you are on site.
-   * ``smb://isisdatar80.isis.cclrc.ac.uk/inst$/`` if you are working remotely through the VPN.
-   * *Note: ``isisdatar80``, ``isisdatar55``, and ``isisdatar3`` can all be used interchangably. We've just used the R80 option in these examples. If one goes down you may be able to connect to one of the others.*
-* This should prompt you for federal ID (You'll need to prefix it with ``clrc\...``) and password.
-* After completing this the archive drive is now mounted.
-* It can be found at ``/Volumes/inst$/``.
+#. While in Finder, hit ``Command+K`` to open the "Connect to Server" dialog box.
+#. For ``Server address`` enter the below and hit ``Connect``:
+
+   * On Site: ``smb://isisdatar80/inst$/``.
+   * Remote: ``smb://isisdatar80.isis.cclrc.ac.uk/inst$/`` (You must be connected to the VPN).
+
+#. This should prompt you for federal ID (you'll need to prefix it with ``clrc\...``) and password.
+#. After completing this the archive drive is now mounted.
+#. It can be found at ``/Volumes/inst$/``.
+
+*Note:* ``isisdatar80``, ``isisdatar55``, and ``isisdatar3`` can all be used interchangably. We've just used the R80 option in these examples. If one goes down you may be able to connect to one of the others.
 
 Linux
 ------
