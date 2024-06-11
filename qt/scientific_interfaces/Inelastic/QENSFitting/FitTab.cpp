@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
+
+#include "Common/RunWidget/RunView.h"
 #include "FitPlotView.h"
 
 #include <QString>
@@ -17,15 +19,13 @@ namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
-      m_outOptionsPresenter() {
+      m_runPresenter(), m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
+  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm->runWidget));
 }
 
-void FitTab::setup() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
-  updateOutputOptions(false);
-}
+void FitTab::setup() { updateOutputOptions(false); }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();
@@ -45,24 +45,6 @@ void FitTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlot
 }
 
 std::string FitTab::tabName() const { return m_parentWidget->windowTitle().toStdString(); }
-
-bool FitTab::validate() {
-  auto validator = std::make_unique<UserInputValidator>();
-  m_dataPresenter->validate(validator.get());
-  m_fittingPresenter->validate(validator.get());
-
-  const auto error = validator->generateErrorMessage();
-  if (!error.empty()) {
-    displayWarning(error);
-  }
-  return error.empty();
-}
-
-void FitTab::run() {
-  updateFitButtons(false);
-  updateOutputOptions(false);
-  m_fittingPresenter->runFit();
-}
 
 void FitTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_plotPresenter->isCurrentlySelected(workspaceID, spectrum)) {
@@ -158,6 +140,17 @@ void FitTab::handleFunctionChanged() {
   m_fittingPresenter->updateFitTypeString();
 }
 
+void FitTab::handleValidation(IUserInputValidator *validator) const {
+  m_dataPresenter->validate(validator);
+  m_fittingPresenter->validate(validator);
+}
+
+void FitTab::handleRun() {
+  updateFitButtons(false);
+  updateOutputOptions(false);
+  m_fittingPresenter->runFit();
+}
+
 void FitTab::handleFitComplete(bool const error) {
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   updateFitButtons(true);
@@ -189,8 +182,7 @@ void FitTab::updateFitFunction() {
 }
 
 void FitTab::updateFitButtons(bool const enable) {
-  m_uiForm->pbRun->setText(enable ? "Run" : "Running...");
-  m_uiForm->pbRun->setEnabled(enable);
+  m_runPresenter->setRunEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fittingPresenter->setFitEnabled(enable);
 }

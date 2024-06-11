@@ -7,6 +7,8 @@
 #pragma once
 
 #include "Common/InelasticTab.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -48,7 +50,7 @@ public:
   virtual void handleFitComplete(bool const error) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL FitTab : public InelasticTab, public IFitTab {
+class MANTIDQT_INELASTIC_DLL FitTab : public InelasticTab, public IFitTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -108,10 +110,11 @@ public:
   void handleFunctionChanged() override;
   void handleFitComplete(bool const error) override;
 
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
+
 private:
   void setup() override;
-  bool validate() override;
-  void run() override;
 
   void updateParameterEstimationData();
   void updateDataReferences();
@@ -124,6 +127,7 @@ private:
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FittingPresenter> m_fittingPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
 };
 
