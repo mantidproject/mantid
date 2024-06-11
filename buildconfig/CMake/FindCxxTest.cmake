@@ -226,14 +226,14 @@ PYTHONHOME=${_python_home}"
       get_filename_component(_suitename ${part} NAME_WE)
       set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
       add_test(
-        NAME ${_cxxtest_separate_name}_valgrind_test
+        NAME ${_cxxtest_separate_name}
         COMMAND
           valgrind --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full
           --errors-for-leak-kinds=definite --show-leak-kinds=definite --log-file=$ENV{VALGRIND_LOG_FILE}
           $<TARGET_FILE:${_cxxtest_testname}>
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
       )
-      set_tests_properties(${_cxxtest_separate_name}_valgrind_test PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+      set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
     endforeach(part ${ARGN})
   endif()
 
