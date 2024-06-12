@@ -171,7 +171,7 @@ bool NexusDescriptor::pathOfTypeExists(const std::string &path, const std::strin
  */
 std::string NexusDescriptor::pathOfType(const std::string &type) const {
   const auto it = std::find_if(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
-                               [&type](const auto typeMap) { return type == typeMap.second; });
+                               [&type](const auto &typeMap) { return type == typeMap.second; });
   if (it != m_pathsToTypes.cend()) {
     return it->first;
   }

@@ -272,7 +272,7 @@ int NXClass::getInt(const std::string &name) const {
  */
 bool NXClass::containsGroup(const std::string &query) const {
   return std::any_of(m_groups->cbegin(), m_groups->cend(),
-                     [&query](const auto group) { return group.nxname == query; });
+                     [&query](const auto &group) { return group.nxname == query; });
 }
 
 /**
@@ -282,7 +282,7 @@ bool NXClass::containsGroup(const std::string &query) const {
  */
 NXInfo NXClass::getDataSetInfo(const std::string &name) const {
   const auto it = std::find_if(datasets().cbegin(), datasets().cend(),
-                               [&name](const auto dataset) { return dataset.nxname == name; });
+                               [&name](const auto &dataset) { return dataset.nxname == name; });
   if (it != datasets().cend()) {
     return *it;
   }
@@ -408,7 +408,7 @@ NXEntry NXRoot::openFirstEntry() {
     throw std::runtime_error("NeXus file has no entries");
   }
   const auto it =
-      std::find_if(groups().cbegin(), groups().cend(), [](const auto group) { return group.nxclass == "NXentry"; });
+      std::find_if(groups().cbegin(), groups().cend(), [](const auto &group) { return group.nxclass == "NXentry"; });
   if (it != groups().cend()) {
     return openEntry(it->nxname);
   }

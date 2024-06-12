@@ -222,7 +222,7 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName, const std::strin
 
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
   return std::any_of(m_allEntries.rbegin(), m_allEntries.rend(),
-                     [&entryName](const auto entry) { return entry.second.count(entryName) == 1; });
+                     [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
 }
 
 } // namespace Mantid::Kernel
