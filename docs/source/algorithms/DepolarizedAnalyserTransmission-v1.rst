@@ -44,7 +44,6 @@ Usage
 Output:
 
 .. testoutput:: ExDepolTransmissionCalc
-   :hide:
    :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    PXD Value = ...
