@@ -8,7 +8,7 @@ SANS Changes
 New Features
 ------------
 - New algorithm :ref:`algm-FlipperEfficiency` for the Polarised SANS workflow.
-- Added algorithm for calculating the efficiency of a helium-3 analyser.
+- New algorithm :ref:`algm-HeliumAnalyserEfficiency` for calculating the efficiency of a helium-3 analyser.
 - New algorithm :ref:`algm-DepolarizedAnalyserTransmission`:
 
 .. figure::  ../../images/6_10_release/depolarized-analyser-transmission-algo.png

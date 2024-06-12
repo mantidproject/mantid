@@ -14,7 +14,7 @@ New features
 
 Bugfixes
 ############
-- Fixed a bug that prevented being able to `show detectors` for Let data.
+- Fixed a bug that prevented being able to `Show detectors` for LET data.
 
 
 :ref:`Release 6.10.0 <v6.10.0>`

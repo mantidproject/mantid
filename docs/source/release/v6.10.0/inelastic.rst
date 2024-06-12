@@ -7,7 +7,7 @@ Inelastic Changes
 
 New Features
 ------------
-- Dialogs for selecting and opening workspaces no longer crash when setting spectra limits using an string with the format ``SpectraStart-SpectraEnd``, where Spectra Start is larger than Spectra End.
+- Dialogs for selecting and opening workspaces no longer crash when setting spectra limits using a string with the format ``SpectraStart-SpectraEnd``, where Spectra Start is larger than Spectra End.
 - IqtFit tab of the :ref:`interface-inelastic-qens-fitting` interface now supports new ``TeixeiraWaterIqt`` fitting function, to fit linewidth and molecular residence time in intermediate scattering functions with Teixeira's model for water.
 - IqtFit tab of :ref:`interface-inelastic-qens-fitting` now has a ``Fit Type`` box for selecting a Stretched Exponential function. This allows further fit functions to be added in the future.
 
@@ -45,7 +45,7 @@ Bugfixes
 - Fit Property Browser of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface no longer crashes Mantid when trying to set a fit function with a parameter having a tie to itself.
 - Loading data into the F(Q)Fit tab in the :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>` is now 30% faster.
 - Full Function Browser and Template Function Browser no longer go out of sync on the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface.
-- :ref:`Elwin Tab <elwin>` no longer ocasionally ignores properties ``Background Subtraction`` and ``Normalise to Lowest Temp``.
+- :ref:`Elwin Tab <elwin>` no longer occasionally ignores properties ``Background Subtraction`` and ``Normalise to Lowest Temp``.
 
 
 Algorithms
@@ -53,7 +53,7 @@ Algorithms
 
 New features
 ############
-- Algorithm :ref:`algm-TransformToIqt` and :ref:`algm-CalculateIqt` has checkbox with title ``EnfoceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
+- Algorithm :ref:`algm-TransformToIqt` and :ref:`algm-CalculateIqt` has checkbox with title ``EnforceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
 
 Bugfixes
 ############
