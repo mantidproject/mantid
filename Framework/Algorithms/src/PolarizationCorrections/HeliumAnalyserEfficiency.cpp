@@ -76,7 +76,8 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropertyNames::OUTPUT_FIT_CURVES),
                                                                        "", Kernel::Direction::Output,
                                                                        PropertyMode::Optional),
-                  "The name of the matrix workspace containing the calculated fit curve.");
+                  "The name of the matrix workspace containing the calculated fit curve, the original data, and the "
+                  "difference between the two.");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropertyNames::OUTPUT_FIT_PARAMS),
                                                                        "", Kernel::Direction::Output,
                                                                        PropertyMode::Optional),
