@@ -30,7 +30,7 @@ from mantid.kernel import (
 )
 from mantid.fitfunctions import FunctionWrapper
 import numpy as np
-from numpy.distutils.misc_util import is_sequence
+from collections.abc import Sequence
 from scipy.optimize import approx_fprime, minimize
 from scipy.ndimage import binary_dilation
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
@@ -680,6 +680,14 @@ def calc_sigma_from_hessian(result, profile_func, x, y, weights, cost_func, nfix
     hess = calc_hessian(calc_cost_func, result.x, step_size, profile_func, x, y, weights, cost_func)
     cov = np.linalg.inv(hess) * 2.0 * result.fun / (len(y) - (len(result.x) - nfixed))
     return np.sqrt(cov[0, 0])  # first parameter is intenisity for BackToBackExponential (only func supported)
+
+
+def is_sequence(seq):
+    # Strings are sequences so check for those separately
+    if isinstance(seq, str):
+        return False
+    # NumPy array is not a Sequence
+    return isinstance(seq, np.ndarray) or isinstance(seq, Sequence)
 
 
 def calc_hessian(func, x0, step_size, *args):
