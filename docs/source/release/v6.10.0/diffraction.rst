@@ -16,7 +16,7 @@ New features
 Bugfixes
 ############
 - :ref:`HRPD reduction script <isis-powder-diffraction-hrpd-ref>` now only subtracts empty run from the vanadium when it is subtracted from the sample run (i.e. when ``subtract_empty_instrument=True``) - note other ISIS instrument will always subtract an empty run from the vanadium.
-- Remove the confusing button in the Algorithm :ref:`WANDPowderReduction <algm-WANDPowderReduction>` no longer displays "Replace input workspace", which was considered confusing.
+- Algorithm :ref:`WANDPowderReduction <algm-WANDPowderReduction>` no longer displays the button "Replace input workspace", which was considered confusing.
 
 
 Engineering Diffraction
@@ -49,7 +49,7 @@ New features
 - ``BaseSX`` now has method ``plot_integrated_peaks_MD`` to plot result of IntegratePeaksMD and save in pdf.
 - New algorithm :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` to integrate single-crystal Bragg peaks in a workspace with an x-unit of TOF adapted from an algorithm in SXD2001 by Gutmann, M. J. (2005).
 - New option to use :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` in ``BaseSX`` class (for use in WISH and SXD reduction).
-- New option to find peaks using the ratio of variance/ mean in :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` - this is a peak finding criterion used in DIALS software Winter, G., et al.  Acta Crystallographica Section D: Structural Biology 74.2 (2018): 85-97.
+- New option to find peaks using the ratio of variance/mean in :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` - this is a peak finding criterion used in DIALS software (Winter, G., et al.  Acta Crystallographica Section D: Structural Biology 74.2 (2018): 85-97).
 - :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` is the default peak finding algorithm in the SXD reduction class.
 - New option to apply ``LorentzCorrection`` to ``ConvertHFIRSCDtoMDE`` for monochromatic single crystal diffraction with rotation about the vertical axis.
 
