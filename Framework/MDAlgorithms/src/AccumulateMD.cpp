@@ -127,7 +127,7 @@ std::string filterToNew(std::vector<std::string> &input_data, const std::vector<
  */
 bool appearsInCurrentData(const std::string &data_source, const std::vector<std::string> &current_data) {
   return std::any_of(current_data.rbegin(), current_data.rend(),
-                     [&data_source](const auto source) { return data_source == source; });
+                     [&data_source](const auto &source) { return data_source == source; });
 }
 
 /*
