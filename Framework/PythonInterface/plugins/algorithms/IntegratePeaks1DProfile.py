@@ -693,7 +693,7 @@ def is_sequence(seq):
 def calc_hessian(func, x0, step_size, *args):
     nparam = len(x0)
     if not is_sequence(step_size):
-        step_size = nparam * [epsilon]
+        step_size = nparam * [step_size]
     hessian = np.zeros((nparam, nparam))
     jac = approx_fprime(x0, func, step_size, *args)
     for iparam in range(nparam):
