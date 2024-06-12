@@ -30,16 +30,20 @@ using namespace API;
 constexpr double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
 
 namespace PropertyNames {
-static const std::string INPUT_WORKSPACE = "InputWorkspace";
-static const std::string OUTPUT_WORKSPACE = "OutputWorkspace";
-static const std::string SPIN_STATES = "SpinStates";
-static const std::string PD = "GasPressureTimesCellLength";
-static const std::string PD_ERROR = "GasPressureTimesCellLengthError";
-static const std::string START_LAMBDA = "StartLambda";
-static const std::string END_LAMBDA = "EndLambda";
-static const std::string IGNORE_FIT_QUALITY_ERROR = "IgnoreFitQualityError";
-static const std::string GROUP_INPUTS = "Inputs";
-static const std::string GROUP_FIT_OPTIONS = "Fit Options";
+auto constexpr INPUT_WORKSPACE{"InputWorkspace"};
+auto constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
+auto constexpr OUTPUT_FIT_CURVES{"OutputFitCurves"};
+auto constexpr OUTPUT_FIT_PARAMS{"OutputFitParameters"};
+auto constexpr SPIN_STATES{"SpinStates"};
+auto constexpr PD{"GasPressureTimesCellLength"};
+auto constexpr PD_ERROR{"GasPressureTimesCellLengthError"};
+auto constexpr START_LAMBDA{"StartLambda"};
+auto constexpr END_LAMBDA{"EndLambda"};
+auto constexpr IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
+
+auto constexpr GROUP_INPUTS{"Inputs"};
+auto constexpr GROUP_FIT_OPTIONS{"Fit Options"};
+auto constexpr GROUP_OUTPUTS{"Outputs"};
 } // namespace PropertyNames
 
 void HeliumAnalyserEfficiency::init() {
@@ -50,8 +54,6 @@ void HeliumAnalyserEfficiency::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
       "Input group workspace to use for polarization calculation");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "Helium analyzer efficiency as a function of wavelength");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
@@ -69,6 +71,17 @@ void HeliumAnalyserEfficiency::init() {
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
                   "therefore not throw an error",
                   Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
+                  "Helium analyzer efficiency as a function of wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(std::string(PropertyNames::OUTPUT_FIT_CURVES),
+                                                                       "", Kernel::Direction::Output,
+                                                                       PropertyMode::Optional),
+                  "The name of the matrix workspace containing the calculated fit curve, the original data, and the "
+                  "difference between the two.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(std::string(PropertyNames::OUTPUT_FIT_PARAMS),
+                                                                       "", Kernel::Direction::Output,
+                                                                       PropertyMode::Optional),
+                  "The name of the table workspace containing the fit parameter results.");
 
   setPropertyGroup(PropertyNames::SPIN_STATES, PropertyNames::GROUP_INPUTS);
   setPropertyGroup(PropertyNames::PD, PropertyNames::GROUP_INPUTS);
@@ -77,6 +90,10 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::START_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::END_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
+
+  setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
+  setPropertyGroup(PropertyNames::OUTPUT_FIT_CURVES, PropertyNames::GROUP_OUTPUTS);
+  setPropertyGroup(PropertyNames::OUTPUT_FIT_PARAMS, PropertyNames::GROUP_OUTPUTS);
 }
 
 /**
@@ -188,6 +205,13 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
 
   ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
   MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
+
+  if (!getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS).empty()) {
+    setProperty(PropertyNames::OUTPUT_FIT_PARAMS, fitParameters);
+  }
+  if (!API::Algorithm::getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES).empty()) {
+    setProperty(PropertyNames::OUTPUT_FIT_CURVES, fitWorkspace);
+  }
 
   pHe = fitParameters->getRef<double>("Value", 0);
   pHeError = fitParameters->getRef<double>("Error", 0);
