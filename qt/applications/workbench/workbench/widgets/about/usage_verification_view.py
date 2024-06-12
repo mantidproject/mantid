@@ -48,7 +48,8 @@ class UsageReportingVerificationView(QDialog):
             "All usage data is anonymous and untraceable.\n"
             "We use the usage data to inform the future development of Mantid.\n\n"
             "Disabling usage reporting means features you need risk being deprecated in\n"
-            "future versions if we think they are not used."
+            "future versions if we think they are not used.\n\n"
+            "Error reporting will also be disabled."
         )
         textLayout.addWidget(labelInformation)
 
