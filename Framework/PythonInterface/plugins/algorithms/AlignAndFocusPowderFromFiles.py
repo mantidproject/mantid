@@ -66,6 +66,7 @@ PROPS_FOR_ALIGN = [
     "CompressTolerance",
     "CompressWallClockTolerance",
     "CompressStartTime",
+    "CompressBinningMode",
     "LorentzCorrection",
     "UnwrapRef",
     "LowResRef",
@@ -254,7 +255,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             prop = self.getProperty(name)
-            name_list = ["PreserveEvents", "CompressTolerance", "CompressWallClockTolerance", "CompressStartTime"]
+            name_list = ["PreserveEvents", "CompressTolerance", "CompressWallClockTolerance", "CompressStartTime", "CompressBinningMode"]
 
             if name in name_list or not prop.isDefault:
                 if "Workspace" in name:
@@ -544,13 +545,14 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return wkspname, unfocusname
 
     def __compressEvents(self, wkspname):
-        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] > 0.0:
+        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0:
             CompressEvents(
                 InputWorkspace=wkspname,
                 OutputWorkspace=wkspname,
                 WallClockTolerance=self.kwargs["CompressWallClockTolerance"],
                 Tolerance=self.kwargs["CompressTolerance"],
                 StartTime=self.kwargs["CompressStartTime"],
+                BinningMode=self.kwargs["CompressBinningMode"],
             )
 
     def __accumulate(self, chunkname, sumname, chunkunfocusname, sumuunfocusname, firstrun, removelogs=False):
