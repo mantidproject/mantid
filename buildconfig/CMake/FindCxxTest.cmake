@@ -233,7 +233,8 @@ PYTHONHOME=${_python_home}"
       add_test(NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
                                                       $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
       )
-      set(MEMORYCHECK_COMMAND "/usr/bin/valgrind")
+      find_program(MEMORYCHECK_COMMAND valgrind)
+      # set(MEMORYCHECK_COMMAND "/usr/bin/valgrind")
       set(MEMORYCHECK_COMMAND_OPTIONS
           "--verbose --gen-suppressions=all --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full --errors-for-leak-kinds=definite --show-leak-kinds=definite"
       )
