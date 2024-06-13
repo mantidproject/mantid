@@ -41,9 +41,5 @@ private:
 
   /// Fit using UserFunction1D to find the pxd and transmission values.
   void calcWavelengthDependentTransmission(API::MatrixWorkspace_sptr const &inputWs, std::string const &outputWsName);
-
-  /// Calculate and output the non-normalised covariance matrix for the fit.
-  void calcNonNormCovarianceMatrix(API::ITableWorkspace_sptr const &normCovMatrix,
-                                   API::ITableWorkspace_sptr const &paramsWs);
 };
 } // namespace Mantid::Algorithms
