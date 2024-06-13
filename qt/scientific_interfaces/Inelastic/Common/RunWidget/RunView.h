@@ -26,7 +26,6 @@ public:
 
   virtual void subscribePresenter(IRunPresenter *presenter) = 0;
 
-  virtual void setRunEnabled(bool const enable) = 0;
   virtual void setRunText(std::string const &text) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
@@ -40,7 +39,6 @@ public:
 
   void subscribePresenter(IRunPresenter *presenter) override;
 
-  void setRunEnabled(bool const enable) override;
   void setRunText(std::string const &text) override;
 
   void displayWarning(std::string const &message) override;

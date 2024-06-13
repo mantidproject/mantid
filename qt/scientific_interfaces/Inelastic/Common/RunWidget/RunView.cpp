@@ -10,6 +10,12 @@
 
 #include <QMessageBox>
 
+namespace {
+
+std::string const RUN_TEXT("Run");
+
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -23,11 +29,9 @@ void RunView::subscribePresenter(IRunPresenter *presenter) { m_presenter = prese
 
 void RunView::notifyRunClicked() { m_presenter->handleRunClicked(); }
 
-void RunView::setRunEnabled(bool const enable) { setRunText(enable ? "Run" : "Running..."); }
-
 void RunView::setRunText(std::string const &text) {
   m_uiForm.pbRun->setText(QString::fromStdString(text));
-  m_uiForm.pbRun->setEnabled(text == "Run");
+  m_uiForm.pbRun->setEnabled(text == RUN_TEXT);
 }
 
 void RunView::displayWarning(std::string const &message) {

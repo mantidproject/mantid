@@ -130,8 +130,8 @@ void DiffractionReduction::handleValidation(IUserInputValidator *validator) cons
     validator->addErrorMessage(*message);
   }
 
-  auto const instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  auto const mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  auto const &instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const &mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (instName != "OSIRIS" || mode != "diffonly") {
     if (!validateRebin()) {
@@ -143,8 +143,8 @@ void DiffractionReduction::handleValidation(IUserInputValidator *validator) cons
 void DiffractionReduction::handleRun() {
   m_plotOptionsPresenter->clearWorkspaces();
 
-  auto const instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  auto const mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  auto const &instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const &mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (instName == "OSIRIS" && mode == "diffonly") {
     runOSIRISdiffonlyReduction();
