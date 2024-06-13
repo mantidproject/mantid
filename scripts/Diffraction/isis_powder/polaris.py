@@ -124,6 +124,7 @@ class Polaris(AbstractInst):
 
     # Overrides
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        self._check_sample_details()
         if self._is_vanadium:
             return polaris_algs.calculate_van_absorb_corrections(
                 ws_to_correct=ws_to_correct,
