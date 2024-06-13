@@ -81,7 +81,7 @@ void FitTab::handleEndXChanged(double endX) {
 }
 
 void FitTab::handleSingleFitClicked() {
-  if (validate()) {
+  if (m_runPresenter->validate()) {
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     updateFitButtons(false);
     updateOutputOptions(false);
