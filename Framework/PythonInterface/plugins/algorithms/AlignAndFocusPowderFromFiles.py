@@ -66,6 +66,7 @@ PROPS_FOR_ALIGN = [
     "CompressTolerance",
     "CompressWallClockTolerance",
     "CompressStartTime",
+    "CompressBinningMode",
     "LorentzCorrection",
     "UnwrapRef",
     "LowResRef",
@@ -198,7 +199,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 linearizedRuns.append(item)
         return linearizedRuns
 
-    def __createLoader(self, filename, wkspname, progstart=None, progstop=None, skipLoadingLogs=False, **kwargs):
+    def __createLoader(self, filename, wkspname, progstart=None, progstop=None, skipLoadingLogs=False, filterBadPulses=0, **kwargs):
         # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
         # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
         # the kwargs are extra things to be supplied to the loader
@@ -233,6 +234,13 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         except RuntimeError:
             pass  # let it drop on the floor
 
+        try:
+            if filterBadPulses > 0:
+                loader.setProperty("FilterBadPulsesLowerCutoff", filterBadPulses)
+        except RuntimeError:
+            # only works for LoadEventNexus, instead run FilterBadPulses separately
+            pass
+
         for key, value in kwargs.items():
             if isinstance(value, str):
                 loader.setPropertyValue(key, value)
@@ -247,7 +255,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             prop = self.getProperty(name)
-            name_list = ["PreserveEvents", "CompressTolerance", "CompressWallClockTolerance", "CompressStartTime"]
+            name_list = ["PreserveEvents", "CompressTolerance", "CompressWallClockTolerance", "CompressStartTime", "CompressBinningMode"]
 
             if name in name_list or not prop.isDefault:
                 if "Workspace" in name:
@@ -430,6 +438,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs and haveAccumulationForFile),
                 progstart=prog_start,
                 progstop=prog_start + prog_per_chunk_step,
+                filterBadPulses=self.filterBadPulses,
                 **chunk
             )
             loader.execute()
@@ -461,7 +470,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 continue
 
             prog_start += prog_per_chunk_step
-            if self.filterBadPulses > 0.0:
+
+            # if LoadEventNexus was used then FilterBadPulses happen during loading
+            if self.filterBadPulses > 0.0 and self.__loaderName != "LoadEventNexus":
                 FilterBadPulses(
                     InputWorkspace=chunkname,
                     OutputWorkspace=chunkname,
@@ -534,13 +545,14 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return wkspname, unfocusname
 
     def __compressEvents(self, wkspname):
-        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] > 0.0:
+        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0:
             CompressEvents(
                 InputWorkspace=wkspname,
                 OutputWorkspace=wkspname,
                 WallClockTolerance=self.kwargs["CompressWallClockTolerance"],
                 Tolerance=self.kwargs["CompressTolerance"],
                 StartTime=self.kwargs["CompressStartTime"],
+                BinningMode=self.kwargs["CompressBinningMode"],
             )
 
     def __accumulate(self, chunkname, sumname, chunkunfocusname, sumuunfocusname, firstrun, removelogs=False):
