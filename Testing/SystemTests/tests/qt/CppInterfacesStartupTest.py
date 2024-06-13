@@ -9,6 +9,7 @@ from itertools import chain
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
+from workbench.config import CONF
 from workbench.utils.gather_interfaces import gather_cpp_interface_names
 
 from qtpy.QtCore import Qt
@@ -35,6 +36,11 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         if len(self._cpp_interface_names) == 0:
             self.fail("Failed to find the names of the c++ interfaces.")
 
+        self._open_interfaces("On Top")
+        self._open_interfaces("Floating")
+
+    def _open_interfaces(self, window_behaviour):
+        CONF.set("AdditionalWindows/behaviour", window_behaviour)
         for interface_name in self._cpp_interface_names:
             self._attempt_to_open_cpp_interface(interface_name)
 
