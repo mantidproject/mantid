@@ -231,8 +231,7 @@ PYTHONHOME=${_python_home}"
         COMMAND
           ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" valgrind --verbose --gen-suppressions=all
           --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full --errors-for-leak-kinds=definite
-          --show-leak-kinds=definite $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} 1>>$ENV{VALGRIND_LOG_FILE}
-          2>>$ENV{VALGRIND_LOG_FILE}
+          --show-leak-kinds=definite $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
       )
 
       # add_test(NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"

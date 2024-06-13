@@ -106,5 +106,6 @@ def publish_test_reports() {
 
 def archive_test_logs(){
   archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/test_logs/*.log", fingerprint: true
-  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/Valgrind_*.log", fingerprint: true
+  // archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/Valgrind_*.log", fingerprint: true
+  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/Testing/Temporary/LastTest_*", fingerprint: true
 }
