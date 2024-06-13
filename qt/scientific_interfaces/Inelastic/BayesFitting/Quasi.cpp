@@ -358,14 +358,14 @@ void Quasi::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("fit 1")) {
     QString program = m_uiForm.cbProgram->currentText();
     auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-    checkADSForPlotSaveWorkspace(fitName, false);
-    fitName.pop_back();
-    auto fitWS = fitName + "_";
-    fitWS += std::to_string(m_previewSpec);
-    if (program == "Lorentzians")
-      m_plotter->plotSpectra(fitWS, "0-4", errorBars);
-    else
-      m_plotter->plotSpectra(fitWS, "0-2", errorBars);
+    if (checkADSForPlotSaveWorkspace(fitName, false)) {
+      auto wsFit = Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(fitName);
+      std::vector<std::string> names = (wsFit)->getNames();
+      if (program == "Lorentzians")
+        m_plotter->plotSpectra(names.at(m_previewSpec), "0-4", errorBars);
+      else
+        m_plotter->plotSpectra(names.at(m_previewSpec), "0-2", errorBars);
+    }
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
     m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec),
                            errorBars);
