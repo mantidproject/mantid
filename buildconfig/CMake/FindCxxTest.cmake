@@ -226,13 +226,16 @@ PYTHONHOME=${_python_home}"
     foreach(part ${ARGN})
       get_filename_component(_suitename ${part} NAME_WE)
       set(_cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
-      add_test(
-        NAME ${_cxxtest_separate_name}
-        COMMAND
-          ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" valgrind --verbose --gen-suppressions=all
-          --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full --errors-for-leak-kinds=definite
-          --show-leak-kinds=definite $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} 1>>$ENV{VALGRIND_LOG_FILE}
-          2>>$ENV{VALGRIND_LOG_FILE}
+      # add_test( NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+      # valgrind --verbose --gen-suppressions=all --track-origins=yes --show-reachable=yes --error-limit=no
+      # --leak-check=full --errors-for-leak-kinds=definite --show-leak-kinds=definite
+      # $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} 1>>$ENV{VALGRIND_LOG_FILE} 2>>$ENV{VALGRIND_LOG_FILE} )
+      add_test(NAME ${_cxxtest_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+                                                      $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
+      )
+      set(MEMORYCHECK_COMMAND "/usr/bin/valgrind")
+      set(MEMORYCHECK_COMMAND_OPTIONS
+          "--verbose --gen-suppressions=all --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full --errors-for-leak-kinds=definite --show-leak-kinds=definite"
       )
       set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
     endforeach(part ${ARGN})
