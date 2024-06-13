@@ -43,7 +43,7 @@ Other important highlights include:
 - New detector grouping options on the :ref:`interface-indirect-diffraction` interface
   (including ``All``, ``Groups``, ``Custom`` and ``File`` options).
 - New way to easily load multiple files into :ref:`Elwin Tab <elwin>` of
-  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`.
+  :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
