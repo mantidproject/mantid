@@ -9,6 +9,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/AddAbsorptionWeightedPathLengths.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -78,6 +79,30 @@ public:
     auto shape = ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
     peaksWS->mutableSample().setShape(shape);
     setMaterialToVanadium(peaksWS);
+
+    Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EventsPerPoint", 1000));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+
+    Mantid::Geometry::IPeak &peak = peaksWS->getPeak(0);
+    const double delta(1e-04);
+    // weighted path length will be less than 2mm because off centre scatter
+    // points that are near the detector will have significantly shorter paths
+    // than those on the opposite side of the sphere
+    TS_ASSERT_DELTA(0.1508, peak.getAbsorptionWeightedPathLength(), delta);
+  }
+
+  void test_spherical_sample_lean() {
+    using namespace Mantid::Kernel;
+    const int NPEAKS = 10;
+    // this sets up a sample with a spherical shape of radius = 1mm
+    auto peaksWS = WorkspaceCreationHelper::createLeanPeaksWorkspace(NPEAKS);
+    auto shape = ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
+    peaksWS->mutableSample().setShape(shape);
+    setMaterialToVanadiumLean(peaksWS);
 
     Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -180,6 +205,11 @@ private:
     peaksWS->mutableSample().setShape(shape);
   }
   void setMaterialToVanadium(std::shared_ptr<PeaksWorkspace> peaksWS) {
+    auto shape = std::shared_ptr<IObject>(peaksWS->sample().getShape().cloneWithMaterial(
+        Mantid::Kernel::Material("Vanadium", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072)));
+    peaksWS->mutableSample().setShape(shape);
+  }
+  void setMaterialToVanadiumLean(std::shared_ptr<LeanElasticPeaksWorkspace> peaksWS) {
     auto shape = std::shared_ptr<IObject>(peaksWS->sample().getShape().cloneWithMaterial(
         Mantid::Kernel::Material("Vanadium", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072)));
     peaksWS->mutableSample().setShape(shape);

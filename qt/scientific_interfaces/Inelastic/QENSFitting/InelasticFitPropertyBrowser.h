@@ -42,11 +42,39 @@ using namespace MantidWidgets;
 
 class FunctionTemplateView;
 class FitStatusWidget;
+class IFittingPresenter;
 
 class MANTIDQT_INELASTIC_DLL IInelasticFitPropertyBrowser {
 public:
   virtual ~IInelasticFitPropertyBrowser() = default;
+
+  virtual void subscribePresenter(IFittingPresenter *presenter) = 0;
+
+  virtual MultiDomainFunction_sptr getFitFunction() const = 0;
+  virtual std::string minimizer(bool withProperties = false) const = 0;
+
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties(FittingMode const &fittingMode) const = 0;
+
+  virtual void setFitEnabled(bool enable) = 0;
+  virtual void setCurrentDataset(FitDomainIndex i) = 0;
+  virtual void setErrorsEnabled(bool enabled) = 0;
+  virtual void setBackgroundA0(double value) = 0;
+
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
+  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
+  virtual void estimateFunctionParameters() = 0;
+
+  virtual FittingMode getFittingMode() const = 0;
+
+  virtual void updateParameters(const IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const ITableWorkspace &params) = 0;
+
   virtual void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings) = 0;
+  virtual void updateFunctionBrowserData(int nData, const QList<MantidWidgets::FunctionModelDataset> &datasets,
+                                         const std::vector<double> &qValues,
+                                         const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
+  virtual void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared) = 0;
 };
 class MANTIDQT_INELASTIC_DLL InelasticFitPropertyBrowser : public QDockWidget, public IInelasticFitPropertyBrowser {
   Q_OBJECT
@@ -54,13 +82,15 @@ class MANTIDQT_INELASTIC_DLL InelasticFitPropertyBrowser : public QDockWidget, p
 public:
   InelasticFitPropertyBrowser(QWidget *parent = nullptr);
 
+  void subscribePresenter(IFittingPresenter *presenter) override;
+
   void init();
   void setFunctionTemplatePresenter(std::unique_ptr<ITemplatePresenter> templatePresenter);
   void setFunction(std::string const &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
-  MultiDomainFunction_sptr getFitFunction() const;
-  std::string minimizer(bool withProperties = false) const;
+  MultiDomainFunction_sptr getFitFunction() const override;
+  std::string minimizer(bool withProperties = false) const override;
   int maxIterations() const;
   int getPeakRadius() const;
   std::string costFunction() const;
@@ -69,27 +99,27 @@ public:
   std::string fitEvaluationType() const;
   std::string fitType() const;
   bool ignoreInvalidData() const;
-  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties(FittingMode const &fittingMode) const;
-  void updateParameters(const IFunction &fun);
-  void updateMultiDatasetParameters(const IFunction &fun);
-  void updateMultiDatasetParameters(const ITableWorkspace &params);
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> fitProperties(FittingMode const &fittingMode) const override;
+  void updateParameters(const IFunction &fun) override;
+  void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateMultiDatasetParameters(const ITableWorkspace &params) override;
   void updateFitStatus(const FitDomainIndex index);
-  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
-  FittingMode getFittingMode() const;
+  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared) override;
+  FittingMode getFittingMode() const override;
   void setConvolveMembers(bool convolveEnabled);
   void setOutputCompositeMembers(bool outputEnabled);
-  void setFitEnabled(bool enable);
-  void setCurrentDataset(FitDomainIndex i);
+  void setFitEnabled(bool enable) override;
+  void setCurrentDataset(FitDomainIndex i) override;
   FitDomainIndex currentDataset() const;
   void updateFunctionBrowserData(int nData, const QList<MantidWidgets::FunctionModelDataset> &datasets,
                                  const std::vector<double> &qValues,
-                                 const std::vector<std::pair<std::string, size_t>> &fitResolutions);
+                                 const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
-  void setErrorsEnabled(bool enabled);
-  EstimationDataSelector getEstimationDataSelector() const;
-  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void estimateFunctionParameters();
-  void setBackgroundA0(double value);
+  void setErrorsEnabled(bool enabled) override;
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
+  void setBackgroundA0(double value) override;
   void setHiddenProperties(const std::vector<std::string> &);
   void updateFunctionListInBrowser(const std::map<std::string, std::string> &functionStrings) override;
 
@@ -103,6 +133,9 @@ protected slots:
   void browserVisibilityChanged(bool isVisible);
   void updateFitType();
   void showFullFunctionBrowser(bool on);
+
+private slots:
+  void notifyFunctionChanged();
 
 signals:
   void functionChanged();
@@ -133,6 +166,8 @@ private:
 
   std::vector<std::string> m_fitStatus;
   std::vector<double> m_fitChiSquared;
+
+  IFittingPresenter *m_presenter;
 };
 
 } // namespace Inelastic

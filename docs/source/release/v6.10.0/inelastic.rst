@@ -15,10 +15,10 @@ New Features
    :width: 500px
 
 - Tabs where ``Open SliceViewer`` is available now support option to plot data as a 3D Surface.
-- :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>` now has new workspace dialog widget with the capacity to select and open multiple compatible workspaces at once.
+- :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now has new workspace dialog widget with the capacity to select and open multiple compatible workspaces at once.
 
-  - :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>` no longer has a files tab. Workspaces can still be added from files in the multifile dialog of the workspaces tab.
-  - :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>` now allows to display in the workspace table either one row per spectra, or just one row per workspace.
+  - :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` no longer has a files tab. Workspaces can still be added from files in the multifile dialog of the workspaces tab.
+  - :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now allows to display in the workspace table either one row per spectra, or just one row per workspace.
 
 .. figure::  ../../images/6_10_release/elwin-load-ws.gif
    :width: 750px
@@ -30,14 +30,14 @@ New Features
 .. figure::  ../../images/6_10_release/qens-interface.png
    :width: 400px
 
-- :ref:`interface-inelastic-data-manipulation` now has checkbox ``EnforceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
+- :ref:`interface-inelastic-data-processor` now has checkbox ``EnforceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
 - A deprecation warning has been added to the Calculate Paalman Pings tab of :ref:`Inelastic Corrections interface <interface-inelastic-corrections>`. This tab will be removed in two minor releases time if we are not informed otherwise.
-- Algorithm :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` will add the integration range to the output workspaces sample logs, calling it either from script or from the :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`.
+- Algorithm :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` will add the integration range to the output workspaces sample logs, calling it either from script or from the :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
 
 
 Bugfixes
 --------
-- :ref:`Elwin Tab <elwin>` of :ref:`interface-inelastic-data-manipulation` no longer crashing when all items of the table are selected with the keyboard and `Remove Selected` button is clicked.
+- :ref:`Elwin Tab <elwin>` of :ref:`interface-inelastic-data-processor` no longer crashing when all items of the table are selected with the keyboard and `Remove Selected` button is clicked.
 - Add `Select All` push button on :ref:`Elwin Tab <elwin>` to select all rows when clicked.
 - Fixed a bug where it wasn't possible to use a custom fit function on the IqtFit tab of :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>`.
 - Disable ``Add`` button and change the button text to *Loading* from workspace dialogs to prevent warnings or crashes if ``Add`` button is pressed but files are still loading.

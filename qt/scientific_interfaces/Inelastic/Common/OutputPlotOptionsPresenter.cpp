@@ -37,14 +37,16 @@ namespace MantidQt::CustomInterfaces {
 OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(
     IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
     std::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_view(view), m_model(std::make_unique<OutputPlotOptionsModel>(availableActions)) {
+    : m_view(view),
+      m_model(std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>(), availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
 /// Used by the unit tests so that m_plotter can be mocked
-OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
+OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view,
+                                                       std::unique_ptr<IOutputPlotOptionsModel> model,
                                                        PlotWidget const &plotType, std::string const &fixedIndices)
-    : m_view(view), m_model(model) {
+    : m_view(view), m_model(std::move(model)) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -94,7 +96,7 @@ void OutputPlotOptionsPresenter::replaceHandle(const std::string &wsName, const 
   (void)wsName;
   // Ignore non matrix workspaces
   if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
-    auto const newName = newWorkspace->getName();
+    auto const &newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
       handleWorkspaceChanged(newName);
   }

@@ -22,8 +22,6 @@ FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataV
 
 FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
 
-std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFittingData(); }
-
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
 std::string FitDataPresenter::tabName() const { return m_tab->tabName(); }
@@ -75,7 +73,7 @@ std::vector<std::pair<std::string, size_t>> FitDataPresenter::getResolutionsForF
   return m_model->getResolutionsForFit();
 }
 
-void FitDataPresenter::validate(UserInputValidator &validator) { m_view->validate(validator); }
+void FitDataPresenter::validate(IUserInputValidator *validator) { m_view->validate(validator); }
 
 void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {

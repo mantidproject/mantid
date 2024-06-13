@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include "IAsciiSaver.h"
+#include "IFileSaver.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -27,7 +27,7 @@ namespace ISISReflectometry {
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter, public SaveViewSubscriber {
 public:
-  SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver);
+  SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver);
 
   // ISavePresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
@@ -86,7 +86,7 @@ private:
 
   /// The view
   ISaveView *m_view;
-  std::unique_ptr<IAsciiSaver> m_saver;
+  std::unique_ptr<IFileSaver> m_saver;
   bool m_shouldAutosave;
   bool m_shouldSaveIndividualRows;
 };

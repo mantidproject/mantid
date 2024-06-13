@@ -35,11 +35,8 @@ public:
   bool isResultGroupPlottable() const override;
   bool isPDFGroupPlottable() const override;
 
-  void clearSpectraToPlot() override;
-  std::vector<SpectrumToPlot> getSpectraToPlot() const override;
-
-  void plotResult(std::string const &plotType) override;
-  void plotPDF(std::string const &workspaceName, std::string const &plotType) override;
+  std::vector<SpectrumToPlot> plotResult(std::string const &plotType) const override;
+  std::vector<SpectrumToPlot> plotPDF(std::string const &workspaceName, std::string const &plotType) const override;
 
   void saveResult() const override;
 
@@ -52,15 +49,24 @@ public:
                         std::string const &outputName) override;
 
 private:
-  void plotResult(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace, std::string const &plotType);
-  void plotAll(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace);
-  void plotAll(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
-  void plotAllSpectra(const Mantid::API::MatrixWorkspace_const_sptr &workspace);
-  void plotParameter(const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace, std::string const &parameter);
-  void plotParameter(const Mantid::API::MatrixWorkspace_const_sptr &workspace, std::string const &parameter);
-  void plotParameterSpectrum(const Mantid::API::MatrixWorkspace_const_sptr &workspace, std::string const &parameter);
+  void plotResult(std::vector<SpectrumToPlot> &spectraToPlot,
+                  const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace, std::string const &plotType) const;
+  void plotAll(std::vector<SpectrumToPlot> &spectraToPlot,
+               const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace) const;
+  void plotAll(std::vector<SpectrumToPlot> &spectraToPlot,
+               const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
+  void plotAllSpectra(std::vector<SpectrumToPlot> &spectraToPlot,
+                      const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
+  void plotParameter(std::vector<SpectrumToPlot> &spectraToPlot,
+                     const Mantid::API::WorkspaceGroup_const_sptr &groupWorkspace, std::string const &parameter) const;
+  void plotParameter(std::vector<SpectrumToPlot> &spectraToPlot,
+                     const Mantid::API::MatrixWorkspace_const_sptr &workspace, std::string const &parameter) const;
+  void plotParameterSpectrum(std::vector<SpectrumToPlot> &spectraToPlot,
+                             const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                             std::string const &parameter) const;
 
-  void plotPDF(const Mantid::API::MatrixWorkspace_const_sptr &workspace, std::string const &plotType);
+  void plotPDF(std::vector<SpectrumToPlot> &spectraToPlot, const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+               std::string const &plotType) const;
 
   void replaceFitResult(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
                         const Mantid::API::MatrixWorkspace_sptr &singleFitWorkspace, std::string const &outputName);
@@ -69,7 +75,6 @@ private:
 
   Mantid::API::WorkspaceGroup_sptr m_resultGroup;
   Mantid::API::WorkspaceGroup_sptr m_pdfGroup;
-  std::vector<SpectrumToPlot> m_spectraToPlot;
 };
 
 } // namespace Inelastic

@@ -137,8 +137,8 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
  * @param log           The logger for sending log messages.
  */
 void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log) {
-  QString errorMessage = "Invalid workspace loaded, ensure a MatrixWorkspace is "
-                         "entered into the field.\n";
+  std::string errorMessage = "Invalid workspace loaded, ensure a MatrixWorkspace is "
+                             "entered into the field.\n";
 
   if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName)) {
     errorMessage += "Consider loading the WorkspaceGroup first into mantid, "

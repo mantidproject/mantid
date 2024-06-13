@@ -1055,7 +1055,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
 
   bool done = false;
   int ntimes = 0;
-  double Mx, My, Sxx, Syy, Sxy;
+  double Mx = 0, My = 0, Sxx = 0, Syy = 0, Sxy = 0;
 
   double RangeX = statBase[INCol] / 2;
   double RangeY = statBase[INRows] / 2;

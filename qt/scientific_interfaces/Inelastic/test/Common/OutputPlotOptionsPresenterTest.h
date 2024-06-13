@@ -23,10 +23,10 @@ std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
 std::map<std::string, std::string>
-constructActions(boost::optional<std::map<std::string, std::string>> const &availableActions) {
+constructActions(std::optional<std::map<std::string, std::string>> const &availableActions) {
   std::map<std::string, std::string> actions;
   if (availableActions)
-    actions = availableActions.get();
+    actions = *availableActions;
   if (actions.find("Plot Spectra") == actions.end())
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
@@ -50,9 +50,10 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
-    m_model = new NiceMock<MockOutputPlotOptionsModel>();
+    auto model = std::make_unique<NiceMock<MockOutputPlotOptionsModel>>();
+    m_model = model.get();
 
-    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), std::move(model));
   }
 
   void tearDown() override {
@@ -76,14 +77,17 @@ public:
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
     m_view = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
-    m_model = new NiceMock<MockOutputPlotOptionsModel>();
+    auto model = std::make_unique<NiceMock<MockOutputPlotOptionsModel>>();
+    m_model = model.get();
 
+    auto actions = constructActions(std::nullopt);
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
-    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
+    ON_CALL(*m_model, availableActions()).WillByDefault(Return(actions));
+    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, actions)).Times(1);
     EXPECT_CALL(*m_view, setIndices(QString(""))).Times(1);
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
-    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), m_model);
+    m_presenter = std::make_unique<OutputPlotOptionsPresenter>(m_view.get(), std::move(model));
   }
 
   ///----------------------------------------------------------------------
@@ -207,7 +211,9 @@ public:
   ///----------------------------------------------------------------------
 
   void test_setPlotType_sets_the_view() {
-    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
+    auto actions = constructActions(std::nullopt);
+    ON_CALL(*m_model, availableActions()).WillByDefault(Return(actions));
+    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, actions)).Times(1);
     m_presenter->setPlotType(PlotWidget::Spectra);
   }
 

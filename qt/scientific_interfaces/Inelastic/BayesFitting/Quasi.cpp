@@ -115,7 +115,7 @@ void Quasi::setup() {}
  */
 bool Quasi::validate() {
   UserInputValidator uiv;
-  QString errors("");
+  std::string errors("");
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
@@ -137,7 +137,7 @@ bool Quasi::validate() {
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
-  if (!errors.isEmpty()) {
+  if (!errors.empty()) {
     emit showMessageBox(errors);
     return false;
   }

@@ -102,8 +102,8 @@ bool Stretch::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-  QString errors = uiv.generateErrorMessage();
-  if (!errors.isEmpty()) {
+  auto const errors = uiv.generateErrorMessage();
+  if (!errors.empty()) {
     emit showMessageBox(errors);
     return false;
   }

@@ -1,4 +1,4 @@
-.. _interface-inelastic-data-manipulation:
+.. _interface-inelastic-data-processor:
 
 Inelastic Data Processor
 ========================

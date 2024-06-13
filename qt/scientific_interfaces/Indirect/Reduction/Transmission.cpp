@@ -33,8 +33,6 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2"));
 
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrument()));
-
   // Update the preview plot when the algorithm is complete
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
 
@@ -115,7 +113,7 @@ void Transmission::transAlgDone(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void Transmission::setInstrument() {
+void Transmission::updateInstrumentConfiguration() {
   try {
     setInstrument(getInstrumentDetail("instrument"));
   } catch (std::exception const &ex) {

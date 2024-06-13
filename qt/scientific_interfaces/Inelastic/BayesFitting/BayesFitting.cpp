@@ -33,7 +33,7 @@ void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 
   loadSettings();

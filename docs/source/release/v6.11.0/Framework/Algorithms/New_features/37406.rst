@@ -1,0 +1,1 @@
+- Implemented the :ref:`FilterBadPulses <algm-FilterBadPulses>` functionality in :ref:`LoadEventNexus <algm-LoadEventNexus>`, adding the new ``FilterBadPulsesLowerCutoff`` parameter.

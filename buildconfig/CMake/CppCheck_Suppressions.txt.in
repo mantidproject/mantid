@@ -362,8 +362,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:2
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:200
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:283
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:302
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:668
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:701
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:699
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:732
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:455
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:457
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:474
@@ -645,7 +645,6 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:232
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:906
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:485
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMcStas.cpp:97
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:172
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:355
@@ -1039,7 +1038,7 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.c
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:64
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:1194
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiFitPeaks2D.cpp:1270
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/WorkspaceCreationHelper.cpp:141
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/WorkspaceCreationHelper.cpp:142
 internalError:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MDAlgorithmsTestHelper.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/DgsConvertToEnergyTransfer.cpp:99
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRInstrument.cpp:102

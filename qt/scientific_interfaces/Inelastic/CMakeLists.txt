@@ -7,7 +7,7 @@ set(ALL_RES_FILES Common/InterfaceResources.qrc)
 add_subdirectory(BayesFitting)
 add_subdirectory(Common)
 add_subdirectory(Corrections)
-add_subdirectory(Manipulation)
+add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 
 # XML is required to parse the settings file

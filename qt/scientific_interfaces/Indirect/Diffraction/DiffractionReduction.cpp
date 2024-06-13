@@ -37,7 +37,8 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 DiffractionReduction::DiffractionReduction(QWidget *parent)
     : InelasticInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_plotWorkspaces(), m_plotOptionsPresenter(),
+      m_groupingWidget() {}
 
 DiffractionReduction::~DiffractionReduction() { saveSettings(); }
 

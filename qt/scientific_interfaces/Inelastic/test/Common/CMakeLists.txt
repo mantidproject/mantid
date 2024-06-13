@@ -4,6 +4,7 @@ set(TEST_FILES
     DataValidationHelperTest.h
     OutputPlotOptionsModelTest.h
     OutputPlotOptionsPresenterTest.h
+    Run/RunPresenterTest.h
     SettingsModelTest.h
     SettingsPresenterTest.h
     ValidationUtilsTest.h
