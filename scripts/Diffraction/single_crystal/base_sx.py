@@ -673,7 +673,7 @@ class BaseSX(ABC):
                         # plot slice
                         im = ax.imshow(ws_cut.getSignalArray().sum(axis=iax)[:, ::-1].T)  # reshape to match sliceviewer
                         im.set_extent([-1, 1, -1, 1])  # so that ellipsoid is a circle
-                        if log_norm:
+                        if log_norm and not np.allclose(im.get_array(), 0):
                             im.set_norm(LogNorm())
                         # plot peak position
                         ax.plot(0, 0, "xr")
@@ -776,7 +776,7 @@ class BaseSX(ABC):
         """
         shape_info = json_loads(peak_shape.toJSON())
         if peak_shape.shapeName().lower() == "spherical":
-            BaseSX.convert_spherical_representation_to_ellipsoid(shape_info)
+            BaseSX._convert_spherical_representation_to_ellipsoid(shape_info)
         # get radii
         radii = np.array([shape_info[f"radius{iax}"] for iax in range(ndims)])
         bg_inner_radii = np.array([shape_info[f"background_inner_radius{iax}"] for iax in range(ndims)])

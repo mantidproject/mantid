@@ -18,6 +18,7 @@ from mantid.dataobjects import Workspace2D
 from Diffraction.single_crystal.base_sx import BaseSX
 import tempfile
 import shutil
+from os import path
 
 base_sx_path = "Diffraction.single_crystal.base_sx"
 
@@ -172,7 +173,7 @@ class BaseSXTest(unittest.TestCase):
         # generate fake data at (0,1,0)
         FakeMDEventData(ws, EllipsoidParams="1e+03,0,1,0,1,0,0,0,1,0,0,0,1,0.01,0.04,0.02,1", RandomSeed="3873875")
         # create peak at (0,1,0) and integrate
-        peaks = self._make_peaks_HKL(hs=[0], ks=[1], ls=[0], wsname="peaks_md")
+        peaks = self._make_peaks_HKL(hs=[1], ks=[1, 6], ls=[1], wsname="peaks_md")
         peaks_int = IntegratePeaksMD(
             InputWorkspace=ws,
             PeakRadius=0.6,
