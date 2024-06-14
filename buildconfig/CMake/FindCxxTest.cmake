@@ -229,7 +229,7 @@ PYTHONHOME=${_python_home}"
       add_test(
         NAME ${_cxxtest_separate_name}
         COMMAND
-          ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" valgrind --verbose --gen-suppressions=all
+          ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" valgrind --gen-suppressions=all
           --track-origins=yes --show-reachable=yes --error-limit=no --leak-check=full --errors-for-leak-kinds=definite
           --show-leak-kinds=definite $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
       )
