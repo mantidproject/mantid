@@ -31,6 +31,7 @@ creation is outlined in :ref:`issue_tracking`.
    Indirect/DataReductionTests
    Inelastic/DataProcessorTests
    Inelastic/QENSFittingTests
+   Inelastic/BayesFittingTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
