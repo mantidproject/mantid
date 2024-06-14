@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FqFitDataPresenter.h"
 #include "FitTab.h"
 #include "FitTabConstants.h"
+#include "FqFitDataPresenter.h"
 #include "MantidAPI/TextAxis.h"
 #include "ParameterEstimation.h"
 

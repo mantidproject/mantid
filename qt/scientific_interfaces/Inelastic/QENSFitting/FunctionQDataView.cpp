@@ -4,11 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FqFitDataView.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataPresenter.h"
+#include "FqFitDataView.h"
 
 #include <QComboBox>
 #include <QHeaderView>

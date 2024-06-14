@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitDataView.h"
 #include "Common/InterfaceUtils.h"
 #include "ConvFitAddWorkspaceDialog.h"
+#include "ConvFitDataView.h"
 #include "FitDataPresenter.h"
 
 #include <QComboBox>
