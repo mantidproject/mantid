@@ -21,6 +21,9 @@ python:
 boost:
   - 1.78
 
+cmake: # Problem with fetching mslice repo in 3.27
+  - '>=3.21.0,<3.27'
+
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
