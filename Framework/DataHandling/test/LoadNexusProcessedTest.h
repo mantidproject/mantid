@@ -671,7 +671,7 @@ public:
     LoadNexusProcessed loadAlg;
     loadAlg.setChild(true);
     loadAlg.initialize();
-    loadAlg.setPropertyValue("Filename", "SingleCrystalLeanElasticPeakTable.nxs");
+    loadAlg.setPropertyValue("Filename", "SingleCrystalLeanElasticPeakTableNew.nxs");
     loadAlg.setPropertyValue("OutputWorkspace", "dummy");
     loadAlg.execute();
 
@@ -682,9 +682,9 @@ public:
     TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
     // In this peaks workspace one of the peaks has been marked as spherically
     // integrated.
-    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(0).getPeakShape().shapeName());
-    TS_ASSERT_EQUALS("none", peakWS->getPeak(1).getPeakShape().shapeName());
-    TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("none", peakWS->getPeak(0).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(1).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(2).getPeakShape().shapeName());
   }
 
   /* The nexus format for this type of workspace has a legacy format with no
