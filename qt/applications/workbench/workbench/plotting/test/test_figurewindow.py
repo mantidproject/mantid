@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
         self.assertEqual(2, len(ax.lines))
 
     def test_drag_and_drop_wont_plot_a_single_binned_workspace(self):
-        ax = self._drop_workspace("single_bin_wsff")
+        ax = self._drop_workspace("single_bin_ws")
         self.assertEqual(1, len(ax.lines))
 
     def test_validate_workspaces_does_not_raise_keyerror_for_non_existent_workspace(self):
