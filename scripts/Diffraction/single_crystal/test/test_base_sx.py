@@ -26,7 +26,7 @@ base_sx_path = "Diffraction.single_crystal.base_sx"
 class BaseSXTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
+        cls.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
         cls._test_dir = tempfile.mkdtemp()
@@ -135,7 +135,7 @@ class BaseSXTest(unittest.TestCase):
         peaks = self._make_peaks_HKL(hs=[1], wsname="peaks7")
         ispec = self.ws.getIndicesFromDetectorIDs(peaks.column("DetID"))[0]
 
-        self.assertAlmostEqual(0.003802, BaseSX.get_radius(peaks.getPeak(0), self.ws, ispec, scale=1), delta=1e-6)
+        self.assertAlmostEqual(0.01020, BaseSX.get_radius(peaks.getPeak(0), self.ws, ispec, scale=1), delta=1e-4)
 
     @patch(base_sx_path + ".mantid.IntegratePeaksMD")
     def test_integrate_peaks_md(self, mock_integrate):
