@@ -2,6 +2,8 @@ get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(TEST_FILES
     DataValidationHelperTest.h
+    DataModelTest.h
+    FitDataTest.h
     OutputPlotOptionsModelTest.h
     OutputPlotOptionsPresenterTest.h
     Run/RunPresenterTest.h

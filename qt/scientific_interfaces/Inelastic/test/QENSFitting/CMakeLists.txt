@@ -7,8 +7,6 @@ set(TEST_FILES
     FqFitDataPresenterTest.h
     FqFitModelTest.h
     FitDataPresenterTest.h
-    FitDataTest.h
-    FitDataModelTest.h
     FitOutputTest.h
     FitOutputOptionsModelTest.h
     FitOutputOptionsPresenterTest.h

@@ -37,7 +37,7 @@ public:
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
 
     auto model = std::make_unique<NiceMock<MockElwinModel>>();
-    auto dataModel = std::make_unique<NiceMock<MockFitDataModel>>();
+    auto dataModel = std::make_unique<NiceMock<MockDataModel>>();
     m_model = model.get();
     m_dataModel = dataModel.get();
 
@@ -130,7 +130,7 @@ public:
   }
 
 private:
-  NiceMock<MockFitDataModel> *m_dataModel;
+  NiceMock<MockDataModel> *m_dataModel;
   NiceMock<MockElwinModel> *m_model;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
   std::unique_ptr<NiceMock<MockElwinView>> m_view;

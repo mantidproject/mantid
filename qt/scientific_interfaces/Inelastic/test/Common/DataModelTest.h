@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "QENSFitting/FitDataModel.h"
+#include "Common/DataModel.h"
 #include "QENSFitting/FitTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,14 +28,14 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Inelastic;
 using namespace MantidQt::MantidWidgets;
 
-class FitDataModelTest : public CxxTest::TestSuite {
+class DataModelTest : public CxxTest::TestSuite {
 public:
-  static FitDataModelTest *createSuite() { return new FitDataModelTest(); }
+  static DataModelTest *createSuite() { return new DataModelTest(); }
 
-  static void destroySuite(FitDataModelTest *suite) { delete suite; }
+  static void destroySuite(DataModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_fitData = std::make_unique<FitDataModel>();
+    m_fitData = std::make_unique<DataModel>();
     auto resolutionWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace1 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace2 = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
@@ -51,7 +51,7 @@ public:
 
   void test_setResolution() { TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), true); }
 
-  void test_setResolutin_bad_data() {
+  void test_setResolution_bad_data() {
     std::vector<double> x = {0., 1., 2., 0., 1., 2., 0., 1., 2., 0., 1., 2.};
     std::vector<double> y = {sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2.};
 
@@ -108,7 +108,7 @@ public:
     TS_ASSERT_THROWS(m_fitData->getNumberOfSpectra(WorkspaceID{2}), const std::runtime_error &);
   }
 
-  void test_getnumberOfDomains_returns_total_spectra_of_all_data() {
+  void test_getNumberOfDomains_returns_total_spectra_of_all_data() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfDomains(), 8);
   }
 
@@ -207,5 +207,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IFitDataModel> m_fitData;
+  std::unique_ptr<IDataModel> m_fitData;
 };

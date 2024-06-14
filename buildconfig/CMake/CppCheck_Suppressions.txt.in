@@ -1420,7 +1420,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/MuonAnalysisHelper.cpp:189
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/MuonAnalysisHelper.cpp:890
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PolarizationAngleCorrectionMD.cpp:0
-returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FitData.cpp:127
+returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/FitData.cpp:127
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/Settings.cpp:29
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FitDataView.h:42
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0

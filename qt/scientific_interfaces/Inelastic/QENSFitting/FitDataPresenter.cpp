@@ -14,7 +14,7 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view)
+FitDataPresenter::FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);

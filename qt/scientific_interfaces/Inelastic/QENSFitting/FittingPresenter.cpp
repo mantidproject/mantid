@@ -93,7 +93,7 @@ Mantid::API::WorkspaceGroup_sptr FittingPresenter::getResultWorkspace() const { 
 
 std::optional<std::string> FittingPresenter::getOutputBasename() const { return m_model->getOutputBasename(); }
 
-IFitDataModel *FittingPresenter::getFitDataModel() const { return m_model->getFitDataModel(); }
+IDataModel *FittingPresenter::getFitDataModel() const { return m_model->getFitDataModel(); }
 
 IFitPlotModel *FittingPresenter::getFitPlotModel() const { return m_model->getFitPlotModel(); }
 

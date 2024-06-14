@@ -13,7 +13,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "QENSFitting/FitDataModel.h"
 #include "ui_ElwinTab.h"
 
 namespace MantidQt {

@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-
+#include "../Common/MockObjects.h"
 #include "QENSFitting/ConvFitAddWorkspaceDialog.h"
 #include "QENSFitting/ConvFitDataPresenter.h"
 #include "QENSFitting/ConvFitModel.h"
 #include "QENSFitting/IFitDataView.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
@@ -44,7 +44,7 @@ public:
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 6);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
@@ -118,7 +118,7 @@ private:
 
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
+  std::unique_ptr<NiceMock<MockDataModel>> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

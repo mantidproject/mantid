@@ -8,8 +8,6 @@ set(SRC_FILES
     DockWidgetArea.cpp
     EditResultsDialog.cpp
     FitStatusWidget.cpp
-    FitData.cpp
-    FitDataModel.cpp
     FitDataPresenter.cpp
     FitDataView.cpp
     FitOutput.cpp
@@ -50,8 +48,6 @@ set(SRC_FILES
 set(INC_FILES
     ConvFitDataPresenter.h
     ConvFitModel.h
-    FitData.h
-    FitDataModel.h
     FitDataPresenter.h
     FitOutput.h
     FitOutputOptionsModel.h
@@ -75,7 +71,6 @@ set(INC_FILES
     FunctionBrowser/MultiFunctionTemplateModel.h
     FunctionBrowser/MultiFunctionTemplatePresenter.h
     FunctionBrowser/TemplateSubType.h
-    IFitDataModel.h
     IFitDataView.h
     IFitOutput.h
     IFitOutputOptionsModel.h

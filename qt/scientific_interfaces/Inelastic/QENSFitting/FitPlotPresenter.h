@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/FitData.h"
 #include "DllConfig.h"
-#include "FitData.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"

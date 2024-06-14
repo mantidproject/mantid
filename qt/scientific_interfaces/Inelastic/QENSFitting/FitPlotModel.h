@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitData.h"
+#include "Common/FitData.h"
 #include "FitOutput.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"

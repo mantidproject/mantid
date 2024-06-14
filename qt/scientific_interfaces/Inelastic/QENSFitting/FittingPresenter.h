@@ -31,7 +31,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class IFitDataModel;
+class IDataModel;
 class IFitPlotModel;
 class IFitOutput;
 class IFitTab;
@@ -79,7 +79,7 @@ public:
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::optional<std::string> getOutputBasename() const;
 
-  IFitDataModel *getFitDataModel() const;
+  IDataModel *getFitDataModel() const;
   IFitPlotModel *getFitPlotModel() const;
 
   bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;

@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 #include "FitData.h"
-#include "IFitDataModel.h"
+#include "IDataModel.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
@@ -23,13 +23,13 @@ namespace Inelastic {
 using namespace MantidWidgets;
 
 /*
-   FitDataModel - Specifies an interface for updating, querying and
+   DataModel - Specifies an interface for updating, querying and
    accessing the raw data in Tabs
 */
-class MANTIDQT_INELASTIC_DLL FitDataModel : public IFitDataModel {
+class MANTIDQT_INELASTIC_DLL DataModel : public IDataModel {
 public:
-  FitDataModel();
-  virtual ~FitDataModel() = default;
+  DataModel();
+  virtual ~DataModel() = default;
   std::vector<FitData> *getFittingData() override;
 
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
@@ -53,7 +53,6 @@ public:
   size_t getNumberOfDomains() const override;
   FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const override;
-
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
   std::string createDisplayName(WorkspaceID workspaceID) const override;
@@ -79,12 +78,13 @@ public:
   std::vector<double> getExcludeRegionVector(FitDomainIndex index) const override;
   void removeSpecialValues(const std::string &name) override;
 
-private:
+protected:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
 
+private:
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   std::unique_ptr<std::vector<FitData>> m_fittingData;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace Inelastic

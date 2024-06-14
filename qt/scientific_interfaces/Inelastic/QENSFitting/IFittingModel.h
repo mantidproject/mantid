@@ -20,7 +20,7 @@ namespace CustomInterfaces {
 namespace Inelastic {
 using namespace MantidWidgets;
 
-class IFitDataModel;
+class IDataModel;
 class IFitPlotModel;
 
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
@@ -78,7 +78,7 @@ public:
   virtual void removeFittingData() = 0;
   virtual void addDefaultParameters() = 0;
   virtual void removeDefaultParameters() = 0;
-  virtual IFitDataModel *getFitDataModel() const = 0;
+  virtual IDataModel *getFitDataModel() const = 0;
   virtual IFitPlotModel *getFitPlotModel() const = 0;
 };
 

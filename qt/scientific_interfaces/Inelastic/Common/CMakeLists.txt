@@ -1,7 +1,9 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
+    DataModel.cpp
     DataValidationHelper.cpp
+    FitData.cpp
     InelasticInterface.cpp
     InelasticTab.cpp
     InterfaceUtils.cpp
@@ -19,7 +21,10 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    DataModel.h
     DataValidationHelper.h
+    FitData.h
+    IDataModel.h
     InterfaceUtils.h
     ISettingsView.h
     OutputPlotOptionsModel.h
