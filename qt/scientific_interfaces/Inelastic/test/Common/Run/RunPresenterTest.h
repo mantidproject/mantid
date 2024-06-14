@@ -42,15 +42,25 @@ public:
 
   void test_handleRunClicked_calls_the_expected_subscriber_function() {
     EXPECT_CALL(*m_subscriber, handleValidation(_)).Times(1);
-    EXPECT_CALL(*m_view, setRunEnabled(false)).Times(1);
+    EXPECT_CALL(*m_view, setRunText("Running...")).Times(1);
     EXPECT_CALL(*m_subscriber, handleRun()).Times(1);
 
     m_presenter->handleRunClicked();
   }
 
-  void test_setRunEnabled_calls_the_appropriate_view_function() {
-    EXPECT_CALL(*m_view, setRunEnabled(true)).Times(1);
+  void test_setRunEnabled_true_calls_the_appropriate_view_function() {
+    EXPECT_CALL(*m_view, setRunText("Run")).Times(1);
     m_presenter->setRunEnabled(true);
+  }
+
+  void test_setRunEnabled_false_calls_the_appropriate_view_function() {
+    EXPECT_CALL(*m_view, setRunText("Running...")).Times(1);
+    m_presenter->setRunEnabled(false);
+  }
+
+  void test_setRunText_calls_the_appropriate_view_function() {
+    EXPECT_CALL(*m_view, setRunText("Finding file...")).Times(1);
+    m_presenter->setRunText("Finding file...");
   }
 
   void test_validate_when_no_error_returned() {

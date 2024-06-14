@@ -20,12 +20,14 @@ RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subsc
 
 void RunPresenter::handleRunClicked() {
   if (validate()) {
-    m_view->setRunEnabled(false);
+    setRunEnabled(false);
     m_subscriber->handleRun();
   }
 }
 
-void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunEnabled(enable); }
+void RunPresenter::setRunEnabled(bool const enable) { m_view->setRunText(enable ? "Run" : "Running..."); }
+
+void RunPresenter::setRunText(std::string const &text) { m_view->setRunText(text); }
 
 bool RunPresenter::validate(std::unique_ptr<IUserInputValidator> validator) const {
   m_subscriber->handleValidation(validator.get());

@@ -23,6 +23,7 @@ public:
   virtual void handleRunClicked() = 0;
 
   virtual void setRunEnabled(bool const enable) = 0;
+  virtual void setRunText(std::string const &text) = 0;
 
   virtual bool
   validate(std::unique_ptr<IUserInputValidator> validator = std::make_unique<UserInputValidator>()) const = 0;
@@ -36,6 +37,7 @@ public:
   void handleRunClicked() override;
 
   void setRunEnabled(bool const enable) override;
+  void setRunText(std::string const &text) override;
 
   bool validate(std::unique_ptr<IUserInputValidator> validator = std::make_unique<UserInputValidator>()) const override;
 
