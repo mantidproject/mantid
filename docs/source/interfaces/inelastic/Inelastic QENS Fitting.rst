@@ -244,7 +244,7 @@ The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabIqtFit
+  :widget: tabIqt
 
 .. _iqtfit-example-workflow:
 
@@ -306,7 +306,7 @@ The fit types available in Convolution are One :ref:`Lorentzian <func-Lorentzian
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabConvFit
+  :widget: tabConvolution
 
 Convolution Options
 ~~~~~~~~~~~~~~~~~~~
@@ -443,7 +443,7 @@ The fit types available in Function (Q)Fit are :ref:`ChudleyElliot <func-Chudley
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabJumpFit
+  :widget: tabFunctionQ
 
 .. _fqfit-example-workflow:
 
