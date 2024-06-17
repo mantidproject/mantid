@@ -23,6 +23,7 @@ Bugfixes
 - Plot settings axes widget no longer throws an error when setting an invalid axes limit and switching tabs.
 - Algorithm alias no longer gets the highest version of the parent algorithm, and instead gets the specific version it was assigned to.
 - Workspace scaling is no longer incorrect when operating on the same workspace on both sides.
+- Using the full 3D view no longer causes a crash with certain instruments on some versions of Linux.
 - Toolbar of Matplotlib plots (non-mantid axes) and plots of 1D :ref:`MDHistoWorkspace <MDHistoWorkspace>` (for which the data have no workspace index) no longer display Fit and Superplot buttons:
 
 .. figure::  ../../images/6_10_release/remove-toolbar-buttons.png

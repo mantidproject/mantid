@@ -33,6 +33,7 @@ New Features
 - :ref:`interface-inelastic-data-processor` now has checkbox ``EnforceNormalization``. This option is set to ``True`` by default (no change to the current algorithms/workflow occurs). When it is set to ``False``, the ``LHSWorkspace`` from the output from ``ExtractFFTSpectrum`` is used in both branches to perform the final workspace division and the two intermediate workspace divisions are skipped.
 - A deprecation warning has been added to the Calculate Paalman Pings tab of :ref:`Inelastic Corrections interface <interface-inelastic-corrections>`. This tab will be removed in two minor releases time if we are not informed otherwise.
 - Algorithm :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` will add the integration range to the output workspaces sample logs, calling it either from script or from the :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
+- The `Inelastic Data Manipulation` interface has been renamed to the :ref:`Inelastic Data Processor <interface-inelastic-data-processor>` interface. The new name provides a better description of what it does.
 
 
 Bugfixes

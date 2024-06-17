@@ -44,6 +44,12 @@ Other important highlights include:
   (including ``All``, ``Groups``, ``Custom`` and ``File`` options).
 - New way to easily load multiple files into :ref:`Elwin Tab <elwin>` of
   :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
+- The `Inelastic Data Analysis` interface has been renamed to the
+  :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` interface
+  and the `Inelastic Data Manipulation` interface has been renamed to the
+  :ref:`Inelastic Data Processor <interface-inelastic-data-processor>` interface.
+  The new names provides better descriptions of what the interfaces do.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
