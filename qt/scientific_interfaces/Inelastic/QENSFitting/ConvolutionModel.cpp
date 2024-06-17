@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitModel.h"
+#include "ConvolutionModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -209,34 +209,35 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
+ConvolutionModel::ConvolutionModel() { m_fitType = CONVFIT_STRING; }
 
-IAlgorithm_sptr ConvFitModel::sequentialFitAlgorithm() const {
+IAlgorithm_sptr ConvolutionModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSequential");
 }
 
-IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
+IAlgorithm_sptr ConvolutionModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID workspaceID) const {
+boost::optional<double> ConvolutionModel::getInstrumentResolution(WorkspaceID workspaceID) const {
   if (workspaceID < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(workspaceID));
   return boost::none;
 }
 
-MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
+MultiDomainFunction_sptr ConvolutionModel::getMultiDomainFunction() const {
   auto function = FittingModel::getMultiDomainFunction();
-  const std::string base = "__ConvFitResolution";
+  const std::string base = "__ConvolutionResolution";
 
   for (auto i = 0u; i < function->nFunctions(); ++i)
     setResolutionAttribute(function, IFunction::Attribute(base + std::to_string(i)));
   return function;
 }
 
-void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
+void ConvolutionModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
 
-std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
+std::unordered_map<std::string, ParameterValue>
+ConvolutionModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = ParameterValue(0.0);
   defaultValues["Centre"] = ParameterValue(0.0);
@@ -256,7 +257,7 @@ std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParam
   return defaultValues;
 }
 
-std::unordered_map<std::string, std::string> ConvFitModel::mapDefaultParameterNames() const {
+std::unordered_map<std::string, std::string> ConvolutionModel::mapDefaultParameterNames() const {
   const auto initialMapping = FittingModel::mapDefaultParameterNames();
   std::unordered_map<std::string, std::string> mapping;
   for (const auto &map : initialMapping) {
@@ -269,7 +270,7 @@ std::unordered_map<std::string, std::string> ConvFitModel::mapDefaultParameterNa
   return mapping;
 }
 
-void ConvFitModel::addSampleLogs() {
+void ConvolutionModel::addSampleLogs() {
   AddSampleLogRunner addSampleLog(getResultWorkspace(), getResultGroup());
   addSampleLog("resolution_filename", boost::algorithm::join(getNames(m_resolution), ","), "String");
 
@@ -279,12 +280,12 @@ void ConvFitModel::addSampleLogs() {
   }
 }
 
-void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+void ConvolutionModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   FittingModel::addOutput(fitAlgorithm);
   addSampleLogs();
 }
 
-void ConvFitModel::setParameterNameChanges(const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
+void ConvolutionModel::setParameterNameChanges(const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
   m_parameterNameChanges =
       constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
 }

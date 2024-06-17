@@ -12,12 +12,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class MSDModel : public FittingModel {
+class MANTIDQT_INELASTIC_DLL IqtFitModel : public FittingModel {
 public:
-  MSDModel();
+  IqtFitModel();
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
 
 private:
-  std::string getResultXAxisUnit() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
+  std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const override;
+
+  bool m_constrainIntensities;
 };
 
 } // namespace Inelastic

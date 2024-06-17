@@ -4,18 +4,18 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "FunctionQDataView.h"
 #include "Common/InterfaceUtils.h"
 #include "Common/SettingsHelper.h"
-#include "FqFitAddWorkspaceDialog.h"
-#include "FqFitDataPresenter.h"
-#include "FqFitDataView.h"
+#include "FunctionQAddWorkspaceDialog.h"
+#include "FunctionQDataPresenter.h"
 
 #include <QComboBox>
 #include <QHeaderView>
 #include <QtGlobal>
 
 namespace {
-QStringList FqFitHeaders() {
+QStringList FunctionQHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "Parameter"
@@ -29,23 +29,23 @@ QStringList FqFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {
+FunctionQDataView::FunctionQDataView(QWidget *parent) : FunctionQDataView(FunctionQHeaders(), parent) {
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
 }
 
-FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
+FunctionQDataView::FunctionQDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-void FqFitDataView::showAddWorkspaceDialog() {
-  auto dialog = new FqFitAddWorkspaceDialog(parentWidget());
+void FunctionQDataView::showAddWorkspaceDialog() {
+  auto dialog = new FunctionQAddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
-  connect(dialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(notifyWorkspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)));
-  connect(dialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
+  connect(dialog, SIGNAL(workspaceChanged(FunctionQAddWorkspaceDialog *, const std::string &)), this,
+          SLOT(notifyWorkspaceChanged(FunctionQAddWorkspaceDialog *, const std::string &)));
+  connect(dialog, SIGNAL(parameterTypeChanged(FunctionQAddWorkspaceDialog *, const std::string &)), this,
+          SLOT(notifyParameterTypeChanged(FunctionQAddWorkspaceDialog *, const std::string &)));
 
   auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -55,25 +55,25 @@ void FqFitDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
-void FqFitDataView::notifyAddClicked() {
-  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+void FunctionQDataView::notifyAddClicked() {
+  if (auto presenter = dynamic_cast<FunctionQDataPresenter *>(m_presenter)) {
     presenter->handleAddClicked();
   }
 }
 
-void FqFitDataView::notifyWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
-  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+void FunctionQDataView::notifyWorkspaceChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+  if (auto presenter = dynamic_cast<FunctionQDataPresenter *>(m_presenter)) {
     presenter->handleWorkspaceChanged(dialog, workspaceName);
   }
 }
 
-void FqFitDataView::notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
-  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+void FunctionQDataView::notifyParameterTypeChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &type) {
+  if (auto presenter = dynamic_cast<FunctionQDataPresenter *>(m_presenter)) {
     presenter->handleParameterTypeChanged(dialog, type);
   }
 }
 
-void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void FunctionQDataView::addTableEntry(size_t row, FitDataRow newRow) {
   FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.parameter));

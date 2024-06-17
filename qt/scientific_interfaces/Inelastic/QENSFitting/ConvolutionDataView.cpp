@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "ConvolutionDataView.h"
 #include "Common/InterfaceUtils.h"
-#include "ConvFitAddWorkspaceDialog.h"
-#include "ConvFitDataView.h"
+#include "ConvolutionAddWorkspaceDialog.h"
 #include "FitDataPresenter.h"
 
 #include <QComboBox>
@@ -14,7 +14,7 @@
 #include <QtGlobal>
 
 namespace {
-QStringList convFitHeaders() {
+QStringList ConvolutionHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "Resolution"
@@ -28,15 +28,15 @@ QStringList convFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
+ConvolutionDataView::ConvolutionDataView(QWidget *parent) : ConvolutionDataView(ConvolutionHeaders(), parent) {}
 
-ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
+ConvolutionDataView::ConvolutionDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-void ConvFitDataView::showAddWorkspaceDialog() {
-  auto dialog = new ConvFitAddWorkspaceDialog(parentWidget());
+void ConvolutionDataView::showAddWorkspaceDialog() {
+  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
   connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
           SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
 
@@ -50,7 +50,7 @@ void ConvFitDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
-void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void ConvolutionDataView::addTableEntry(size_t row, FitDataRow newRow) {
   FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.resolution));

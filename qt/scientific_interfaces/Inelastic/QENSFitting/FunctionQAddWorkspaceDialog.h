@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "ui_FqFitAddWorkspaceDialog.h"
+#include "ui_FunctionQAddWorkspaceDialog.h"
 
 #include <QDialog>
 
@@ -16,10 +16,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL FunctionQAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit FqFitAddWorkspaceDialog(QWidget *parent);
+  explicit FunctionQAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   std::string parameterType() const;
@@ -37,8 +37,8 @@ public:
 
 signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
-  void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
-  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
+  void workspaceChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &workspace);
+  void parameterTypeChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &type);
 
 private slots:
   void emitWorkspaceChanged(const QString &name);
@@ -47,7 +47,7 @@ private slots:
   void handleAutoLoaded();
 
 private:
-  Ui::FqFitAddWorkspaceDialog m_uiForm;
+  Ui::FunctionQAddWorkspaceDialog m_uiForm;
 };
 
 } // namespace Inelastic

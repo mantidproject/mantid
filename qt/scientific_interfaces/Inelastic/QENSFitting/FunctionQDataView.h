@@ -15,27 +15,27 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
-class FqFitAddWorkspaceDialog;
+class FunctionQAddWorkspaceDialog;
 
 /**
 Presenter for a table of convolution fitting data.
 */
-class MANTIDQT_INELASTIC_DLL FqFitDataView : public FitDataView {
+class MANTIDQT_INELASTIC_DLL FunctionQDataView : public FitDataView {
   Q_OBJECT
 public:
-  FqFitDataView(QWidget *parent);
+  FunctionQDataView(QWidget *parent);
   void addTableEntry(size_t row, FitDataRow newRow) override;
 
 protected:
-  FqFitDataView(const QStringList &headers, QWidget *parent);
+  FunctionQDataView(const QStringList &headers, QWidget *parent);
 
 protected slots:
   void showAddWorkspaceDialog() override;
 
 private slots:
   void notifyAddClicked();
-  void notifyWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName);
-  void notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
+  void notifyWorkspaceChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &workspaceName);
+  void notifyParameterTypeChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &type);
 };
 
 } // namespace Inelastic

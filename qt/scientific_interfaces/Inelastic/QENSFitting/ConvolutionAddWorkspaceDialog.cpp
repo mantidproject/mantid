@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitAddWorkspaceDialog.h"
+#include "ConvolutionAddWorkspaceDialog.h"
 
 #include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -18,7 +18,7 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
+ConvolutionAddWorkspaceDialog::ConvolutionAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
   m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
@@ -30,40 +30,40 @@ ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : QDialog(
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-std::string ConvFitAddWorkspaceDialog::workspaceName() const {
+std::string ConvolutionAddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-std::string ConvFitAddWorkspaceDialog::resolutionName() const {
+std::string ConvolutionAddWorkspaceDialog::resolutionName() const {
   return m_uiForm.dsResolution->getCurrentDataName().toStdString();
 }
 
-MantidWidgets::FunctionModelSpectra ConvFitAddWorkspaceDialog::workspaceIndices() const {
+MantidWidgets::FunctionModelSpectra ConvolutionAddWorkspaceDialog::workspaceIndices() const {
   return MantidWidgets::FunctionModelSpectra(m_uiForm.leWorkspaceIndices->text().toStdString());
 }
 
-void ConvFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
+void ConvolutionAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setWSSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
+void ConvolutionAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::setResolutionWSSuffices(const QStringList &suffices) {
+void ConvolutionAddWorkspaceDialog::setResolutionWSSuffices(const QStringList &suffices) {
   m_uiForm.dsResolution->setWSSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::setResolutionFBSuffices(const QStringList &suffices) {
+void ConvolutionAddWorkspaceDialog::setResolutionFBSuffices(const QStringList &suffices) {
   m_uiForm.dsResolution->setFBSuffixes(suffices);
 }
 
-void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
+void ConvolutionAddWorkspaceDialog::updateSelectedSpectra() {
   auto const state = m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
   selectAllSpectra(state);
 }
 
-void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
+void ConvolutionAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
   if (doesExistInADS(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(getIndexString(name)));
@@ -72,7 +72,7 @@ void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
     m_uiForm.leWorkspaceIndices->setEnabled(true);
 }
 
-void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
+void ConvolutionAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
   const auto workspace = getADSWorkspace(name);
   if (workspace)
@@ -81,9 +81,9 @@ void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
     setAllSpectraSelectionEnabled(false);
 }
 
-void ConvFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
+void ConvolutionAddWorkspaceDialog::emitAddData() { emit addData(this); }
 
-void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
+void ConvolutionAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
   if (m_uiForm.ckAllSpectra->isChecked()) {
     m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(getIndexString(workspace)));
@@ -91,7 +91,7 @@ void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   }
 }
 
-void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
+void ConvolutionAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
 }
 

@@ -19,10 +19,10 @@ QENSFitting::QENSFitting(QWidget *parent)
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   auto const tabFactory = std::make_unique<TabFactory>(m_uiForm.twIDATabs);
-  m_tabs.emplace(MSD_FIT, tabFactory->makeMSDFitTab(MSD_FIT));
-  m_tabs.emplace(IQT_FIT, tabFactory->makeIqtFitTab(IQT_FIT));
-  m_tabs.emplace(CONV_FIT, tabFactory->makeConvFitTab(CONV_FIT));
-  m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
+  m_tabs.emplace(MSD_FIT, tabFactory->makeMSDTab(MSD_FIT));
+  m_tabs.emplace(Iqt_FIT, tabFactory->makeIqtTab(Iqt_FIT));
+  m_tabs.emplace(CONV_FIT, tabFactory->makeConvolutionTab(CONV_FIT));
+  m_tabs.emplace(FQ_FIT, tabFactory->makeFunctionQTab(FQ_FIT));
 }
 
 /**

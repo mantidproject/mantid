@@ -15,10 +15,10 @@ namespace Inelastic {
 using ResolutionCollectionType = IndexCollectionType<WorkspaceID, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 
-class MANTIDQT_INELASTIC_DLL ConvFitModel : public FittingModel {
+class MANTIDQT_INELASTIC_DLL ConvolutionModel : public FittingModel {
 public:
-  ConvFitModel();
-  ~ConvFitModel() = default;
+  ConvolutionModel();
+  ~ConvolutionModel() = default;
 
   boost::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
 

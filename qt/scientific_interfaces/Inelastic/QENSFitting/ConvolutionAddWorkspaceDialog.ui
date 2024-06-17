@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConvFitAddWorkspaceDialog</class>
- <widget class="QDialog" name="ConvFitAddWorkspaceDialog">
+ <class>ConvolutionAddWorkspaceDialog</class>
+ <widget class="QDialog" name="ConvolutionAddWorkspaceDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -100,7 +100,16 @@
    <item>
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>

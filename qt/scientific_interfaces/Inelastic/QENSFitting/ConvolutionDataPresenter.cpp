@@ -4,18 +4,18 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitAddWorkspaceDialog.h"
-#include "ConvFitDataPresenter.h"
+#include "ConvolutionDataPresenter.h"
+#include "ConvolutionAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvFitDataPresenter::ConvFitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
+ConvolutionDataPresenter::ConvolutionDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
     : FitDataPresenter(tab, model, view) {}
 
-bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
-  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+bool ConvolutionDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
+  if (const auto convDialog = dynamic_cast<ConvolutionAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
     setResolution(convDialog->resolutionName());
     return true;
@@ -23,7 +23,7 @@ bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dia
   return false;
 }
 
-void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
+void ConvolutionDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
   auto resolutionVector = m_model->getResolutionsForFit();
   const auto &resolution = resolutionVector.at(row.value).first;

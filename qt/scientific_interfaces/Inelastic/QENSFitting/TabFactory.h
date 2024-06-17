@@ -15,10 +15,10 @@ class FitTab;
 class TabFactory {
 public:
   explicit TabFactory(QTabWidget *tabWidget);
-  FitTab *makeMSDFitTab(int const index) const;
-  FitTab *makeIqtFitTab(int const index) const;
-  FitTab *makeConvFitTab(int const index) const;
-  FitTab *makeFqFitTab(int const index) const;
+  FitTab *makeMSDTab(int const index) const;
+  FitTab *makeIqtTab(int const index) const;
+  FitTab *makeConvolutionTab(int const index) const;
+  FitTab *makeFunctionQTab(int const index) const;
 
 private:
   QTabWidget *m_tabWidget;

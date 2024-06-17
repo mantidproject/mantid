@@ -47,8 +47,8 @@ static const auto FUNCTION_STRINGS =
                                                   {"EISFDiffSphere", "EISFDiffSphere"},
                                                   {"EISFDiffSphereAlkyl", "EISFDiffSphereAlkyl"}});
 
-namespace MSDFit {
-static const auto TAB_NAME = "MSDFit";
+namespace MSD {
+static const auto TAB_NAME = "MSD";
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -60,7 +60,7 @@ static const auto ALL_FITS =
                                                    "Msd>0, Beta>0)"},
                                         {"Yi", "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
                                                "Sigma>0)"}});
-} // namespace MSDFit
+} // namespace MSD
 
 namespace IqtFit {
 static const auto TAB_NAME = "IqtFit";
@@ -76,8 +76,8 @@ inline auto templateSubTypes() {
 
 } // namespace IqtFit
 
-namespace ConvFit {
-static const auto TAB_NAME = "ConvFit";
+namespace Convolution {
+static const auto TAB_NAME = "Convolution";
 static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
@@ -88,10 +88,10 @@ inline auto templateSubTypes() {
                               std::make_unique<ConvTypes::BackgroundSubType>());
 }
 
-} // namespace ConvFit
+} // namespace Convolution
 
-namespace FqFit {
-static const auto TAB_NAME = "FQFit";
+namespace FunctionQ {
+static const auto TAB_NAME = "FunctionQ";
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -129,6 +129,6 @@ static const auto ALL_FITS = std::map<std::string, std::string>(
 static const std::unordered_map<DataType, std::map<std::string, std::string>> availableFits{
     {{DataType::WIDTH, WIDTH_FITS}, {DataType::EISF, EISF_FITS}, {DataType::ALL, ALL_FITS}}};
 
-} // namespace FqFit
+} // namespace FunctionQ
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

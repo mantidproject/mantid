@@ -4,14 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MSDFitModel.h"
+#include "MSDModel.h"
 
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-MSDFitModel::MSDFitModel() { m_fitType = MSDFIT_STRING; }
+MSDModel::MSDModel() { m_fitType = MSDFIT_STRING; }
 
-std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }
+std::string MSDModel::getResultXAxisUnit() const { return "Temperature"; }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

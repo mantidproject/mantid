@@ -8,7 +8,7 @@
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "ui_ConvFitAddWorkspaceDialog.h"
+#include "ui_ConvolutionAddWorkspaceDialog.h"
 
 #include <QDialog>
 
@@ -16,10 +16,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class MANTIDQT_INELASTIC_DLL ConvFitAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL ConvolutionAddWorkspaceDialog : public QDialog, public MantidWidgets::IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit ConvFitAddWorkspaceDialog(QWidget *parent);
+  explicit ConvolutionAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   std::string resolutionName() const;
@@ -44,7 +44,7 @@ private:
   void setWorkspace(const std::string &workspace);
   void setAllSpectraSelectionEnabled(bool doEnable);
 
-  Ui::ConvFitAddWorkspaceDialog m_uiForm;
+  Ui::ConvolutionAddWorkspaceDialog m_uiForm;
 };
 
 } // namespace Inelastic

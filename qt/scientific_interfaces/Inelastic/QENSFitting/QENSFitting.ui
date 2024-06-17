@@ -64,17 +64,17 @@
         <string>MSD </string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabIqtFit">
+      <widget class="QWidget" name="tabIqt">
        <attribute name="title">
         <string>I(Q, t) </string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabConvFit">
+      <widget class="QWidget" name="tabConvolution">
        <attribute name="title">
         <string>Convolution</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabJumpFit">
+      <widget class="QWidget" name="tabFunctionQ">
        <attribute name="title">
         <string>Function (Q)</string>
        </attribute>
