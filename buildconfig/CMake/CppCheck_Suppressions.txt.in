@@ -885,7 +885,7 @@ cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyO
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:72
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/WrapWithNDArray.cpp:82
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/WrapWithNDArray.cpp:87
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ConfigService.cpp:69
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ConfigService.cpp:73
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/MuonNexusReader.cpp:248
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Property.cpp:102
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Quat.cpp:55
