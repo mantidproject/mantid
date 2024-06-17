@@ -265,6 +265,15 @@ class BaseSX(ABC):
                     mantid.PredictFractionalPeaks(Peaks=pred_peaks, FracPeaks=out_peaks_name, EnableLogging=False, **kwargs)
             self.set_peaks(run, out_peaks_name, peak_type)
 
+    @default_apply_to_all_runs
+    def correct_integrated_peaks_for_attenuation(self, peak_type, run=None, **kwargs):
+        default_kwargs = {"EventsPerPoint": 1500, "MaxScatterPtAttempts": 6000}
+        kwargs = {**default_kwargs, **kwargs}
+        ws = self.get_ws(run)
+        peaks = self.get_peaks(run, peak_type)
+        mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
+        mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, ApplyCorrection=True, **kwargs)
+
     @staticmethod
     def get_back_to_back_exponential_func(pk, ws, ispec):
         tof = pk.getTOF()
