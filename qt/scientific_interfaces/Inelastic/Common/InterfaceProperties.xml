@@ -63,7 +63,7 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 		<WORKSPACE-SUFFIXES sample="_red,_sqw"/>
 	</INTERFACE>
 
-	<INTERFACE id="MSDFit">
+	<INTERFACE id="MSD">
 		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_eq.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_eq"/>
@@ -81,13 +81,13 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 		<WORKSPACE-SUFFIXES sample="_iqt"/>
 	</INTERFACE>
 
-	<INTERFACE id="ConvFit">
+	<INTERFACE id="Convolution">
 		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs,_sqw.dave" resolution="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave"/>
 		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
 	</INTERFACE>
 
-	<INTERFACE id="FQFit">
+	<INTERFACE id="FunctionQ">
 		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_Result.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_Result"/>
