@@ -520,9 +520,9 @@ class SPowderSemiEmpiricalCalculator:
         # Finally we (re)calculate the first-order spectrum with more accurate DW method
         if not self._isotropic_fundamentals:
             fundamentals_spectra_with_dw = self._calculate_fundamentals_over_k(angle=angle)
-            isotropic_multiphonon_spectra = [spectrum for spectrum in spectra if spectrum.metadata["quantum_order"] > 1]
-            if isotropic_multiphonon_spectra:
-                spectra = type(spectra).from_spectra(isotropic_multiphonon_spectra) + fundamentals_spectra_with_dw
+            isotropic_multiphonon_indices = [i for i, metadata in enumerate(spectra.iter_metadata()) if metadata["quantum_order"] > 1]
+            if isotropic_multiphonon_indices:
+                spectra = spectra[isotropic_multiphonon_indices] + fundamentals_spectra_with_dw
             else:
                 spectra = fundamentals_spectra_with_dw
 
