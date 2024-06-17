@@ -109,7 +109,6 @@ void Quasi::setFileExtensionsByName(bool filter) {
 }
 
 void Quasi::handleValidation(IUserInputValidator *validator) const {
-  std::string errors("");
   validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
