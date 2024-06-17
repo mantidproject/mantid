@@ -159,10 +159,10 @@ public:
   }
 
   void test_that_addOutput_adds_the_output_of_a_fit_into_the_model() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__ConvFit");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
     m_model->addOutput(alg);
 
     TS_ASSERT(m_model->getResultWorkspace());
@@ -170,10 +170,10 @@ public:
   }
 
   void test_that_addOutput_adds_the_output_of_a_single_fit_into_the_model() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__ConvFit");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
     m_model->addOutput(alg);
 
     TS_ASSERT(m_model->getResultWorkspace());
@@ -181,7 +181,7 @@ public:
   }
 
   void test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->isPreviouslyFit(WorkspaceID(0), WorkspaceIndex(0)));
   }
@@ -221,10 +221,10 @@ public:
   }
 
   void test_that_getFitParameterNames_returns_a_vector_of_fit_parameters_if_the_fitOutput_contains_parameters() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-2");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-2");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__ConvFit");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
     m_model->addOutput(alg);
 
     TS_ASSERT(!m_model->getFitParameterNames().empty());
@@ -252,16 +252,16 @@ public:
   }
 
   void test_that_getParameterValues_returns_an_empty_map_if_the_dataIndex_is_out_of_range() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getParameterValues(1, 0).empty());
   }
 
   void test_that_getParameterValues_returns_the_default_parameters_if_there_are_no_fit_parameters() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__ConvFit");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__Convolution");
     m_model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
     auto const parameters = m_model->getParameterValues(0, 0);
@@ -269,7 +269,7 @@ public:
   }
 
   void test_that_getParameterValues_returns_the_fit_parameters_after_a_fit_has_been_executed() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     auto const parameters = m_model->getParameterValues(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -278,16 +278,16 @@ public:
   }
 
   void test_getFitParameters_returns_an_empty_map_when_there_is_no_fitOutput() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__ConvFit");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__Convolution");
 
     TS_ASSERT(m_model->getFitParameters(0, 0).empty());
   }
 
   void test_getFitParameters_returns_the_fitParameters_after_a_fit() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     auto const parameters = m_model->getFitParameters(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -296,13 +296,13 @@ public:
   }
 
   void test_getDefaultParameters_returns_an_empty_map_when_the_dataIndex_is_out_of_range() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getDefaultParameters(1).empty());
   }
 
   void test_getDefaultParameters_returns_the_default_parameters_which_have_been_set() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
 
     m_model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -313,14 +313,14 @@ public:
   }
 
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getResultLocation(0, 0));
   }
 
   void test_that_cleanFailedRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
     SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
@@ -336,7 +336,7 @@ public:
   void
   test_that_cleanFailedRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails_for_a_single_workspaceIndex() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
     SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
@@ -382,13 +382,13 @@ public:
   }
 
   void test_getResultLocation_returns_none_when_out_of_index() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(!m_model->getResultLocation(WorkspaceID{1}, WorkspaceIndex{0}));
   }
 
   void test_getResultWorkspace_does_not_throw() {
-    addInstrumentWorkspaceToModel("__ConvFit", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT_THROWS_NOTHING(m_model->getResultWorkspace());
   }

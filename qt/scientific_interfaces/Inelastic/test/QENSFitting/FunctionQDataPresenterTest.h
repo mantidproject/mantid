@@ -11,10 +11,10 @@
 
 #include "../Common/MockObjects.h"
 #include "QENSFitting/FitDataView.h"
-#include "QENSFitting/FqFitAddWorkspaceDialog.h"
-#include "QENSFitting/FqFitDataPresenter.h"
-#include "QENSFitting/FqFitModel.h"
 #include "QENSFitting/FunctionBrowser/SingleFunctionTemplateView.h"
+#include "QENSFitting/FunctionQAddWorkspaceDialog.h"
+#include "QENSFitting/FunctionQDataPresenter.h"
+#include "QENSFitting/FunctionQModel.h"
 #include "QENSFitting/InelasticFitPropertyBrowser.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -48,11 +48,11 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 } // namespace
 
-class FqFitDataPresenterTest : public CxxTest::TestSuite {
+class FunctionQDataPresenterTest : public CxxTest::TestSuite {
 public:
-  static FqFitDataPresenterTest *createSuite() { return new FqFitDataPresenterTest(); }
+  static FunctionQDataPresenterTest *createSuite() { return new FunctionQDataPresenterTest(); }
 
-  static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
+  static void destroySuite(FunctionQDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
@@ -63,7 +63,7 @@ public:
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<FqFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
+    m_presenter = std::make_unique<FunctionQDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
   }
@@ -87,7 +87,7 @@ public:
     TS_ASSERT(m_view);
   }
 
-  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_FunctionQ() {
     auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
@@ -129,7 +129,7 @@ private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
   std::unique_ptr<NiceMock<MockDataModel>> m_model;
-  std::unique_ptr<FqFitDataPresenter> m_presenter;
+  std::unique_ptr<FunctionQDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
