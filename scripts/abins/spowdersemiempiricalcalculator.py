@@ -5,7 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from itertools import repeat
 import json
+from multiprocessing import Pool
+import numbers
 from operator import attrgetter
 from pathlib import Path
 from typing import Dict, Tuple, Union
@@ -556,9 +559,6 @@ class SPowderSemiEmpiricalCalculator:
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
 
-    from line_profiler import profile
-
-    @profile
     def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
         """
         Apply instrumental broadening to scattering data
@@ -567,15 +567,10 @@ class SPowderSemiEmpiricalCalculator:
         (There is room for improvement, by reworking all the broadening
         implementations to accept 2-D input.)
         """
-        broadened_spectra = []
+        n_threads = abins.parameters.performance.get("threads")
 
         if isinstance(spectra, AbinsSpectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
-
-            from multiprocessing import Pool
-            from itertools import repeat
-
-            n_threads = abins.parameters.performance.get("threads")
 
             with Pool(n_threads) as p:
                 broadened_spectra = p.starmap(
@@ -591,6 +586,8 @@ class SPowderSemiEmpiricalCalculator:
             )
 
         else:  # 2-D data, broaden one column  at time
+            broadened_spectra = []
+
             frequencies = spectra.get_bin_centres(bin_ax="y").to(self.freq_unit).magnitude
 
             z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
