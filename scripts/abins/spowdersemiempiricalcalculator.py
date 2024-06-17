@@ -439,16 +439,17 @@ class SPowderSemiEmpiricalCalculator:
 
         self._report_progress("Applying q^2n / n! q-dependence")
         if is_2d:
+            # convert 1-D spectra sampled at q=1 to 2-D spectra by applying q-dependent factor
             z_data = np.empty((spectra.y_data.shape[0], q2.shape[0], spectra.y_data.shape[1]), dtype=FLOAT_TYPE) * ureg(spectra.y_data_unit)
-            for i, spectrum in enumerate(spectra):
+            for i, (y_data_1d, metadata) in enumerate(zip(spectra.y_data, spectra.iter_metadata())):
+                z_data[i] = y_data_1d * q2_order_corrections[metadata["quantum_order"] - 1]
 
-                z_data[i] = spectrum.y_data * q2_order_corrections[spectrum.metadata["quantum_order"] - 1]
             spectra = AbinsSpectrum2DCollection(
                 x_data=(self._q_bins * self.q_unit), y_data=spectra.x_data, z_data=z_data, metadata=spectra.metadata
             )
         else:
-            for i, spectrum in enumerate(spectra):
-                spectra._y_data[i] *= q2_order_corrections[spectrum.metadata["quantum_order"] - 1]
+            for i, metadata in enumerate(spectra.iter_metadata()):
+                spectra._y_data[i] *= q2_order_corrections[metadata["quantum_order"] - 1]
 
         if isinstance(spectra, AbinsSpectrum1DCollection):
             get_raw_s = attrgetter("_y_data")
@@ -461,11 +462,11 @@ class SPowderSemiEmpiricalCalculator:
             )
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
 
-            for i, spectrum in enumerate(spectra):
-                if spectrum.metadata["quantum_order"] < min_order:
+            for i, metadata in enumerate(spectra.iter_metadata()):
+                if metadata["quantum_order"] < min_order:
                     continue
 
-                atom_index = spectrum.metadata["atom_index"]
+                atom_index = metadata["atom_index"]
                 get_raw_s(spectra)[i] *= iso_dw[atom_index]
 
         return spectra

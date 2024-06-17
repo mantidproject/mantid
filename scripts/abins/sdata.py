@@ -94,7 +94,8 @@ def check_thresholds(
 
 
 XTickLabels = Sequence[Tuple[int, str]]
-LineData = Sequence[Dict[str, Union[str, int]]]
+OneLineData = Dict[str, Union[str, int]]
+LineData = Sequence[OneLineData]
 Metadata = Dict[str, Union[str, int, LineData]]
 
 
@@ -144,6 +145,17 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
                 select_items[key] = value
 
         return Spectrum1DCollection.select(self, **select_items)
+
+    def iter_metadata(self) -> Generator[OneLineData, None, None]:
+        common_metadata = dict((key, self.metadata[key]) for key in self.metadata.keys() - set("line_data"))
+        from itertools import repeat
+
+        line_data = self.metadata.get("line_data")
+        if line_data is None:
+            line_data = repeat({}, len(self._y_data))
+
+        for one_line_data in line_data:
+            yield common_metadata | one_line_data
 
     def _get_line_data_vals(self, *line_data_keys: str) -> List[tuple]:
         """
@@ -374,6 +386,17 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
             x_tick_labels=self.x_tick_labels,
             metadata=new_metadata,
         )
+
+    def iter_metadata(self) -> Generator[OneLineData, None, None]:
+        common_metadata = dict((key, self.metadata[key]) for key in self.metadata.keys() - set("line_data"))
+        from itertools import repeat
+
+        line_data = self.metadata.get("line_data")
+        if line_data is None:
+            line_data = repeat({}, len(self._z_data))
+
+        for one_line_data in self.metadata["line_data"]:
+            yield common_metadata | one_line_data
 
     @classmethod
     def from_spectra(cls, spectra: Sequence[Spectrum2D]) -> Self:
