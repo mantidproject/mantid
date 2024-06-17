@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from copy import deepcopy
-from itertools import chain, groupby
+from itertools import chain, groupby, repeat
+from multiprocessing import Pool
 from numbers import Integral, Real
 from operator import itemgetter
 from typing import (
@@ -35,6 +36,15 @@ from abins.constants import FLOAT_TYPE
 from abins.instruments.directinstrument import DirectInstrument
 from abins.logging import get_logger, Logger
 import abins.parameters
+
+# Avoid inconsistent unit registries when (un)pickling for multiprocessing
+import pint
+
+pint.set_application_registry(ureg)
+
+
+# Parallel threads for autoconvolution
+N_THREADS = abins.parameters.performance.get("threads")
 
 
 def _iter_check_thresholds(
@@ -428,7 +438,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
             z_data_magnitude[i + 1, :, :] = spectrum.z_data.magnitude
 
         metadata = cls._combine_metadata([spec.metadata for spec in spectra])
-        z_data = Quantity(z_data_magnitude, z_data_units)
+        z_data = ureg.Quantity(z_data_magnitude, z_data_units)
         return cls(x_data, y_data, z_data, x_tick_labels=x_tick_labels, metadata=metadata)
 
     def group_by(self, *line_data_keys: str) -> Self:
@@ -612,6 +622,9 @@ def add_autoconvolution_spectra(
     The process will begin with the highest existing order, and repeat until
     a spectrum of MAX_ORDER is obtained.
 
+    This operation is parallelised over atoms: the number of tasks is controlled
+    by abins.parameters.performance["threads"]
+
     Results are rebinned into ``output_bins`` if this is provided
 
     Arguments:
@@ -633,18 +646,17 @@ def add_autoconvolution_spectra(
         sorted(spectra, key=(lambda spec: (spec.metadata["atom_index"], spec.metadata["quantum_order"]))),
         key=(lambda spec: spec.metadata["atom_index"]),
     )
+    # Iterator tweaking: drop the keys and convert each group to list
+    spectra_by_atom = (list(sba_item[1]) for sba_item in spectra_by_atom)
 
     # create new spectra using first and last spectra in initial group, iterating until order = max_order
-
-    output_spectra = []
     x_data = spectra.x_data
-    for _, atom_spectra in spectra_by_atom:
-        autoconvolved_atom_spectra: Spectrum1DCollection = _autoconvolve_atom_spectra(list(atom_spectra), x_data, max_order=max_order)
+
+    with Pool(N_THREADS) as p:
+        output_spectra = p.starmap(_autoconvolve_atom_spectra, zip(map(list, spectra_by_atom), repeat(x_data), repeat(max_order)))
 
         if output_bins is not None:
-            autoconvolved_atom_spectra = _resample_spectra(autoconvolved_atom_spectra, x_data, output_bins)
-
-        output_spectra.append(autoconvolved_atom_spectra)
+            output_spectra = p.starmap(_resample_spectra, zip(output_spectra, repeat(x_data), repeat(output_bins)))
 
     return _fast_1d_from_spectra(chain(*output_spectra))
 
@@ -663,11 +675,11 @@ def _fast_1d_from_spectra(spectra: Iterable[Spectrum1D]) -> AbinsSpectrum1DColle
     metadata = AbinsSpectrum1DCollection._combine_metadata(metadata_list)
 
     return AbinsSpectrum1DCollection(
-        x_data=x_data, y_data=Quantity(np.asarray(y_data_list), units=first_spectrum._internal_y_data_unit), metadata=metadata
+        x_data=x_data, y_data=ureg.Quantity(np.asarray(y_data_list), units=first_spectrum._internal_y_data_unit), metadata=metadata
     )
 
 
-def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, *, max_order: int) -> AbinsSpectrum1DCollection:
+def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, max_order: int) -> AbinsSpectrum1DCollection:
     """
     Autoconvolve pre-sorted list of spectra; convolve first element with last until order reaches max_order
 
@@ -694,7 +706,7 @@ def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity,
         new_y_data.append(autoconv_spectrum)
         new_line_data.append({"quantum_order": order + 1})
 
-    y_data = Quantity(np.asarray(new_y_data), units=y_units)
+    y_data = ureg.Quantity(np.asarray(new_y_data), units=y_units)
     metadata = atom_spectra[0].metadata | {"line_data": new_line_data}
 
     return AbinsSpectrum1DCollection(x_data=x_data, y_data=y_data, metadata=metadata)
@@ -718,7 +730,7 @@ def _resample_spectra(spectra: AbinsSpectrum1DCollection, input_bins: Quantity, 
 
     return Spectrum1DCollection(
         x_data=output_bins,
-        y_data=Quantity(
+        y_data=ureg.Quantity(
             np.asarray(output_ydata, dtype=FLOAT_TYPE), units=(ureg(f"{spectra.y_data_unit} {spectra.x_data_unit}") / output_bins.units)
         ),
         metadata=spectra.metadata,
