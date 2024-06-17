@@ -95,7 +95,7 @@ class PythonLoggingTests(unittest.TestCase):
                 )
             )
 
-        result = subprocess.run([sys.executable, TEST_SCRIPT_NAME], timeout=600)  # This will raise subprocess.TimeoutExpired if deadlocke
+        result = subprocess.run([sys.executable, TEST_SCRIPT_NAME], timeout=60)  # This will raise subprocess.TimeoutExpired if deadlocke
         result.check_returncode()
 
 
