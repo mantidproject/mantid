@@ -119,16 +119,8 @@ private:
 
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-<<<<<<< HEAD:qt/scientific_interfaces/Inelastic/test/QENSFitting/ConvFitDataPresenterTest.h
   std::unique_ptr<NiceMock<MockDataModel>> m_model;
-  std::unique_ptr<ConvFitDataPresenter> m_presenter;
-||||||| parent of 0f95df646b7 (Rename files and functions in qens fitting test files):qt/scientific_interfaces/Inelastic/test/QENSFitting/ConvFitDataPresenterTest.h
-  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
-  std::unique_ptr<ConvFitDataPresenter> m_presenter;
-=======
-  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
   std::unique_ptr<ConvolutionDataPresenter> m_presenter;
->>>>>>> 0f95df646b7 (Rename files and functions in qens fitting test files):qt/scientific_interfaces/Inelastic/test/QENSFitting/ConvolutionDataPresenterTest.h
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
