@@ -20,7 +20,7 @@
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
 #include "FunctionQDataPresenter.h"
 #include "FunctionQModel.h"
-#include "IqtModel.h"
+#include "IqtFitModel.h"
 #include "MSDModel.h"
 
 namespace {
