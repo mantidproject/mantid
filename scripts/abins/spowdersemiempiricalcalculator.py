@@ -556,6 +556,9 @@ class SPowderSemiEmpiricalCalculator:
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
 
+    from line_profiler import profile
+
+    @profile
     def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
         """
         Apply instrumental broadening to scattering data
@@ -569,12 +572,18 @@ class SPowderSemiEmpiricalCalculator:
         if isinstance(spectra, AbinsSpectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
-            for s_row in spectra.y_data.to(self.s_unit).magnitude:
-                broadened_spectra.append(
-                    self._instrument.convolve_with_resolution_function(
-                        frequencies=frequencies, bins=self._bins, s_dft=s_row, scheme=broadening_scheme
-                    )[1]
+            from multiprocessing import Pool
+            from itertools import repeat
+
+            n_threads = abins.parameters.performance.get("threads")
+
+            with Pool(n_threads) as p:
+                broadened_spectra = p.starmap(
+                    _apply_resolution,
+                    zip(repeat(frequencies), repeat(self._bins), spectra._y_data, repeat(broadening_scheme), repeat(self._instrument)),
                 )
+                broadened_spectra = list(broadened_spectra)
+
             return AbinsSpectrum1DCollection(
                 x_data=spectra.x_data,
                 y_data=(np.asarray(broadened_spectra, dtype=FLOAT_TYPE) * spectra.y_data.units),
@@ -905,3 +914,12 @@ class SPowderSemiEmpiricalCalculator:
                   ) / (15. * factor)
         # fmt: on
         return s
+
+
+def _apply_resolution(frequencies: np.ndarray, bins: np.ndarray, s_dft: np.ndarray, scheme: str, instrument: Instrument) -> np.ndarray:
+    """Apply instrument resolution function to a row of data
+
+    This is a top-level function for use with multiprocessing Pool.starmap
+
+    """
+    return instrument.convolve_with_resolution_function(frequencies=frequencies, bins=bins, s_dft=s_dft, scheme=scheme)[1]
