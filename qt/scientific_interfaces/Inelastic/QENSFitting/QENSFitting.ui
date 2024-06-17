@@ -51,32 +51,44 @@
        </size>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;MSD: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Mean Square Displacements for different fit models.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;I(Q,t): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit models to I(Q,t) curves, including stretch exponentials.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Convolution: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit models (typically lorentzians) based on the convolution of S(Q,w) and R(Q,w) curves, requires resolution file.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Function(Q): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fits the FWHM or the EISF vs. Q resulting from convolution fitting analysis to different diffusion models.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string/>
       </property>
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabMSD">
        <attribute name="title">
-        <string>MSD </string>
+        <string>MSD</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;MSD: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Mean Square Displacements for different fit models.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabIqt">
        <attribute name="title">
         <string>I(Q, t) </string>
        </attribute>
+       <attribute name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;I(Q,t): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit exponentials, stretch exponentials and TeixeiraWater model to I(Q,t) curves.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </attribute>
       </widget>
       <widget class="QWidget" name="tabConvolution">
        <attribute name="title">
         <string>Convolution</string>
        </attribute>
+       <attribute name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Convolution: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit models (typically lorentzians) based on the convolution of S(Q,w) and R(Q,w) curves, requires resolution file.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </attribute>
       </widget>
       <widget class="QWidget" name="tabFunctionQ">
        <attribute name="title">
         <string>Function (Q)</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Function(Q): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fits the FWHM or the EISF vs. Q resulting from convolution fitting analysis to different diffusion models.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </attribute>
       </widget>
      </widget>
