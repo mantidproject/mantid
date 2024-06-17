@@ -168,7 +168,7 @@ autoconvolution = {
 
 performance = {
     "optimal_size": 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
-    "threads": 4,  # number of threads used in parallel calculations
+    "threads": None,  # number of threads used in parallel calculations: if None, use all available CPUs
 }
 
 # Experimental / debug features
