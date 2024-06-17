@@ -48,8 +48,6 @@ set(SRC_FILES
 set(INC_FILES
     ConvolutionDataPresenter.h
     ConvolutionModel.h
-    FitData.h
-    FitDataModel.h
     FitDataPresenter.h
     FitOutput.h
     FitOutputOptionsModel.h
