@@ -66,6 +66,22 @@ void validateInputWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
     return;
   }
 }
+
+double calculateErrorValue(double const t11Y, double const t11E, double const t10Y, double const t10E,
+                           double const t01Y, double const t01E, double const t00Y, double const t00E) {
+  double const denom_1 = std::pow((t11Y + t10Y), 2) * (t00Y - t01Y);
+  double const denom_0 = (t11Y + t10Y) * std::pow((t00Y - t01Y), 2);
+
+  double const deff_dt11 = (t10Y * (t00Y + t01Y)) / denom_1;
+  double const deff_dt10 = (-t11Y * (t00Y + t01Y)) / denom_1;
+  double const deff_dt00 = (t01Y * (t10Y - t11Y)) / denom_0;
+  double const deff_dt01 = (t00Y * (t11Y - t10Y)) / denom_0;
+
+  double const sigma_squared = std::pow(deff_dt11, 2) * std::pow(t11E, 2) + std::pow(deff_dt00, 2) * std::pow(t00E, 2) +
+                               std::pow(deff_dt10, 2) * std::pow(t10E, 2) + std::pow(deff_dt01, 2) * std::pow(t01E, 2);
+
+  return std::sqrt(sigma_squared);
+}
 } // namespace
 
 std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
@@ -121,6 +137,21 @@ MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr 
   auto const &numerator = (t11Ws * t00Ws) - (t10Ws * t01Ws);
   auto const &denominator = (t11Ws + t10Ws) * (t00Ws - t01Ws);
   auto const &efficiency = numerator / denominator;
+
+  // Calculate the errors
+  auto const &t11Y = t11Ws->y(0);
+  auto const &t11E = t11Ws->e(0);
+  auto const &t10Y = t10Ws->y(0);
+  auto const &t10E = t10Ws->e(0);
+  auto const &t01Y = t01Ws->y(0);
+  auto const &t01E = t01Ws->e(0);
+  auto const &t00Y = t00Ws->y(0);
+  auto const &t00E = t00Ws->e(0);
+  auto &efficiencyE = efficiency->mutableE(0);
+  auto const numBins = efficiencyE.size();
+  for (size_t i = 0; i < numBins; ++i) {
+    efficiencyE[i] = calculateErrorValue(t11Y[i], t11E[i], t10Y[i], t10E[i], t01Y[i], t01E[i], t00Y[i], t00E[i]);
+  }
   return efficiency;
 }
 
