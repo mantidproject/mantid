@@ -30,10 +30,10 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     :param names: A list of workspace names
     :return: List of bools, True if all workspaces have multiple bins
     """
-    ws = None
     ads = AnalysisDataServiceImpl.Instance()
     has_multiple_bins = []
     for name in names:
+        ws = None
         result = None
 
         try:
