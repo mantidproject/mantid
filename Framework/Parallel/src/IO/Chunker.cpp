@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <tuple>
 #include <utility>
 
 #include "MantidParallel/IO/Chunker.h"
