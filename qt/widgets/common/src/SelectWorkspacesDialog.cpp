@@ -50,6 +50,7 @@ public:
 @param typeFilter : optional filter for filtering workspaces by type.
 @param customButtonLabel : optional label for another custom button, return code
 for this is defined by CustomButton.
+@param mode : optional selection mode for the list widget, default is MultiSelection
 */
 SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::string &typeFilter,
                                                const std::string &customButtonLabel,
