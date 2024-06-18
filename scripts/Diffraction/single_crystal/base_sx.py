@@ -36,7 +36,7 @@ class INTEGRATION_TYPE(Enum):
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str, file_ext: str):
+    def __init__(self, vanadium_runno: str, file_ext: str = ".raw", scale_integrated: bool = False):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
@@ -44,6 +44,7 @@ class BaseSX(ABC):
         self.sample_dict = None
         self.n_mcevents = 1200
         self.file_ext = file_ext  # file extension
+        self.scale_integrated = scale_integrated
 
     # --- decorator to apply to all runs is run=None ---
     def default_apply_to_all_runs(func):
@@ -267,12 +268,12 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def correct_integrated_peaks_for_attenuation(self, peak_type, run=None, **kwargs):
-        default_kwargs = {"EventsPerPoint": 1500, "MaxScatterPtAttempts": 6000}
+        default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
         kwargs = {**default_kwargs, **kwargs}
         ws = self.get_ws(run)
         peaks = self.get_peaks(run, peak_type)
         mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
-        mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, ApplyCorrection=True, **kwargs)
+        mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)
 
     @staticmethod
     def get_back_to_back_exponential_func(pk, ws, ispec):
