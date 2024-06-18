@@ -6,7 +6,7 @@ Mantid 6.10.0 Release Notes
 
 .. figure:: ../../images/6_10_release/IntegratePeaks1DProfile_OutputFile.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
@@ -32,8 +32,8 @@ Other important highlights include:
 - Improvements to the way Mantid handles event compression. The algorithm
   :ref:`algm-CompressEvents` now has the ability to combine events together in
   logarithmically increasing size groups.
-  :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the
-  ``CompressTolerance`` was re-implemented (the execution time of
+  We re-implemented :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the
+  ``CompressTolerance`` (the execution time of
   ``LoadEventNexus`` is generally longer, but workflows using
   ``CompressEvents`` generally run faster).
 - New option to find peaks using the ratio of variance/mean in
