@@ -118,7 +118,7 @@ void CalculatePaalmanPings::run() {
   const auto efixed = m_uiForm.doubleEfixed->value();
   absCorAlgo->setProperty("EFixed", efixed);
 
-  const long int numwave = m_uiForm.spNwave->value();
+  const auto numwave = m_uiForm.spNwave->value();
   absCorAlgo->setProperty("NumberWavelengths", numwave);
 
   const bool inter = m_uiForm.cbInterpolate->isChecked();

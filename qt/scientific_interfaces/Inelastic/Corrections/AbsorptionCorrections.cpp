@@ -175,19 +175,19 @@ void AbsorptionCorrections::run() {
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  auto const events = m_uiForm.spNumberEvents->value();
   monteCarloAbsCor->setProperty("EventsPerPoint", events);
   auto const interpolation = m_uiForm.cbInterpolation->currentText().toStdString();
   monteCarloAbsCor->setProperty("Interpolation", interpolation);
-  long const maxAttempts = static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
+  auto const maxAttempts = m_uiForm.spMaxScatterPtAttempts->value();
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
   bool const isSparseInstrument = m_uiForm.cbSparseInstrument->isChecked();
   if (isSparseInstrument) {
     monteCarloAbsCor->setProperty("SparseInstrument", isSparseInstrument);
-    long const numberOfDetectorRows = static_cast<long>(m_uiForm.spNumberDetectorRows->value());
+    auto const numberOfDetectorRows = m_uiForm.spNumberDetectorRows->value();
     monteCarloAbsCor->setProperty("NumberOfDetectorRows", numberOfDetectorRows);
-    long const numberOfDetectorColumns = static_cast<long>(m_uiForm.spNumberDetectorColumns->value());
+    auto const numberOfDetectorColumns = m_uiForm.spNumberDetectorColumns->value();
     monteCarloAbsCor->setProperty("NumberOfDetectorColumns", numberOfDetectorColumns);
   }
 
