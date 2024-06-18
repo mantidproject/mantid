@@ -201,15 +201,15 @@ FunctionQDataPresenter::FunctionQDataPresenter(IFitTab *tab, IDataModel *model, 
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
 bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
-  if (const auto FunctionQDialog = dynamic_cast<FunctionQAddWorkspaceDialog const *>(dialog)) {
-    addWorkspace(FunctionQDialog->workspaceName(), FunctionQDialog->parameterType(),
-                 FunctionQDialog->parameterNameIndex());
-    setActiveWorkspaceIDToCurrentWorkspace(FunctionQDialog);
+  if (const auto functionQDialog = dynamic_cast<FunctionQAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(functionQDialog->workspaceName(), functionQDialog->parameterType(),
+                 functionQDialog->parameterNameIndex());
+    setActiveWorkspaceIDToCurrentWorkspace(functionQDialog);
 
-    auto const parameterIndex = FunctionQDialog->parameterNameIndex();
+    auto const parameterIndex = functionQDialog->parameterNameIndex();
     if (parameterIndex < 0) {
       throw std::runtime_error("No valid parameter was selected.");
-    } else if (FunctionQDialog->parameterType() == "Width") {
+    } else if (functionQDialog->parameterType() == "Width") {
       setActiveWidth(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
     } else {
       setActiveEISF(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
@@ -226,7 +226,7 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = createFunctionQParameters(workspace);
   const auto spectrum = getParameterSpectrum(parameters);
-  auto FunctionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
+  auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
 
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
@@ -234,7 +234,7 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  m_tab->handleFunctionListChanged(FunctionQFunctionList);
+  m_tab->handleFunctionListChanged(functionQFunctionList);
   if (paramType == "Width") {
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);

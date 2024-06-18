@@ -15,7 +15,7 @@
 #include <QtGlobal>
 
 namespace {
-QStringList FunctionQHeaders() {
+QStringList functionQHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "Parameter"
@@ -29,7 +29,7 @@ QStringList FunctionQHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FunctionQDataView::FunctionQDataView(QWidget *parent) : FunctionQDataView(FunctionQHeaders(), parent) {
+FunctionQDataView::FunctionQDataView(QWidget *parent) : FunctionQDataView(functionQHeaders(), parent) {
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
 }
 

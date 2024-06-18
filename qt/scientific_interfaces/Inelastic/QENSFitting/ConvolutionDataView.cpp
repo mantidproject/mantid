@@ -14,7 +14,7 @@
 #include <QtGlobal>
 
 namespace {
-QStringList ConvolutionHeaders() {
+QStringList convolutionHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "Resolution"
@@ -28,7 +28,7 @@ QStringList ConvolutionHeaders() {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvolutionDataView::ConvolutionDataView(QWidget *parent) : ConvolutionDataView(ConvolutionHeaders(), parent) {}
+ConvolutionDataView::ConvolutionDataView(QWidget *parent) : ConvolutionDataView(convolutionHeaders(), parent) {}
 
 ConvolutionDataView::ConvolutionDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();

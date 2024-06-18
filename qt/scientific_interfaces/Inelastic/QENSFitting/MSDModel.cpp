@@ -10,7 +10,7 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-MSDModel::MSDModel() { m_fitType = MSDFIT_STRING; }
+MSDModel::MSDModel() { m_fitType = MSD_STRING; }
 
 std::string MSDModel::getResultXAxisUnit() const { return "Temperature"; }
 

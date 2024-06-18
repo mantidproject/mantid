@@ -22,7 +22,7 @@ Mantid::Kernel::Logger logger("FunctionQModel");
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FunctionQModel::FunctionQModel() { m_fitType = FQFIT_STRING; }
+FunctionQModel::FunctionQModel() { m_fitType = FUNCTIONQ_STRING; }
 
 std::string FunctionQModel::getResultXAxisUnit() const { return ""; }
 
