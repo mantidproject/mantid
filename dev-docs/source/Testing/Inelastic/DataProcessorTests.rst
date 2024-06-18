@@ -122,19 +122,24 @@ Elwin tab
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Click on ``Add Workspaces``, a dialog window should prompt
-#. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``irs26176_graphite002_red`` workspace.
+#. Enter ``irs26174_graphite002_red.nxs`` in ``Input file``. The table of the dialog should be populated with the ``irs26174_graphite002_red`` workspace.
 #. Select the workspace from the table and click on ``Add Data``. Close the dialog.
 #. Back on ``Elwin`` tab, click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
-#. Open the ``Add Workspaces`` dialog again, and in ``Input file`` choose ``browse``. Navigate to the ISIS-Sample data and select the two files, ``irs26174_graphite002_red.nxs`` and ``irs26176_graphite002_red.nxs`` using shift key.
-#. Add the loaded workspaces
+#. Right-click on the ``irs26174_graphite002_red_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice. **NB** keep this workspace if you are doing the :ref:`QENS Fitting Manual Test <inelastic_qens_fitting_testing>`
+#. Remove the Workspace from the interface by clicking on the ``Select All`` button and then the ``Remove Selected`` button.
+#. Open the ``Add Workspaces`` dialog again, there should be a ``irs26174_graphite002_red`` workspace on the table with ``Ws Index`` equal to ``0-50``.
+#. In ``Input file`` choose ``Browse``. Navigate to the ISIS-Sample data folder and select the file ``irs26176_graphite002_red.nxs``. A new entry, ``irs26176_graphite002_red``, should be
+   added to the data table, with ``Ws Index`` equal to ``0-50``. (beware that there is a ``irs26176_graphite002_red.nxs`` file on the ``Usage Data`` set. This is NOT the correct file for this test,
+   it should be loaded from the Sample Data-ISIS set)
+#. With both workspaces on the data table, click on  the ``Select All`` button and then on the ``Add Data`` button. Both workspaces should be added to the ``Elwin`` interface.
 #. Change the integration range from -0.2 to 0.2
 #. Click ``Run``
-#. This should result in three new workspaces again, this time with file ranges as their name
+#. This should result in three new workspaces again, this time with file ranges as their name.
 #. In the main GUI right-click on ``irs26174-26176_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
 #. This should plot two lines of :math:`ln((meV))^{-1}` vs :math:`Q2`
-#. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
-I(Q, T) tab
+
+I(Q, t) tab
 -----------
 
 **Time required 3 - 5 minutes for each**
@@ -164,7 +169,7 @@ I(Q, T) tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
-#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a workspace with 51 histograms and 86 bins. **NB** keep this workspace for the next test
+#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a workspace with 51 histograms and 86 bins. **NB** keep this workspace if you are doing the :ref:`QENS Fitting Manual Test <inelastic_qens_fitting_testing>`
 #. Click ``Plot Current preview`` this should plot the same data as the preview window
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
