@@ -31,10 +31,10 @@ using DefaultParametersType = IndexCollectionType<WorkspaceID, std::unordered_ma
 
 static const std::string SIM_STRING = "sim";
 static const std::string SEQ_STRING = "seq";
-static const std::string IQTFIT_STRING = "Iqt";
-static const std::string CONVFIT_STRING = "Conv";
-static const std::string MSDFIT_STRING = "Msd";
-static const std::string FQFIT_STRING = "FQ";
+static const std::string IQT_STRING = "Iqt";
+static const std::string CONVOLUTION_STRING = "Conv";
+static const std::string MSD_STRING = "Msd";
+static const std::string FUNCTIONQ_STRING = "FQ";
 static const std::string MULTI_STRING = "Multi";
 
 /*

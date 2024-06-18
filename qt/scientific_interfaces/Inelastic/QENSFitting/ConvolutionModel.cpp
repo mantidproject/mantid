@@ -209,7 +209,7 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-ConvolutionModel::ConvolutionModel() { m_fitType = CONVFIT_STRING; }
+ConvolutionModel::ConvolutionModel() { m_fitType = CONVOLUTION_STRING; }
 
 IAlgorithm_sptr ConvolutionModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSequential");
