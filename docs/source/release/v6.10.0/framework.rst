@@ -89,7 +89,7 @@ New features
   The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains the same raw data as the data archive from the past 3 years.
   This new feature will speed up file loading times for external users **on IDAaaS** that do not have access to the data archive.
   Please note that if you are **not** on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.
-  Here is a demonstration on IDAaaS showing that an instrument file can now be loaded even when the archive is turned off:
+  Here is a demonstration on IDAaaS showing that an instrument file can now be loaded even when the archive is turned off (purely for demonstration purposes):
 
 .. figure::  ../../images/6_10_release/data-cache.gif
   :align: center
