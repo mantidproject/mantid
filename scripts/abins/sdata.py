@@ -405,7 +405,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         if line_data is None:
             line_data = repeat({}, len(self._z_data))
 
-        for one_line_data in self.metadata["line_data"]:
+        for one_line_data in line_data:
             yield common_metadata | one_line_data
 
     @classmethod
