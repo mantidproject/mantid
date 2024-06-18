@@ -53,7 +53,8 @@ class Test(unittest.TestCase):
 
     def test_validate_workspaces_does_not_raise_keyerror_for_non_existent_workspace(self):
         try:
-            _validate_workspaces(["non_existent_workspace", "second_non_existent_workspace"])
+            result = _validate_workspaces(["non_existent_workspace", "second_non_existent_workspace"])
+            self.assertEqual(result, [False, False])
         except KeyError:
             self.fail("KeyError was raised for non-existent workspaces.")
 
