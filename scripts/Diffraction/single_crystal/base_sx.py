@@ -267,11 +267,11 @@ class BaseSX(ABC):
             self.set_peaks(run, out_peaks_name, peak_type)
 
     @default_apply_to_all_runs
-    def correct_integrated_peaks_for_attenuation(self, peak_type, run=None, **kwargs):
+    def correct_integrated_peaks_for_attenuation(self, peak_type, int_type=None, run=None, **kwargs):
         default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
         kwargs = {**default_kwargs, **kwargs}
         ws = self.get_ws(run)
-        peaks = self.get_peaks(run, peak_type)
+        peaks = self.get_peaks(run, peak_type, int_type)
         mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
         mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)
 
