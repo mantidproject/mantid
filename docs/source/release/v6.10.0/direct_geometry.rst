@@ -22,7 +22,7 @@ MSlice
 
 Bugfixes
 ############
-- Saving an .nxs file as .nxspe or vice versa no longer causes a crash. Instead, a warning message is now being shown.
+- Saving a .nxs file as .nxspe or vice versa no longer causes a crash. Instead, a warning message is now being shown.
 - Cut plots with GDOS intensity no longer have empty lines in the MDHisto tab and so no longer cause a crash when deleting these.
 
 :ref:`Release 6.10.0 <v6.10.0>`
