@@ -1,0 +1,1 @@
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has been updated to take advantage of new capabilities in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`
