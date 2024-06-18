@@ -476,7 +476,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
     return;
   }
 
-  size_t parent;
+  size_t parentIndex = -1;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> detectorsId{pickID};
@@ -487,8 +487,8 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      parent = componentInfo.parent(pickID);
-      detectorsId = componentInfo.detectorsInSubtree(parent);
+      parentIndex = componentInfo.parent(pickID);
+      detectorsId = componentInfo.detectorsInSubtree(parentIndex);
     }
     storeDetectorMask(m_roi_on->isChecked(), detectorsId);
 
@@ -501,8 +501,8 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      parent = componentInfo.parent(pickID);
-      const auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
+      parentIndex = componentInfo.parent(pickID);
+      const auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parentIndex));
       m_detectorsToGroup.clear();
       std::copy(dets.cbegin(), dets.cend(), std::back_inserter(m_detectorsToGroup));
     }
@@ -520,7 +520,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
 
     } else if (m_tube->isChecked()) {
       QString message = QString("Component %0 picked for grouping")
-                            .arg(QString::fromStdString(componentInfo.componentID(parent)->getName()));
+                            .arg(QString::fromStdString(componentInfo.componentID(parentIndex)->getName()));
       m_instrWidget->updateInfoText(message);
     }
   }
