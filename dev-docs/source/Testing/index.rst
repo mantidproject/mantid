@@ -29,6 +29,7 @@ creation is outlined in :ref:`issue_tracking`.
    ElementalAnalysis/ElementalAnalysisTests
    Indirect/DiffractionTests
    Indirect/DataReductionTests
+   Inelastic/CorrectionsTests
    Inelastic/DataProcessorTests
    Inelastic/QENSFittingTests
    Inelastic/BayesFittingTests
