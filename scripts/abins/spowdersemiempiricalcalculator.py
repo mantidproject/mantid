@@ -499,9 +499,8 @@ class SPowderSemiEmpiricalCalculator:
 
         fundamentals_spectra_with_dw = self._broaden_spectra(fundamentals_spectra_with_dw, broadening_scheme=broadening_scheme)
 
-        if multiphonon_orders := [spectrum for spectrum in isotropic_spectra if spectrum.metadata["quantum_order"] > 1]:
-            result = AbinsSpectrum2DCollection.from_spectra(multiphonon_orders) + fundamentals_spectra_with_dw
-            return result
+        if multiphonon_indices := [i for i, metadata in enumerate(isotropic_spectra.iter_metadata()) if metadata["quantum_order"] > 1]:
+            return isotropic_spectra[multiphonon_indices] + fundamentals_spectra_with_dw
 
         else:
             return fundamentals_spectra_with_dw
