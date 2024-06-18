@@ -316,21 +316,28 @@ public:
 
   void test_search_results_in_data_cache() {
     auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
-    auto const tempCache = std::filesystem::temp_directory_path() /= "fakeCache";
-    std::filesystem::create_directories(tempCache / INSTRUMENT);
-    std::ofstream indexFile(tempCache / INSTRUMENT / (std::string(INSTRUMENT) + "_index.json"));
-    indexFile << "{\n"
-              << "\t\"22345\": \"fake/path/to/file\"\n"
-              << "}\n";
-    indexFile.close();
-
-    ConfigService::Instance().setString("datacachesearch.directory", tempCache.string());
+    setupFakeDataCache();
 
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto results = doJournalSearch(searcher);
     checkFilteredSearchResults(results);
     ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    verifyAndClear();
+  }
+
+  void test_search_with_archive_on_and_cache_set() {
+    auto const &defaultArchiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
+    auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
+    setupFakeDataCache();
+    ConfigService::Instance().setString("datasearch.searcharchive", "On");
+
+    auto searcher = makeCatalogSearcher();
+    searcher.subscribe(&m_notifyee);
+    auto results = doJournalSearch(searcher);
+    checkSearchResults(results);
+    ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
     verifyAndClear();
   }
 
@@ -351,6 +358,18 @@ private:
     for (size_t i = 0; i < actual.size(); ++i) {
       TS_ASSERT_EQUALS(actual[i], expected[i]);
     }
+  }
+
+  void setupFakeDataCache() {
+    auto const tempCache = std::filesystem::temp_directory_path() /= "fakeCache";
+    std::filesystem::create_directories(tempCache / INSTRUMENT);
+    std::ofstream indexFile(tempCache / INSTRUMENT / (std::string(INSTRUMENT) + "_index.json"));
+    indexFile << "{\n"
+              << "\t\"22345\": \"fake/path/to/file\"\n"
+              << "}\n";
+    indexFile.close();
+
+    ConfigService::Instance().setString("datacachesearch.directory", tempCache.string());
   }
 
   void checkFilteredSearchResults(SearchResults const &actual) {

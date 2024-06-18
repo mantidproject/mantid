@@ -85,7 +85,11 @@ ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorith
 SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITableWorkspace_sptr &resultsTable) {
   auto searchResults = requiresICat() ? convertICatResultsTableToSearchResults(resultsTable)
                                       : convertJournalResultsTableToSearchResults(resultsTable);
-
+  // If the archive is switched on, just return the whole set of results.
+  auto const &archiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
+  if (archiveSetting != "off") {
+    return searchResults;
+  }
   // Check if we're on IDAaaS with the Data Cache available.
   auto const &dataCache = ISISInstrumentDataCache(ConfigService::Instance().getString("datacachesearch.directory"));
   if (!dataCache.isIndexFileAvailable(searchCriteria().instrument)) {
