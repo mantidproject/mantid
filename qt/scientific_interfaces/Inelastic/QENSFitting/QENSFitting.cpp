@@ -20,7 +20,7 @@ QENSFitting::QENSFitting(QWidget *parent)
 
   auto const tabFactory = std::make_unique<TabFactory>(m_uiForm.twIDATabs);
   m_tabs.emplace(MSD_FIT, tabFactory->makeMSDTab(MSD_FIT));
-  m_tabs.emplace(Iqt_FIT, tabFactory->makeIqtTab(Iqt_FIT));
+  m_tabs.emplace(IQT_FIT, tabFactory->makeIqtTab(IQT_FIT));
   m_tabs.emplace(CONV_FIT, tabFactory->makeConvolutionTab(CONV_FIT));
   m_tabs.emplace(FQ_FIT, tabFactory->makeFunctionQTab(FQ_FIT));
 }
