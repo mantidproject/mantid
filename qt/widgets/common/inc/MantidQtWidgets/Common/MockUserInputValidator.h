@@ -19,6 +19,9 @@ class MockUserInputValidator : public MantidQt::CustomInterfaces::IUserInputVali
 public:
   virtual ~MockUserInputValidator() = default;
 
+  MOCK_METHOD2(checkFileFinderWidgetIsValid, bool(const QString &name, const FileFinderWidget *widget));
+  MOCK_METHOD3(checkDataSelectorIsValid, bool(const QString &name, DataSelector *widget, bool silent));
+
   MOCK_METHOD2(addErrorMessage, void(const std::string &message, bool const silent));
 
   MOCK_CONST_METHOD0(generateErrorMessage, std::string());

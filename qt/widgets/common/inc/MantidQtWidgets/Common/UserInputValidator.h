@@ -27,6 +27,9 @@ class DLLExport IUserInputValidator {
 public:
   virtual ~IUserInputValidator() = default;
 
+  virtual bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) = 0;
+  virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
+
   virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
 
   virtual std::string generateErrorMessage() const = 0;
@@ -54,9 +57,9 @@ public:
   /// Check that the given WorkspaceSelector is not empty.
   bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
   /// Check that the given FileFinderWidget widget has valid files.
-  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget);
+  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) override;
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false);
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) override;
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.

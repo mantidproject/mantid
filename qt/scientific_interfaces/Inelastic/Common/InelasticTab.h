@@ -100,7 +100,7 @@ protected:
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
   /// Overidden by child class.
-  virtual void setup() = 0;
+  virtual void setup() {}
   /// Overidden by child class.
   virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
   /// Overidden by child class.
