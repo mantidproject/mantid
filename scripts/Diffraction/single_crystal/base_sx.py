@@ -19,6 +19,9 @@ from matplotlib.patches import Circle
 from matplotlib.colors import LogNorm
 from matplotlib.backends.backend_pdf import PdfPages
 from abc import ABC, abstractmethod
+from scipy.spatial.transform import Rotation
+from scipy.optimize import minimize
+from functools import reduce
 
 
 class PEAK_TYPE(Enum):
@@ -813,6 +816,79 @@ class BaseSX(ABC):
                 "translation2": 0.0,
             }
         )
+
+    @staticmethod
+    def optimize_goniometer_axis(pk_ws_list: list, iaxis: int, euler_axes: str = "yz", fix_angles: bool = True, apply: bool = False):
+        import pydevd_pycharm
+
+        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+
+        # extract axes and angles from goniometer
+        gonio = BaseSX.retrieve(pk_ws_list[0]).run().getGoniometer()
+        gonio_axes = [gonio.getAxis(iax)["rotationaxis"] * gonio.getAxis(iax)["sense"] for iax in range(gonio.getNumberAxes())]
+        gonio_angles = np.zeros((len(pk_ws_list), len(gonio_axes)))
+        for iws, peaks in enumerate(pk_ws_list):
+            gonio = BaseSX.retrieve(peaks).run().getGoniometer()
+            gonio_angles[iws, :] = [gonio.getAxis(iax)["angle"] for iax in range(gonio.getNumberAxes())]
+
+        # get all U matrices rotated by goniometer
+        umats = [BaseSX.retrieve(peaks).sample().getOrientedLattice().getU() for peaks in pk_ws_list]
+        umats_rot = [BaseSX.retrieve(peaks).getPeak(0).getGoniometerMatrix() @ umats[irun] for irun, peaks in enumerate(pk_ws_list)]
+        # use run with minimum rotation around iaxis as reference (zero is ideal)
+        iref = np.argmin(abs(gonio_angles[:, iaxis]))
+        umat_ref = umats[iref]
+
+        # optimise goniometer axis (and optionally the goniometer angles)
+        pguess = len(euler_axes) * [0]
+        if not fix_angles:
+            pguess.extend(gonio_angles[:, iaxis])
+
+        result = minimize(
+            BaseSX._optimize_goniometer_axis_cost_function,
+            pguess,
+            args=(umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis),
+            method="Nelder-Mead",
+        )
+
+        if not result.success:
+            logger.error("Failed to optimise goniometer axis - please check UB matrices on the workspaces.")
+        else:
+            # update gonio axes and angles
+            gonio_axes[iaxis] = Rotation.from_euler(euler_axes, result.x[: len(euler_axes)], degrees=True).apply(gonio_axes[iaxis])
+            if not fix_angles:
+                gonio_angles[:, iaxis] = result.x[len(euler_axes) :]
+            if apply:
+                for iws, peaks in enumerate(pk_ws_list):
+                    gonio_rots = [
+                        Rotation.from_rotvec(axis * gonio_angles[irun, iax], degrees=True).as_matrix()
+                        for iax, axis in enumerate(gonio_axes)
+                    ]
+                    R = reduce(lambda x, y: x @ y, gonio_rots)
+                    [pk.setGoniometerMatrix(R) for pk in BaseSX.retrieve(peaks)]
+        return gonio_axes, gonio_angles
+
+    @staticmethod
+    def _optimize_goniometer_axis_cost_function(p, umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis):
+        # rotate goniometer axis being optimised
+        print("p = ", p)
+        euler_angles = p[: len(euler_axes)]
+        these_gonio_axes = gonio_axes.copy()
+        these_gonio_axes[iaxis] = Rotation.from_euler(euler_axes, euler_angles, degrees=True).apply(these_gonio_axes[iaxis])
+        these_gonio_angles = gonio_angles.copy()
+        if len(p) > len(euler_axes):
+            these_gonio_angles[:, iaxis] = p[len(euler_axes) :]  # overwrite with angles provided
+        # add up total angle difference in rotation to get from predicted to observed U for all runs
+        angle_sum = 0
+        for irun, urot in enumerate(umats_rot):
+            # caluclate predicted goniometer rotation
+            gonio_rots = [
+                Rotation.from_rotvec(axis * these_gonio_angles[irun, iax], degrees=True).as_matrix()
+                for iax, axis in enumerate(these_gonio_axes)
+            ]
+            urot_predict = reduce(lambda x, y: x @ y, gonio_rots) @ umat_ref
+            # add rotation angle between prediced and observed U
+            angle_sum = angle_sum + Rotation.from_matrix(urot_predict @ urot.T).magnitude()
+        return angle_sum
 
     @staticmethod
     def retrieve(ws):
