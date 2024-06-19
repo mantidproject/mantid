@@ -315,14 +315,17 @@ public:
   }
 
   void test_search_results_in_data_cache() {
+    auto const &defaultArchiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
     auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
     setupFakeDataCache();
+    ConfigService::Instance().setString("datasearch.searcharchive", "off");
 
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto results = doJournalSearch(searcher);
     checkFilteredSearchResults(results);
     ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
     verifyAndClear();
   }
 
