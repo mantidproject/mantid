@@ -72,10 +72,10 @@ void SqwView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setFB
 void SqwView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
 bool SqwView::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsInput, "Sample", DataType::Red);
 
-  auto const errorMessage = uiv.generateErrorMessage();
+  auto const errorMessage = uiv->generateErrorMessage();
   if (!errorMessage.empty())
     showMessageBox(errorMessage);
   return errorMessage.empty();

@@ -21,10 +21,13 @@ public:
 
   MOCK_METHOD2(checkFileFinderWidgetIsValid, bool(const QString &name, const FileFinderWidget *widget));
   MOCK_METHOD3(checkDataSelectorIsValid, bool(const QString &name, DataSelector *widget, bool silent));
+  MOCK_METHOD3(checkWorkspaceGroupIsValid, bool(QString const &groupName, QString const &inputType, bool silent));
+  MOCK_METHOD2(checkWorkspaceExists, bool(QString const &workspaceName, bool silent));
 
   MOCK_METHOD2(addErrorMessage, void(const std::string &message, bool const silent));
 
   MOCK_CONST_METHOD0(generateErrorMessage, std::string());
+  MOCK_CONST_METHOD0(isAllInputValid, bool());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

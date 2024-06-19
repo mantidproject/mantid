@@ -407,7 +407,7 @@ std::string UserInputValidator::generateErrorMessage() const {
  *
  * @return True if all input is valid, false otherwise
  */
-bool UserInputValidator::isAllInputValid() { return !m_error; }
+bool UserInputValidator::isAllInputValid() const { return !m_error; }
 
 /**
  * Sets a validation label that is displyed next to the widget on the UI.

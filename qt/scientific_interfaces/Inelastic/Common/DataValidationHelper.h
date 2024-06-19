@@ -13,29 +13,29 @@ namespace DataValidationHelper {
 
 enum DataType { Red, Sqw, Calib, Corrections };
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsOneOf(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsOneOf(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                 MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                 std::string const &inputType, DataType const &primaryType,
                                                 std::vector<DataType> const &otherTypes, bool silent = false);
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsOfType(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsOfType(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                  MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                  std::string const &inputType, DataType const &type,
                                                  bool silent = false);
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsAReducedFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsAReducedFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                        MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                        std::string const &inputType, bool silent = false);
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsASqwFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsASqwFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                    MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                    std::string const &inputType, bool silent = false);
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsACalibrationFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsACalibrationFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                            MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                            std::string const &inputType, bool silent = false);
 
-MANTIDQT_INELASTIC_DLL bool validateDataIsACorrectionsFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+MANTIDQT_INELASTIC_DLL bool validateDataIsACorrectionsFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                            MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                            std::string const &inputType, bool silent = false);
 
