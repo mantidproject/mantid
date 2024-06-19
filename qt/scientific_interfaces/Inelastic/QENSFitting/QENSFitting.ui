@@ -69,7 +69,7 @@
       </widget>
       <widget class="QWidget" name="tabIqt">
        <attribute name="title">
-        <string>I(Q, t) </string>
+        <string>I(Q, t)</string>
        </attribute>
        <attribute name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;I(Q,t): &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Fit exponentials, stretch exponentials and TeixeiraWater model to I(Q,t) curves.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

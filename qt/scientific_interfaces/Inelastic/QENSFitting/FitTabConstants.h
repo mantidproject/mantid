@@ -63,7 +63,7 @@ static const auto ALL_FITS =
 } // namespace MSD
 
 namespace IqtFit {
-static const auto TAB_NAME = "IqtFit";
+static const auto TAB_NAME = "I(Q, t)";
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -91,7 +91,7 @@ inline auto templateSubTypes() {
 } // namespace Convolution
 
 namespace FunctionQ {
-static const auto TAB_NAME = "FunctionQ";
+static const auto TAB_NAME = "Function (Q)";
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});

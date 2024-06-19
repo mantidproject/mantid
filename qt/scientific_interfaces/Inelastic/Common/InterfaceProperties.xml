@@ -75,7 +75,7 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
 	</INTERFACE>
 
-	<INTERFACE id="IqtFit">
+	<INTERFACE id="I(Q, t)">
 		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_iqt.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_iqt"/>
@@ -87,7 +87,7 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
 	</INTERFACE>
 
-	<INTERFACE id="FunctionQ">
+	<INTERFACE id="Function (Q)">
 		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_Result.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_Result"/>
