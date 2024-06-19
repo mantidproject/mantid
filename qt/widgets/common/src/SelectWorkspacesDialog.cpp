@@ -50,9 +50,11 @@ public:
 @param typeFilter : optional filter for filtering workspaces by type.
 @param customButtonLabel : optional label for another custom button, return code
 for this is defined by CustomButton.
+@param mode : optional selection mode for the list widget, default is MultiSelection
 */
 SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::string &typeFilter,
-                                               const std::string &customButtonLabel)
+                                               const std::string &customButtonLabel,
+                                               QAbstractItemView::SelectionMode mode)
     : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr), m_customButton(nullptr) {
   setWindowTitle("Mantid - Select workspace");
   m_wsList = new QListWidget(parent);
@@ -69,7 +71,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::strin
   }
 
   m_wsList->addItems(tmp);
-  m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
+  m_wsList->setSelectionMode(mode);
 
   auto *btnBox = new QDialogButtonBox(Qt::Horizontal);
 

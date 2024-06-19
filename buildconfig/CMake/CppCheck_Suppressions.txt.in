@@ -1356,8 +1356,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/sr
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadRawDialog.cpp:149
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/StartLiveDataDialog.cpp:398
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/StartLiveDataDialog.cpp:143
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/SequentialFitDialog.cpp:108
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/SequentialFitDialog.cpp:188
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/SequentialFitDialog.cpp:112
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/SequentialFitDialog.cpp:192
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyHandler.cpp:65
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/SortTableWorkspaceDialog.cpp:115
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.cpp:0
