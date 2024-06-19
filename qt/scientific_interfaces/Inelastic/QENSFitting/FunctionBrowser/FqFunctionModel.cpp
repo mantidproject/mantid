@@ -50,7 +50,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 FqFunctionModel::FqFunctionModel()
     : SingleFunctionTemplateModel(std::make_unique<FunctionParameterEstimation>(estimators)) {
-  updateAvailableFunctions(FqFit::ALL_FITS);
+  updateAvailableFunctions(FunctionQ::ALL_FITS);
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

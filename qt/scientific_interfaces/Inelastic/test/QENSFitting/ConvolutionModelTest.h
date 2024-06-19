@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "QENSFitting/ConvFitModel.h"
+#include "QENSFitting/ConvolutionModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -42,7 +42,7 @@ MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   return std::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
-void setFittingFunction(std::unique_ptr<ConvFitModel> &model, std::string const &functionString) {
+void setFittingFunction(std::unique_ptr<ConvolutionModel> &model, std::string const &functionString) {
   model->setFitFunction(getFunction(functionString));
 }
 
@@ -63,7 +63,7 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::st
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<ConvFitModel> &model, const MatrixWorkspace_sptr &workspace,
+IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<ConvolutionModel> &model, const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
                                "(composite=Convolution,FixResolution=true,NumDeriv=true;"
@@ -77,7 +77,7 @@ IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<ConvFitModel> &model, const
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<ConvFitModel> &model, MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<ConvolutionModel> &model, MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
   auto const alg = getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
@@ -86,16 +86,16 @@ IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<ConvFitModel> &model, Ma
 
 } // namespace
 
-class ConvFitModelTest : public CxxTest::TestSuite {
+class ConvolutionModelTest : public CxxTest::TestSuite {
 public:
-  static ConvFitModelTest *createSuite() { return new ConvFitModelTest(); }
+  static ConvolutionModelTest *createSuite() { return new ConvolutionModelTest(); }
 
-  static void destroySuite(ConvFitModelTest *suite) { delete suite; }
+  static void destroySuite(ConvolutionModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<ConvFitModel>();
+    m_model = std::make_unique<ConvolutionModel>();
   }
 
   void tearDown() override {
@@ -164,5 +164,5 @@ public:
 private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<ConvFitModel> m_model;
+  std::unique_ptr<ConvolutionModel> m_model;
 };

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FqFitAddWorkspaceDialog.h"
+#include "FunctionQAddWorkspaceDialog.h"
 
 #include <boost/optional.hpp>
 
@@ -12,7 +12,7 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
+FunctionQAddWorkspaceDialog::FunctionQAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.dsWorkspace->setLoadProperty("LoadHistory", false);
 
@@ -24,61 +24,61 @@ FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : QDialog(pare
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-std::string FqFitAddWorkspaceDialog::workspaceName() const {
+std::string FunctionQAddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-std::string FqFitAddWorkspaceDialog::parameterType() const {
+std::string FunctionQAddWorkspaceDialog::parameterType() const {
   return m_uiForm.cbParameterType->currentText().toStdString();
 }
 
-int FqFitAddWorkspaceDialog::parameterNameIndex() const { return m_uiForm.cbParameterName->currentIndex(); }
+int FunctionQAddWorkspaceDialog::parameterNameIndex() const { return m_uiForm.cbParameterName->currentIndex(); }
 
-void FqFitAddWorkspaceDialog::setParameterTypes(const std::vector<std::string> &types) {
+void FunctionQAddWorkspaceDialog::setParameterTypes(const std::vector<std::string> &types) {
   QSignalBlocker blocker(m_uiForm.cbParameterType);
   m_uiForm.cbParameterType->clear();
   for (auto &&type : types)
     m_uiForm.cbParameterType->addItem(QString::fromStdString(type));
 }
 
-void FqFitAddWorkspaceDialog::setParameterNames(const std::vector<std::string> &names) {
+void FunctionQAddWorkspaceDialog::setParameterNames(const std::vector<std::string> &names) {
   m_uiForm.cbParameterName->clear();
   for (auto &&name : names)
     m_uiForm.cbParameterName->addItem(QString::fromStdString(name));
 }
 
-void FqFitAddWorkspaceDialog::enableParameterSelection() {
+void FunctionQAddWorkspaceDialog::enableParameterSelection() {
   m_uiForm.cbParameterName->setEnabled(true);
   m_uiForm.cbParameterType->setEnabled(true);
 }
 
-void FqFitAddWorkspaceDialog::disableParameterSelection() {
+void FunctionQAddWorkspaceDialog::disableParameterSelection() {
   m_uiForm.cbParameterName->setEnabled(false);
   m_uiForm.cbParameterType->setEnabled(false);
 }
 
-void FqFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
+void FunctionQAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setWSSuffixes(suffices);
 }
 
-void FqFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
+void FunctionQAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
-void FqFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
+void FunctionQAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
   m_uiForm.pbAdd->setText("Add");
   m_uiForm.pbAdd->setEnabled(true);
   emit workspaceChanged(this, name.toStdString());
 }
 
-void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
+void FunctionQAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
 }
-void FqFitAddWorkspaceDialog::handleAutoLoaded() {
+void FunctionQAddWorkspaceDialog::handleAutoLoaded() {
   m_uiForm.pbAdd->setText("Loading");
   m_uiForm.pbAdd->setEnabled(false);
 }
 
-void FqFitAddWorkspaceDialog::emitAddData() { emit addData(this); }
+void FunctionQAddWorkspaceDialog::emitAddData() { emit addData(this); }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

@@ -8,7 +8,7 @@
 
 #include <utility>
 
-#include "ConvFitModel.h"
+#include "ConvolutionModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"

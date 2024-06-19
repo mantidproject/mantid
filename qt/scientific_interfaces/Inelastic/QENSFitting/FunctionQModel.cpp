@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FqFitModel.h"
+#include "FunctionQModel.h"
 
 #include <utility>
 
@@ -16,16 +16,16 @@ using namespace Mantid::API;
 
 namespace {
 
-Mantid::Kernel::Logger logger("FqFitModel");
+Mantid::Kernel::Logger logger("FunctionQModel");
 
 } // namespace
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
+FunctionQModel::FunctionQModel() { m_fitType = FUNCTIONQ_STRING; }
 
-std::string FqFitModel::getResultXAxisUnit() const { return ""; }
+std::string FunctionQModel::getResultXAxisUnit() const { return ""; }
 
-std::string FqFitModel::getResultLogName() const { return "SourceName"; }
+std::string FunctionQModel::getResultLogName() const { return "SourceName"; }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

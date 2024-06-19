@@ -6,18 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ConvFitDataView.h"
-#include "ConvFitModel.h"
+#include "ConvolutionDataView.h"
+#include "ConvolutionModel.h"
 #include "FitDataPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class ConvFitAddWorkspaceDialog;
-class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public FitDataPresenter {
+class ConvolutionAddWorkspaceDialog;
+class MANTIDQT_INELASTIC_DLL ConvolutionDataPresenter : public FitDataPresenter {
 public:
-  ConvFitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
+  ConvolutionDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
 
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 

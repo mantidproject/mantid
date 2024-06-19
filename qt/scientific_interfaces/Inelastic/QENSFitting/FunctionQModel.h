@@ -12,9 +12,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-class MANTIDQT_INELASTIC_DLL FqFitModel : public FittingModel {
+class MANTIDQT_INELASTIC_DLL FunctionQModel : public FittingModel {
 public:
-  FqFitModel();
+  FunctionQModel();
 
 private:
   std::string getResultXAxisUnit() const override;

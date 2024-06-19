@@ -1,10 +1,10 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    ConvFitAddWorkspaceDialog.cpp
-    ConvFitModel.cpp
-    ConvFitDataView.cpp
-    ConvFitDataPresenter.cpp
+    ConvolutionAddWorkspaceDialog.cpp
+    ConvolutionModel.cpp
+    ConvolutionDataView.cpp
+    ConvolutionDataPresenter.cpp
     DockWidgetArea.cpp
     EditResultsDialog.cpp
     FitStatusWidget.cpp
@@ -20,10 +20,10 @@ set(SRC_FILES
     FitTab.cpp
     FittingModel.cpp
     FittingPresenter.cpp
-    FqFitAddWorkspaceDialog.cpp
-    FqFitDataPresenter.cpp
-    FqFitDataView.cpp
-    FqFitModel.cpp
+    FunctionQAddWorkspaceDialog.cpp
+    FunctionQDataPresenter.cpp
+    FunctionQDataView.cpp
+    FunctionQModel.cpp
     FunctionBrowser/ConvFunctionTemplateModel.cpp
     FunctionBrowser/FitTypes.cpp
     FunctionBrowser/FunctionTemplateView.cpp
@@ -39,15 +39,15 @@ set(SRC_FILES
     FunctionBrowser/MultiFunctionTemplateView.cpp
     InelasticFitPropertyBrowser.cpp
     IqtFitModel.cpp
-    MSDFitModel.cpp
+    MSDModel.cpp
     ParameterEstimation.cpp
     TabFactory.cpp
     QENSFitting.cpp
 )
 
 set(INC_FILES
-    ConvFitDataPresenter.h
-    ConvFitModel.h
+    ConvolutionDataPresenter.h
+    ConvolutionModel.h
     FitDataPresenter.h
     FitOutput.h
     FitOutputOptionsModel.h
@@ -57,8 +57,8 @@ set(INC_FILES
     FittingModel.h
     FittingPresenter.h
     FitTabConstants.h
-    FqFitDataPresenter.h
-    FqFitModel.h
+    FunctionQDataPresenter.h
+    FunctionQModel.h
     FunctionBrowser/ConvFunctionTemplateModel.h
     FunctionBrowser/FitTypes.h
     FunctionBrowser/FunctionTemplatePresenter.h
@@ -78,19 +78,19 @@ set(INC_FILES
     IFitPlotView.h
     IFittingModel.h
     IqtFitModel.h
-    MSDFitModel.h
+    MSDModel.h
     ParameterEstimation.h
     TabFactory.h
 )
 
 set(MOC_FILES
-    ConvFitAddWorkspaceDialog.h
-    ConvFitDataView.h
+    ConvolutionAddWorkspaceDialog.h
+    ConvolutionDataView.h
     DockWidgetArea.h
     EditResultsDialog.h
     FitTab.h
-    FqFitAddWorkspaceDialog.h
-    FqFitDataView.h
+    FunctionQAddWorkspaceDialog.h
+    FunctionQDataView.h
     FitStatusWidget.h
     FitDataView.h
     FitOutputOptionsView.h
@@ -103,13 +103,13 @@ set(MOC_FILES
 )
 
 set(UI_FILES
-    ConvFitAddWorkspaceDialog.ui
+    ConvolutionAddWorkspaceDialog.ui
     EditResultsDialog.ui
     FitDataView.ui
     FitPreviewPlot.ui
     FitOutputOptions.ui
     FitTab.ui
-    FqFitAddWorkspaceDialog.ui
+    FunctionQAddWorkspaceDialog.ui
     SpectrumSelector.ui
     QENSFitting.ui
 )

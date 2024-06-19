@@ -22,10 +22,10 @@ QENS Fitting tabs
 
 There are four QENS Fitting interfaces that share a common layout and features:
 
-* MSD Fit
-* I(Q,t) Fit,
-* Conv Fit
-* F(Q)
+* MSD
+* I(Q,t)
+* Convolution
+* Function(Q)
 
 Each tab also has a few unique options. These interfaces do not support GroupWorkspaces
 as input.
@@ -73,7 +73,7 @@ bu ticking the `See full function` box, displays the generic function browser in
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
 to a parameter of the same name in a different function, or by selecting 'Tie > Custom Tie' to tie to parameters of
 different names and for providing mathematical expressions. Parameters can be constrained by right-clicking and
-using the available options under 'Constrain'.
+using the available options under 'Constraint'.
 
 Upon performing a fit, the parameter values will be updated here to display the result of the fit for the selected
 spectrum.
@@ -163,8 +163,8 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-MSD Fit
--------
+MSD
+---
 
 Given either a saved NeXus file, or workspace generated using the Elwin tab, this
 tab fits :math:`intensity` vs. :math:`Q` with one of three functions for each
@@ -172,7 +172,7 @@ run specified to give the Mean Square Displacement (MSD). It then plots the MSD
 as function of run number. This is done using the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
+MSD searches for the log files named <runnumber>_sample.txt in your chosen
 raw file directory (the name ‘sample’ is for OSIRIS). These log files will exist
 if the correct temperature was loaded using SE-log-name in the Elwin tab. If they
 exist the temperature is read and the MSD is plotted versus temperature; if they do
@@ -198,9 +198,9 @@ equal to zero.
 
 .. _msdfit-example-workflow:
 
-MSD Fit Example Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~
-The MSD Fit tab operates on ``_eq`` files. The files used in this workflow are produced on the Elwin
+MSD Example Workflow
+~~~~~~~~~~~~~~~~~~~~~
+The MSD tab operates on ``_eq`` files. The files used in this workflow are produced on the Elwin
 tab as seen in the :ref:`elwin-example-workflow`.
 
 1. Click **Browse** and select the file ``osi104371-104375_graphite002_red_elwin_eq``. Load this
@@ -232,10 +232,10 @@ tab as seen in the :ref:`elwin-example-workflow`.
 8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
    Msd parameter which can be found within the _Results group workspace.
 
-I(Q, t) Fit
------------
+I(Q, t)
+-------
 
-I(Q, t) Fit provides a simplified interface for controlling various fitting
+I(Q, t) provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
@@ -244,13 +244,13 @@ The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabIqtFit
+  :widget: tabIqt
 
 .. _iqtfit-example-workflow:
 
-I(Q, t) Fit Example Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The I(Q, t) Fit tab operates on ``_iqt`` files. The files used in this workflow are produced on the
+I(Q, t)  Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The I(Q, t) tab operates on ``_iqt`` files. The files used in this workflow are produced on the
 I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
 1. Click **Browse** and select the file ``irs26176_graphite002_iqt``.
@@ -282,10 +282,10 @@ I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
 .. _convfit:
 
-Conv Fit
---------
+Convolution
+-----------
 
-ConvFit provides a simplified interface for controlling
+Convolution provides a simplified interface for controlling
 various fitting functions (see the :ref:`Fit <algm-Fit>` algorithm for more
 info). The functions are also available via the fit wizard.
 
@@ -299,17 +299,17 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian,
+The fit types available in Convolution are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian,
 :ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`,
 :ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
 :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabConvFit
+  :widget: tabConvolution
 
-Conv Fit Options
-~~~~~~~~~~~~~~~~
+Convolution Options
+~~~~~~~~~~~~~~~~~~~
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -323,9 +323,9 @@ Resolution
 
 .. _convfit-example-workflow:
 
-ConvFit Example Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~
-The Conv Fit tab allows ``_red`` and ``_sqw`` for its sample file, and allows ``_red``, ``_sqw`` and
+Convolution Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Convolution tab allows ``_red`` and ``_sqw`` for its sample file, and allows ``_red``, ``_sqw`` and
 ``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
 number 26176 on the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface in the ISIS
 Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
@@ -357,12 +357,12 @@ and the reflection is 002.
 Theory
 ~~~~~~
 
-For more on the theory of Conv Fit see the :ref:`ConvFitConcept` concept page.
+For more on the theory of Convolution see the :ref:`ConvFitConcept` concept page.
 
-ConvFit fitting model
-~~~~~~~~~~~~~~~~~~~~~
+Convolution fitting model
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The model used to perform fitting in ConvFit is described in the following tree, note that
+The model used to perform fitting in Convolution is described in the following tree, note that
 everything under the Model section is optional and determined by the *Fit Type*
 and *Use Delta Function* options in the interface.
 
@@ -426,8 +426,8 @@ formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 
 .. _fqfit:
 
-F(Q) Fit
---------
+Function(Q)
+-----------
 
 One of the models used to interpret diffusion is that of jump diffusion in which
 it is assumed that an atom remains at a given site for a time :math:`\tau`; and
@@ -437,20 +437,20 @@ This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`,
+The fit types available in Function(Q) are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`,
 :ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`,
 :ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
 
 .. interface:: QENS Fitting
   :width: 450
-  :widget: tabJumpFit
+  :widget: tabFunctionQ
 
 .. _fqfit-example-workflow:
 
-F(Q) Fit Example Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~
-The F(Q) Fit tab operates on ``_result`` files which can be produced on the ConvFit tab.  The
-sample file used in this workflow is produced on the Conv Fit tab as seen in the
+Function(Q) Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Function(Q) tab operates on ``_result`` files which can be produced on the Convolution tab.  The
+sample file used in this workflow is produced on the Convolution tab as seen in the
 :ref:`convfit-example-workflow`.
 
 1. Click **Browse** and select the file ``irs26176_graphite002_conv_Delta1LFitF_s0_to_9_Result``.
@@ -475,7 +475,7 @@ sample file used in this workflow is produced on the Conv Fit tab as seen in the
 Bayesian (FABADA minimizer)
 ---------------------------
 
-There is the option to perform Bayesian analysis on the I(Q, t) Fit and ConvFit
+There is the option to perform Bayesian analysis on the I(Q, t) and Convolution
 tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
 order to to use this you will need to use better starting parameters than the
 defaults provided by the interface.
@@ -484,7 +484,7 @@ You may also experience issues where the starting parameters may give a reliable
 fit on one spectra but not others, in this case the best option is to reduce
 the number of spectra that are fitted in one operation.
 
-In both I(Q, t) Fit and ConvFit the following options are available when fitting
+In both I(Q, t) and Convolution the following options are available when fitting
 using FABADA:
 
 Output Chain

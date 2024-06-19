@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "QENSFitting/FqFitModel.h"
+#include "QENSFitting/FunctionQModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -24,16 +24,16 @@ std::vector<std::string> getParameterLabels() { return {"f0.EISF", "f1.Width", "
 
 } // namespace
 
-class FqFitModelTest : public CxxTest::TestSuite {
+class FunctionQModelTest : public CxxTest::TestSuite {
 public:
-  static FqFitModelTest *createSuite() { return new FqFitModelTest(); }
+  static FunctionQModelTest *createSuite() { return new FunctionQModelTest(); }
 
-  static void destroySuite(FqFitModelTest *suite) { delete suite; }
+  static void destroySuite(FunctionQModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_workspace = createWorkspaceWithTextAxis(4, getParameterLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<FqFitModel>();
+    m_model = std::make_unique<FunctionQModel>();
   }
 
   void tearDown() override {
@@ -53,5 +53,5 @@ public:
 private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<FqFitModel> m_model;
+  std::unique_ptr<FunctionQModel> m_model;
 };
