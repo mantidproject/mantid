@@ -194,7 +194,7 @@ template <size_t Bits, typename Signed> struct wide_integer<Bits, Signed>::_impl
     size_t count = static_cast<size_t>(r / std::numeric_limits<uint64_t>::max());
     self = count;
     self *= std::numeric_limits<uint64_t>::max();
-    long double to_diff = count;
+    auto to_diff = static_cast<long double>(count);
     to_diff *= std::numeric_limits<uint64_t>::max();
 
     self += to_Integral(r - to_diff);
