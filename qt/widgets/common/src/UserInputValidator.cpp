@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -307,7 +308,7 @@ bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName, bool
  */
 bool UserInputValidator::checkWorkspaceNumberOfHistograms(QString const &workspaceName, std::size_t const &validSize) {
   if (checkWorkspaceExists(workspaceName))
-    return checkWorkspaceNumberOfHistograms(getADSWorkspace(workspaceName.toStdString()), validSize);
+    return checkWorkspaceNumberOfHistograms(WorkspaceUtils::getADSWorkspace(workspaceName.toStdString()), validSize);
   return false;
 }
 
@@ -336,7 +337,7 @@ bool UserInputValidator::checkWorkspaceNumberOfHistograms(const MatrixWorkspace_
  */
 bool UserInputValidator::checkWorkspaceNumberOfBins(QString const &workspaceName, std::size_t const &validSize) {
   if (checkWorkspaceExists(workspaceName))
-    return checkWorkspaceNumberOfBins(getADSWorkspace(workspaceName.toStdString()), validSize);
+    return checkWorkspaceNumberOfBins(WorkspaceUtils::getADSWorkspace(workspaceName.toStdString()), validSize);
   return false;
 }
 
@@ -367,7 +368,7 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(const MatrixWorkspace_sptr &
  */
 bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent) {
   if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup", silent)) {
-    if (auto const group = getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
+    if (auto const group = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
       if (auto const error = containsInvalidWorkspace(group)) {
         addErrorMessage(error.get(), silent);
         return false;

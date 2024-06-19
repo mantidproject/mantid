@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using MantidQt::API::FileFinderWidget;
 using MantidQt::MantidWidgets::DataSelector;
@@ -27,6 +28,9 @@ class DLLExport IUserInputValidator {
 public:
   virtual ~IUserInputValidator() = default;
 
+  virtual bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr) = 0;
+  virtual bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr) = 0;
+  virtual bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) = 0;
   virtual bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) = 0;
   virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
   virtual bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false) = 0;
@@ -35,14 +39,12 @@ public:
   bool checkWorkspaceType(QString const &workspaceName, QString const &inputType, QString const &validType,
                           bool silent = false);
 
+  virtual void setErrorLabel(QLabel *errorLabel, bool valid) = 0;
+
   virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
 
   virtual std::string generateErrorMessage() const = 0;
   virtual bool isAllInputValid() const = 0;
-
-protected:
-  template <typename T = Mantid::API::MatrixWorkspace>
-  std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
 };
 
 /**
@@ -60,12 +62,11 @@ public:
   UserInputValidator();
 
   /// Check that the given QLineEdit field is not empty.
-  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr);
-  /// Check that the given QLineEdit field is valid as per any validators it
-  /// might have.
-  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr);
+  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr) override;
+  /// Check that the given QLineEdit field is valid as per any validators it might have.
+  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr) override;
   /// Check that the given WorkspaceSelector is not empty.
-  bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
+  bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) override;
   /// Check that the given FileFinderWidget widget has valid files.
   bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) override;
   /// Check that the given DataSelector widget has valid input.
@@ -74,12 +75,10 @@ public:
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.
   bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
-  /// Check that the given "outer" range completely encloses the given "inner"
-  /// range.
+  /// Check that the given "outer" range completely encloses the given "inner" range.
   bool checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer, const QString &innerName,
                             std::pair<double, double> inner);
-  /// Check that the given range can be split evenly into bins of the given
-  /// width.
+  /// Check that the given range can be split evenly into bins of the given width.
   bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
   /// Checks two values are not equal
   bool checkNotEqual(const QString &name, double x, double y = 0.0, double tolerance = 0.00000001);
@@ -99,7 +98,7 @@ public:
   void addErrorMessage(const std::string &message, bool const silent = false) override;
 
   /// Sets a validation label
-  void setErrorLabel(QLabel *errorLabel, bool valid);
+  void setErrorLabel(QLabel *errorLabel, bool valid) override;
 
   /// Returns an error message which contains all the error messages raised by
   /// the check functions.
@@ -127,7 +126,7 @@ template <typename T>
 bool IUserInputValidator::checkWorkspaceType(QString const &workspaceName, QString const &inputType,
                                              QString const &validType, bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
-    if (!getADSWorkspace<T>(workspaceName.toStdString())) {
+    if (!MantidWidgets::WorkspaceUtils::getADSWorkspace<T>(workspaceName.toStdString())) {
       addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
                       silent);
       return false;
@@ -135,16 +134,6 @@ bool IUserInputValidator::checkWorkspaceType(QString const &workspaceName, QStri
       return true;
   }
   return false;
-}
-
-/**
- * Gets a workspace from the ADS.
- *
- * @param workspaceName The name of the workspace
- * @return The workspace
- */
-template <typename T> std::shared_ptr<T> IUserInputValidator::getADSWorkspace(std::string const &workspaceName) {
-  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 } // namespace CustomInterfaces

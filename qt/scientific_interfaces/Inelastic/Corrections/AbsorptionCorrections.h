@@ -9,6 +9,8 @@
 #include "CorrectionsTab.h"
 #include "ui_AbsorptionCorrections.h"
 
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -18,7 +20,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL AbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL AbsorptionCorrections : public CorrectionsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -26,6 +28,9 @@ public:
   ~AbsorptionCorrections();
 
   Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   virtual void algorithmComplete(bool error);
@@ -43,17 +48,13 @@ private slots:
   void setSampleDensity(double value);
   void setCanDensity(double value);
   void handlePresetShapeChanges(int index);
-  UserInputValidator doValidation();
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  void validateSampleGeometryInputs(UserInputValidator &uiv, const QString &shape);
-  void validateContainerGeometryInputs(UserInputValidator &uiv, const QString &shape);
+  void validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
+  void validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
@@ -89,10 +90,7 @@ private:
   double getSampleDensityValue(QString const &type) const;
   double getCanDensityValue(QString const &type) const;
 
-  void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   bool m_saveAlgRunning{false};
 
@@ -101,6 +99,8 @@ private:
   std::shared_ptr<Densities> m_sampleDensities;
   std::shared_ptr<Densities> m_canDensities;
   Mantid::API::IAlgorithm_sptr m_absCorAlgo;
+
+  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
