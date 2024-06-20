@@ -558,9 +558,6 @@ class SPowderSemiEmpiricalCalculator:
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
 
-    from line_profiler import profile
-
-    @profile
     def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
         """
         Apply instrumental broadening to scattering data
@@ -594,41 +591,26 @@ class SPowderSemiEmpiricalCalculator:
 
             frequencies = spectra.get_bin_centres(bin_ax="y").to(self.freq_unit).magnitude
 
-            z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
+            # For efficient parallel map() operation, we view the 3-D
+            # (contributions, q_rows, frequencies) as a 2-D (contributions*q_rows, frequencies)
+            # sequence of spectra, and reshape afterwards
 
-            output_z = []
+            z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
+            s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
+
             with Pool(n_threads) as p:
-                for spec_i, s_matrix in enumerate(z_data_magnitude):
-                    broadened_spectra = p.starmap(
-                        _apply_resolution,
-                        zip(repeat(frequencies), repeat(self._bins), s_matrix, repeat(broadening_scheme), repeat(self._instrument)),
-                        chunksize=chunksize,
-                    )
-                    output_z.append(list(broadened_spectra))
+                broadened_spectra = p.starmap(
+                    _apply_resolution,
+                    zip(repeat(frequencies), repeat(self._bins), s_rows, repeat(broadening_scheme), repeat(self._instrument)),
+                    chunksize=chunksize,
+                )
 
             return AbinsSpectrum2DCollection(
                 x_data=spectra.x_data,
                 y_data=spectra.y_data,
-                z_data=ureg.Quantity(np.asarray(output_z), self.s_unit),
+                z_data=ureg.Quantity(np.asarray(broadened_spectra).reshape(z_data_magnitude.shape), self.s_unit),
                 metadata=spectra.metadata,
             )
-
-            # Not a lot of speedup there. Things to try next:
-            # - Flatten the loop, build a long list and reshape the resulting array. Now there is only one starmap call!
-            #
-            # - Pass a shared memory array to every map call and have it write
-            #   data to the appropriate indices. Now we don't have to do
-            #   anything with the map output? Not clear if that was a significant cost anyway...
-
-            # for spec_i, s_matrix in enumerate(z_data_magnitude):
-            #     for q_i, s_row in enumerate(s_matrix):
-            #         z_data_magnitude[spec_i, q_i] = self._instrument.convolve_with_resolution_function(
-            #             frequencies=frequencies, bins=self._bins, s_dft=s_row, scheme=broadening_scheme
-            #         )[1]
-
-            # return AbinsSpectrum2DCollection(
-            #     x_data=spectra.x_data, y_data=spectra.y_data, z_data=(z_data_magnitude * self.s_unit), metadata=spectra.metadata
-            # )
 
     def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SpectrumCollection:
         """
