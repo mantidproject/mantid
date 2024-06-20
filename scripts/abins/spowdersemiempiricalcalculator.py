@@ -172,6 +172,8 @@ class SPowderSemiEmpiricalCalculator:
         """
         Loads S from an hdf file.
         """
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
 
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
@@ -191,8 +193,6 @@ class SPowderSemiEmpiricalCalculator:
 
         # Some of the strings get stored as bytes, safer to just parse strings
         data_dict = {key: _stringify(value) for key, value in data_dict.items()}
-
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             spectra = AbinsSpectrum1DCollection.from_dict(data_dict)
