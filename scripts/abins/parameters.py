@@ -169,7 +169,7 @@ autoconvolution = {
 performance = {
     "optimal_size": 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
     "threads": None,  # number of threads used in parallel calculations: if None, use all available CPUs
-    "broadening_chunksize": 5,  # Number of 1-D spectra broadened by each thread in parallel broadening
+    "broadening_chunksize": 100,  # Number of 1-D spectra broadened by each thread in parallel broadening
 }
 
 # Experimental / debug features
