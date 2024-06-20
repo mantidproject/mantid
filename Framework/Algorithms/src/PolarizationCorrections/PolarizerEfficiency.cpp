@@ -6,19 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Unit.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <filesystem>
@@ -121,17 +117,15 @@ void PolarizerEfficiency::exec() { calculatePolarizerEfficiency(); }
 
 void PolarizerEfficiency::calculatePolarizerEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  const auto &groupWorkspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
-  const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
+  const WorkspaceGroup_sptr &groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
+  const auto spinConfigurationInput = getPropertyValue(PropertyNames::SPIN_STATES);
 
   const auto &t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                             SpinStateValidator::ZERO_ONE);
   const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                             SpinStateValidator::ZERO_ZERO);
 
-  auto effCell = convertToHistIfNecessary(
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getProperty(PropertyNames::ANALYSER_EFFICIENCY)));
+  auto effCell = convertToHistIfNecessary(getProperty(PropertyNames::ANALYSER_EFFICIENCY));
 
   auto rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
