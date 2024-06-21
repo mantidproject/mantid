@@ -819,10 +819,6 @@ class BaseSX(ABC):
 
     @staticmethod
     def optimize_goniometer_axis(pk_ws_list: list, iaxis: int, euler_axes: str = "yz", fix_angles: bool = True, apply: bool = False):
-        import pydevd_pycharm
-
-        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
-
         # extract axes and angles from goniometer
         gonio = BaseSX.retrieve(pk_ws_list[0]).run().getGoniometer()
         gonio_axes = [gonio.getAxis(iax)["rotationaxis"] * gonio.getAxis(iax)["sense"] for iax in range(gonio.getNumberAxes())]
@@ -837,7 +833,6 @@ class BaseSX(ABC):
         # use run with minimum rotation around iaxis as reference (zero is ideal)
         iref = np.argmin(abs(gonio_angles[:, iaxis]))
         umat_ref = umats[iref]
-
         # optimise goniometer axis (and optionally the goniometer angles)
         pguess = len(euler_axes) * [0]
         if not fix_angles:
@@ -857,6 +852,7 @@ class BaseSX(ABC):
             gonio_axes[iaxis] = Rotation.from_euler(euler_axes, result.x[: len(euler_axes)], degrees=True).apply(gonio_axes[iaxis])
             if not fix_angles:
                 gonio_angles[:, iaxis] = result.x[len(euler_axes) :]
+            # get average U matrix accross all runs (using new goniometer)
             if apply:
                 for iws, peaks in enumerate(pk_ws_list):
                     gonio_rots = [
@@ -865,12 +861,13 @@ class BaseSX(ABC):
                     ]
                     R = reduce(lambda x, y: x @ y, gonio_rots)
                     [pk.setGoniometerMatrix(R) for pk in BaseSX.retrieve(peaks)]
-        return gonio_axes, gonio_angles
+                    # adjust U matrix for optimimised goniometer
+                    BaseSX.retrieve(peaks).sample().getOrientedLattice().setU(R.T @ umats_rot[iws])
+        return gonio_axes, gonio_angles, umat_ref
 
     @staticmethod
     def _optimize_goniometer_axis_cost_function(p, umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis):
         # rotate goniometer axis being optimised
-        print("p = ", p)
         euler_angles = p[: len(euler_axes)]
         these_gonio_axes = gonio_axes.copy()
         these_gonio_axes[iaxis] = Rotation.from_euler(euler_axes, euler_angles, degrees=True).apply(these_gonio_axes[iaxis])
