@@ -311,6 +311,11 @@ void PanelsSurface::project(const size_t detIndex, double &u, double &v, double 
   uscale = vscale = 1.0;
 }
 
+void PanelsSurface::project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
+                            double &vscale) const {
+  throw std::runtime_error("A detector ID is required to project with a PanelsSurface.");
+}
+
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
   const auto &detectorInfo = m_instrActor->detectorInfo();
   const int index = m_detector2bankMap[udet.detIndex];
