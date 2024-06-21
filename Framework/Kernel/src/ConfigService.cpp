@@ -65,6 +65,7 @@
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
+#include <sys/sysctl.h>
 #endif
 
 namespace Mantid {
@@ -1009,7 +1010,21 @@ std::string ConfigServiceImpl::getOSName() { return m_pSysConfig->getString("sys
  *
  *  @returns The  name of the computer
  */
-std::string ConfigServiceImpl::getOSArchitecture() { return m_pSysConfig->getString("system.osArchitecture"); }
+std::string ConfigServiceImpl::getOSArchitecture() {
+  auto osArch = m_pSysConfig->getString("system.osArchitecture");
+#ifdef __APPLE__
+  if (osArch == "x86_64") {
+    // This could be running under Rosetta on an Arm Mac
+    // https://developer.apple.com/documentation/apple-silicon/about-the-rosetta-translation-environment
+    int ret = 0;
+    size_t size = sizeof(ret);
+    if (sysctlbyname("sysctl.proc_translated", &ret, &size, nullptr, 0) != -1 && ret == 1) {
+      osArch = "arm64_(x86_64)";
+    }
+  }
+#endif
+  return osArch;
+}
 
 /** Gets the name of the operating system Architecture
  *
