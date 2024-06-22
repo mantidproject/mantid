@@ -222,7 +222,7 @@ class SXDTest(unittest.TestCase):
 
         self.assertFalse("Material" in self.sxd.sample_dict)
 
-    def test_correct_integrated_peaks_for_attenuation(self):
+    def test_calc_absorption_weighted_path_lengths(self):
         # make workspace with sample
         ws_with_sample = CloneWorkspace(self.ws)
         SetSample(
@@ -238,7 +238,7 @@ class SXDTest(unittest.TestCase):
         self.sxd.set_ws(runno, ws_with_sample)
         self.sxd.set_peaks(runno, peaks_to_correct, PEAK_TYPE.FOUND)
 
-        self.sxd.correct_integrated_peaks_for_attenuation(PEAK_TYPE.FOUND)
+        self.sxd.calc_absorption_weighted_path_lengths(PEAK_TYPE.FOUND)
 
         self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
 
