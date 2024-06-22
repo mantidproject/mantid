@@ -268,6 +268,16 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def calc_absorption_weighted_path_lengths(self, peak_type, int_type=None, run=None, **kwargs):
+        """
+        Method to calculate tbar for each peak (saved in a column of the table) and optionally apply an attenuation
+        correction to the integrated intensity of each peak. By default the correction will be applied if
+        self.scale_integrated = True - which is the case for SXD but not WISH, but can be overridden by supplying
+        keyword ApplyCorrection.
+        :param peak_type: PEAK_TYPE Enum to identify peak table to use
+        :param int_type: INTEGRATION_TYPE Enum to identify peak table to use
+        :param run: run number to identify peak table to use (if not supplied default will be to apply to all runs)
+        :param kwargs: keyword arguments passed to AddAbsorptionWeightedPathLengths algorithm
+        """
         default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
         kwargs = {**default_kwargs, **kwargs}
         ws = self.get_ws(run)
