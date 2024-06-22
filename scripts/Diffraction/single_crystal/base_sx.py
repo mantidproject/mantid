@@ -535,6 +535,7 @@ class BaseSX(ABC):
             if not spgr.isAllowedReflection(pk.getIntHKL()):
                 iremove.append(ipk)
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
+        return len(iremove)
 
     @staticmethod
     def remove_peaks_near_powder_line(peaks, resolution=0.05, dmin=0.5, dmax=10, phase="Al", dlist=None, structure=None):
@@ -886,6 +887,29 @@ class BaseSX(ABC):
             # add rotation angle between prediced and observed U
             angle_sum = angle_sum + Rotation.from_matrix(urot_predict @ urot.T).magnitude()
         return angle_sum
+
+    @staticmethod
+    def find_consistent_ub(peaks_ref, peaks, hkl_tol=0.15, hm_symbol=None, fix_alatt=True):
+        sample = BaseSX.retrieve(peaks_ref).sample()
+        if not sample.hasOrientedLattice():
+            logger.error("Reference workspace must have a UB.")
+            return
+        mantid.SetUB(Workspace=peaks, UB=sample.getOrientedLattice().getUB(), EnableLogging=False)
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=hkl_tol, RoundHKLs=True, CommonUBForAll=True, EnableLogging=False)
+        if hm_symbol is not None:
+            nremoved = BaseSX.remove_forbidden_peaks(peaks, hm_symbol)  # check doesn't remove unindexed peaks
+            nindexed = nindexed - nremoved
+        if nindexed < 2:
+            logger.error("Reference UB must index at least 2 valid peaks.")
+            return
+        # optimise UB
+        if fix_alatt:
+            # get lattice parameters from ws given UB
+            latt = BaseSX.retrieve(peaks_ref).sample().getOrientedLattice()
+            alatt = {param: getattr(latt, param)() for param in ("a", "b", "c", "alpha", "beta", "gamma")}
+            mantid.CalculateUMatrix(PeaksWorkspace=peaks, **alatt)
+        else:
+            mantid.FindUBUsingIndexedPeaks(PeaksWorkspace=peaks, Tolerance=hkl_tol)
 
     @staticmethod
     def retrieve(ws):
