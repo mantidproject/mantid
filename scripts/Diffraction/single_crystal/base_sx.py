@@ -36,7 +36,7 @@ class INTEGRATION_TYPE(Enum):
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str, file_ext: str = ".raw", scale_integrated: bool = False):
+    def __init__(self, vanadium_runno: Optional[str] = None, file_ext: str = ".raw", scale_integrated: bool = False):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
