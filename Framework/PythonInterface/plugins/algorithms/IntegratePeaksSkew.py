@@ -217,6 +217,12 @@ class InstrumentArrayConverter:
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = int(nrows) // 2, int(ncols) // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
+        # add masked pixels to edges (sometimes used to denote edges or broken components)
+        det_info = self.ws.detectorInfo()
+        for irow in range(det_edges.shape[0]):
+            for icol in range(det_edges.shape[1]):
+                if det_info.isMasked(det_info.indexOf(int(detids[irow, icol]))):
+                    det_edges = True
         peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
 
