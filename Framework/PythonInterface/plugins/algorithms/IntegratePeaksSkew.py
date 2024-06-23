@@ -429,7 +429,7 @@ class PeakData:
         prev_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
         for istart in range(1, iend):
             this_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
-            if this_skew >= prev_skew:
+            if this_skew >= prev_skew or this_skew < 0:
                 istart -= 1
                 break
             else:
