@@ -46,7 +46,7 @@ requirements:
     - muparser
     - nexus
     - numpy {{ numpy }}
-    - occt
+    - occt {{ occt }}
     - python {{ python }}
     - poco {{ poco }}
     - setuptools
@@ -63,7 +63,7 @@ requirements:
     - lib3mf  # [win]
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.27") }}
-    - {{ pin_compatible("occt", max_pin="x.x.x") }}
+    - occt {{ occt }}
     - pycifrw
     - python
     - python-dateutil
