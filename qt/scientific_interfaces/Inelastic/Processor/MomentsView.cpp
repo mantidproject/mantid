@@ -84,6 +84,7 @@ void MomentsView::notifyScaleValueChanged(double const value) { m_presenter->han
 
 void MomentsView::notifyValueChanged(QtProperty *prop, double value) {
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), value);
+  prop->propertyName() == "EMin" ? setRangeSelectorMin(value) : setRangeSelectorMax(value);
 }
 
 void MomentsView::notifyRunClicked() { m_presenter->handleRunClicked(); }
@@ -110,19 +111,11 @@ void MomentsView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->s
 
 void MomentsView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
-OutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+IOutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+
+DataSelector *MomentsView::getDataSelector() const { return m_uiForm.dsInput; }
 
 std::string MomentsView::getDataName() const { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
-
-bool MomentsView::validate() {
-  auto uiv = std::make_unique<UserInputValidator>();
-  validateDataIsOfType(uiv.get(), m_uiForm.dsInput, "Sample", DataType::Sqw);
-
-  auto const errorMessage = uiv->generateErrorMessage();
-  if (!errorMessage.empty())
-    showMessageBox(errorMessage);
-  return errorMessage.empty();
-}
 
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
