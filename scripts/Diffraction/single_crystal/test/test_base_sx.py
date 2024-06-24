@@ -227,17 +227,42 @@ class BaseSXTest(unittest.TestCase):
         self.assertTrue(V3D(*new_axis).angle(V3D(*axes[1])) < 1e-3)
         self.assertTrue(np.allclose(angles[:, 1], [0.0631, 17, 47], atol=1e-3))
 
+    def test_find_consistent_ub(self):
+        ub = np.diag([0.25, 0.5, 0.1])
+        gonio_angle = 3
+        offset = 0.5  # angle to offset nominal goniometer rotation
+        ub_rot = Rotation.from_rotvec([0, gonio_angle, 0], degrees=True).as_matrix() @ ub
+        peaks_ref = self._make_peaks_HKL(hs=[1], ks=range(1, 6), ls=[1], wsname="peaks_ref", ub=ub)
+        peaks_rot = self._make_peaks_HKL(hs=[1], ks=range(1, 6), ls=[1], wsname="peaks_rot", ub=ub_rot)
+
+        # reset the UB to the unrotated one and set the goniometer matrix at a slightly different angle
+        SetUB(peaks_rot, ub=ub)
+        SetGoniometer(peaks_rot, Axis0=f"{gonio_angle+offset},0,1,0,1")
+        [pk.setGoniometerMatrix(peaks_rot.run().getGoniometer().getR()) for pk in BaseSX.retrieve(peaks_rot)]
+
+        BaseSX.find_consistent_ub(peaks_ref, peaks_rot)
+
+        # expect UB to be rotated by 1 degree around Y
+        u_expected = Rotation.from_rotvec([0, -offset, 0], degrees=True).as_matrix()
+        u_found = peaks_rot.sample().getOrientedLattice().getU()
+        difference_angle = Rotation.from_matrix(u_found.T @ u_expected).magnitude()
+        self.assertTrue(np.isclose(difference_angle, 0))
+
     # --- helper funcs ---
 
-    def _make_peaks_HKL(self, hs=None, ks=[0], ls=[1], wsname="peaks_hkl"):
+    def _make_peaks_HKL(self, hs=None, ks=[0], ls=[1], wsname="peaks_hkl", ub=np.diag([0.25, 0.25, 0.1])):
         peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace=wsname)
-        SetUB(peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+        SetUB(peaks, UB=ub)
         if hs is None:
             hs = range(3)
         for h in hs:
             for k in ks:
                 for l in ls:
-                    peaks.addPeak(peaks.createPeakHKL([h, k, l]))
+                    try:
+                        peaks.addPeak(peaks.createPeakHKL([h, k, l]))
+                    except ValueError:
+                        pass
+
         return peaks
 
     def _make_peaks_qsample(self, qxs=None, qys=[0], qzs=[1], wsname="peaks_qsamp"):
