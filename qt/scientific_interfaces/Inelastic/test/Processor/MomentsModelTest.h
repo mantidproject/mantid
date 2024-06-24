@@ -22,7 +22,7 @@ public:
 
   void setUp() override { m_model = std::make_unique<MomentsModel>(); }
 
-  void test_algorrithm_set_up() {
+  void test_algorithm_set_up() {
     // The Moments algorithm is a python algorithm and so can not be called in c++ tests
     m_workspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_sqw", m_workspace);
