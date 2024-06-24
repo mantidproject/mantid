@@ -31,7 +31,7 @@ public:
   void setupProperties() override;
   IOutputPlotOptionsView *getPlotOptions() const override;
   std::string getDataName() const override;
-  DataSelector *getDataSelector() const override;
+  MantidWidgets::DataSelector *getDataSelector() const override;
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
 

@@ -113,7 +113,7 @@ void MomentsView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->s
 
 IOutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
-DataSelector *MomentsView::getDataSelector() const { return m_uiForm.dsInput; }
+MantidWidgets::DataSelector *MomentsView::getDataSelector() const { return m_uiForm.dsInput; }
 
 std::string MomentsView::getDataName() const { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
 

@@ -14,6 +14,9 @@
 #include <tuple>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class DataSelector;
+}
 namespace CustomInterfaces {
 
 class IOutputPlotOptionsView;
@@ -27,7 +30,7 @@ public:
 
   virtual void setupProperties() = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
-  virtual DataSelector *getDataSelector() const = 0;
+  virtual MantidWidgets::DataSelector *getDataSelector() const = 0;
   virtual std::string getDataName() const = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
 
