@@ -88,7 +88,7 @@ double computeHeightApproximation(IFunction_sptr function) {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-IqtFitModel::IqtFitModel() : FittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
+IqtFitModel::IqtFitModel() : FittingModel(), m_constrainIntensities(false) { m_fitType = IQT_STRING; }
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");

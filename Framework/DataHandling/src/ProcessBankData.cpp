@@ -118,6 +118,11 @@ void ProcessBankData::run() {
     pulseROI = thisBankPulseTimes->getPulseIndices(alg->filter_time_start, alg->filter_time_stop);
   }
 
+  if (alg->filter_bad_pulses) {
+    pulseROI = Mantid::Kernel::ROI::calculate_intersection(
+        pulseROI, thisBankPulseTimes->getPulseIndices(alg->bad_pulses_timeroi->toTimeIntervals()));
+  }
+
   const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name, pulseROI);
 
   // loop over all pulses

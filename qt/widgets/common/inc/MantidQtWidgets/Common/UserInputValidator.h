@@ -22,6 +22,19 @@ class QStringList;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class DLLExport IUserInputValidator {
+public:
+  virtual ~IUserInputValidator() = default;
+
+  virtual bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) = 0;
+  virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
+
+  virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
+
+  virtual std::string generateErrorMessage() const = 0;
+};
+
 /**
  * A class to try and get rid of some of the boiler-plate code surrounding input
  * validation, and hopefully as a result make it more readable.
@@ -31,7 +44,7 @@ namespace CustomInterfaces {
  *
  *
  */
-class DLLExport UserInputValidator {
+class DLLExport UserInputValidator final : public IUserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
@@ -44,9 +57,9 @@ public:
   /// Check that the given WorkspaceSelector is not empty.
   bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
   /// Check that the given FileFinderWidget widget has valid files.
-  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget);
+  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) override;
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false);
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) override;
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.
@@ -77,14 +90,14 @@ public:
   bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false);
 
   /// Add a custom error message to the list.
-  void addErrorMessage(const QString &message, bool silent = false);
+  void addErrorMessage(const std::string &message, bool const silent = false) override;
 
   /// Sets a validation label
   void setErrorLabel(QLabel *errorLabel, bool valid);
 
   /// Returns an error message which contains all the error messages raised by
   /// the check functions.
-  QString generateErrorMessage();
+  std::string generateErrorMessage() const override;
   /// Checks to see if all input is valid
   bool isAllInputValid();
 
@@ -113,7 +126,8 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName, QStrin
                                             QString const &validType, bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
     if (!getADSWorkspace<T>(workspaceName.toStdString())) {
-      addErrorMessage("The " + inputType + " workspace is not a " + validType + ".", silent);
+      addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
+                      silent);
       return false;
     } else
       return true;

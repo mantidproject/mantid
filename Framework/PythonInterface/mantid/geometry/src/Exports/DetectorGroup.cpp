@@ -31,12 +31,8 @@ bool isMonitorDeprecated(const DetectorGroup &self) {
                                        "deprecated, use "
                                        "'SpectrumInfo::isMonitor' instead.");
   const auto &dets = self.getDetectors();
-  for (const auto &det : dets) {
-    const auto &detInfo = det->parameterMap().detectorInfo();
-    if (!detInfo.isMonitor(det->index()))
-      return false;
-  }
-  return true;
+  return std::all_of(dets.cbegin(), dets.cend(),
+                     [](const auto &det) { return det->parameterMap().detectorInfo().isMonitor(det->index()); });
 }
 } // namespace
 

@@ -100,11 +100,11 @@ protected:
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
   /// Overidden by child class.
-  virtual void setup() = 0;
+  virtual void setup() {}
   /// Overidden by child class.
-  virtual void run() = 0;
+  virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
   /// Overidden by child class.
-  virtual bool validate() = 0;
+  virtual bool validate() { throw std::logic_error("InelasticTab::validate() called but is not implemented."); }
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;
@@ -160,7 +160,7 @@ private slots:
 
 signals:
   /// Send signal to parent window to show a message box to user
-  void showMessageBox(const QString &message);
+  void showMessageBox(const std::string &message);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

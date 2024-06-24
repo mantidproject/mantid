@@ -154,9 +154,8 @@ void SaveDiffCal::writeDetIdsfromSVWS(H5::Group &group, const std::string &name,
   std::vector<int32_t> values;
   for (size_t i = 0; i < m_numValues; ++i) {
     const auto &detids = ws->getSpectrum(i).getDetectorIDs();
-    for (const auto &detid : detids) {
-      values.push_back(static_cast<int32_t>(detid));
-    }
+    std::transform(detids.cbegin(), detids.cend(), std::back_inserter(values),
+                   [](const auto &detid) { return static_cast<int32_t>(detid); });
   }
 
   H5Util::writeArray1D(group, name, values);

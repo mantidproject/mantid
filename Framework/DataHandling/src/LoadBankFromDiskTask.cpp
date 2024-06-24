@@ -336,7 +336,8 @@ void LoadBankFromDiskTask::run() {
     file.openGroup(entry_name, entry_type);
 
     const bool needPulseInfo = (!m_loader.alg->compressEvents) || m_loader.alg->compressTolerance == 0 ||
-                               m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered || m_have_weight;
+                               m_loader.m_ws.nPeriods() > 1 || m_loader.alg->m_is_time_filtered ||
+                               m_loader.alg->filter_bad_pulses || m_have_weight;
 
     // Load the event_index field.
     if (needPulseInfo)
@@ -356,7 +357,6 @@ void LoadBankFromDiskTask::run() {
         m_loader.alg->getLogger().warning() << "Bank " << entry_name
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";
-
       // Open and validate event_id field.
       int64_t start_event = 0;
       int64_t stop_event = 0;

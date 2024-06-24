@@ -15,6 +15,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <cmath>
+#include <numeric>
 namespace Mantid {
 namespace DataObjects {
 
@@ -86,13 +87,9 @@ public:
 
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {
-    long int dataSize(0);
-
-    for (auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt) {
-      dataSize += static_cast<long int>(elemIt->size() * sizeof(Type));
-    }
-
-    return dataSize;
+    return std::accumulate(m_data.cbegin(), m_data.cend(), 0, [](long int dataSize, const auto &elem) {
+      return dataSize + static_cast<long int>(elem.size() * sizeof(Type));
+    });
   }
 
   /// Create another copy of the column

@@ -38,7 +38,7 @@ public:
                              std::string const &fixedIndices = "",
                              std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   /// Used by the unit tests so that the view and model can be mocked
-  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, OutputPlotOptionsModel *model,
+  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
                              PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~OutputPlotOptionsPresenter() = default;
 
@@ -73,7 +73,7 @@ private:
   bool validateWorkspaceSize(MantidAxis const &axisType);
 
   IOutputPlotOptionsView *m_view;
-  std::unique_ptr<OutputPlotOptionsModel> m_model;
+  std::unique_ptr<IOutputPlotOptionsModel> m_model;
   PlotWidget m_plotType;
 };
 

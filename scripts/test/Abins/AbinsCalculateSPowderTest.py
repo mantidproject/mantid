@@ -32,7 +32,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     _instruments_defaults = {}
 
     default_calculator_kwargs = dict(
-        temperature=_temperature, instrument=_instrument, sample_form=_sample_form, quantum_order_num=_order_event, autoconvolution_max=10
+        temperature=_temperature, instrument=_instrument, sample_form=_sample_form, quantum_order_num=_order_event, autoconvolution_max=0
     )
 
     def setUp(self):

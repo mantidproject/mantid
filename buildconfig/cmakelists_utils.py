@@ -97,7 +97,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     lines.append("set(" + cmake_tag)
     for file in files:
         lines.append("    " + file)
-    lines[-1] += ")"  # close the parentheses
+    lines.append(")")  # close the parentheses
     lines += lines_after
 
     return lines

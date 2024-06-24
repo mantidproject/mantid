@@ -63,7 +63,7 @@ bool TransmissionCalc::validate() {
   auto const error = uiv.generateErrorMessage();
   showMessageBox(error);
 
-  return error.isEmpty();
+  return error.empty();
 }
 
 /**
@@ -80,7 +80,7 @@ void TransmissionCalc::run() {
   try {
     transAlg->setProperty("Instrument", instrumentName);
   } catch (std::exception &) {
-    emit showMessageBox("Instrument " + QString::fromStdString(instrumentName) + " is not supported.");
+    emit showMessageBox("Instrument " + instrumentName + " is not supported.");
     setRunIsRunning(false);
     return;
   }

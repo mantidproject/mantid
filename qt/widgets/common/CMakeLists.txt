@@ -304,6 +304,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MockJobRunner.h
+    inc/MantidQtWidgets/Common/MockUserInputValidator.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -721,6 +722,7 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
+    test/SelectionWorkspacesDialogTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/WorkspaceUtilsTest.h
@@ -749,6 +751,7 @@ set(QT5_TEST_FILES
     test/FitScriptGeneratorPresenterTest.h
     test/FitScriptGeneratorViewTest.h
     test/FitScriptOptionsBrowserTest.h
+    test/SelectWorkspacesDialogTest.h
     test/FunctionTreeViewTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h

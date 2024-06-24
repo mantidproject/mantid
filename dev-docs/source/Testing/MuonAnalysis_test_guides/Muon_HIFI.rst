@@ -54,8 +54,8 @@ HIFI Transverse Field Simultaneous Fitting
 	- Click **Undo Fits**
 	- Click the value for the **Frequency** parameter; A ``...`` should appear
 	  next to it, click it. A new window should appear
-	- Enter values for each run in the table as from ``0.0`` to ``1.1`` in
-	  steps of ``0.1``
+	- Enter a value of ``0.01`` for the first run in the table
+	- For each of the other runs in the table, enter values from ``0.1`` to ``1.1`` in steps of ``0.1``
 	- Click **Ok**
 	- Click **Fit**
 	- This time the fit should work with a significantly lower value for **Chi-squared** (``<10``)
@@ -83,6 +83,7 @@ HIFI MultiPeriod Data
 - Go to the **Sequential Fitting** tab
 	- Press ``Sequentially fit all``
 	- When its complete the table should update
+	- It is ok if some of the rows say "Failed". This happens because these rows need more iterations to converge. However, if you go to the Fitting tab and cycle through the datasets, you can see that the fits are still reasonably good.
 	- Selecting rows will show you the data and fit for those rows
 - Go to the **Grouping** tab
 	- The ``Period`` column in the group table will show a series of numbers (1, 2, 3 or 4)

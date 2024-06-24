@@ -31,11 +31,8 @@ public:
   virtual bool isResultGroupPlottable() const = 0;
   virtual bool isPDFGroupPlottable() const = 0;
 
-  virtual void clearSpectraToPlot() = 0;
-  virtual std::vector<SpectrumToPlot> getSpectraToPlot() const = 0;
-
-  virtual void plotResult(std::string const &plotType) = 0;
-  virtual void plotPDF(std::string const &workspaceName, std::string const &plotType) = 0;
+  virtual std::vector<SpectrumToPlot> plotResult(std::string const &plotType) const = 0;
+  virtual std::vector<SpectrumToPlot> plotPDF(std::string const &workspaceName, std::string const &plotType) const = 0;
 
   virtual void saveResult() const = 0;
 

@@ -47,6 +47,7 @@ For setting scales, axis titles, plot titles etc. you can use:
 
     # Rescale the axis limits
     axes.set_xlim(0,5000)
+    axes.set_ylim(0.001,1500)
 
     #C hange the y-axis label
     axes.set_ylabel(r'Counts ($\mu s$)$^{-1}$')
@@ -185,6 +186,8 @@ To overplot on the same window:
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
+    # This file can be found in the Usage Examples folder, available
+    # here https://www.mantidproject.org/installation/index#sample-data
     data = Load('PG3_733.nxs')
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})

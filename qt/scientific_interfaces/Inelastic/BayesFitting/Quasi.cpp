@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
 #include "Common/InterfaceUtils.h"
+#include "Common/RunWidget/RunView.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -24,6 +25,8 @@ namespace MantidQt::CustomInterfaces {
 
 Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
+
+  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
@@ -75,7 +78,6 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   // Plot current preview
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
@@ -106,66 +108,52 @@ void Quasi::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void Quasi::setup() {}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool Quasi::validate() {
-  UserInputValidator uiv;
-  QString errors("");
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+void Quasi::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   // check that the ResNorm file is valid if we are using it
   if (m_uiForm.chkUseResNorm->isChecked()) {
-    uiv.checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
+    validator->checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
   }
 
   // check fixed width file exists
   if (m_uiForm.chkFixWidth->isChecked() && !m_uiForm.mwFixWidthDat->isValid()) {
-    uiv.checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
+    validator->checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
   }
 
   // check eMin and eMax values
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
-    errors.append("EMin must be strictly less than EMax.\n");
-
-  // Create and show error messages
-  errors.append(uiv.generateErrorMessage());
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
+    validator->addErrorMessage("EMin must be strictly less than EMax.\n");
 
   // Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
     if (!resName.endsWith("_res")) {
-      emit showMessageBox("Stretched Exponential program can only be used with "
-                          "a resolution file.");
-      return false;
+      validator->addErrorMessage("Stretched Exponential program can only be used with "
+                                 "a resolution file.");
     }
   }
 
   auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
   if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
-    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
-    return false;
+    validator->addErrorMessage("The 'quickBayes' package does not support a 'Sloping' background type.");
   }
-
-  return true;
 }
 
-/**
- * Run the BayesQuasi algorithm
- */
-void Quasi::run() {
+void Quasi::handleRun() {
+  auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result == QMessageBox::No) {
+      m_runPresenter->setRunEnabled(true);
+      return;
+    }
+  }
+
   m_uiForm.ppPlot->watchADS(false);
 
   bool elasticPeak = false;
@@ -260,17 +248,17 @@ void Quasi::run() {
 
   m_batchAlgoRunner->executeBatchAsync();
 }
+
 /**
  * Enable plotting and saving and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setPlotResultEnabled(!error);
+  setSaveResultEnabled(!error);
   if (!error) {
     updateMiniPlot();
     m_uiForm.ppPlot->watchADS(true);
-  } else {
-    setPlotResultEnabled(false);
-    setSaveResultEnabled(false);
   }
 }
 
@@ -478,26 +466,6 @@ void Quasi::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Quasi::runClicked() {
-  if (validateTab()) {
-    auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    displayMessageAndRun(saveDirectory);
-  }
-}
-
-void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
-  if (saveDirectory.empty()) {
-    int const result = displaySaveDirectoryMessage();
-    if (result != QMessageBox::No) {
-      setRunIsRunning(true);
-      runTab();
-    }
-  } else {
-    setRunIsRunning(true);
-    runTab();
-  }
-}
-
 int Quasi::displaySaveDirectoryMessage() {
   char const *textMessage = "BayesQuasi requires a default save directory and "
                             "one is not currently set."
@@ -559,8 +527,6 @@ void Quasi::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
-void Quasi::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void Quasi::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
@@ -569,14 +535,9 @@ void Quasi::setPlotResultEnabled(bool enabled) {
 void Quasi::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void Quasi::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
+  m_runPresenter->setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
-}
-
-void Quasi::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
 void Quasi::setPlotResultIsPlotting(bool plotting) {
