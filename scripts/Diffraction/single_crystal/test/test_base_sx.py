@@ -13,12 +13,16 @@ from mantid.simpleapi import (
     TransformHKL,
     IntegratePeaksMD,
     FakeMDEventData,
+    SetGoniometer,
 )
 from mantid.dataobjects import Workspace2D
+from mantid.kernel import V3D
 from Diffraction.single_crystal.base_sx import BaseSX
 import tempfile
 import shutil
 from os import path
+import numpy as np
+from scipy.spatial.transform import Rotation
 
 base_sx_path = "Diffraction.single_crystal.base_sx"
 
@@ -192,6 +196,37 @@ class BaseSXTest(unittest.TestCase):
         # check output file saved
         self.assertTrue(path.exists(out_file))
 
+    def test_optimize_goniometer_axis_fix_angles_True_apply_False(self):
+        phis = [0, 15, 45]
+        pk_ws_list, new_axis = self._setup_peaks_for_goniometer_optimisation(phis)
+        R_nominal = pk_ws_list[-1].getPeak(0).getGoniometerMatrix().copy()
+
+        axes, angles = BaseSX.optimize_goniometer_axis(pk_ws_list, iaxis=1, euler_axes="yz", fix_angles=True)
+
+        self.assertTrue(V3D(*new_axis).angle(V3D(*axes[1])) < 1e-3)
+        self.assertTrue(np.allclose(angles[:, 1], phis))
+        self.assertTrue(np.allclose(R_nominal, pk_ws_list[-1].getPeak(0).getGoniometerMatrix()))
+
+    def test_optimize_goniometer_axis_fix_angles_True_apply_True(self):
+        phis = [0, 15, 45]
+        pk_ws_list, new_axis = self._setup_peaks_for_goniometer_optimisation(phis)
+        R_nominal = pk_ws_list[-1].getPeak(0).getGoniometerMatrix().copy()
+
+        axes, angles = BaseSX.optimize_goniometer_axis(pk_ws_list, iaxis=1, euler_axes="yz", fix_angles=True, apply=True)
+
+        self.assertTrue(V3D(*new_axis).angle(V3D(*axes[1])) < 1e-3)
+        self.assertTrue(np.allclose(angles[:, 1], phis))
+        self.assertFalse(np.allclose(R_nominal, pk_ws_list[-1].getPeak(0).getGoniometerMatrix()))
+
+    def test_optimize_goniometer_axis_fix_angles_False(self):
+        phis = [0, 15, 45]
+        pk_ws_list, new_axis = self._setup_peaks_for_goniometer_optimisation(phis)
+
+        axes, angles = BaseSX.optimize_goniometer_axis(pk_ws_list, iaxis=1, euler_axes="yz", fix_angles=False)
+
+        self.assertTrue(V3D(*new_axis).angle(V3D(*axes[1])) < 1e-3)
+        self.assertTrue(np.allclose(angles[:, 1], [0.0631, 17, 47], atol=1e-3))
+
     # --- helper funcs ---
 
     def _make_peaks_HKL(self, hs=None, ks=[0], ls=[1], wsname="peaks_hkl"):
@@ -214,6 +249,31 @@ class BaseSXTest(unittest.TestCase):
                 for qz in qzs:
                     peaks.addPeak(peaks.createPeakQSample([qx, qy, qz]))
         return peaks
+
+    def _setup_peaks_for_goniometer_optimisation(self, phis=[0, 15, 45]):
+        b = np.diag([0.25, 0.5, 0.1])  # B matrix (of UB) - here assume U = I
+        # calibrated goniometer axis to be found - not quite along X
+        new_axis = np.array([1, 0, 0.05])
+        new_axis = new_axis / np.linalg.norm(new_axis)
+
+        # create peaks and set goniometer using nominal axis along X (as well as vertical)
+        omegas = [0, 10, 10]  # around vertical
+        pk_ws_list = []
+        for iphi, phi in enumerate(phis):
+            peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, OutputWorkspace=f"peaks_{iphi}", NumberOfPeaks=1)
+            SetGoniometer(peaks, Axis0=f"{omegas[iphi]},0,1,0,1", Axis1=f"{phi},1,0,0,1")
+            R_nominal = peaks.run().getGoniometer().getR().copy()
+            peaks.getPeak(0).setGoniometerMatrix(R_nominal)  # normally would be automatically on peak
+            # set UB corresponding to rotation of phi+2 degrees around the calibrated axis
+            this_phi = phi + 2 if not np.isclose(phi, 0) else 0
+            this_R = (
+                Rotation.from_rotvec([0, omegas[iphi], 0], degrees=True).as_matrix()
+                @ Rotation.from_rotvec(this_phi * new_axis, degrees=True).as_matrix()
+            )
+            this_u = R_nominal.T @ this_R
+            SetUB(Workspace=peaks, UB=this_u @ b)
+            pk_ws_list.append(peaks)
+        return pk_ws_list, new_axis
 
 
 if __name__ == "__main__":

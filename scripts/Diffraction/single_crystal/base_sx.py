@@ -857,14 +857,13 @@ class BaseSX(ABC):
             if apply:
                 for iws, peaks in enumerate(pk_ws_list):
                     gonio_rots = [
-                        Rotation.from_rotvec(axis * gonio_angles[irun, iax], degrees=True).as_matrix()
-                        for iax, axis in enumerate(gonio_axes)
+                        Rotation.from_rotvec(axis * gonio_angles[iws, iax], degrees=True).as_matrix() for iax, axis in enumerate(gonio_axes)
                     ]
                     R = reduce(lambda x, y: x @ y, gonio_rots)
                     [pk.setGoniometerMatrix(R) for pk in BaseSX.retrieve(peaks)]
                     # adjust U matrix for optimimised goniometer
                     BaseSX.retrieve(peaks).sample().getOrientedLattice().setU(R.T @ umats_rot[iws])
-        return gonio_axes, gonio_angles, umat_ref
+        return gonio_axes, gonio_angles
 
     @staticmethod
     def _optimize_goniometer_axis_cost_function(p, umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis):
