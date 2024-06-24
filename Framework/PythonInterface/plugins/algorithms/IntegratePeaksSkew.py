@@ -222,7 +222,7 @@ class InstrumentArrayConverter:
         for irow in range(det_edges.shape[0]):
             for icol in range(det_edges.shape[1]):
                 if det_info.isMasked(det_info.indexOf(int(detids[irow, icol]))):
-                    det_edges = True
+                    det_edges[irow, icol] = True
         peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
 
@@ -830,15 +830,15 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             name="NRowsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
-            doc="Masks including pixels on rows NRowsEdge from the detector edge are " "defined as on the edge.",
+            validator=IntBoundedValidator(lower=0),
+            doc="Masks including pixels on rows NRowsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NColsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
-            doc="Masks including pixels on cols NColsEdge from the detector edge are " "defined as on the edge.",
+            validator=IntBoundedValidator(lower=0),
+            doc="Masks including pixels on cols NColsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NPixMin",

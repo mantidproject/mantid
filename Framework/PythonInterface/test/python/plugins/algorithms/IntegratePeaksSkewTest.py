@@ -367,7 +367,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             OutputWorkspace="out8",
         )
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
-        self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 10.84209, delta=1e-4)
+        self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 8.8002, delta=1e-4)
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
