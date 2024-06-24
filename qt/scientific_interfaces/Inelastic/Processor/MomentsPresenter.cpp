@@ -40,7 +40,7 @@ void MomentsPresenter::setup() {}
  *
  */
 void MomentsPresenter::handleDataReady(std::string const &dataName) {
-  if (m_view->validate()) {
+  if (validate()) {
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
   }
@@ -58,7 +58,16 @@ void MomentsPresenter::handleScaleValueChanged(double value) { m_model->setScale
 
 void MomentsPresenter::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
-bool MomentsPresenter::validate() { return true; }
+bool MomentsPresenter::validate() {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_view->getDataSelector(), "Sample", DataType::Sqw);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.empty())
+    m_view->showMessageBox(errorMessage);
+  return errorMessage.empty();
+}
+
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
