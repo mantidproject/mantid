@@ -86,6 +86,21 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.59, delta=1e-1)
         self.assertAlmostEqual(out.column("Intens/SigInt")[1], 0.0, delta=1e-2)
 
+    def test_exec_IntegrateIfOnEdge_False_respects_detector_masking(self):
+        kwargs = self.profile_kwargs.copy()
+        kwargs["IntegrateIfOnEdge"] = False
+        kwargs["NRowsEdge"] = 0
+        kwargs["NColsEdge"] = 0
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws)
+        det_info = ws_masked.detectorInfo()
+        det_info.setMasked(det_info.indexOf(self.peaks_edge.getPeak(1).getDetectorID()), True)
+
+        out = IntegratePeaks1DProfile(
+            InputWorkspace=ws_masked, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_2_masked", **kwargs
+        )
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.59, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[1], 0.0, delta=1e-2)
+
     def test_exec_poisson_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "Poisson"

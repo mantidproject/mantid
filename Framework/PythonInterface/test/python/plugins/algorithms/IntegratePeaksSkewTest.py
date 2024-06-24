@@ -90,7 +90,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             IntegrateIfOnEdge=False,
             NRowsEdge=0,
             NColsEdge=0,
-            OutputWorkspace="out0",
+            OutputWorkspace="out0_masked",
         )
         # check peaks in bank 1 were not integrated (mask touches edge)
         self.assertEqual(out.getPeak(0).getIntensity(), 0)
