@@ -1180,7 +1180,7 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  } catch (Poco::NotFoundException &e) {
+  } catch (const Poco::NotFoundException &e) {
     UNUSED_ARG(e); // let it drop on the floor
   }
 
@@ -1190,7 +1190,7 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  } catch (Poco::NotFoundException &e) {
+  } catch (const Poco::NotFoundException &e) {
     UNUSED_ARG(e); // let it drop on the floor
   }
 
