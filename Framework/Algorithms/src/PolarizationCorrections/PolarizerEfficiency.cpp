@@ -50,7 +50,7 @@ void PolarizerEfficiency::init() {
                                                                        Direction::Output, PropertyMode::Optional),
                   "Polarizer efficiency as a function of wavelength");
 
-  const auto &spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
+  const auto &spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4});
   declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
                   "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
 
@@ -71,11 +71,12 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     return errorList;
   }
 
-  if (inputWorkspace->size() != 4) {
+  auto const &inputWsCount = inputWorkspace->size();
+  if (inputWsCount < 2 || inputWsCount > 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
-        "The input group workspace must have four periods corresponding to the four spin configurations.";
+        "The input group workspace must have at least two periods corresponding to the spin configurations.";
   } else {
-    for (size_t i = 0; i < inputWorkspace->size(); ++i) {
+    for (size_t i = 0; i < inputWsCount; ++i) {
       const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
       Unit_const_sptr unit = stateWs->getAxis(0)->unit();
       if (unit->unitID() != "Wavelength") {
