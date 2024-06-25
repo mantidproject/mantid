@@ -24,7 +24,6 @@ from mantid.kernel import (
 )
 from dataclasses import dataclass
 import numpy as np
-from scipy.ndimage import uniform_filter
 from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from FindSXPeaksConvolve import make_kernel, get_kernel_shape
@@ -575,7 +574,6 @@ def convolve_shoebox(y, esq, kernel, mode="same"):
         econv = np.sqrt(convolve(esq, kernel**2, mode=mode))
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
-    intens_over_sig = uniform_filter(intens_over_sig, size=len(y.shape))
     # zero edges where convolution is invalid
     if mode == "same":
         edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
