@@ -1,1 +1,0 @@
-- Add documentation techniques page on :ref: `Applying absorption corrections` <applying_corrections>.

@@ -1,1 +1,0 @@
-- Avoid loading non existing spectra in the :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` :ref:`Fitting tab <ui engineering fitting>` when doing a fit following an ADS clear.

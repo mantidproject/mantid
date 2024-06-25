@@ -1,1 +1,0 @@
-- The IqtFit tab of :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` now has a 'Fit Type' box for selecting a Stretched Exponential function. This allows further fit functions to be added in the future.

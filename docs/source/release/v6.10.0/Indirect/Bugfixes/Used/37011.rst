@@ -1,1 +1,0 @@
-- Fixed a bug where the EFixed when switching to the 'graphite' analyser would not be updated on the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface.

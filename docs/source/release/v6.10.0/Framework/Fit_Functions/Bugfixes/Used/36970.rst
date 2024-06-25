@@ -1,1 +1,0 @@
-- CompositeFunction will now throw an exception if getNumberDomains() is called and there is an inconsistent number of domains in any of the member functions.
