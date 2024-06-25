@@ -281,7 +281,7 @@ void ConvolutionModel::addSampleLogs() {
 }
 
 void ConvolutionModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  FittingModel::addOutput(fitAlgorithm);
+  FittingModel::addOutput(std::move(fitAlgorithm));
   addSampleLogs();
 }
 

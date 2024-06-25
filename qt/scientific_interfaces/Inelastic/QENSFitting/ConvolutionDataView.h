@@ -23,7 +23,7 @@ class MANTIDQT_INELASTIC_DLL ConvolutionDataView : public FitDataView {
   Q_OBJECT
 public:
   ConvolutionDataView(QWidget *parent);
-  void addTableEntry(size_t row, FitDataRow newRow) override;
+  void addTableEntry(size_t row, FitDataRow const &newRow) override;
 
 protected:
   ConvolutionDataView(const QStringList &headers, QWidget *parent);

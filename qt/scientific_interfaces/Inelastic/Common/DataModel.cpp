@@ -177,7 +177,7 @@ std::vector<std::string> DataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData->size());
   std::transform(m_fittingData->cbegin(), m_fittingData->cend(), std::back_inserter(names),
-                 [](const auto &fittingData) { return fittingData.workspace()->getName(); });
+                 [](const auto &fittingData) -> const std::string & { return fittingData.workspace()->getName(); });
   return names;
 }
 
@@ -188,7 +188,7 @@ void DataModel::addWorkspace(const std::string &workspaceName, const FunctionMod
     throw std::runtime_error("Fitting Data must consist of one or more spectra.");
 
   auto ws = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-  addWorkspace(ws, spectra);
+  addWorkspace(std::move(ws), spectra);
 }
 
 void DataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) {
