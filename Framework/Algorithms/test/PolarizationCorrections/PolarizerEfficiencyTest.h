@@ -79,6 +79,16 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
+  void testNonMatchingHistogramLengths() {
+    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0", 2);
+    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0", 2);
+
+    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
+
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+  }
+
   void testExampleCalculation() {
     auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
     auto tPara1 = generateFunctionDefinedWorkspace("T_para1", "4 + x*0");
@@ -231,7 +241,8 @@ private:
     return group;
   }
 
-  MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const std::string &name, const std::string &func) {
+  MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const std::string &name, const std::string &func,
+                                                        const int numBanks = 1) {
     auto createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
     createSampleWorkspace->initialize();
     createSampleWorkspace->setProperty("WorkspaceType", "Histogram");
@@ -242,7 +253,7 @@ private:
     createSampleWorkspace->setProperty("XMin", "1");
     createSampleWorkspace->setProperty("XMax", "8");
     createSampleWorkspace->setProperty("BinWidth", "1");
-    createSampleWorkspace->setProperty("NumBanks", 1);
+    createSampleWorkspace->setProperty("NumBanks", numBanks);
     createSampleWorkspace->setProperty("BankPixelWidth", 1);
     createSampleWorkspace->execute();
 
