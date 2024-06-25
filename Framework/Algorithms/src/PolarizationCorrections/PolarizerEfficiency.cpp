@@ -65,12 +65,14 @@ void PolarizerEfficiency::init() {
  */
 std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
+  // Check input workspaces.
   const WorkspaceGroup_sptr inputWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (inputWorkspace == nullptr) {
     errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a workspace group.";
     return errorList;
   }
 
+  const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
   auto const &inputWsCount = inputWorkspace->size();
   if (inputWsCount < 2 || inputWsCount > 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
@@ -81,6 +83,10 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
       Unit_const_sptr unit = stateWs->getAxis(0)->unit();
       if (unit->unitID() != "Wavelength") {
         errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+      }
+      if (analyserWs->getNumberHistograms() != stateWs->getNumberHistograms()) {
+        errorList[PropertyNames::ANALYSER_EFFICIENCY] = "All workspaces must contain the same number of histograms.";
+        errorList[PropertyNames::INPUT_WORKSPACE] = "All workspaces must contain the same number of histograms.";
       }
     }
   }
