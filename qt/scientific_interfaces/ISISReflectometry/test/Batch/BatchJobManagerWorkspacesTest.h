@@ -15,6 +15,13 @@ public:
   static BatchJobManagerWorkspacesTest *createSuite() { return new BatchJobManagerWorkspacesTest(); }
   static void destroySuite(BatchJobManagerWorkspacesTest *suite) { delete suite; }
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testGetWorkspacesToSaveForOnlyRowInGroup() {
     auto jobManager = makeJobManager(oneGroupWithARowModel());
     auto *row = getRow(jobManager, 0, 0);
@@ -25,8 +32,6 @@ public:
     // For a single row, we save the binned workspace for the row
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, false);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"IvsQBin"});
-
-    verifyAndClear();
   }
 
   void testGetWorkspacesToSaveForRowInMultiRowGroup() {
@@ -39,8 +44,6 @@ public:
     // For multiple rows, we don't save any workspaces
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, false);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{});
-
-    verifyAndClear();
   }
 
   void testGetWorkspacesToSaveForGroupWithoutIncludeRows() {
@@ -54,8 +57,6 @@ public:
 
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, false);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"stitched_test"});
-
-    verifyAndClear();
   }
 
   void testGetWorkspacesToSaveForGroupWithIncludeRows() {
@@ -75,8 +76,6 @@ public:
     // The order of items in the vector of workspace names is important - the stitched workspace name must be the first
     // one to ensure that it is picked up as the filename if saving all workspaces to a single file
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>({"stitched_test", "row_bin_test01", "row_bin_test02"}));
-
-    verifyAndClear();
   }
 
   void testGetWorkspacesToSaveForGroupHasNoRowsWithIncludeRows() {
@@ -90,8 +89,6 @@ public:
 
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, true);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"stitched_test"});
-
-    verifyAndClear();
   }
 
   void testGetWorkspacesToSaveForGroupHasInvalidRowWithIncludeRows() {
@@ -105,8 +102,6 @@ public:
 
     auto workspacesToSave = jobManager.algorithmOutputWorkspacesToSave(m_jobAlgorithm, true);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"stitched_test"});
-
-    verifyAndClear();
   }
 
   void testDeletedWorkspaceResetsStateForRow() {
@@ -117,7 +112,6 @@ public:
 
     jobManager.notifyWorkspaceDeleted("IvsQBin_test");
     TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
-    verifyAndClear();
   }
 
   void testDeletedWorkspaceResetsOutputNamesForRow() {
@@ -130,7 +124,6 @@ public:
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
-    verifyAndClear();
   }
 
   void testDeleteWorkspaceResetsStateForGroup() {
@@ -141,7 +134,6 @@ public:
 
     jobManager.notifyWorkspaceDeleted("stitched_test");
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
-    verifyAndClear();
   }
 
   void testDeleteWorkspaceResetsOutputNamesForGroup() {
@@ -152,7 +144,6 @@ public:
 
     jobManager.notifyWorkspaceDeleted("stitched_test");
     TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
-    verifyAndClear();
   }
 
   void testRenameWorkspaceDoesNotResetStateForRow() {
@@ -163,7 +154,6 @@ public:
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
     TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
-    verifyAndClear();
   }
 
   void testRenameWorkspaceDoesResetStateForRowWhenOldNameIsSameAsCurrent() {
@@ -173,8 +163,7 @@ public:
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_new", "IvsQBin_test");
-    TS_ASSERT_DIFFERS(row->state(), State::ITEM_SUCCESS)
-    verifyAndClear();
+    TS_ASSERT_DIFFERS(row->state(), State::ITEM_SUCCESS);
   }
 
   void testRenameWorkspaceUpdatesCorrectWorkspaceForRow() {
@@ -187,7 +176,6 @@ public:
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "IvsQ_test");
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "IvsQBin_new");
-    verifyAndClear();
   }
 
   void testRenameWorkspaceDoesNotResetStateForGroup() {
@@ -198,7 +186,6 @@ public:
 
     jobManager.notifyWorkspaceRenamed("stitched_test", "stitched_new");
     TS_ASSERT_EQUALS(group.state(), State::ITEM_SUCCESS);
-    verifyAndClear();
   }
 
   void testRenameWorkspaceUpdatesPostprocessedNameForGroup() {
@@ -209,7 +196,6 @@ public:
 
     jobManager.notifyWorkspaceRenamed("stitched_test", "stitched_new");
     TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "stitched_new");
-    verifyAndClear();
   }
 
   void testDeleteAllWorkspacesResetsStateForRowAndGroup() {
@@ -224,7 +210,6 @@ public:
     jobManager.notifyAllWorkspacesDeleted();
     TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
-    verifyAndClear();
   }
 
   void testDeleteAllWorkspacesResetsOutputNamesForRowAndGroup() {
@@ -241,6 +226,5 @@ public:
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
     TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
-    verifyAndClear();
   }
 };
