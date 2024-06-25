@@ -1,1 +1,0 @@
-- It is now possible to use the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interface on a MacOS operating system.

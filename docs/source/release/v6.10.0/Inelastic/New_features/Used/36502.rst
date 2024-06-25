@@ -1,1 +1,0 @@
-- Added new `TeixeiraWaterIqt` fitting function, to fit linewidth and molecular residence time in intermediate scattering functions with Teixeira's model for water. This is now available in the IqtFit tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface.

@@ -1,1 +1,0 @@
-- Fixed a freeze in the Muon Analysis interface after deleting a workspace which is not loaded into the interface.

@@ -1,1 +1,0 @@
-- GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports all lattice parameters being overridden (previously was assumed cubic)

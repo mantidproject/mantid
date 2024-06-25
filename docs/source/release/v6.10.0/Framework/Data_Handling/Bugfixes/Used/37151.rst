@@ -1,1 +1,0 @@
-- The properties ``GroupingWorkspace`` and ``GroupingFilename`` are now optional in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>`. At least one must be specified.

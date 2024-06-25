@@ -1,5 +1,0 @@
-- Abins/Abins2D can now import phonopy .yaml data where the force
-  constants are stored in a file named ``FORCE_CONSTANTS`` or
-  ``force_constants.hdf5`` in the same directory as the YAML file.
-  This is recommended when using large force constants arrays as the
-  YAML loader can be very slow.

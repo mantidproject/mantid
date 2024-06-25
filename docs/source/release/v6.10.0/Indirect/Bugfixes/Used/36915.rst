@@ -1,1 +1,0 @@
-- Fixed an error on the :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>` caused by providing a number of detector groups which is larger than the number of spectra in a reduction.
