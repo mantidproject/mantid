@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MolDyn.h"
 
+#include "Common/RunWidget/RunView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -16,8 +17,9 @@
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
+MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent), m_runPresenter() {
   m_uiForm.setupUi(parent);
+  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0"));
 
@@ -26,7 +28,6 @@ MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
   connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(versionSelected(const QString &)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -35,17 +36,8 @@ MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.dsResolution->isOptional(true);
 }
 
-void MolDyn::setup() {}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool MolDyn::validate() {
-  UserInputValidator uiv;
-
-  if (uiv.checkFileFinderWidgetIsValid("Data", m_uiForm.mwRun)) {
+void MolDyn::handleValidation(IUserInputValidator *validator) const {
+  if (validator->checkFileFinderWidgetIsValid("Data", m_uiForm.mwRun)) {
     QString filename = m_uiForm.mwRun->getFirstFilename();
     QString version = m_uiForm.cbVersion->currentText();
     QFileInfo finfo(filename);
@@ -53,27 +45,21 @@ bool MolDyn::validate() {
 
     if (version == "3") {
       if (ext != "dat" && ext != "cdl")
-        uiv.addErrorMessage("File is not of expected type.\n File type must be .dat or .cdl");
+        validator->addErrorMessage("File is not of expected type.\n File type must be .dat or .cdl");
 
       QString functions = m_uiForm.leFunctionNames->text();
       if (ext == "cdl" && functions.isEmpty())
-        uiv.addErrorMessage("Must specify at least one function when loading CDL file.");
+        validator->addErrorMessage("Must specify at least one function when loading CDL file.");
     }
   }
 
   // Validate resolution
   if (m_uiForm.ckResolution->isChecked())
-    uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-
-  emit showMessageBox(uiv.generateErrorMessage());
-  return uiv.isAllInputValid();
+    validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 }
 
-/**
- * Collect the settings on the GUI and run the MolDyn algorithm.
- */
-void MolDyn::run() {
-  setRunIsRunning(true);
+void MolDyn::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
 
   // Get filename and base filename (for naming output workspace group)
   auto const filename = m_uiForm.mwRun->getFirstFilename();
@@ -107,10 +93,9 @@ void MolDyn::run() {
 }
 
 void MolDyn::algorithmComplete(bool error) {
-  setRunIsRunning(false);
-  if (error)
-    setSaveEnabled(false);
-  else
+  m_runPresenter->setRunEnabled(true);
+  setSaveEnabled(!error);
+  if (!error)
     setOutputPlotOptionsWorkspaces({m_outputWsName});
 }
 
@@ -132,11 +117,6 @@ void MolDyn::versionSelected(const QString &version) {
   m_uiForm.mwRun->isForDirectory(version4);
 }
 
-void MolDyn::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
-}
-
 /**
  * Handle saving workspaces
  */
@@ -150,18 +130,6 @@ void MolDyn::saveClicked() {
     addSaveWorkspaceToQueue(baseName);
   m_batchAlgoRunner->executeBatchAsync();
 }
-
-void MolDyn::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void MolDyn::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveEnabled(enabled);
-}
-
-void MolDyn::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void MolDyn::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
