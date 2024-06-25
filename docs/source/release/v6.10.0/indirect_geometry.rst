@@ -17,7 +17,7 @@ New Features
 Bugfixes
 --------
 - :ref:`interface-indirect-data-reduction` on old TOSCA data no longer throws out-of-range error.
-- Masking detectors in the :ref:`algm-ISISIndirectEnergyTransfer` no longer masks the wrong spectum on old TOSCA data.
+- Masking detectors in the :ref:`algm-ISISIndirectEnergyTransfer` no longer masks the wrong spectrum on old TOSCA data.
   The algorithm now uses spectra indices instead of workspace indices, accounting for shifts in the position of spectra after the mask is calculated.
 - :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>` no longer throws an error when providing a number of detector groups which is larger than the number of spectra in a reduction.
 - :ref:`interface-indirect-data-reduction` interface now updates ``EFixed`` when switching to the ``graphite`` analyser.
