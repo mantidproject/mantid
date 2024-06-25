@@ -207,3 +207,8 @@ To fix this situation we use the ``rebase`` command, providing the
 
     git fetch
     git rebase --onto origin/release-next $(git merge-base origin/main origin/topic) topic
+
+Fixing a merge conflict between protected branches
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A Gatekeeper should follow :ref:`these instructions <FixProtectedBranchMergeConflict>` if there is a merge conflict between two protected branches e.g. ``main`` and ``release-next``.
