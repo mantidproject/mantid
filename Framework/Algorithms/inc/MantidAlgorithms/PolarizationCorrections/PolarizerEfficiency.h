@@ -35,8 +35,6 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  bool processGroups() override;
-  void validateGroupInput();
   void calculatePolarizerEfficiency();
   MatrixWorkspace_sptr convertToHistIfNecessary(const MatrixWorkspace_sptr ws);
   void saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
