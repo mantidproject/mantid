@@ -12,6 +12,7 @@
 
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::Geometry::Goniometer;
