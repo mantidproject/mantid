@@ -55,18 +55,6 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("InputWorkspace", ws1), const std::invalid_argument &);
   }
 
-  void testGroupWorkspaceWithWrongSize() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-    MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
-    WorkspaceGroup_sptr groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2});
-    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(groupWs);
-    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
-  }
-
   void testOutput() {
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     polariserEfficiency->execute();
@@ -78,7 +66,6 @@ public:
   void testSpinConfigurations() {
     auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
-    TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
   }
@@ -101,6 +88,25 @@ public:
     auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tAnti1, tPara1});
 
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    polariserEfficiency->execute();
+    MatrixWorkspace_sptr calculatedPolariserEfficiency = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        polariserEfficiency->getProperty("OutputWorkspace"));
+
+    // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
+    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 7/12
+    for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
+      TS_ASSERT_DELTA(7.0 / 12.0, y, 1e-8);
+    }
+  }
+
+  void testExampleCalculationTwoInputs() {
+    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
+    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
+
+    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
+
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    polariserEfficiency->setProperty("SpinStates", "00,01");
     polariserEfficiency->execute();
     MatrixWorkspace_sptr calculatedPolariserEfficiency = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polariserEfficiency->getProperty("OutputWorkspace"));
