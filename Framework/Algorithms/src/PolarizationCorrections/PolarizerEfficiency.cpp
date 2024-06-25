@@ -96,24 +96,6 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   return errorList;
 }
 
-/**
- * Explicitly calls validateInputs and throws runtime error in case
- * of issues in the input properties.
- */
-void PolarizerEfficiency::validateGroupInput() {
-  const auto &results = validateInputs();
-  if (results.size() > 0) {
-    const auto &result = results.cbegin();
-    throw std::runtime_error("Issue in " + result->first + " property: " + result->second);
-  }
-}
-
-bool PolarizerEfficiency::processGroups() {
-  validateGroupInput();
-  calculatePolarizerEfficiency();
-  return true;
-}
-
 void PolarizerEfficiency::exec() { calculatePolarizerEfficiency(); }
 
 void PolarizerEfficiency::calculatePolarizerEfficiency() {
