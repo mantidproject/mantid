@@ -1,1 +1,0 @@
-- Fixed a bug in :ref:`algm-ISISIndirectDiffractionReduction` where the vanadium files were not being calibrated when a calibration file was provided for OSIRIS diffspec mode.

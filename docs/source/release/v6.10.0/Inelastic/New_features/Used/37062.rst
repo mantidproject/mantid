@@ -1,1 +1,0 @@
-- The `Inelastic Data Analysis` interface has been renamed to the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` interface. The new name provides a better description of what it does.

@@ -1,1 +1,0 @@
-- A performance improvement when using the :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` algorithm to load a NeXus file has been achieved.

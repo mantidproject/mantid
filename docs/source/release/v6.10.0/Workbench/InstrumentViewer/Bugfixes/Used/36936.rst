@@ -1,1 +1,0 @@
-- Fixed bug where title on InstrumentView window did not update upon renaming the workspace.

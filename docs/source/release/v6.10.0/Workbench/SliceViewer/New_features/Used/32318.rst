@@ -1,1 +1,0 @@
-- In non-orthogonal view, the signal will now be hidden (previously was ``-``).

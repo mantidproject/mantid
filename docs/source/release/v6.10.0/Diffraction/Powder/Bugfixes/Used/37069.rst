@@ -1,1 +1,0 @@
-- HRPD reduction :ref:`isis-powder-diffraction-hrpd-ref` now only subtracts empty run from the vanadium when it is subtracted from the sample run (i.e. when ``subtract_empty_instrument=True``) - note other ISIS instrument will always subtract an empty run from the vanadium.

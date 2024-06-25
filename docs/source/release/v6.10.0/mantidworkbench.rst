@@ -40,7 +40,7 @@ New features
 Bugfixes
 ############
 - InstrumentView window title now updates upon renaming the workspace.
-- InstrumentView now avoids rendering issue on linux when OpenGl is disabled.
+- InstrumentView now avoids rendering issue on Linux when OpenGl is disabled.
 
 
 SliceViewer

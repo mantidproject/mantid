@@ -1,1 +1,0 @@
-- Disable `Add` button and change the button text to *Loading* from workspace dialogs to prevent warnings or crashes if `Add` button is pressed but files are still loading.

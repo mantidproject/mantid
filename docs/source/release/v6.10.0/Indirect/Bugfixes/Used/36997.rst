@@ -1,2 +1,0 @@
-- Fixed an out-of-range error when running a :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` on old TOSCA data.
-- Fixed a bug where the wrong spectrum would be masked out for old TOSCA data. Masking detectors in the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm was using workspace indices, which assume spectra do not shift in position after the mask is calculated, however this was not the case. Spectra indices are now used for masking detectors.

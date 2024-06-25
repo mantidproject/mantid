@@ -1,1 +1,0 @@
-- Added new workspace dialog widget with the capacity to select and open multiple compatible workspaces at once. For use in :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`

@@ -1,1 +1,0 @@
-- New grouping options using ``HB3AAdjustSampleNorm`` for DEMAND data.
