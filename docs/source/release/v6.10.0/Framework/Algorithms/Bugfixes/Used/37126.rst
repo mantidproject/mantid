@@ -1,1 +1,0 @@
-- A performance improvement when using the :ref:`Load <algm-Load>` algorithm to load a single file has been achieved.

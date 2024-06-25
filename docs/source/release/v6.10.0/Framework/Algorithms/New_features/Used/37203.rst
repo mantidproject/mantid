@@ -1,1 +1,0 @@
-- Add the ability for :ref:`algm-CompressEvents` to combine events together in a logarithmic increasing size groups.

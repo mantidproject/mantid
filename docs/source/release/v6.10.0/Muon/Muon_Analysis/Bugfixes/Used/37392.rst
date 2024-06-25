@@ -1,1 +1,0 @@
-- Fixed a bug when switching between "Normal" fitting and "TF Asymmetry" fitting modes.

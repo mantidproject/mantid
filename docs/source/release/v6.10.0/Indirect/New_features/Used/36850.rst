@@ -1,2 +1,0 @@
-- Added sample logs for multiple run reductions in :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`. `run_number` log stores the run numbers used in the reduction, separated by commas. `multi_run_reduction` log informs about the reduction done on chopped runs or regular runs.
-- Added string with first and last run numbers in the reduced output workspace used with multiple runs in :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`.

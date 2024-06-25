@@ -1,1 +1,0 @@
-- Fixed a bug causing the Full Function Browser and Template Function Browser from going out of sync on the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface.

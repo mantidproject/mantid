@@ -1,1 +1,0 @@
-- Fixed a bug affecting the pairing and the difference tables of the groupings tab in the Muon Analysis Interface. The bug can crash Mantid if after deleting any rows other than the last one from the table, the `Alpha Guess` button or the `Group 1`, `Group 2` combo boxes are clicked.
