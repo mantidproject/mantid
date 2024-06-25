@@ -38,7 +38,7 @@ dependencies:
   - qtpy>=1.9.0
   - quasielasticbayes
   - requests>=2.25.1
-  - scipy>=1.10.0
+  - scipy>=1.10.0,<1.14
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme>=0.8.1
