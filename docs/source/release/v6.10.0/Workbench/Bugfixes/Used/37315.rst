@@ -1,1 +1,0 @@
-- Fixed a bug where dragging a table workspace onto a plot could cause a crash.

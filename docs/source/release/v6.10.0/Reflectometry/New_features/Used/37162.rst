@@ -1,1 +1,0 @@
-- Algorithm :ref:`algm-SaveISISReflectometryORSO` is now able to save into either the ASCII or Nexus format. The :ref:`Save tab<refl_save>` (formerly the Save ASCII tab) has been re-named and updated to offer ORSO Nexus as an additional save format.

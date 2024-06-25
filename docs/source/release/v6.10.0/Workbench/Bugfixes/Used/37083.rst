@@ -1,1 +1,0 @@
-- Fixed bug where overplotting workspaces onto a regular Matplotlib plot could cause an error.
