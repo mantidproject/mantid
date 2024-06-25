@@ -73,6 +73,11 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   }
 
   const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
+  if (analyserWs == nullptr) {
+    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The analyser efficiency workspace is not a MatrixWorkspace.";
+    return errorList;
+  }
+
   auto const &inputWsCount = inputWorkspace->size();
   if (inputWsCount < 2 || inputWsCount > 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
