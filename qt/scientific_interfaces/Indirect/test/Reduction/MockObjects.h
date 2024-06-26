@@ -78,8 +78,8 @@ public:
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
   MOCK_CONST_METHOD0(isRunFilesValid, bool());
-  MOCK_CONST_METHOD1(validateCalibrationFileType, void(UserInputValidator &uiv));
-  MOCK_CONST_METHOD1(validateRebinString, void(UserInputValidator &uiv));
+  MOCK_CONST_METHOD1(validateCalibrationFileType, void(UserInputValidator *uiv));
+  MOCK_CONST_METHOD1(validateRebinString, void(UserInputValidator *uiv));
   MOCK_CONST_METHOD2(validateGroupingProperties,
                      std::optional<std::string>(std::size_t const &spectraMin, std::size_t const &spectraMax));
   MOCK_CONST_METHOD0(showRebinWidthPrompt, bool());

@@ -115,10 +115,10 @@ OutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipo
 std::string MomentsView::getDataName() const { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
 
 bool MomentsView::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsInput, "Sample", DataType::Sqw);
 
-  auto const errorMessage = uiv.generateErrorMessage();
+  auto const errorMessage = uiv->generateErrorMessage();
   if (!errorMessage.empty())
     showMessageBox(errorMessage);
   return errorMessage.empty();

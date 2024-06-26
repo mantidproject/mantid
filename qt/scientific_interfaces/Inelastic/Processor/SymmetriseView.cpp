@@ -386,9 +386,9 @@ void SymmetriseView::replotNewSpectrum(double value) {
 }
 
 bool SymmetriseView::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
-  auto const errorMessage = uiv.generateErrorMessage();
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsInput, "Sample", DataType::Red);
+  auto const errorMessage = uiv->generateErrorMessage();
   if (!errorMessage.empty())
     showMessageBox(errorMessage);
   return errorMessage.empty();

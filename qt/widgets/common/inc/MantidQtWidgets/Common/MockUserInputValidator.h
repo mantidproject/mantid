@@ -19,12 +19,20 @@ class MockUserInputValidator : public MantidQt::CustomInterfaces::IUserInputVali
 public:
   virtual ~MockUserInputValidator() = default;
 
+  MOCK_METHOD3(checkFieldIsNotEmpty, bool(const QString &name, QLineEdit *field, QLabel *errorLabel));
+  MOCK_METHOD3(checkFieldIsValid, bool(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel));
+  MOCK_METHOD2(checkWorkspaceSelectorIsNotEmpty, bool(const QString &name, WorkspaceSelector *workspaceSelector));
   MOCK_METHOD2(checkFileFinderWidgetIsValid, bool(const QString &name, const FileFinderWidget *widget));
   MOCK_METHOD3(checkDataSelectorIsValid, bool(const QString &name, DataSelector *widget, bool silent));
+  MOCK_METHOD3(checkWorkspaceGroupIsValid, bool(QString const &groupName, QString const &inputType, bool silent));
+  MOCK_METHOD2(checkWorkspaceExists, bool(QString const &workspaceName, bool silent));
+
+  MOCK_METHOD2(setErrorLabel, void(QLabel *errorLabel, bool valid));
 
   MOCK_METHOD2(addErrorMessage, void(const std::string &message, bool const silent));
 
   MOCK_CONST_METHOD0(generateErrorMessage, std::string());
+  MOCK_CONST_METHOD0(isAllInputValid, bool());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

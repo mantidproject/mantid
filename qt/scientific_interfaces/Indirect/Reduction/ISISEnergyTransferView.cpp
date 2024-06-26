@@ -102,12 +102,12 @@ std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getF
 
 bool IETView::isRunFilesValid() const { return m_uiForm.dsRunFiles->isValid(); }
 
-void IETView::validateCalibrationFileType(UserInputValidator &uiv) const {
+void IETView::validateCalibrationFileType(UserInputValidator *uiv) const {
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 }
 
-void IETView::validateRebinString(UserInputValidator &uiv) const {
-  uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
+void IETView::validateRebinString(UserInputValidator *uiv) const {
+  uiv->checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
 }
 
 std::optional<std::string> IETView::validateGroupingProperties(std::size_t const &spectraMin,
@@ -301,10 +301,10 @@ void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
 void IETView::pbRunFinished() { m_presenter->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 
-  auto const errorMessage = uiv.generateErrorMessage();
+  auto const errorMessage = uiv->generateErrorMessage();
   if (!errorMessage.empty())
     showMessageBox(errorMessage);
 }

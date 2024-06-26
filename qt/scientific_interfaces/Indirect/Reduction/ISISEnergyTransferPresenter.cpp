@@ -138,14 +138,14 @@ void IETPresenter::updateInstrumentConfiguration() {
 
 bool IETPresenter::validate() {
   IETRunData runData = m_view->getRunData();
-  UserInputValidator uiv;
+  auto uiv = std::make_unique<UserInputValidator>();
 
   if (!m_view->isRunFilesValid()) {
-    uiv.addErrorMessage("Run file range is invalid.");
+    uiv->addErrorMessage("Run file range is invalid.");
   }
 
   if (runData.getInputData().getUseCalibration()) {
-    m_view->validateCalibrationFileType(uiv);
+    m_view->validateCalibrationFileType(uiv.get());
   }
 
   auto rebinDetails = runData.getRebinData();
@@ -157,11 +157,11 @@ bool IETPresenter::validate() {
         if (response)
           rebinWidth = std::abs(rebinWidth);
 
-        bool rebinValid = !uiv.checkBins(rebinDetails.getRebinLow(), rebinWidth, rebinDetails.getRebinHigh());
+        bool rebinValid = !uiv->checkBins(rebinDetails.getRebinLow(), rebinWidth, rebinDetails.getRebinHigh());
         m_view->setSingleRebin(rebinValid);
       }
     } else {
-      m_view->validateRebinString(uiv);
+      m_view->validateRebinString(uiv.get());
     }
   } else {
     m_view->setSingleRebin(false);
@@ -177,14 +177,14 @@ bool IETPresenter::validate() {
 
   for (auto const &error : errors) {
     if (!error.empty())
-      uiv.addErrorMessage(error);
+      uiv->addErrorMessage(error);
   }
 
-  auto const error = uiv.generateErrorMessage();
+  auto const error = uiv->generateErrorMessage();
   if (!error.empty())
     m_view->showMessageBox(error);
 
-  return validateInstrumentDetails() && uiv.isAllInputValid();
+  return validateInstrumentDetails() && uiv->isAllInputValid();
 }
 
 void IETPresenter::notifyRunClicked() { runTab(); }
