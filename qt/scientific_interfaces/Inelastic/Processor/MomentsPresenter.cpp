@@ -59,10 +59,10 @@ void MomentsPresenter::handleScaleValueChanged(double value) { m_model->setScale
 void MomentsPresenter::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
 bool MomentsPresenter::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_view->getDataSelector(), "Sample", DataType::Sqw);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_view->getDataSelector(), "Sample", DataType::Sqw);
 
-  auto const errorMessage = uiv.generateErrorMessage();
+  auto const errorMessage = uiv->generateErrorMessage();
   if (!errorMessage.empty())
     m_view->showMessageBox(errorMessage);
   return errorMessage.empty();
