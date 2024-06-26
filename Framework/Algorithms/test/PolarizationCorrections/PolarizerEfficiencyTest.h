@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testNonMatchingHistogramLengths() {
+  void testFailsWithTooManyHistograms() {
     auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0", 2);
     auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0", 2);
 
