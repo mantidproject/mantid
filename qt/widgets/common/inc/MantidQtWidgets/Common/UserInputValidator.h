@@ -60,6 +60,7 @@ class DLLExport UserInputValidator final : public IUserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
+  ~UserInputValidator() override;
 
   /// Check that the given QLineEdit field is not empty.
   bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr) override;

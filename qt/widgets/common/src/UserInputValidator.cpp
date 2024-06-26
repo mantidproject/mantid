@@ -51,6 +51,8 @@ boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const
 namespace MantidQt::CustomInterfaces {
 UserInputValidator::UserInputValidator() : m_errorMessages(), m_error(false) {}
 
+UserInputValidator::~UserInputValidator() = default;
+
 /**
  * Check that a given QLineEdit field (with given name) is not empty.  If it is
  * empty then the given QLabel will be set to "*" and an error will be added to
