@@ -36,8 +36,11 @@ private:
   void init() override;
   void exec() override;
   void calculatePolarizerEfficiency();
+  void calculateErrors(const MatrixWorkspace_sptr &t00Ws, const MatrixWorkspace_sptr &t01Ws,
+                       const MatrixWorkspace_sptr &effCellWs, const MatrixWorkspace_sptr &effPolarizerWs);
   MatrixWorkspace_sptr convertToHistIfNecessary(const MatrixWorkspace_sptr ws);
   void saveToFile(MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
+  MatrixWorkspace_sptr power(const MatrixWorkspace_sptr &ws, const double exponent);
 };
 
 } // namespace Algorithms

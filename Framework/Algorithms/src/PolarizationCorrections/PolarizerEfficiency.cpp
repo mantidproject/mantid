@@ -77,6 +77,9 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The analyser efficiency workspace is not a MatrixWorkspace.";
     return errorList;
   }
+  if (analyserWs->getNumberHistograms() != 1) {
+    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "All workspaces must contain a single histogram.";
+  }
 
   auto const &inputWsCount = inputWorkspace->size();
   if (inputWsCount < 2 || inputWsCount > 4) {
@@ -89,9 +92,8 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
       if (unit->unitID() != "Wavelength") {
         errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
       }
-      if (analyserWs->getNumberHistograms() != stateWs->getNumberHistograms()) {
-        errorList[PropertyNames::ANALYSER_EFFICIENCY] = "All workspaces must contain the same number of histograms.";
-        errorList[PropertyNames::INPUT_WORKSPACE] = "All workspaces must contain the same number of histograms.";
+      if (stateWs->getNumberHistograms() != 1) {
+        errorList[PropertyNames::INPUT_WORKSPACE] = "All workspaces must contain a single histogram.";
       }
     }
   }
@@ -129,7 +131,9 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   rebin->execute();
   effCell = rebin->getProperty("OutputWorkspace");
 
-  const auto &effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
+  auto &&effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
+
+  calculateErrors(t00Ws, t01Ws, effCell, effPolarizer);
 
   auto const &filename = getPropertyValue(PropertyNames::OUTPUT_FILE_PATH);
   if (!filename.empty()) {
@@ -139,6 +143,27 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   auto const &outputWsName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
   if (!outputWsName.empty()) {
     setProperty(PropertyNames::OUTPUT_WORKSPACE, effPolarizer);
+  }
+}
+
+void PolarizerEfficiency::calculateErrors(const MatrixWorkspace_sptr &t00Ws, const MatrixWorkspace_sptr &t01Ws,
+                                          const MatrixWorkspace_sptr &effCellWs,
+                                          const MatrixWorkspace_sptr &effPolarizerWs) {
+  const auto &deltaT00Ws = (t01Ws) / (2 * (2 * effCellWs - 1) * power(t00Ws + t01Ws, 2));
+  const auto &deltaT01Ws = (-1 * t00Ws) / (2 * (2 * effCellWs - 1) * power(t00Ws + t01Ws, 2));
+  const auto &deltaEffCellWs = (t01Ws - t00Ws) / (power(2 * (2 * effCellWs - 1), 2) * (t00Ws + t01Ws));
+
+  auto &effPolarizerE = effPolarizerWs->mutableE(0);
+  const auto &t00E = t00Ws->e(0);
+  const auto &t01E = t01Ws->e(0);
+  const auto &effCellE = effCellWs->e(0);
+  const auto &delta00Y = deltaT00Ws->y(0);
+  const auto &delta01Y = deltaT01Ws->y(0);
+  const auto &deltaEffCellY = deltaEffCellWs->y(0);
+
+  for (size_t i = 0; i < effPolarizerE.size(); ++i) {
+    effPolarizerE[i] = sqrt(pow(abs(delta00Y[i]), 2) * pow(t00E[i], 2) + pow(abs(delta01Y[i]), 2) * pow(t01E[i], 2) +
+                            pow(abs(deltaEffCellY[i]), 2) * pow(effCellE[i], 2));
   }
 }
 
@@ -171,6 +196,15 @@ MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixW
   convertToHistogram->setProperty("OutputWorkspace", wsClone);
   convertToHistogram->execute();
   return convertToHistogram->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr PolarizerEfficiency::power(const MatrixWorkspace_sptr &ws, const double exponent) {
+  auto powerAlg = createChildAlgorithm("Power");
+  powerAlg->initialize();
+  powerAlg->setProperty("InputWorkspace", ws);
+  powerAlg->setProperty("Exponent", exponent);
+  powerAlg->execute();
+  return powerAlg->getProperty("OutputWorkspace");
 }
 
 } // namespace Mantid::Algorithms
