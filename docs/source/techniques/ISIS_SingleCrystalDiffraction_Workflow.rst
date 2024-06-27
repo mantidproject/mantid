@@ -173,6 +173,7 @@ The reduction proceeds as follows:
     for run in runs:
         skew_args = {**skew_args, 'OutputFile': path.join(save_dir, f"{run}_{peak_type.value}_int.pdf")}
         sxd.integrate_data(integration_type, peak_type, run=run, **skew_args)
+        sxd.calc_absorption_weighted_path_lengths(peak_type, integration_type, run=run, ApplyCorrection=True)
         sxd.save_peak_table(run, peak_type, integration_type, save_dir, save_format='SHELX')
 
     # save combined table

@@ -36,7 +36,7 @@ class INTEGRATION_TYPE(Enum):
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str, file_ext: str):
+    def __init__(self, vanadium_runno: Optional[str] = None, file_ext: str = ".raw", scale_integrated: bool = False):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
@@ -44,6 +44,7 @@ class BaseSX(ABC):
         self.sample_dict = None
         self.n_mcevents = 1200
         self.file_ext = file_ext  # file extension
+        self.scale_integrated = scale_integrated
 
     # --- decorator to apply to all runs is run=None ---
     def default_apply_to_all_runs(func):
@@ -264,6 +265,25 @@ class BaseSX(ABC):
                 if pred_peaks is not None and pred_peaks.sample().hasOrientedLattice():
                     mantid.PredictFractionalPeaks(Peaks=pred_peaks, FracPeaks=out_peaks_name, EnableLogging=False, **kwargs)
             self.set_peaks(run, out_peaks_name, peak_type)
+
+    @default_apply_to_all_runs
+    def calc_absorption_weighted_path_lengths(self, peak_type, int_type=None, run=None, **kwargs):
+        """
+        Method to calculate tbar for each peak (saved in a column of the table) and optionally apply an attenuation
+        correction to the integrated intensity of each peak. By default the correction will be applied if
+        self.scale_integrated = True - which is the case for SXD but not WISH, but can be overridden by supplying
+        keyword ApplyCorrection.
+        :param peak_type: PEAK_TYPE Enum to identify peak table to use
+        :param int_type: INTEGRATION_TYPE Enum to identify peak table to use
+        :param run: run number to identify peak table to use (if not supplied default will be to apply to all runs)
+        :param kwargs: keyword arguments passed to AddAbsorptionWeightedPathLengths algorithm
+        """
+        default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
+        kwargs = {**default_kwargs, **kwargs}
+        ws = self.get_ws(run)
+        peaks = self.get_peaks(run, peak_type, int_type)
+        mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
+        mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)
 
     @staticmethod
     def get_back_to_back_exponential_func(pk, ws, ispec):
