@@ -27,13 +27,11 @@ public:
 
   std::vector<std::string> types() const;
 
-  operator bool() const { return !m_widthSpectra.empty() || !m_eisfSpectra.empty(); }
+  operator bool() const { return !m_widths.empty() || !m_eisfs.empty(); }
 
 private:
-  std::vector<std::string> m_widths;
-  std::vector<std::size_t> m_widthSpectra;
-  std::vector<std::string> m_eisf;
-  std::vector<std::size_t> m_eisfSpectra;
+  std::vector<std::pair<std::string, std::size_t>> m_widths;
+  std::vector<std::pair<std::string, std::size_t>> m_eisfs;
 };
 
 } // namespace Inelastic

@@ -162,10 +162,8 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
 
 void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                           const int &spectrum_index) {
-  const auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  const auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   FunctionQParameters parameters(workspace);
-  const auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
-
   if (!parameters)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
@@ -174,9 +172,8 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
 
   const auto name = getHWHMName(workspace->getName());
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.spectra("Width"));
-  m_tab->handleFunctionListChanged(functionQFunctionList);
-  const auto singleSpectra =
-      FunctionModelSpectra(std::to_string(parameters.spectra(m_activeParameterType)[spectrum_index]));
+  m_tab->handleFunctionListChanged(chooseFunctionQFunctions(paramType == "Width"));
+  const auto singleSpectra = FunctionModelSpectra(std::to_string(parameters.spectra(paramType)[spectrum_index]));
   m_model->addWorkspace(hwhmWorkspace->getName(), singleSpectra);
 }
 

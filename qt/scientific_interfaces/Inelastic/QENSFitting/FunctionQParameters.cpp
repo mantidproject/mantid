@@ -15,72 +15,61 @@ using namespace Mantid::API;
 
 namespace {
 
-struct ContainsOneOrMore {
-  explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
-
-  bool operator()(const std::string &str) const {
-    return std::any_of(m_substrings.cbegin(), m_substrings.cend(),
-                       [&str](std::string const &substring) { return str.rfind(substring) != std::string::npos; });
-  }
-
-private:
-  std::vector<std::string> m_substrings;
-};
-
-template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis const *axis,
-                                                                             Predicate const &predicate) {
-  std::vector<std::string> labels;
-  std::vector<std::size_t> spectra;
+std::vector<std::pair<std::string, std::size_t>> findAxisLabels(TextAxis const *axis,
+                                                                std::vector<std::string> const &parameterSuffixes) {
+  std::vector<std::pair<std::string, std::size_t>> labelAndSpectra;
 
   for (auto i = 0u; i < axis->length(); ++i) {
-    auto label = axis->label(i);
-    if (predicate(label)) {
-      labels.emplace_back(label);
-      spectra.emplace_back(i);
+    auto const label = axis->label(i);
+    if (std::any_of(parameterSuffixes.cbegin(), parameterSuffixes.cend(),
+                    [&](auto const &str) { return label.rfind(str) != std::string::npos; })) {
+      labelAndSpectra.emplace_back(std::make_pair(label, i));
     }
   }
-  return std::make_pair(labels, spectra);
+  return labelAndSpectra;
 }
 
-template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
-                                                                             Predicate const &predicate) {
+std::vector<std::pair<std::string, std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
+                                                                std::vector<std::string> const &parameterSuffixes) {
   if (auto const axis = dynamic_cast<TextAxis *>(workspace->getAxis(1)))
-    return findAxisLabels(axis, predicate);
-  return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
+    return findAxisLabels(axis, parameterSuffixes);
+  return {};
+}
+
+template <typename T>
+std::vector<T> extract(const std::vector<std::pair<std::string, std::size_t>> &vec,
+                       std::function<T(std::pair<std::string, std::size_t>)> const &lambda) {
+  std::vector<T> result;
+  result.reserve(vec.size());
+  std::transform(vec.begin(), vec.end(), std::back_inserter(result), lambda);
+  return result;
 }
 
 } // namespace
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FunctionQParameters::FunctionQParameters() : m_widths(), m_widthSpectra(), m_eisf(), m_eisfSpectra() {}
+FunctionQParameters::FunctionQParameters() : m_widths(), m_eisfs() {}
 
-FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace) {
-  auto const foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
-  auto const foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
-
-  m_widths = foundWidths.first;
-  m_widthSpectra = foundWidths.second;
-  m_eisf = foundEISF.first;
-  m_eisfSpectra = foundEISF.second;
-}
+FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace)
+    : m_widths(findAxisLabels(workspace, {".Width", ".FWHM"})), m_eisfs(findAxisLabels(workspace, {".EISF"})) {}
 
 std::vector<std::string> FunctionQParameters::names(std::string const &parameterType) const {
+  auto const nameGetter = [](auto const &pair) { return pair.first; };
   if (parameterType == "Width") {
-    return m_widths;
+    return extract<std::string>(m_widths, nameGetter);
   } else if (parameterType == "EISF") {
-    return m_eisf;
+    return extract<std::string>(m_eisfs, nameGetter);
   }
   return {};
 }
 
 std::vector<std::size_t> FunctionQParameters::spectra(std::string const &parameterType) const {
+  auto const spectraGetter = [](auto const &pair) { return pair.second; };
   if (parameterType == "Width") {
-    return m_widthSpectra;
+    return extract<std::size_t>(m_widths, spectraGetter);
   } else if (parameterType == "EISF") {
-    return m_eisfSpectra;
+    return extract<std::size_t>(m_eisfs, spectraGetter);
   }
   throw std::logic_error("An unexpected parameter type '" + parameterType + "'is active.");
 }
@@ -89,7 +78,7 @@ std::vector<std::string> FunctionQParameters::types() const {
   std::vector<std::string> types;
   if (!m_widths.empty())
     types.emplace_back("Width");
-  if (!m_eisf.empty())
+  if (!m_eisfs.empty())
     types.emplace_back("EISF");
   return types;
 }
