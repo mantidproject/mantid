@@ -7,9 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace MantidQt {
@@ -19,8 +19,7 @@ namespace Inelastic {
 class MANTIDQT_INELASTIC_DLL FunctionQParameters {
 public:
   FunctionQParameters();
-  FunctionQParameters(std::pair<std::vector<std::string>, std::vector<std::size_t>> widths,
-                      std::pair<std::vector<std::string>, std::vector<std::size_t>> eisfs);
+  FunctionQParameters(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
   std::vector<std::string> names(std::string const &parameterType) const;
 
