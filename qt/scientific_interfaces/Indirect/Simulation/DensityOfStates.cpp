@@ -21,6 +21,9 @@ Mantid::Kernel::Logger g_log("DensityOfStates");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
+
+enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
+
 DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
@@ -35,10 +38,20 @@ DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
 }
 
 void DensityOfStates::handleValidation(IUserInputValidator *validator) const {
-  const auto filename = m_uiForm.mwInputFile->getFirstFilename().toStdString();
-  InputFormat format = filenameToFormat(filename);
-  QString specType = m_uiForm.cbSpectrumType->currentText();
-  auto items = m_uiForm.lwIons->selectedItems();
+  auto const filename = m_uiForm.mwInputFile->getFirstFilename().toStdString();
+  if (filename.empty()) {
+    validator->addErrorMessage("A data file has not been loaded.");
+    return;
+  }
+  auto const format = filenameToFormat(filename);
+  if (format == InputFormat::Unsupported) {
+    validator->addErrorMessage("The provided file format is unsupported. The supported extensions are 'phonon', "
+                               "'castep', 'castep_bin' and 'yaml'.");
+    return;
+  }
+
+  auto const specType = m_uiForm.cbSpectrumType->currentText();
+  auto const items = m_uiForm.lwIons->selectedItems();
 
   if (specType == "DensityOfStates" && isPdosFile(format) && items.size() < 1)
     validator->addErrorMessage("Must select at least one ion for DensityOfStates.");
@@ -216,12 +229,6 @@ void DensityOfStates::saveClicked() {
 }
 
 void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-/**
- * Handle file formats
- */
-
-enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
 
 DensityOfStates::InputFormat DensityOfStates::filenameToFormat(std::string const &filename) const {
   QFileInfo inputFileInfo(QString::fromStdString(filename));
