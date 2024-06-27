@@ -13,6 +13,25 @@
 
 namespace {
 struct FunctionQParameters {
+
+  std::vector<std::string> names(std::string const &parameterType) const {
+    if (parameterType == "Width") {
+      return widths;
+    } else if (parameterType == "EISF") {
+      return eisf;
+    }
+    return {};
+  }
+
+  std::vector<std::size_t> spectra(std::string const &parameterType) const {
+    if (parameterType == "Width") {
+      return widthSpectra;
+    } else if (parameterType == "EISF") {
+      return eisfSpectra;
+    }
+    throw std::logic_error("An unexpected parameter type '" + parameterType + "'is active.");
+  }
+
   std::vector<std::string> widths;
   std::vector<std::size_t> widthSpectra;
   std::vector<std::string> eisf;
@@ -37,8 +56,8 @@ public:
   FunctionQDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
   bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
-  void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
-  void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
+  void setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra, std::size_t parameterIndex,
+                        WorkspaceID dataIndex, bool single = true) override;
 
   void handleAddClicked() override;
   void handleWorkspaceChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &workspace) override;
@@ -48,7 +67,6 @@ protected:
   void addTableEntry(FitDomainIndex row) override;
 
 private:
-  std::vector<std::size_t> activeParameterSpectra(FunctionQParameters const &functionQParameters) const;
   void setActiveParameterType(const std::string &type);
   void updateActiveWorkspaceID(WorkspaceID index);
   void updateParameterOptions(FunctionQAddWorkspaceDialog *dialog, const FunctionQParameters &parameters);
