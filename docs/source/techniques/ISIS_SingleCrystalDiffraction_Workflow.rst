@@ -173,11 +173,12 @@ The reduction proceeds as follows:
     for run in runs:
         skew_args = {**skew_args, 'OutputFile': path.join(save_dir, f"{run}_{peak_type.value}_int.pdf")}
         sxd.integrate_data(integration_type, peak_type, run=run, **skew_args)
+        sxd.remove_non_integrated_peaks(sxd.get_peaks(run, peak_type, integration_type))
         sxd.calc_absorption_weighted_path_lengths(peak_type, integration_type, run=run, ApplyCorrection=True)
         sxd.save_peak_table(run, peak_type, integration_type, save_dir, save_format='SHELX')
 
     # save combined table
-    sxd.save_all_peaks(peak_type, integration_type, save_dir=save_dir, save_format='Jana')
+    sxd.save_all_peaks(peak_type, integration_type, save_dir=save_dir, save_format='SHELX')
 
 .. _isis-single-crystal-diffraction-wish-ref:
 
