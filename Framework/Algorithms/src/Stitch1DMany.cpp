@@ -104,6 +104,10 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
        * Row:       each period only for groups
        */
       m_inputWSMatrix.reserve(inputWorkspacesStr.size());
+      /// When the StitchIDMany algorithm is called from the GUI, the validateInputs method is called twice.
+      /// This causes an unintended side effect on the m_inputWSMatrix variable.
+      /// To fix this, the clear method is called on m_inputWSMatrix to ensure it is always empty at this point.
+      m_inputWSMatrix.clear();
       std::vector<MatrixWorkspace_sptr> column;
       for (const auto &ws : inputWorkspacesStr) {
         auto groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(ws);
