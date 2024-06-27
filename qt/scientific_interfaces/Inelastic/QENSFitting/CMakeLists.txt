@@ -24,6 +24,7 @@ set(SRC_FILES
     FunctionQDataPresenter.cpp
     FunctionQDataView.cpp
     FunctionQModel.cpp
+    FunctionQParameters.cpp
     FunctionBrowser/ConvFunctionTemplateModel.cpp
     FunctionBrowser/FitTypes.cpp
     FunctionBrowser/FunctionTemplateView.cpp
@@ -59,6 +60,7 @@ set(INC_FILES
     FitTabConstants.h
     FunctionQDataPresenter.h
     FunctionQModel.h
+    FunctionQParameters.h
     FunctionBrowser/ConvFunctionTemplateModel.h
     FunctionBrowser/FitTypes.h
     FunctionBrowser/FunctionTemplatePresenter.h
