@@ -325,6 +325,9 @@ _translations = {
     "Kevin A. Tactac": "TacTac, Kevin",
     "GuiMacielPereira": "Pereira, Guilherme",
     "Kort Travis": "Travis, Kort",
+    "Gui Maciel Pereira": "Pereira, Guilherme",
+    "Zachary Morgan (zgf)": "Morgan, Zachary",
+    "Patrou, Maria": "Patrou, Maria",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
