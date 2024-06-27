@@ -149,21 +149,21 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
 void PolarizerEfficiency::calculateErrors(const MatrixWorkspace_sptr &t00Ws, const MatrixWorkspace_sptr &t01Ws,
                                           const MatrixWorkspace_sptr &effCellWs,
                                           const MatrixWorkspace_sptr &effPolarizerWs) {
-  const auto &deltaT00Ws = (t01Ws) / (2 * (2 * effCellWs - 1) * power(t00Ws + t01Ws, 2));
-  const auto &deltaT01Ws = (-1 * t00Ws) / (2 * (2 * effCellWs - 1) * power(t00Ws + t01Ws, 2));
-  const auto &deltaEffCellWs = (t01Ws - t00Ws) / (power(2 * (2 * effCellWs - 1), 2) * (t00Ws + t01Ws));
 
   auto &effPolarizerE = effPolarizerWs->mutableE(0);
   const auto &t00E = t00Ws->e(0);
   const auto &t01E = t01Ws->e(0);
   const auto &effCellE = effCellWs->e(0);
-  const auto &delta00Y = deltaT00Ws->y(0);
-  const auto &delta01Y = deltaT01Ws->y(0);
-  const auto &deltaEffCellY = deltaEffCellWs->y(0);
+  const auto &t00Y = t00Ws->y(0);
+  const auto &t01Y = t01Ws->y(0);
+  const auto &effCellY = effCellWs->y(0);
 
   for (size_t i = 0; i < effPolarizerE.size(); ++i) {
-    effPolarizerE[i] = sqrt(pow(abs(delta00Y[i]), 2) * pow(t00E[i], 2) + pow(abs(delta01Y[i]), 2) * pow(t01E[i], 2) +
-                            pow(abs(deltaEffCellY[i]), 2) * pow(effCellE[i], 2));
+    const auto &delta00 = (t01Y[i]) / (2 * (2 * effCellY[i] - 1) * pow(t00Y[i] + t01Y[i], 2));
+    const auto &delta01 = (-1 * t00Y[i]) / (2 * (2 * effCellY[i] - 1) * pow(t00Y[i] + t01Y[i], 2));
+    const auto &deltaEffCell = (t01Y[i] - t00Y[i]) / (pow(2 * (2 * effCellY[i] - 1), 2) * (t00Y[i] + t01Y[i]));
+    effPolarizerE[i] = sqrt(pow(abs(delta00), 2) * pow(t00E[i], 2) + pow(abs(delta01), 2) * pow(t01E[i], 2) +
+                            pow(abs(deltaEffCell), 2) * pow(effCellE[i], 2));
   }
 }
 
