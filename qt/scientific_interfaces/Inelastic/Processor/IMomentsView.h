@@ -14,9 +14,12 @@
 #include <tuple>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class DataSelector;
+}
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IOutputPlotOptionsView;
 class IMomentsPresenter;
 
 class MANTIDQT_INELASTIC_DLL IMomentsView {
@@ -26,10 +29,9 @@ public:
   virtual void subscribePresenter(IMomentsPresenter *presenter) = 0;
 
   virtual void setupProperties() = 0;
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual MantidWidgets::DataSelector *getDataSelector() const = 0;
   virtual std::string getDataName() const = 0;
-
-  virtual bool validate() = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
 
   virtual void setFBSuffixes(QStringList const &suffix) = 0;

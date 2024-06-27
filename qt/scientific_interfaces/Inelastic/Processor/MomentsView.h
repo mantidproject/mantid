@@ -29,11 +29,9 @@ public:
   void subscribePresenter(IMomentsPresenter *presenter) override;
 
   void setupProperties() override;
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
   std::string getDataName() const override;
-
-  bool validate() override;
-
+  MantidWidgets::DataSelector *getDataSelector() const override;
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
 
