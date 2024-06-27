@@ -184,12 +184,8 @@ MatrixWorkspace_sptr createHWHMWorkspace(MatrixWorkspace_sptr workspace, const s
   return hwhmWorkspace;
 }
 
-boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FunctionQParameters &parameters) {
-  if (!parameters.widthSpectra.empty())
-    return parameters.widthSpectra;
-  else if (!parameters.eisfSpectra.empty())
-    return parameters.eisfSpectra;
-  return boost::none;
+bool hasParameterSpectra(const FunctionQParameters &parameters) {
+  return !parameters.widthSpectra.empty() || !parameters.eisfSpectra.empty();
 }
 
 } // namespace
@@ -200,16 +196,6 @@ FunctionQDataPresenter::FunctionQDataPresenter(IFitTab *tab, IDataModel *model, 
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
-std::vector<std::size_t>
-FunctionQDataPresenter::activeParameterSpectra(FunctionQParameters const &functionQParameters) const {
-  if (m_activeParameterType == "Width") {
-    return functionQParameters.widthSpectra;
-  } else if (m_activeParameterType == "EISF") {
-    return functionQParameters.eisfSpectra;
-  }
-  throw std::logic_error("An unexpected parameter type '" + m_activeParameterType + "'is active.");
-}
-
 bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto functionQDialog = dynamic_cast<FunctionQAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(functionQDialog->workspaceName(), functionQDialog->parameterType(),
@@ -219,11 +205,10 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
     auto const parameterIndex = functionQDialog->parameterNameIndex();
     if (parameterIndex < 0) {
       throw std::runtime_error("No valid parameter was selected.");
-    } else if (functionQDialog->parameterType() == "Width") {
-      setActiveWidth(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
-    } else {
-      setActiveEISF(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
     }
+    const auto parameters = createFunctionQParameters(m_model->getWorkspace(m_activeWorkspaceID));
+    setActiveSpectra(parameters.spectra(functionQDialog->parameterType()), static_cast<std::size_t>(parameterIndex),
+                     m_activeWorkspaceID, false);
     updateActiveWorkspaceID(getNumberOfWorkspaces());
     return true;
   }
@@ -232,28 +217,22 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
 
 void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                           const int &spectrum_index) {
-  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-  const auto name = getHWHMName(workspace->getName());
+  const auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   const auto parameters = createFunctionQParameters(workspace);
-  const auto spectrum = getParameterSpectrum(parameters);
-  auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
+  const auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
 
-  if (!spectrum)
+  if (!hasParameterSpectra(parameters))
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
+
+  const auto name = getHWHMName(workspace->getName());
   const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
   m_tab->handleFunctionListChanged(functionQFunctionList);
-  if (paramType == "Width") {
-    const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
-    m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
-  } else if (paramType == "EISF") {
-    const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.eisfSpectra[spectrum_index]));
-    m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
-  } else {
-    throw std::invalid_argument("Invalid Parameter Type");
-  }
+  const auto singleSpectra =
+      FunctionModelSpectra(std::to_string(parameters.spectra(m_activeParameterType)[spectrum_index]));
+  m_model->addWorkspace(hwhmWorkspace->getName(), singleSpectra);
 }
 
 std::map<std::string, std::string> FunctionQDataPresenter::chooseFunctionQFunctions(bool paramWidth) const {
@@ -304,12 +283,7 @@ void FunctionQDataPresenter::updateParameterOptions(FunctionQAddWorkspaceDialog 
                                                     const FunctionQParameters &parameter) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
-  if (m_activeParameterType == "Width")
-    dialog->setParameterNames(parameter.widths);
-  else if (m_activeParameterType == "EISF")
-    dialog->setParameterNames(parameter.eisf);
-  else
-    dialog->setParameterNames({});
+  dialog->setParameterNames(parameter.names(m_activeParameterType));
 }
 
 void FunctionQDataPresenter::updateParameterTypes(FunctionQAddWorkspaceDialog *dialog,
@@ -341,46 +315,23 @@ void FunctionQDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidget
   updateActiveWorkspaceID(index);
 }
 
-void FunctionQDataPresenter::setActiveWidth(std::size_t widthIndex, WorkspaceID workspaceID, bool single) {
-  const auto parameters = createFunctionQParameters(m_model->getWorkspace(workspaceID));
-  if (parameters.widthSpectra.size() > widthIndex) {
-    const auto &widthSpectra = parameters.widthSpectra;
-    if (single == true) {
-      m_model->setSpectra(createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})), workspaceID);
-    } else { // In multiple mode the spectra needs to be appending on the
-             // existing spectra list.
-      auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
-      auto spectra = m_model->getSpectra(workspaceID);
-      for (const auto &i : spectra) {
-        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
-          spectra_vec.push_back(i.value);
-        }
-      }
-      m_model->setSpectra(createSpectra(spectra_vec), workspaceID);
+void FunctionQDataPresenter::setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra,
+                                              std::size_t parameterIndex, WorkspaceID workspaceID, bool single) {
+  if (activeParameterSpectra.size() <= parameterIndex) {
+    return;
+  }
+  if (single) {
+    m_model->setSpectra(createSpectra(std::vector<std::size_t>({activeParameterSpectra[parameterIndex]})), workspaceID);
+    return;
+  }
+  // In multiple mode the spectra needs to be appending on the existing spectra list.
+  auto spectra = std::vector<std::size_t>({activeParameterSpectra[parameterIndex]});
+  for (const auto &i : m_model->getSpectra(workspaceID)) {
+    if ((std::find(spectra.begin(), spectra.end(), i.value) == spectra.end())) {
+      spectra.emplace_back(i.value);
     }
-  } else
-    logger.warning("Invalid width index specified.");
-}
-
-void FunctionQDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID workspaceID, bool single) {
-  const auto parameters = createFunctionQParameters(m_model->getWorkspace(workspaceID));
-  if (parameters.eisfSpectra.size() > eisfIndex) {
-    const auto &eisfSpectra = parameters.eisfSpectra;
-    if (single == true) {
-      m_model->setSpectra(createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})), workspaceID);
-    } else { // In multiple mode the spectra needs to be appending on the
-             // existing spectra list.
-      auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
-      auto spectra = m_model->getSpectra(workspaceID);
-      for (const auto &i : spectra) {
-        if ((std::find(spectra_vec.cbegin(), spectra_vec.cend(), i.value) == spectra_vec.cend())) {
-          spectra_vec.push_back(i.value);
-        }
-      }
-      m_model->setSpectra(createSpectra(spectra_vec), workspaceID);
-    }
-  } else
-    logger.warning("Invalid EISF index specified.");
+  }
+  m_model->setSpectra(createSpectra(spectra), workspaceID);
 }
 
 void FunctionQDataPresenter::addTableEntry(FitDomainIndex row) {
