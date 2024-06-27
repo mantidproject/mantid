@@ -58,11 +58,7 @@ FunctionQParameters createFunctionQParameters(const MatrixWorkspace_sptr &worksp
   auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
   auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
 
-  FunctionQParameters parameters;
-  parameters.widths = foundWidths.first;
-  parameters.widthSpectra = foundWidths.second;
-  parameters.eisf = foundEISF.first;
-  parameters.eisfSpectra = foundEISF.second;
+  FunctionQParameters parameters(foundWidths, foundEISF);
   return parameters;
 }
 
@@ -184,10 +180,6 @@ MatrixWorkspace_sptr createHWHMWorkspace(MatrixWorkspace_sptr workspace, const s
   return hwhmWorkspace;
 }
 
-bool hasParameterSpectra(const FunctionQParameters &parameters) {
-  return !parameters.widthSpectra.empty() || !parameters.eisfSpectra.empty();
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces::Inelastic {
@@ -221,14 +213,14 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   const auto parameters = createFunctionQParameters(workspace);
   const auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
 
-  if (!hasParameterSpectra(parameters))
+  if (!parameters)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
 
   const auto name = getHWHMName(workspace->getName());
-  const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
+  const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.spectra("Width"));
   m_tab->handleFunctionListChanged(functionQFunctionList);
   const auto singleSpectra =
       FunctionModelSpectra(std::to_string(parameters.spectra(m_activeParameterType)[spectrum_index]));
@@ -289,16 +281,7 @@ void FunctionQDataPresenter::updateParameterOptions(FunctionQAddWorkspaceDialog 
 void FunctionQDataPresenter::updateParameterTypes(FunctionQAddWorkspaceDialog *dialog,
                                                   FunctionQParameters const &parameters) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
-  dialog->setParameterTypes(getParameterTypes(parameters));
-}
-
-std::vector<std::string> FunctionQDataPresenter::getParameterTypes(FunctionQParameters const &parameters) const {
-  std::vector<std::string> types;
-  if (!parameters.widths.empty())
-    types.emplace_back("Width");
-  if (!parameters.eisf.empty())
-    types.emplace_back("EISF");
-  return types;
+  dialog->setParameterTypes(parameters.types());
 }
 
 void FunctionQDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidgets::IAddWorkspaceDialog const *dialog) {

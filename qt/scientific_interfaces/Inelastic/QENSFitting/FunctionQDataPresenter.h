@@ -13,29 +13,45 @@
 
 namespace {
 struct FunctionQParameters {
+  FunctionQParameters() : m_widths(), m_widthSpectra(), m_eisf(), m_eisfSpectra() {}
+  FunctionQParameters(std::pair<std::vector<std::string>, std::vector<std::size_t>> widths,
+                      std::pair<std::vector<std::string>, std::vector<std::size_t>> eisfs)
+      : m_widths(widths.first), m_widthSpectra(widths.second), m_eisf(eisfs.first), m_eisfSpectra(eisfs.second) {}
 
   std::vector<std::string> names(std::string const &parameterType) const {
     if (parameterType == "Width") {
-      return widths;
+      return m_widths;
     } else if (parameterType == "EISF") {
-      return eisf;
+      return m_eisf;
     }
     return {};
   }
 
   std::vector<std::size_t> spectra(std::string const &parameterType) const {
     if (parameterType == "Width") {
-      return widthSpectra;
+      return m_widthSpectra;
     } else if (parameterType == "EISF") {
-      return eisfSpectra;
+      return m_eisfSpectra;
     }
     throw std::logic_error("An unexpected parameter type '" + parameterType + "'is active.");
   }
 
-  std::vector<std::string> widths;
-  std::vector<std::size_t> widthSpectra;
-  std::vector<std::string> eisf;
-  std::vector<std::size_t> eisfSpectra;
+  std::vector<std::string> types() const {
+    std::vector<std::string> types;
+    if (!m_widths.empty())
+      types.emplace_back("Width");
+    if (!m_eisf.empty())
+      types.emplace_back("EISF");
+    return types;
+  }
+
+  operator bool() const { return !m_widthSpectra.empty() || !m_eisfSpectra.empty(); }
+
+private:
+  std::vector<std::string> m_widths;
+  std::vector<std::size_t> m_widthSpectra;
+  std::vector<std::string> m_eisf;
+  std::vector<std::size_t> m_eisfSpectra;
 };
 } // namespace
 
@@ -71,7 +87,6 @@ private:
   void updateActiveWorkspaceID(WorkspaceID index);
   void updateParameterOptions(FunctionQAddWorkspaceDialog *dialog, const FunctionQParameters &parameters);
   void updateParameterTypes(FunctionQAddWorkspaceDialog *dialog, FunctionQParameters const &parameters);
-  std::vector<std::string> getParameterTypes(FunctionQParameters const &parameters) const;
   std::map<std::string, std::string> chooseFunctionQFunctions(bool paramWidth) const;
   void setActiveWorkspaceIDToCurrentWorkspace(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
