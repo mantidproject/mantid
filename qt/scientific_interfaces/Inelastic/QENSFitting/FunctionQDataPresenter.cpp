@@ -15,53 +15,6 @@
 namespace {
 using namespace MantidQt::CustomInterfaces::Inelastic;
 
-Mantid::Kernel::Logger logger("FunctionQDataPresenter");
-
-struct ContainsOneOrMore {
-  explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
-
-  bool operator()(const std::string &str) const {
-    return std::any_of(m_substrings.cbegin(), m_substrings.cend(),
-                       [&str](std::string const &substring) { return str.rfind(substring) != std::string::npos; });
-  }
-
-private:
-  std::vector<std::string> m_substrings;
-};
-
-template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis const *axis,
-                                                                             Predicate const &predicate) {
-  std::vector<std::string> labels;
-  std::vector<std::size_t> spectra;
-
-  for (auto i = 0u; i < axis->length(); ++i) {
-    auto label = axis->label(i);
-    if (predicate(label)) {
-      labels.emplace_back(label);
-      spectra.emplace_back(i);
-    }
-  }
-  return std::make_pair(labels, spectra);
-}
-
-template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
-                                                                             Predicate const &predicate) {
-  auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
-  if (axis)
-    return findAxisLabels(axis, predicate);
-  return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
-}
-
-FunctionQParameters createFunctionQParameters(const MatrixWorkspace_sptr &workspace) {
-  auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
-  auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
-
-  FunctionQParameters parameters(foundWidths, foundEISF);
-  return parameters;
-}
-
 std::string createSpectra(const std::vector<std::size_t> &spectrum) {
   std::string spectra = "";
   for (const auto spec : spectrum) {
@@ -198,7 +151,7 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
     if (parameterIndex < 0) {
       throw std::runtime_error("No valid parameter was selected.");
     }
-    const auto parameters = createFunctionQParameters(m_model->getWorkspace(m_activeWorkspaceID));
+    FunctionQParameters parameters(m_model->getWorkspace(m_activeWorkspaceID));
     setActiveSpectra(parameters.spectra(functionQDialog->parameterType()), static_cast<std::size_t>(parameterIndex),
                      m_activeWorkspaceID, false);
     updateActiveWorkspaceID(getNumberOfWorkspaces());
@@ -210,7 +163,7 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
 void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                           const int &spectrum_index) {
   const auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-  const auto parameters = createFunctionQParameters(workspace);
+  FunctionQParameters parameters(workspace);
   const auto functionQFunctionList = chooseFunctionQFunctions(paramType == "Width");
 
   if (!parameters)
@@ -249,25 +202,27 @@ void FunctionQDataPresenter::handleAddClicked() { updateActiveWorkspaceID(m_mode
 
 void FunctionQDataPresenter::handleWorkspaceChanged(FunctionQAddWorkspaceDialog *dialog,
                                                     const std::string &workspaceName) {
-  FunctionQParameters parameters;
   try {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
-    parameters = createFunctionQParameters(workspace);
+    FunctionQParameters parameters(workspace);
     dialog->enableParameterSelection();
+    updateParameterTypes(dialog, parameters);
+    updateParameterOptions(dialog, parameters);
   } catch (const std::invalid_argument &) {
+    FunctionQParameters parameters;
     dialog->disableParameterSelection();
+    updateParameterTypes(dialog, parameters);
+    updateParameterOptions(dialog, parameters);
   }
-  updateParameterTypes(dialog, parameters);
-  updateParameterOptions(dialog, parameters);
 }
 
 void FunctionQDataPresenter::handleParameterTypeChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
   if (!workspaceName.empty() && m_adsInstance.doesExist(workspaceName)) {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
-    const FunctionQParameters parameter = createFunctionQParameters(workspace);
+    FunctionQParameters parameters(workspace);
     setActiveParameterType(type);
-    updateParameterOptions(dialog, parameter);
+    updateParameterOptions(dialog, parameters);
   }
 }
 
