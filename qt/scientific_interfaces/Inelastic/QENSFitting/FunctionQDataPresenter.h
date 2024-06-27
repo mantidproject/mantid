@@ -48,6 +48,7 @@ protected:
   void addTableEntry(FitDomainIndex row) override;
 
 private:
+  std::vector<std::size_t> activeParameterSpectra(FunctionQParameters const &functionQParameters) const;
   void setActiveParameterType(const std::string &type);
   void updateActiveWorkspaceID(WorkspaceID index);
   void updateParameterOptions(FunctionQAddWorkspaceDialog *dialog, const FunctionQParameters &parameters);

@@ -200,6 +200,16 @@ FunctionQDataPresenter::FunctionQDataPresenter(IFitTab *tab, IDataModel *model, 
     : FitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
+std::vector<std::size_t>
+FunctionQDataPresenter::activeParameterSpectra(FunctionQParameters const &functionQParameters) const {
+  if (m_activeParameterType == "Width") {
+    return functionQParameters.widthSpectra;
+  } else if (m_activeParameterType == "EISF") {
+    return functionQParameters.eisfSpectra;
+  }
+  throw std::logic_error("An unexpected parameter type '" + m_activeParameterType + "'is active.");
+}
+
 bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   if (const auto functionQDialog = dynamic_cast<FunctionQAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(functionQDialog->workspaceName(), functionQDialog->parameterType(),
