@@ -198,13 +198,4 @@ MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixW
   return convertToHistogram->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr PolarizerEfficiency::power(const MatrixWorkspace_sptr &ws, const double exponent) {
-  auto powerAlg = createChildAlgorithm("Power");
-  powerAlg->initialize();
-  powerAlg->setProperty("InputWorkspace", ws);
-  powerAlg->setProperty("Exponent", exponent);
-  powerAlg->execute();
-  return powerAlg->getProperty("OutputWorkspace");
-}
-
 } // namespace Mantid::Algorithms
