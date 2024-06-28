@@ -165,7 +165,7 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   const auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   FunctionQParameters parameters(workspace);
   if (!parameters)
-    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+    throw std::invalid_argument("Workspace contains no Width, EISF or A0 spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
@@ -182,7 +182,7 @@ std::map<std::string, std::string> FunctionQDataPresenter::chooseFunctionQFuncti
     return paramWidth ? FunctionQ::WIDTH_FITS : FunctionQ::EISF_FITS;
 
   bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
-  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
+  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF") || m_view->dataColumnContainsText("A0");
   if (widthFuncs && eisfFuncs)
     return FunctionQ::ALL_FITS;
   else if (widthFuncs)
@@ -245,7 +245,10 @@ void FunctionQDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidget
   // This a vector of workspace names currently loaded
   auto const wsVector = m_model->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
-  auto const wsIt = std::find(wsVector.cbegin(), wsVector.cend(), hwhmWsName);
+  auto wsIt = std::find(wsVector.cbegin(), wsVector.cend(), hwhmWsName);
+  if (wsIt == wsVector.cend()) {
+    wsIt = std::find(wsVector.cbegin(), wsVector.cend(), wsName);
+  }
   // this is the index of the workspace.
   auto const index = WorkspaceID(std::distance(wsVector.cbegin(), wsIt));
   updateActiveWorkspaceID(index);

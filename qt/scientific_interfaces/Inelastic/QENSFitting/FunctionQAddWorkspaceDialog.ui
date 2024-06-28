@@ -50,6 +50,11 @@
             <string>EISF</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>A0</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item row="1" column="0">
