@@ -138,7 +138,8 @@ void CalculateIqt::exec() {
   bool enforceNormalization = getProperty("EnforceNormalization");
   const int nIterations = getProperty("NumberOfIterations");
   const int seed = getProperty("SeedValue");
-  resolution = normalizedFourierTransform(resolution, rebinParams, enforceNormalization);
+
+  m_sampleIntegral = integration(sampleWorkspace);
 
   auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed, calculateErrors,
                                                     nIterations, enforceNormalization);
@@ -159,7 +160,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorksp
                                                               const std::string &rebinParams, const int seed,
                                                               const bool calculateErrors, const int nIterations,
                                                               const bool enforceNormalization) {
-  auto outputWorkspace = calculateIqt(sample, resolution, rebinParams, enforceNormalization);
+  auto outputWorkspace = calculateIqt(sample, resolution, rebinParams, true);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
   simulatedWorkspaces.emplace_back(outputWorkspace);
@@ -171,7 +172,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorksp
     for (auto i = 0; i < nIterations - 1; ++i) {
       errorCalculationProg.report("Calculating Monte Carlo errors...");
       PARALLEL_START_INTERRUPT_REGION
-      auto simulated = doSimulation(sample->clone(), resolution, rebinParams, mTwister, enforceNormalization);
+      auto simulated = doSimulation(sample->clone(), resolution->clone(), rebinParams, mTwister, enforceNormalization);
       PARALLEL_CRITICAL(emplace_back)
       simulatedWorkspaces.emplace_back(simulated);
       PARALLEL_END_INTERRUPT_REGION
@@ -269,28 +270,30 @@ MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sp
                                                               const std::string &rebinParams,
                                                               const bool enforceNormalization) {
   workspace = rebin(workspace, rebinParams);
-  auto workspace_int = integration(workspace);
+  auto workspaceIntegral = integration(workspace);
   workspace = convertToPointData(workspace);
   workspace = extractFFTSpectrum(workspace);
   if (enforceNormalization) {
-    return divide(workspace, workspace_int);
+    return divide(workspace, workspaceIntegral);
   }
   // return the output workspace of ExtractFFTSpectrum
   return workspace;
 }
 
 MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
-                                                const MatrixWorkspace_sptr &resolutionWorkspace,
+                                                MatrixWorkspace_sptr resolutionWorkspace,
                                                 const std::string &rebinParams, const bool enforceNormalization) {
   workspace = normalizedFourierTransform(workspace, rebinParams, enforceNormalization);
+  resolutionWorkspace = normalizedFourierTransform(resolutionWorkspace, rebinParams, true);
   return divide(workspace, resolutionWorkspace);
 }
 
-MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, const MatrixWorkspace_sptr &resolution,
+MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
                                                 const std::string &rebinParams, MersenneTwister &mTwister,
                                                 const bool enforceNormalization) {
-  auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
-  return calculateIqt(simulatedWorkspace, resolution, rebinParams, enforceNormalization);
+  auto simulatedSample = randomizeWorkspaceWithinError(std::move(sample), mTwister);
+  auto simulatedResolution = randomizeWorkspaceWithinError(std::move(resolution), mTwister);
+  return divide(calculateIqt(simulatedSample, simulatedResolution, rebinParams, false), m_sampleIntegral);
 }
 
 MatrixWorkspace_sptr
