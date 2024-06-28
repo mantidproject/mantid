@@ -37,6 +37,7 @@ namespace MantidQt::CustomInterfaces {
 SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model)
     : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
@@ -63,21 +64,14 @@ void SqwPresenter::handleDataReady(std::string const &dataName) {
   }
 }
 
-bool SqwPresenter::validate() {
-  UserInputValidator uiv = m_model->validate(m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
-  auto const errorMessage = uiv.generateErrorMessage();
-  // Show an error message if needed
-  if (!errorMessage.empty())
-    m_view->showMessageBox(errorMessage);
-  return errorMessage.empty();
+void SqwPresenter::handleValidation(IUserInputValidator *validator) const {
+  m_model->validate(validator, m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
 }
 
 void SqwPresenter::run() {
   m_model->setupRebinAlgorithm(m_batchAlgoRunner);
   m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
   m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
-
-  m_view->setRunButtonText("Running...");
   m_view->setEnableOutputOptions(false);
 
   m_batchAlgoRunner->executeBatch();
@@ -92,7 +86,6 @@ void SqwPresenter::runComplete(bool error) {
   if (!error) {
     setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
   }
-  m_view->setRunButtonText("Run");
   m_view->setEnableOutputOptions(!error);
 }
 
@@ -119,7 +112,7 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void SqwPresenter::handleRunClicked() { runTab(); }
+void SqwPresenter::handleRun() { runTab(); }
 
 void SqwPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))

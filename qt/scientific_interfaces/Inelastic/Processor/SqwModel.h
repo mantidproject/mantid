@@ -38,8 +38,8 @@ public:
                                               std::string const &reflection) const = 0;
   virtual std::string getOutputWorkspace() const = 0;
   virtual MatrixWorkspace_sptr getRqwWorkspace() const = 0;
-  virtual UserInputValidator validate(std::tuple<double, double> const qRange,
-                                      std::tuple<double, double> const eRange) const = 0;
+  virtual void validate(IUserInputValidator *validator, std::tuple<double, double> const qRange,
+                        std::tuple<double, double> const eRange) const = 0;
   virtual MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
                                                        const std::string &reflection) const = 0;
 };
@@ -65,8 +65,8 @@ public:
                                       std::string const &reflection) const override;
   std::string getOutputWorkspace() const override;
   MatrixWorkspace_sptr getRqwWorkspace() const override;
-  UserInputValidator validate(std::tuple<double, double> const qRange,
-                              std::tuple<double, double> const eRange) const override;
+  void validate(IUserInputValidator *validator, std::tuple<double, double> const qRange,
+                std::tuple<double, double> const eRange) const override;
   MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
                                                const std::string &reflection) const override;
 
