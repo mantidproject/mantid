@@ -117,6 +117,10 @@ protected:
                                                                      const Kernel::V3D &detPos,
                                                                      const Mantid::Geometry::BoundingBox &detectorBbox);
 
+  std::shared_ptr<Geometry::CSGObject>
+  createCollimatorHexahedronShape(const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo,
+                                  const int64_t &histogramIndex);
+
 private:
   void init() override;
   void exec() override;
