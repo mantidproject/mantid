@@ -8,6 +8,8 @@
 
 #include "Common/DataModel.h"
 #include "Common/IDataModel.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/Runwidget/RunPresenter.h"
 #include "DataProcessor.h"
 #include "DataProcessorInterface.h"
 
@@ -18,6 +20,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ElwinTab.h"
 
 namespace MantidQt {
@@ -31,7 +34,6 @@ class IElwinPresenter {
 public:
   virtual void handleValueChanged(std::string const &propName, double value) = 0;
   virtual void handleValueChanged(std::string const &propName, bool value) = 0;
-  virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
   virtual void handlePlotPreviewClicked() = 0;
   virtual void handlePreviewSpectrumChanged(int spectrum) = 0;
@@ -42,7 +44,7 @@ public:
   virtual void updateAvailableSpectra() = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter {
+class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
 public:
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
   ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
@@ -51,12 +53,14 @@ public:
 
   void run() override;
   void setup() override;
-  bool validate() override;
+
+  // runWidget
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
   // Elwin interface methods
   void handleValueChanged(std::string const &propName, double) override;
   void handleValueChanged(std::string const &propName, bool) override;
-  void handleRunClicked() override;
   void handleSaveClicked() override;
   void handlePlotPreviewClicked() override;
   void handlePreviewSpectrumChanged(int spectrum) override;

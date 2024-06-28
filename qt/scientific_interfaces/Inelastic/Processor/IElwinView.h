@@ -23,6 +23,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IRunView;
 class IOutputPlotOptionsView;
 class IElwinPresenter;
 
@@ -32,6 +33,7 @@ public:
   virtual ~IElwinView() = default;
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
+  virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;

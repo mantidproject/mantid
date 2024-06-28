@@ -45,6 +45,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_pt
     : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::make_unique<DataModel>()),
       m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
@@ -54,6 +55,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_pt
     : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::move(dataModel)),
       m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
@@ -125,21 +127,17 @@ bool ElwinPresenter::checkForELTWorkspace() {
   return WorkspaceUtils::doesExistInADS(workspaceName);
 }
 
-bool ElwinPresenter::validate() {
-  UserInputValidator uiv;
+void ElwinPresenter::handleValidation(IUserInputValidator *validator) const {
+  if (m_view->isTableEmpty())
+    validator->addErrorMessage("Data Table is empty");
   auto rangeOne = std::make_pair(m_view->getIntegrationStart(), m_view->getIntegrationEnd());
-  uiv.checkValidRange("Range One", rangeOne);
+  validator->checkValidRange("Range One", rangeOne);
   bool useTwoRanges = m_view->getBackgroundSubtraction();
   if (useTwoRanges) {
     auto rangeTwo = std::make_pair(m_view->getBackgroundStart(), m_view->getBackgroundEnd());
-    uiv.checkValidRange("Range Two", rangeTwo);
-    uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
+    validator->checkValidRange("Range Two", rangeTwo);
+    validator->checkRangesDontOverlap(rangeOne, rangeTwo);
   }
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.empty())
-    m_view->showMessageBox(errorMessage);
-  return errorMessage.empty();
 }
 
 void ElwinPresenter::handleValueChanged(std::string const &propName, double value) {
@@ -251,10 +249,9 @@ void ElwinPresenter::updateIntegrationRange() {
   }
 }
 
-void ElwinPresenter::handleRunClicked() {
+void ElwinPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  if (!m_view->isTableEmpty())
-    runTab();
+  runTab();
 }
 
 /**
