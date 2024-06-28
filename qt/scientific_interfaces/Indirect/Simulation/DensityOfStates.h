@@ -7,44 +7,40 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "SimulationTab.h"
 #include "ui_DensityOfStates.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL DensityOfStates : public SimulationTab {
+class MANTIDQT_INDIRECT_DLL DensityOfStates : public SimulationTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   DensityOfStates(QWidget *parent = nullptr);
 
-  QString help() { return "DensityOfStates"; };
-
-  void setup() override;
-  bool validate() override;
-  void run() override;
-
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   void dosAlgoComplete(bool error);
   void handleFileChange();
   void ionLoadComplete(bool error);
-  void runClicked();
   void saveClicked();
 
 private:
-  void setRunIsRunning(bool running);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
   enum class InputFormat : int;
-  InputFormat filenameToFormat(QString filename);
-  std::string formatToFilePropName(InputFormat format);
-  bool isPdosFile(InputFormat dosFileFormat);
+  InputFormat filenameToFormat(std::string const &filename) const;
+  std::string formatToFilePropName(InputFormat const &format) const;
+  bool isPdosFile(InputFormat const &dosFileFormat) const;
 
+  std::unique_ptr<IRunPresenter> m_runPresenter;
   /// The ui form
   Ui::DensityOfStates m_uiForm;
   /// Name of output workspace
