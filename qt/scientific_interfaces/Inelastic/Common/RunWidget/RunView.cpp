@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 RunView::RunView(QWidget *parent) : QWidget(parent), m_presenter() {
-  m_uiForm.setupUi(parent);
+  m_uiForm.setupUi(this);
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
 }
