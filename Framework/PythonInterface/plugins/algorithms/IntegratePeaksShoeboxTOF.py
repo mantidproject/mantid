@@ -190,9 +190,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="NFWHM",
-            defaultValue=4,
+            defaultValue=4.0,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=FloatBoundedValidator(lower=1.0),
             doc="If GetNBinsFromBackToBackParams=True then the number of TOF bins will be NFWHM x FWHM of the "
             "BackToBackExponential at the peak detector and TOF.",
         )
