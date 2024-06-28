@@ -33,6 +33,10 @@ void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOpti
   m_plotOptionsPresenter = std::move(presenter);
 }
 
+void DataProcessor::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
+  m_runPresenter = std::move(presenter);
+}
+
 void DataProcessor::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
 void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
@@ -40,10 +44,9 @@ void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> cons
 }
 
 void DataProcessor::runTab() {
-  if (validate()) {
+  if (m_runPresenter->validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
-    emit updateRunButton(false, "disable", "Running...", "Running data reduction...");
     try {
       if (m_plotOptionsPresenter) {
         m_plotOptionsPresenter->clearWorkspaces();
@@ -51,11 +54,11 @@ void DataProcessor::runTab() {
       run();
     } catch (std::exception const &ex) {
       m_tabRunning = false;
-      emit updateRunButton(true, "enable");
       emit showMessageBox(ex.what());
     }
   } else {
     g_log.warning("Failed to validate input!");
+    m_runPresenter->setRunEnabled(true);
   }
 }
 
@@ -69,9 +72,9 @@ void DataProcessor::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
+    m_runPresenter->setRunEnabled(true);
     runComplete(error);
     auto const enableOutputButtons = error == false ? "enable" : "disable";
-    emit updateRunButton(true, enableOutputButtons);
   }
 }
 
