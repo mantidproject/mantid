@@ -431,6 +431,7 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IElwinPresenter *presenter));
   MOCK_METHOD0(setup, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
 
   MOCK_METHOD2(setAvailableSpectra,
@@ -511,6 +512,7 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IMomentsPresenter *presenter));
   MOCK_METHOD0(setupProperties, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getDataSelector, DataSelector *());
   MOCK_CONST_METHOD0(getDataName, std::string());
@@ -523,6 +525,7 @@ public:
   MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));
   MOCK_METHOD1(setRangeSelectorMin, void(double newValue));
   MOCK_METHOD1(setRangeSelectorMax, void(double newValue));
+  MOCK_METHOD1(setSaveResultEnabled, void(bool enable));
 
   MOCK_METHOD1(plotNewData, void(std::string const &filename));
   MOCK_METHOD0(replot, void());

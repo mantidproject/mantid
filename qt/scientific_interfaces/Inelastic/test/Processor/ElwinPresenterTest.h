@@ -35,6 +35,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockElwinView>>();
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_runView = std::make_unique<NiceMock<MockRunView>>();
 
     auto model = std::make_unique<NiceMock<MockElwinModel>>();
     auto dataModel = std::make_unique<NiceMock<MockDataModel>>();
@@ -42,6 +43,7 @@ public:
     m_dataModel = dataModel.get();
 
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
+    ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     m_presenter = std::make_unique<ElwinPresenter>(nullptr, m_view.get(), std::move(model), std::move(dataModel));
 
     m_workspace = createWorkspace(5);
@@ -55,10 +57,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_dataModel));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputPlotView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_runView.get()));
 
     m_presenter.reset();
     m_view.reset();
     m_outputPlotView.reset();
+    m_runView.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -89,8 +93,7 @@ public:
 
   void test_handleRunClicked_doesnt_run_with_invalid_ranges() {
     EXPECT_CALL(*m_outputPlotView, clearWorkspaces()).Times(1);
-    EXPECT_CALL(*m_view, isTableEmpty()).Times(1);
-    m_presenter->handleRunClicked();
+    m_presenter->handleRun();
   }
 
   void test_handlePlotPreviewClicked_calls_warning_when_no_workspace() {
@@ -133,6 +136,7 @@ private:
   NiceMock<MockDataModel> *m_dataModel;
   NiceMock<MockElwinModel> *m_model;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
+  std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockElwinView>> m_view;
   std::unique_ptr<ElwinPresenter> m_presenter;
 

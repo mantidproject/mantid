@@ -36,11 +36,13 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockMomentsView>>();
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_runView = std::make_unique<NiceMock<MockRunView>>();
 
     auto model = std::make_unique<NiceMock<MockMomentsModel>>();
     m_model = model.get();
 
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
+    ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     m_presenter = std::make_unique<MomentsPresenter>(nullptr, m_view.get(), std::move(model));
 
     m_workspace = createWorkspace(5);
@@ -53,10 +55,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputPlotView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_runView.get()));
 
     m_presenter.reset();
     m_view.reset();
     m_outputPlotView.reset();
+    m_runView.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -91,6 +95,7 @@ public:
 private:
   NiceMock<MockMomentsModel> *m_model;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
+  std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockMomentsView>> m_view;
   std::unique_ptr<MomentsPresenter> m_presenter;
 
