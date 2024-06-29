@@ -55,6 +55,7 @@ public:
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
+  bool validate() override;
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
