@@ -27,11 +27,13 @@ public:
   ~MomentsView();
 
   void subscribePresenter(IMomentsPresenter *presenter) override;
-
   void setupProperties() override;
+
+  IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptions() const override;
-  std::string getDataName() const override;
   MantidWidgets::DataSelector *getDataSelector() const override;
+
+  std::string getDataName() const override;
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
 
@@ -43,10 +45,10 @@ public:
   void setRangeSelectorMin(double newValue) override;
   /// Sets the max of the range selector if it is more than the min
   void setRangeSelectorMax(double newValue) override;
+  void setSaveResultEnabled(bool enable) override;
   void plotNewData(std::string const &filename) override;
   void replot() override;
   void plotOutput(std::string const &outputWorkspace) override;
-
   void showMessageBox(const std::string &message) const override;
 
 private slots:
@@ -56,8 +58,6 @@ private slots:
   void notifyScaleChanged(int);
   void notifyScaleValueChanged(double);
   void notifyRangeChanged(double, double);
-
-  void notifyRunClicked();
   void notifySaveClicked();
 
 private:

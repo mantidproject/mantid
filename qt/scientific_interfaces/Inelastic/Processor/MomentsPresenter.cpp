@@ -29,6 +29,7 @@ namespace MantidQt::CustomInterfaces {
 MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model)
     : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 }
@@ -58,14 +59,8 @@ void MomentsPresenter::handleScaleValueChanged(double value) { m_model->setScale
 
 void MomentsPresenter::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
-bool MomentsPresenter::validate() {
-  auto uiv = std::make_unique<UserInputValidator>();
-  validateDataIsOfType(uiv.get(), m_view->getDataSelector(), "Sample", DataType::Sqw);
-
-  auto const errorMessage = uiv->generateErrorMessage();
-  if (!errorMessage.empty())
-    m_view->showMessageBox(errorMessage);
-  return errorMessage.empty();
+void MomentsPresenter::handleValidation(IUserInputValidator *validator) const {
+  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Sqw);
 }
 
 /**
@@ -129,7 +124,7 @@ void MomentsPresenter::setFileExtensionsByName(bool filter) {
 /**
  * Handle when Run is clicked
  */
-void MomentsPresenter::handleRunClicked() { runTab(); }
+void MomentsPresenter::handleRun() { runTab(); }
 
 /**
  * Handles saving of workspaces
