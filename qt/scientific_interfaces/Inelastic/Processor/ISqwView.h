@@ -30,6 +30,7 @@ public:
 
   virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
   virtual std::tuple<double, double> getQRangeFromPlot() const = 0;

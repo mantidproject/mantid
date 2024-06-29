@@ -32,6 +32,7 @@ public:
 
   IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptions() const override;
+
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
   std::tuple<double, double> getQRangeFromPlot() const override;

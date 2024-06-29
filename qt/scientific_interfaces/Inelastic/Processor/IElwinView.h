@@ -33,6 +33,7 @@ public:
   virtual ~IElwinView() = default;
   virtual void subscribePresenter(IElwinPresenter *presenter) = 0;
   virtual void setup() = 0;
+
   virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
 
