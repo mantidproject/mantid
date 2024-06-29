@@ -28,7 +28,7 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt::CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0), m_runPresenter() {
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 

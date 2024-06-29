@@ -50,7 +50,7 @@ void DiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 

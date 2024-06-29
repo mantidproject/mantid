@@ -26,9 +26,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-54</y>
-        <width>929</width>
-        <height>821</height>
+        <y>0</y>
+        <width>954</width>
+        <height>771</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -1251,7 +1251,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="runWidget" native="true"/>
+        <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
        </item>
        <item>
         <widget class="QGroupBox" name="gbOutput">
@@ -1308,15 +1308,21 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>Common/OutputPlotOptionsView.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>Common/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

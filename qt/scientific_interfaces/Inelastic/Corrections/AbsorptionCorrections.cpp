@@ -111,7 +111,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   std::map<std::string, std::string> actions;
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
 
