@@ -58,4 +58,8 @@ void IqtModel::setCalculateErrors(bool calculateErrors) { m_calculateErrors = ca
 
 void IqtModel::setEnforceNormalization(bool enforceNormalization) { m_enforceNormalization = enforceNormalization; }
 
+double IqtModel::EMin() { return m_energyMin; }
+
+double IqtModel::EMax() { return m_energyMax; }
+
 } // namespace MantidQt::CustomInterfaces
