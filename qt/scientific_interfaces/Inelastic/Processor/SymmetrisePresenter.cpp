@@ -31,6 +31,7 @@ SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
     : DataProcessor(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
       m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 
@@ -42,10 +43,12 @@ SymmetrisePresenter::~SymmetrisePresenter() { m_propTrees["SymmPropTree"]->unset
 
 void SymmetrisePresenter::setup() {}
 
-bool SymmetrisePresenter::validate() { return m_view->validate(); }
+void SymmetrisePresenter::handleValidation(IUserInputValidator *validator) const {
+  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red);
+}
 
-void SymmetrisePresenter::handleRunOrPreviewClicked(bool isPreview) {
-  setIsPreview(isPreview);
+void SymmetrisePresenter::handleRun() {
+  setIsPreview(false);
   runTab();
 }
 
@@ -91,8 +94,6 @@ void SymmetrisePresenter::run() {
 
   // Execute the algorithm(s) on a separated thread
   m_batchAlgoRunner->executeBatchAsync();
-  // Now enable the run function
-  m_view->enableRun(true);
 }
 
 /**
@@ -121,7 +122,12 @@ void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void SymmetrisePresenter::handleReflectTypeChanged(int value) { m_model->setIsPositiveReflect(value == 0); }
+void SymmetrisePresenter::handleReflectTypeChanged(int value) {
+  if (validate()) {
+    m_model->setIsPositiveReflect(value == 0);
+    m_view->resetEDefaults(value == 0);
+  }
+}
 
 void SymmetrisePresenter::handleDoubleValueChanged(std::string const &propName, double value) {
   if (propName == "Spectrum No") {
@@ -136,14 +142,17 @@ void SymmetrisePresenter::handleDoubleValueChanged(std::string const &propName, 
   }
 }
 
+void SymmetrisePresenter::handlePreviewClicked() {
+  setIsPreview(true);
+  runTab();
+}
 void SymmetrisePresenter::handleDataReady(std::string const &dataName) {
-  if (m_view->validate()) {
+  if (validate()) {
     m_view->plotNewData(dataName);
   }
   m_model->setWorkspaceName(dataName);
 }
 
 void SymmetrisePresenter::setIsPreview(bool preview) { m_isPreview = preview; }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

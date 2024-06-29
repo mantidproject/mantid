@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
-
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "SymmetriseModel.h"
@@ -40,8 +40,9 @@ public:
   virtual void handleReflectTypeChanged(int value) = 0;
   virtual void handleDoubleValueChanged(std::string const &propname, double value) = 0;
   virtual void handleDataReady(std::string const &dataName) = 0;
-  virtual void handleRunOrPreviewClicked(bool isPreview) = 0;
+  virtual void handlePreviewClicked() = 0;
   virtual void handleSaveClicked() = 0;
+  virtual void setIsPreview(bool preview) = 0;
 };
 
 /** SymmetrisePresenter
@@ -49,22 +50,27 @@ public:
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataProcessor, public ISymmetrisePresenter {
+class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataProcessor,
+                                                   public ISymmetrisePresenter,
+                                                   public IRunSubscriber {
 public:
   SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;
 
   void setup() override;
   void run() override;
-  bool validate() override;
+
+  // run widget
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
   void handleReflectTypeChanged(int value) override;
   void handleDoubleValueChanged(std::string const &propname, double value) override;
   void handleDataReady(std::string const &dataName) override;
-  void handleRunOrPreviewClicked(bool isPreview) override;
+  void handlePreviewClicked() override;
   void handleSaveClicked() override;
 
-  void setIsPreview(bool preview);
+  void setIsPreview(bool preview) override;
 
 protected:
   void runComplete(bool error) override;

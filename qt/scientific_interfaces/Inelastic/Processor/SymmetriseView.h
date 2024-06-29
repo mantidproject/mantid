@@ -29,7 +29,10 @@ public:
   void subscribePresenter(ISymmetrisePresenter *presenter) override;
 
   void setDefaults() override;
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IRunView *getRunView() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
+  MantidWidgets::DataSelector *getDataSelector() const override;
+
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
 
@@ -47,22 +50,20 @@ public:
 
   void previewAlgDone() override;
   void enableSave(bool save) override;
-  void enableRun(bool run) override;
-  bool validate() override;
   void showMessageBox(std::string const &message) const override;
+  void resetEDefaults(bool isPositive);
+  void resetEDefaults(bool isPositive, QPair<double, double> range);
 
 private slots:
   void notifyDoubleValueChanged(QtProperty *, double);
   void notifyReflectTypeChanged(QtProperty *, int value);
   void notifyDataReady(QString const &);
   void notifyPreviewClicked();
-  void notifyRunClicked();
   void notifySaveClicked();
   void notifyXrangeLowChanged(double value);
   void notifyXrangeHighChanged(double value);
 
 private:
-  void resetEDefaults(bool isPositive, QPair<double, double> range);
   void updateHorizontalMarkers(QPair<double, double> yrange);
 
   Ui::SymmetriseTab m_uiForm;
