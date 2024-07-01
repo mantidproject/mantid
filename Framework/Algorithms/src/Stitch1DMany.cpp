@@ -295,7 +295,7 @@ void Stitch1DMany::exec() {
 void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
                               const std::vector<double> &manualScaleFactors, Workspace_sptr &outWS) {
 
-  auto lhsWS = toStitch.front();
+  auto &lhsWS = toStitch.front();
   // Support Python list syntax for selecting the last element in the list
   auto indexOfReference = m_indexOfReference == -1 ? toStitch.size() - 1 : m_indexOfReference;
 
