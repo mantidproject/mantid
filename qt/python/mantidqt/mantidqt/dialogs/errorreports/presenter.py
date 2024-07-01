@@ -6,10 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 import os
+import subprocess
+import tempfile
+from pathlib import Path
 from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
+from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 
 
@@ -39,8 +43,73 @@ class ErrorReporterPresenter(object):
                         self._traceback = file.readlines()
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
+                elif is_linux():
+                    self._traceback = self._recover_trace_from_core_dump()
             except OSError:
                 pass
+
+    def _recover_trace_from_core_dump(self):
+        # TODO check core dumps are enabled?
+        core_dump_dir = ConfigService.getString("errorreports.core_dumps")
+        if not core_dump_dir:
+            with open("/proc/sys/kernel/core_pattern") as fp:
+                core_dump_dir = fp.readline().split()[0][1:]
+        if not os.path.exists(core_dump_dir) or not os.path.isdir(core_dump_dir):
+            return ""
+        self.error_log.notice(f"Found core dump directory {core_dump_dir}")
+        latest_core_dump = self._latest_core_dump(core_dump_dir)
+        self.error_log.notice(f"Found latest core dump file {latest_core_dump} ({latest_core_dump.stat().st_ctime})")
+        output = ""
+        if latest_core_dump.suffix == ".lz4":
+            output = self._decompress_lz4_then_run_gdb(latest_core_dump)
+        else:
+            output = self._run_gdb(latest_core_dump.as_posix())
+        if not output:
+            return ""
+        self.error_log.notice("Trimming gdb output to extract back trace...")
+        return self._trim_core_dump_file(output)
+
+    def _decompress_lz4_then_run_gdb(self, latest_core_dump: Path):
+        tmp_core_copy_fp = tempfile.NamedTemporaryFile()
+        lz4_command = ["lz4", "-d", latest_core_dump.as_posix(), tmp_core_copy_fp.name]
+        self.error_log.notice(f"Running {' '.join(lz4_command)} ...")
+        result = subprocess.run(lz4_command, capture_output=True, text=True)
+        output = ""
+        if result.returncode == 0:
+            self.error_log.notice(f"Decompressed core file to {tmp_core_copy_fp.name}")
+            output = self._run_gdb(tmp_core_copy_fp.name)
+        else:
+            self.error_log.notice(f"lz4 returned non-zero exit code:\n{result.stderr}")
+        tmp_core_copy_fp.close()
+        return output
+
+    def _run_gdb(self, core_file: str):
+        commands_fp = tempfile.NamedTemporaryFile()
+        with open(commands_fp.name, "w") as fp:
+            fp.write("bt\nq\n")
+
+        gdb_command = ["gdb", "-x", commands_fp.name, f"{os.environ['CONDA_PREFIX']}/bin/python", core_file]
+        self.error_log.notice(f"Running {' '.join(gdb_command)} ...")
+        result = subprocess.run(gdb_command, capture_output=True, text=True)
+        commands_fp.close()
+        if result.returncode == 0:
+            self.error_log.notice("gdb ran successfully")
+            return result.stdout
+        self.error_log.notice(f"gdb returned non-zero exit code:\n{result.stderr}")
+        return ""
+
+    @staticmethod
+    def _latest_core_dump(dir: str):
+        # TODO check if it was created recently?
+        files = Path(dir).iterdir()
+        sorted_files = sorted([file for file in files], key=lambda file: file.stat().st_ctime)
+        return Path(dir, sorted_files[-1])
+
+    @staticmethod
+    def _trim_core_dump_file(content: str):
+        lines = content.split("\n")
+        trace_begins_index = next(n for n, line in enumerate(lines) if line.startswith("#"))
+        return "\n".join(lines[trace_begins_index - 1 :])
 
     def forget_contact_info(self):
         settings = QSettings()
