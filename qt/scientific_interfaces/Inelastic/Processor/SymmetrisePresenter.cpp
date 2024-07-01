@@ -141,7 +141,7 @@ void SymmetrisePresenter::handlePreviewClicked() {
   handleRun();
 }
 void SymmetrisePresenter::handleDataReady(std::string const &dataName) {
-  if (validate()) {
+  if (m_runPresenter->validate()) {
     m_view->plotNewData(dataName);
   }
   m_model->setWorkspaceName(dataName);
