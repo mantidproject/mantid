@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from qtpy.QtCore import QSettings
@@ -58,7 +59,11 @@ class ErrorReporterPresenter(object):
             return ""
         self.error_log.notice(f"Found core dump directory {core_dump_dir}")
         latest_core_dump = self._latest_core_dump(core_dump_dir)
-        self.error_log.notice(f"Found latest core dump file {latest_core_dump} ({latest_core_dump.stat().st_ctime})")
+        if latest_core_dump is None:
+            return ""
+        self.error_log.notice(
+            f"Found latest core dump file {latest_core_dump} ({datetime.fromtimestamp(latest_core_dump.stat().st_ctime)})"
+        )
         output = ""
         if latest_core_dump.suffix == ".lz4":
             output = self._decompress_lz4_then_run_gdb(latest_core_dump)
@@ -98,12 +103,16 @@ class ErrorReporterPresenter(object):
         self.error_log.notice(f"gdb returned non-zero exit code:\n{result.stderr}")
         return ""
 
-    @staticmethod
-    def _latest_core_dump(dir: str):
-        # TODO check if it was created recently?
+    def _latest_core_dump(self, dir: str):
+        CORE_DUMP_RECENCY_LIMIT = 30
         files = Path(dir).iterdir()
         sorted_files = sorted([file for file in files], key=lambda file: file.stat().st_ctime)
-        return Path(dir, sorted_files[-1])
+        latest_core_dump = sorted_files[-1]
+        difference = datetime.now() - datetime.fromtimestamp(latest_core_dump.stat().st_ctime)
+        if difference.seconds < CORE_DUMP_RECENCY_LIMIT:
+            return Path(dir, sorted_files[-1])
+        self.error_log.notice(f"Did not find a core dump from within the last {CORE_DUMP_RECENCY_LIMIT} seconds.")
+        return None
 
     @staticmethod
     def _trim_core_dump_file(content: str):
