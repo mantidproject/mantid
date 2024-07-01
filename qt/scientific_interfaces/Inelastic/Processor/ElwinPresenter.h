@@ -9,7 +9,6 @@
 #include "Common/DataModel.h"
 #include "Common/IDataModel.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/Runwidget/RunPresenter.h"
 #include "DataProcessor.h"
 #include "DataProcessorInterface.h"
 

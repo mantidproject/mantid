@@ -76,7 +76,6 @@ void DataProcessor::tabExecutionComplete(bool error) {
     m_tabRunning = false;
     m_runPresenter->setRunEnabled(true);
     runComplete(error);
-    auto const enableOutputButtons = error == false ? "enable" : "disable";
   }
 }
 

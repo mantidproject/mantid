@@ -51,8 +51,8 @@ public:
   void previewAlgDone() override;
   void enableSave(bool save) override;
   void showMessageBox(std::string const &message) const override;
-  void resetEDefaults(bool isPositive);
-  void resetEDefaults(bool isPositive, QPair<double, double> range);
+  void resetEDefaults(bool isPositive) override;
+  void resetEDefaults(bool isPositive, QPair<double, double> range) override;
 
 private slots:
   void notifyDoubleValueChanged(QtProperty *, double);

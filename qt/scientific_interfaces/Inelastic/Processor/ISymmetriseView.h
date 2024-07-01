@@ -17,7 +17,7 @@
 #include <tuple>
 
 namespace MantidQt {
-namespace MantidWidget {
+namespace MantidWidgets {
 class DataSelector;
 }
 namespace CustomInterfaces {
