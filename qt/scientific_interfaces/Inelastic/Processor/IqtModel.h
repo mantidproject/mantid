@@ -31,8 +31,8 @@ public:
   virtual void setNumBins(double numBins) = 0;
   virtual void setCalculateErrors(bool calculateErrors) = 0;
   virtual void setEnforceNormalization(bool enforceNormalization) = 0;
-  virtual double EMin() = 0;
-  virtual double EMax() = 0;
+  virtual double EMin() const = 0;
+  virtual double EMax() const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL IqtModel : public IIqtModel {
@@ -50,8 +50,8 @@ public:
   void setNumBins(double numBins) override;
   void setCalculateErrors(bool calculateErrors) override;
   void setEnforceNormalization(bool enforceNormalization) override;
-  double EMin() override;
-  double EMax() override;
+  double EMin() const override;
+  double EMax() const override;
 
 private:
   std::string m_sampleWorkspace;
