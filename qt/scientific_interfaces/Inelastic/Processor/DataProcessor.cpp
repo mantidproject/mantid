@@ -43,8 +43,6 @@ void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> cons
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-bool DataProcessor::validate() { return m_runPresenter->validate(); }
-
 void DataProcessor::runTab() {
   if (m_runPresenter->validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();

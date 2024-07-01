@@ -55,7 +55,6 @@ public:
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
-  bool validate() override;
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
@@ -67,12 +66,12 @@ private slots:
 
 protected:
   virtual void runComplete(bool error) { (void)error; };
+  std::unique_ptr<RunPresenter> m_runPresenter;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
-  std::unique_ptr<RunPresenter> m_runPresenter;
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces
