@@ -146,11 +146,17 @@ public:
 
   QtCatalogSearcherTest() : m_view(), m_notifyee(), m_searchAlg(std::make_shared<MockSearchAlgorithm>()) {}
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void test_constructor_subscribes_to_view() {
     EXPECT_CALL(m_view, subscribeSearch(_)).Times(1);
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    verifyAndClear();
   }
 
   void test_journal_search() {
@@ -180,7 +186,6 @@ public:
     expectGetAlgorithmRunner();
     auto success = startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_returns_success_if_has_active_session() {
@@ -189,7 +194,6 @@ public:
     expectGetAlgorithmRunner();
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_async_journal_search_sets_in_progress_flag() {
@@ -198,7 +202,6 @@ public:
     expectGetAlgorithmRunner();
     startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_sets_in_progress_flag() {
@@ -207,7 +210,6 @@ public:
     expectGetAlgorithmRunner();
     startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
-    verifyAndClear();
   }
 
   void test_async_journal_search_starts_algorithm_runner() {
@@ -216,7 +218,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     startAsyncJournalSearch(searcher);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_starts_algorithm_runner() {
@@ -225,7 +226,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     startAsyncCatalogSearch(searcher);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_returns_success_when_not_logged_in() {
@@ -248,7 +248,6 @@ public:
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_finish_handle_starts_async_search_if_active_session() {
@@ -257,7 +256,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_finish_does_not_notify_failure_if_active_session() {
@@ -266,7 +264,6 @@ public:
     expectGetAlgorithmRunner();
     expectNotNotifiedSearchFailed();
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_finish_handle_notifies_failure_if_no_active_session() {
@@ -274,7 +271,6 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_error_handle_notifies_failure_if_no_active_session() {
@@ -282,7 +278,6 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
-    verifyAndClear();
   }
 
   void test_error_handle_does_not_notify_failure_if_active_session() {
@@ -290,28 +285,24 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotNotifiedSearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
-    verifyAndClear();
   }
 
   void test_set_saved_flag() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, setSaved()).Times(1);
     searcher.setSaved();
-    verifyAndClear();
   }
 
   void test_notify_search_results_changed_sets_unsaved_flag() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, setUnsaved()).Times(1);
     searcher.notifySearchResultsChanged();
-    verifyAndClear();
   }
 
   void test_search_results_collection_passed_to_results() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, getSearchResultsCSV()).Times(1);
     searcher.getSearchResultsCSV();
-    verifyAndClear();
   }
 
   void test_search_results_in_data_cache() {
@@ -326,7 +317,6 @@ public:
     checkFilteredSearchResults(results);
     ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
     ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
-    verifyAndClear();
   }
 
   void test_search_with_archive_on_and_cache_set() {
@@ -341,7 +331,6 @@ public:
     checkSearchResults(results);
     ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
     ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
-    verifyAndClear();
   }
 
 private:
