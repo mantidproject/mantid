@@ -34,8 +34,6 @@ MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::uni
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 }
 
-void MomentsPresenter::setup() {}
-
 /**
  * Handles the event of data being loaded. Validates the loaded data.
  *
@@ -56,8 +54,6 @@ void MomentsPresenter::handleScaleChanged(bool state) { m_model->setScale(state)
  * Handles the scale value being changed.
  */
 void MomentsPresenter::handleScaleValueChanged(double value) { m_model->setScaleValue(value); }
-
-void MomentsPresenter::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
 void MomentsPresenter::handleValidation(IUserInputValidator *validator) const {
   validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Sqw);
@@ -124,7 +120,10 @@ void MomentsPresenter::setFileExtensionsByName(bool filter) {
 /**
  * Handle when Run is clicked
  */
-void MomentsPresenter::handleRun() { runTab(); }
+void MomentsPresenter::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
+  runAlgorithm(m_model->setupAlgorithm());
+}
 
 /**
  * Handles saving of workspaces

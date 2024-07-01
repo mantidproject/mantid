@@ -42,9 +42,6 @@ public:
   MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
   ~MomentsPresenter() = default;
 
-  void setup() override;
-  void run() override;
-
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;

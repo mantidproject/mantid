@@ -50,9 +50,6 @@ public:
                  std::unique_ptr<IDataModel> dataModel);
   ~ElwinPresenter();
 
-  void run() override;
-  void setup() override;
-
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;

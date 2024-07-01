@@ -72,11 +72,8 @@ void DataProcessor::runTab() {
  */
 void DataProcessor::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
-  if (m_tabRunning) {
-    m_tabRunning = false;
-    m_runPresenter->setRunEnabled(true);
-    runComplete(error);
-  }
+  m_runPresenter->setRunEnabled(true);
+  runComplete(error);
 }
 
 /**

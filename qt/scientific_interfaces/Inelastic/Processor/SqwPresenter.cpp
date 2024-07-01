@@ -42,8 +42,6 @@ SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqw
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
 
-void SqwPresenter::setup() {}
-
 /**
  * Handles the event of data being loaded. Validates the loaded data.
  *
@@ -66,15 +64,6 @@ void SqwPresenter::handleDataReady(std::string const &dataName) {
 
 void SqwPresenter::handleValidation(IUserInputValidator *validator) const {
   m_model->validate(validator, m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
-}
-
-void SqwPresenter::run() {
-  m_model->setupRebinAlgorithm(m_batchAlgoRunner);
-  m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
-  m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
-  m_view->setEnableOutputOptions(false);
-
-  m_batchAlgoRunner->executeBatch();
 }
 
 /**
@@ -112,7 +101,15 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void SqwPresenter::handleRun() { runTab(); }
+void SqwPresenter::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
+  m_model->setupRebinAlgorithm(m_batchAlgoRunner);
+  m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
+  m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
+  m_view->setEnableOutputOptions(false);
+
+  m_batchAlgoRunner->executeBatch();
+}
 
 void SqwPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))

@@ -36,9 +36,6 @@ public:
   IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model);
   ~IqtPresenter() = default;
 
-  void setup() override;
-  void run() override;
-
   // runWidget
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;

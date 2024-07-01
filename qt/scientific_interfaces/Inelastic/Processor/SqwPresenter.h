@@ -44,9 +44,6 @@ public:
   SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);
   ~SqwPresenter() = default;
 
-  void setup() override;
-  void run() override;
-
   // runSubscriber
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;

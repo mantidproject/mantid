@@ -48,6 +48,8 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_pt
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
+  m_view->setup();
+  updateAvailableSpectra();
 }
 
 ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
@@ -58,42 +60,11 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_pt
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
-}
-
-ElwinPresenter::~ElwinPresenter() {}
-
-void ElwinPresenter::setup() {
   m_view->setup();
   updateAvailableSpectra();
 }
 
-void ElwinPresenter::run() {
-  m_view->setRunIsRunning(true);
-
-  // Get workspace names
-  std::string inputGroupWsName = "Elwin_Input";
-  std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
-  // Load input files
-  std::string inputWorkspacesString;
-  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
-
-    auto workspace = m_dataModel->getWorkspace(i);
-    auto spectra = m_dataModel->getSpectra(i);
-    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
-    inputWorkspacesString += spectraWS + ",";
-  }
-
-  // Group input workspaces
-  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
-
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, outputWsBasename, inputGroupWsName, m_view->getLogName(),
-                                      m_view->getLogValue());
-
-  m_batchAlgoRunner->executeBatchAsync();
-
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
-}
+ElwinPresenter::~ElwinPresenter() {}
 
 /**
  * Ungroups the output after the execution of the algorithm
@@ -251,7 +222,31 @@ void ElwinPresenter::updateIntegrationRange() {
 
 void ElwinPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  runTab();
+  m_view->setRunIsRunning(true);
+
+  // Get workspace names
+  std::string inputGroupWsName = "Elwin_Input";
+  std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
+  // Load input files
+  std::string inputWorkspacesString;
+  for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
+
+    auto workspace = m_dataModel->getWorkspace(i);
+    auto spectra = m_dataModel->getSpectra(i);
+    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    inputWorkspacesString += spectraWS + ",";
+  }
+
+  // Group input workspaces
+  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
+
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, outputWsBasename, inputGroupWsName, m_view->getLogName(),
+                                      m_view->getLogValue());
+
+  m_batchAlgoRunner->executeBatchAsync();
+
+  // Set the result workspace for Python script export
+  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
 
 /**

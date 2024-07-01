@@ -34,9 +34,8 @@ IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqt
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
+  m_view->setup();
 }
-
-void IqtPresenter::setup() { m_view->setup(); }
 
 void IqtPresenter::handleSampDataReady(const std::string &wsname) {
   try {
@@ -63,7 +62,16 @@ void IqtPresenter::handleIterationsChanged(int iterations) { m_model->setNIterat
 
 void IqtPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  runTab();
+  m_view->setWatchADS(false);
+  m_view->setSaveResultEnabled(false);
+
+  m_view->updateDisplayedBinParameters();
+
+  // Construct the result workspace for Python script export
+  std::string sampleName = m_view->getSampleName();
+  m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
+  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 /**
  * Handle saving of workspace
@@ -115,19 +123,6 @@ void IqtPresenter::handleValueChanged(std::string const &propName, double value)
 void IqtPresenter::handlePreviewSpectrumChanged(int spectra) {
   setSelectedSpectrum(spectra);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-}
-
-void IqtPresenter::run() {
-  m_view->setWatchADS(false);
-  m_view->setSaveResultEnabled(false);
-
-  m_view->updateDisplayedBinParameters();
-
-  // Construct the result workspace for Python script export
-  std::string sampleName = m_view->getSampleName();
-  m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
-  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
-  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**

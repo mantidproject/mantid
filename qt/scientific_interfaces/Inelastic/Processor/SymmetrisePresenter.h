@@ -57,9 +57,6 @@ public:
   SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;
 
-  void setup() override;
-  void run() override;
-
   // run widget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;

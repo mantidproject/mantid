@@ -41,30 +41,11 @@ SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
 
 SymmetrisePresenter::~SymmetrisePresenter() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
 
-void SymmetrisePresenter::setup() {}
-
 void SymmetrisePresenter::handleValidation(IUserInputValidator *validator) const {
   validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red);
 }
 
 void SymmetrisePresenter::handleRun() {
-  setIsPreview(false);
-  runTab();
-}
-
-/**
- * Handles saving of workspace
- */
-void SymmetrisePresenter::handleSaveClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatch();
-}
-
-/** Handles running the algorithm either from run button or preview button. Set with m_isPreview flag.
- *
- */
-void SymmetrisePresenter::run() {
   m_view->setRawPlotWatchADS(false);
 
   // There should never really be unexecuted algorithms in the queue, but it is
@@ -87,6 +68,7 @@ void SymmetrisePresenter::run() {
 
     m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
   } else {
+    clearOutputPlotOptionsWorkspaces();
     auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
     // Set the workspace name for Python script export
     m_pythonExportWsName = outputWorkspaceName;
@@ -97,13 +79,24 @@ void SymmetrisePresenter::run() {
 }
 
 /**
+ * Handles saving of workspace
+ */
+void SymmetrisePresenter::handleSaveClicked() {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatch();
+}
+
+/**
  * Handle plotting result or preview workspace.
  *
  * @param error If the algorithm failed
  */
 void SymmetrisePresenter::runComplete(bool error) {
-  if (error)
+  if (error) {
+    setIsPreview(false);
     return;
+  }
 
   if (m_isPreview) {
     m_view->previewAlgDone();
@@ -113,6 +106,7 @@ void SymmetrisePresenter::runComplete(bool error) {
     m_view->enableSave(true);
   }
   m_view->setRawPlotWatchADS(true);
+  setIsPreview(false);
 }
 
 void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
@@ -144,7 +138,7 @@ void SymmetrisePresenter::handleDoubleValueChanged(std::string const &propName, 
 
 void SymmetrisePresenter::handlePreviewClicked() {
   setIsPreview(true);
-  runTab();
+  handleRun();
 }
 void SymmetrisePresenter::handleDataReady(std::string const &dataName) {
   if (validate()) {
