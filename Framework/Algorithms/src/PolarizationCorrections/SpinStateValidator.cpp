@@ -18,17 +18,34 @@ const std::string SpinStateValidator::ONE_ONE = "11";
 const std::string SpinStateValidator::ZERO = "0";
 const std::string SpinStateValidator::ONE = "1";
 
+const std::string SpinStateValidator::MINUS_PLUS = "-+";
+const std::string SpinStateValidator::PLUS_MINUS = "+-";
+const std::string SpinStateValidator::MINUS_MINUS = "--";
+const std::string SpinStateValidator::PLUS_PLUS = "++";
+const std::string SpinStateValidator::MINUS = "-";
+const std::string SpinStateValidator::PLUS = "+";
+
 namespace SpinStateStrings {
-static const std::unordered_set<std::string> ALLOWED_PAIR_SPIN_STATES{
+static const std::unordered_set<std::string> ALLOWED_PAIR_FLIP_CONFIG{
     SpinStateValidator::ZERO_ZERO, SpinStateValidator::ZERO_ONE, SpinStateValidator::ONE_ZERO,
     SpinStateValidator::ONE_ONE};
-static const std::unordered_set<std::string> ALLOWED_SINGLE_SPIN_STATES{SpinStateValidator::ZERO,
+
+static const std::unordered_set<std::string> ALLOWED_SINGLE_FLIP_CONFIG{SpinStateValidator::ZERO,
                                                                         SpinStateValidator::ONE};
+
+static const std::unordered_set<std::string> ALLOWED_PAIR_SPIN_STATES{
+    SpinStateValidator::MINUS_PLUS, SpinStateValidator::PLUS_MINUS, SpinStateValidator::MINUS_MINUS,
+    SpinStateValidator::PLUS_PLUS};
+
+static const std::unordered_set<std::string> ALLOWED_SINGLE_SPIN_STATES{SpinStateValidator::MINUS,
+                                                                        SpinStateValidator::PLUS};
+
 } // namespace SpinStateStrings
 
-SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates)
+SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
+                                       const bool useFlipperConfig)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
-      m_acceptSingleStates(acceptSingleStates) {}
+      m_acceptSingleStates(acceptSingleStates), m_useFlipperConfig(useFlipperConfig) {}
 
 Kernel::IValidator_sptr SpinStateValidator::clone() const {
   return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates);
@@ -38,6 +55,11 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   if (input.empty())
     return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 11, 10, 00";
 
+  auto const &allowedPairs =
+      m_useFlipperConfig ? SpinStateStrings::ALLOWED_PAIR_FLIP_CONFIG : SpinStateStrings::ALLOWED_PAIR_SPIN_STATES;
+  auto const &allowedSingles =
+      m_useFlipperConfig ? SpinStateStrings::ALLOWED_SINGLE_FLIP_CONFIG : SpinStateStrings::ALLOWED_SINGLE_SPIN_STATES;
+
   std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(input);
 
   int numberSpinStates = static_cast<int>(spinStates.size());
@@ -45,9 +67,9 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     return "The number of spin states specified is not an allowed value";
 
   // First check that the spin states are valid entries
-  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [this](std::string s) {
-        const bool isPair = setContains(SpinStateStrings::ALLOWED_PAIR_SPIN_STATES, s);
-        const bool isSingle = m_acceptSingleStates && setContains(SpinStateStrings::ALLOWED_SINGLE_SPIN_STATES, s);
+  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [&](std::string s) {
+        const bool isPair = setContains(allowedPairs, s);
+        const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, s);
         return !isPair && !isSingle;
       })) {
     return m_acceptSingleStates
@@ -57,10 +79,9 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
 
   // Single digits can't mix with pairs
   if (m_acceptSingleStates) {
-    bool containsAnySingles =
-        SpinStateValidator::anyOfIsInSet(spinStates, SpinStateStrings::ALLOWED_SINGLE_SPIN_STATES);
+    bool containsAnySingles = SpinStateValidator::anyOfIsInSet(spinStates, allowedSingles);
 
-    bool containsAnyPairs = SpinStateValidator::anyOfIsInSet(spinStates, SpinStateStrings::ALLOWED_PAIR_SPIN_STATES);
+    bool containsAnyPairs = SpinStateValidator::anyOfIsInSet(spinStates, allowedPairs);
     if (!(containsAnyPairs ^ containsAnySingles)) {
       return "Single and paired spin states cannot be mixed";
     }

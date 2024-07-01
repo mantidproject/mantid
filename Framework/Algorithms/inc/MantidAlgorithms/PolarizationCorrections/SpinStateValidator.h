@@ -24,7 +24,8 @@ particular ordering.
 */
 class MANTID_ALGORITHMS_DLL SpinStateValidator : public Kernel::TypedValidator<std::string> {
 public:
-  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false);
+  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false,
+                     const bool useFlipperConfig = true);
   Kernel::IValidator_sptr clone() const override;
 
   static const std::string ZERO_ONE;
@@ -33,6 +34,13 @@ public:
   static const std::string ONE_ONE;
   static const std::string ZERO;
   static const std::string ONE;
+
+  static const std::string MINUS_PLUS;
+  static const std::string PLUS_MINUS;
+  static const std::string MINUS_MINUS;
+  static const std::string PLUS_PLUS;
+  static const std::string MINUS;
+  static const std::string PLUS;
 
   static bool anyOfIsInSet(const std::vector<std::string> &anyOf, const std::unordered_set<std::string> &set);
   static bool setContains(const std::unordered_set<std::string> &set, const std::string &s) {
@@ -43,5 +51,6 @@ private:
   std::string checkValidity(const std::string &input) const override;
   std::unordered_set<int> m_allowedNumbersOfSpins = {1, 2, 3, 4};
   bool m_acceptSingleStates = false;
+  bool m_useFlipperConfig = true;
 };
 } // namespace Mantid::Algorithms
