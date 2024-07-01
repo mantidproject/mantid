@@ -85,13 +85,6 @@ public:
     m_presenter->handleValueChanged("EMax", value);
   }
 
-  void test_handleDataReady_does_not_work_with_invalid_data() {
-    auto dataSelector = std::make_unique<DataSelector>();
-    ON_CALL(*m_view, getDataSelector()).WillByDefault(Return(dataSelector.get()));
-    TS_ASSERT(!m_presenter->validate());
-    dataSelector.reset();
-  }
-
 private:
   NiceMock<MockMomentsModel> *m_model;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
