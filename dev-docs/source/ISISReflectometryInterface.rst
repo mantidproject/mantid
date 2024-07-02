@@ -4,12 +4,12 @@
 ISIS Reflectometry Interface
 ============================
 
-This document gives a brief overview of the `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/ISIS%20Reflectometry.html>`_ design and things that you should be aware of when working on this interface. If you need to work on this interface, please make sure you are familiar with the `Development guidelines`_ below as a minimum.
+This document gives a brief overview of the `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/reflectometry/ISIS%20Reflectometry.html>`_ design and things that you should be aware of when working on this interface. If you need to work on this interface, please make sure you are familiar with the `Development guidelines`_ below as a minimum.
 
 Overview
 --------
 
-The `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/ISIS%20Reflectometry.html>`_ provides a way for users to easily run a reduction on a *batch* of runs. A batch of runs is entered into a table, which is actually a tree structure with two levels - this allows sets of runs to be grouped so that their outputs are post-processed (stitched) together. Various default settings can be specified on the tabs. A tab is also provided to make exporting the results for a set of workspaces easy.
+The `ISIS Reflectometry Interface <https://docs.mantidproject.org/nightly/interfaces/reflectometry/ISIS%20Reflectometry.html>`_ provides a way for users to easily run a reduction on a *batch* of runs. A batch of runs is entered into a table, which is actually a tree structure with two levels - this allows sets of runs to be grouped so that their outputs are post-processed (stitched) together. Various default settings can be specified on the tabs. A tab is also provided to make exporting the results for a set of workspaces easy.
 
 The reduction for each row is done via :ref:`algm-ReflectometryISISLoadAndProcess` (which includes any pre-processing). Post-processing for a group is done via :ref:`algm-Stitch1DMany`.
 
