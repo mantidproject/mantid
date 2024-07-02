@@ -698,11 +698,7 @@ void AlignAndFocusPowder::exec() {
   } else if (DIFCref > 0.) {
     m_outputW = convertUnits(m_outputW, "TOF");
     // this correction has some assumptions on the events being compressed
-    if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
-      if (compressEventsTolerance > 0.) {
-        compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
-      }
-    }
+    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
 
     // this is a legacy way for describing the minimum wavelength to remove from the data
     // it is uncommon that it is used
@@ -817,9 +813,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  if (compressEventsTolerance > 0.) {
-    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
-  }
+  compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
   m_progress->report();
 
   if (!binInDspace && !m_delta_ragged.empty()) {
@@ -1207,6 +1201,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
 
 void AlignAndFocusPowder::compressEventsOutputWS(const double compressEventsTolerance,
                                                  const double wallClockTolerance) {
+  if (compressEventsTolerance == 0.)
+    return; // no compression is required
+
   if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
     g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
     if (!isEmpty(wallClockTolerance))
@@ -1237,7 +1234,7 @@ bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance
   if (hasWallClockTolerance)
     return false;
   // compressing isn't an option
-  if (compressTolerance == 0)
+  if (compressTolerance == 0.)
     return false;
 
   if (const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_outputW)) {
