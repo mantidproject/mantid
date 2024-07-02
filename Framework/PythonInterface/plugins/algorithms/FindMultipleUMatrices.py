@@ -12,10 +12,21 @@ from mantid.api import (
     IPeaksWorkspaceProperty,
     AnalysisDataService as ADS,
 )
+from mantid.dataobjects import PeaksWorkspace
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion, logger
-from mantid.geometry import SpaceGroupFactory, PointGroupFactory, CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
+from mantid.geometry import (
+    SpaceGroupFactory,
+    PointGroupFactory,
+    CrystalStructure,
+    ReflectionGenerator,
+    ReflectionConditionFilter,
+    SpaceGroup,
+    PointGroup,
+    UnitCell,
+)
 from itertools import combinations, product
 import numpy as np
+from typing import Sequence
 
 
 _MIN_NUM_INDEXED_PEAKS = 3  # one more peak indexed than required for CalculateUMatrix
@@ -66,11 +77,13 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             name="c", defaultValue=1.0, direction=Direction.Input, validator=positiveFloatValidator, doc="Lattice parameter c"
         )
         self.declareProperty(
-            name="alpha", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle alpha"
+            name="alpha", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle alpha (in degrees)"
         )
-        self.declareProperty(name="beta", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle beta")
         self.declareProperty(
-            name="gamma", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle gamma"
+            name="beta", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle beta (in degrees)"
+        )
+        self.declareProperty(
+            name="gamma", defaultValue=90.0, direction=Direction.Input, validator=angleValidator, doc="Lattice angle gamma (in degrees)"
         )
         self.declareProperty(
             name="HKLTolerance",
@@ -256,17 +269,18 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         ws_out = self.exec_child_alg("GroupWorkspaces", InputWorkspaces=peaks_out_list)
         self.setProperty("OutputWorkspace", ws_out)
 
-    def exec_child_alg(self, alg_name, **kwargs):
+    def exec_child_alg(self, alg_name: str, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
         alg.setAlwaysStoreInADS(False)
         alg.initialize()
-        for prop, value in kwargs.items():
-            alg.setProperty(prop, value)
+        alg.setProperties(kwargs)
         alg.execute()
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
-    def remove_equiv_ubs_by_accuracy(self, hkl_ers, ubs, pointgroup, unit_cell, min_angle_ub):
+    def remove_equiv_ubs_by_accuracy(
+        self, hkl_ers: np.ndarray, ubs: Sequence[np.ndarray], pointgroup: PointGroup, unit_cell: UnitCell, min_angle_ub: float
+    ):
         iub_keep = set()
         for iub, ub in enumerate(ubs):
             if iub in iub_keep:
@@ -285,7 +299,9 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         return hkl_ers[iub_keep], [ubs[ii] for ii in iub_keep]
 
     @staticmethod
-    def are_ubs_equivalent_within_tolerance(ub1, ub2, pointgroup, unit_cell, angle_tol):
+    def are_ubs_equivalent_within_tolerance(
+        ub1: np.ndarray, ub2: np.ndarray, pointgroup: PointGroup, unit_cell: UnitCell, angle_tol: float
+    ):
         inv_ub1 = np.linalg.inv(ub1)
         inv_ub2 = np.linalg.inv(ub2)
         axes_equiv = 2 * [False]
@@ -300,7 +316,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
                 break
         return all(axes_equiv)
 
-    def get_indices_of_nub_most_accurate_ubs(self, hkl_ers, num_ubs=1):
+    def get_indices_of_nub_most_accurate_ubs(self, hkl_ers: np.ndarray, num_ubs: int = 1):
         # see which ubs index the most peaks most accurately (with minimum error)
         iub_min_er = np.argmin(hkl_ers, axis=0)
         # exclude reflections that are not indexed by any UB
@@ -322,7 +338,9 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
             hkl_ers[iub[-1], :] = np.inf  # overwrite values as if didn't index any peaks
             return self.get_indices_of_nub_most_accurate_ubs(hkl_ers, num_ubs)
 
-    def get_peak_tables_for_each_ub(self, peaks, ubs, hkl_ers, num_ubs, optimise_ubs):
+    def get_peak_tables_for_each_ub(
+        self, peaks: PeaksWorkspace, ubs: Sequence[np.ndarray], hkl_ers: np.ndarray, num_ubs: int, optimise_ubs: bool
+    ):
         iub, iub_min_er, ipks_indexed = self.get_indices_of_nub_most_accurate_ubs(hkl_ers, num_ubs)
         peaks_out_list = []
         for itable in range(min(num_ubs, len(iub))):
@@ -343,7 +361,9 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         return peaks_out_list
 
     @staticmethod
-    def calculate_reflections(spgr_sym, dmin, dmax, dtol, a, b, c, alpha, beta, gamma):
+    def calculate_reflections(
+        spgr_sym: str, dmin: float, dmax: float, dtol: float, a: float, b: float, c: float, alpha: float, beta: float, gamma: float
+    ):
         xtal = CrystalStructure(f"{a} {b} {c} {alpha} {beta} {gamma}", spgr_sym, "")  # no basis required
         generator = ReflectionGenerator(xtal, ReflectionConditionFilter.Centering)
         hkls = generator.getUniqueHKLs(dmin - dtol, dmax + dtol)  # getUnique
@@ -354,7 +374,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         return hkls, dhkls, xtal.getUnitCell()
 
     @staticmethod
-    def calculate_angles_between_reflections(hkls1, hkls2, unit_cell):
+    def calculate_angles_between_reflections(hkls1: Sequence[float], hkls2: Sequence[float], unit_cell):
         angles = np.zeros((len(hkls1), len(hkls2)))
         for ihkl_1, hkl1 in enumerate(hkls1):
             for ihkl_2, hkl2 in enumerate(hkls2):
@@ -362,7 +382,7 @@ class FindMultipleUMatrices(DataProcessorAlgorithm):
         return angles
 
     @staticmethod
-    def calculate_hkl_ers(peaks, spacegroup):
+    def calculate_hkl_ers(peaks: PeaksWorkspace, spacegroup: SpaceGroup):
         mod_hkl = peaks.sample().getOrientedLattice().getModHKL()
         return np.array(
             [

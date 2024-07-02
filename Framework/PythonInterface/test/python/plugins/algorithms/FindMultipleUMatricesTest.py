@@ -55,7 +55,7 @@ class FindMultipleUMatricesTest(unittest.TestCase):
         }
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         AnalysisDataService.clear()
 
     def _assert_correct_ubs_found(self, peaks_grp_ws, found_peaks, **kwargs):

@@ -10,7 +10,7 @@ Description
 -----------
 
 FindMultipleUMatrices will use the lattice parameters and spacegroup provided to optimise a number (``NumberOfUBs``)
-of UB matrices (B is hard-coded due to the lattice parameters provided) and return a group of peak workspaces
+of UB matrices (B is hard-coded due to the lattice parameters provided) and returns a group of peak workspaces
 one for each UB, containing the peaks that are indexed most accurately by that UB.
 
 This algorithm is useful for finding a single UB in the presence of spurious peaks, or finding multiple UBs when there
@@ -20,7 +20,7 @@ The algorithm proceeds by looping over each pair of peaks in ``PeaksWorkspace`` 
 (``MinDSpacing`` and ``MaxDSpacing``), trying to index them based on their d-spacing and angle between the
 peaks (within tolerances given by ``DSpacingTolerance`` and ``AngleTolerance``). It then calculates the HKL
 errors (difference in HKL residuals squared) for all peaks in ``PeaksWorkspace`` and identifies the UBs that
-index the most peaks most accurately (i.e. better than any other UB found)
+index the most peaks with the highest accuracy (i.e. better than any other UB found)
 
 Note that although the user can provide modulation vectors, these are not currently used to index pairs of
 peaks but are indexed by each candidate UB found and used to determine the best UBs to return.
@@ -30,7 +30,7 @@ d-spacing peaks to start.
 
 
 Useage
------------
+------
 
 **Example:**
 
