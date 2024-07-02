@@ -75,6 +75,7 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes
+    - pydantic
 
 test:
   imports:
