@@ -12,6 +12,7 @@
 #include "MantidKernel/SingletonHolder.h"
 
 #include <map>
+#include <set>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -19,7 +20,7 @@
 namespace Mantid {
 namespace API {
 
-using PreviewRegister = std::map<std::string, std::map<std::string, std::map<std::string, IPreview_uptr>>>;
+using PreviewRegister = std::set<IPreview_uptr>;
 
 /** PreviewManager : Manages the raw data previews.
  */
@@ -41,7 +42,7 @@ public:
       throw std::runtime_error("Preview with the same name is already registered for the same "
                                "facility and technique.");
     }
-    m_previews[facility][technique][name] = std::move(preview);
+    m_previews.insert(std::move(preview));
   }
 
 private:

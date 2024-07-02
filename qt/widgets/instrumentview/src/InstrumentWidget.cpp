@@ -112,8 +112,8 @@ public:
  * after creating the widget.
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
-                                   bool useThread, QString settingsGroup, TabCustomizations customizations)
+                                   double scaleMin, double scaleMax, bool setDefaultView, bool useThread,
+                                   Dependencies deps, QString settingsGroup, TabCustomizations customizations)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_settingsGroup(std::move(settingsGroup)), m_instrumentActor(nullptr),
       m_surfaceType(FULL3D), m_savedialog_dir(QString::fromStdString(
@@ -303,6 +303,7 @@ void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
         defaultView = "CYLINDRICAL_Y";
       }
       setSurfaceType(defaultView);
+      m_renderTab->flipUnwrappedView(m_instrumentActor->getDefaultFlip());
     } else {
       setSurfaceType(m_surfaceType); // This call must come after the
                                      // InstrumentActor is created
@@ -705,7 +706,7 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
   renameWorkspace(newWs);
   // re-create the underlying instrument in the background and reset the autoscale, scales, and default view options to
   // the values that this window was launched with originally
-  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, false);
+  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, true);
 
   // update the view and colormap
   auto surface = getSurface();

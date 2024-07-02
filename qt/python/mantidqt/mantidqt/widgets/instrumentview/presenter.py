@@ -28,7 +28,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     @param ws : The workspace object OR workspace name.
     """
 
-    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView = None):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView = None, use_thread=False):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
@@ -37,7 +37,9 @@ class InstrumentViewPresenter(ObservingPresenter):
             workspace = AnalysisDataService.retrieve(self.ws_name)
             workspace.readLock()
             try:
-                self.container = InstrumentView(parent=parent, presenter=self, name=self.ws_name, window_flags=window_flags)
+                self.container = InstrumentView(
+                    parent=parent, presenter=self, name=self.ws_name, window_flags=window_flags, use_thread=use_thread
+                )
             finally:
                 workspace.unlock()
 
@@ -53,14 +55,14 @@ class InstrumentViewPresenter(ObservingPresenter):
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
-    """
-    Replace the workspace being shown by the instrument widget.
-    @param new_workspace_name : the name of the new workspace to set
-    @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
-    """
-
     def replace_workspace(self, new_workspace_name, new_window_name=None):
+        """
+        Replace the workspace being shown by the instrument widget.
+        @param new_workspace_name: the name of the new workspace to set
+        @param new_window_name: the new title of the window. Optional, if none provided, uses the name of the workspace.
+        """
         self.container.replace_workspace(new_workspace_name, new_window_name)
+        self.ws_name = new_workspace_name
 
     def rename_workspace(self, old_name, new_name):
         # rename is handled by the InstrumentWidget inside C++

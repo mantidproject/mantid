@@ -41,10 +41,10 @@ public:
   static InstrumentWidgetTest *createSuite() { return new InstrumentWidgetTest(); }
   static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
 
-  using QtMock = StrictMock<MockQtDisplay>;
-  using GLMock = StrictMock<MockGLDisplay>;
-  using ConnectMock = StrictMock<MockQtConnect>;
-  using MetaObjectMock = StrictMock<MockQtMetaObject>;
+  using QtMock = NiceMock<MockQtDisplay>;
+  using GLMock = NiceMock<MockGLDisplay>;
+  using ConnectMock = NiceMock<MockQtConnect>;
+  using MetaObjectMock = NiceMock<MockQtMetaObject>;
   using DisplayMock = NiceMock<MockInstrumentDisplay>;
   using MessageMock = NiceMock<MockMessageHandler>;
 
@@ -71,7 +71,7 @@ public:
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-      auto instance = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto instance = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = instance.getInstrumentActor();
@@ -89,7 +89,7 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
-      auto instance = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto instance = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = instance.getInstrumentActor();
@@ -111,7 +111,7 @@ public:
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -134,8 +134,7 @@ public:
       EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
-
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -155,7 +154,7 @@ public:
       EXPECT_CALL(*glMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(glMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -174,8 +173,9 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
+
       EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(qtMock.get()));
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -199,7 +199,7 @@ public:
       EXPECT_CALL(*glMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(glMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -221,7 +221,7 @@ public:
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(2).WillRepeatedly(Return(qtMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -242,7 +242,7 @@ public:
         auto displayMock = makeDisplay();
         EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
         EXPECT_CALL(*displayMock, updateView(expected)).Times(1);
-        auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+        auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
         if (useLoadingThread) {
           InstrumentActor &actor = widget.getInstrumentActor();
@@ -263,7 +263,7 @@ public:
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, currentWidget()).Times(3).WillRepeatedly(Return(qtMock.get()));
 
-      auto widget = construct(wsname, std::move(displayMock), qtMock.get(), glMock.get(), 46, useLoadingThread);
+      auto widget = construct(wsname, std::move(displayMock), qtMock.get(), glMock.get(), 47, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -386,6 +386,6 @@ private:
     InstrumentWidget::Dependencies deps{std::move(displayMock),    nullptr,      nullptr, std::move(connectMock),
                                         std::move(metaObjectMock), makeMessage()};
 
-    return InstrumentWidget(wsname, nullptr, true, true, 0.0, 0.0, true, std::move(deps), useLoadingThread);
+    return InstrumentWidget(wsname, nullptr, true, true, 0.0, 0.0, true, useLoadingThread, std::move(deps));
   }
 };
