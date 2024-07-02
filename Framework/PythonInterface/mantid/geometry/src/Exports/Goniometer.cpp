@@ -12,6 +12,7 @@
 
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::Geometry::Goniometer;
@@ -40,6 +41,17 @@ void calcFromQSampleAndWavelength(Goniometer &self, const object &position, doub
                                   bool inner) {
   self.calcFromQSampleAndWavelength(Converters::PyObjectToV3D(position)(), wavelength, flip_x, inner);
 }
+
+boost::python::dict getAxis(const Goniometer &self, size_t axisnumber) {
+  const auto &axis = self.getAxis(axisnumber);
+
+  boost::python::dict pythonAxis;
+  pythonAxis["rotationaxis"] = axis.rotationaxis;
+  pythonAxis["angle"] = axis.angle;
+  pythonAxis["sense"] = axis.sense;
+
+  return pythonAxis;
+}
 } // namespace
 
 void export_Goniometer() {
@@ -55,6 +67,8 @@ void export_Goniometer() {
                                                                 "goniometer is \'YZY\'"))
       .def("getR", &Goniometer::getR, arg("self"), return_readonly_numpy())
       .def("setR", &setR, (arg("self"), arg("rot")))
+      .def("getNumberAxes", &Goniometer::getNumberAxes, arg("self"))
+      .def("getAxis", &getAxis, (arg("self"), arg("axisnumber")))
       .def("calcFromQSampleAndWavelength", &calcFromQSampleAndWavelength,
            (arg("self"), arg("positions"), arg("wavelength"), arg("flip_x") = false, arg("inner") = false));
 }
