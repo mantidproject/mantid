@@ -76,9 +76,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/T
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:408
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:225
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1904
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1168
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1178
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1919
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:403
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:76
