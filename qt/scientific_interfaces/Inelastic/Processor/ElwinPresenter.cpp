@@ -319,12 +319,12 @@ void ElwinPresenter::updateAvailableSpectra() {
   m_view->setAvailableSpectra(spectra.begin(), spectra.end());
 }
 
-size_t ElwinPresenter::findWorkspaceID() {
+WorkspaceID ElwinPresenter::findWorkspaceID() {
   auto currentWorkspace = m_view->getCurrentPreview();
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
   auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
   size_t workspaceID = findWorkspace - allWorkspaces.begin();
-  return workspaceID;
+  return WorkspaceID{workspaceID};
 }
 
 /**

@@ -87,7 +87,7 @@ private:
   bool checkForELTWorkspace();
   void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
   void newPreviewWorkspaceSelected(const std::string &workspaceName);
-  size_t findWorkspaceID();
+  WorkspaceID findWorkspaceID();
 
   IElwinView *m_view;
   std::unique_ptr<IElwinModel> m_model;

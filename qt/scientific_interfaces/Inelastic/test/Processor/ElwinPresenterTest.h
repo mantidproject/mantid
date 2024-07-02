@@ -44,6 +44,8 @@ public:
 
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
+    ON_CALL(*m_dataModel, getSpectra(WorkspaceID{0})).WillByDefault(Return(FunctionModelSpectra("0-1")));
+
     m_presenter = std::make_unique<ElwinPresenter>(nullptr, m_view.get(), std::move(model), std::move(dataModel));
 
     m_workspace = createWorkspace(5);
