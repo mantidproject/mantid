@@ -25,6 +25,7 @@ namespace {
 /// Property names.
 namespace Prop {
 static const std::string FLIPPERS{"Flippers"};
+static const std::string SPIN_STATES{"SpinStates"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WS{"InputWorkspaces"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
@@ -40,6 +41,17 @@ static const std::string On{SpinStateValidator::ONE};
 static const std::string OnOff{SpinStateValidator::ONE_ZERO};
 static const std::string OnOn{SpinStateValidator::ONE_ONE};
 } // namespace Flippers
+
+/// Spin State configurations.
+namespace SpinStates {
+using namespace Mantid::Algorithms;
+static const std::string Dn{SpinStateValidator::MINUS};
+static const std::string DnDn{SpinStateValidator::MINUS_MINUS};
+static const std::string DnUp{SpinStateValidator::MINUS_PLUS};
+static const std::string Up{SpinStateValidator::PLUS};
+static const std::string UpDn{SpinStateValidator::PLUS_MINUS};
+static const std::string UpUp{SpinStateValidator::PLUS_PLUS};
+} // namespace SpinStates
 
 /**
  * Throw if given ws is nullptr.
@@ -333,10 +345,13 @@ void PolarizationCorrectionWildes::init() {
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
 
-  const auto spinStateValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
+  const auto flipperConfigValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
   declareProperty(Prop::FLIPPERS,
                   Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn,
-                  spinStateValidator, "Flipper configurations of the input workspaces.");
+                  flipperConfigValidator, "Flipper configurations of the input workspaces.");
+  const auto spinStateValidator =
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 1, 2, 3, 4}, true, false, true);
+  declareProperty(Prop::SPIN_STATES, "", spinStateValidator, "The order of the spin states in the output workspace.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
@@ -410,6 +425,12 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
   const auto flipperCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
   if (inputs.size() != flipperCount) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
+                             ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+  }
+  const auto &spinStates = getPropertyValue(Prop::SPIN_STATES);
+  const auto &spinStatesCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
+  if (inputs.size() != spinStatesCount) {
+    issues[Prop::FLIPPERS] = "The number of spin state configurations (" + std::to_string(spinStatesCount) +
                              ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
   }
   return issues;
@@ -501,24 +522,26 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
  * @return a group workspace
  */
 API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
-  const std::string outWSName = getProperty(Prop::OUTPUT_WS);
+  const auto &outWSName = getPropertyValue(Prop::OUTPUT_WS);
+  auto spinStateOrder = getPropertyValue(Prop::SPIN_STATES);
   std::vector<std::string> names;
+  if (!spinStateOrder.empty()) {
+    names.resize(PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder).size());
+  }
+
   if (outputs.ppWS) {
-    names.emplace_back(outWSName + "_++");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStates::UpUp);
   }
   if (outputs.pmWS) {
-    names.emplace_back(outWSName + "_+-");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStates::UpDn);
   }
   if (outputs.mpWS) {
-    names.emplace_back(outWSName + "_-+");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStates::DnUp);
   }
   if (outputs.mmWS) {
-    names.emplace_back(outWSName + "_--");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStates::DnDn);
   }
+
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
   group->setProperty("InputWorkspaces", names);
@@ -526,6 +549,28 @@ API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const Workspa
   group->execute();
   API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
   return outWS;
+}
+
+/**
+ * Add an output name in the correct position in the vector and to the ADS.
+ * @param names A list of the names of the workspaces the algorithm has generated.
+ * @param spinStateOrder The order the output should be in.
+ * @param baseName The base name for the output workspaces (<BASENAME>_<SPIN_STATE> e.g OUT_+-)
+ * @param ws The workspace to add to the vector and ADS.
+ * @param spinState The spin state the workspace represents.
+ */
+void PolarizationCorrectionWildes::addSpinStateOutput(std::vector<std::string> &names,
+                                                      const std::string &spinStateOrder, const std::string &baseName,
+                                                      const API::MatrixWorkspace_sptr &ws,
+                                                      const std::string &spinState) {
+  if (spinStateOrder.empty()) {
+    names.emplace_back(baseName + "_" + spinState);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), ws);
+  } else {
+    auto const &i = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStateOrder, spinState);
+    names[i] = baseName + "_" + spinState;
+    API::AnalysisDataService::Instance().addOrReplace(names[i], ws);
+  }
 }
 
 /**

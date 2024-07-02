@@ -51,6 +51,10 @@ public:
     runIdealCaseFullCorrections("11,00,10,01", {"++", "+-", "-+", "--"});
   }
 
+  void test_IdealCaseFullCorrectionsReorderedOutputs() {
+    runIdealCaseFullCorrections("00,11,10,01", {"--", "++", "-+", "+-"}, true);
+  }
+
   void test_IdealCaseThreeInputs10Missing() { idealThreeInputsTest("10", "00,01,11", {"++", "+-", "-+", "--"}); }
 
   void test_IdealCaseThreeInputs10MissingReorderedInput() {
@@ -327,7 +331,7 @@ public:
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
     effWS->replaceAxis(1, std::move(axis));
-    runCorrectionWildes(wsName, effWS, "0", false);
+    runCorrectionWildes(wsName, effWS, "0", "", false);
   }
 
   void test_FailureWhenEfficiencyXDataMismatches() {
@@ -340,7 +344,7 @@ public:
     // Change a bin edge of one of the histograms.
     auto &xs = effWS->mutableX(0);
     xs[xs.size() / 2] *= 1.01;
-    runCorrectionWildes(wsName, effWS, "0", false);
+    runCorrectionWildes(wsName, effWS, "0", "", false);
   }
 
   void test_FailureWhenNumberOfHistogramsInInputWorkspacesMismatch() {
@@ -357,7 +361,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    runCorrectionWildes(wsNames, effWS, "", false);
+    runCorrectionWildes(wsNames, effWS, "", "", false);
   }
 
   void test_FailureWhenAnInputWorkspaceIsMissing() {
@@ -431,13 +435,15 @@ private:
   Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::string &inputWorkspace,
                                                        Mantid::API::MatrixWorkspace_sptr effWs,
                                                        const std::string &flippers = "",
+                                                       const std::string &spinStates = "",
                                                        const bool expectedToWork = true) {
-    return runCorrectionWildes(std::vector<std::string>{inputWorkspace}, effWs, flippers, expectedToWork);
+    return runCorrectionWildes(std::vector<std::string>{inputWorkspace}, effWs, flippers, spinStates, expectedToWork);
   }
 
   Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::vector<std::string> &inputWorkspaces,
                                                        Mantid::API::MatrixWorkspace_sptr effWs,
                                                        const std::string &flippers = "",
+                                                       const std::string &spinStates = "",
                                                        const bool expectedToWork = true) {
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
@@ -454,6 +460,9 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     if (!flippers.empty()) {
       alg.setProperty("Flippers", flippers);
+    }
+    if (!spinStates.empty()) {
+      alg.setProperty("SpinStates", spinStates);
     }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWs))
     if (expectedToWork) {
@@ -555,7 +564,8 @@ private:
   void idealCaseFullCorrectionsTest(const Mantid::HistogramData::BinEdges &edges,
                                     const Mantid::API::MatrixWorkspace_sptr &effWS,
                                     const std::array<std::string, 4> &outputSpinStates,
-                                    const std::string &flipperConfig = "00,01,10,11") {
+                                    const std::string &flipperConfig = "00,01,10,11",
+                                    const std::string &spinStates = "") {
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     const double yVal = 2.3;
@@ -576,18 +586,45 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "10").value()] = ws10->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "11").value()] = ws11->getName();
 
-    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig, spinStates);
     auto pols = std::vector<std::string>(4);
     std::transform(outputSpinStates.cbegin(), outputSpinStates.cend(), pols.begin(),
                    [](const std::string &s) { return "_" + s; });
-    compareCorrectionResults(
-        outputWS, pols, nHist, nBins, edges, counts,
-        [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
-        [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
+    if (!spinStates.empty()) {
+      compareCorrectionResults(
+          outputWS, pols, nHist, nBins, edges, counts,
+          [&](size_t wsIndex, double c) {
+            if (pols[wsIndex] == "_++")
+              wsIndex = 0;
+            else if (pols[wsIndex] == "_+-")
+              wsIndex = 1;
+            else if (pols[wsIndex] == "_-+")
+              wsIndex = 2;
+            else if (pols[wsIndex] == "_--")
+              wsIndex = 3;
+            return c * static_cast<double>(wsIndex + 1);
+          },
+          [&](size_t wsIndex, double c) {
+            if (pols[wsIndex] == "_++")
+              wsIndex = 0;
+            else if (pols[wsIndex] == "_+-")
+              wsIndex = 1;
+            else if (pols[wsIndex] == "_-+")
+              wsIndex = 2;
+            else if (pols[wsIndex] == "_--")
+              wsIndex = 3;
+            return std::sqrt(c) * static_cast<double>(wsIndex + 1);
+          });
+    } else {
+      compareCorrectionResults(
+          outputWS, pols, nHist, nBins, edges, counts,
+          [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
+          [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
+    }
   }
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
-                            const std::vector<std::string> &ouputWsOrder) {
+                            const std::vector<std::string> &outputWsOrder) {
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -613,7 +650,7 @@ private:
 
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     for (size_t i = 0; i != 4; ++i) {
-      const auto &dir = ouputWsOrder[i];
+      const auto &dir = outputWsOrder[i];
       const std::string wsName = m_outputWSName + std::string("_") + dir;
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
@@ -1318,10 +1355,15 @@ private:
     }
   }
 
-  void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder) {
+  void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder,
+                                   const bool useSpinStates = false) {
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     auto effWS = idealEfficiencies(edges);
-    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig);
+    std::string spinStates = "";
+    if (useSpinStates) {
+      spinStates = outputOrder[0] + "," + outputOrder[1] + "," + outputOrder[2] + "," + outputOrder[3];
+    }
+    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig, spinStates);
   }
 };
 
