@@ -73,7 +73,7 @@ void FunctionQDataView::notifyParameterTypeChanged(FunctionQAddWorkspaceDialog *
   }
 }
 
-void FunctionQDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void FunctionQDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
   FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.parameter));

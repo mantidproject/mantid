@@ -321,13 +321,14 @@ void FunctionQDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidget
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  FittingModel get table workspace index
-  const auto wsName = dialog->workspaceName().append("_HWHM");
+  auto const &wsName = dialog->workspaceName();
+  auto const hwhmWsName = wsName + "_HWHM";
   // This a vector of workspace names currently loaded
-  auto wsVector = m_model->getWorkspaceNames();
+  auto const wsVector = m_model->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
-  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
+  auto const wsIt = std::find(wsVector.cbegin(), wsVector.cend(), hwhmWsName);
   // this is the index of the workspace.
-  const auto index = WorkspaceID(std::distance(wsVector.begin(), wsIt));
+  auto const index = WorkspaceID(std::distance(wsVector.cbegin(), wsIt));
   updateActiveWorkspaceID(index);
 }
 

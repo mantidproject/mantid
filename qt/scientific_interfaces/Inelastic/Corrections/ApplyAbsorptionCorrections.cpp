@@ -345,7 +345,7 @@ void ApplyAbsorptionCorrections::handleRun() {
   if (m_uiForm.ckUseCan->isChecked()) {
     auto const canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
     auto const containerWs = getADSWorkspace(canName);
-    auto logs = containerWs->run();
+    auto const &logs = containerWs->run();
     if (logs.hasProperty("run_number")) {
       outputWsName += "_" + QString::fromStdString(logs.getProperty("run_number")->value());
     } else {

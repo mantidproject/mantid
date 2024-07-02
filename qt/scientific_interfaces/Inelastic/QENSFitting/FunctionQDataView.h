@@ -24,7 +24,7 @@ class MANTIDQT_INELASTIC_DLL FunctionQDataView : public FitDataView {
   Q_OBJECT
 public:
   FunctionQDataView(QWidget *parent);
-  void addTableEntry(size_t row, FitDataRow newRow) override;
+  void addTableEntry(size_t row, FitDataRow const &newRow) override;
 
 protected:
   FunctionQDataView(const QStringList &headers, QWidget *parent);
