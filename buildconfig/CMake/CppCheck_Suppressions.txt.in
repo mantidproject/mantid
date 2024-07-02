@@ -82,8 +82,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cp
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:403
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:76
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:126
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:127
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyManager.h:106

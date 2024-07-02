@@ -4,14 +4,14 @@ c_compiler:
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
   - 15                         # [osx]
-  - 10                         # [linux]
+  - 12                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
   - 15                         # [osx]
-  - 10                         # [linux]
+  - 12                         # [linux]
 llvm_openmp:                   # [osx]
   - 15                         # [osx]
 
