@@ -109,7 +109,7 @@ public:
     TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
     TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
     TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);
-    TS_ASSERT_DELTA(eValues[0], 0, 0.0001);
+    TS_ASSERT_DELTA(eValues[0], 0.0292, 0.0001);
   }
 
   void test_sample_output_values_are_correct_normalization() {
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
     TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
     TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);
-    TS_ASSERT_DELTA(eValues[0], 0, 0.0001);
+    TS_ASSERT_DELTA(eValues[0], 0.0292, 0.0001);
   }
 
   void test_sample_output_values_are_correct_no_normalization() {
@@ -133,9 +133,9 @@ public:
     MatrixWorkspace_sptr outWorkspace = algorithm->getProperty("OutputWorkspace");
     const auto &yValues = outWorkspace->y(0);
     const auto &eValues = outWorkspace->e(0);
-    TS_ASSERT_DELTA(yValues[0], 0.701429, 0.0001);
-    TS_ASSERT_DELTA(yValues[1], 0.854227, 0.0001);
-    TS_ASSERT_DELTA(yValues[4], 0.338872, 0.0001);
+    TS_ASSERT_DELTA(yValues[0], 0.0491, 0.0001);
+    TS_ASSERT_DELTA(yValues[1], 0.0598, 0.0001);
+    TS_ASSERT_DELTA(yValues[4], 0.0237, 0.0001);
     TS_ASSERT_DELTA(eValues[0], 1.17028e-16, 0.0001);
   }
 

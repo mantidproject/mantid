@@ -44,10 +44,10 @@ private:
 
   API::MatrixWorkspace_sptr removeInvalidData(API::MatrixWorkspace_sptr workspace);
   API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace,
-                                                       const std::string &rebinParams, const bool normalise);
+                                                       const std::string &rebinParams, const bool enforceNormalization);
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace,
                                          API::MatrixWorkspace_sptr resolutionWorkspace, const std::string &rebinParams,
-                                         const bool normalise = false);
+                                         const bool enforceNormalization);
   API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
                                          const std::string &rebinParams, Kernel::MersenneTwister &mTwister,
                                          const bool enforceNormalization);

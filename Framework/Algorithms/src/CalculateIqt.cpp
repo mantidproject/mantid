@@ -269,12 +269,13 @@ MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sp
 }
 
 MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace,
-                                                              const std::string &rebinParams, const bool normalise) {
+                                                              const std::string &rebinParams,
+                                                              const bool enforceNormalization) {
   workspace = rebin(workspace, rebinParams);
   auto workspaceIntegral = integration(workspace);
   workspace = convertToPointData(workspace);
   workspace = extractFFTSpectrum(workspace);
-  if (normalise) {
+  if (enforceNormalization) {
     return divide(workspace, workspaceIntegral);
   }
   return workspace;
@@ -282,8 +283,8 @@ MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sp
 
 MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 MatrixWorkspace_sptr resolutionWorkspace,
-                                                const std::string &rebinParams, const bool normalise) {
-  workspace = normalizedFourierTransform(workspace, rebinParams, normalise);
+                                                const std::string &rebinParams, const bool enforceNormalization) {
+  workspace = normalizedFourierTransform(workspace, rebinParams, enforceNormalization);
   // Always normalise the resolution
   resolutionWorkspace = normalizedFourierTransform(resolutionWorkspace, rebinParams, true);
   return divide(workspace, resolutionWorkspace);
@@ -294,7 +295,7 @@ MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, Mat
                                                 const bool enforceNormalization) {
   auto const simulatedSample = randomizeWorkspaceWithinError(std::move(sample), mTwister);
   auto const simulatedResolution = randomizeWorkspaceWithinError(std::move(resolution), mTwister);
-  auto const iqt = calculateIqt(simulatedSample, simulatedResolution, rebinParams);
+  auto const iqt = calculateIqt(simulatedSample, simulatedResolution, rebinParams, false);
   return enforceNormalization ? divide(iqt, m_sampleIntegral) : iqt;
 }
 
