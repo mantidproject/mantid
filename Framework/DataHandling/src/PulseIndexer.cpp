@@ -184,7 +184,7 @@ size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
   }
 }
 
-bool PulseIndexer::includedPulse(const size_t pulseIndex) const {
+bool PulseIndexer::includedPulse(const size_t pulseIndex, const size_t prevPulseIndex) const {
   if (pulseIndex >= m_roi.back()) {
     return false; // case is already handled in getStopEventIndex and shouldn't be called
   } else if (pulseIndex < m_roi.front()) {
@@ -193,7 +193,7 @@ bool PulseIndexer::includedPulse(const size_t pulseIndex) const {
     if (m_roi_complex) {
       // get the first ROI time boundary greater than the input time. Note that an ROI is a series of alternating
       // ROI_USE and ROI_IGNORE values.
-      const auto iterUpper = std::upper_bound(m_roi.cbegin(), m_roi.cend(), pulseIndex);
+      const auto iterUpper = std::upper_bound(m_roi.cbegin() + prevPulseIndex, m_roi.cend(), pulseIndex);
 
       return (std::distance(m_roi.cbegin(), iterUpper) % 2 != 0);
     } else {
@@ -253,12 +253,13 @@ bool PulseIndexer::Iterator::calculateEventRange() {
 const PulseIndexer::IteratorValue &PulseIndexer::Iterator::operator*() const { return m_value; }
 
 PulseIndexer::Iterator &PulseIndexer::Iterator::operator++() {
+  const auto previousPulseIndex = m_value.pulseIndex;
   ++m_value.pulseIndex;
   // cache the final pulse index to use
   const auto lastPulseIndex = m_indexer->m_roi.back();
 
   // advance to the next included pulse
-  while ((m_value.pulseIndex < lastPulseIndex) && (!m_indexer->includedPulse(m_value.pulseIndex)))
+  while ((m_value.pulseIndex < lastPulseIndex) && (!m_indexer->includedPulse(m_value.pulseIndex, previousPulseIndex)))
     ++m_value.pulseIndex;
 
   // return early if this has advanced to the end
