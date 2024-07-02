@@ -114,7 +114,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QWidget" name="runWidget" native="true"/>
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -176,6 +176,12 @@
    <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>Common/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

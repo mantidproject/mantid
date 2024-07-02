@@ -22,7 +22,7 @@ FitTab::FitTab(QWidget *parent, std::string const &tabName)
       m_runPresenter(), m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm->runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm->runWidget);
 }
 
 void FitTab::setup() { updateOutputOptions(false); }

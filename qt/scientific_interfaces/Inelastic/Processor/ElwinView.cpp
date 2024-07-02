@@ -112,7 +112,6 @@ void ElwinView::setup() {
   connect(m_uiForm.ckCollapse, SIGNAL(stateChanged(int)), this, SLOT(notifyRowModeChanged()));
 
   // Handle plot and save
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotPreviewClicked()));
 
@@ -127,8 +126,6 @@ void ElwinView::setup() {
 }
 
 void ElwinView::subscribePresenter(IElwinPresenter *presenter) { m_presenter = presenter; }
-
-void ElwinView::notifyRunClicked() { m_presenter->handleRunClicked(); }
 
 void ElwinView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
@@ -176,6 +173,8 @@ void ElwinView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
     QMessageBox::warning(this->parentWidget(), "Warning! ", ex.what());
   }
 }
+
+IRunView *ElwinView::getRunView() const { return m_uiForm.runWidget; }
 
 IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
@@ -430,17 +429,9 @@ void ElwinView::setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProp
 }
 
 void ElwinView::setRunIsRunning(const bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
+  setSaveResultEnabled(!running);
   m_uiForm.ppPlot->watchADS(!running);
 }
-
-void ElwinView::setButtonsEnabled(const bool enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
-void ElwinView::setRunEnabled(const bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void ElwinView::setSaveResultEnabled(const bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 

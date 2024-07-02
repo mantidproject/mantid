@@ -234,6 +234,9 @@ std::string parseRunNumbers(std::vector<std::string> const &workspaceNames) {
   std::smatch match;
   std::vector<int> runNumbers;
   std::string prefix;
+  if (workspaceNames.empty()) {
+    return std::string("");
+  }
   std::string suffix = workspaceNames[0].substr(workspaceNames[0].find_first_of('_'));
   for (auto const &name : names)
     if (std::regex_search(name, match, regDigits)) {

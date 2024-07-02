@@ -87,12 +87,17 @@ IqtView::IqtView(QWidget *parent) : QWidget(parent), m_presenter(), m_iqtTree(nu
 
 IqtView::~IqtView() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
 
-OutputPlotOptionsView *IqtView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+MantidWidgets::DataSelector *IqtView::getDataSelector(const std::string &selectorName) const {
+  return selectorName == "resolution" ? m_uiForm.dsResolution : m_uiForm.dsInput;
+}
+
+IRunView *IqtView::getRunView() const { return m_uiForm.runWidget; }
+
+IOutputPlotOptionsView *IqtView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void IqtView::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_iqtTree);
-
   // Number of decimal places in property browsers.
   static const unsigned int NUM_DECIMALS = 6;
   // Create and configure properties
@@ -140,7 +145,6 @@ void IqtView::setup() {
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SLOT(notifySampDataReady(const QString &)));
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(notifyResDataReady(const QString &)));
   connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SLOT(notifyIterationsChanged(int)));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(notifyErrorsClicked(int)));
@@ -171,8 +175,6 @@ void IqtView::notifyResDataReady(const QString &resFilename) {
 }
 
 void IqtView::notifyIterationsChanged(int iterations) { m_presenter->handleIterationsChanged(iterations); }
-
-void IqtView::notifyRunClicked() { m_presenter->handleRunClicked(); }
 
 void IqtView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
@@ -277,31 +279,6 @@ void IqtView::notifyUpdateRangeSelector(QtProperty *prop, double val) {
 
 void IqtView::setPreviewSpectrumMaximum(int value) { m_uiForm.spPreviewSpec->setMaximum(value); }
 
-/**
- * Ensure we have present and valid file/ws inputs.
- *
- * The underlying Fourier transform of Iqt
- * also means we must enforce several rules on the parameters.
- */
-bool IqtView::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-
-  auto const eLow = m_dblManager->value(m_properties["ELow"]);
-  auto const eHigh = m_dblManager->value(m_properties["EHigh"]);
-
-  if (eLow >= eHigh)
-    uiv.addErrorMessage("ELow must be less than EHigh.\n");
-
-  auto const message = uiv.generateErrorMessage();
-  if (!message.empty())
-    showMessageBox(message);
-
-  return message.empty();
-}
-
 void IqtView::setSampleFBSuffixes(const QStringList &suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
 
 void IqtView::setSampleWSSuffixes(const QStringList &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
@@ -310,11 +287,7 @@ void IqtView::setResolutionFBSuffixes(const QStringList &suffix) { m_uiForm.dsRe
 
 void IqtView::setResolutionWSSuffixes(const QStringList &suffix) { m_uiForm.dsResolution->setWSSuffixes(suffix); }
 
-void IqtView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void IqtView::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void IqtView::setRunText(bool running) { m_uiForm.pbRun->setText(running ? "Running..." : "Run"); }
 
 void IqtView::setWatchADS(bool watch) { m_uiForm.ppPlot->watchADS(watch); }
 

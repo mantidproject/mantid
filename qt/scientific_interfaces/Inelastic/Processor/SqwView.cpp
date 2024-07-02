@@ -46,8 +46,6 @@ SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
   connect(m_uiForm.spEWidth, SIGNAL(valueChanged(double)), this, SLOT(notifyEWidthChanged(double)));
   connect(m_uiForm.spEHigh, SIGNAL(valueChanged(double)), this, SLOT(notifyEHighChanged(double)));
   connect(m_uiForm.ckRebinInEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyRebinEChanged(int)));
-
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
@@ -63,7 +61,9 @@ SqwView::~SqwView() {}
 
 void SqwView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
-OutputPlotOptionsView *SqwView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+IRunView *SqwView::getRunView() const { return m_uiForm.runWidget; }
+
+IOutputPlotOptionsView *SqwView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 std::string SqwView::getDataName() const { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
 
@@ -97,14 +97,7 @@ void SqwView::notifyEHighChanged(double value) { m_presenter->handleEHighChanged
 
 void SqwView::notifyRebinEChanged(int value) { m_presenter->handleRebinEChanged(value); }
 
-void SqwView::notifyRunClicked() { m_presenter->handleRunClicked(); }
-
 void SqwView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
-
-void SqwView::setRunButtonText(std::string const &runText) {
-  m_uiForm.pbRun->setText(QString::fromStdString(runText));
-  m_uiForm.pbRun->setEnabled(runText == "Run");
-}
 
 void SqwView::setEnableOutputOptions(bool const enable) {
   m_uiForm.ipoPlotOptions->setEnabled(enable);

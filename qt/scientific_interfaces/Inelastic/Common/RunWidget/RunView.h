@@ -35,7 +35,8 @@ class MANTIDQT_INELASTIC_DLL RunView final : public QWidget, public IRunView {
   Q_OBJECT
 
 public:
-  RunView(QWidget *parent);
+  RunView(QWidget *parent = nullptr);
+  ~RunView() = default;
 
   void subscribePresenter(IRunPresenter *presenter) override;
 

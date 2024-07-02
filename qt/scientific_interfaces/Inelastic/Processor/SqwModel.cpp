@@ -122,26 +122,23 @@ MatrixWorkspace_sptr SqwModel::getRqwWorkspace() const {
   return getADSWorkspace(outputName);
 }
 
-UserInputValidator SqwModel::validate(std::tuple<double, double> const qRange,
-                                      std::tuple<double, double> const eRange) const {
+void SqwModel::validate(IUserInputValidator *validator, std::tuple<double, double> const qRange,
+                        std::tuple<double, double> const eRange) const {
 
   double const tolerance = 1e-10;
 
-  UserInputValidator uiv;
-
   // Validate Q binning
-  uiv.checkBins(m_qLow, m_qWidth, m_qHigh, tolerance);
-  uiv.checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
-                           std::make_pair(m_qLow, m_qHigh));
+  validator->checkBins(m_qLow, m_qWidth, m_qHigh, tolerance);
+  validator->checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
+                                  std::make_pair(m_qLow, m_qHigh));
 
   // If selected, validate energy binning
   if (m_rebinInEnergy) {
 
-    uiv.checkBins(m_eLow, m_eWidth, m_eHigh, tolerance);
-    uiv.checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
-                             std::make_pair(m_eLow, m_eHigh));
+    validator->checkBins(m_eLow, m_eWidth, m_eHigh, tolerance);
+    validator->checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
+                                    std::make_pair(m_eLow, m_eHigh));
   }
-  return uiv;
 }
 
 std::string SqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,

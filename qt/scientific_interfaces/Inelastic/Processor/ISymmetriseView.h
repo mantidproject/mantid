@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <QPair>
 #include <QStringList>
 
 #include <memory>
@@ -16,9 +17,13 @@
 #include <tuple>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class DataSelector;
+}
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IRunView;
+class IOutputPlotOptionsView;
 class ISymmetrisePresenter;
 
 class MANTIDQT_INELASTIC_DLL ISymmetriseView {
@@ -26,9 +31,12 @@ class MANTIDQT_INELASTIC_DLL ISymmetriseView {
 public:
   virtual ~ISymmetriseView() = default;
   virtual void subscribePresenter(ISymmetrisePresenter *presenter) = 0;
-
   virtual void setDefaults() = 0;
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+
+  virtual IRunView *getRunView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual MantidWidgets::DataSelector *getDataSelector() const = 0;
+
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
 
@@ -44,10 +52,11 @@ public:
   virtual bool verifyERange(std::string const &workspaceName) = 0;
   virtual void setRawPlotWatchADS(bool watchADS) = 0;
 
+  virtual void resetEDefaults(bool isPositive) = 0;
+  virtual void resetEDefaults(bool isPositive, QPair<double, double> range) = 0;
+
   virtual void previewAlgDone() = 0;
   virtual void enableSave(bool save) = 0;
-  virtual void enableRun(bool run) = 0;
-  virtual bool validate() = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
 };
 } // namespace CustomInterfaces

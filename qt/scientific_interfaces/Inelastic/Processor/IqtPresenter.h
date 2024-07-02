@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "IIqtView.h"
 #include "IqtModel.h"
@@ -20,7 +21,6 @@ public:
   virtual void handleSampDataReady(const std::string &wsname) = 0;
   virtual void handleResDataReady(const std::string &resWorkspace) = 0;
   virtual void handleIterationsChanged(int iterations) = 0;
-  virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
   virtual void handlePlotCurrentPreview() = 0;
   virtual void handleErrorsClicked(int state) = 0;
@@ -30,20 +30,19 @@ public:
 };
 
 using namespace Mantid::API;
-class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataProcessor, public IIqtPresenter {
+class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataProcessor, public IIqtPresenter, public IRunSubscriber {
 
 public:
   IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model);
   ~IqtPresenter() = default;
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
+  // runWidget
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
   void handleSampDataReady(const std::string &wsname) override;
   void handleResDataReady(const std::string &resWorkspace) override;
   void handleIterationsChanged(int iterations) override;
-  void handleRunClicked() override;
   void handleSaveClicked() override;
   void handlePlotCurrentPreview() override;
   void handleErrorsClicked(int state) override;
@@ -63,8 +62,6 @@ private:
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   IIqtView *m_view;
   std::unique_ptr<IIqtModel> m_model;

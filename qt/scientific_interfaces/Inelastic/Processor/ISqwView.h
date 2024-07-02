@@ -18,7 +18,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IRunView;
+class IOutputPlotOptionsView;
 class ISqwPresenter;
 
 class MANTIDQT_INELASTIC_DLL ISqwView {
@@ -27,7 +28,9 @@ public:
   virtual ~ISqwView() = default;
   virtual void subscribePresenter(ISqwPresenter *presenter) = 0;
 
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IRunView *getRunView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
   virtual std::tuple<double, double> getQRangeFromPlot() const = 0;
@@ -37,7 +40,6 @@ public:
   virtual void setDefaultQAndEnergy() = 0;
   virtual bool validate() = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
-  virtual void setRunButtonText(std::string const &runText) = 0;
   virtual void setEnableOutputOptions(bool const enable) = 0;
 };
 } // namespace CustomInterfaces

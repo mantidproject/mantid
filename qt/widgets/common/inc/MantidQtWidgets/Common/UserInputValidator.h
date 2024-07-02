@@ -35,6 +35,11 @@ public:
   virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
   virtual bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false) = 0;
   virtual bool checkWorkspaceExists(QString const &workspaceName, bool silent = false) = 0;
+  virtual bool checkValidRange(const QString &name, std::pair<double, double> range) = 0;
+  virtual bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB) = 0;
+  virtual bool checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer, const QString &innerName,
+                                    std::pair<double, double> inner) = 0;
+  virtual bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001) = 0;
   template <typename T = Mantid::API::MatrixWorkspace>
   bool checkWorkspaceType(QString const &workspaceName, QString const &inputType, QString const &validType,
                           bool silent = false);
@@ -73,14 +78,14 @@ public:
   /// Check that the given DataSelector widget has valid input.
   bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) override;
   /// Check that the given start and end range is valid.
-  bool checkValidRange(const QString &name, std::pair<double, double> range);
+  bool checkValidRange(const QString &name, std::pair<double, double> range) override;
   /// Check that the given ranges dont overlap.
-  bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
+  bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB) override;
   /// Check that the given "outer" range completely encloses the given "inner" range.
   bool checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer, const QString &innerName,
-                            std::pair<double, double> inner);
+                            std::pair<double, double> inner) override;
   /// Check that the given range can be split evenly into bins of the given width.
-  bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
+  bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001) override;
   /// Checks two values are not equal
   bool checkNotEqual(const QString &name, double x, double y = 0.0, double tolerance = 0.00000001);
 
