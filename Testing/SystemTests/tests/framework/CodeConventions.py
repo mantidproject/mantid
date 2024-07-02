@@ -26,6 +26,7 @@ ALG_BAD_PARAMS = {
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
+    "FindMultipleUMatrices(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
     "LoadDNSSCD(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ModeratorTzero(v1)": ("tolTOF"),
@@ -181,7 +182,7 @@ class Algorithms(systemtesting.MantidSystemTest):
     def runTest(self):
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-        for (name, versions) in algs.items():
+        for name, versions in algs.items():
             if not self.verifyAlgName(name):
                 self.__ranOk += 1
                 continue

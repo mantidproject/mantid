@@ -1,0 +1,1 @@
+- New algorithm :ref:`FindMultipleUMatrices <algm-FindMultipleUMatrices>` to find multiple UB matrices (given lattice parameters) for sample with multiple domains or spurious peaks.
