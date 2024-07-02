@@ -43,18 +43,21 @@ static const std::unordered_set<std::string> ALLOWED_SINGLE_SPIN_STATES{SpinStat
 } // namespace SpinStateStrings
 
 SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
-                                       const bool useFlipperConfig)
+                                       const bool useFlipperConfig, const bool optional)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
-      m_acceptSingleStates(acceptSingleStates), m_useFlipperConfig(useFlipperConfig) {}
+      m_acceptSingleStates(acceptSingleStates), m_useFlipperConfig(useFlipperConfig), m_optional(optional) {}
 
 Kernel::IValidator_sptr SpinStateValidator::clone() const {
   return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates);
 }
 
 std::string SpinStateValidator::checkValidity(const std::string &input) const {
-  if (input.empty())
+  if (input.empty()) {
+    if (m_optional) {
+      return "";
+    }
     return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 11, 10, 00";
-
+  }
   auto const &allowedPairs =
       m_useFlipperConfig ? SpinStateStrings::ALLOWED_PAIR_FLIP_CONFIG : SpinStateStrings::ALLOWED_PAIR_SPIN_STATES;
   auto const &allowedSingles =
