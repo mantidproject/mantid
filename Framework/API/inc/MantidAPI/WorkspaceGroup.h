@@ -69,8 +69,10 @@ public:
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;
-  /// Inidicates that the workspace group can be treated as multiperiod.
+  /// Indicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
+  /// Check if the workspace group contains just peak workspaces
+  bool isGroupPeaksWorkspaces() const;
   /// Check if a workspace is included in this group or any nested groups.
   bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
