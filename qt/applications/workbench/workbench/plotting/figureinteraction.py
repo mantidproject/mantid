@@ -492,7 +492,7 @@ class FigureInteraction(object):
         images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
         for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
-            if type(images[0].norm) == scale_type:
+            if type(images[0].norm) is scale_type:
                 action.setCheckable(True)
                 action.setChecked(True)
             axes_actions.addAction(action)

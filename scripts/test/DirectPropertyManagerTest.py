@@ -26,7 +26,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         return super(DirectPropertyManagerTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.prop_man is None or type(self.prop_man) != type(PropertyManager):
+        if self.prop_man is None or type(self.prop_man) is not type(PropertyManager):
             self.prop_man = PropertyManager("MAR")
 
     def tearDown(self):
