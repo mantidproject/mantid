@@ -23,7 +23,7 @@ class DNSReductionGUIPresenter:
         self.command_line_reader = command_line_reader
         self._parameter_abo = parameter_abo
         self.model = self._parameter_abo
-        self._switch_mode("powder_elastic")
+        self._switch_mode("single_crystal_elastic")
         # connect signals
         self._attach_signal_slots()
 

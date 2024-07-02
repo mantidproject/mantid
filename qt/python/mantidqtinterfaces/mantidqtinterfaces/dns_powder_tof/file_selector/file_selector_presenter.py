@@ -241,8 +241,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.num_columns = self.model.get_active_model_column_count()
         self.view.set_first_column_spanned(self.model.get_scan_range())
         # expand all only in the case when the total number of files
-        # to display is less than 151 (more files to expand might take
-        # significant time to process)
+        # to display is less than 151 (more files to expand takes
+        # some time to execute)
         file_count = self.model.get_number_of_files_in_treeview()
         if file_count <= 150:
             self.view.expand_all()
