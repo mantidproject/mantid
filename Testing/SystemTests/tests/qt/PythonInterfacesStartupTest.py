@@ -10,6 +10,7 @@ import systemtesting
 
 from mantidqt.utils.qt.testing import get_application
 from workbench.utils.gather_interfaces import gather_python_interface_names
+from workbench.config import CONF
 
 from qtpy.QtCore import QCoreApplication, QSettings
 
@@ -52,10 +53,15 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
 
         self._qapp = get_application()  # keep QApp reference alive
         try:
-            for interface_script in self._interface_scripts:
-                self._attempt_to_open_and_close_python_interface(interface_script)
+            self._open_interfaces("On Top")
+            self._open_interfaces("Floating")
         finally:
             self._qapp = None
+
+    def _open_interfaces(self, window_behaviour):
+        CONF.set("AdditionalWindows/behaviour", window_behaviour)
+        for interface_script in self._interface_scripts:
+            self._attempt_to_open_and_close_python_interface(interface_script)
 
     def _attempt_to_open_and_close_python_interface(self, interface_script):
         # Ensures the interfaces close after their script has been executed

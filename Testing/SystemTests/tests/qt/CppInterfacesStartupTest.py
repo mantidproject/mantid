@@ -9,6 +9,7 @@ from itertools import chain
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
+from workbench.config import CONF, WINDOW_ONTOP_FLAGS, WINDOW_STANDARD_FLAGS
 from workbench.utils.gather_interfaces import gather_cpp_interface_names
 
 from qtpy.QtCore import Qt
@@ -35,14 +36,29 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         if len(self._cpp_interface_names) == 0:
             self.fail("Failed to find the names of the c++ interfaces.")
 
-        for interface_name in self._cpp_interface_names:
-            self._attempt_to_open_cpp_interface(interface_name)
+        self._open_interfaces("On Top")
+        self._open_interfaces("Floating")
 
-    def _attempt_to_open_cpp_interface(self, interface_name):
+    def _open_interfaces(self, window_behaviour):
+        CONF.set("AdditionalWindows/behaviour", window_behaviour)
+        for interface_name in self._cpp_interface_names:
+            self._attempt_to_open_cpp_interface(interface_name, window_behaviour)
+
+    def _attempt_to_open_cpp_interface(self, interface_name, window_behaviour):
         try:
             interface = self._interface_manager.createSubWindow(interface_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()
+            if window_behaviour == "On Top":
+                self.assertTrue(
+                    interface.windowFlags() & WINDOW_ONTOP_FLAGS,
+                    f"{interface_name} is not using correct window flags for 'On Top' behaviour",
+                )
+            else:
+                self.assertTrue(
+                    interface.windowFlags() & WINDOW_STANDARD_FLAGS,
+                    f"{interface_name} is not using correct window flags for 'Floating' behaviour",
+                )
             interface.close()
 
             # Delete the interface manually because the destructor is not being called as expected on close (even with
