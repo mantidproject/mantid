@@ -39,7 +39,7 @@ MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::uni
  *
  */
 void MomentsPresenter::handleDataReady(std::string const &dataName) {
-  if (validate()) {
+  if (m_runPresenter->validate()) {
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
   }
