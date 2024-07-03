@@ -421,11 +421,27 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
-  const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const auto flipperCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
+  const auto flipperConfig = PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(Prop::FLIPPERS));
+  const auto flipperCount = flipperConfig.size();
   if (inputs.size() != flipperCount) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
                              ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+  }
+  // SpinStates checks.
+  const auto spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(Prop::SPIN_STATES));
+  if (inputs.size() == 1 && !spinStates.empty()) {
+    issues[Prop::SPIN_STATES] = "Output workspace order cannot be set for direct beam calculations.";
+  } else {
+    if (flipperConfig.front().size() == 1 && spinStates.size() != 2) {
+      issues[Prop::SPIN_STATES] =
+          "Incorrect number of workspaces in output configuration: " + std::to_string(spinStates.size()) +
+          ". Only two output workspaces are produced when an analyzer is not used.";
+    }
+    if (flipperConfig.front().size() == 2 && spinStates.size() != 4) {
+      issues[Prop::SPIN_STATES] =
+          "Incorrect number of workspaces in output configuration: " + std::to_string(spinStates.size()) +
+          ". Four output workspaces are produced by the corrections.";
+    }
   }
   return issues;
 }
