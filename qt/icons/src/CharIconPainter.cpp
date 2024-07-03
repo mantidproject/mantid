@@ -29,9 +29,9 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter, QRect rec
   // These variables will be useful later on, so I have left them being passed
   // down this far. This is because they can be used for defining variable
   // changes based on state of the buttons/QObject that the Icon is present in.
-  // Since we currently don't use this feature availible with QIcon they have
+  // Since we currently don't use this feature available with QIcon they have
   // not yet been implemented. Mode has now been implemented however it will
-  // only ever be gray in it's current mode when disabled.
+  // only ever be gray in its current mode when disabled.
   UNUSED_ARG(state);
 
   painter->save();
