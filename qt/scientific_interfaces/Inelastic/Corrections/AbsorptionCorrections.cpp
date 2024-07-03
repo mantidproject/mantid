@@ -144,10 +144,6 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(double)), this, SLOT(setSampleDensity(double)));
   connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this, SLOT(setCanDensity(double)));
 
-  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.cbUseCan, SIGNAL(stateChanged(int)), this, SLOT(doValidation()));
-
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);
 }
@@ -605,11 +601,6 @@ void AbsorptionCorrections::saveClicked() {
   addSaveWorkspace(m_pythonExportWsName);
   addSaveWorkspace(factorsWs);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void AbsorptionCorrections::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
 }
 
 void AbsorptionCorrections::setSampleDensityOptions(QString const &method) {
