@@ -43,25 +43,6 @@ void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> cons
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void DataProcessor::runTab() {
-  if (m_runPresenter->validate()) {
-    m_tabStartTime = DateAndTime::getCurrentTime();
-    m_tabRunning = true;
-    try {
-      if (m_plotOptionsPresenter) {
-        m_plotOptionsPresenter->clearWorkspaces();
-      }
-      run();
-    } catch (std::exception const &ex) {
-      m_tabRunning = false;
-      emit showMessageBox(ex.what());
-    }
-  } else {
-    g_log.warning("Failed to validate input!");
-    m_runPresenter->setRunEnabled(true);
-  }
-}
-
 /**
  * Slot used to update the run button when an algorithm that was strted by the
  * Run button complete.

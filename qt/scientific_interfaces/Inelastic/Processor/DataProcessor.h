@@ -58,9 +58,6 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
-public slots:
-  void runTab();
-
 private slots:
   void tabExecutionComplete(bool error);
 

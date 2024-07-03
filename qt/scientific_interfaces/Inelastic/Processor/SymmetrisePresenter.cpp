@@ -117,7 +117,7 @@ void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
 }
 
 void SymmetrisePresenter::handleReflectTypeChanged(int value) {
-  if (validate()) {
+  if (m_runPresenter->validate()) {
     m_model->setIsPositiveReflect(value == 0);
     m_view->resetEDefaults(value == 0);
   }
