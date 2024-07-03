@@ -8,7 +8,6 @@
 
 #include "../DllConfig.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "SimulationTab.h"
 #include "ui_Sassena.h"
 
@@ -34,7 +33,6 @@ private slots:
 private:
   void setSaveEnabled(bool enabled);
 
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   /// The ui form
   Ui::Sassena m_uiForm;
   /// Name of the output workspace group

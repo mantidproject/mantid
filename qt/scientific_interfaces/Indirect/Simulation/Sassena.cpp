@@ -15,7 +15,7 @@
 namespace MantidQt::CustomInterfaces {
 Sassena::Sassena(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 

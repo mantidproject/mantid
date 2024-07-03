@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -68,6 +69,9 @@ public:
   void displayWarning(std::string const &message);
 
 protected:
+  /// Set the presenter for the run widget
+  void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
+
   /// Run the load algorithms
   bool loadFile(const std::string &filename, const std::string &outputName, const int specMin = -1,
                 const int specMax = -1, bool loadHistory = true);
@@ -105,6 +109,8 @@ protected:
   virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
   /// Overidden by child class.
   virtual bool validate() { throw std::logic_error("InelasticTab::validate() called but is not implemented."); }
+
+  std::unique_ptr<RunPresenter> m_runPresenter;
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;

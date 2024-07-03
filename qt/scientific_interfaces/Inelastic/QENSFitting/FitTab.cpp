@@ -19,7 +19,7 @@ namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
-      m_runPresenter(), m_outOptionsPresenter() {
+      m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
   m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm->runWidget);

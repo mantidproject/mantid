@@ -33,10 +33,6 @@ void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOpti
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void DataProcessor::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
-  m_runPresenter = std::move(presenter);
-}
-
 void DataProcessor::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
 void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {

@@ -49,7 +49,7 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
 namespace MantidQt::CustomInterfaces {
 
 InelasticTab::InelasticTab(QObject *parent)
-    : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
+    : QObject(parent), m_runPresenter(), m_properties(), m_dblManager(new QtDoublePropertyManager()),
       m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
       m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
@@ -65,6 +65,10 @@ InelasticTab::InelasticTab(QObject *parent)
   m_valPosDbl->setBottom(tolerance);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
+}
+
+void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
+  m_runPresenter = std::move(presenter);
 }
 
 //----------------------------------------------------------------------------------------------
