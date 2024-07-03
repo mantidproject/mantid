@@ -40,7 +40,7 @@ dependencies:
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
   - quasielasticbayes
   - requests>=2.25.1
-  - scipy>=1.10.0,<1.14
+  - scipy>=1.10.0
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme>=0.8.1
