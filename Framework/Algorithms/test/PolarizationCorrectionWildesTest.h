@@ -61,6 +61,10 @@ public:
     idealThreeInputsTest("10", "01,00,11", {"++", "+-", "-+", "--"});
   }
 
+  void test_IdealCaseThreeInputs10MissingReorderedOutput() {
+    idealThreeInputsTest("10", "01,00,11", {"--", "+-", "-+", "++"}, true);
+  }
+
   void test_IdealCaseThreeInputs01Missing() { idealThreeInputsTest("01", "00,10,11", {"++", "+-", "-+", "--"}); }
 
   void test_IdealCaseThreeInputs01MissingReorderedInput() {
@@ -624,7 +628,7 @@ private:
   }
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
-                            const std::vector<std::string> &outputWsOrder) {
+                            const std::vector<std::string> &outputWsOrder, const bool useSpinStates = false) {
     constexpr size_t nBins{3};
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
@@ -645,8 +649,13 @@ private:
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, presentFlipperConf).value()] = wsXX->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "11").value()] = ws11->getName();
 
+    std::string spinStates = "";
+    if (useSpinStates) {
+      spinStates = outputWsOrder[0] + "," + outputWsOrder[1] + "," + outputWsOrder[2] + "," + outputWsOrder[3];
+    }
+
     auto effWS = idealEfficiencies(edges);
-    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig, spinStates);
 
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     for (size_t i = 0; i != 4; ++i) {
