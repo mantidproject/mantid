@@ -25,14 +25,13 @@ Mantid::Kernel::Logger g_log("DataReductionTab");
 
 namespace MantidQt::CustomInterfaces {
 
-DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent)
-    : InelasticTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
+DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent) : InelasticTab(parent), m_idrUI(idrUI) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
 DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
-    : InelasticTab(), m_idrUI(idrUI), m_algorithmRunner(std::move(algorithmRunner)), m_tabRunning(false) {
+    : InelasticTab(), m_idrUI(idrUI), m_algorithmRunner(std::move(algorithmRunner)) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
@@ -49,41 +48,6 @@ void DataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotO
 
 void DataReductionTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
-}
-
-void DataReductionTab::runTab() {
-  if (validate()) {
-    m_tabStartTime = DateAndTime::getCurrentTime();
-    m_tabRunning = true;
-    emit updateRunButton(false, "disable", "Running...", "Running data reduction...");
-    try {
-      if (m_plotOptionsPresenter) {
-        m_plotOptionsPresenter->clearWorkspaces();
-      }
-      run();
-    } catch (std::exception const &ex) {
-      m_tabRunning = false;
-      emit updateRunButton(true, "enable");
-      emit showMessageBox(ex.what());
-    }
-  } else {
-    g_log.warning("Failed to validate indirect tab input!");
-  }
-}
-
-/**
- * Slot used to update the run button when an algorithm that was strted by the
- * Run button complete.
- *
- * @param error Unused
- */
-void DataReductionTab::tabExecutionComplete(bool error) {
-  UNUSED_ARG(error);
-  if (m_tabRunning) {
-    m_tabRunning = false;
-    auto const enableOutputButtons = error == false ? "enable" : "disable";
-    emit updateRunButton(true, enableOutputButtons);
-  }
 }
 
 void DataReductionTab::handleNewInstrumentConfiguration() { updateInstrumentConfiguration(); }
