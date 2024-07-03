@@ -51,7 +51,7 @@ dependencies:
 
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.13.1
+  - cppcheck==2.14.2
   - pre-commit>=2.12.0
   - libcxx<17
 
