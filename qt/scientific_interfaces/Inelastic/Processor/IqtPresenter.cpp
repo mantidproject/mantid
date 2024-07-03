@@ -31,11 +31,11 @@ namespace CustomInterfaces {
 IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model)
     : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
+  m_view->setup();
 }
-
-void IqtPresenter::setup() { m_view->setup(); }
 
 void IqtPresenter::handleSampDataReady(const std::string &wsname) {
   try {
@@ -60,9 +60,18 @@ void IqtPresenter::handleResDataReady(const std::string &resWorkspace) {
 
 void IqtPresenter::handleIterationsChanged(int iterations) { m_model->setNIterations(std::to_string(iterations)); }
 
-void IqtPresenter::handleRunClicked() {
+void IqtPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  runTab();
+  m_view->setWatchADS(false);
+  m_view->setSaveResultEnabled(false);
+
+  m_view->updateDisplayedBinParameters();
+
+  // Construct the result workspace for Python script export
+  std::string sampleName = m_view->getSampleName();
+  m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
+  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 /**
  * Handle saving of workspace
@@ -116,19 +125,6 @@ void IqtPresenter::handlePreviewSpectrumChanged(int spectra) {
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
-void IqtPresenter::run() {
-  m_view->setWatchADS(false);
-  setRunIsRunning(true);
-
-  m_view->updateDisplayedBinParameters();
-
-  // Construct the result workspace for Python script export
-  std::string sampleName = m_view->getSampleName();
-  m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
-  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
 /**
  * Handle algorithm completion.
  *
@@ -136,10 +132,8 @@ void IqtPresenter::run() {
  */
 void IqtPresenter::runComplete(bool error) {
   m_view->setWatchADS(true);
-  setRunIsRunning(false);
-  if (error)
-    m_view->setSaveResultEnabled(false);
-  else
+  m_view->setSaveResultEnabled(!error);
+  if (!error)
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
 }
 
@@ -149,7 +143,13 @@ void IqtPresenter::runComplete(bool error) {
  * The underlying Fourier transform of Iqt
  * also means we must enforce several rules on the parameters.
  */
-bool IqtPresenter::validate() { return m_view->validate(); }
+void IqtPresenter::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_view->getDataSelector("sample"));
+  validator->checkDataSelectorIsValid("Resolution", m_view->getDataSelector("resolution"));
+
+  if (m_model->EMin() >= m_model->EMax())
+    validator->addErrorMessage("ELow must be less than EHigh.\n");
+}
 
 void IqtPresenter::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
@@ -160,16 +160,6 @@ void IqtPresenter::setFileExtensionsByName(bool filter) {
   m_view->setResolutionFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
                                          : InterfaceUtils::getExtensions(tabName));
   m_view->setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
-}
-
-void IqtPresenter::setButtonsEnabled(bool enabled) {
-  m_view->setRunEnabled(enabled);
-  m_view->setSaveResultEnabled(enabled);
-}
-
-void IqtPresenter::setRunIsRunning(bool running) {
-  m_view->setRunText(running);
-  setButtonsEnabled(!running);
 }
 
 /**

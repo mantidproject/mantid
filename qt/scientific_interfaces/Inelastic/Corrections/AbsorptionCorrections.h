@@ -35,7 +35,6 @@ public:
 private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
-  void runClicked();
   void getParameterDefaults(QString const &dataName);
   void setSampleDensityOptions(QString const &method);
   void setCanDensityOptions(QString const &method);
@@ -72,8 +71,6 @@ private:
                          std::string const &beamWidthParamName) const;
   void setBeamHeightValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
                           std::string const &beamHeightParamName) const;
-  void setWavelengthsValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
-                           std::string const &wavelengthsParamName) const;
   void setEventsValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
                       std::string const &eventsParamName) const;
   void setInterpolationValue(const Mantid::Geometry::Instrument_const_sptr &instrument,

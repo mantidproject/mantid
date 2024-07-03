@@ -27,7 +27,7 @@ namespace MantidQt::CustomInterfaces {
 ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");

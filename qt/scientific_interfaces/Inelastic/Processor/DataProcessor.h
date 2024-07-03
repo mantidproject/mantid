@@ -8,6 +8,7 @@
 
 #include "Common/InelasticTab.h"
 #include "Common/OutputPlotOptionsPresenter.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -46,27 +47,23 @@ public:
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
-  /// Set the active workspaces used in the plotting options
+  /// Set the presenter for the run widget
+  void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
+
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
+  /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
-
-public slots:
-  void runTab();
-
-signals:
-  /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
 
 private slots:
   void tabExecutionComplete(bool error);
 
 protected:
   virtual void runComplete(bool error) { (void)error; };
+  std::unique_ptr<RunPresenter> m_runPresenter;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };

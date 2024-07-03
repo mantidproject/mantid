@@ -26,6 +26,11 @@ public:
   MOCK_METHOD3(checkDataSelectorIsValid, bool(const QString &name, DataSelector *widget, bool silent));
   MOCK_METHOD3(checkWorkspaceGroupIsValid, bool(QString const &groupName, QString const &inputType, bool silent));
   MOCK_METHOD2(checkWorkspaceExists, bool(QString const &workspaceName, bool silent));
+  MOCK_METHOD2(checkValidRange, bool(QString const &name, std::pair<double, double> range));
+  MOCK_METHOD2(checkRangesDontOverlap, bool(std::pair<double, double> rangeA, std::pair<double, double> rangeB));
+  MOCK_METHOD4(checkRangeIsEnclosed, bool(const QString &outerName, std::pair<double, double> outer,
+                                          const QString &innerName, std::pair<double, double> inner));
+  MOCK_METHOD4(checkBins, bool(double lower, double binWidth, double upper, double tolerance));
 
   MOCK_METHOD2(setErrorLabel, void(QLabel *errorLabel, bool valid));
 

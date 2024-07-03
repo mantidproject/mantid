@@ -111,7 +111,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   std::map<std::string, std::string> actions;
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
 
@@ -143,10 +143,6 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.cbCanMaterialMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCanMaterialOptions(int)));
   connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(double)), this, SLOT(setSampleDensity(double)));
   connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this, SLOT(setCanDensity(double)));
-
-  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.cbUseCan, SIGNAL(stateChanged(int)), this, SLOT(doValidation()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);
@@ -605,11 +601,6 @@ void AbsorptionCorrections::saveClicked() {
   addSaveWorkspace(m_pythonExportWsName);
   addSaveWorkspace(factorsWs);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void AbsorptionCorrections::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
 }
 
 void AbsorptionCorrections::setSampleDensityOptions(QString const &method) {

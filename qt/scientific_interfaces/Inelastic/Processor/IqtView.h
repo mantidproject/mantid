@@ -33,19 +33,18 @@ public:
 
   void subscribePresenter(IIqtPresenter *presenter) override;
 
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IRunView *getRunView() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
+  MantidWidgets::DataSelector *getDataSelector(const std::string &selectorName) const override;
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void setPreviewSpectrumMaximum(int value) override;
   void updateDisplayedBinParameters() override;
   void setRangeSelectorDefault(const MatrixWorkspace_sptr inputWorkspace, const QPair<double, double> &range) override;
-  bool validate() override;
   void setSampleFBSuffixes(const QStringList &suffix) override;
   void setSampleWSSuffixes(const QStringList &suffix) override;
   void setResolutionFBSuffixes(const QStringList &suffix) override;
   void setResolutionWSSuffixes(const QStringList &suffix) override;
-  void setRunEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
-  void setRunText(bool running) override;
   void setWatchADS(bool watch) override;
   void setup() override;
   void showMessageBox(const std::string &message) const override;
@@ -57,7 +56,6 @@ private slots:
   void notifySampDataReady(const QString &filename);
   void notifyResDataReady(const QString &resFilename);
   void notifyIterationsChanged(int iterations);
-  void notifyRunClicked();
   void notifySaveClicked();
   void notifyPlotCurrentPreview();
   void notifyErrorsClicked(int state);

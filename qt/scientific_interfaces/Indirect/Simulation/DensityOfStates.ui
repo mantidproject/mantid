@@ -57,8 +57,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>500</width>
-        <height>381</height>
+        <width>480</width>
+        <height>364</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -515,7 +515,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="runWidget" native="true"/>
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -577,6 +577,12 @@
    <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>Common/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

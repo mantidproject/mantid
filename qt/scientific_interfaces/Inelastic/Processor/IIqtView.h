@@ -16,9 +16,13 @@
 #include <tuple>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class DataSelector;
+}
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IRunView;
+class IOutputPlotOptionsView;
 class IIqtPresenter;
 
 class MANTIDQT_INELASTIC_DLL IIqtView {
@@ -27,20 +31,20 @@ public:
   virtual ~IIqtView() = default;
   virtual void subscribePresenter(IIqtPresenter *presenter) = 0;
 
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IRunView *getRunView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual MantidWidgets::DataSelector *getDataSelector(const std::string &selectorName) const = 0;
+
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
   virtual void setPreviewSpectrumMaximum(int value) = 0;
   virtual void updateDisplayedBinParameters() = 0;
   virtual void setRangeSelectorDefault(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
                                        const QPair<double, double> &range) = 0;
-  virtual bool validate() = 0;
   virtual void setSampleFBSuffixes(const QStringList &suffix) = 0;
   virtual void setSampleWSSuffixes(const QStringList &suffix) = 0;
   virtual void setResolutionFBSuffixes(const QStringList &suffix) = 0;
   virtual void setResolutionWSSuffixes(const QStringList &suffix) = 0;
-  virtual void setRunEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
-  virtual void setRunText(bool running) = 0;
   virtual void setWatchADS(bool watch) = 0;
   virtual void setup() = 0;
   virtual void showMessageBox(const std::string &message) const = 0;
