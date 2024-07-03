@@ -350,7 +350,7 @@ void PolarizationCorrectionWildes::init() {
                   Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn,
                   flipperConfigValidator, "Flipper configurations of the input workspaces.");
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 1, 2, 3, 4}, true, false, true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 1, 2, 4}, true, false, true);
   declareProperty(Prop::SPIN_STATES, "", spinStateValidator, "The order of the spin states in the output workspace.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
@@ -425,12 +425,6 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
   const auto flipperCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
   if (inputs.size() != flipperCount) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
-                             ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
-  }
-  const auto &spinStates = getPropertyValue(Prop::SPIN_STATES);
-  const auto &spinStatesCount = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty).size();
-  if (inputs.size() != spinStatesCount) {
-    issues[Prop::FLIPPERS] = "The number of spin state configurations (" + std::to_string(spinStatesCount) +
                              ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
   }
   return issues;
