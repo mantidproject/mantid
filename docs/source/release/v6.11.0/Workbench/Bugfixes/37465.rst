@@ -1,0 +1,1 @@
+- Fixed a bug where editing plot settings could reorder the line order.
