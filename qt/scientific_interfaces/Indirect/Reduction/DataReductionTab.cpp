@@ -39,6 +39,10 @@ DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::I
 
 DataReductionTab::~DataReductionTab() = default;
 
+void DataReductionTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
+  m_runPresenter = std::move(presenter);
+}
+
 void DataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }

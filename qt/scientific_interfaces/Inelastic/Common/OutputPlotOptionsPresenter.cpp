@@ -105,7 +105,7 @@ void OutputPlotOptionsPresenter::replaceHandle(const std::string &wsName, const 
 void OutputPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
   auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
   m_view->setWorkspaces(workspaceNames);
-  handleWorkspaceChanged(workspaceNames.front());
+  handleWorkspaceChanged(!workspaceNames.empty() ? workspaceNames.front() : "");
 }
 
 void OutputPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {

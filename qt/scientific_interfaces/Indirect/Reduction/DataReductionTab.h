@@ -10,6 +10,7 @@
 #include "Common/InelasticTab.h"
 #include "Common/InstrumentConfig.h"
 #include "Common/OutputPlotOptionsPresenter.h"
+#include "Common/RunWidget/RunPresenter.h"
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
@@ -51,6 +52,8 @@ public:
   DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
   ~DataReductionTab() override;
 
+  /// Set the presenter for the run widget
+  void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
@@ -89,6 +92,7 @@ protected:
 protected:
   IDataReduction *m_idrUI;
   std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
+  std::unique_ptr<RunPresenter> m_runPresenter;
 
 private slots:
   void tabExecutionComplete(bool error);

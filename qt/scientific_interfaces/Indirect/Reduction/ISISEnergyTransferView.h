@@ -17,6 +17,7 @@ namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
 class IIETPresenter;
+class IRunView;
 
 class MANTIDQT_INDIRECT_DLL IIETView {
 public:
@@ -29,14 +30,15 @@ public:
   virtual IETSaveData getSaveData() const = 0;
 
   virtual std::string getGroupOutputOption() const = 0;
+  virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptionsView() const = 0;
   virtual bool getGroupOutputCheckbox() const = 0;
 
   virtual std::string getFirstFilename() const = 0;
 
   virtual bool isRunFilesValid() const = 0;
-  virtual void validateCalibrationFileType(UserInputValidator *uiv) const = 0;
-  virtual void validateRebinString(UserInputValidator *uiv) const = 0;
+  virtual void validateCalibrationFileType(IUserInputValidator *uiv) const = 0;
+  virtual void validateRebinString(IUserInputValidator *uiv) const = 0;
   virtual std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
                                                                 std::size_t const &spectraMax) const = 0;
 
@@ -66,7 +68,6 @@ public:
   virtual void setSaveEnabled(bool enable) = 0;
   virtual void setPlotTimeIsPlotting(bool plotting) = 0;
   virtual void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) = 0;
-  virtual void setRunButtonText(std::string const &runText) = 0;
   virtual void setEnableOutputOptions(bool const enable) = 0;
 
   virtual void setInstrumentSpectraRange(int specMin, int specMax) = 0;
@@ -92,14 +93,15 @@ public:
   IETSaveData getSaveData() const override;
 
   std::string getGroupOutputOption() const override;
+  IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptionsView() const override;
   bool getGroupOutputCheckbox() const override;
 
   std::string getFirstFilename() const override;
 
   bool isRunFilesValid() const override;
-  void validateCalibrationFileType(UserInputValidator *uiv) const override;
-  void validateRebinString(UserInputValidator *uiv) const override;
+  void validateCalibrationFileType(IUserInputValidator *uiv) const override;
+  void validateRebinString(IUserInputValidator *uiv) const override;
   std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
                                                         std::size_t const &spectraMax) const override;
 
@@ -128,7 +130,6 @@ public:
   void setSaveEnabled(bool enable) override;
   void setPlotTimeIsPlotting(bool plotting) override;
   void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) override;
-  void setRunButtonText(std::string const &runText) override;
   void setEnableOutputOptions(bool const enable) override;
 
   void setInstrumentSpectraRange(int specMin, int specMax) override;
@@ -142,14 +143,12 @@ public:
 
 private slots:
   void saveClicked();
-  void runClicked();
   void plotRawClicked();
   void saveCustomGroupingClicked(std::string const &customGrouping);
   void pbRunFinished();
 
   void handleDataReady();
 
-  void pbRunEditing();
   void pbRunFinding();
 
 private:
