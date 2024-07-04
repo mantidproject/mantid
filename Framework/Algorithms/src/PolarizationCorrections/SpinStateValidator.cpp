@@ -56,7 +56,8 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     if (m_optional) {
       return "";
     }
-    return "Enter a spin state string, it should be a comma-separated list of spin states, e.g. 01, 11, 10, 00";
+    return m_useFlipperConfig ? "Enter a spin state string, it should be a comma-separated list, e.g. 01, 11, 10, 00"
+                              : "Enter a spin state string, it should be a comma-separated list, e.g. --, ++, -+, +-";
   }
   auto const &allowedPairs =
       m_useFlipperConfig ? SpinStateStrings::ALLOWED_PAIR_FLIP_CONFIG : SpinStateStrings::ALLOWED_PAIR_SPIN_STATES;
@@ -75,9 +76,15 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
         const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, s);
         return !isPair && !isSingle;
       })) {
+    if (m_useFlipperConfig) {
+      return m_acceptSingleStates
+                 ? "The spin states must either be one or two digits, with each being either a zero or one"
+                 : "The spin states must consist of two digits, either a zero or a one.";
+    }
     return m_acceptSingleStates
-               ? "The spin states must either be one or two digits, with each being either a zero or one"
-               : "The spin states must consist of two digits, either a zero or a one.";
+               ? "The spin states must either be one or two characters, with each being either a plus (up) or minus "
+                 "(down)."
+               : "The spin states must consist of two characters, either a minus (down) or a plus (up).";
   }
 
   // Single digits can't mix with pairs
