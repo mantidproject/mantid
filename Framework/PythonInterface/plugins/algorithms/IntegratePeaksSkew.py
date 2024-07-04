@@ -217,6 +217,12 @@ class InstrumentArrayConverter:
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = int(nrows) // 2, int(ncols) // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
+        # add masked pixels to edges (sometimes used to denote edges or broken components)
+        det_info = self.ws.detectorInfo()
+        for irow in range(det_edges.shape[0]):
+            for icol in range(det_edges.shape[1]):
+                if det_info.isMasked(det_info.indexOf(int(detids[irow, icol]))):
+                    det_edges[irow, icol] = True
         peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
 
@@ -429,7 +435,7 @@ class PeakData:
         prev_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
         for istart in range(1, iend):
             this_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
-            if this_skew >= prev_skew:
+            if this_skew >= prev_skew or this_skew < 0:
                 istart -= 1
                 break
             else:
@@ -824,15 +830,15 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             name="NRowsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
-            doc="Masks including pixels on rows NRowsEdge from the detector edge are " "defined as on the edge.",
+            validator=IntBoundedValidator(lower=0),
+            doc="Masks including pixels on rows NRowsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NColsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
-            doc="Masks including pixels on cols NColsEdge from the detector edge are " "defined as on the edge.",
+            validator=IntBoundedValidator(lower=0),
+            doc="Masks including pixels on cols NColsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NPixMin",

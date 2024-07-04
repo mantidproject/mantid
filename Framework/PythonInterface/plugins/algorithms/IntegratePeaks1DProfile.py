@@ -188,14 +188,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             name="NRowsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NRowsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NColsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NColsEdge from the detector edge are defined as on the edge.",
         )
         edge_check_enabled = EnabledWhenProperty("IntegrateIfOnEdge", PropertyCriterion.IsDefault)

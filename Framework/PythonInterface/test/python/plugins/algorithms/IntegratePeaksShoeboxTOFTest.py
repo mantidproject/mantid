@@ -13,6 +13,7 @@ from mantid.simpleapi import (
     LoadParameterFile,
     AnalysisDataService,
     SortPeaksWorkspace,
+    CloneWorkspace,
 )
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt
@@ -98,6 +99,28 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
             NRows=3,
             NCols=3,
             NBins=3,
+            WeakPeakThreshold=0.0,
+            OptimiseShoebox=False,
+            IntegrateIfOnEdge=False,
+        )
+        # check edge peak integrated but lower I/sigma as shell would overlap edge
+        self._assert_found_correct_peaks(out, 2 * [0.0])
+
+    def test_exec_IntegrateIfOnEdge_False_respects_detector_masking(self):
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws)
+        det_info = ws_masked.detectorInfo()
+        [det_info.setMasked(det_info.indexOf(pk.getDetectorID()), True) for pk in self.peaks]
+
+        out = IntegratePeaksShoeboxTOF(
+            InputWorkspace=ws_masked,
+            PeaksWorkspace=self.peaks,
+            OutputWorkspace="peaks1_masked",
+            GetNBinsFromBackToBackParams=False,
+            NRows=3,
+            NCols=3,
+            NBins=3,
+            NRowsEdge=0,
+            NColsEdge=0,
             WeakPeakThreshold=0.0,
             OptimiseShoebox=False,
             IntegrateIfOnEdge=False,
