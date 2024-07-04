@@ -8,6 +8,7 @@
 
 
 from matplotlib.lines import Line2D
+from matplotlib.container import ErrorbarContainer
 
 from mantid.plots.legend import LegendProperties
 from mantid.plots import datafunctions, MantidAxes
@@ -123,9 +124,11 @@ class CurvesTabWidgetPresenter:
         if isinstance(curve, Line2D):
             curve_index = ax.get_lines().index(curve)
             errorbar = False
-        else:
+        elif isinstance(curve, ErrorbarContainer):
             curve_index = ax.get_lines().index(curve[0])
             errorbar = True
+        else:
+            return
 
         # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
         # equally spaced apart. However since the curve is being replotted we don't want that to happen, so here
