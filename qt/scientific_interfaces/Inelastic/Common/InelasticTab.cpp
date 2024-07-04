@@ -71,8 +71,6 @@ void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter
   m_runPresenter = std::move(presenter);
 }
 
-bool InelasticTab::validateTab() { return validate(); }
-
 /**
  * Handles generating a Python script for the algorithms run on the current tab.
  */
