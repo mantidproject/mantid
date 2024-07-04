@@ -446,7 +446,17 @@ class PeakFitter:
         }
         self.error_strategy = error_strategy
 
+        self.update_peak_position()
         self.create_peak_function_with_initial_params()
+
+    def update_peak_position(self):
+        # search for pixel with highest TOF integrated counts in 3x3 window around peak position
+        irow_min = np.clip(self.peak_pos[0] - 1, a_min=0, a_max=self.ysum.shape[0])
+        irow_max = np.clip(self.peak_pos[0] + 2, a_min=0, a_max=self.ysum.shape[0])  # add 1 as last index not in slice
+        icol_min = np.clip(self.peak_pos[1] - 1, a_min=0, a_max=self.ysum.shape[1])
+        icol_max = np.clip(self.peak_pos[1] + 2, a_min=0, a_max=self.ysum.shape[1])  # add 1 as last index not in slice
+        imax = np.unravel_index(np.argmax(self.ysum[irow_min:irow_max, icol_min:icol_max]), (irow_max - irow_min, icol_max - icol_min))
+        self.peak_pos = (imax[0] + irow_min, imax[1] + icol_min)
 
     def calc_tof_peak_centre_and_bounds(self, ispec):
         # need to do this for each spectrum as DIFC different for each
@@ -457,13 +467,13 @@ class PeakFitter:
         return tof_pk, tof_pk_min, tof_pk_max
 
     def create_peak_function_with_initial_params(self):
-        # need to create from scratch for setMatrxiWorkspace to overwrite parameters
+        # need to create from scratch for setMatrixWorkspace to overwrite parameters
         peak_func = FunctionFactory.Instance().createPeakFunction(self.peak_func_name)
         # set centre and determine the index of the centre parameter
         tof_pk = self.pk.getTOF()
         peak_func.setCentre(tof_pk)
         if self.peak_pos is not None:
-            # initilaise instrument specific parameters (e.g A,B,S for case of BackTobackExponential)
+            # initialise instrument specific parameters (e.g A,B,S for case of BackTobackExponential)
             ispec = int(self.ispecs[self.peak_pos])
             peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
             if np.isclose(peak_func.fwhm(), 0.0):
