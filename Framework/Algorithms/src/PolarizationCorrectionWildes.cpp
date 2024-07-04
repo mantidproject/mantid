@@ -431,7 +431,7 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
   const auto spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(Prop::SPIN_STATES));
   if (inputs.size() == 1 && !spinStates.empty()) {
     issues[Prop::SPIN_STATES] = "Output workspace order cannot be set for direct beam calculations.";
-  } else {
+  } else if (!spinStates.empty()) {
     if (flipperConfig.front().size() == 1 && spinStates.size() != 2) {
       issues[Prop::SPIN_STATES] =
           "Incorrect number of workspaces in output configuration: " + std::to_string(spinStates.size()) +
