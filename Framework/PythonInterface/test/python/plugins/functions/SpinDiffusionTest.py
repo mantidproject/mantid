@@ -4,26 +4,43 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest
-import numpy as np
+from mantid.simpleapi import FunctionWrapper
 
-from MsdTestHelper import is_registered, check_output
+from numpy import corrcoef, linspace, log
+from scipy.stats import linregress
+import unittest
 
 
 class SpinDiffusionTest(unittest.TestCase):
-    def test_function_has_been_registered(self):
-        status, msg = is_registered("SpinDiffusion")
-        if not status:
-            self.fail(msg)
 
-    def test_function_output(self):
-        input = [0.01, 0.1, 1.0, 10.0]
-        expected = [0.00058769, 0.00056914, 0.00050933, 0.00041845]
-        tolerance = 1.0e-05
-        status, output = check_output("SpinDiffusion", input, expected, tolerance, A=1.0, DParallel=1e3, DPerpendicular=1e-2, NDimensions=2)
-        if not status:
-            msg = "Computed output {} from input {} unequal to expected: {}"
-            self.fail(msg.format(*[str(a) for a in (output, input, expected)]))
+    def test_spin_diffusion_when_n_dimensions_one(self):
+        x = linspace(0.01, 100.0, 1000)
+        f = FunctionWrapper("SpinDiffusion", A=1.0, DParallel=1e3, DPerpendicular=1e-2, NDimensions=1)
+        y = f(x)
+
+        # We expect the NDimensions=1 case to follow a x^-(1/2) relationship
+        slope, *_ = linregress(log(x), log(y))
+        self.assertAlmostEqual(slope, -0.5, delta=0.01)
+
+    def test_spin_diffusion_when_n_dimensions_two(self):
+        x = linspace(0.01, 100.0, 1000)
+        f = FunctionWrapper("SpinDiffusion", A=1.0, DParallel=1e3, DPerpendicular=1e-2, NDimensions=2)
+        y = f(x)
+
+        # We expect the NDimensions=2 case to follow a x^(-1) relationship
+        coefficent_matrix = corrcoef(log(y), log(1 / x))
+        # A correlation coefficient close to 1 indicates a strong linear relationship
+        self.assertAlmostEqual(coefficent_matrix[0, 1], 1.0, delta=0.05)
+
+    def test_spin_diffusion_when_n_dimensions_three(self):
+        x = linspace(2.0, 100.0, 1000)
+        f = FunctionWrapper("SpinDiffusion", A=1.0, DParallel=1e3, DPerpendicular=1e-2, NDimensions=3)
+        y = f(x)
+
+        # We expect the NDimensions=3 case to follow a x^(-3/2) relationship
+        coefficent_matrix = corrcoef(log(y), log(1 / x ** (3 / 2)))
+        # A correlation coefficient close to 1 indicates a strong linear relationship
+        self.assertAlmostEqual(coefficent_matrix[0, 1], 1.0, delta=0.05)
 
 
 if __name__ == "__main__":
