@@ -91,8 +91,6 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   }
 }
 
-void CalculatePaalmanPings::setup() { doValidation(true); }
-
 void CalculatePaalmanPings::validateChemical() { doValidation(true); }
 
 void CalculatePaalmanPings::run() {

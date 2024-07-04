@@ -22,7 +22,6 @@ public:
   ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
-  void setup() override;
   void run() override;
 
 public slots:

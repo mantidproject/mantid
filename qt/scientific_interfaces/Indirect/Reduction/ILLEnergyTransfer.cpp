@@ -49,8 +49,6 @@ ILLEnergyTransfer::ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent) : D
  */
 ILLEnergyTransfer::~ILLEnergyTransfer() = default;
 
-void ILLEnergyTransfer::setup() {}
-
 bool ILLEnergyTransfer::validate() {
   UserInputValidator uiv;
 

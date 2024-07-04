@@ -71,8 +71,6 @@ void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter
   m_runPresenter = std::move(presenter);
 }
 
-void InelasticTab::setupTab() { setup(); }
-
 bool InelasticTab::validateTab() { return validate(); }
 
 /**

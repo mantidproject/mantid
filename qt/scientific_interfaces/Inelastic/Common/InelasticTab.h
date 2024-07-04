@@ -97,14 +97,10 @@ protected:
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
 
-  QString runPythonCode(const QString &code, bool no_output = false);
-
   /// Checks the ADS for a workspace named `workspaceName`,
   /// opens a warning box for plotting/saving if none found
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
-  /// Overidden by child class.
-  virtual void setup() {}
   /// Overidden by child class.
   virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
   /// Overidden by child class.
@@ -152,7 +148,6 @@ protected:
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 
 public slots:
-  void setupTab();
   bool validateTab();
   void exportPythonScript();
 

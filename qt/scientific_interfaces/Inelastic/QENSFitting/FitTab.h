@@ -113,8 +113,6 @@ public:
   void handleRun() override;
 
 private:
-  void setup() override;
-
   void updateParameterEstimationData();
   void updateDataReferences();
   void updateFitFunction();

@@ -92,7 +92,6 @@ private:
     std::unique_ptr<TabModel> tabModel = std::make_unique<TabModel>();
     auto presenter = std::make_unique<TabPresenter>(tabContent, new TabView(tabContent), std::move(tabModel));
 
-    presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,

@@ -25,8 +25,6 @@ FitTab::FitTab(QWidget *parent, std::string const &tabName)
   m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm->runWidget);
 }
 
-void FitTab::setup() { updateOutputOptions(false); }
-
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();
   auto plotter = std::make_unique<Widgets::MplCpp::ExternalPlotter>();

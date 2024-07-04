@@ -31,9 +31,6 @@ public:
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
 
-protected:
-  void setup() override;
-
 private slots:
   /// Handles completion of the algorithm
   void algorithmComplete(bool error);

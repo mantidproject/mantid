@@ -32,7 +32,6 @@ void Tools::initLayout() {
   std::map<unsigned int, ToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
     connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
-    iter->second->setupTab();
   }
 
   loadSettings();

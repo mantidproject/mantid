@@ -135,7 +135,6 @@ private:
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     DataReductionTab *tabIDRContent = new T(this, tabContent);
-    tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(tabIDRContent, SIGNAL(showMessageBox(const std::string &)), this,
@@ -176,7 +175,6 @@ private:
     auto presenter = std::make_unique<TabPresenter>(this, new TabView(tabContent), std::make_unique<TabModel>(),
                                                     std::move(algorithmRunner));
 
-    presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,

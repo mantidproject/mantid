@@ -44,7 +44,6 @@ private slots:
   void setCanDensity(double value);
 
 private:
-  void setup() override;
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
