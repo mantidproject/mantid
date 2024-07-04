@@ -304,7 +304,11 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
 /**
  * Handle when Run is clicked
  */
-void ILLEnergyTransfer::runClicked() { runTab(); }
+void ILLEnergyTransfer::runClicked() {
+  if (validate()) {
+    run();
+  }
+}
 
 /**
  * Handles plotting of the reduced ws.

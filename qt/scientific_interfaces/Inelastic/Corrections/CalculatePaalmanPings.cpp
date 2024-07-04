@@ -575,7 +575,9 @@ void CalculatePaalmanPings::saveClicked() {
 
 void CalculatePaalmanPings::runClicked() {
   clearOutputPlotOptionsWorkspaces();
-  runTab();
+  if (validate()) {
+    run();
+  }
 }
 
 void CalculatePaalmanPings::setSampleDensityOptions(QString const &method) {

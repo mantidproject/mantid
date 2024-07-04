@@ -71,18 +71,6 @@ void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter
   m_runPresenter = std::move(presenter);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-void InelasticTab::runTab() {
-  if (validate()) {
-    m_tabStartTime = DateAndTime::getCurrentTime();
-    run();
-  } else {
-    g_log.warning("Failed to validate indirect tab input!");
-  }
-}
-
 void InelasticTab::setupTab() { setup(); }
 
 bool InelasticTab::validateTab() { return validate(); }

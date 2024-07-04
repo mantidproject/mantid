@@ -152,7 +152,6 @@ protected:
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 
 public slots:
-  void runTab();
   void setupTab();
   bool validateTab();
   void exportPythonScript();

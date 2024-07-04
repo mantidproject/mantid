@@ -86,18 +86,6 @@ void Tools::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Slot to run the underlying algorithm code based on the currently selected
- * tab.
- *
- * This method checks the tabs validate method is passing before calling
- * the run method.
- */
-void Tools::runClicked() {
-  int tabIndex = m_uiForm.ToolsTabs->currentIndex();
-  m_tabs[tabIndex]->runTab();
-}
-
 std::string Tools::documentationPage() const { return "Indirect Tools"; }
 
 Tools::~Tools() = default;
