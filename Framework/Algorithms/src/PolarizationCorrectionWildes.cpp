@@ -45,12 +45,10 @@ static const std::string OnOn{SpinStateValidator::ONE_ONE};
 /// Spin State configurations.
 namespace SpinStates {
 using namespace Mantid::Algorithms;
-static const std::string Dn{SpinStateValidator::MINUS};
 static const std::string DnDn{SpinStateValidator::MINUS_MINUS};
 static const std::string DnUp{SpinStateValidator::MINUS_PLUS};
-static const std::string Up{SpinStateValidator::PLUS};
-static const std::string UpDn{SpinStateValidator::PLUS_MINUS};
 static const std::string UpUp{SpinStateValidator::PLUS_PLUS};
+static const std::string UpDn{SpinStateValidator::PLUS_MINUS};
 } // namespace SpinStates
 
 /**
