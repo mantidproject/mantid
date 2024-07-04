@@ -101,11 +101,6 @@ protected:
   /// opens a warning box for plotting/saving if none found
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
-  /// Overidden by child class.
-  virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
-  /// Overidden by child class.
-  virtual bool validate() { throw std::logic_error("InelasticTab::validate() called but is not implemented."); }
-
   std::unique_ptr<RunPresenter> m_runPresenter;
 
   /// Parent QWidget (if applicable)

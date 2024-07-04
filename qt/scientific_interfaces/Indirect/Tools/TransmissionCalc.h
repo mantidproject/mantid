@@ -8,7 +8,6 @@
 
 #include "../DllConfig.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "ToolsTab.h"
 #include "ui_TransmissionCalc.h"
@@ -36,7 +35,6 @@ private slots:
   void algorithmComplete(bool error);
 
 private:
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   /// The UI form
   Ui::TransmissionCalc m_uiForm;
   /// The name of the current instrument

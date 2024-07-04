@@ -25,7 +25,7 @@ Mantid::Kernel::Logger g_log("TransmissionCalc");
 namespace MantidQt::CustomInterfaces {
 TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 

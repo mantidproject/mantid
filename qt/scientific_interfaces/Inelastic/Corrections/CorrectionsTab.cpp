@@ -53,11 +53,6 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) { loadSettings(s
 void CorrectionsTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
- * Slot that can be called when a user edits an input.
- */
-void CorrectionsTab::inputChanged() { validate(); }
-
-/**
  * Check that the binning between two workspaces matches.
  *
  * @param left :: left hand workspace for the equality operator

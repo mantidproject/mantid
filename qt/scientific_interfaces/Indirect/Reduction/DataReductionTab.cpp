@@ -26,13 +26,11 @@ Mantid::Kernel::Logger g_log("DataReductionTab");
 namespace MantidQt::CustomInterfaces {
 
 DataReductionTab::DataReductionTab(IDataReduction *idrUI, QObject *parent) : InelasticTab(parent), m_idrUI(idrUI) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
 DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
     : InelasticTab(), m_idrUI(idrUI), m_algorithmRunner(std::move(algorithmRunner)) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(handleNewInstrumentConfiguration()));
 }
 
