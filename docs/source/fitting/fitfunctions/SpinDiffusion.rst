@@ -9,7 +9,7 @@ SpinDiffusion
 Description
 -----------
 
-[Get description from Adam] [1]_. The data fitted using this fit function is assumed to be in units of Gauss.
+The Spin diffusion fitting function, models the diffusion of isotropic muonium as a function of applied field for 1D, 2D and 3D behaviour [1]_. The data fitted using this fit function is assumed to be in units of Gauss.
 
 .. math::
     \lambda(B) &= \frac{A^2}{4} J(\omega) \\
@@ -41,7 +41,7 @@ Systems of different dimensionality :math:`d` can simply be represented in terms
 References
 ----------
 
-.. [1] Blundell, Stephen J., and others (eds), Muon Spectroscopy: An Introduction (Oxford, 2021; online edn, Oxford Academic, 23 June 2022), https://doi.org/10.1093/oso/9780198858959.001.0001, accessed 17 Apr. 2024.
+.. [1] Blundell, Stephen J., and others (eds), Muon Spectroscopy: An Introduction (Oxford, 2021; online edn, Oxford Academic, 23 June 2022), pp. 117-119, https://doi.org/10.1093/oso/9780198858959.001.0001, accessed 17 Apr. 2024.
 
 .. categories::
 
