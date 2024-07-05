@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TransmissionCalc.h"
+#include "Common/RunWidget/RunView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -24,8 +25,7 @@ Mantid::Kernel::Logger g_log("TransmissionCalc");
 namespace MantidQt::CustomInterfaces {
 TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.setupUi(parent);
-
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
@@ -42,36 +42,19 @@ void TransmissionCalc::setup() {
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
 }
 
-/**
- * Validate the form to check the algorithm can be run.
- *
- * @return Whether the form was valid
- */
-bool TransmissionCalc::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
+void TransmissionCalc::handleValidation(IUserInputValidator *validator) const {
+  validator->checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
 
   auto const chemicalFormula = m_uiForm.leChemicalFormula->text().toStdString();
   try {
     Mantid::Kernel::Material::parseChemicalFormula(chemicalFormula);
   } catch (std::runtime_error const &) {
-    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-    uiv.setErrorLabel(m_uiForm.valChemicalFormula, false);
+    validator->addErrorMessage("Chemical Formula for Sample was not recognised.");
+    validator->setErrorLabel(m_uiForm.valChemicalFormula, false);
   }
-
-  auto const error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
-  return error.empty();
 }
 
-/**
- * Run the tab, invoking the IndirectTransmission algorithm.
- */
-void TransmissionCalc::run() {
-  setRunIsRunning(true);
-
+void TransmissionCalc::handleRun() {
   std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string outWsName = instrumentName + "_transmission";
 
@@ -81,7 +64,7 @@ void TransmissionCalc::run() {
     transAlg->setProperty("Instrument", instrumentName);
   } catch (std::exception &) {
     emit showMessageBox("Instrument " + instrumentName + " is not supported.");
-    setRunIsRunning(false);
+    m_runPresenter->setRunEnabled(true);
     return;
   }
   transAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
@@ -105,7 +88,7 @@ void TransmissionCalc::run() {
  * @param error If the algorithm encountered an error during execution
  */
 void TransmissionCalc::algorithmComplete(bool error) {
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
 
   if (!error) {
     std::string const instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
@@ -136,14 +119,5 @@ void TransmissionCalc::algorithmComplete(bool error) {
  * @param settings The settings to loading into the interface
  */
 void TransmissionCalc::loadSettings(const QSettings &settings) { UNUSED_ARG(settings); }
-
-void TransmissionCalc::runClicked() { runTab(); }
-
-void TransmissionCalc::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-}
-
-void TransmissionCalc::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 } // namespace MantidQt::CustomInterfaces
