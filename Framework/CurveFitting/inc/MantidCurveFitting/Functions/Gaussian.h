@@ -38,6 +38,7 @@ public:
   Gaussian();
   /// overwrite IPeakFunction base class methods
   double centre() const override;
+  std::string getWidthParameterName() const override { return "Sigma"; }
   double height() const override;
   double fwhm() const override;
   double intensity() const override;

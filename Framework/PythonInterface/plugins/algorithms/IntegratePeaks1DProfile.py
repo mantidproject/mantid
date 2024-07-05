@@ -35,6 +35,9 @@ from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
 
 
+MIN_TOF_WIDTH = 1e-3
+
+
 class IntegratePeaks1DProfile(DataProcessorAlgorithm):
     def name(self):
         return "IntegratePeaks1DProfile"
@@ -493,9 +496,8 @@ class PeakFitter:
         peak_func = self.create_peak_function_with_initial_params()
         peak_func.setIntensity(intensity)
         peak_func.setCentre(tof_pk)
-        # peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
-        peak_func.addConstraints(f"{tof_pk_min}<X0<{tof_pk_max}")
-        peak_func.addConstraints(f"{1e-2}<S")
+        peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
+        peak_func.addConstraints(f"{MIN_TOF_WIDTH}<{peak_func.getWidthParameterName()}")
         bg_func = FunctionWrapper(self.bg_func_name)
         bg_func.setParameter("A0", bg)  # set constant background
         return FunctionWrapper(peak_func) + bg_func, peak_func
