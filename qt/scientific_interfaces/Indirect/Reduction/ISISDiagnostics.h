@@ -48,8 +48,8 @@ public:
   ISISDiagnostics(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISDiagnostics() override;
 
-  void handleRun();
-  void handleValidation(IUserInputValidator *validator) const;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void algorithmComplete(bool error);

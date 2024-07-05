@@ -47,8 +47,8 @@ public:
   void setBackgroundRangeLimits(const double &backgroundMin, const double &backgroundMax);
   void setResolutionSpectraRange(const double &minimum, const double &maximum);
 
-  void handleRun();
-  void handleValidation(IUserInputValidator *validator) const;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void algorithmComplete(bool error);

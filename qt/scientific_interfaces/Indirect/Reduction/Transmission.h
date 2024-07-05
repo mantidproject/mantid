@@ -23,8 +23,8 @@ public:
   Transmission(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~Transmission() override;
 
-  void handleRun();
-  void handleValidation(IUserInputValidator *validator) const;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void transAlgDone(bool error);

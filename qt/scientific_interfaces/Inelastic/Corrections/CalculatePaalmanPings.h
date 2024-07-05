@@ -25,8 +25,8 @@ class MANTIDQT_INELASTIC_DLL CalculatePaalmanPings : public CorrectionsTab, publ
 public:
   CalculatePaalmanPings(QWidget *parent = nullptr);
 
-  void handleRun();
-  void handleValidation(IUserInputValidator *validator) const;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void absCorComplete(bool error);
