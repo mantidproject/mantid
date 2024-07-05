@@ -335,7 +335,6 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
                 # fit peak
                 peak_fitter = PeakFitter(
-                    peaks,
                     peak,
                     peak_data,
                     tof_slice,
@@ -399,7 +398,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         alg.setProperties(kwargs)
         alg.setProperty("WorkspaceIndex", ispec)
         alg.execute()
-        func = FunctionFactory.createInitialized(alg.getPropertyValue("Function"))
+        func = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
         status = alg.getPropertyValue("OutputStatus")
         success = status == "success" or "Changes in function value are too small" in status
         return success, func
@@ -408,7 +407,6 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 class PeakFitter:
     def __init__(
         self,
-        peaks,
         pk,
         peak_data,
         tof_slice,
@@ -547,7 +545,8 @@ class PeakFitter:
                     continue  # skip
                 intens = peak_func.intensity()
                 if self.error_strategy == "Hessian":
-                    sigma = 1  # To-Do
+                    [peak_func.setError(iparam, profile_func.getError(iparam)) for iparam in range(peak_func.nParams())]
+                    sigma = peak_func.intensityError()
                 else:
                     sigma = calc_sigma_from_summation(self.tofs, self.esq[irow, icol, :], FunctionWrapper(peak_func)(self.tofs))
                 intens_over_sigma = intens / sigma if sigma > 0 else 0.0
