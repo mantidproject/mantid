@@ -181,6 +181,21 @@ bool DataSelector::isValid() {
                                                "missing from the analysis data "
                                                "service");
         }
+      } else {
+        auto &ads = AnalysisDataService::Instance();
+        if (!ads.doesExist(wsName)) {
+          return isValid;
+        }
+        auto const workspaceTypes = m_uiForm.wsWorkspaceInput->getWorkspaceTypes();
+        auto const workspace = ads.retrieveWS<Workspace>(wsName);
+        isValid = workspaceTypes.empty() || workspaceTypes.indexOf(QString::fromStdString(workspace->id())) != -1;
+        if (!isValid) {
+          m_uiForm.rfFileInput->setFileProblem("The specified workspace type (" +
+                                               QString::fromStdString(workspace->id()) +
+                                               ") is "
+                                               "not one of the allowed types: " +
+                                               workspaceTypes.join(", "));
+        }
       }
     }
   } else {
