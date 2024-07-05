@@ -129,7 +129,7 @@ class LegendProperties(dict):
         font_size = float(ConfigService.getString("plots.legend.FontSize"))
         if not props:
             legend = ax.legend(handles=get_legend_handles(ax), loc=loc, prop={"size": font_size})
-            if type(ax.figure.get_layout_engine()) == TightLayoutEngine:
+            if type(ax.figure.get_layout_engine()) is TightLayoutEngine:
                 legend.set_in_layout(False)
             legend_set_draggable(legend, True)
             return
@@ -193,7 +193,7 @@ class LegendProperties(dict):
         legend.set_visible(props["visible"])
 
         # Dragging the legend around in a tight layout plot causes some strange behaviour
-        if type(ax.figure.get_layout_engine()) == TightLayoutEngine:
+        if type(ax.figure.get_layout_engine()) is TightLayoutEngine:
             legend.set_in_layout(False)
 
         legend_set_draggable(legend, True)
