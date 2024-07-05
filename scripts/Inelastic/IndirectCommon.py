@@ -293,13 +293,15 @@ def check_analysers_are_equal(in1WS, in2WS):
         analyser_1 = ws1.getInstrument().getStringParameter("analyser")[0]
         reflection_1 = ws1.getInstrument().getStringParameter("reflection")[0]
     except IndexError:
-        raise RuntimeError("Could not find analyser or reflection for workspace %s" % in1WS)
+        # Ignore this check if an analyser or reflection cannot be found
+        return
     ws2 = s_api.mtd[in2WS]
     try:
         analyser_2 = ws2.getInstrument().getStringParameter("analyser")[0]
         reflection_2 = ws2.getInstrument().getStringParameter("reflection")[0]
     except:
-        raise RuntimeError("Could not find analyser or reflection for workspace %s" % in2WS)
+        # Ignore this check if an analyser or reflection cannot be found
+        return
 
     if analyser_1 != analyser_2:
         raise ValueError("Workspace %s and %s have different analysers" % (ws1, ws2))

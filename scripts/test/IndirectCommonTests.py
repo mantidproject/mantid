@@ -139,10 +139,10 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
-    def test_CheckAnalysersOrEFixed_raises_runtimeError_with_no_inst_data(self):
+    def test_CheckAnalysersOrEFixed_does_not_raise_error_with_no_inst_data(self):
         ws1 = self.make_dummy_workspace_without_instrument("test_ws1")
         ws2 = self.make_dummy_workspace_without_instrument("test_ws2")
-        self.assertRaises(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assert_does_not_raise(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
     def test_CheckHistZero(self):
         ws = self.make_dummy_QENS_workspace()
