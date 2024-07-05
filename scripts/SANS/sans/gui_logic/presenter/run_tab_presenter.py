@@ -340,6 +340,10 @@ class RunTabPresenter(PresenterCommon):
 
         self._view.setup_layout()
 
+        # provide an option for users to show or hide the plot-results checkbox from the properties file
+        # it also ensure the checkbox is hidden by default
+        self.hide_or_show_plot_results_checkbox_based_on_user_properties()
+
         self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
         self._view.set_out_default_output_mode()
@@ -422,6 +426,19 @@ class RunTabPresenter(PresenterCommon):
             # user file contains an error that would not otherwise be caught
             traceback.print_exc()
             self._on_user_file_load_failure(other_error, "Unknown error in loading user file.", use_error_name=True)
+
+    # When performing merged reduction, if both the scale option and the plot result option are selected,
+    # it causes an issue. The agreed temporary fix is to hide the plot result checkbox by default since
+    # the functionality is rarely used. Users can enable the visibility of the plot result checkbox
+    # from their properties file if needed. This experiment will help us determine whether to
+    # permanently hide the checkbox or fix the underlying issue.
+    def hide_or_show_plot_results_checkbox_based_on_user_properties(self):
+        visibility = ConfigService.getString("sans.isis_sans.plotResults")
+        (
+            self._view.set_plot_results_checkbox_visibility(True)
+            if visibility == "On"
+            else self._view.set_plot_results_checkbox_visibility(False)
+        )
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
         self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
