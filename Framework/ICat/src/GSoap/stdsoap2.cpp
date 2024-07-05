@@ -16,6 +16,7 @@ GNU_DIAG_OFF("cast-align")
 GNU_DIAG_OFF("deprecated-copy")
 GNU_DIAG_OFF("stringop-truncation")
 GNU_DIAG_OFF("restrict")
+GNU_DIAG_OFF("stringop-overread")
 
 /*
   stdsoap2.c[pp] 2.8.15
