@@ -1001,6 +1001,9 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     def set_background_subtraction_mode(self, mode):
         self.background_subtraction_checkbox.setChecked(mode)
 
+    def set_plot_results_checkbox_visibility(self, visibility):
+        self.plot_results_checkbox.setVisible(visibility)
+
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # START ACCESSORS
