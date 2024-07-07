@@ -65,9 +65,11 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 
   // Connect the data selector for the sample to the mini plot
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsSample, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleResolutionInputReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   // Connect the program selector to its handler
   connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
@@ -86,6 +88,12 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.dsResolution->isOptional(true);
   m_uiForm.dsSample->setWorkspaceTypes({"Workspace2D"});
   m_uiForm.dsResolution->setWorkspaceTypes({"Workspace2D"});
+}
+
+void Quasi::enableView(bool const enable) {
+  m_uiForm.dsSample->setEnabled(enable);
+  m_uiForm.dsResolution->setEnabled(enable);
+  m_runPresenter->setRunText(enable ? "Run" : "Loading...");
 }
 
 /**
@@ -324,6 +332,7 @@ void Quasi::updateMiniPlot() {
  * @param filename :: The name of the workspace to plot
  */
 void Quasi::handleSampleInputReady(const QString &filename) {
+  enableView(true);
   auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(filename.toStdString())) {
     return;
@@ -375,6 +384,8 @@ void Quasi::plotCurrentPreview() {
  * @param wsName The name of the workspace loaded
  */
 void Quasi::handleResolutionInputReady(const QString &wsName) {
+  enableView(true);
+
   bool isResolution(wsName.endsWith("_res"));
 
   m_uiForm.chkUseResNorm->setEnabled(isResolution);
