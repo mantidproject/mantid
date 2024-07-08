@@ -33,7 +33,7 @@ from scipy.ndimage import binary_dilation
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
-
+from typing import Callable
 
 MIN_TOF_WIDTH = 1e-3
 
@@ -318,17 +318,6 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                     nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins").value
                 else:
                     nbins = self.getProperty("NBins").value
-                # get tof indices and limits
-                itof = ws.yIndexOfX(pk_tof, int(ispec))
-                if peak_func_name == "BackToBackExponential":
-                    # take into account asymmetry of peak function in choosing window
-                    nbins_left = nbins // 3
-                    istart = itof - nbins_left
-                    iend = itof + (nbins - nbins_left)
-                else:
-                    istart = itof - nbins // 2
-                    iend = itof + nbins // 2
-                tof_slice = slice(int(np.clip(istart, a_min=0, a_max=ws.blocksize())), int(np.clip(iend, a_min=0, a_max=ws.blocksize())))
 
                 # get data array and crop
                 peak_data = array_converter.get_peak_data(peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge)
@@ -337,7 +326,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                 peak_fitter = PeakFitter(
                     peak,
                     peak_data,
-                    tof_slice,
+                    nbins,
                     peak_func_name,
                     bg_func_name,
                     peak_params_to_fix,
@@ -409,7 +398,7 @@ class PeakFitter:
         self,
         pk,
         peak_data,
-        tof_slice,
+        nbins,
         peak_func_name,
         bg_func_name,
         peak_params_to_fix,
@@ -426,17 +415,31 @@ class PeakFitter:
         self.frac_dspac_delta: float = frac_dspac_delta
         self.i_over_sig_threshold: float = i_over_sig_threshold
         # extract data
-        self.tofs, self.y, self.esq, self.ispecs = get_and_clip_data_arrays(peak_data, tof_slice)
-        self.ysum = self.y.sum(axis=2)
-        self.yfit_foc: np.ndarray = np.zeros(self.tofs.shape)
-        self.successful: np.ndarray = np.zeros(self.ispecs.shape, dtype=bool)
-        self.attempted: np.ndarray = self.successful.copy()
+        self.tofs: np.ndarray = None
+        self.y: np.ndarray = None
+        self.esq: np.ndarray = None
+        self.ispecs: np.ndarray = None
+        self.yfit_foc: np.ndarray = None
+        self.successful: np.ndarray = None
+        self.attempted: np.ndarray = None
         self.intens_sum: float = 0
         self.sigma_sq_sum: float = 0
         self.peak_func_name: str = peak_func_name
         self.bg_func_name: str = bg_func_name
         self.peak_params_to_fix: Seqence[str] = peak_params_to_fix
-        self.exec_fit = exec_fit
+        self.exec_fit: Callable = exec_fit
+        self.fit_kwargs: dict = None
+        self.error_strategy: str = error_strategy
+        self.cached_params: dict = None
+        self.nfixed_default: int = None
+        self.nfixed: int = None
+
+        self.get_and_clip_data_arrays(peak_data, nbins)
+        self.ysum = self.y.sum(axis=2)
+        self.yfit_foc: np.ndarray = np.zeros(self.tofs.shape)
+        self.successful: np.ndarray = np.zeros(self.ispecs.shape, dtype=bool)
+        self.attempted: np.ndarray = self.successful.copy()
+        self.update_peak_position()
         self.fit_kwargs = {
             "InputWorkspace": self.ws,
             "CreateOutput": False,
@@ -445,10 +448,30 @@ class PeakFitter:
             "EndX": self.tofs[-1],
             **fit_kwargs,
         }
-        self.error_strategy = error_strategy
 
-        self.update_peak_position()
-        self.create_peak_function_with_initial_params()
+    def get_tof_slice_for_cropping(self, nbins):
+        # get tof indices and limits
+        self.ispec = int(self.ispecs[self.peak_pos])
+        itof = self.ws.yIndexOfX(self.pk.getTOF(), self.ispec)
+        if self.peak_func_name == "BackToBackExponential":
+            # take into account asymmetry of peak function in choosing window
+            nbins_left = nbins // 3
+            istart = itof - nbins_left
+            iend = itof + (nbins - nbins_left)
+        else:
+            istart = itof - nbins // 2
+            iend = itof + nbins // 2
+        self.tof_slice = slice(
+            int(np.clip(istart, a_min=0, a_max=self.ws.blocksize())), int(np.clip(iend, a_min=0, a_max=self.ws.blocksize()))
+        )
+
+    def get_and_clip_data_arrays(self, peak_data, nbins):
+        tofs, y, esq, self.ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
+        self.get_tof_slice_for_cropping(nbins)
+        self.tofs = tofs[self.peak_pos[0], self.peak_pos[1], self.tof_slice]  # take x at peak cen, should be same for all det
+        # crop data array to TOF region of peak
+        self.y = y[:, :, self.tof_slice]
+        self.esq = esq[:, :, self.tof_slice]
 
     def update_peak_position(self):
         # search for pixel with highest TOF integrated counts in 3x3 window around peak position
@@ -467,48 +490,40 @@ class PeakFitter:
         tof_pk_max = np.clip(tof_pk * (1 + self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
         return tof_pk, tof_pk_min, tof_pk_max
 
-    def create_peak_function_with_initial_params(self):
+    def create_peak_function_with_initial_params(self, ispec, intensity, bg, tof_pk, tof_pk_min, tof_pk_max):
         # need to create from scratch for setMatrixWorkspace to overwrite parameters
         peak_func = FunctionFactory.Instance().createPeakFunction(self.peak_func_name)
-        # set centre and determine the index of the centre parameter
-        tof_pk = self.pk.getTOF()
+        # set initial parameters of peak
         peak_func.setCentre(tof_pk)
-        if self.peak_pos is not None:
-            # initialise instrument specific parameters (e.g A,B,S for case of BackTobackExponential)
-            ispec = int(self.ispecs[self.peak_pos])
-            peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
-            if np.isclose(peak_func.fwhm(), 0.0):
-                # width not set by default - set width based max of d-spacing tolerance or bin-width
-                bin_width = self.tofs[len(self.tofs) // 2] - self.tofs[1 + len(self.tofs) // 2]
-                fwhm = max(self.frac_dspac_delta * tof_pk, bin_width)
-                peak_func.setFwhm(fwhm)
+        # initialise instrument specific parameters (e.g A,B,S for case of BackToBackExponential)
+        peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
+        if np.isclose(peak_func.fwhm(), 0.0):
+            # width not set by default - set width based max of d-spacing tolerance or bin-width
+            bin_width = self.tofs[len(self.tofs) // 2] - self.tofs[1 + len(self.tofs) // 2]
+            fwhm = max(self.frac_dspac_delta * tof_pk, bin_width)
+            peak_func.setFwhm(fwhm)
+        peak_func.setIntensity(intensity)
         # fix parameters
         self.nfixed_default = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
         [peak_func.fixParameter(par_name) for par_name in self.peak_params_to_fix]
         self.nfixed = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
-        # set minimum of all parameters to be 0
-        [peak_func.addConstraints(f"0<{peak_func.parameterName(ipar)}") for ipar in range(peak_func.nParams())]
-        return peak_func
-
-    def get_intialized_composite_and_peak_functions(self, intensity, bg, tof_pk, tof_pk_min, tof_pk_max):
-        peak_func = self.create_peak_function_with_initial_params()
-        peak_func.setIntensity(intensity)
-        peak_func.setCentre(tof_pk)
-        peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
-        peak_func.addConstraints(f"{MIN_TOF_WIDTH}<{peak_func.getWidthParameterName()}")
+        self.add_constraints_to_peak_function(peak_func, tof_pk_min, tof_pk_max)
         bg_func = FunctionWrapper(self.bg_func_name)
         bg_func.setParameter("A0", bg)  # set constant background
         return FunctionWrapper(peak_func) + bg_func, peak_func
+
+    def add_constraints_to_peak_function(self, peak_func, tof_pk_min, tof_pk_max):
+        # set minimum of all parameters to be 0
+        [peak_func.addConstraints(f"0<{peak_func.parameterName(ipar)}") for ipar in range(peak_func.nParams())]
+        # constrain centre and width
+        peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
+        peak_func.addConstraints(f"{MIN_TOF_WIDTH}<{peak_func.getWidthParameterName()}")
 
     def fit_spectrum(self, profile_func, ispec):
         return self.exec_fit(ispec, Function=str(profile_func), **self.fit_kwargs)
 
     def integrate_peak(self):
-        if self.peak_pos is None:
-            # no peak found
-            return
-        else:
-            return self.fit_nearest([self.peak_pos])
+        self.fit_nearest([self.peak_pos])
 
     def fit_nearest(self, inearest):
         # fit in order of max intensity
@@ -528,7 +543,9 @@ class PeakFitter:
             if tof_pk < self.tofs[0] or tof_pk > self.tofs[-1]:
                 continue  # peak not in data limits
             # update initial parameter guesses
-            profile_func, peak_func = self.get_intialized_composite_and_peak_functions(initial_intens, bg, tof_pk, tof_pk_min, tof_pk_max)
+            profile_func, peak_func = self.create_peak_function_with_initial_params(
+                ispec, initial_intens, bg, tof_pk, tof_pk_min, tof_pk_max
+            )
             # fit
             success, profile_func = self.fit_spectrum(profile_func, ispec)
             if success:
@@ -658,16 +675,6 @@ def plot_integration_results(output_file, results, prog_reporter):
             f"OutputFile ({output_file}) could not be opened - please check it is not open by "
             f"another programme and that the user has permission to write to that directory."
         )
-
-
-def get_and_clip_data_arrays(peak_data, tof_slice):
-    x, y, esq, ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-    x = x[peak_data.irow, peak_data.icol, :]  # take x at peak centre, should be same for all detectors
-    # crop data array to TOF region of peak
-    x = x[tof_slice]
-    y = y[:, :, tof_slice]
-    esq = esq[:, :, tof_slice]
-    return x, y, esq, ispecs
 
 
 # register algorithm with mantid
