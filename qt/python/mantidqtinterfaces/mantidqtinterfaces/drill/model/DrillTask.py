@@ -112,7 +112,7 @@ class DrillTask(QRunnable):
             f()
         self.alg = sapi.AlgorithmManager.create(self.algName)
         errors = list()
-        for (k, v) in self.properties.items():
+        for k, v in self.properties.items():
             try:
                 self.alg.setProperty(k, v)
             except Exception as e:

@@ -12,7 +12,6 @@ from qtpy.QtCore import QObject, Signal
 
 
 class SuperplotAdsObserverSignals(QObject):
-
     """
     Emitted when a workspace is deleted.
     Args:

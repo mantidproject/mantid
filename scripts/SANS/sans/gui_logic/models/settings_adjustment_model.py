@@ -75,9 +75,9 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
-            DetectorType.LAB.value
-        ].wavelength_adjustment_file = value
+        self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file = (
+            value
+        )
 
     @property
     def wavelength_adjustment_det_2(self):

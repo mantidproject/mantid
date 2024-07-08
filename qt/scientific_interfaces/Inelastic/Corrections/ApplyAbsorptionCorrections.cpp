@@ -7,7 +7,6 @@
 #include "ApplyAbsorptionCorrections.h"
 #include "Common/DataValidationHelper.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -33,10 +32,9 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent), m_spectra(0u), m_runPresenter() {
+ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent) {
+  m_spectra = 0;
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
@@ -50,6 +48,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
@@ -66,6 +65,8 @@ ApplyAbsorptionCorrections::~ApplyAbsorptionCorrections() {
   if (m_ppContainerWS)
     AnalysisDataService::Instance().remove(m_containerWorkspaceName);
 }
+
+void ApplyAbsorptionCorrections::setup() {}
 
 /**
  * Disables corrections when using S(Q, w) as input data.
@@ -176,47 +177,8 @@ void ApplyAbsorptionCorrections::updateContainer() {
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
 
-void ApplyAbsorptionCorrections::handleValidation(IUserInputValidator *validator) const {
-  // Check input not empty
-  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  validator->checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
-  // Validate the container workspace
-  if (m_uiForm.ckUseCan->isChecked())
-    validateDataIsOneOf(validator, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
-
-  // Validate the sample workspace
-  validateDataIsOneOf(validator, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
-
-  // Validate the corrections workspace
-  validateDataIsOfType(validator, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
-
-  if (validator->isAllInputValid()) {
-    // Check sample has the same number of Histograms as each of the workspaces in the corrections group
-    auto const correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
-    if (AnalysisDataService::Instance().doesExist(correctionsGroupName)) {
-      auto const ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(correctionsGroupName);
-      for (std::size_t i = 0; i < ppCorrectionsGp->size(); i++) {
-        MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(ppCorrectionsGp->getItem(i));
-
-        const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
-        const size_t containerHist = factorWs->getNumberHistograms();
-
-        if (sampleHist != containerHist) {
-          validator->addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
-        }
-      }
-    } else {
-      validator->addErrorMessage("Please check the Corrections Workspace that has been selected.");
-    }
-  }
-}
-
-void ApplyAbsorptionCorrections::handleRun() {
-  clearOutputPlotOptionsWorkspaces();
-  setSaveResultEnabled(false);
-
-  m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
-  m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+void ApplyAbsorptionCorrections::run() {
+  setRunIsRunning(true);
 
   // Create / Initialize algorithm
   auto absCorProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
@@ -252,7 +214,7 @@ void ApplyAbsorptionCorrections::handleRun() {
         m_uiForm.ckRebinContainer->setChecked(true);
       } else {
         m_batchAlgoRunner->clearQueue();
-        m_runPresenter->setRunEnabled(true);
+        setRunIsRunning(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply absorption corrections "
                     "using a sample and "
@@ -306,7 +268,7 @@ void ApplyAbsorptionCorrections::handleRun() {
         break;
       default:
         m_batchAlgoRunner->clearQueue();
-        m_runPresenter->setRunEnabled(true);
+        setRunIsRunning(false);
         setSaveResultEnabled(false);
         g_log.error("ApplyAbsorptionCorrections cannot run with corrections that do "
                     "not match sample binning.");
@@ -399,8 +361,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr
  */
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
-  m_runPresenter->setRunEnabled(true);
-  setSaveResultEnabled(!error);
+  setRunIsRunning(false);
 
   if (!error) {
     if (m_uiForm.ckUseCan->isChecked()) {
@@ -421,6 +382,7 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
 
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else {
+    setSaveResultEnabled(false);
     emit showMessageBox("Unable to apply corrections.\nSee Results Log for more details.");
   }
 }
@@ -432,8 +394,7 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
  */
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
-  m_runPresenter->setRunEnabled(true);
-  setSaveResultEnabled(!error);
+  setRunIsRunning(false);
 
   if (!error) {
     // Handle preview plot
@@ -453,9 +414,53 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
       deleteAlg->execute();
     }
   } else {
+    setSaveResultEnabled(false);
     emit showMessageBox("Unable to process corrected workspace.\nSee Results "
                         "Log for more details.");
   }
+}
+
+bool ApplyAbsorptionCorrections::validate() {
+  UserInputValidator uiv;
+
+  // Check input not empty
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
+  // Validate the container workspace
+  if (m_uiForm.ckUseCan->isChecked())
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+
+  // Validate the sample workspace
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
+
+  // Validate the corrections workspace
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
+
+  if (uiv.isAllInputValid()) {
+    // Check sample has the same number of Histograms as each of the workspaces in the corrections group
+    m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
+    if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {
+      m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+      for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+        MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
+
+        const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
+        const size_t containerHist = factorWs->getNumberHistograms();
+
+        if (sampleHist != containerHist) {
+          uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        }
+      }
+    } else {
+      uiv.addErrorMessage("Please check the Corrections Workspace that has been selected.");
+    }
+  }
+
+  // Show errors if there are any
+  if (!uiv.isAllInputValid())
+    emit showMessageBox(uiv.generateErrorMessage());
+
+  return uiv.isAllInputValid();
 }
 
 void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
@@ -503,6 +508,11 @@ void ApplyAbsorptionCorrections::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void ApplyAbsorptionCorrections::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
 
 /**
@@ -567,6 +577,18 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName, MatrixW
   }
 }
 
+void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
 void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+
+void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
 
 } // namespace MantidQt::CustomInterfaces

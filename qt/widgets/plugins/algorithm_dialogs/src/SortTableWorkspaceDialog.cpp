@@ -185,10 +185,11 @@ void SortTableWorkspaceDialog::addColumn() {
 
   // suggest a name for the new column: one that hasn't been used in
   // other sort columns
-  const auto it = std::find_if(m_columnNames.cbegin(), m_columnNames.cend(),
-                               [&](const auto &name) { return !m_sortColumns.contains(name); });
-  if (it != m_columnNames.cend()) {
-    columnName->setItemText(-1, *it);
+  foreach (QString name, m_columnNames) {
+    if (!m_sortColumns.contains(name)) {
+      columnName->setItemText(-1, name);
+      break;
+    }
   }
   // cache the column name
   m_sortColumns << columnName->currentText();

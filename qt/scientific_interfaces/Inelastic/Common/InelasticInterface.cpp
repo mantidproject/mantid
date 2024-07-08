@@ -46,8 +46,6 @@ void InelasticInterface::applySettings(std::map<std::string, QVariant> const &se
 
 void InelasticInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 
-void InelasticInterface::showMessageBox(std::string const &message) {
-  showInformationBox(QString::fromStdString(message));
-}
+void InelasticInterface::showMessageBox(QString const &message) { showInformationBox(message); }
 
 } // namespace MantidQt::CustomInterfaces

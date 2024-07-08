@@ -146,12 +146,10 @@ class AtomsData(collections.abc.Sequence):
         return len(self._data)
 
     @overload
-    def __getitem__(self, item: int) -> _AtomData:
-        ...
+    def __getitem__(self, item: int) -> _AtomData: ...
 
     @overload
-    def __getitem__(self, item: slice) -> List[_AtomData]:
-        ...
+    def __getitem__(self, item: slice) -> List[_AtomData]: ...
 
     def __getitem__(self, item):
         return self._data[item]

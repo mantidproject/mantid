@@ -1,13 +1,15 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    ConvolutionAddWorkspaceDialog.cpp
-    ConvolutionModel.cpp
-    ConvolutionDataView.cpp
-    ConvolutionDataPresenter.cpp
+    ConvFitAddWorkspaceDialog.cpp
+    ConvFitModel.cpp
+    ConvFitDataView.cpp
+    ConvFitDataPresenter.cpp
     DockWidgetArea.cpp
     EditResultsDialog.cpp
     FitStatusWidget.cpp
+    FitData.cpp
+    FitDataModel.cpp
     FitDataPresenter.cpp
     FitDataView.cpp
     FitOutput.cpp
@@ -19,11 +21,10 @@ set(SRC_FILES
     FitPlotView.cpp
     FitTab.cpp
     FittingModel.cpp
-    FittingPresenter.cpp
-    FunctionQAddWorkspaceDialog.cpp
-    FunctionQDataPresenter.cpp
-    FunctionQDataView.cpp
-    FunctionQModel.cpp
+    FqFitAddWorkspaceDialog.cpp
+    FqFitDataPresenter.cpp
+    FqFitDataView.cpp
+    FqFitModel.cpp
     FunctionBrowser/ConvFunctionTemplateModel.cpp
     FunctionBrowser/FitTypes.cpp
     FunctionBrowser/FunctionTemplateView.cpp
@@ -39,15 +40,17 @@ set(SRC_FILES
     FunctionBrowser/MultiFunctionTemplateView.cpp
     InelasticFitPropertyBrowser.cpp
     IqtFitModel.cpp
-    MSDModel.cpp
+    MSDFitModel.cpp
     ParameterEstimation.cpp
     TabFactory.cpp
     QENSFitting.cpp
 )
 
 set(INC_FILES
-    ConvolutionDataPresenter.h
-    ConvolutionModel.h
+    ConvFitDataPresenter.h
+    ConvFitModel.h
+    FitData.h
+    FitDataModel.h
     FitDataPresenter.h
     FitOutput.h
     FitOutputOptionsModel.h
@@ -55,10 +58,9 @@ set(INC_FILES
     FitPlotModel.h
     FitPlotPresenter.h
     FittingModel.h
-    FittingPresenter.h
     FitTabConstants.h
-    FunctionQDataPresenter.h
-    FunctionQModel.h
+    FqFitDataPresenter.h
+    FqFitModel.h
     FunctionBrowser/ConvFunctionTemplateModel.h
     FunctionBrowser/FitTypes.h
     FunctionBrowser/FunctionTemplatePresenter.h
@@ -71,6 +73,7 @@ set(INC_FILES
     FunctionBrowser/MultiFunctionTemplateModel.h
     FunctionBrowser/MultiFunctionTemplatePresenter.h
     FunctionBrowser/TemplateSubType.h
+    IFitDataModel.h
     IFitDataView.h
     IFitOutput.h
     IFitOutputOptionsModel.h
@@ -78,19 +81,19 @@ set(INC_FILES
     IFitPlotView.h
     IFittingModel.h
     IqtFitModel.h
-    MSDModel.h
+    MSDFitModel.h
     ParameterEstimation.h
     TabFactory.h
 )
 
 set(MOC_FILES
-    ConvolutionAddWorkspaceDialog.h
-    ConvolutionDataView.h
+    ConvFitAddWorkspaceDialog.h
+    ConvFitDataView.h
     DockWidgetArea.h
     EditResultsDialog.h
     FitTab.h
-    FunctionQAddWorkspaceDialog.h
-    FunctionQDataView.h
+    FqFitAddWorkspaceDialog.h
+    FqFitDataView.h
     FitStatusWidget.h
     FitDataView.h
     FitOutputOptionsView.h
@@ -103,13 +106,13 @@ set(MOC_FILES
 )
 
 set(UI_FILES
-    ConvolutionAddWorkspaceDialog.ui
+    ConvFitAddWorkspaceDialog.ui
     EditResultsDialog.ui
     FitDataView.ui
     FitPreviewPlot.ui
     FitOutputOptions.ui
     FitTab.ui
-    FunctionQAddWorkspaceDialog.ui
+    FqFitAddWorkspaceDialog.ui
     SpectrumSelector.ui
     QENSFitting.ui
 )

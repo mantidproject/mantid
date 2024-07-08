@@ -6,26 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/FitData.h"
-#include "DllConfig.h"
-#include "MantidAPI/IFunction_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
+#include "FitPlotModel.h"
 
-#include <string>
-#include <utility>
-#include <vector>
+#include "DllConfig.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
-using namespace MantidQt::MantidWidgets;
-
-class IFitOutput;
 class IFitTab;
-class IFitPlotModel;
 class IFitPlotView;
 
 class MANTIDQT_INELASTIC_DLL IFitPlotPresenter {
@@ -49,7 +39,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FitPlotPresenter final : public IFitPlotPresenter {
 
 public:
-  FitPlotPresenter(IFitTab *tab, IFitPlotView *view, IFitPlotModel *model);
+  FitPlotPresenter(IFitTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model);
 
   void watchADS(bool watch);
 
@@ -58,6 +48,8 @@ public:
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
+  void setFittingData(std::vector<FitData> *fittingData);
+  void setFitOutput(IFitOutput *fitOutput);
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
@@ -114,7 +106,7 @@ private:
 
   IFitTab *m_tab;
   IFitPlotView *m_view;
-  IFitPlotModel *m_model;
+  std::unique_ptr<FitPlotModel> m_model;
 
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };

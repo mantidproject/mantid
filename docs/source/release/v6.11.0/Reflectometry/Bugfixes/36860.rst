@@ -1,2 +1,0 @@
-- When on IDAaaS, only runs that are available in the ISIS Instrument Data Cache will appear in the ``Search Runs``
-  section of the :ref:`Runs tab <refl_runs>` when the ``Search Data Archive`` setting is set to ``Off``.

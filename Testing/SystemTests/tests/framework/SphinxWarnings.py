@@ -89,7 +89,7 @@ class SphinxWarnings(systemtesting.MantidSystemTest):
 
     def runTest(self):
         algs = mantid.AlgorithmFactory.getRegisteredAlgorithms(True)
-        for (name, versions) in algs.items():
+        for name, versions in algs.items():
             for version in versions:
                 if mantid.api.DeprecatedAlgorithmChecker(name, version).isDeprecated() == "":
                     # get an instance

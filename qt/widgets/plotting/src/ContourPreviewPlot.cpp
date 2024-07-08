@@ -22,10 +22,14 @@ constexpr auto MANTID_PROJECTION = "mantid";
 namespace MantidQt::MantidWidgets {
 
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent, bool observeADS)
-    : QWidget(parent), m_canvas(new FigureCanvasQt(111, MANTID_PROJECTION, parent)) {
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111, MANTID_PROJECTION, parent)),
+      m_wsRemovedObserver(*this, &ContourPreviewPlot::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this, &ContourPreviewPlot::onWorkspaceReplaced) {
   createLayout();
   watchADS(observeADS);
 }
+
+ContourPreviewPlot::~ContourPreviewPlot() { watchADS(false); }
 
 /**
  * Initialize the layout for the widget
@@ -43,21 +47,26 @@ void ContourPreviewPlot::createLayout() {
  * @param on If true ADS observers are enabled else they are disabled
  */
 void ContourPreviewPlot::watchADS(bool on) {
-  this->observeReplace(on);
-  this->observeDelete(on);
+  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  if (on) {
+    notificationCenter.addObserver(m_wsRemovedObserver);
+    notificationCenter.addObserver(m_wsReplacedObserver);
+  } else {
+    notificationCenter.removeObserver(m_wsReplacedObserver);
+    notificationCenter.removeObserver(m_wsRemovedObserver);
+  }
 }
 
 /**
  * Observer method called when a workspace is removed from the ADS
  * @param nf A pointer to the notification object
  */
-void ContourPreviewPlot::deleteHandle(const std::string &wsName, const Workspace_sptr &workspace) {
-  (void)wsName;
-  if (auto matrixWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+void ContourPreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+  if (auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // If the artist has already been removed, ignore.
     bool workspaceRemoved = false;
     try {
-      workspaceRemoved = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(matrixWorkspace);
+      workspaceRemoved = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(workspace);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
     if (workspaceRemoved) {
@@ -70,11 +79,12 @@ void ContourPreviewPlot::deleteHandle(const std::string &wsName, const Workspace
  * Observer method called when a workspace is replaced in the ADS
  * @param nf A pointer to the notification object
  */
-void ContourPreviewPlot::replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) {
-  (void)wsName;
-  if (auto newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
-    if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace)) {
-      m_canvas->draw();
+void ContourPreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+    if (auto newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace)) {
+        m_canvas->draw();
+      }
     }
   }
 }

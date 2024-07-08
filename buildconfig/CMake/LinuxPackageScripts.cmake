@@ -88,7 +88,6 @@ set(GDB_DEFINITIONS
 if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     shift
     GDB=\"gdb --args\"
-    SINGLEPROCESS=\"--single-process\"
 fi"
 )
 

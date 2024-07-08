@@ -138,7 +138,9 @@ double V3D::normalize() {
 
 /** Round each component to the nearest integer */
 void V3D::round() noexcept {
-  std::transform(m_pt.cbegin(), m_pt.cend(), m_pt.begin(), [](auto p) { return std::round(p); });
+  for (auto &p : m_pt) {
+    p = std::round(p);
+  }
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
@@ -237,7 +239,13 @@ bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const noexcept {
   @return true if the vector's elements are less in magnitude than tolerance
 */
 bool V3D::nullVector(const double tolerance) const noexcept {
-  return std::none_of(m_pt.cbegin(), m_pt.cend(), [&tolerance](const auto p) { return std::abs(p) > tolerance; });
+  for (const double p : m_pt) {
+    if (std::abs(p) > tolerance) {
+      return false;
+    }
+  }
+  // Getting to this point means a null vector
+  return true;
 }
 
 bool V3D::unitVector(const double tolerance) const noexcept {

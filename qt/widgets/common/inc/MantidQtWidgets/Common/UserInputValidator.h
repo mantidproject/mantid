@@ -10,7 +10,6 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
-#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 using MantidQt::API::FileFinderWidget;
 using MantidQt::MantidWidgets::DataSelector;
@@ -23,30 +22,6 @@ class QStringList;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class DLLExport IUserInputValidator {
-public:
-  virtual ~IUserInputValidator() = default;
-
-  virtual bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr) = 0;
-  virtual bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr) = 0;
-  virtual bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) = 0;
-  virtual bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) = 0;
-  virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
-  virtual bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false) = 0;
-  virtual bool checkWorkspaceExists(QString const &workspaceName, bool silent = false) = 0;
-  template <typename T = Mantid::API::MatrixWorkspace>
-  bool checkWorkspaceType(QString const &workspaceName, QString const &inputType, QString const &validType,
-                          bool silent = false);
-
-  virtual void setErrorLabel(QLabel *errorLabel, bool valid) = 0;
-
-  virtual void addErrorMessage(const std::string &message, bool const silent = false) = 0;
-
-  virtual std::string generateErrorMessage() const = 0;
-  virtual bool isAllInputValid() const = 0;
-};
-
 /**
  * A class to try and get rid of some of the boiler-plate code surrounding input
  * validation, and hopefully as a result make it more readable.
@@ -56,36 +31,42 @@ public:
  *
  *
  */
-class DLLExport UserInputValidator final : public IUserInputValidator {
+class DLLExport UserInputValidator {
 public:
   /// Default Constructor.
   UserInputValidator();
-  ~UserInputValidator() override;
 
   /// Check that the given QLineEdit field is not empty.
-  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr) override;
-  /// Check that the given QLineEdit field is valid as per any validators it might have.
-  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr) override;
+  bool checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel = nullptr);
+  /// Check that the given QLineEdit field is valid as per any validators it
+  /// might have.
+  bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr);
   /// Check that the given WorkspaceSelector is not empty.
-  bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) override;
+  bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector);
   /// Check that the given FileFinderWidget widget has valid files.
-  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) override;
+  bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget);
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) override;
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false);
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.
   bool checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
-  /// Check that the given "outer" range completely encloses the given "inner" range.
+  /// Check that the given "outer" range completely encloses the given "inner"
+  /// range.
   bool checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer, const QString &innerName,
                             std::pair<double, double> inner);
-  /// Check that the given range can be split evenly into bins of the given width.
+  /// Check that the given range can be split evenly into bins of the given
+  /// width.
   bool checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
   /// Checks two values are not equal
   bool checkNotEqual(const QString &name, double x, double y = 0.0, double tolerance = 0.00000001);
 
+  /// Checks that a workspace has the correct workspace type
+  template <typename T = Mantid::API::MatrixWorkspace>
+  bool checkWorkspaceType(QString const &workspaceName, QString const &inputType, QString const &validType,
+                          bool silent = false);
   /// Checks that a workspace exists in the ADS
-  bool checkWorkspaceExists(QString const &workspaceName, bool silent = false) override;
+  bool checkWorkspaceExists(QString const &workspaceName, bool silent = false);
   /// Checks the number of histograms in a workspace
   bool checkWorkspaceNumberOfHistograms(QString const &workspaceName, std::size_t const &validSize);
   bool checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &, std::size_t const &validSize);
@@ -93,21 +74,25 @@ public:
   bool checkWorkspaceNumberOfBins(QString const &workspaceName, std::size_t const &validSize);
   bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &, std::size_t const &validSize);
   /// Checks that a workspace group contains valid matrix workspace's
-  bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false) override;
+  bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false);
 
   /// Add a custom error message to the list.
-  void addErrorMessage(const std::string &message, bool const silent = false) override;
+  void addErrorMessage(const QString &message, bool silent = false);
 
   /// Sets a validation label
-  void setErrorLabel(QLabel *errorLabel, bool valid) override;
+  void setErrorLabel(QLabel *errorLabel, bool valid);
 
   /// Returns an error message which contains all the error messages raised by
   /// the check functions.
-  std::string generateErrorMessage() const override;
+  QString generateErrorMessage();
   /// Checks to see if all input is valid
-  bool isAllInputValid() const override;
+  bool isAllInputValid();
 
 private:
+  /// Gets a workspace from the ADS
+  template <typename T = Mantid::API::MatrixWorkspace>
+  std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
+
   /// Any raised error messages.
   QStringList m_errorMessages;
   /// True if there has been an error.
@@ -124,17 +109,26 @@ private:
  * @return True if the workspace has the correct type
  */
 template <typename T>
-bool IUserInputValidator::checkWorkspaceType(QString const &workspaceName, QString const &inputType,
-                                             QString const &validType, bool silent) {
+bool UserInputValidator::checkWorkspaceType(QString const &workspaceName, QString const &inputType,
+                                            QString const &validType, bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
-    if (!MantidWidgets::WorkspaceUtils::getADSWorkspace<T>(workspaceName.toStdString())) {
-      addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
-                      silent);
+    if (!getADSWorkspace<T>(workspaceName.toStdString())) {
+      addErrorMessage("The " + inputType + " workspace is not a " + validType + ".", silent);
       return false;
     } else
       return true;
   }
   return false;
+}
+
+/**
+ * Gets a workspace from the ADS.
+ *
+ * @param workspaceName The name of the workspace
+ * @return The workspace
+ */
+template <typename T> std::shared_ptr<T> UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
+  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 } // namespace CustomInterfaces

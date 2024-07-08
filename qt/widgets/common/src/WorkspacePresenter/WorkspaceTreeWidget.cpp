@@ -805,8 +805,11 @@ bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
-    return std::any_of(renamed.cbegin(), renamed.cend(),
-                       [&](const auto &oldName) { return m_selectedNames.contains(oldName); });
+    foreach (QString oldName, renamed) {
+      if (m_selectedNames.contains(oldName)) {
+        return true;
+      }
+    }
   } else if (m_selectedNames.contains(name)) {
     return true;
   }
@@ -1478,7 +1481,7 @@ void WorkspaceTreeWidget::onClickShowDetectorTable() {
 void WorkspaceTreeWidget::showDetectorsTable() {
   // get selected workspace
   auto ws = QString::fromStdString(getSelectedWorkspaceNames()[0]);
-  const auto *table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
+  const auto table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
   if (!table) {
     QMessageBox::information(this, "Error", QString("Cannot create detectors tables for workspace ") + ws);
   }

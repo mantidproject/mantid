@@ -8,7 +8,7 @@ on:
     branches: [ornl-next, release-next]
 
 jobs:
-  merge-release-into-main:
+  merge-relase-into-main:
     runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'release-next' }}
     steps:

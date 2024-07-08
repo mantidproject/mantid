@@ -27,21 +27,16 @@ public:
 
   EventPresenterTest() : m_view() {}
 
-  void tearDown() override {
-    // Verifying and clearing of expectations happens when mock variables are destroyed.
-    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
-    // explicitly verify and clear them after each test.
-    verifyAndClear();
-  }
-
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
+    verifyAndClear();
   }
 
   void testNoEventSlicingByDefault() {
     auto presenter = makePresenter();
     TS_ASSERT(isNoSlicing(presenter.slicing()));
+    verifyAndClear();
   }
 
   void testInitializesWithStateFromViewWhenChangingToUniformSlicingByTime() {
@@ -56,6 +51,7 @@ public:
     TS_ASSERT_EQUALS(presenter.slicing().which(), 2);
     auto const &uniformSlicingByTime = boost::get<UniformSlicingByTime>(presenter.slicing());
     TS_ASSERT(uniformSlicingByTime == UniformSlicingByTime(secondsPerSlice));
+    verifyAndClear();
   }
 
   void testInitializesWithStateFromViewWhenChangingToUniformSlicingByNumberOfSlices() {
@@ -70,6 +66,7 @@ public:
     TS_ASSERT_EQUALS(presenter.slicing().which(), 3);
     auto const &uniformSlicingByNumberOfSlices = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
     TS_ASSERT(uniformSlicingByNumberOfSlices == UniformSlicingByNumberOfSlices(numberOfSlices));
+    verifyAndClear();
   }
 
   void testInitializesWithStateFromViewWhenChangingToCustomSlicing() {
@@ -86,6 +83,7 @@ public:
     TS_ASSERT_EQUALS(presenter.slicing().which(), 4);
     auto const &sliceTimes = boost::get<CustomSlicingByList>(presenter.slicing());
     TS_ASSERT(sliceTimes == CustomSlicingByList(expectedSliceTimes));
+    verifyAndClear();
   }
 
   void testInitializedWithStateFromViewWhenChangingToSlicingByEventLog() {
@@ -104,6 +102,7 @@ public:
     TS_ASSERT_EQUALS(presenter.slicing().which(), 5);
     auto const &sliceValues = boost::get<SlicingByEventLog>(presenter.slicing());
     TS_ASSERT(sliceValues == SlicingByEventLog(expectedSliceValues, logBlockName));
+    verifyAndClear();
   }
 
   void testChangingSliceCountUpdatesModel() {
@@ -118,6 +117,7 @@ public:
     presenter.notifyUniformSliceCountChanged(expectedSliceCount);
     auto const &sliceValues = boost::get<UniformSlicingByNumberOfSlices>(presenter.slicing());
     TS_ASSERT(sliceValues == UniformSlicingByNumberOfSlices(expectedSliceCount));
+    verifyAndClear();
   }
 
   void testViewUpdatedWhenInvalidSliceValuesEntered() {
@@ -131,6 +131,7 @@ public:
 
     EXPECT_CALL(m_view, showCustomBreakpointsInvalid()).Times(1);
     presenter.notifyCustomSliceValuesChanged(invalidCustomBreakpoints);
+    verifyAndClear();
   }
 
   void testModelUpdatedWhenInvalidSliceValuesEntered() {
@@ -145,6 +146,7 @@ public:
     presenter.notifyCustomSliceValuesChanged(invalidCustomBreakpoints);
     auto const &slicing = boost::get<InvalidSlicing>(presenter.slicing());
     TS_ASSERT(slicing == InvalidSlicing());
+    verifyAndClear();
   }
 
   void testModelUpdatedWhenInvalidSliceValuesCorrected() {
@@ -158,6 +160,7 @@ public:
 
     presenter.notifyCustomSliceValuesChanged(validCustomBreakpoints);
     TS_ASSERT(!isInvalid(presenter.slicing()));
+    verifyAndClear();
   }
 
   void testViewUpdatedWhenInvalidSliceValuesCorrected() {
@@ -171,12 +174,14 @@ public:
 
     EXPECT_CALL(m_view, showCustomBreakpointsValid());
     presenter.notifyCustomSliceValuesChanged(validCustomBreakpoints);
+    verifyAndClear();
   }
 
   void testChangingSliceTypeNotifiesMainPresenter() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifySliceTypeChanged(SliceType::None);
+    verifyAndClear();
   }
 
   void testChangingSliceCountNotifiesMainPresenter() {
@@ -184,12 +189,14 @@ public:
     presenter.notifySliceTypeChanged(SliceType::UniformEven);
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyUniformSliceCountChanged(1);
+    verifyAndClear();
   }
 
   void testChangingCustomSliceValuesNotifiesMainPresenter() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyCustomSliceValuesChanged("");
+    verifyAndClear();
   }
 
   void testNoSlicingOccursWhenSliceTypeIsNone() {
@@ -202,6 +209,8 @@ public:
     presenter.notifyCustomSliceValuesChanged("string");
     presenter.notifyLogSliceBreakpointsChanged("");
     presenter.notifyLogBlockNameChanged("");
+
+    verifyAndClear();
   }
 
 private:

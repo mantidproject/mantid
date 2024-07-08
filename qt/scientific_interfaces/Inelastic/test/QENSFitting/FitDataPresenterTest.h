@@ -9,8 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../Common/MockObjects.h"
-#include "Common/DataModel.h"
+#include "QENSFitting/FitDataModel.h"
 #include "QENSFitting/FitDataPresenter.h"
 #include "QENSFitting/FitDataView.h"
 #include "QENSFitting/FittingModel.h"
@@ -108,7 +107,7 @@ public:
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockDataModel>>();
+    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<FitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
@@ -216,7 +215,7 @@ private:
 
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockDataModel>> m_model;
+  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
   std::unique_ptr<FitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

@@ -15,7 +15,6 @@ class DrillTableItemSignals(QObject):
 
 
 class DrillTableItem(QTableWidgetItem):
-
     """
     Reference to the item presenter.
     """

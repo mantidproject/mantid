@@ -48,11 +48,11 @@ std::vector<int> createDetectorList(int const spectraMin, int const spectraMax) 
 
 double getSampleLog(const MatrixWorkspace_const_sptr &workspace, std::vector<std::string> const &logNames,
                     double const &defaultValue) {
-  const auto it = std::find_if(logNames.cbegin(), logNames.cend(),
-                               [&workspace](const auto &logName) { return workspace->run().hasProperty(logName); });
-  if (it != logNames.cend()) {
-    return workspace->getLogAsSingleValue(*it);
+  for (auto const &logName : logNames) {
+    if (workspace->run().hasProperty(logName))
+      return workspace->getLogAsSingleValue(logName);
   }
+
   return defaultValue;
 }
 

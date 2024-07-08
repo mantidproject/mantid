@@ -9,7 +9,6 @@ from ..view.DrillSettingsDialog import DrillSettingsDialog
 
 
 class DrillSettingsPresenter:
-
     """
     Settings dialog.
     """

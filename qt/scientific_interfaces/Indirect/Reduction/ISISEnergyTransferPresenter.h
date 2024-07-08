@@ -6,13 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataReductionTab.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
 
-#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
+#include "DataReductionTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,17 +25,14 @@ public:
   virtual void notifyRunFinished() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab,
-                                           public IIETPresenter,
-                                           public API::IAlgorithmRunnerSubscriber {
+class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab, public IIETPresenter {
+  Q_OBJECT
 
 public:
-  IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
-               std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
+  IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model);
 
   void setup() override;
   void run() override;
-  bool validate() override;
 
   void notifySaveClicked() override;
   void notifyRunClicked() override;
@@ -44,18 +40,22 @@ public:
   void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
 
-  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
+public slots:
+  bool validate() override;
+
+private slots:
+  void algorithmComplete(bool error);
+  void plotRawComplete(bool error);
+  void setInstrumentDefault();
 
 private:
   bool validateInstrumentDetails();
-  void updateInstrumentConfiguration() override;
-
-  void handleReductionComplete();
-  void handlePlotRawPreProcessComplete();
 
   InstrumentData getInstrumentData();
 
   void setFileExtensionsByName(bool filter) override;
+
+  std::string m_outputGroupName;
 
   IIETView *m_view;
   std::unique_ptr<IIETModel> m_model;

@@ -8,7 +8,7 @@
 
 #include <utility>
 
-#include "ConvolutionModel.h"
+#include "ConvFitModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -45,26 +45,26 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::st
   return nullptr;
 }
 
-std::optional<double> firstParameterValue(const IFunction_sptr &function, const std::string &category,
-                                          const std::string &parameterName) {
+boost::optional<double> firstParameterValue(const IFunction_sptr &function, const std::string &category,
+                                            const std::string &parameterName) {
   if (!function)
-    return std::nullopt;
+    return boost::none;
 
   const auto functionWithParameter = firstFunctionWithParameter(function, category, parameterName);
   if (functionWithParameter)
     return functionWithParameter->getParameter(parameterName);
-  return std::nullopt;
+  return boost::none;
 }
 
-std::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
+boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
   return firstParameterValue(function, "Peak", "PeakCentre");
 }
 
-std::optional<double> findFirstFWHM(const IFunction_sptr &function) {
+boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
   return firstParameterValue(function, "Peak", "FWHM");
 }
 
-std::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
+boost::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
   return firstParameterValue(function, "Background", "A0");
 }
 
@@ -83,9 +83,10 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 using namespace Mantid::API;
 
-FitPlotModel::FitPlotModel(std::vector<FitData> *fittingData, IFitOutput *fitOutput)
-    : m_fittingData(fittingData), m_fitOutput(fitOutput), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0},
-      m_activeFunction() {}
+FitPlotModel::FitPlotModel()
+    : m_fittingData(), m_fitOutput(), m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0}, m_activeFunction() {}
+
+FitPlotModel::~FitPlotModel() {}
 
 void FitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWorkspaceID = workspaceID; }
 
@@ -94,6 +95,10 @@ void FitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeWorkspac
 void FitPlotModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   m_activeFunction = std::move(function);
 }
+
+void FitPlotModel::setFittingData(std::vector<FitData> *fittingData) { m_fittingData = fittingData; }
+
+void FitPlotModel::setFitOutput(IFitOutput *fitOutput) { m_fitOutput = fitOutput; }
 
 MatrixWorkspace_sptr FitPlotModel::getWorkspace() const {
   if (m_activeWorkspaceID < m_fittingData->size())
@@ -158,33 +163,33 @@ FitDomainIndex FitPlotModel::getActiveDomainIndex() const {
   return index;
 }
 
-std::optional<double> FitPlotModel::getFirstHWHM() const {
+boost::optional<double> FitPlotModel::getFirstHWHM() const {
   auto fwhm = findFirstFWHM(m_activeFunction);
   if (fwhm) {
     return *fwhm / 2.0;
   }
-  return std::nullopt;
+  return boost::none;
 }
 
-std::optional<double> FitPlotModel::getFirstPeakCentre() const { return findFirstPeakCentre(m_activeFunction); }
+boost::optional<double> FitPlotModel::getFirstPeakCentre() const { return findFirstPeakCentre(m_activeFunction); }
 
-std::optional<double> FitPlotModel::getFirstBackgroundLevel() const {
+boost::optional<double> FitPlotModel::getFirstBackgroundLevel() const {
   auto const spectra = getSpectra(m_activeWorkspaceID);
   if (spectra.empty())
-    return std::optional<double>();
+    return boost::optional<double>();
   auto index = spectra.indexOf(m_activeWorkspaceIndex);
   if (!m_activeFunction || m_activeFunction->nFunctions() == 0)
-    return std::optional<double>();
+    return boost::optional<double>();
   return findFirstBackgroundLevel(m_activeFunction->getFunction(index.value));
 }
 
 double FitPlotModel::calculateHWHMMaximum(double minimum) const {
-  const auto peakCentre = getFirstPeakCentre().value_or(0.);
+  const auto peakCentre = getFirstPeakCentre().get_value_or(0.);
   return peakCentre + (peakCentre - minimum);
 }
 
 double FitPlotModel::calculateHWHMMinimum(double maximum) const {
-  const auto peakCentre = getFirstPeakCentre().value_or(0.);
+  const auto peakCentre = getFirstPeakCentre().get_value_or(0.);
   return peakCentre - (maximum - peakCentre);
 }
 
@@ -240,12 +245,12 @@ FitDomainIndex FitPlotModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIn
   return index;
 }
 
-std::optional<ResultLocationNew> FitPlotModel::getResultLocation(WorkspaceID workspaceID,
-                                                                 WorkspaceIndex spectrum) const {
+boost::optional<ResultLocationNew> FitPlotModel::getResultLocation(WorkspaceID workspaceID,
+                                                                   WorkspaceIndex spectrum) const {
   auto fitDomainIndex = getDomainIndex(workspaceID, spectrum);
   if (!m_fitOutput->isEmpty() && numberOfWorkspaces() > workspaceID)
     return m_fitOutput->getResultLocation(fitDomainIndex);
-  return std::nullopt;
+  return boost::none;
 }
 
 std::pair<double, double> FitPlotModel::getGuessRange() const {

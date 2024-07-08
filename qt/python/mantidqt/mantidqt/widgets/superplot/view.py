@@ -15,7 +15,6 @@ import os
 
 
 class WorkspaceItemSignals(QObject):
-
     """
     Thrown when the delete button is pressed.
     """
@@ -27,7 +26,6 @@ class WorkspaceItemSignals(QObject):
 
 
 class WorkspaceItem(QTreeWidgetItem):
-
     """
     Name of the workspace represented by this item.
     """
@@ -68,7 +66,6 @@ class WorkspaceItem(QTreeWidgetItem):
 
 
 class SpectrumItemSignals(QObject):
-
     """
     Thrown when the delete button is pressed.
     Args:
@@ -83,7 +80,6 @@ class SpectrumItemSignals(QObject):
 
 
 class SpectrumItem(QTreeWidgetItem):
-
     """
     Index of the spectrum represented by this item.
     """

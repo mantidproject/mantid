@@ -1,1 +1,0 @@
-- Legend in plots is no longer accidentally picked up by a mouse scroll

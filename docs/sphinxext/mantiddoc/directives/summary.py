@@ -8,7 +8,6 @@ from mantiddoc.directives.base import AlgorithmBaseDirective
 
 
 class SummaryDirective(AlgorithmBaseDirective):
-
     """
     Obtains the summary for a given algorithm based on it's name.
     """

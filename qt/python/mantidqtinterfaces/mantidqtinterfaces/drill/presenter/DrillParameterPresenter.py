@@ -10,7 +10,6 @@ from qtpy.QtCore import Qt
 
 
 class DrillParameterPresenter:
-
     """
     Reference to the QTableWidgetItem.
     """

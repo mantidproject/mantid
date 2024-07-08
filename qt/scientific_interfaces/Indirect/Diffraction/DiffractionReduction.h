@@ -10,8 +10,6 @@
 
 #include "Common/InelasticInterface.h"
 #include "Common/OutputPlotOptionsPresenter.h"
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 
 #include "ui_DiffractionReduction.h"
 
@@ -24,7 +22,7 @@ namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
 
-class DiffractionReduction : public InelasticInterface, public IRunSubscriber {
+class DiffractionReduction : public InelasticInterface {
   Q_OBJECT
 
 public:
@@ -37,11 +35,9 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
 
-  void handleValidation(IUserInputValidator *validator) const override;
-  void handleRun() override;
-
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);
+  void run();
   void saveReductions();
   void runFilesChanged();
   void runFilesFinding();
@@ -71,8 +67,8 @@ private:
   Mantid::API::IAlgorithm_sptr convertUnitsAlgorithm(const std::string &inputWsName, const std::string &outputWsName,
                                                      const std::string &target);
 
-  bool validateRebin() const;
-  std::string validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder, bool const isChecked = true) const;
+  bool validateRebin();
+  QString validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder, bool const isChecked = true) const;
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
                                                    const std::string &reflection = "");
@@ -81,6 +77,9 @@ private:
   void connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field);
   void runOSIRISdiffonlyReduction();
 
+  void setRunIsRunning(bool running);
+  void setButtonsEnabled(bool enabled);
+  void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
 private:
@@ -91,7 +90,6 @@ private:
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
 
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   DetectorGroupingOptions *m_groupingWidget;
 };

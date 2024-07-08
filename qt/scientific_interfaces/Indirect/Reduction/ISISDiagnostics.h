@@ -58,6 +58,7 @@ private slots:
   void sliceCalib(bool state);
   void rangeSelectorDropped(double /*min*/, double /*max*/);
   void doublePropertyChanged(QtProperty * /*prop*/, double /*val*/);
+  void setDefaultInstDetails();
   void sliceAlgDone(bool error);
   void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
@@ -72,8 +73,6 @@ private slots:
                        QString const &message = "Run", QString const &tooltip = "");
 
 private:
-  void updateInstrumentConfiguration() override;
-
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
 
   void setFileExtensionsByName(bool filter) override;

@@ -27,7 +27,7 @@ namespace DataValidationHelper {
  * @param primaryType The most important type.
  * @return True if the data is valid.
  */
-bool validateDataIsOneOf(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsOneOf(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                          DataType const &primaryType, std::vector<DataType> const &otherTypes, bool silent) {
   if (std::any_of(otherTypes.cbegin(), otherTypes.cend(),
                   [&](auto const &type) { return validateDataIsOfType(uiv, dataSelector, inputType, type, true); })) {
@@ -46,7 +46,7 @@ bool validateDataIsOneOf(IUserInputValidator *uiv, DataSelector *dataSelector, s
  * @param type The type of the data (e.g. red or sqw).
  * @return True if the data is valid.
  */
-bool validateDataIsOfType(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsOfType(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                           DataType const &type, bool silent) {
   switch (type) {
   case DataType::Red:
@@ -72,13 +72,13 @@ bool validateDataIsOfType(IUserInputValidator *uiv, DataSelector *dataSelector, 
  * Container).
  * @return True if the data is valid.
  */
-bool validateDataIsAReducedFile(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsAReducedFile(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                                 bool silent) {
   auto const dataName = dataSelector->getCurrentDataName();
-  uiv->checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
-  uiv->checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
+  uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
+  uiv.checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
-  return uiv->isAllInputValid();
+  return uiv.isAllInputValid();
 }
 
 /**
@@ -89,13 +89,13 @@ bool validateDataIsAReducedFile(IUserInputValidator *uiv, DataSelector *dataSele
  * @param inputType The type of the input (e.g. Sample or Container).
  * @return True if the data is valid.
  */
-bool validateDataIsASqwFile(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsASqwFile(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                             bool silent) {
   auto const dataName = dataSelector->getCurrentDataName();
-  uiv->checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
-  uiv->checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
+  uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
+  uiv.checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
-  return uiv->isAllInputValid();
+  return uiv.isAllInputValid();
 }
 
 /**
@@ -106,13 +106,13 @@ bool validateDataIsASqwFile(IUserInputValidator *uiv, DataSelector *dataSelector
  * @param inputType The type of the input (e.g. Sample or Container).
  * @return True if the data is valid.
  */
-bool validateDataIsACalibrationFile(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsACalibrationFile(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                                     bool silent) {
   auto const dataName = dataSelector->getCurrentDataName();
-  uiv->checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
-  uiv->checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
+  uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
+  uiv.checkWorkspaceType<MatrixWorkspace>(dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
-  return uiv->isAllInputValid();
+  return uiv.isAllInputValid();
 }
 
 /**
@@ -123,14 +123,14 @@ bool validateDataIsACalibrationFile(IUserInputValidator *uiv, DataSelector *data
  * @param inputType The type of the input (e.g. Sample or Container).
  * @return True if the data is valid.
  */
-bool validateDataIsACorrectionsFile(IUserInputValidator *uiv, DataSelector *dataSelector, std::string const &inputType,
+bool validateDataIsACorrectionsFile(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                                     bool silent) {
   auto const dataName = dataSelector->getCurrentDataName();
-  uiv->checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
-  uiv->checkWorkspaceType<WorkspaceGroup>(dataName, QString::fromStdString(inputType), "WorkspaceGroup", silent);
-  uiv->checkWorkspaceGroupIsValid(dataName, QString::fromStdString(inputType), silent);
+  uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector, silent);
+  uiv.checkWorkspaceType<WorkspaceGroup>(dataName, QString::fromStdString(inputType), "WorkspaceGroup", silent);
+  uiv.checkWorkspaceGroupIsValid(dataName, QString::fromStdString(inputType), silent);
   // TODO :: check the axis labels for the data units
-  return uiv->isAllInputValid();
+  return uiv.isAllInputValid();
 }
 
 } // namespace DataValidationHelper

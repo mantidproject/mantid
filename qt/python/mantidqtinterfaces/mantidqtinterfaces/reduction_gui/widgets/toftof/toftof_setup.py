@@ -420,17 +420,13 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.normalise = (
             elem.NORM_MONITOR
             if self.rbtNormaliseMonitor.isChecked()
-            else elem.NORM_TIME
-            if self.rbtNormaliseTime.isChecked()
-            else elem.NORM_NONE
+            else elem.NORM_TIME if self.rbtNormaliseTime.isChecked() else elem.NORM_NONE
         )
 
         elem.correctTof = (
             elem.CORR_TOF_VAN
             if self.rbtCorrectTOFVan.isChecked()
-            else elem.CORR_TOF_SAMPLE
-            if self.rbtCorrectTOFSample.isChecked()
-            else elem.CORR_TOF_NONE
+            else elem.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else elem.CORR_TOF_NONE
         )
         return elem
 

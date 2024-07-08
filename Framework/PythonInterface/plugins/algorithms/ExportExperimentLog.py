@@ -16,7 +16,6 @@ import os
 
 
 class ExportExperimentLog(PythonAlgorithm):
-
     """Algorithm to export experiment log"""
 
     _wksp = None

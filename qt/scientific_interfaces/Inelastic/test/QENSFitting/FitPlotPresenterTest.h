@@ -51,13 +51,22 @@ public:
   static void destroySuite(FitPlotPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    /// Note that the FitPlotModel could not be mocked as the
+    /// Presenter takes an FittingModel. This means the
+    /// FittingModel is mocked instead - which is a good
+    /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
-    m_model = std::make_unique<NiceMock<MockFitPlotModel>>();
+    auto model = std::make_unique<FitPlotModel>();
     m_view = std::make_unique<NiceMock<MockFitPlotView>>();
-    m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), m_model.get());
+    m_presenter = std::make_unique<FitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
+    m_fittingData = std::make_unique<std::vector<FitData>>();
+    m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
+    m_fitOutput = std::make_unique<FitOutput>();
+    m_presenter->setFittingData(m_fittingData.get());
+    m_presenter->setFitOutput(m_fitOutput.get());
   }
 
   void tearDown() override {
@@ -101,9 +110,6 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_set_the_available_spectra() {
-    ON_CALL(*m_model, getWorkspace()).WillByDefault(Return(m_workspace));
-    ON_CALL(*m_model, getActiveWorkspaceID()).WillByDefault(Return(WorkspaceID{0}));
-    ON_CALL(*m_model, getSpectra(WorkspaceID{0})).WillByDefault(Return(FunctionModelSpectra("0-5")));
 
     EXPECT_CALL(*m_view, setAvailableSpectra(WorkspaceIndex(0), WorkspaceIndex(5))).Times(1);
 
@@ -111,10 +117,6 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_enable_selectors_when_workspace_presenter() {
-    ON_CALL(*m_model, getWorkspace()).WillByDefault(Return(m_workspace));
-    ON_CALL(*m_model, getActiveWorkspaceID()).WillByDefault(Return(WorkspaceID{0}));
-    ON_CALL(*m_model, getSpectra(WorkspaceID{0})).WillByDefault(Return(FunctionModelSpectra("0-5")));
-
     EXPECT_CALL(*m_view, enableSpectrumSelection(true)).Times(1);
     EXPECT_CALL(*m_view, enableFitRangeSelection(true)).Times(1);
 
@@ -122,7 +124,7 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_disable_selectors_when_there_is_no_workspace() {
-    ON_CALL(*m_model, getWorkspace()).WillByDefault(Return(nullptr));
+    m_fittingData->clear();
 
     EXPECT_CALL(*m_view, enableSpectrumSelection(false)).Times(1);
     EXPECT_CALL(*m_view, enableFitRangeSelection(false)).Times(1);
@@ -136,8 +138,8 @@ public:
   }
 
   void test_that_handleSelectedFitDataChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    ON_CALL(*m_model, getRange()).WillByDefault(Return(std::pair<double, double>{1.0, 2.0}));
-
+    m_fittingData->at(0).setStartX(1.0);
+    m_fittingData->at(0).setEndX(2.0);
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
@@ -145,12 +147,8 @@ public:
   }
 
   void test_that_handlePlotSpectrumChanged_will_set_the_active_spectrum() {
-    auto workspaceIndex = WorkspaceIndex(2);
-
-    EXPECT_CALL(*m_model, setActiveSpectrum(workspaceIndex)).Times(1);
-    EXPECT_CALL(*m_view, setPlotSpectrum(workspaceIndex)).Times(1);
-
-    m_presenter->handlePlotSpectrumChanged(workspaceIndex);
+    m_presenter->handlePlotSpectrumChanged(2);
+    TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), 2);
   }
 
   void test_that_handlePlotSpectrumChanged_will_plot_the_input_when_there_is_only_an_input_workspace() {
@@ -166,8 +164,8 @@ public:
   }
 
   void test_that_handlePlotSpectrumChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    ON_CALL(*m_model, getRange()).WillByDefault(Return(std::pair<double, double>{1.0, 2.0}));
-
+    m_fittingData->at(0).setStartX(1.0);
+    m_fittingData->at(0).setEndX(2.0);
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
@@ -176,6 +174,7 @@ public:
 
   void test_that_handlePlotCurrentPreview_will_display_an_error_message_if_there_is_no_input_workspace() {
     std::string const message("Workspace not found - data may not be loaded.");
+    m_fittingData->clear();
 
     EXPECT_CALL(*m_view, displayMessage(message)).Times(1);
 
@@ -202,20 +201,12 @@ public:
   }
 
   void test_that_handleHWHMMinimumChanged_will_set_the_hwhm_minimum() {
-    double hwhmMin{2.0};
-
-    ON_CALL(*m_model, calculateHWHMMinimum(hwhmMin)).WillByDefault(Return(-hwhmMin));
-    EXPECT_CALL(*m_view, setHWHMMinimum(-hwhmMin)).Times(1);
-
-    m_presenter->handleHWHMMinimumChanged(hwhmMin);
+    EXPECT_CALL(*m_view, setHWHMMinimum(-2.0)).Times(1);
+    m_presenter->handleHWHMMinimumChanged(2.0);
   }
 
   void test_that_handleHWHMMaximumChanged_will_set_the_hwhm_maximum() {
-    double hwhmMax{2.0};
-
-    ON_CALL(*m_model, calculateHWHMMaximum(hwhmMax)).WillByDefault(Return(-hwhmMax));
-    EXPECT_CALL(*m_view, setHWHMMaximum(-hwhmMax)).Times(1);
-
+    EXPECT_CALL(*m_view, setHWHMMaximum(-2.0)).Times(1);
     m_presenter->handleHWHMMaximumChanged(2.0);
   }
 
@@ -224,12 +215,21 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_setActiveSpectrum_will_set_the_spectrum_in_view_and_model() {
-    auto const workspaceIndex = WorkspaceIndex{3};
+    EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{3})).Times(1);
 
-    EXPECT_CALL(*m_model, setActiveSpectrum(workspaceIndex)).Times(1);
-    EXPECT_CALL(*m_view, setPlotSpectrum(workspaceIndex)).Times(1);
+    m_presenter->setActiveSpectrum(WorkspaceIndex{3});
 
-    m_presenter->setActiveSpectrum(workspaceIndex);
+    TS_ASSERT_EQUALS(m_presenter->getSelectedDomainIndex(), FitDomainIndex{3});
+  }
+
+  void test_that_isCurrentlySelected_returns_true_if_the_index_and_spectrum_given_are_selected() {
+    m_presenter->handleSelectedFitDataChanged(2);
+    TS_ASSERT(m_presenter->isCurrentlySelected(2, 0));
+  }
+
+  void test_that_isCurrentlySelected_returns_false_if_the_index_and_spectrum_given_are_not_selected() {
+    m_presenter->handleSelectedFitDataChanged(2);
+    TS_ASSERT(!m_presenter->isCurrentlySelected(0, 0));
   }
 
   void test_that_setFitSingleSpectrum_methods_calls_view() {
@@ -260,8 +260,6 @@ public:
   void test_that_updateRangeSelectors_will_update_the_background_selector() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
-
-    ON_CALL(*m_model, getFirstBackgroundLevel()).WillByDefault(Return(0.0));
     Expectation setVisible = EXPECT_CALL(*m_view, setBackgroundRangeVisible(true)).Times(1);
     EXPECT_CALL(*m_view, setBackgroundLevel(0.0)).Times(1).After(setVisible);
 
@@ -271,9 +269,6 @@ public:
   void test_that_updateRangeSelectors_will_update_the_hwhm_selector() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
-
-    ON_CALL(*m_model, getFirstHWHM()).WillByDefault(Return(0.00875));
-    ON_CALL(*m_model, getFirstPeakCentre()).WillByDefault(Return(0.0));
 
     Expectation setVisible = EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
     EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);
@@ -310,7 +305,7 @@ public:
     EXPECT_CALL(*m_view, clearDataSelection()).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-0")).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1")).Times(1);
-    EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{0})).Times(1);
+    EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{0})).Times(2);
     TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), WorkspaceIndex{0});
 
     m_presenter->updateDataSelection({"DisplayName-0", "DisplayName-1"});
@@ -319,11 +314,6 @@ public:
   void test_updateAvailableSpectra_uses_minmax_if_spectra_is_continuous() {
     auto spectra = FunctionModelSpectra("0-5");
     auto minmax = spectra.getMinMax();
-
-    ON_CALL(*m_model, getWorkspace()).WillByDefault(Return(m_workspace));
-    ON_CALL(*m_model, getActiveWorkspaceID()).WillByDefault(Return(WorkspaceID{0}));
-    ON_CALL(*m_model, getSpectra(WorkspaceID{0})).WillByDefault(Return(spectra));
-
     EXPECT_CALL(*m_view, setAvailableSpectra(minmax.first, minmax.second)).Times(1);
 
     m_presenter->updateAvailableSpectra();
@@ -350,7 +340,6 @@ public:
   void test_updateGuess_enables_plot_guess_if_model_can_calculate_guess() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
-    ON_CALL(*m_model, canCalculateGuess()).WillByDefault(Return(true));
     EXPECT_CALL(*m_view, enablePlotGuess(true)).Times(1);
     EXPECT_CALL(*m_view, isPlotGuessChecked()).Times(1);
     m_presenter->updateGuess();
@@ -364,7 +353,6 @@ public:
   void test_updateGuessAvailability_enables_plot_guess_if_model_can_calculate_guess() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
-    ON_CALL(*m_model, canCalculateGuess()).WillByDefault(Return(true));
     EXPECT_CALL(*m_view, enablePlotGuess(true)).Times(1);
     m_presenter->updateGuessAvailability();
   }
@@ -377,9 +365,10 @@ public:
 private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitPlotView>> m_view;
-  std::unique_ptr<NiceMock<MockFitPlotModel>> m_model;
   std::unique_ptr<FitPlotPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
+  std::unique_ptr<std::vector<FitData>> m_fittingData;
+  std::unique_ptr<FitOutput> m_fitOutput;
 };

@@ -1,1 +1,0 @@
-- Refine error message when applying absorption correction with missing sample details in powder diffraction scripts

@@ -13,7 +13,6 @@ SUBSTITUTE_REF_RE = re.compile(r"\|(.+?)\|")
 
 
 class PropertiesDirective(AlgorithmBaseDirective):
-
     """
     Outputs the given algorithm's properties into a ReST formatted table.
     """

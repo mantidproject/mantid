@@ -1,17 +1,13 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(SRC_FILES
-    DataModel.cpp
     DataValidationHelper.cpp
-    FitData.cpp
     InelasticInterface.cpp
     InelasticTab.cpp
     InterfaceUtils.cpp
     OutputPlotOptionsModel.cpp
     OutputPlotOptionsPresenter.cpp
     OutputPlotOptionsView.cpp
-    RunWidget/RunPresenter.cpp
-    RunWidget/RunView.cpp
     Settings.cpp
     SettingsHelper.cpp
     SettingsModel.cpp
@@ -21,24 +17,19 @@ set(SRC_FILES
 )
 
 set(INC_FILES
-    DataModel.h
     DataValidationHelper.h
-    FitData.h
-    IDataModel.h
     InterfaceUtils.h
     ISettingsView.h
     OutputPlotOptionsModel.h
     OutputPlotOptionsPresenter.h
-    RunWidget/IRunSubscriber.h
-    RunWidget/RunPresenter.h
     SettingsHelper.h
     SettingsPresenter.h
     ValidationUtils.h
 )
 
-set(MOC_FILES InelasticInterface.h InelasticTab.h OutputPlotOptionsView.h RunWidget/RunView.h Settings.h SettingsView.h)
+set(MOC_FILES InelasticInterface.h InelasticTab.h OutputPlotOptionsView.h Settings.h SettingsView.h)
 
-set(UI_FILES InterfaceSettings.ui OutputPlotOptions.ui RunWidget/RunView.ui)
+set(UI_FILES InterfaceSettings.ui OutputPlotOptions.ui)
 
 list(TRANSFORM SRC_FILES PREPEND ${SUB_DIRECTORY}/)
 list(TRANSFORM INC_FILES PREPEND ${SUB_DIRECTORY}/)

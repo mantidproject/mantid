@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
 #include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -26,8 +25,6 @@ Mantid::Kernel::Logger g_log("ResNorm");
 namespace MantidQt::CustomInterfaces {
 ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
-
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");
@@ -60,6 +57,7 @@ ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmComplete(bool)));
 
   // Post Plot and Save
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
@@ -78,9 +76,19 @@ void ResNorm::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void ResNorm::handleValidation(IUserInputValidator *validator) const {
-  bool const vanValid = validator->checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  bool const resValid = validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+void ResNorm::setup() {}
+
+/**
+ * Validate the form to check the program can be run
+ *
+ * @return :: Whether the form was valid
+ */
+bool ResNorm::validate() {
+  UserInputValidator uiv;
+  QString errors("");
+
+  bool const vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
+  bool const resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
     // Check vanadium input is _red or _sqw workspace
@@ -88,7 +96,7 @@ void ResNorm::handleValidation(IUserInputValidator *validator) const {
     int const cutIndex = vanName.lastIndexOf("_");
     QString const vanSuffix = vanName.right(vanName.size() - (cutIndex + 1));
     if (vanSuffix.compare("red") != 0 && vanSuffix.compare("sqw") != 0)
-      validator->addErrorMessage("The Vanadium run is not _red or _sqw workspace");
+      uiv.addErrorMessage("The Vanadium run is not _red or _sqw workspace");
 
     // Check Res and Vanadium are the same Run
     if (resValid) {
@@ -100,8 +108,8 @@ void ResNorm::handleValidation(IUserInputValidator *validator) const {
       int const vanRun = vanadiumWs->getRunNumber();
 
       if (resRun != vanRun)
-        validator->addErrorMessage("The provided Vanadium and Resolution do not have "
-                                   "matching run numbers");
+        uiv.addErrorMessage("The provided Vanadium and Resolution do not have "
+                            "matching run numbers");
     }
   }
 
@@ -109,10 +117,22 @@ void ResNorm::handleValidation(IUserInputValidator *validator) const {
   auto const eMin = getDoubleManagerProperty("EMin");
   auto const eMax = getDoubleManagerProperty("EMax");
   if (eMin >= eMax)
-    validator->addErrorMessage("EMin must be strictly less than EMax.\n");
+    errors.append("EMin must be strictly less than EMax.\n");
+
+  // Create and show error messages
+  errors.append(uiv.generateErrorMessage());
+  if (!errors.isEmpty()) {
+    emit showMessageBox(errors);
+    return false;
+  }
+
+  return true;
 }
 
-void ResNorm::handleRun() {
+/**
+ * Run the ResNorm v2 algorithm.
+ */
+void ResNorm::run() {
   m_uiForm.ppPlot->watchADS(false);
 
   auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
@@ -143,9 +163,7 @@ void ResNorm::handleRun() {
  * @param error If the algorithm failed
  */
 void ResNorm::handleAlgorithmComplete(bool error) {
-  m_runPresenter->setRunEnabled(true);
-  setPlotResultEnabled(!error);
-  setSaveResultEnabled(!error);
+  setRunIsRunning(false);
   if (!error) {
     // Update preview plot
     previewSpecChanged(m_previewSpec);
@@ -153,6 +171,9 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     processLogs();
 
     m_uiForm.ppPlot->watchADS(true);
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 
@@ -417,6 +438,13 @@ void ResNorm::plotCurrentPreview() {
       plotWorkspaces, plotIndices, std::vector<bool>(plotWorkspaces.size(), SettingsHelper::externalPlotErrorBars()));
 }
 
+void ResNorm::runClicked() {
+  if (validateTab()) {
+    setRunIsRunning(true);
+    runTab();
+  }
+}
+
 /**
  * Handles saving when button is clicked
  */
@@ -449,6 +477,8 @@ void ResNorm::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
+void ResNorm::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
 void ResNorm::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
@@ -457,9 +487,14 @@ void ResNorm::setPlotResultEnabled(bool enabled) {
 void ResNorm::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void ResNorm::setButtonsEnabled(bool enabled) {
-  m_runPresenter->setRunEnabled(enabled);
+  setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
+}
+
+void ResNorm::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
 }
 
 void ResNorm::setPlotResultIsPlotting(bool plotting) {

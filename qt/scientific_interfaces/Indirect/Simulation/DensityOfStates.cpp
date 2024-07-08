@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DensityOfStates.h"
 
-#include "Common/RunWidget/RunView.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -21,56 +21,63 @@ Mantid::Kernel::Logger g_log("DensityOfStates");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-
-enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
-
 DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
 
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
 
-void DensityOfStates::handleValidation(IUserInputValidator *validator) const {
-  auto const filename = m_uiForm.mwInputFile->getFirstFilename().toStdString();
-  if (filename.empty()) {
-    validator->addErrorMessage("A data file has not been loaded.");
-    return;
-  }
-  auto const format = filenameToFormat(filename);
-  if (format == InputFormat::Unsupported) {
-    validator->addErrorMessage("The provided file format is unsupported. The supported extensions are 'phonon', "
-                               "'castep', 'castep_bin' and 'yaml'.");
-    return;
-  }
+void DensityOfStates::setup() {}
 
-  auto const specType = m_uiForm.cbSpectrumType->currentText();
-  auto const items = m_uiForm.lwIons->selectedItems();
+/**
+ * Validate the form to check the program can be run.
+ *
+ * @return Whether the form was valid
+ */
+bool DensityOfStates::validate() {
+  UserInputValidator uiv;
+
+  const auto filename = m_uiForm.mwInputFile->getFirstFilename();
+  InputFormat format = filenameToFormat(filename);
+  QString specType = m_uiForm.cbSpectrumType->currentText();
+  auto items = m_uiForm.lwIons->selectedItems();
 
   if (specType == "DensityOfStates" && isPdosFile(format) && items.size() < 1)
-    validator->addErrorMessage("Must select at least one ion for DensityOfStates.");
+    uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
+
+  // Give error message when there are errors
+  if (!uiv.isAllInputValid())
+    emit showMessageBox(uiv.generateErrorMessage());
+
+  return uiv.isAllInputValid();
 }
 
-void DensityOfStates::handleRun() {
-  clearOutputPlotOptionsWorkspaces();
+/**
+ * Configures and executes the DensityOfStates algorithm.
+ */
+void DensityOfStates::run() {
+  setRunIsRunning(true);
 
   // Get the SimulatedDensityOfStates algorithm
   auto dosAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
-  const auto filename = m_uiForm.mwInputFile->getFirstFilename().toStdString();
+  const auto filename = m_uiForm.mwInputFile->getFirstFilename();
   const auto specType = m_uiForm.cbSpectrumType->currentText();
   const auto filePropName = formatToFilePropName(filenameToFormat(filename));
 
-  m_outputWsName = QFileInfo(QString::fromStdString(filename)).baseName() + "_" + specType;
+  // QFileInfo inputFileInfo(filename);
+
+  m_outputWsName = QFileInfo(filename).baseName() + "_" + specType;
 
   // Set common properties
-  dosAlgo->setProperty(filePropName, filename);
+  dosAlgo->setProperty(filePropName, filename.toStdString());
   dosAlgo->setProperty("OutputWorkspace", m_outputWsName.toStdString());
 
   const auto peakShape = m_uiForm.cbPeakShape->currentText().toStdString();
@@ -138,9 +145,10 @@ void DensityOfStates::handleRun() {
 void DensityOfStates::dosAlgoComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
 
-  m_runPresenter->setRunEnabled(true);
-  setSaveEnabled(!error);
-  if (!error)
+  setRunIsRunning(false);
+  if (error)
+    setSaveEnabled(false);
+  else
     setOutputPlotOptionsWorkspaces({m_outputWsName.toStdString()});
 }
 
@@ -148,7 +156,7 @@ void DensityOfStates::dosAlgoComplete(bool error) {
  * Handles a new file being selected by the browser.
  */
 void DensityOfStates::handleFileChange() {
-  auto const filename = m_uiForm.mwInputFile->getFirstFilename().toStdString();
+  QString filename = m_uiForm.mwInputFile->getFirstFilename();
   InputFormat fileFormat = filenameToFormat(filename);
   bool pdosAvailable = isPdosFile(fileFormat);
 
@@ -156,7 +164,7 @@ void DensityOfStates::handleFileChange() {
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
-    ionTableAlgo->setProperty(formatToFilePropName(fileFormat), filename);
+    ionTableAlgo->setProperty(formatToFilePropName(fileFormat), filename.toStdString());
     ionTableAlgo->setProperty("SpectrumType", "IonTable");
     ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
 
@@ -219,6 +227,11 @@ void DensityOfStates::ionLoadComplete(bool error) {
  */
 void DensityOfStates::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
 
+void DensityOfStates::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
+}
+
 /**
  * Handle saving of workspace
  */
@@ -228,10 +241,28 @@ void DensityOfStates::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+void DensityOfStates::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void DensityOfStates::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
+void DensityOfStates::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
 void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-DensityOfStates::InputFormat DensityOfStates::filenameToFormat(std::string const &filename) const {
-  QFileInfo inputFileInfo(QString::fromStdString(filename));
+/**
+ * Handle file formats
+ */
+
+enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
+
+DensityOfStates::InputFormat DensityOfStates::filenameToFormat(QString filename) {
+  QFileInfo inputFileInfo(filename);
   const auto suffix = inputFileInfo.suffix().toStdString();
 
   InputFormat format;
@@ -251,7 +282,7 @@ DensityOfStates::InputFormat DensityOfStates::filenameToFormat(std::string const
   return format;
 }
 
-std::string DensityOfStates::formatToFilePropName(InputFormat const &format) const {
+std::string DensityOfStates::formatToFilePropName(InputFormat format) {
   std::string filePropName;
 
   switch (format) {
@@ -271,7 +302,7 @@ std::string DensityOfStates::formatToFilePropName(InputFormat const &format) con
   return filePropName;
 }
 
-bool DensityOfStates::isPdosFile(InputFormat const &dosFileFormat) const {
+bool DensityOfStates::isPdosFile(InputFormat dosFileFormat) {
   return (dosFileFormat == InputFormat::Phonon) || (dosFileFormat == InputFormat::ForceConstants);
 }
 

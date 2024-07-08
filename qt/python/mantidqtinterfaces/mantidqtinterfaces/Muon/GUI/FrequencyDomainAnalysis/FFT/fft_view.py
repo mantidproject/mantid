@@ -11,7 +11,6 @@ from mantidqtinterfaces.Muon.GUI.Common.message_box import warning
 
 
 class FFTView(QtWidgets.QWidget):
-
     """
     creates the layout for the FFT GUI
     """

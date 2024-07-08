@@ -117,7 +117,7 @@ def calibrateMerlin(filename):
         door9func,
         outputPeak=True,
         margin=30,
-        rangeList=list(range(20))
+        rangeList=list(range(20)),
         # because 20, 21, 22, 23 are defective detectors
     )
     print("Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt")

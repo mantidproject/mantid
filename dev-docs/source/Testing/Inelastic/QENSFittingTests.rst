@@ -11,8 +11,8 @@ Inelastic QENS Fitting Testing
 - Download the `ISIS Sample Data <http://download.mantidproject.org>`_
 - Make sure that the data set is on your list of search directories
 
-MSD tab
--------
+MSD Fit tab
+-----------
 
 *Preparation*
 
@@ -23,7 +23,7 @@ MSD tab
 --------------
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``QENS fitting``
-#. Go to the ``MSD`` tab
+#. Go to the ``MSD fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``File`` click browse and select the file that you saved in the previous test
 #. Check ``All Spectra``
@@ -36,8 +36,8 @@ MSD tab
 #. Repeat the previous steps with ``Peters`` and ``Yi`` functions
 #. Try run fits using the different ``Minimizer`` options (except FABADA), each time change the ``End X`` value either + or - 0.1
 
-I(Q, T) tab
------------
+I(Q, T) Fit tab
+---------------
 
 *Preparation*
 
@@ -48,7 +48,7 @@ I(Q, T) tab
 --------------
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``QENS fitting``
-#. Go to the ``I(Q, T)`` tab
+#. Go to the ``I(Q, T) Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``Workspace`` select the ``_iqt`` workspace from the previous test
 #. Check ``All Spectra``
@@ -64,8 +64,8 @@ I(Q, T) tab
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
 
-Convolution tab
----------------
+Conv Fit tab
+------------
 
 *Preparation*
 
@@ -76,7 +76,7 @@ Convolution tab
 --------------
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``QENS fitting``
-#. Go to the ``Convolution`` tab
+#. Go to the ``Conv Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box's set to ``File``
 #. Click browse and load the ``irs26176_graphite002_red.nxs`` file from the sample data
@@ -99,8 +99,8 @@ Convolution tab
 
 #. Change the ``Fit type`` to different functions and run fits
 
-Function (Q) tab
-----------------
+F(Q) Fit tab
+------------
 
 *Preparation*
 
@@ -111,7 +111,7 @@ Function (Q) tab
 --------------
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``QENS fitting``
-#. Go to the ``Function (Q)`` tab
+#. Go to the ``F(Q) Fit`` tab
 #. Click ``Add Workspace``
 #. With the combo box set to ``Workspace`` select the ``0-5__Result`` workspace from the previous test
 #. In Parameter Name select ``f1.f0.FWHM``

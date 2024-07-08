@@ -181,7 +181,7 @@ class Algorithms(systemtesting.MantidSystemTest):
     def runTest(self):
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-        for (name, versions) in algs.items():
+        for name, versions in algs.items():
             if not self.verifyAlgName(name):
                 self.__ranOk += 1
                 continue

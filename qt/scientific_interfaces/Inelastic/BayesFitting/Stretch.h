@@ -7,25 +7,24 @@
 #pragma once
 
 #include "BayesFittingTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ui_Stretch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL Stretch : public BayesFittingTab, public IRunSubscriber {
+class MANTIDQT_INELASTIC_DLL Stretch : public BayesFittingTab {
   Q_OBJECT
 
 public:
   Stretch(QWidget *parent = nullptr);
 
+  // Inherited methods from BayesFittingTab
+  void setup() override;
+  bool validate() override;
+  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
-
-  void handleValidation(IUserInputValidator *validator) const override;
-  void handleRun() override;
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -39,6 +38,7 @@ private slots:
   /// Save the workspaces produces from the algorithm
   void saveWorkspaces();
 
+  void runClicked();
   void plotWorkspaces();
   void plotContourClicked();
   void algorithmComplete(const bool &error);
@@ -49,16 +49,17 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   void populateContourWorkspaceComboBox();
+  void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
+  void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setPlotContourEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 
   /// Current preview spectrum
   int m_previewSpec;

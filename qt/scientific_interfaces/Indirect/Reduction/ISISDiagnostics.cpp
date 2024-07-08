@@ -91,6 +91,9 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
 
   // SIGNAL/SLOT CONNECTIONS
 
+  // Update instrument information when a new instrument config is selected
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
+
   // Update properties when a range selector is changed
   connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeSelectorDropped(double, double)));
@@ -203,11 +206,11 @@ bool ISISDiagnostics::validate() {
       std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
   uiv.checkValidRange("Spectra Range", specRange);
 
-  auto const error = uiv.generateErrorMessage();
+  QString error = uiv.generateErrorMessage();
   bool isError = error != "";
 
   if (isError)
-    g_log.warning(error);
+    g_log.warning(error.toStdString());
 
   return !isError;
 }
@@ -242,7 +245,7 @@ void ISISDiagnostics::algorithmComplete(bool error) {
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISDiagnostics::updateInstrumentConfiguration() {
+void ISISDiagnostics::setDefaultInstDetails() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {

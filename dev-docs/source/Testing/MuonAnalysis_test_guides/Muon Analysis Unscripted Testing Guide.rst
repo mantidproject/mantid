@@ -39,9 +39,9 @@ Group 2: PSI data
 
 This group tests bin data from the PSI facility and introduces background corrections.
 Test instructions can be found at :ref:`Muon_Analysis_PSI-ref`.
-You will need the following file from the unit test data:
+You will need the following run:
 
-- deltat_tdc_dolly_1529.bin
+- dolly 1529
 
 Group 3: HIFI data
 ^^^^^^^^^^^^^^^^^^

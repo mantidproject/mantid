@@ -157,7 +157,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put("ec_temp", self.ecTemp)
         put("ec_factor", self.ecFactor)
 
-        for (runs, cmnt, temp) in self.dataRuns:
+        for runs, cmnt, temp in self.dataRuns:
             put("data_runs", runs)
             put("data_comment", cmnt)
             put("data_temperature", temp)

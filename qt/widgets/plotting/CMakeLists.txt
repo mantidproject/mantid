@@ -25,7 +25,6 @@ set(MPL_INC_FILES
     inc/MantidQtWidgets/Plotting/ExternalPlotter.h
     inc/MantidQtWidgets/Plotting/AxisID.h
     inc/MantidQtWidgets/Plotting/PlotWidget/IPlotView.h
-    inc/MantidQtWidgets/Plotting/MockExternalPlotter.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
@@ -39,7 +38,7 @@ mtd_add_qt_library(
   NOMOC ${MPL_INC_FILES}
   DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc
-  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} gmock
+  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks

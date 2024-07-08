@@ -46,9 +46,7 @@ def OUTSPEC(
     nphalf = int(npts / 2)
     tmp1 = np.where(
         np.less_equal(
-            sigma[
-                nphalf:,
-            ],
+            sigma[nphalf:,],
             1.0e3,
         ),
         guess[nphalf:, :] / sigma[nphalf:, :] ** 2,

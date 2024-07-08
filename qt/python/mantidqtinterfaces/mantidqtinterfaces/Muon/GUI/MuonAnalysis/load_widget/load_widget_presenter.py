@@ -11,7 +11,6 @@ SIMULTANEOUS = "Simultaneous"
 
 
 class LoadWidgetPresenter(object):
-
     """
     The load widget is responsible for combining data loaded from its two sub-widgets in a systematic way
     (either keeping a single workspace, or allowing multiple to be loaded at once).
@@ -125,7 +124,6 @@ class LoadWidgetPresenter(object):
         self.handle_run_widget_data_changed()
 
     class LoadNotifier(Observable):
-
         """
         Notify when loaded data changes from file widget or run widget, or when clear button is pressed.
         """

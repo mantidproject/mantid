@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
-IETModel::IETModel() : m_outputGroupName(), m_outputWorkspaces() {}
+IETModel::IETModel() : m_outputWorkspaces() {}
 
 std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
   std::vector<std::string> errors;
@@ -119,8 +119,8 @@ std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::st
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
-                                                                           IETRunData &runData) {
+std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                      InstrumentData const &instData, IETRunData &runData) {
   auto properties = runData.groupingProperties();
 
   setInstrumentProperties(*properties, instData);
@@ -130,12 +130,17 @@ MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(Instr
   setRebinProperties(*properties, runData.getRebinData());
   setAnalysisProperties(*properties, runData.getAnalysisData());
 
-  m_outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
-  setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName);
+  std::string outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
+  setOutputProperties(*properties, runData.getOutputData(), outputGroupName);
 
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
-  return std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
+  API::IConfiguredAlgorithm_sptr configuredAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
+
+  batchAlgoRunner->executeAlgorithmAsync(std::move(configuredAlg));
+
+  return outputGroupName;
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {

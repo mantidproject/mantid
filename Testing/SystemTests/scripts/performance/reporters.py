@@ -7,6 +7,7 @@
 import os
 import sys
 
+
 #########################################################################
 # A base class to support report results in an appropriate manner
 #########################################################################
@@ -42,7 +43,7 @@ class TextResultReporter(ResultReporter):
         """
         nstars = 30
         print("*" * nstars)
-        for (name, val) in result.data.items():
+        for name, val in result.data.items():
             str_val = str(val)
             str_val = str_val.replace("\n", " ")
             if len(str_val) > 50:

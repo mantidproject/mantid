@@ -1,20 +1,21 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
 set(TEST_FILES
-    ConvolutionModelTest.h
-    ConvolutionDataPresenterTest.h
+    ConvFitModelTest.h
+    ConvFitDataPresenterTest.h
     ConvFunctionTemplateModelTest.h
-    FunctionQDataPresenterTest.h
-    FunctionQModelTest.h
+    FqFitDataPresenterTest.h
+    FqFitModelTest.h
     FitDataPresenterTest.h
+    FitDataTest.h
+    FitDataModelTest.h
     FitOutputTest.h
     FitOutputOptionsModelTest.h
     FitOutputOptionsPresenterTest.h
     FitPlotModelTest.h
     FitPlotPresenterTest.h
-    FittingModelTest.h
-    FittingPresenterTest.h
     InelasticFitPropertyBrowserTest.h
+    FittingModelTest.h
     IqtFitModelTest.h
     ParameterEstimationTest.h
 )

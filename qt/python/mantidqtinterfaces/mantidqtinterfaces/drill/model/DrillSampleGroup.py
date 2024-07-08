@@ -7,7 +7,6 @@
 
 
 class DrillSampleGroup:
-
     """
     Name of the group.
     """

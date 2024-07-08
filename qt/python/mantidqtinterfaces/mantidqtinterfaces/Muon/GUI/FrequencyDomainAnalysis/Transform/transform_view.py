@@ -8,7 +8,6 @@ from qtpy import QtWidgets
 
 
 class TransformView(QtWidgets.QWidget):
-
     """
     Creates the view for the transformation tab.
     At the top is the transform selection widget

@@ -31,7 +31,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 MSDFunctionModel::MSDFunctionModel()
     : SingleFunctionTemplateModel(std::make_unique<FunctionParameterEstimation>(estimators)) {
-  updateAvailableFunctions(MSD::ALL_FITS);
+  updateAvailableFunctions(MSDFit::ALL_FITS);
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

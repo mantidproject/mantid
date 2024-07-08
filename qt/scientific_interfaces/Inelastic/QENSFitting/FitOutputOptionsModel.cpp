@@ -168,7 +168,7 @@ std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitOutputOptionsModel::FitOutputOptionsModel() : m_resultGroup(), m_pdfGroup() {}
+FitOutputOptionsModel::FitOutputOptionsModel() : m_resultGroup(), m_pdfGroup(), m_spectraToPlot() {}
 
 void FitOutputOptionsModel::setResultWorkspace(WorkspaceGroup_sptr groupWorkspace) { m_resultGroup = groupWorkspace; }
 
@@ -196,85 +196,75 @@ bool FitOutputOptionsModel::isPDFGroupPlottable() const {
   return false;
 }
 
-std::vector<SpectrumToPlot> FitOutputOptionsModel::plotResult(std::string const &plotType) const {
-  if (!m_resultGroup) {
-    throw std::runtime_error(noWorkspaceErrorMessage("plotting"));
-  }
-  std::vector<SpectrumToPlot> spectraToPlot;
-  plotResult(spectraToPlot, m_resultGroup, plotType);
-  return spectraToPlot;
-}
+void FitOutputOptionsModel::clearSpectraToPlot() { m_spectraToPlot.clear(); }
 
-void FitOutputOptionsModel::plotResult(std::vector<SpectrumToPlot> &spectraToPlot,
-                                       const WorkspaceGroup_const_sptr &groupWorkspace,
-                                       std::string const &plotType) const {
-  if (plotType == "All")
-    plotAll(spectraToPlot, groupWorkspace);
+std::vector<SpectrumToPlot> FitOutputOptionsModel::getSpectraToPlot() const { return m_spectraToPlot; }
+
+void FitOutputOptionsModel::plotResult(std::string const &plotType) {
+  if (m_resultGroup)
+    plotResult(m_resultGroup, plotType);
   else
-    plotParameter(spectraToPlot, groupWorkspace, plotType);
+    throw std::runtime_error(noWorkspaceErrorMessage("plotting"));
 }
 
-void FitOutputOptionsModel::plotAll(std::vector<SpectrumToPlot> &spectraToPlot,
-                                    const WorkspaceGroup_const_sptr &groupWorkspace) const {
+void FitOutputOptionsModel::plotResult(const WorkspaceGroup_const_sptr &groupWorkspace, std::string const &plotType) {
+  if (plotType == "All")
+    plotAll(groupWorkspace);
+  else
+    plotParameter(groupWorkspace, plotType);
+}
+
+void FitOutputOptionsModel::plotAll(const WorkspaceGroup_const_sptr &groupWorkspace) {
   for (auto const &workspace : *groupWorkspace)
-    plotAll(spectraToPlot, convertToMatrixWorkspace(workspace));
+    plotAll(convertToMatrixWorkspace(workspace));
 }
 
-void FitOutputOptionsModel::plotAll(std::vector<SpectrumToPlot> &spectraToPlot,
-                                    const MatrixWorkspace_const_sptr &workspace) const {
+void FitOutputOptionsModel::plotAll(const MatrixWorkspace_const_sptr &workspace) {
   if (workspaceIsPlottable(workspace))
-    plotAllSpectra(spectraToPlot, workspace);
+    plotAllSpectra(workspace);
 }
 
-void FitOutputOptionsModel::plotAllSpectra(std::vector<SpectrumToPlot> &spectraToPlot,
-                                           const MatrixWorkspace_const_sptr &workspace) const {
+void FitOutputOptionsModel::plotAllSpectra(const MatrixWorkspace_const_sptr &workspace) {
   for (auto index = 0u; index < workspace->getNumberHistograms(); ++index) {
     auto const plotInfo = std::make_pair(workspace->getName(), index);
-    spectraToPlot.emplace_back(plotInfo);
+    m_spectraToPlot.emplace_back(plotInfo);
   }
 }
 
-void FitOutputOptionsModel::plotParameter(std::vector<SpectrumToPlot> &spectraToPlot,
-                                          const WorkspaceGroup_const_sptr &groupWorkspace,
-                                          std::string const &parameter) const {
+void FitOutputOptionsModel::plotParameter(const WorkspaceGroup_const_sptr &groupWorkspace,
+                                          std::string const &parameter) {
   for (auto const &workspace : *groupWorkspace)
-    plotParameter(spectraToPlot, convertToMatrixWorkspace(workspace), parameter);
+    plotParameter(convertToMatrixWorkspace(workspace), parameter);
 }
 
-void FitOutputOptionsModel::plotParameter(std::vector<SpectrumToPlot> &spectraToPlot,
-                                          const MatrixWorkspace_const_sptr &workspace,
-                                          std::string const &parameter) const {
+void FitOutputOptionsModel::plotParameter(const MatrixWorkspace_const_sptr &workspace, std::string const &parameter) {
   if (workspaceIsPlottable(workspace))
-    plotParameterSpectrum(spectraToPlot, workspace, parameter);
+    plotParameterSpectrum(workspace, parameter);
 }
 
-void FitOutputOptionsModel::plotParameterSpectrum(std::vector<SpectrumToPlot> &spectraToPlot,
-                                                  const MatrixWorkspace_const_sptr &workspace,
-                                                  std::string const &parameter) const {
+void FitOutputOptionsModel::plotParameterSpectrum(const MatrixWorkspace_const_sptr &workspace,
+                                                  std::string const &parameter) {
   auto const parameters = extractAxisLabels(workspace, 1);
   auto const iter = parameters.find(parameter);
   if (iter != parameters.end()) {
     auto const plotInfo = std::make_pair(workspace->getName(), iter->second);
-    spectraToPlot.emplace_back(plotInfo);
+    m_spectraToPlot.emplace_back(plotInfo);
   }
 }
 
-std::vector<SpectrumToPlot> FitOutputOptionsModel::plotPDF(std::string const &workspaceName,
-                                                           std::string const &plotType) const {
-  if (!m_pdfGroup) {
+void FitOutputOptionsModel::plotPDF(std::string const &workspaceName, std::string const &plotType) {
+  if (m_pdfGroup) {
+    auto const workspace = m_pdfGroup->getItem(workspaceName);
+    plotPDF(convertToMatrixWorkspace(workspace), plotType);
+  } else
     throw std::runtime_error(noWorkspaceErrorMessage("plotting"));
-  }
-  std::vector<SpectrumToPlot> spectraToPlot;
-  plotPDF(spectraToPlot, convertToMatrixWorkspace(m_pdfGroup->getItem(workspaceName)), plotType);
-  return spectraToPlot;
 }
 
-void FitOutputOptionsModel::plotPDF(std::vector<SpectrumToPlot> &spectraToPlot,
-                                    const MatrixWorkspace_const_sptr &workspace, std::string const &plotType) const {
+void FitOutputOptionsModel::plotPDF(const MatrixWorkspace_const_sptr &workspace, std::string const &plotType) {
   if (plotType == "All")
-    plotAll(spectraToPlot, workspace);
+    plotAll(workspace);
   else
-    plotParameter(spectraToPlot, workspace, plotType);
+    plotParameter(workspace, plotType);
 }
 
 void FitOutputOptionsModel::saveResult() const {

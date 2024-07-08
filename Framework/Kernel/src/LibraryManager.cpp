@@ -116,8 +116,12 @@ bool LibraryManagerImpl::isLoaded(const std::string &filename) const {
  * @return True if the library should be skipped
  */
 bool LibraryManagerImpl::isExcluded(const std::string &filename, const std::vector<std::string> &excludes) const {
-  return std::any_of(excludes.cbegin(), excludes.cend(),
-                     [&filename](const auto exclude) { return filename.find(exclude) != std::string::npos; });
+  for (const auto &exclude : excludes) {
+    if (filename.find(exclude) != std::string::npos) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

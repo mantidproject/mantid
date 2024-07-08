@@ -33,15 +33,8 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     ads = AnalysisDataServiceImpl.Instance()
     has_multiple_bins = []
     for name in names:
-        ws = None
         result = None
-
-        try:
-            ws = ads.retrieve(name)
-        except KeyError:
-            # Handle the case where the workspace name does not exist
-            mantid.kernel.logger.warning(f"Workspace '{name}' does not exist.")
-            result = False
+        ws = ads.retrieve(name)
         if isinstance(ws, WorkspaceGroup):
             result = all(_validate_workspaces(ws.getNames()))
         elif isinstance(ws, MatrixWorkspace):
@@ -49,7 +42,7 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
                 result = ws.blocksize() > 1
             except RuntimeError:
                 # blocksize() implementation in Workspace2D and EventWorkspace can throw an error if histograms are not equal
-                for i in range(ws.getNumberHistograms()):
+                for i in ws.getNumberHistograms():
                     if ws.y(i).size() > 1:
                         result = True
                         break

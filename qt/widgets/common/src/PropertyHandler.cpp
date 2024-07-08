@@ -68,13 +68,14 @@ void PropertyHandler::init() {
     pi->property()->addSubProperty(fnProp);
     // assign m_item
     QList<QtBrowserItem *> itList = pi->children();
-    const auto it = std::find_if(itList.cbegin(), itList.cend(),
-                                 [&fnProp](auto browserItem) { return browserItem->property() == fnProp; });
-    if (it != itList.cend()) {
-      m_item = *it;
-    } else {
-      throw std::runtime_error("Browser item not found");
+    foreach (QtBrowserItem *browserItem, itList) {
+      if (browserItem->property() == fnProp) {
+        m_item = browserItem;
+        break;
+      }
     }
+    if (m_item == nullptr)
+      throw std::runtime_error("Browser item not found");
 
     if (!m_cf) {
       m_browser->m_browser->setExpanded(m_item, false);
@@ -665,10 +666,11 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
 
     // If the parameter is fixed, re-fix to update the subproperty.
     if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
-      const auto subProps = prop->subProperties();
-      if (std::any_of(subProps.cbegin(), subProps.cend(),
-                      [](const auto &subProp) { return subProp->propertyName() == "Fix"; })) {
-        fix(prop->propertyName());
+      foreach (const QtProperty *subProp, prop->subProperties()) {
+        if (subProp->propertyName() == "Fix") {
+          fix(prop->propertyName());
+          break;
+        }
       }
     }
 
@@ -1112,19 +1114,20 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
 bool PropertyHandler::isParameter(QtProperty *prop) { return m_parameters.contains(prop); }
 
 QtProperty *PropertyHandler::getParameterProperty(const QString &parName) const {
-  const auto it = std::find_if(m_parameters.cbegin(), m_parameters.cend(),
-                               [&parName](const auto &parProp) { return parProp->propertyName() == parName; });
-  if (it != m_parameters.cend()) {
-    return *it;
+  foreach (QtProperty *parProp, m_parameters) {
+    if (parProp->propertyName() == parName) {
+      return parProp;
+    }
   }
   return nullptr;
 }
 
 QtProperty *PropertyHandler::getParameterProperty(QtProperty *prop) const {
-  const auto it = std::find_if(m_parameters.cbegin(), m_parameters.cend(),
-                               [&prop](const auto &parProp) { return parProp->subProperties().contains(prop); });
-  if (it != m_parameters.cend()) {
-    return *it;
+  foreach (QtProperty *parProp, m_parameters) {
+    QList<QtProperty *> subs = parProp->subProperties();
+    if (subs.contains(prop)) {
+      return parProp;
+    }
   }
   return nullptr;
 }

@@ -52,9 +52,7 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
         result = (
             RangeStepType.LIN
             if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN]
-            else RangeStepType.LOG
-            if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG]
-            else RangeStepType.NOT_SET
+            else RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else RangeStepType.NOT_SET
         )
         return result
 

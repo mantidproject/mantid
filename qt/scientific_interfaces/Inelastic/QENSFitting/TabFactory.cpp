@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TabFactory.h"
 
-#include "ConvolutionDataPresenter.h"
+#include "ConvFitDataPresenter.h"
 #include "FitDataPresenter.h"
 #include "FitTab.h"
 #include "FitTabConstants.h"
+#include "FqFitDataPresenter.h"
+#include "FqFitModel.h"
 #include "FunctionBrowser/ConvFunctionTemplateModel.h"
 #include "FunctionBrowser/FqFunctionModel.h"
 #include "FunctionBrowser/IqtFunctionTemplateModel.h"
@@ -18,10 +20,8 @@
 #include "FunctionBrowser/MultiFunctionTemplateView.h"
 #include "FunctionBrowser/SingleFunctionTemplatePresenter.h"
 #include "FunctionBrowser/SingleFunctionTemplateView.h"
-#include "FunctionQDataPresenter.h"
-#include "FunctionQModel.h"
 #include "IqtFitModel.h"
-#include "MSDModel.h"
+#include "MSDFitModel.h"
 
 namespace {
 using namespace MantidQt::CustomInterfaces::Inelastic;
@@ -38,11 +38,11 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 TabFactory::TabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
-FitTab *TabFactory::makeMSDTab(int const index) const {
-  auto tab = new FitTab(m_tabWidget->widget(index), MSD::TAB_NAME);
+FitTab *TabFactory::makeMSDFitTab(int const index) const {
+  auto tab = new FitTab(m_tabWidget->widget(index), MSDFit::TAB_NAME);
+  tab->setupFittingModel<MSDFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, MSDFunctionModel>(
-      MSD::HIDDEN_PROPS);
-  tab->setupFittingPresenter<MSDModel>();
+      MSDFit::HIDDEN_PROPS);
   tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter();
   tab->setUpFitDataPresenter<FitDataPresenter>();
@@ -50,12 +50,12 @@ FitTab *TabFactory::makeMSDTab(int const index) const {
   return tab;
 }
 
-FitTab *TabFactory::makeIqtTab(int const index) const {
+FitTab *TabFactory::makeIqtFitTab(int const index) const {
   auto tab = new FitTab(m_tabWidget->widget(index), IqtFit::TAB_NAME);
+  tab->setupFittingModel<IqtFitModel>();
   auto browserCustomizations = packBrowserCustomizations(IqtFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, IqtFunctionTemplateModel>(
       IqtFit::HIDDEN_PROPS, false, std::move(browserCustomizations));
-  tab->setupFittingPresenter<IqtFitModel>();
   tab->setupFitDataView<FitDataView>();
   tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<FitDataPresenter>();
@@ -63,28 +63,29 @@ FitTab *TabFactory::makeIqtTab(int const index) const {
   return tab;
 }
 
-FitTab *TabFactory::makeConvolutionTab(int const index) const {
-  auto tab = new FitTab(m_tabWidget->widget(index), Convolution::TAB_NAME);
-  auto browserCustomizations = packBrowserCustomizations(Convolution::templateSubTypes());
+FitTab *TabFactory::makeConvFitTab(int const index) const {
+  auto tab = new FitTab(m_tabWidget->widget(index), ConvFit::TAB_NAME);
+  tab->setupFittingModel<ConvFitModel>();
+  auto browserCustomizations = packBrowserCustomizations(ConvFit::templateSubTypes());
   tab->setupFitPropertyBrowser<MultiFunctionTemplateView, MultiFunctionTemplatePresenter, ConvFunctionTemplateModel>(
-      Convolution::HIDDEN_PROPS, true, std::move(browserCustomizations));
-  tab->setupFittingPresenter<ConvolutionModel>();
-  tab->setupFitDataView<ConvolutionDataView>();
+      ConvFit::HIDDEN_PROPS, true, std::move(browserCustomizations));
+  tab->setupFitDataView<ConvFitDataView>();
   tab->setupOutputOptionsPresenter(true);
-  tab->setUpFitDataPresenter<ConvolutionDataPresenter>();
+  tab->setUpFitDataPresenter<ConvFitDataPresenter>();
   tab->setupPlotView();
   return tab;
 }
 
-FitTab *TabFactory::makeFunctionQTab(int const index) const {
-  auto tab = new FitTab(m_tabWidget->widget(index), FunctionQ::TAB_NAME);
+FitTab *TabFactory::makeFqFitTab(int const index) const {
+  auto tab = new FitTab(m_tabWidget->widget(index), FqFit::TAB_NAME);
+  tab->setupFittingModel<FqFitModel>();
   tab->setupFitPropertyBrowser<SingleFunctionTemplateView, SingleFunctionTemplatePresenter, FqFunctionModel>(
-      FunctionQ::HIDDEN_PROPS);
-  tab->setupFittingPresenter<FunctionQModel>();
-  tab->setupFitDataView<FunctionQDataView>();
+      FqFit::HIDDEN_PROPS);
+  tab->setupFitDataView<FqFitDataView>();
   tab->setupOutputOptionsPresenter();
-  tab->setUpFitDataPresenter<FunctionQDataPresenter>();
-  tab->setupPlotView(FunctionQ::X_BOUNDS);
+  tab->setUpFitDataPresenter<FqFitDataPresenter>();
+  tab->subscribeFitBrowserToDataPresenter();
+  tab->setupPlotView(FqFit::X_BOUNDS);
   return tab;
 }
 

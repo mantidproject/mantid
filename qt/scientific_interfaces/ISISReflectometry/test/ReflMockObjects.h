@@ -28,7 +28,7 @@
 #include "GUI/Runs/ISearchModel.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchCriteria.h"
-#include "GUI/Save/IFileSaver.h"
+#include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
@@ -329,12 +329,12 @@ public:
 };
 
 /**** Saver ****/
-class MockFileSaver : public IFileSaver {
+class MockAsciiSaver : public IAsciiSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
   MOCK_CONST_METHOD4(save, void(std::string const &, std::vector<std::string> const &, std::vector<std::string> const &,
                                 FileFormatOptions const &));
-  virtual ~MockFileSaver() = default;
+  virtual ~MockAsciiSaver() = default;
 };
 
 /**** Job runner ****/

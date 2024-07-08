@@ -60,6 +60,17 @@ std::vector<std::string> getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &
     return getAxisLabels(axis);
   return std::vector<std::string>();
 }
+
+std::unordered_map<size_t, std::unordered_map<std::string, ParameterValue>>
+extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
+  auto rowCount = tableWs->rowCount();
+  TableRowExtractor extractRowFromTable(std::move(tableWs));
+  std::unordered_map<size_t, std::unordered_map<std::string, ParameterValue>> parameterMap;
+  for (size_t rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
+    parameterMap.emplace(rowIndex, extractRowFromTable(rowIndex));
+  }
+  return parameterMap;
+}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::Inelastic {
@@ -80,11 +91,11 @@ std::unordered_map<std::string, ParameterValue> FitOutput::getParameters(FitDoma
   }
 }
 
-std::optional<ResultLocationNew> FitOutput::getResultLocation(FitDomainIndex index) const {
+boost::optional<ResultLocationNew> FitOutput::getResultLocation(FitDomainIndex index) const {
   if (m_outputResultLocations.count(index.value) == 1) {
     return m_outputResultLocations.at(index.value);
   }
-  return std::nullopt;
+  return boost::none;
 }
 
 std::vector<std::string> FitOutput::getResultParameterNames() const {
@@ -107,20 +118,25 @@ void FitOutput::clear() {
 
 void FitOutput::addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                           Mantid::API::ITableWorkspace_sptr parameterTable,
-                          const Mantid::API::WorkspaceGroup_sptr &resultWorkspace, FitDomainIndex fitDomainIndex) {
-  TableRowExtractor extractRowFromTable(std::move(parameterTable));
+                          const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) {
+  m_parameters = extractParametersFromTable(parameterTable);
   m_resultGroup = resultGroup;
   m_resultWorkspace = resultWorkspace;
-  if (resultGroup->size() == 1u) {
-    m_parameters.insert_or_assign(fitDomainIndex.value, extractRowFromTable(0));
-    m_outputResultLocations.insert_or_assign(fitDomainIndex.value, ResultLocationNew(resultGroup, WorkspaceID{0}));
-    return;
-  }
-
+  m_outputResultLocations.clear();
   for (size_t index = 0; index < resultGroup->size(); index++) {
-    m_parameters.insert_or_assign(index, extractRowFromTable(index));
-    m_outputResultLocations.insert_or_assign(index, ResultLocationNew(resultGroup, WorkspaceID{index}));
+    m_outputResultLocations.emplace(index, ResultLocationNew(resultGroup, WorkspaceID{static_cast<size_t>(index)}));
   }
+}
+
+void FitOutput::addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                                Mantid::API::ITableWorkspace_sptr parameterTable,
+                                const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+                                FitDomainIndex fitDomainIndex) {
+  TableRowExtractor extractRowFromTable(std::move(parameterTable));
+  m_parameters.insert_or_assign(fitDomainIndex.value, extractRowFromTable(0));
+  m_outputResultLocations.insert_or_assign(fitDomainIndex.value, ResultLocationNew(resultGroup, WorkspaceID{0}));
+  m_resultWorkspace = resultWorkspace;
+  m_resultGroup = resultGroup;
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

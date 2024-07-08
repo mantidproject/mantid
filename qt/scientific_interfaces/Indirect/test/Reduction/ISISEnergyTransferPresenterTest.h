@@ -16,7 +16,6 @@
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -34,7 +33,6 @@ public:
 
   void setUp() override {
     auto model = std::make_unique<NiceMock<MockIETModel>>();
-    auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
 
     m_outputOptionsView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
     m_instrumentConfig = std::make_unique<NiceMock<MockInstrumentConfig>>();
@@ -43,12 +41,10 @@ public:
     ON_CALL(*m_view, getPlotOptionsView()).WillByDefault(Return(m_outputOptionsView.get()));
 
     m_model = model.get();
-    m_algorithmRunner = algorithmRunner.get();
     m_idrUI = std::make_unique<NiceMock<MockDataReduction>>();
     ON_CALL(*m_idrUI, getInstrumentConfiguration()).WillByDefault(Return(m_instrumentConfig.get()));
 
-    m_presenter =
-        std::make_unique<IETPresenter>(m_idrUI.get(), m_view.get(), std::move(model), std::move(algorithmRunner));
+    m_presenter = std::make_unique<IETPresenter>(m_idrUI.get(), m_view.get(), std::move(model));
   }
 
   void tearDown() override {
@@ -56,7 +52,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_instrumentConfig));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_algorithmRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_idrUI));
 
     m_presenter.reset();
@@ -121,7 +116,6 @@ private:
 
   std::unique_ptr<NiceMock<MockIETView>> m_view;
   NiceMock<MockIETModel> *m_model;
-  NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockDataReduction>> m_idrUI;
 
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputOptionsView;

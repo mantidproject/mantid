@@ -81,23 +81,23 @@ template <typename T> std::vector<T> createIndicesVector(std::string const &indi
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-std::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames, std::vector<int> const &indices,
-                                            bool errorBars, bool overplot = false,
-                                            std::optional<QHash<QString, QVariant>> kwargs = std::nullopt,
-                                            std::optional<Python::Object> figure = std::nullopt) {
+boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames, std::vector<int> const &indices,
+                                              bool errorBars, bool overplot = false,
+                                              boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
+                                              boost::optional<Python::Object> figure = boost::none) {
   QHash<QString, QVariant> plotKwargs;
   if (kwargs)
-    plotKwargs = *kwargs;
+    plotKwargs = kwargs.get();
   if (errorBars)
     plotKwargs["capsize"] = ERROR_CAPSIZE;
 
   using MantidQt::Widgets::MplCpp::plot;
   try {
-    return plot(workspaceNames, std::nullopt, indices, std::move(figure), plotKwargs, std::nullopt, std::nullopt,
+    return plot(workspaceNames, boost::none, indices, std::move(figure), plotKwargs, boost::none, boost::none,
                 errorBars, overplot);
   } catch (PythonException const &ex) {
     g_log.error() << ex.what();
-    return std::nullopt;
+    return boost::none;
   }
 }
 
@@ -105,12 +105,16 @@ std::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames, s
 
 namespace MantidQt::Widgets::MplCpp {
 
+ExternalPlotter::ExternalPlotter() = default;
+
+ExternalPlotter::~ExternalPlotter() = default;
+
 /**
  * Calls plotSpectra with no kwargs
  */
 void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
                                   bool errorBars) {
-  return plotSpectra(workspaceName, workspaceIndices, errorBars, std::nullopt);
+  return plotSpectra(workspaceName, workspaceIndices, errorBars, boost::none);
 }
 
 /**
@@ -123,7 +127,7 @@ void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param kwargs The kwargs to be used when plotting the workspace
  */
 void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                                  std::optional<QHash<QString, QVariant>> const &kwargs) {
+                                  boost::optional<QHash<QString, QVariant>> const &kwargs) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
                   errorBars, false, kwargs);
@@ -138,7 +142,7 @@ void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
                                                std::vector<bool> const &errorBars) {
   return plotCorrespondingSpectra(
       workspaceNames, workspaceIndices, errorBars,
-      std::vector<std::optional<QHash<QString, QVariant>>>(workspaceNames.size(), std::nullopt));
+      std::vector<boost::optional<QHash<QString, QVariant>>>(workspaceNames.size(), boost::none));
 }
 
 /**
@@ -153,7 +157,7 @@ void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
 void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
                                                std::vector<int> const &workspaceIndices,
                                                std::vector<bool> const &errorBars,
-                                               std::vector<std::optional<QHash<QString, QVariant>>> const &kwargs) {
+                                               std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs) {
   if (workspaceNames.empty() || workspaceIndices.empty() || errorBars.empty() || kwargs.empty())
     return;
   auto const numberOfPlots = workspaceNames.size();
@@ -165,7 +169,7 @@ void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
     if (figure)
       figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])), {workspaceIndices[i]},
-                             errorBars[i], true, kwargs[i], *figure);
+                             errorBars[i], true, kwargs[i], figure.get());
   }
 }
 
@@ -230,8 +234,8 @@ void ExternalPlotter::plotTiled(std::string const &workspaceName, std::string co
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
       plotKwargs["capsize"] = ERROR_CAPSIZE;
-    plot(QStringList(QString::fromStdString(workspaceName)), std::nullopt, createIndicesVector<int>(workspaceIndices),
-         std::nullopt, plotKwargs, std::nullopt, "Tiled Plot: " + workspaceName, errorBars, false, true);
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none, createIndicesVector<int>(workspaceIndices),
+         boost::none, plotKwargs, boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
   }
 }
 
@@ -245,8 +249,8 @@ void ExternalPlotter::plotTiled(std::string const &workspaceName, std::string co
  * @param axisType The axis to validate (i.e. Spectrum or Bin)
  * @return True if the data is valid
  */
-bool ExternalPlotter::validate(std::string const &workspaceName, std::optional<std::string> const &workspaceIndices,
-                               std::optional<MantidAxis> const &axisType) const {
+bool ExternalPlotter::validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices,
+                               boost::optional<MantidAxis> const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
@@ -264,12 +268,12 @@ bool ExternalPlotter::validate(std::string const &workspaceName, std::optional<s
  * @return True if the data is valid
  */
 bool ExternalPlotter::validate(const MatrixWorkspace_const_sptr &workspace,
-                               std::optional<std::string> const &workspaceIndices,
-                               std::optional<MantidAxis> const &axisType) const {
-  if (workspaceIndices && axisType && *axisType == MantidAxis::Spectrum)
-    return validateSpectra(workspace, *workspaceIndices);
-  else if (workspaceIndices && axisType && *axisType == MantidAxis::Bin)
-    return validateBins(workspace, *workspaceIndices);
+                               boost::optional<std::string> const &workspaceIndices,
+                               boost::optional<MantidAxis> const &axisType) const {
+  if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
+    return validateSpectra(workspace, workspaceIndices.get());
+  else if (workspaceIndices && axisType && axisType.get() == MantidAxis::Bin)
+    return validateBins(workspace, workspaceIndices.get());
   return true;
 }
 

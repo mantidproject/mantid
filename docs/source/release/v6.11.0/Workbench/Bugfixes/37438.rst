@@ -1,1 +1,0 @@
-- Fixed key shortcuts `k` and `l` in mantid plot for quickly switching between `linear` and `log` scales.

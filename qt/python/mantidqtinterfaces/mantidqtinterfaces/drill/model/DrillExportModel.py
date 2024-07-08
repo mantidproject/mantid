@@ -18,7 +18,6 @@ import os
 
 
 class DrillExportModel:
-
     """
     Dictionary containing algorithm (name, extension) tuples and activation
     state.
