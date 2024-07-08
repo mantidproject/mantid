@@ -3,6 +3,8 @@
 
 .. summary::
 
+.. relatedalgorithms::
+
 .. properties::
 
 Description
