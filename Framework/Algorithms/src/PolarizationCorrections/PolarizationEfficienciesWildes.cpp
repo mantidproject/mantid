@@ -213,8 +213,27 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 }
 
 void PolarizationEfficienciesWildes::exec() {
+  calculateFlipperEfficienciesAndPhi();
+
+  const bool solveForP = !isDefault(PropNames::OUTPUT_P_EFF_WS);
+  const bool solveForA = !isDefault(PropNames::OUTPUT_A_EFF_WS);
+  if (solveForP || solveForA) {
+    calculatePolarizerAndAnalyserEfficiencies(solveForP, solveForA);
+  }
+
+  setOutputs();
+}
+
+namespace {
+void setUnitAndDistributionToMatch(const MatrixWorkspace_sptr &wsToUpdate, const MatrixWorkspace_sptr &matchWs) {
+  wsToUpdate->setYUnit(matchWs->YUnit());
+  wsToUpdate->setDistribution(matchWs->isDistribution());
+}
+} // unnamed namespace
+
+void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   // Calculate the polarizing and analysing flipper efficiencies
-  const WorkspaceGroup_sptr &nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
+  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
   const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
   const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ZERO_ZERO);
   const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ZERO_ONE);
@@ -223,53 +242,17 @@ void PolarizationEfficienciesWildes::exec() {
 
   const auto numerator = ws00 - ws01 - ws10 + ws11;
 
-  const auto wsFp = numerator / (2 * (ws00 - ws01));
-  const auto wsFa = numerator / (2 * (ws00 - ws10));
+  const auto ws00Minus01 = ws00 - ws01;
+  const auto ws00Minus10 = ws00 - ws10;
 
-  const auto wsPhi = calculatePhi(ws00, ws01, ws10, ws11);
+  m_wsFp = numerator / (2 * ws00Minus01);
+  m_wsFa = numerator / (2 * ws00Minus10);
 
-  MatrixWorkspace_sptr wsP = nullptr;
-  MatrixWorkspace_sptr wsA = nullptr;
-  const bool solveForP = !isDefault(PropNames::OUTPUT_P_EFF_WS);
-  const bool solveForA = !isDefault(PropNames::OUTPUT_A_EFF_WS);
-  if (solveForP || solveForA) {
-    calculatePolarizerAndAnalyserEfficiencies(wsFp, wsFa, wsPhi, solveForP, wsP, solveForA, wsA);
-  }
-  setOutputs(wsPhi, wsFp, wsFa, wsP, wsA);
+  // Calculate phi
+  m_wsPhi = (ws00Minus01 * ws00Minus10) / ((ws00 * ws11) - (ws01 * ws10));
 }
 
-namespace {
-/// Solve for the unknown efficiency from either (2p-1) or (2a-1)
-MatrixWorkspace_sptr solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsPhi,
-                                                    const MatrixWorkspace_sptr &wsTXMO) {
-  return (wsPhi / (2 * wsTXMO)) + 0.5;
-}
-
-void setUnitAndDistributionToMatch(const MatrixWorkspace_sptr &wsToUpdate, const MatrixWorkspace_sptr &matchWs) {
-  wsToUpdate->setYUnit(matchWs->YUnit());
-  wsToUpdate->setDistribution(matchWs->isDistribution());
-}
-} // unnamed namespace
-
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculatePhi(const MatrixWorkspace_sptr &ws00,
-                                                                  const MatrixWorkspace_sptr &ws01,
-                                                                  const MatrixWorkspace_sptr &ws10,
-                                                                  const MatrixWorkspace_sptr &ws11) {
-  return ((ws00 - ws01) * (ws00 - ws10)) / ((ws00 * ws11) - (ws01 * ws10));
-}
-
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateRho(const MatrixWorkspace_sptr &wsFp) {
-  return (2 * wsFp) - 1;
-}
-
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateAlpha(const MatrixWorkspace_sptr &wsFa) {
-  return (2 * wsFa) - 1;
-}
-
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp,
-                                                                          const MatrixWorkspace_sptr &wsFp,
-                                                                          const MatrixWorkspace_sptr &wsFa,
-                                                                          const MatrixWorkspace_sptr &wsPhi) {
+MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp) {
   const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
   const auto &ws00 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ZERO_ZERO);
   const auto &ws01 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ZERO_ONE);
@@ -279,8 +262,8 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const 
   // We use the flipper efficiency to multiply the mag ws counts, but the resulting workspace will have lost the Y unit
   // and distribution information. We need to put these back otherwise the rest of the calculation fails when it tries
   // to add and subtract workspaces with different Y units.
-  const auto twoFp = 2 * wsFp;
-  const auto twoFa = 2 * wsFa;
+  const auto twoFp = 2 * m_wsFp;
+  const auto twoFa = 2 * m_wsFa;
 
   const auto twoFa00 = (1 - twoFa) * ws00;
   setUnitAndDistributionToMatch(twoFa00, ws00);
@@ -296,7 +279,7 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const 
 
   const auto numerator = twoFa00 + twoFa10 - ws01 + ws11;
   const auto denominator = twoFp00 + twoFp01 - ws10 + ws11;
-  const auto tpmoSquared = wsPhi * (numerator / denominator);
+  const auto tpmoSquared = m_wsPhi * (numerator / denominator);
 
   auto alg = createChildAlgorithm("Power");
   alg->initialize();
@@ -307,81 +290,82 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const 
   return alg->getProperty("OutputWorkspace");
 }
 
-void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(
-    const MatrixWorkspace_sptr &wsFp, const MatrixWorkspace_sptr &wsFa, const MatrixWorkspace_sptr &wsPhi,
-    const bool solveForP, MatrixWorkspace_sptr &wsP, const bool solveForA, MatrixWorkspace_sptr &wsA) {
-  const WorkspaceGroup_sptr &magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
+void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(const bool solveForP,
+                                                                               const bool solveForA) {
+  const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
 
   if (magWsGrp != nullptr) {
-    const MatrixWorkspace_sptr wsTPMO = calculateTPMOFromPhi(magWsGrp, wsFp, wsFa, wsPhi);
+    const MatrixWorkspace_sptr wsTPMO = calculateTPMOFromPhi(magWsGrp);
 
     if (solveForP) {
-      wsP = (wsTPMO + 1) / 2;
+      m_wsP = (wsTPMO + 1) / 2;
     }
 
     if (solveForA) {
-      wsA = solveUnknownEfficiencyFromTXMO(wsPhi, wsTPMO);
+      m_wsA = solveUnknownEfficiencyFromTXMO(wsTPMO);
     }
 
     return;
   }
 
   if (solveForP) {
-    if (const MatrixWorkspace_sptr &inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
-      wsP = inWsP->clone();
+    if (const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
+      m_wsP = inWsP->clone();
     } else {
-      const MatrixWorkspace_sptr &inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
-      wsP = solveForUnknownEfficiency(wsPhi, inWsA);
+      const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
+      m_wsP = solveForUnknownEfficiency(inWsA);
     }
   }
 
   if (solveForA) {
-    if (const MatrixWorkspace_sptr &inWsA = getProperty(PropNames::INPUT_A_EFF_WS)) {
-      wsA = inWsA->clone();
+    if (const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS)) {
+      m_wsA = inWsA->clone();
     } else {
-      const MatrixWorkspace_sptr &inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
-      wsA = solveForUnknownEfficiency(wsPhi, inWsP);
+      const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
+      m_wsA = solveForUnknownEfficiency(inWsP);
     }
   }
 }
 
 MatrixWorkspace_sptr
-PolarizationEfficienciesWildes::solveForUnknownEfficiency(const MatrixWorkspace_sptr &wsPhi,
-                                                          const MatrixWorkspace_sptr &knownEfficiency) {
+PolarizationEfficienciesWildes::solveForUnknownEfficiency(const MatrixWorkspace_sptr &knownEfficiency) {
   const auto wsTXMO = (2 * knownEfficiency) - 1;
-  return solveUnknownEfficiencyFromTXMO(wsPhi, wsTXMO);
+  return solveUnknownEfficiencyFromTXMO(wsTXMO);
 }
 
-void PolarizationEfficienciesWildes::setOutputs(const MatrixWorkspace_sptr &wsPhi, const MatrixWorkspace_sptr &wsFp,
-                                                const MatrixWorkspace_sptr &wsFa, const MatrixWorkspace_sptr &wsP,
-                                                const MatrixWorkspace_sptr &wsA) {
-  setProperty(PropNames::OUTPUT_F_P_EFF_WS, wsFp);
-  setProperty(PropNames::OUTPUT_F_A_EFF_WS, wsFa);
+MatrixWorkspace_sptr
+PolarizationEfficienciesWildes::solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsTXMO) {
+  return (m_wsPhi / (2 * wsTXMO)) + 0.5;
+}
 
-  if (wsP != nullptr) {
-    setProperty(PropNames::OUTPUT_P_EFF_WS, wsP);
+void PolarizationEfficienciesWildes::setOutputs() {
+  setProperty(PropNames::OUTPUT_F_P_EFF_WS, m_wsFp);
+  setProperty(PropNames::OUTPUT_F_A_EFF_WS, m_wsFa);
+
+  if (m_wsP != nullptr) {
+    setProperty(PropNames::OUTPUT_P_EFF_WS, m_wsP);
   }
 
-  if (wsA != nullptr) {
-    setProperty(PropNames::OUTPUT_A_EFF_WS, wsA);
+  if (m_wsA != nullptr) {
+    setProperty(PropNames::OUTPUT_A_EFF_WS, m_wsA);
   }
 
   if (getProperty(PropNames::INCLUDE_DIAGNOSTICS)) {
-    setProperty(PropNames::OUTPUT_PHI_WS, wsPhi);
+    setProperty(PropNames::OUTPUT_PHI_WS, m_wsPhi);
 
-    const auto wsRho = calculateRho(wsFp);
+    const auto wsRho = (2 * m_wsFp) - 1;
     setProperty(PropNames::OUTPUT_RHO_WS, wsRho);
 
-    const auto wsAlpha = calculateAlpha(wsFa);
+    const auto wsAlpha = (2 * m_wsFa) - 1;
     setProperty(PropNames::OUTPUT_ALPHA_WS, wsAlpha);
 
-    if (wsP != nullptr) {
-      const auto wsTPMO = (2 * wsP) - 1;
+    if (m_wsP != nullptr) {
+      const auto wsTPMO = (2 * m_wsP) - 1;
       setProperty(PropNames::OUTPUT_TPMO_WS, wsTPMO);
     }
 
-    if (wsA != nullptr) {
-      const auto wsTAMO = (2 * wsA) - 1;
+    if (m_wsA != nullptr) {
+      const auto wsTAMO = (2 * m_wsA) - 1;
       setProperty(PropNames::OUTPUT_TAMO_WS, wsTAMO);
     }
   }

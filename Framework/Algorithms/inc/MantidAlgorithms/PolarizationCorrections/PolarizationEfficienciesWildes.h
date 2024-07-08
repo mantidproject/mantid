@@ -39,33 +39,29 @@ private:
   /// Check that the inputs to the algorithm are valid.
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Calculate the value of Phi using the non-magnetic workspace intensities
-  MatrixWorkspace_sptr calculatePhi(const MatrixWorkspace_sptr &ws00, const MatrixWorkspace_sptr &ws01,
-                                    const MatrixWorkspace_sptr &ws10, const MatrixWorkspace_sptr &ws11);
-
-  /// Calculate the value of Rho from the polarizing flipper efficiency (Fp)
-  MatrixWorkspace_sptr calculateRho(const MatrixWorkspace_sptr &wsFp);
-
-  /// Calculate the value of Alpha from the analysing flipper efficiency (Fa)
-  MatrixWorkspace_sptr calculateAlpha(const MatrixWorkspace_sptr &wsFa);
+  /// Calculate Fp, Fa and Phi
+  void calculateFlipperEfficienciesAndPhi();
 
   /// Calculate (2p-1) from Phi, Fp, Fa and the magnetic workspace intensities
-  MatrixWorkspace_sptr calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp, const MatrixWorkspace_sptr &wsFp,
-                                            const MatrixWorkspace_sptr &wsFa, const MatrixWorkspace_sptr &wsPhi);
+  MatrixWorkspace_sptr calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp);
 
   /// Calculate the polarizer and/or analyser efficiencies, as requested
-  void calculatePolarizerAndAnalyserEfficiencies(const MatrixWorkspace_sptr &wsFp, const MatrixWorkspace_sptr &wsFa,
-                                                 const MatrixWorkspace_sptr &wsPhi, const bool solveForP,
-                                                 MatrixWorkspace_sptr &wsP, const bool solveForA,
-                                                 MatrixWorkspace_sptr &wsA);
+  void calculatePolarizerAndAnalyserEfficiencies(const bool solveForP, const bool solveForA);
 
   /// If either the polarizer or the analyser efficiency is known, use the relationship Phi = (2p-1)(2a-1) to solve for
   /// the other efficiency
-  MatrixWorkspace_sptr solveForUnknownEfficiency(const MatrixWorkspace_sptr &wsPhi,
-                                                 const MatrixWorkspace_sptr &knownEfficiency);
+  MatrixWorkspace_sptr solveForUnknownEfficiency(const MatrixWorkspace_sptr &knownEfficiency);
+
+  /// Solve for the unknown efficiency from either (2p-1) or (2a-1) using the relationship Phi = (2p-1)(2a-1)
+  MatrixWorkspace_sptr solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsTXMO);
 
   ///  Set the algorithm outputs
-  void setOutputs(const MatrixWorkspace_sptr &wsPhi, const MatrixWorkspace_sptr &wsFp, const MatrixWorkspace_sptr &wsFa,
-                  const MatrixWorkspace_sptr &wsP, const MatrixWorkspace_sptr &wsA);
+  void setOutputs();
+
+  MatrixWorkspace_sptr m_wsFp = nullptr;
+  MatrixWorkspace_sptr m_wsFa = nullptr;
+  MatrixWorkspace_sptr m_wsPhi = nullptr;
+  MatrixWorkspace_sptr m_wsP = nullptr;
+  MatrixWorkspace_sptr m_wsA = nullptr;
 };
 } // namespace Mantid::Algorithms
