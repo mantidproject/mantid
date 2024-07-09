@@ -492,16 +492,7 @@ class LoadCIF(PythonAlgorithm):
         raise RuntimeError(f"Could not find any UB Matrix keys. Missing one of the following: " f"{UBMatrixBuilder.ub_matrix_keys}")
 
     def _getFileUrl(self):
-        # ReadCif requires a URL, windows path specs seem to confuse urllib,
-        # so the pathname is converted to a URL before passing it to ReadCif.
-        # pylint: disable=no-name-in-module
-        try:
-            from urllib import pathname2url
-        except ImportError:
-            from urllib.request import pathname2url
-
-        cifFileName = self.getProperty("InputFile").value
-        return pathname2url(cifFileName)
+        return self.getProperty("InputFile").value
 
     def _setCrystalStructureFromCifFile(self, workspace, cif_data):
         crystalStructure = self._getCrystalStructureFromCifFile(cif_data)

@@ -26,7 +26,7 @@ dependencies:
   - pip>=21.0.1
   - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
   - psutil>=5.8.0
-  - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
+  - pycifrw
   - pyqt>=5.15,<6
   - python-dateutil>=2.8.1
   - python=3.10.*
@@ -38,7 +38,7 @@ dependencies:
   - qtpy>=1.9.0
   - quasielasticbayes
   - requests>=2.25.1
-  - scipy>=1.10.0,<1.14
+  - scipy>=1.10.0
   - setuptools
   - sphinx>=4.5.*
   - sphinx_bootstrap_theme>=0.8.1
@@ -51,7 +51,7 @@ dependencies:
 
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.13.1
+  - cppcheck==2.14.2
   - pre-commit>=2.12.0
   - libcxx<17
 
