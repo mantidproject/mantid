@@ -103,6 +103,22 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
   validateInputWorkspace(analyserWs, PropertyNames::ANALYSER_EFFICIENCY, errorList);
 
+  const auto &spinConfigurationInput = getPropertyValue(PropertyNames::SPIN_STATES);
+  const auto &spinStateCount = PolarizationCorrectionsHelpers::splitSpinStateString(spinConfigurationInput).size();
+  if (spinStateCount != inputWsCount) {
+    errorList[PropertyNames::SPIN_STATES] =
+        "The number of workspaces in the input WorkspaceGroup ( " + std::to_string(inputWsCount) +
+        ") does not match the number of spin states provided (" + std::to_string(spinStateCount) + ").";
+  }
+  const auto &t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(inputWorkspace, spinConfigurationInput,
+                                                                            SpinStateValidator::ZERO_ONE);
+  const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(inputWorkspace, spinConfigurationInput,
+                                                                            SpinStateValidator::ZERO_ZERO);
+  if (t01Ws == nullptr || t00Ws == nullptr) {
+    errorList[PropertyNames::SPIN_STATES] = "The required spin configurations (00, 01) could not be found in the given"
+                                            "SpinStates.";
+  }
+
   // Check outputs.
   auto const &outputWs = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
   auto const &outputFile = getPropertyValue(PropertyNames::OUTPUT_FILE_PATH);

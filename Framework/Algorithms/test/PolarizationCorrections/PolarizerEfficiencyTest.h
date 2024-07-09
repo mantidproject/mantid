@@ -86,6 +86,18 @@ public:
     auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
 
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    polariserEfficiency->setProperty("SpinStates", "00, 01");
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+  }
+
+  void testFailsWithNonMatchingGroupSizeAndNumberOfSpinStates() {
+    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
+    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
+
+    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
+
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
+    polariserEfficiency->setProperty("SpinStates", "00, 01, 10");
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
