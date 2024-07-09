@@ -178,9 +178,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                             * fit_result.OutputParameters.cell(3, 2)
                         )
                         # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
-                        integrated_intensity_error = np.sqrt(
-                            2 * np.pi * (A**2 * errs**2 + sigma**2 * errA**2 + 2 * A * sigma * cor_As)
-                        )
+                        integrated_intensity_error = np.sqrt(2 * np.pi * (A**2 * errs**2 + sigma**2 * errA**2 + 2 * A * sigma * cor_As))
 
                     elif method == "CountsWithFitting":
                         y = y[

@@ -27,7 +27,6 @@ IDENTITY_TRANSFORM = IdentityTransform()
 
 
 class ModestImage(MantidImage):
-
     """
     Computationally modest image class.
 

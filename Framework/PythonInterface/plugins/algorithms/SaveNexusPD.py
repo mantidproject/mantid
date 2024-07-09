@@ -192,7 +192,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         x_id = xUnit.unitID()
 
         result = [None, None, None]
-        for (i, target) in enumerate(["TOF", "dSpacing", "MomentumTransfer"]):
+        for i, target in enumerate(["TOF", "dSpacing", "MomentumTransfer"]):
             if str(x_id) == target:
                 result[i] = wksp
             elif self._sourcePos is not None:
@@ -277,7 +277,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 self._writeY(nxdetector, tof, i)
 
                 # write out axes in the nxdetector
-                for (field, wkspIter) in zip(("tof", "dspacing", "Q"), (tof, dspacing, momentumtransfer)):
+                for field, wkspIter in zip(("tof", "dspacing", "Q"), (tof, dspacing, momentumtransfer)):
                     if field in xAxesToWrite:
                         self._writeX(nxdetector, field, wkspIter, i, writeDx)
 

@@ -36,6 +36,7 @@ InputWorkspaceTypes = Union[str, Workspace2D, EventWorkspace]
 
 class TableType(enum.Enum):
     r"""Allowed types of calibration-related tables to be saved and/or loaded"""
+
     CALIBRATION = "calibration"
     FIT = "fit"
     MASK = "mask"

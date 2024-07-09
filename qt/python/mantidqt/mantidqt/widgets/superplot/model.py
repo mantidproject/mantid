@@ -14,7 +14,6 @@ from .ads_observer import SuperplotAdsObserver
 
 
 class SuperplotModel(QObject):
-
     """
     Constant for bin mode.
     """

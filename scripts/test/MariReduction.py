@@ -23,7 +23,6 @@ class ReduceMARI(ReductionWrapper):
     # -------------------------------------------------------------------------------------------------#
     @MainProperties
     def def_main_properties(self):
-
         """Define main properties used in reduction"""
         prop = {}
         prop["sample_run"] = 11001

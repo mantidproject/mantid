@@ -13,9 +13,12 @@ Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA, by grouping
 py pixels along a tube and px tubes. py is 1, 2, 4, 8, 16, 32, 64, or
 128. px is 1, 2, 4, or 8.
 
+To select older instrument definition file, set instrument to "InstrumentDefinitionFile" and a input option will appear.
+
 .. Note ::
 
-    All parameters are strings. Using integers for AlongTubes or AcrossTubes will cause errors
+    All parameters are strings. Using integers for AlongTubes or AcrossTubes will cause errors.
+    Only instrument definition files from ARCS, SEQUOIA, CNCS, HYSPEC are supported.
 
 Usage
 -----

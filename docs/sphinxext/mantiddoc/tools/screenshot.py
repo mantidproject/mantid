@@ -7,6 +7,7 @@
     :copyright: Copyright 2020
         ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
+
 from functools import wraps
 import os
 from mantidqt.interfacemanager import InterfaceManager

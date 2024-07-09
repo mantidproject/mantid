@@ -22,7 +22,8 @@ from tube_calib import getCalibration, getCalibratedPixelPositions, getPoints
 # buried directly in the string
 CALIBRATE_SIGNATURE = "ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak]"  # noqa
 
-__doc__ = _MODULE_DOC = """
+__doc__ = _MODULE_DOC = (
+    """
 =========================
 Definition of Calibration
 =========================
@@ -72,7 +73,8 @@ Other Useful Methods
 .. autofunction:: tube.readCalibrationFile
 
 """.format(
-    CALIBRATE_SIGNATURE
+        CALIBRATE_SIGNATURE
+    )
 )
 
 

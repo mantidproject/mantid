@@ -225,9 +225,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if not self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).isDefault:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
             if len(manual_scale_factors) != dimensionality - 1:
-                issues[
-                    PropertyNames.MANUAL_SCALE_FACTORS
-                ] = "Provide N-1 manual scale factors, where N is the number of different angle configurations"
+                issues[PropertyNames.MANUAL_SCALE_FACTORS] = (
+                    "Provide N-1 manual scale factors, where N is the number of different angle configurations"
+                )
         angle_options = self.getProperty(PropertyNames.ANGLE_OPTION).value
         for angle_option in angle_options:
             if angle_option not in [PropertyNames.DAN, PropertyNames.SAN, PropertyNames.UAN]:

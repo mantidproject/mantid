@@ -300,9 +300,9 @@ def qangle(
         ] = ErrorCodes.INSIDE_BEAMSTOP
 
     if goniometer_constraints:
-        error_code[
-            ((omega < goniometer_range[0]) | (omega > goniometer_range[1])) & (error_code == ErrorCodes.CORRECT)
-        ] = ErrorCodes.GONIOMETR
+        error_code[((omega < goniometer_range[0]) | (omega > goniometer_range[1])) & (error_code == ErrorCodes.CORRECT)] = (
+            ErrorCodes.GONIOMETR
+        )
 
     return dict(
         Q_lab_x=Q_lab_x,

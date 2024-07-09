@@ -55,6 +55,7 @@ set(TEST_PY_FILES
     FindSXPeaksConvolveTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateGroupingSNSInelasticTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     GroupBySampleChangerPositionTest.py

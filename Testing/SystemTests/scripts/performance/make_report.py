@@ -11,6 +11,7 @@ import os
 import subprocess
 import sqlite3
 
+
 # ====================================================================================
 def getSourceDir():
     """Returns the location of the source code."""

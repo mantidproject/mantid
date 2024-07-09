@@ -35,6 +35,7 @@ class MyOldAlg(PythonAlgorithm):
 
 class RedirectStdOut:
     r"""redirect logging messages to a file"""
+
     # Adapted from https://stackoverflow.com/a/45899925
 
     CONFIG_KEY = "logging.channels.consoleChannel.class"

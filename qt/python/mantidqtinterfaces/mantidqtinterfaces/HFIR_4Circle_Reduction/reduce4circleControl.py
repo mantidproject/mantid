@@ -1451,7 +1451,7 @@ class CWSCDReductionControl(object):
 
         # create list of output
         param_list = list()
-        for (exp_number, scan_number) in self._myPeakInfoDict.keys():
+        for exp_number, scan_number in self._myPeakInfoDict.keys():
             peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
 
             # x value

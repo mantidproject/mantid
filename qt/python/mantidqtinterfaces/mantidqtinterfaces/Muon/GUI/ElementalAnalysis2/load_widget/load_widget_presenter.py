@@ -11,7 +11,6 @@ SIMULTANEOUS = "Simultaneous"
 
 
 class LoadWidgetPresenterEA(object):
-
     """
     The load widget is responsible for combining data loaded from its two sub-widgets in a systematic way
     (either keeping a single workspace, or allowing multiple to be loaded at once).

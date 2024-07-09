@@ -7,7 +7,6 @@
 
 
 class DummyLabelPresenter(object):
-
     """ """
 
     def __init__(self, view, model):

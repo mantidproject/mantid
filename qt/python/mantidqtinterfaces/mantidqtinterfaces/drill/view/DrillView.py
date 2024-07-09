@@ -351,7 +351,7 @@ class DrillView(QMainWindow):
         Erase the contents of the selected cells.
         """
         indexes = self.table.getSelectedCells()
-        for (r, c) in indexes:
+        for r, c in indexes:
             self.table.eraseCell(r, c)
 
     def addRowAfter(self):

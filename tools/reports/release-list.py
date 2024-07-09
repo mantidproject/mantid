@@ -148,7 +148,7 @@ if __name__ == "__main__":
         if milestone not in releases:
             # see if they have a different date
             found = False
-            for (i, release) in enumerate(releases):
+            for i, release in enumerate(releases):
                 if release.name == milestone.name:
                     found = True
                     if milestone.date < release.date:

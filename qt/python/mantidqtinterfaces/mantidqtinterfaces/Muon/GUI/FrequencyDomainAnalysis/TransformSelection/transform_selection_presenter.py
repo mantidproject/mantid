@@ -7,7 +7,6 @@
 
 
 class TransformSelectionPresenter(object):
-
     """
     The widget for selecting the widget
     shown in the transformation tab

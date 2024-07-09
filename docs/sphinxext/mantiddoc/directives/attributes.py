@@ -8,7 +8,6 @@ from mantiddoc.directives.properties import PropertiesDirective
 
 
 class AttributesDirective(PropertiesDirective):
-
     """
     Outputs the given fit function's properties into a ReST formatted table.
     """

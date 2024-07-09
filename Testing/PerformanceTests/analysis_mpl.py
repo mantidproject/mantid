@@ -321,7 +321,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     last_commitid = ""
     row_class = ""
     table_rows = []
-    for (rev, variable, date, res) in sorted:
+    for rev, variable, date, res in sorted:
         table_row_html = ""
         if rev != last_rev:
             # Changed SVN revision. Swap row color
