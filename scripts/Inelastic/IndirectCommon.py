@@ -133,6 +133,12 @@ def getEfixed(workspace):
         if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
             return analyser_comp.getNumberParameter("EFixed")[0]
 
+    if efixed_log := try_get_sample_log(workspace, "EFixed"):
+        return float(efixed_log)
+    # For Direct data, we can use "Ei" in the sample logs as EFixed
+    if ei_log := try_get_sample_log(workspace, "Ei"):
+        return float(ei_log)
+
     raise ValueError("No Efixed parameter found")
 
 
@@ -312,9 +318,8 @@ def check_analysers_are_equal(in1WS, in2WS):
 
 
 def get_sample_log(workspace, log_name):
-    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False)
+    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
     log_value = table.cell(0, 0) if table else None
-    s_api.DeleteWorkspace(table, EnableLogging=False)
     return log_value
 
 

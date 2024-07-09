@@ -73,6 +73,20 @@ class IndirectCommonTests(unittest.TestCase):
         ws = CreateSampleWorkspace()
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
 
+    def test_getEFixed_with_no_instrument_but_efixed_sample_log(self):
+        ws = self.make_dummy_workspace_without_instrument("test_ws1")
+        AddSampleLog(ws, LogName="EFixed", LogType="Number", LogText="1.83")
+
+        e_fixed = indirect_common.getEfixed(ws)
+        self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
+
+    def test_getEFixed_with_no_instrument_but_ei_sample_log(self):
+        ws = self.make_dummy_workspace_without_instrument("test_ws1")
+        AddSampleLog(ws, LogName="Ei", LogType="Number", LogText="1.83")
+
+        e_fixed = indirect_common.getEfixed(ws)
+        self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
+
     def test_getDefaultWorkingDirectory(self):
         path = os.path.join(os.path.expanduser("~"), "")
         config["defaultsave.directory"] = path
