@@ -15,7 +15,7 @@ ordering of the workspaces in ``InputWorkspace`` is taken from the ``SpinStates`
 efficiency, :math:`\epsilon_{cell}`, is given by ``AnalyserEfficiency``.
 
 First the ``AnalyserEfficiency`` workspace is rebinned to match the binning of the input workspace that corresponds to the "00" spin state.
-Having done this, the polarization of the polarizer, :math:`P_{SM}`, is given by
+Having done this, the polarization of the polarizer, :math:`P_{SM}`, is given by [#KRYCKA]_
 
 .. math::
     P_{SM} = \frac{T_{00} - T_{01}}{2P_{cell}(T_{00} + T_{01})}
@@ -67,6 +67,13 @@ Output:
     :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     Polarizer efficiency at a wavelength of 4.0 Å is ...
+
+References
+----------
+
+.. [#KRYCKA] Polarization-analyzed small-angle neutron scattering. I. Polarized data reduction using Pol-Corr, Kathryn Krycka et al, *Journal of Applied Crystallography*, **45** (2012), 546-553
+          `doi: 10.1107/S0021889812003445 <https://doi.org/10.1107/S0021889812003445>`_
+
 
 .. categories::
 
