@@ -36,6 +36,24 @@ static const std::string OUTPUT_FILE_PATH = "OutputFilePath";
 
 namespace {
 static const std::string FILE_EXTENSION = ".nxs";
+
+void validateInputWorkspace(MatrixWorkspace_sptr const &ws, std::string const &propertyName,
+                            std::map<std::string, std::string> &errorList) {
+  if (ws == nullptr) {
+    errorList[propertyName] = "All input workspaces must be of type MatrixWorkspace.";
+    return;
+  }
+  if (ws->getNumberHistograms() != 1) {
+    errorList[propertyName] = "All input workspaces must contain a single histogram.";
+  }
+  if (ws->getAxis(0)->unit()->unitID() != "Wavelength") {
+    errorList[propertyName] = "All input workspaces must be in units of Wavelength.";
+  }
+  if (!ws->isHistogramData() && ws->isDistribution()) {
+    errorList[propertyName] = "All input workspaces must be using distributed histogram data.";
+  }
+}
+
 } // unnamed namespace
 
 void PolarizerEfficiency::init() {
@@ -72,15 +90,6 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     return errorList;
   }
 
-  const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
-  if (analyserWs == nullptr) {
-    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The analyser efficiency workspace is not a MatrixWorkspace.";
-    return errorList;
-  }
-  if (analyserWs->getNumberHistograms() != 1) {
-    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "All workspaces must contain a single histogram.";
-  }
-
   auto const &inputWsCount = inputWorkspace->size();
   if (inputWsCount < 2 || inputWsCount > 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
@@ -88,15 +97,11 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   } else {
     for (size_t i = 0; i < inputWsCount; ++i) {
       const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
-      Unit_const_sptr unit = stateWs->getAxis(0)->unit();
-      if (unit->unitID() != "Wavelength") {
-        errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
-      }
-      if (stateWs->getNumberHistograms() != 1) {
-        errorList[PropertyNames::INPUT_WORKSPACE] = "All workspaces must contain a single histogram.";
-      }
+      validateInputWorkspace(stateWs, PropertyNames::INPUT_WORKSPACE, errorList);
     }
   }
+  const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
+  validateInputWorkspace(analyserWs, PropertyNames::ANALYSER_EFFICIENCY, errorList);
 
   // Check outputs.
   auto const &outputWs = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
@@ -121,7 +126,7 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                             SpinStateValidator::ZERO_ZERO);
 
-  auto effCell = convertToHistIfNecessary(getProperty(PropertyNames::ANALYSER_EFFICIENCY));
+  MatrixWorkspace_sptr effCell = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
 
   auto rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
@@ -178,24 +183,6 @@ void PolarizerEfficiency::saveToFile(MatrixWorkspace_sptr const &workspace, std:
   saveAlg->setProperty("Filename", filePath.string());
   saveAlg->setProperty("InputWorkspace", workspace);
   saveAlg->execute();
-}
-
-MatrixWorkspace_sptr PolarizerEfficiency::convertToHistIfNecessary(const MatrixWorkspace_sptr ws) {
-  if (ws->isHistogramData() && ws->isDistribution())
-    return ws;
-
-  MatrixWorkspace_sptr wsClone = ws->clone();
-  wsClone->setDistribution(true);
-
-  if (wsClone->isHistogramData())
-    return wsClone;
-
-  auto convertToHistogram = createChildAlgorithm("ConvertToHistogram");
-  convertToHistogram->initialize();
-  convertToHistogram->setProperty("InputWorkspace", wsClone);
-  convertToHistogram->setProperty("OutputWorkspace", wsClone);
-  convertToHistogram->execute();
-  return convertToHistogram->getProperty("OutputWorkspace");
 }
 
 } // namespace Mantid::Algorithms
