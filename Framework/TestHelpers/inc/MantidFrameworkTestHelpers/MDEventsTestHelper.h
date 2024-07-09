@@ -343,7 +343,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t 
   if (nd > 1)
     splitter->setSplitInto(1, split1);
   // Set the size to 10.0 in all directions
-  auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
+  auto box = new MDBox<MDLeanEvent<nd>, nd>(splitter);
   for (size_t d = 0; d < nd; d++)
     // carefull! function with the side effects!
     box->setExtents(d, dimensionMin, dimensionMax);
@@ -351,7 +351,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t 
   box->calcVolume();
 
   // Split
-  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box.get());
+  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box);
   return out;
 }
 
