@@ -113,10 +113,6 @@ protected:
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   void prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS);
-  std::shared_ptr<Geometry::CSGObject> createCollimatorCorridorShape(const Kernel::V3D &samplePos,
-                                                                     const Kernel::V3D &detPos,
-                                                                     const Mantid::Geometry::BoundingBox &detectorBbox);
-
   std::shared_ptr<Geometry::CSGObject>
   createCollimatorHexahedronShape(const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo,
                                   const int64_t &histogramIndex);
@@ -174,6 +170,7 @@ private:
                                                          const Geometry::IObject *shapeObjectWithScatter);
   void addWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape, const std::string_view &matName,
                                   API::MatrixWorkspace_sptr ws);
+  double getDoubleParamFromIDF(std::string paramName);
   long long m_callsToInterceptSurface{0};
   long long m_IkCalculations{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
@@ -191,6 +188,7 @@ private:
   bool m_NormalizeSQ{};
   Geometry::BoundingBox m_activeRegion;
   std::unique_ptr<IBeamProfile> m_beamProfile;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
 };
 } // namespace Algorithms
 } // namespace Mantid
