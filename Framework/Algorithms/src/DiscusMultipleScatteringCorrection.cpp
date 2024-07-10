@@ -343,7 +343,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   const bool radialCollimator = getProperty("RadialCollimator");
   if (radialCollimator) {
     auto numberOfHist = inputWS->getNumberHistograms();
-    for (auto histIdx = 0; histIdx < numberOfHist; ++histIdx) {
+    for (size_t histIdx = 0; histIdx < numberOfHist; ++histIdx) {
       if (inputWS->spectrumInfo().hasDetectors(histIdx) && !inputWS->spectrumInfo().isMonitor(histIdx) &&
           !inputWS->spectrumInfo().isMasked(histIdx)) {
         const auto detector = inputWS->getDetector(histIdx);
@@ -1553,7 +1553,7 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
     const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
   const auto shape = detectorInfo.detector(histogramIndex).shape();
   try {
-    const auto &shapeInfo = shape->shapeInfo();
+    shape->shapeInfo();
   } catch (std::exception &) {
     return nullptr;
   }
@@ -1563,14 +1563,14 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
   const auto cuboidGeometry = shape->shapeInfo().cuboidGeometry();
 
   // Positions of the detector's front face
-  const auto &detLeftFrontBottomPos = detectorAbsolPos + cuboidGeometry.leftFrontBottom;                // U
-  const auto &detLeftFrontTopPos = detectorAbsolPos + cuboidGeometry.leftFrontTop;                      // T
-  const auto &detRightFrontBottomPos = detectorAbsolPos + cuboidGeometry.rightFrontBottom;              // V
-  const auto detRightFrontTopPos = detLeftFrontTopPos + detRightFrontBottomPos - detLeftFrontBottomPos; // W
+  const auto &detLeftFrontBottomPos = detectorAbsolPos + cuboidGeometry.leftFrontBottom;
+  const auto &detLeftFrontTopPos = detectorAbsolPos + cuboidGeometry.leftFrontTop;
+  const auto &detRightFrontBottomPos = detectorAbsolPos + cuboidGeometry.rightFrontBottom;
+  const auto detRightFrontTopPos = detLeftFrontTopPos + detRightFrontBottomPos - detLeftFrontBottomPos;
 
   const auto detCentorPos =
-      (detLeftFrontBottomPos + detLeftFrontTopPos + detRightFrontBottomPos + detRightFrontTopPos) / 4.0; // C
-  const auto detTopMiddlePos = (detLeftFrontTopPos + detRightFrontTopPos) / 2.0;                         // D
+      (detLeftFrontBottomPos + detLeftFrontTopPos + detRightFrontBottomPos + detRightFrontTopPos) / 4.0;
+  const auto detTopMiddlePos = (detLeftFrontTopPos + detRightFrontTopPos) / 2.0;
 
   // Sanity check to avoid dividing by zero
   if ((detRightFrontTopPos == detLeftFrontTopPos) || (detTopMiddlePos == detCentorPos) || (detCentorPos == samplePos)) {
@@ -1579,9 +1579,9 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
 
   // Define the unit vectors needed for calculations
   const auto unitVecLeftToRight =
-      (detRightFrontTopPos - detLeftFrontTopPos) / (detRightFrontTopPos - detLeftFrontTopPos).norm();        // x2
-  const auto unitVecBottomToUp = (detTopMiddlePos - detCentorPos) / (detTopMiddlePos - detCentorPos).norm(); // x1
-  const auto unitVecSampleToDet = (detCentorPos - samplePos) / (detCentorPos - samplePos).norm();            // x4
+      (detRightFrontTopPos - detLeftFrontTopPos) / (detRightFrontTopPos - detLeftFrontTopPos).norm();
+  const auto unitVecBottomToUp = (detTopMiddlePos - detCentorPos) / (detTopMiddlePos - detCentorPos).norm();
+  const auto unitVecSampleToDet = (detCentorPos - samplePos) / (detCentorPos - samplePos).norm();
 
   // Collimator inner radius
   const auto colInnerRadius = getDoubleParamFromIDF("col-radius");
@@ -1593,16 +1593,16 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
   // Calculated positions of collimator openning plane that is parallell to the detector.
   const auto colOpenningLeftTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
                                      (unitVecBottomToUp * (colPlateHeight / 2.0)) -
-                                     (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // R
+                                     (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
   const auto colOpenningRightTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
                                       (unitVecBottomToUp * (colPlateHeight / 2.0)) +
-                                      (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // S
+                                      (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
   const auto colOpenningLeftBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
                                         (unitVecBottomToUp * (colPlateHeight / 2.0)) -
-                                        (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // Q
+                                        (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
   const auto colOpenningRightBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
                                          (unitVecBottomToUp * (colPlateHeight / 2.0)) +
-                                         (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // P
+                                         (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
 
   // Sanity check to avoid dividing by zero
   if ((colOpenningLeftTopPos == detLeftFrontTopPos) || (colOpenningLeftBottomPos == detLeftFrontBottomPos) ||
@@ -1612,54 +1612,52 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
 
   // Unit vectors along the sides of hexahedron shape
   const auto unitVecAlongLeftTopLeg =
-      (colOpenningLeftTopPos - detLeftFrontTopPos) / (colOpenningLeftTopPos - detLeftFrontTopPos).norm(); // y2
-  const auto unitVecAlongLeftBottomLeg = (colOpenningLeftBottomPos - detLeftFrontBottomPos) /
-                                         (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm(); // y4
+      (colOpenningLeftTopPos - detLeftFrontTopPos) / (colOpenningLeftTopPos - detLeftFrontTopPos).norm();
+  const auto unitVecAlongLeftBottomLeg =
+      (colOpenningLeftBottomPos - detLeftFrontBottomPos) / (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm();
   const auto unitVecAlongRightTopLeg =
-      (colOpenningRightTopPos - detRightFrontTopPos) / (colOpenningRightTopPos - detRightFrontTopPos).norm(); // y1
+      (colOpenningRightTopPos - detRightFrontTopPos) / (colOpenningRightTopPos - detRightFrontTopPos).norm();
   const auto unitVecAlongRightBottomLeg = (colOpenningRightBottomPos - detRightFrontBottomPos) /
-                                          (colOpenningRightBottomPos - detRightFrontBottomPos).norm(); // y3
+                                          (colOpenningRightBottomPos - detRightFrontBottomPos).norm();
 
   // Positions of the hexahedron extended towards the sample for each of its legs to have a length twice the lenght of
   // sample to detector
   double sampleCentreToDetDistance = (detCentorPos - samplePos).norm();
-  const auto leftFrontBottomPoint =
-      detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0; // S-dash
+  const auto leftFrontBottomPoint = detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0;
   const auto hexaHedronLegsLenRatio =
       (leftFrontBottomPoint - detRightFrontTopPos).norm() / (colOpenningRightTopPos - detRightFrontTopPos).norm();
-  const auto leftBackBottomPoint =
-      detLeftFrontTopPos +
-      unitVecAlongLeftTopLeg * hexaHedronLegsLenRatio * (colOpenningLeftTopPos - detLeftFrontTopPos).norm(); // R-dash
+  const auto leftBackBottomPoint = detLeftFrontTopPos + unitVecAlongLeftTopLeg * hexaHedronLegsLenRatio *
+                                                            (colOpenningLeftTopPos - detLeftFrontTopPos).norm();
   const auto rightFrontBottomPoint =
-      detRightFrontBottomPos + unitVecAlongRightBottomLeg * hexaHedronLegsLenRatio *
-                                   (colOpenningRightBottomPos - detRightFrontBottomPos).norm(); // P-dash
+      detRightFrontBottomPos +
+      unitVecAlongRightBottomLeg * hexaHedronLegsLenRatio * (colOpenningRightBottomPos - detRightFrontBottomPos).norm();
   const auto rightBackBottomPoint =
-      detLeftFrontBottomPos + unitVecAlongLeftBottomLeg * hexaHedronLegsLenRatio *
-                                  (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm(); // Q-dash
+      detLeftFrontBottomPos +
+      unitVecAlongLeftBottomLeg * hexaHedronLegsLenRatio * (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm();
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<hexahedron id=\"corridor-shape\" >"
-                 << "<left-back-bottom-point x=\"" << leftBackBottomPoint.X() << "\"" // R-dash
+                 << "<left-back-bottom-point x=\"" << leftBackBottomPoint.X() << "\""
                  << " y=\"" << leftBackBottomPoint.Y() << "\""
                  << " z=\"" << leftBackBottomPoint.Z() << "\" />"
-                 << "<left-front-bottom-point x=\"" << leftFrontBottomPoint.X() << "\"" // S-dash
+                 << "<left-front-bottom-point x=\"" << leftFrontBottomPoint.X() << "\""
                  << " y=\"" << leftFrontBottomPoint.Y() << "\""
                  << " z=\"" << leftFrontBottomPoint.Z() << "\" />"
-                 << "<right-front-bottom-point x=\"" << rightFrontBottomPoint.X() << "\"" // P-dash
+                 << "<right-front-bottom-point x=\"" << rightFrontBottomPoint.X() << "\""
                  << " y=\"" << rightFrontBottomPoint.Y() << "\""
                  << " z=\"" << rightFrontBottomPoint.Z() << "\" />"
-                 << "<right-back-bottom-point x=\"" << rightBackBottomPoint.X() << "\"" // Q-dash
+                 << "<right-back-bottom-point x=\"" << rightBackBottomPoint.X() << "\""
                  << " y=\"" << rightBackBottomPoint.Y() << "\""
                  << " z=\"" << rightBackBottomPoint.Z() << "\" />"
-                 << "<left-back-top-point x=\"" << detLeftFrontTopPos.X() << "\"" // T
+                 << "<left-back-top-point x=\"" << detLeftFrontTopPos.X() << "\""
                  << " y=\"" << detLeftFrontTopPos.Y() << "\""
                  << " z=\"" << detLeftFrontTopPos.Z() << "\" />"
-                 << "<left-front-top-point x=\"" << detRightFrontTopPos.X() << "\"" // W
+                 << "<left-front-top-point x=\"" << detRightFrontTopPos.X() << "\""
                  << " y=\"" << detRightFrontTopPos.Y() << "\""
                  << " z=\"" << detRightFrontTopPos.Z() << "\" />"
-                 << "<right-front-top-point x=\"" << detRightFrontBottomPos.X() << "\"" // V
+                 << "<right-front-top-point x=\"" << detRightFrontBottomPos.X() << "\""
                  << " y=\"" << detRightFrontBottomPos.Y() << "\""
                  << " z=\"" << detRightFrontBottomPos.Z() << "\" />"
-                 << "<right-back-top-point x=\"" << detLeftFrontBottomPos.X() << "\"" // U
+                 << "<right-back-top-point x=\"" << detLeftFrontBottomPos.X() << "\""
                  << " y=\"" << detLeftFrontBottomPos.Y() << "\""
                  << " z=\"" << detLeftFrontBottomPos.Z() << "\" />"
                  << "</hexahedron>";
