@@ -627,8 +627,6 @@ void DiscusMultipleScatteringCorrection::exec() {
       const size_t nsteps = std::max(static_cast<size_t>(1), nSimulationPoints - 1);
       const size_t xStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
 
-      // const auto detPos = spectrumInfo.position(i);
-
       // create copy of the SQ workspaces vector and fully copy any members that will be modified
       auto componentWorkspaces = m_SQWSs;
 
