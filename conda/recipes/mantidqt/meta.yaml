@@ -37,6 +37,8 @@ requirements:
 
   host:
     - eigen
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}

@@ -56,7 +56,6 @@ requirements:
     - versioningit
     - libglu  # [linux]
   run:
-    - {{ pin_compatible("libboost-python-devel", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
