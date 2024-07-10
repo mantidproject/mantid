@@ -37,7 +37,7 @@ public:
   bool isTableEmpty() const override;
 
   void validate(IUserInputValidator *validator) override;
-  virtual void addTableEntry(size_t row, FitDataRow newRow) override;
+  virtual void addTableEntry(size_t row, FitDataRow const &newRow) override;
   virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) override;
   int getColumnIndexFromName(std::string const &ColName) override;
   void clearTable() override;

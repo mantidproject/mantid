@@ -50,7 +50,7 @@ void ConvolutionDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
-void ConvolutionDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void ConvolutionDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
   FitDataView::addTableEntry(row, newRow);
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.resolution));

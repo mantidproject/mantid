@@ -290,7 +290,7 @@ public:
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());
   MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::IUserInputValidator *validator));
-  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
+  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow const &newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
   MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));
   MOCK_METHOD0(clearTable, void());

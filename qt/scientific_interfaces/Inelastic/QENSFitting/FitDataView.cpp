@@ -77,7 +77,7 @@ void FitDataView::displayWarning(const std::string &warning) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(warning));
 }
 
-void FitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void FitDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
   m_uiForm->tbFitData->insertRow(static_cast<int>(row));
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.name));
