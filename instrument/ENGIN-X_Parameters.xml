@@ -115,4 +115,22 @@ the create a distinct ENTITY for each bank-->
 
 </component-link>
 
+<component-link name="ENGIN-X" >
+  <!-- Specify the Inner radius of the collimator as seen from the sample -->
+  <parameter name="col-radius">
+      <value val="0.5"/>
+  </parameter>
+
+  <!-- Specify the angular extend of the collimator seen from the sample -->
+  <parameter name="col-angular-extend">
+      <value val="0.034"/>
+  </parameter>
+
+  <!-- Specify the height of the collimator plates -->
+  <parameter name="col-plate-height">
+      <value val="0.2"/>
+  </parameter>
+
+</component-link>
+
 </parameter-file>
