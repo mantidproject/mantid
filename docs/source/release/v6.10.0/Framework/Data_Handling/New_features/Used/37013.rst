@@ -1,5 +1,0 @@
-- Introduced file search/loading from instrument data cache on IDAaaS.
-  The instrument data cache is the directory ``/data/instrument/`` present on IDAaaS, and contains a local copy of the data archive.
-  The instrument data cache is used to search for files before looking in the data archive.
-  This new feature fixes the problem of loading files for users who do not have access to the data archive on IDAaaS.
-  Please note that if you are not on IDAaaS, avoid creating the directory ``/data/instrument/`` as this will trigger a search for files inside that directory.

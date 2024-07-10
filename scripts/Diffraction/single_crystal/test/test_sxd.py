@@ -15,6 +15,7 @@ from mantid.simpleapi import (
     ClearUB,
     HasUB,
     ClearCache,
+    SetSample,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -220,6 +221,26 @@ class SXDTest(unittest.TestCase):
         self.sxd.set_sample(Geometry={"Shape": "CSG", "Value": self.sxd.sphere_shape})
 
         self.assertFalse("Material" in self.sxd.sample_dict)
+
+    def test_calc_absorption_weighted_path_lengths(self):
+        # make workspace with sample
+        ws_with_sample = CloneWorkspace(self.ws)
+        SetSample(
+            ws_with_sample,
+            Geometry={"Shape": "CSG", "Value": self.sxd.sphere_shape},
+            Material={"ChemicalFormula": "C2 H4", "SampleNumberDensity": 0.02, "NumberDensityUnit": "Formula Units"},
+        )
+        # make peaks workspace and set intensity to 1
+        peaks_to_correct = CloneWorkspace(self.peaks)
+        peaks_to_correct.getPeak(0).setIntensity(1.0)
+        # store in class
+        runno = 1234
+        self.sxd.set_ws(runno, ws_with_sample)
+        self.sxd.set_peaks(runno, peaks_to_correct, PEAK_TYPE.FOUND)
+
+        self.sxd.calc_absorption_weighted_path_lengths(PEAK_TYPE.FOUND)
+
+        self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
 
     #  --- methods specific to SXD class ---
 

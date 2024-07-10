@@ -1,2 +1,0 @@
-- Speedup :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` significantly by using ``scipy.signal.convolve`` instead of ``scipy.ndimag.convolve``.
-- Remove ``RemoveOnEdge`` option in :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` as the algorithm uses new convolution method that ignores edges.

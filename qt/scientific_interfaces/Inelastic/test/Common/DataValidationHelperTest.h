@@ -199,7 +199,7 @@ private:
     EXPECT_CALL(*m_dataSelector, getCurrentDataName()).Times(1);
     EXPECT_CALL(*m_dataSelector, isValid()).Times(1);
 
-    (void)functor(*m_uiv, m_dataSelector.get(), ERROR_LABEL, primaryType, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, false);
   }
 
   template <typename Functor>
@@ -211,7 +211,7 @@ private:
     EXPECT_CALL(*m_dataSelector, getCurrentDataName()).Times(nTimes);
     EXPECT_CALL(*m_dataSelector, isValid()).Times(nTimes);
 
-    (void)functor(*m_uiv, m_dataSelector.get(), ERROR_LABEL, primaryType, otherTypes, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, otherTypes, false);
   }
 
   template <typename Functor>
@@ -220,7 +220,7 @@ private:
     ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
     ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
 
-    TS_ASSERT(functor(*m_uiv, m_dataSelector.get(), errorLabel, false));
+    TS_ASSERT(functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false));
     TS_ASSERT(m_uiv->generateErrorMessage().empty());
   }
 
@@ -230,7 +230,7 @@ private:
     ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
     ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
 
-    TS_ASSERT(!functor(*m_uiv, m_dataSelector.get(), errorLabel, false));
+    TS_ASSERT(!functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false));
     TS_ASSERT(!m_uiv->generateErrorMessage().empty());
   }
 
@@ -240,7 +240,7 @@ private:
     ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
     ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
 
-    (void)functor(*m_uiv, m_dataSelector.get(), errorLabel, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false);
 
     TS_ASSERT_EQUALS(m_uiv->generateErrorMessage(), errorMessage);
   }

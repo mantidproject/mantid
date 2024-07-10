@@ -1,1 +1,0 @@
-- Fix bug in :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` where peak shapes are skipped

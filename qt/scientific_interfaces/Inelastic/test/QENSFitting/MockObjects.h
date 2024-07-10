@@ -14,6 +14,9 @@
 #include "Processor/ElwinPresenter.h"
 #include "Processor/ElwinView.h"
 #include "Processor/IElwinView.h"
+#include "Processor/IMomentsView.h"
+#include "Processor/MomentsModel.h"
+#include "Processor/MomentsPresenter.h"
 #include "QENSFitting/FitOutput.h"
 #include "QENSFitting/FitPlotModel.h"
 #include "QENSFitting/FitTab.h"
@@ -428,6 +431,7 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IElwinPresenter *presenter));
   MOCK_METHOD0(setup, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
 
   MOCK_METHOD2(setAvailableSpectra,
@@ -500,6 +504,45 @@ public:
   MOCK_METHOD1(setNormalise, void(bool normalise));
   MOCK_METHOD1(setOutputWorkspaceNames, void(std::string const &workspaceBaseName));
   MOCK_CONST_METHOD0(getOutputWorkspaceNames, std::string());
+};
+
+class MockMomentsView : public IMomentsView {
+public:
+  virtual ~MockMomentsView() = default;
+
+  MOCK_METHOD1(subscribePresenter, void(IMomentsPresenter *presenter));
+  MOCK_METHOD0(setupProperties, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
+  MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
+  MOCK_CONST_METHOD0(getDataSelector, DataSelector *());
+  MOCK_CONST_METHOD0(getDataName, std::string());
+  MOCK_CONST_METHOD1(showMessageBox, void(std::string const &message));
+
+  MOCK_METHOD1(setFBSuffixes, void(QStringList const &suffix));
+  MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
+
+  MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
+  MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));
+  MOCK_METHOD1(setRangeSelectorMin, void(double newValue));
+  MOCK_METHOD1(setRangeSelectorMax, void(double newValue));
+  MOCK_METHOD1(setSaveResultEnabled, void(bool enable));
+
+  MOCK_METHOD1(plotNewData, void(std::string const &filename));
+  MOCK_METHOD0(replot, void());
+  MOCK_METHOD1(plotOutput, void(std::string const &outputWorkspace));
+};
+
+class MockMomentsModel : public IMomentsModel {
+public:
+  virtual ~MockMomentsModel() = default;
+
+  MOCK_METHOD0(setupAlgorithm, IAlgorithm_sptr());
+  MOCK_METHOD1(setInputWorkspace, void(const std::string &workspace));
+  MOCK_METHOD1(setEMin, void(double eMin));
+  MOCK_METHOD1(setEMax, void(double eMax));
+  MOCK_METHOD1(setScale, void(bool scale));
+  MOCK_METHOD1(setScaleValue, void(double scaleValue));
+  MOCK_CONST_METHOD0(getOutputWorkspace, std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

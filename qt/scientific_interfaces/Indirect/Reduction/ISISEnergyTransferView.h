@@ -35,8 +35,8 @@ public:
   virtual std::string getFirstFilename() const = 0;
 
   virtual bool isRunFilesValid() const = 0;
-  virtual void validateCalibrationFileType(UserInputValidator &uiv) const = 0;
-  virtual void validateRebinString(UserInputValidator &uiv) const = 0;
+  virtual void validateCalibrationFileType(UserInputValidator *uiv) const = 0;
+  virtual void validateRebinString(UserInputValidator *uiv) const = 0;
   virtual std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
                                                                 std::size_t const &spectraMax) const = 0;
 
@@ -98,8 +98,8 @@ public:
   std::string getFirstFilename() const override;
 
   bool isRunFilesValid() const override;
-  void validateCalibrationFileType(UserInputValidator &uiv) const override;
-  void validateRebinString(UserInputValidator &uiv) const override;
+  void validateCalibrationFileType(UserInputValidator *uiv) const override;
+  void validateRebinString(UserInputValidator *uiv) const override;
   std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
                                                         std::size_t const &spectraMax) const override;
 

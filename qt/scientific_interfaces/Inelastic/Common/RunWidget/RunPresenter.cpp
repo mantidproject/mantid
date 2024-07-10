@@ -21,7 +21,12 @@ RunPresenter::RunPresenter(IRunSubscriber *subscriber, IRunView *view) : m_subsc
 void RunPresenter::handleRunClicked() {
   if (validate()) {
     setRunEnabled(false);
-    m_subscriber->handleRun();
+    try {
+      m_subscriber->handleRun();
+    } catch (std::exception const &ex) {
+      m_view->displayWarning(ex.what());
+      setRunEnabled(true);
+    }
   }
 }
 

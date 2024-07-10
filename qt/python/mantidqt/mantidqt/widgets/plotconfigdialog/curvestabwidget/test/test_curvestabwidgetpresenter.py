@@ -49,9 +49,9 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
             if line.get_label() == "noerrors":
                 return line
 
-    def _generate_presenter(self, mock_view=None, fig=None):
+    def _generate_presenter(self, mock_view=None, fig=None, current_curve_name="Workspace"):
         if not mock_view:
-            mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)", get_current_curve_name=lambda: "Workspace")
+            mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)", get_current_curve_name=lambda: current_curve_name)
         if not fig:
             fig = self.fig
         mock_view.select_curve_list = Mock(selectedItems=lambda: [])
@@ -224,6 +224,20 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(new_err_container[0].get_marker(), "v")
         # Test only one errorbar is plotted
         self.assertEqual(1, len(new_err_container[2][0].get_segments()))
+
+    def test_replot_second_curve_twice_does_not_alter_line_order(self):
+        fig = self.make_figure_with_multiple_curves()
+        ax = fig.get_axes()[0]
+        presenter = self._generate_presenter(fig=fig, current_curve_name="Workspace 2")
+        presenter.view.select_curve_list.currentIndex.return_value = 1
+        new_plot_kwargs = {"errorevery": 2, "linestyle": "-.", "color": "r", "marker": "v"}
+        presenter._replot_current_curve(new_plot_kwargs)
+        second_curve = presenter.get_current_curve()[0]
+        self.assertEqual(ax.get_lines().index(second_curve), 1)
+        new_plot_kwargs = {"errorevery": 2, "linestyle": "-.", "color": "b", "marker": "v"}
+        presenter._replot_current_curve(new_plot_kwargs)
+        second_curve = presenter.get_current_curve()[0]
+        self.assertEqual(ax.get_lines().index(second_curve), 1)
 
     def test_curve_errorbars_are_hidden_on_apply_properties_when_hide_curve_is_ticked(self):
         fig = figure()

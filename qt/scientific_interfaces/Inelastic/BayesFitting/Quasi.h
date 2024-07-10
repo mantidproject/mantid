@@ -7,23 +7,24 @@
 #pragma once
 
 #include "BayesFittingTab.h"
+#include "Common/RunWidget/IRunSubscriber.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab {
+class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   Quasi(QWidget *parent = nullptr);
 
-  // Inherited methods from BayesFittingTab
-  void setup() override;
-  bool validate() override;
-  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -45,23 +46,21 @@ private slots:
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
 
-  void runClicked();
   void plotClicked();
   void plotCurrentPreview();
   void saveClicked();
 
 private:
-  void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
   void setFileExtensionsByName(bool filter) override;
 
-  void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
+
+  std::unique_ptr<IRunPresenter> m_runPresenter;
 
   std::string m_outputBaseName;
   /// Current preview spectrum

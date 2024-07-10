@@ -1,1 +1,0 @@
-- Added method to python API of Instrument Viewer to set maintain aspect ratio option by calling `myiv.set_maintain_aspect_ratio(False)`.

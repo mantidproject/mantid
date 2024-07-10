@@ -1,1 +1,0 @@
-- Speedup processing of IDF XML during loading when side-by-side-view-location parameter is not used

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/RunWidget/RunView.h"
 #include "DllConfig.h"
 #include "ISqwView.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -29,7 +30,9 @@ public:
 
   void subscribePresenter(ISqwPresenter *presenter) override;
 
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IRunView *getRunView() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
+
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
   std::tuple<double, double> getQRangeFromPlot() const override;
@@ -39,7 +42,6 @@ public:
   void setDefaultQAndEnergy() override;
   bool validate() override;
   void showMessageBox(std::string const &message) const override;
-  void setRunButtonText(std::string const &runText) override;
   void setEnableOutputOptions(bool const enable) override;
 
 private slots:
@@ -51,7 +53,6 @@ private slots:
   void notifyEWidthChanged(double value);
   void notifyEHighChanged(double value);
   void notifyRebinEChanged(int value);
-  void notifyRunClicked();
   void notifySaveClicked();
 
 private:

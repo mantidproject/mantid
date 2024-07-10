@@ -288,6 +288,7 @@ _translations = {
     "Jesse McGaha": "McGaha, Jesse",
     "jrmcgaha-dev": "McGaha, Jesse",
     "Zachary Morgan": "Morgan, Zachary",
+    "Zachary Morgan (zgf)": "Morgan, Zachary",
     "zjmorgan": "Morgan, Zachary",
     "MialLewis": "Lewis, Mial",
     "Jan-Lukas Wynen": "Wynen, Jan-Lukas",
@@ -318,12 +319,14 @@ _translations = {
     "rboston628": "Boston, Reece",
     "Marie Backman": "Backman, Marie",
     "Maria Patrou": "Patrou, Maria",
+    "Patrou, Maria": "Patrou, Maria",
     "James Clarke": "Clarke, James",
     "Adri Diaz": "Diaz-Alvarez, Adrian",
     "adriazalvarez": "Diaz-Alvarez, Adrian",
     "Waruna Wickramasingha": "Jayasundara Abeykoon Wickramasingha, Waruna Priyankara",
     "Kevin A. Tactac": "TacTac, Kevin",
     "GuiMacielPereira": "Pereira, Guilherme",
+    "Gui Maciel Pereira": "Pereira, Guilherme",
     "Kort Travis": "Travis, Kort",
 }
 

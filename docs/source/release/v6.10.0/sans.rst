@@ -16,7 +16,7 @@ New Features
 
 Bugfixes
 --------
-- Rows in the table on the :ref:`ISIS_SANS_Runs_Tab-ref` no longer ocasionally pick up an output name from a different row and then overwrite the data in that output workspace.
+- Rows in the table on the :ref:`ISIS_SANS_Runs_Tab-ref` no longer occasionally pick up an output name from a different row and then overwrite the data in that output workspace.
 - Saving from the ``Save Other`` dialog in the :ref:`ISIS_SANS_Runs_Tab-ref` no longer throws an error.
 
 :ref:`Release 6.10.0 <v6.10.0>`

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
 #include "Common/InterfaceUtils.h"
+#include "Common/RunWidget/RunView.h"
 #include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -23,6 +24,8 @@ Mantid::Kernel::Logger g_log("Stretch");
 namespace MantidQt::CustomInterfaces {
 Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
+
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
@@ -70,7 +73,6 @@ Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this, SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
@@ -90,38 +92,26 @@ void Stretch::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void Stretch::setup() {}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool Stretch::validate() {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-
-  auto const errors = uiv.generateErrorMessage();
-  if (!errors.empty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
+void Stretch::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
   if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
-    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
-    return false;
+    validator->addErrorMessage("The 'quickBayes' package does not support a 'Sloping' background type.");
   }
-
-  return true;
 }
 
-/**
- * Collect the settings on the GUI and build a python
- * script that runs Stretch
- */
-void Stretch::run() {
+void Stretch::handleRun() {
+  auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result == QMessageBox::No) {
+      m_runPresenter->setRunEnabled(true);
+      return;
+    }
+  }
+
   m_uiForm.ppPlot->watchADS(false);
 
   // Workspace input
@@ -182,12 +172,11 @@ void Stretch::run() {
 void Stretch::algorithmComplete(const bool &error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
-  setRunIsRunning(false);
-  if (error) {
-    setPlotResultEnabled(false);
-    setPlotContourEnabled(false);
-    setSaveResultEnabled(false);
-  } else {
+  m_runPresenter->setRunEnabled(true);
+  setPlotResultEnabled(!error);
+  setPlotContourEnabled(!error);
+  setSaveResultEnabled(!error);
+  if (!error) {
     if (doesExistInADS(m_contourWorkspaceName))
       populateContourWorkspaceComboBox();
     else
@@ -225,26 +214,6 @@ void Stretch::saveWorkspaces() {
   addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
   addSaveWorkspaceToQueue(contourWorkspace, contourFullPath);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void Stretch::runClicked() {
-  if (validateTab()) {
-    auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    displayMessageAndRun(saveDirectory);
-  }
-}
-
-void Stretch::displayMessageAndRun(std::string const &saveDirectory) {
-  if (saveDirectory.empty()) {
-    int const result = displaySaveDirectoryMessage();
-    if (result != QMessageBox::No) {
-      setRunIsRunning(true);
-      runTab();
-    }
-  } else {
-    setRunIsRunning(true);
-    runTab();
-  }
 }
 
 int Stretch::displaySaveDirectoryMessage() {
@@ -407,8 +376,6 @@ void Stretch::updateProperties(QtProperty *prop, double val) {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
-void Stretch::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void Stretch::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
@@ -422,15 +389,10 @@ void Stretch::setPlotContourEnabled(bool enabled) {
 void Stretch::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void Stretch::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
+  m_runPresenter->setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
-}
-
-void Stretch::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
 void Stretch::setPlotResultIsPlotting(bool plotting) {

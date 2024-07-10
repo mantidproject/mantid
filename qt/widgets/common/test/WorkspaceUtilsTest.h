@@ -120,6 +120,11 @@ public:
     TS_ASSERT_EQUALS(parseRunNumbers(individual_workspace), "irs123_test");
   }
 
+  void test_parseRunNumber_call_with_empty_array_returns_empty_string() {
+    std::vector<std::string> empty_workspace{};
+    TS_ASSERT_EQUALS(parseRunNumbers(empty_workspace), "");
+  }
+
   void test_MaximumIndex_returns_properIndex() {
     auto const testWorkspace = createWorkspace(3);
 

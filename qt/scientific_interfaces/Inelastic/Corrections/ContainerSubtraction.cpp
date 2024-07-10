@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
 #include "Common/InterfaceUtils.h"
+#include "Common/RunWidget/RunView.h"
 #include "Common/SettingsHelper.h"
-#include <utility>
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -15,6 +15,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
+
+#include <utility>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
@@ -24,8 +26,9 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 }
 
 namespace MantidQt::CustomInterfaces {
-ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0) {
+ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0), m_runPresenter() {
   m_uiForm.setupUi(parent);
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
@@ -35,7 +38,6 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(par
   connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
   connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
@@ -62,11 +64,51 @@ void ContainerSubtraction::setTransformedContainer(const MatrixWorkspace_sptr &w
   AnalysisDataService::Instance().addOrReplace(workspace->getName(), m_transformedContainerWS);
 }
 
-void ContainerSubtraction::setup() {}
+void ContainerSubtraction::handleValidation(IUserInputValidator *validator) const {
+  // Check valid inputs
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  validator->checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-void ContainerSubtraction::run() {
-  setRunIsRunning(true);
+  // Check sample is a matrix workspace
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsName = sampleName.toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+  if (sampleExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName)) {
+    validator->addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
+  // Check container is a matrix workspace
+  const auto containerName = m_uiForm.dsContainer->getCurrentDataName();
+  const auto containerWsName = containerName.toStdString();
+  bool containerExists = AnalysisDataService::Instance().doesExist(containerWsName);
+  if (containerExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(containerWsName)) {
+    validator->addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+  }
+
+  if (m_csSampleWS && m_csContainerWS) {
+    // Check Sample is of same type as container
+    const auto containerType = m_csContainerWS->YUnit();
+    const auto sampleType = m_csSampleWS->YUnit();
+
+    g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
+    g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
+
+    if (containerType != sampleType)
+      validator->addErrorMessage("Sample and can workspaces must contain the same "
+                                 "type of data; have the same Y-Unit.");
+
+    // Check sample has the same number of Histograms as the contianer
+    const size_t sampleHist = m_csSampleWS->getNumberHistograms();
+    const size_t containerHist = m_csContainerWS->getNumberHistograms();
+
+    if (sampleHist != containerHist) {
+      validator->addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+    }
+  }
+}
+
+void ContainerSubtraction::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
   if (m_csSampleWS && m_csContainerWS) {
     m_originalSampleUnits = m_csSampleWS->getAxis(0)->unit()->unitID();
 
@@ -82,7 +124,6 @@ void ContainerSubtraction::run() {
       containerWs = requestRebinToSample(containerWs);
 
       if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
-        setRunIsRunning(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply container corrections using a sample and "
                     "container with different binning.");
@@ -98,7 +139,8 @@ void ContainerSubtraction::run() {
     AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName, m_csSubtractedWS);
     containerSubtractionComplete();
   }
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setSaveResultEnabled(true);
   setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
 }
 
@@ -139,61 +181,6 @@ void ContainerSubtraction::removeOutput() {
     ads.remove(m_pythonExportWsName);
   }
   m_pythonExportWsName.clear();
-}
-
-/**
- * Validates the user input in the UI
- * @return if the input was valid
- */
-bool ContainerSubtraction::validate() {
-  UserInputValidator uiv;
-
-  // Check valid inputs
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-
-  // Check sample is a matrix workspace
-  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
-  const auto sampleWsName = sampleName.toStdString();
-  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
-  if (sampleExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName)) {
-    uiv.addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-  }
-
-  // Check container is a matrix workspace
-  const auto containerName = m_uiForm.dsContainer->getCurrentDataName();
-  const auto containerWsName = containerName.toStdString();
-  bool containerExists = AnalysisDataService::Instance().doesExist(containerWsName);
-  if (containerExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(containerWsName)) {
-    uiv.addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-  }
-
-  if (m_csSampleWS && m_csContainerWS) {
-    // Check Sample is of same type as container
-    const auto containerType = m_csContainerWS->YUnit();
-    const auto sampleType = m_csSampleWS->YUnit();
-
-    g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
-    g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
-
-    if (containerType != sampleType)
-      uiv.addErrorMessage("Sample and can workspaces must contain the same "
-                          "type of data; have the same Y-Unit.");
-
-    // Check sample has the same number of Histograms as the contianer
-    const size_t sampleHist = m_csSampleWS->getNumberHistograms();
-    const size_t containerHist = m_csContainerWS->getNumberHistograms();
-
-    if (sampleHist != containerHist) {
-      uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
-    }
-  }
-
-  // Show errors if there are any
-  if (!uiv.isAllInputValid())
-    emit showMessageBox(uiv.generateErrorMessage());
-
-  return uiv.isAllInputValid();
 }
 
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
@@ -338,11 +325,6 @@ void ContainerSubtraction::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void ContainerSubtraction::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
 }
 
 /**
@@ -522,18 +504,6 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(const MatrixWorkspac
   return shiftLog;
 }
 
-void ContainerSubtraction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void ContainerSubtraction::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void ContainerSubtraction::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
-void ContainerSubtraction::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
 
 } // namespace MantidQt::CustomInterfaces

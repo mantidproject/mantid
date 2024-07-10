@@ -1,1 +1,0 @@
-- New algorithm :ref:`FindGoniometerAngles <algm-FindGoniometerAngles>` that does a brute force search for the goniometer rotation angles that maximize the number of peaks indexed by the UB.

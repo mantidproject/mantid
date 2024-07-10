@@ -39,7 +39,7 @@ New features
 
 
 - New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the ``bank_error_events`` bank of a NeXus file.
-- Re-implemtation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall.
+- Re-implementation of :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the ``CompressTolerance``. This uses significantly less memory to create fewer events overall.
   However, the execution time of ``LoadEventNexus`` itself is generally longer; workflows that benefit from ``CompressEvents`` generally run faster.
 - Algorithm :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` supports new peak finding strategy ``AllPeaksNSigma``.
   Credits to the author of SXD2001 for the idea of using NSigma as a threshold (albeit in SXD2001 the peak finding is done in 3D).
@@ -132,7 +132,7 @@ Dependencies
 
 New features
 ############
-- Droped support for end-of-life numpy 1.22 and 1.23, and extended support to 1.25 and 1.26.
+- Dropped support for end-of-life numpy 1.22 and 1.23, and extended support to 1.25 and 1.26.
 
 
 MantidWorkbench

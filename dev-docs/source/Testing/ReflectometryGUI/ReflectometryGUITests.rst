@@ -26,7 +26,7 @@ Loading batch files
 - Go to the menu ``Batch->Load``.
 - Browse to the sample data and select file ``INTER_NR_test.json``.
 - The interface should be populated with some information, including some content in the runs table.
-- Click the ``Expand All Rows`` button on the toolbar to expand the groups in the table.
+- Click the ``Expand All Groups`` button on the toolbar to expand the groups in the table.
 - The decimal values should be shown to 2 decimal places as per the Options that we set.
 - Re-open the same batch file. You should not be prompted with any warnings (unless you changed anything).
 
@@ -126,14 +126,16 @@ Copy, Cut and Paste are available from the toolbar buttons, the right-click cont
 
 Note that it is very picky about pasting onto the correct destination (i.e. group onto group, row onto row etc.) and gives a confusing error message about "depth and size" if you get it wrong - this just indicates that the operation is not possible.
 
-These operations should work:
+Re-load the test batch file and then test the operations listed below.
+
+These should work:
 
 - Select a row, copy it, and paste it onto a different row.
 - Select 2 rows from one group, copy them, and paste onto 2 rows in another group.
 - Select a group and copy it. Paste it onto another group.
 - Copy a group. Deselect everything in the table before you paste. It should be pasted as a new group at the end.
 
-These operations give an error:
+These will give an error:
 
 - Copy a row. Deselect everything and paste. This fails because we don't know which group to paste into.
 - Copy a row and try pasting onto a group. This could in theory append the row into the group but is currently not implemented.
@@ -162,7 +164,11 @@ Saving a batch
 Save tab
 --------
 
-- Load a batch file and process it, if you have not already.
+- Close the Reflectometry GUI and re-open it to ensure any previous settings have been cleared.
+- In the Search box on the left, enter Investigation Id ``1120015`` and Cycle ``11_3``.
+- Click ``Search`` and the results list will fill with all the runs for that experiment.
+- Select one of the results that is not highlighted blue (i.e. run ``11934``) and click the ``Transfer`` button.
+- In the main Runs table, click to process the row.
 - Go to the Save tab and hit Refresh. The workspaces list will contain all of the workspaces in the ADS.
 - Select a workspace in the list that starts with ``IvsQ``.
 - Type a valid path into the Save path textbox.
@@ -171,15 +177,15 @@ Save tab
 - Untick ``Header`` and ``Q resolution`` and set the separator to ``Comma``.
 - Click ``Save`` and open the file that should have been saved to the save directory you specified. It should contain 3 columns of numbers, separated by commas.
 - Tick ``Q resolution`` and re-save. It should now contain 4 columns of numbers.
-- Double-click on a workspace name in the left list, e.g. ``IvsQ_13460``. The right list should be populated with parameters but be disabled.
+- Double-click on a workspace name in the left list, e.g. ``IvsQ_binned_11934``. The right list should be populated with parameters but be disabled.
 - Tick ``Header`` and the parameters list should be enabled. Select a couple of them, e.g. ``nperiods`` and ``run_start``, and re-save.
 
   - The file should now contain some header text starting with ``MFT``.
-  - Amongst other things this text should contain the logs you selected, e.g. ``nperiods : 1`` and ``run_end : 2011-12-15T14:19:13``.
+  - Amongst other things this text should contain the logs you selected, e.g. ``nperiods : 1`` and ``run_end : 2011-10-21T13:32:03``.
 
 - Try changing the separator to spaces or tabs and check that the 3 or 4 columns of numbers are separated using that separator.
 - Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns (includes Q resolution)`` checkbox should be enabled.
-- Select a single ``IvsQ_binned`` workspace from the left list, e.g. ``IvsQ_binned_13460``, and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 8 columns of numbers with headings ``Qz``, ``R``, ``sR``, ``sQz``, ``lambda``, ``slambda``, ``incident theta`` and ``sincident theta``.
+- Select a single ``IvsQ_binned`` workspace from the left list, e.g. ``IvsQ_binned_11934``, and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 8 columns of numbers with headings ``Qz``, ``R``, ``sR``, ``sQz``, ``lambda``, ``slambda``, ``incident theta`` and ``sincident theta``.
 - Untick ``Additional columns (includes Q resolution)`` and re-save (the ``Q resolution`` checkbox should still be selected from the earlier steps). The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
 - Untick ``Q resolution`` and re-save. The file should now contain 3 columns of numbers with headings ``Qz``, ``R``, ``sR``.
 - Change the dropdown to ``ORSO Nexus (*.orb)``. The availability of the settings should be the same as they were for the ``ORSO Ascii (*.ort)`` format. Click Save and check that a file with extension ``.orb`` is saved out. This should be a Nexus file type, so will not be possible to view in a text editor. Use an HDF5 viewer to check that the contents of the file appear sensible.

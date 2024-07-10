@@ -1,1 +1,0 @@
-- The :ref:`Peak Shapes <the-peak-shape>` (NoShape, PeakShapeSpherical, PeakShapeEllipsoid) and :meth:`mantid.api.IPeak.setPeakShape` have been exposed to Python allowing you to manually create and set the peak shapes.

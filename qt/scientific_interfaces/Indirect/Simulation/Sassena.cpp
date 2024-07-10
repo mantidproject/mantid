@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Sassena.h"
 
+#include "Common/RunWidget/RunView.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
@@ -14,41 +15,26 @@
 namespace MantidQt::CustomInterfaces {
 Sassena::Sassena(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmFinish(bool)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
-void Sassena::setup() {}
-
-/**
- * Validate the form to check the program can be run.
- *
- * @return Whether the form was valid
- */
-bool Sassena::validate() {
-  UserInputValidator uiv;
-
+void Sassena::handleValidation(IUserInputValidator *validator) const {
   auto const inputFileName = m_uiForm.mwInputFile->getFirstFilename();
   if (inputFileName.isEmpty())
-    uiv.addErrorMessage("Incorrect input file provided.");
-
-  emit showMessageBox(uiv.generateErrorMessage());
-  return uiv.isAllInputValid();
+    validator->addErrorMessage("Incorrect input file provided.");
 }
 
-/**
- * Configures and executes the LoadSassena algorithm.
- */
-void Sassena::run() {
+void Sassena::handleRun() {
   using namespace Mantid::API;
   using MantidQt::API::BatchAlgorithmRunner;
 
-  setRunIsRunning(true);
+  clearOutputPlotOptionsWorkspaces();
 
   QString const inputFileName = m_uiForm.mwInputFile->getFirstFilename();
   m_outWsName = QFileInfo(inputFileName).baseName();
@@ -75,10 +61,9 @@ void Sassena::run() {
  * @param error If the batch was stopped due to error
  */
 void Sassena::handleAlgorithmFinish(bool error) {
-  setRunIsRunning(false);
-  if (error)
-    setSaveEnabled(false);
-  else
+  m_runPresenter->setRunEnabled(true);
+  setSaveEnabled(!error);
+  if (!error)
     setOutputPlotOptionsWorkspaces({m_outWsName.toStdString()});
 }
 
@@ -90,11 +75,6 @@ void Sassena::handleAlgorithmFinish(bool error) {
  */
 void Sassena::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
 
-void Sassena::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
-}
-
 /**
  * Handle saving of workspace
  */
@@ -103,18 +83,6 @@ void Sassena::saveClicked() {
     addSaveWorkspaceToQueue(m_outWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
-
-void Sassena::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void Sassena::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveEnabled(enabled);
-}
-
-void Sassena::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void Sassena::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 

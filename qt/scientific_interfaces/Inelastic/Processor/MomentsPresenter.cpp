@@ -29,18 +29,17 @@ namespace MantidQt::CustomInterfaces {
 MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model)
     : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 }
-
-void MomentsPresenter::setup() {}
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
 void MomentsPresenter::handleDataReady(std::string const &dataName) {
-  if (m_view->validate()) {
+  if (m_runPresenter->validate()) {
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
   }
@@ -56,9 +55,10 @@ void MomentsPresenter::handleScaleChanged(bool state) { m_model->setScale(state)
  */
 void MomentsPresenter::handleScaleValueChanged(double value) { m_model->setScaleValue(value); }
 
-void MomentsPresenter::run() { runAlgorithm(m_model->setupAlgorithm()); }
+void MomentsPresenter::handleValidation(IUserInputValidator *validator) const {
+  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Sqw);
+}
 
-bool MomentsPresenter::validate() { return true; }
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
@@ -120,7 +120,10 @@ void MomentsPresenter::setFileExtensionsByName(bool filter) {
 /**
  * Handle when Run is clicked
  */
-void MomentsPresenter::handleRunClicked() { runTab(); }
+void MomentsPresenter::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
+  runAlgorithm(m_model->setupAlgorithm());
+}
 
 /**
  * Handles saving of workspaces

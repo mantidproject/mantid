@@ -102,10 +102,6 @@ protected slots:
   void inputChanged();
 
 private:
-  void setup() override = 0;
-  void run() override = 0;
-  bool validate() override = 0;
-
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
 

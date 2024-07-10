@@ -1,1 +1,0 @@
-- Fixed an unreliable error when loading a new group of runs after doing a simultaneous fit.
