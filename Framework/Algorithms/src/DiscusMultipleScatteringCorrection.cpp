@@ -341,26 +341,6 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
           "energy transfer bins are always simulated separately for indirect geometry";
   }
 
-  const bool radialCollimator = getProperty("RadialCollimator");
-  if (radialCollimator) {
-    auto numberOfHist = inputWS->getNumberHistograms();
-    for (auto histIdx = 0; histIdx < numberOfHist; ++histIdx) {
-      if (inputWS->spectrumInfo().hasDetectors(histIdx) && !inputWS->spectrumInfo().isMonitor(histIdx) &&
-          !inputWS->spectrumInfo().isMasked(histIdx)) {
-        const auto detector = inputWS->getDetector(histIdx);
-        if (!detector->shape()) {
-          issues["RadialCollimator"] = "RadialCollimator is only applicable when each detector has a valid shape";
-          break;
-        } else if ((detector->shape()->shape() != Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID)) {
-          issues["RadialCollimator"] = "RadialCollimator is only applicable when each detector has a cuboid shape. "
-                                       "A different shape was found at histogram index:" +
-                                       std::to_string(histIdx);
-          break;
-        }
-      }
-    }
-  }
-
   return issues;
 }
 /**
@@ -520,6 +500,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   prepareSampleBeamGeometry(inputWS);
   prepareStructureFactors();
+  loadCollimatorInfo();
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
@@ -1381,7 +1362,7 @@ GNU_DIAG_OFF("free-nonheap-object")
 std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
     ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
-    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
   std::vector<int> countZeroWeights(wValues.size(), 0);
   std::vector<double> sumOfWeights(wValues.size(), 0.);
@@ -1440,7 +1421,7 @@ GNU_DIAG_ON("free-nonheap-object")
 std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatter(
     const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
     const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
-    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
 
   double weight = 1;
 
@@ -1486,8 +1467,9 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
   if (considerCollimator) {
     const auto &samplePos = detectorInfo.samplePosition();
     auto hexahedron = createCollimatorHexahedronShape(samplePos, detectorInfo, histogramIndex);
-    // checking is the final scatter point inside the collimatorCorridor shape?
-    if (hexahedron && !hexahedron->isValid(track.startPoint()))
+    // zero the paths if the final scatter point is not inside the collimatorCorridor shape or the collimator shape is
+    // not as expected
+    if ((!hexahedron) || (hexahedron && !hexahedron->isValid(track.startPoint())))
       return {true, std::vector<double>(wValues.size(), 0.)};
   }
 
@@ -1555,10 +1537,14 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
  the sample with a legth as twice the distance from sample to detector.
  */
 std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createCollimatorHexahedronShape(
-    const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+    const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
   const auto shape = detectorInfo.detector(histogramIndex).shape();
+  if (!shape || (shape->shape() != Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID)) {
+    return nullptr;
+  }
+
   try {
-    const auto &shapeInfo = shape->shapeInfo();
+    shape->shapeInfo();
   } catch (std::exception &) {
     return nullptr;
   }
@@ -1568,46 +1554,43 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
   const auto cuboidGeometry = shape->shapeInfo().cuboidGeometry();
 
   // Positions of the detector's front face
-  const auto &detLeftFrontBottomPos = detectorAbsolPos + cuboidGeometry.leftFrontBottom;                // U
-  const auto &detLeftFrontTopPos = detectorAbsolPos + cuboidGeometry.leftFrontTop;                      // T
-  const auto &detRightFrontBottomPos = detectorAbsolPos + cuboidGeometry.rightFrontBottom;              // V
-  const auto detRightFrontTopPos = detLeftFrontTopPos + detRightFrontBottomPos - detLeftFrontBottomPos; // W
+  const auto &detLeftFrontBottomPos = detectorAbsolPos + cuboidGeometry.leftFrontBottom;
+  const auto &detLeftFrontTopPos = detectorAbsolPos + cuboidGeometry.leftFrontTop;
+  const auto &detRightFrontBottomPos = detectorAbsolPos + cuboidGeometry.rightFrontBottom;
+  const auto detRightFrontTopPos = detLeftFrontTopPos + detRightFrontBottomPos - detLeftFrontBottomPos;
 
-  const auto detCentorPos =
-      (detLeftFrontBottomPos + detLeftFrontTopPos + detRightFrontBottomPos + detRightFrontTopPos) / 4.0; // C
-  const auto detTopMiddlePos = (detLeftFrontTopPos + detRightFrontTopPos) / 2.0;                         // D
+  const auto detCentrePos =
+      (detLeftFrontBottomPos + detLeftFrontTopPos + detRightFrontBottomPos + detRightFrontTopPos) / 4.0;
+  const auto detTopMiddlePos = (detLeftFrontTopPos + detRightFrontTopPos) / 2.0;
 
   // Sanity check to avoid dividing by zero
-  if ((detRightFrontTopPos == detLeftFrontTopPos) || (detTopMiddlePos == detCentorPos) || (detCentorPos == samplePos)) {
+  if ((detRightFrontTopPos == detLeftFrontTopPos) || (detTopMiddlePos == detCentrePos) || (detCentrePos == samplePos)) {
     return nullptr;
   }
 
   // Define the unit vectors needed for calculations
-  const auto unitVecLeftToRight =
-      (detRightFrontTopPos - detLeftFrontTopPos) / (detRightFrontTopPos - detLeftFrontTopPos).norm();        // x2
-  const auto unitVecBottomToUp = (detTopMiddlePos - detCentorPos) / (detTopMiddlePos - detCentorPos).norm(); // x1
-  const auto unitVecSampleToDet = (detCentorPos - samplePos) / (detCentorPos - samplePos).norm();            // x4
+  const auto unitVecBottomToUp = Kernel::normalize(detTopMiddlePos - detCentrePos);
+  const auto unitVecSampleToDet = Kernel::normalize(detCentrePos - samplePos);
+  const auto unitVecLeftToRight = Kernel::normalize(
+      V3D(-1.0 * unitVecSampleToDet.Z(), 0,
+          -1.0 * unitVecSampleToDet.X())); // this is a vector normal to unitVecSampleToDet on XZ plane
 
-  // Collimator inner radius
-  const auto colInnerRadius = getDoubleParamFromIDF("col-radius");
-  // Half of the angular extend of the collimator seen from the sample
-  const double colHalfAngularExtent = 0.5 * getDoubleParamFromIDF("col-angular-extend");
-  // Height of collimator plate
-  const double colPlateHeight = getDoubleParamFromIDF("col-plate-height");
-
-  // Calculated positions of collimator openning plane that is parallell to the detector.
-  const auto colOpenningLeftTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
-                                     (unitVecBottomToUp * (colPlateHeight / 2.0)) -
-                                     (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // R
-  const auto colOpenningRightTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
-                                      (unitVecBottomToUp * (colPlateHeight / 2.0)) +
-                                      (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // S
-  const auto colOpenningLeftBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
-                                        (unitVecBottomToUp * (colPlateHeight / 2.0)) -
-                                        (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // Q
-  const auto colOpenningRightBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
-                                         (unitVecBottomToUp * (colPlateHeight / 2.0)) +
-                                         (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent)); // P
+  const auto colOpenningLeftTopPos =
+      (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos +
+      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) -
+      (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
+  const auto colOpenningRightTopPos =
+      (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos +
+      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) +
+      (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
+  const auto colOpenningLeftBottomPos =
+      (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos -
+      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) -
+      (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
+  const auto colOpenningRightBottomPos =
+      (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos -
+      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) +
+      (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
 
   // Sanity check to avoid dividing by zero
   if ((colOpenningLeftTopPos == detLeftFrontTopPos) || (colOpenningLeftBottomPos == detLeftFrontBottomPos) ||
@@ -1616,60 +1599,68 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
   }
 
   // Unit vectors along the sides of hexahedron shape
-  const auto unitVecAlongLeftTopLeg =
-      (colOpenningLeftTopPos - detLeftFrontTopPos) / (colOpenningLeftTopPos - detLeftFrontTopPos).norm(); // y2
-  const auto unitVecAlongLeftBottomLeg = (colOpenningLeftBottomPos - detLeftFrontBottomPos) /
-                                         (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm(); // y4
-  const auto unitVecAlongRightTopLeg =
-      (colOpenningRightTopPos - detRightFrontTopPos) / (colOpenningRightTopPos - detRightFrontTopPos).norm(); // y1
-  const auto unitVecAlongRightBottomLeg = (colOpenningRightBottomPos - detRightFrontBottomPos) /
-                                          (colOpenningRightBottomPos - detRightFrontBottomPos).norm(); // y3
+  const auto unitVecAlongLeftTopLeg = Kernel::normalize(colOpenningLeftTopPos - detLeftFrontTopPos);
+  const auto unitVecAlongLeftBottomLeg = Kernel::normalize(colOpenningLeftBottomPos - detLeftFrontBottomPos);
+  const auto unitVecAlongRightTopLeg = Kernel::normalize(colOpenningRightTopPos - detRightFrontTopPos);
+  const auto unitVecAlongRightBottomLeg = Kernel::normalize(colOpenningRightBottomPos - detRightFrontBottomPos);
 
   // Positions of the hexahedron extended towards the sample for each of its legs to have a length twice the lenght of
   // sample to detector
-  double sampleCentreToDetDistance = (detCentorPos - samplePos).norm();
-  const auto leftFrontBottomPoint =
-      detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0; // S-dash
+  double sampleCentreToDetDistance = (detCentrePos - samplePos).norm();
+  const auto leftFrontBottomPoint = detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0;
   const auto hexaHedronLegsLenRatio =
       (leftFrontBottomPoint - detRightFrontTopPos).norm() / (colOpenningRightTopPos - detRightFrontTopPos).norm();
-  const auto leftBackBottomPoint =
-      detLeftFrontTopPos +
-      unitVecAlongLeftTopLeg * hexaHedronLegsLenRatio * (colOpenningLeftTopPos - detLeftFrontTopPos).norm(); // R-dash
+  const auto leftBackBottomPoint = detLeftFrontTopPos + unitVecAlongLeftTopLeg * hexaHedronLegsLenRatio *
+                                                            (colOpenningLeftTopPos - detLeftFrontTopPos).norm();
   const auto rightFrontBottomPoint =
-      detRightFrontBottomPos + unitVecAlongRightBottomLeg * hexaHedronLegsLenRatio *
-                                   (colOpenningRightBottomPos - detRightFrontBottomPos).norm(); // P-dash
+      detRightFrontBottomPos +
+      unitVecAlongRightBottomLeg * hexaHedronLegsLenRatio * (colOpenningRightBottomPos - detRightFrontBottomPos).norm();
   const auto rightBackBottomPoint =
-      detLeftFrontBottomPos + unitVecAlongLeftBottomLeg * hexaHedronLegsLenRatio *
-                                  (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm(); // Q-dash
+      detLeftFrontBottomPos +
+      unitVecAlongLeftBottomLeg * hexaHedronLegsLenRatio * (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm();
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<hexahedron id=\"corridor-shape\" >"
-                 << "<left-back-bottom-point x=\"" << leftBackBottomPoint.X() << "\"" // R-dash
+                 << "<left-back-bottom-point x=\"" << leftBackBottomPoint.X() << "\""
                  << " y=\"" << leftBackBottomPoint.Y() << "\""
                  << " z=\"" << leftBackBottomPoint.Z() << "\" />"
-                 << "<left-front-bottom-point x=\"" << leftFrontBottomPoint.X() << "\"" // S-dash
+                 << "<left-front-bottom-point x=\"" << leftFrontBottomPoint.X() << "\""
                  << " y=\"" << leftFrontBottomPoint.Y() << "\""
                  << " z=\"" << leftFrontBottomPoint.Z() << "\" />"
-                 << "<right-front-bottom-point x=\"" << rightFrontBottomPoint.X() << "\"" // P-dash
+                 << "<right-front-bottom-point x=\"" << rightFrontBottomPoint.X() << "\""
                  << " y=\"" << rightFrontBottomPoint.Y() << "\""
                  << " z=\"" << rightFrontBottomPoint.Z() << "\" />"
-                 << "<right-back-bottom-point x=\"" << rightBackBottomPoint.X() << "\"" // Q-dash
+                 << "<right-back-bottom-point x=\"" << rightBackBottomPoint.X() << "\""
                  << " y=\"" << rightBackBottomPoint.Y() << "\""
                  << " z=\"" << rightBackBottomPoint.Z() << "\" />"
-                 << "<left-back-top-point x=\"" << detLeftFrontTopPos.X() << "\"" // T
+                 << "<left-back-top-point x=\"" << detLeftFrontTopPos.X() << "\""
                  << " y=\"" << detLeftFrontTopPos.Y() << "\""
                  << " z=\"" << detLeftFrontTopPos.Z() << "\" />"
-                 << "<left-front-top-point x=\"" << detRightFrontTopPos.X() << "\"" // W
+                 << "<left-front-top-point x=\"" << detRightFrontTopPos.X() << "\""
                  << " y=\"" << detRightFrontTopPos.Y() << "\""
                  << " z=\"" << detRightFrontTopPos.Z() << "\" />"
-                 << "<right-front-top-point x=\"" << detRightFrontBottomPos.X() << "\"" // V
+                 << "<right-front-top-point x=\"" << detRightFrontBottomPos.X() << "\""
                  << " y=\"" << detRightFrontBottomPos.Y() << "\""
                  << " z=\"" << detRightFrontBottomPos.Z() << "\" />"
-                 << "<right-back-top-point x=\"" << detLeftFrontBottomPos.X() << "\"" // U
+                 << "<right-back-top-point x=\"" << detLeftFrontBottomPos.X() << "\""
                  << " y=\"" << detLeftFrontBottomPos.Y() << "\""
                  << " z=\"" << detLeftFrontBottomPos.Z() << "\" />"
                  << "</hexahedron>";
   Geometry::ShapeFactory shapeMaker;
   return shapeMaker.createShape(xmlShapeStream.str());
+}
+
+void DiscusMultipleScatteringCorrection::loadCollimatorInfo() {
+  const bool radialCollimator = getProperty("RadialCollimator");
+  if (radialCollimator) {
+    m_collimatorInfo = std::make_unique<CollimatorInfo>();
+    // Collimator inner radius
+    m_collimatorInfo->m_innerRadius = getDoubleParamFromIDF("col-radius");
+    // Half of the angular extent of the collimator seen from the sample
+    m_collimatorInfo->m_halfAngularExtent = 0.5 * getDoubleParamFromIDF("col-angular-extent");
+    // Height of collimator plate
+    m_collimatorInfo->m_plateHeight = getDoubleParamFromIDF("col-plate-height");
+    m_collimatorInfo->m_axis = getV3DParamFromIDF("col-axis");
+  }
 }
 
 double DiscusMultipleScatteringCorrection::getDoubleParamFromIDF(std::string paramName) {
@@ -1682,6 +1673,25 @@ double DiscusMultipleScatteringCorrection::getDoubleParamFromIDF(std::string par
   }
 
   return static_cast<double>(val_vec.front());
+}
+
+Kernel::V3D DiscusMultipleScatteringCorrection::getV3DParamFromIDF(std::string paramName) {
+  if (!m_instrument->hasParameter(paramName)) {
+    throw std::runtime_error("Cannot find parameter:" + paramName + " from instrument parameter file");
+  }
+
+  std::string paramValStr = m_instrument->getStringParameter(paramName)[0];
+  std::vector<std::string> v3dStrComponent;
+  boost::split(v3dStrComponent, paramValStr, boost::is_any_of(","));
+  if (v3dStrComponent.size() != 3) {
+    throw std::runtime_error("Invalid number of coordinates given for parameter:" + paramName +
+                             " in instrument parameter file");
+  }
+  std::vector<double> v3dComponents(3);
+  std::transform(v3dStrComponent.begin(), v3dStrComponent.end(), v3dComponents.begin(),
+                 [](const std::string &str) -> double { return std::stod(str); });
+
+  return Kernel::V3D(v3dComponents[0], v3dComponents[1], v3dComponents[3]);
 }
 
 double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const double kinc) {
@@ -2156,7 +2166,6 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
     const auto &envBox = m_env->boundingBox();
     m_activeRegion.grow(envBox);
   }
-  // auto instrument = inputWS->getInstrument();
   m_instrument = inputWS->getInstrument();
   m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, inputWS->sample());
   m_refframe = m_instrument->getReferenceFrame();

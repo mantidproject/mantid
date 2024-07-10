@@ -169,7 +169,7 @@ public:
     auto &pmap = inputWorkspace->instrumentParameters();
     Instrument_const_sptr instrument = inputWorkspace->getInstrument();
     pmap.addDouble(instrument.get(), "col-radius", 0.5);
-    pmap.addDouble(instrument.get(), "col-angular-extend", 0.034);
+    pmap.addDouble(instrument.get(), "col-angular-extent", 0.034);
     pmap.addDouble(instrument.get(), "col-plate-height", 0.2);
 
     auto alg = createAlgorithm();
