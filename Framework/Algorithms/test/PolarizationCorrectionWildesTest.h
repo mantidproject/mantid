@@ -570,10 +570,11 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "01")] = ws01->getName();
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "10")] = ws10->getName();
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+    auto const &flipperConfigVec = splitSpinStateString(flipperConfig);
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "01")] = ws01->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "10")] = ws10->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "11")] = ws11->getName();
 
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
     auto pols = std::vector<std::string>(4);
@@ -602,9 +603,10 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "00")] = ws00->getName();
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, presentFlipperConf)] = wsXX->getName();
-    wsNames[indexOfWorkspaceForSpinState(flipperConfig, "11")] = ws11->getName();
+    auto const &flipperConfigVec = splitSpinStateString(flipperConfig);
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "00")] = ws00->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, presentFlipperConf)] = wsXX->getName();
+    wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "11")] = ws11->getName();
 
     auto effWS = idealEfficiencies(edges);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig);
