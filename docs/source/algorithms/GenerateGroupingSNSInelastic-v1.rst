@@ -19,6 +19,7 @@ To select older instrument definition file, set instrument to "InstrumentDefinit
 
     All parameters are strings. Using integers for AlongTubes or AcrossTubes will cause errors.
     Only instrument definition files from ARCS, SEQUOIA, CNCS, HYSPEC are supported.
+    If both an instrument and InstrumentDefinitionFile are selected, InstrumentDefinitionFile will be ignored.
 
 Usage
 -----
