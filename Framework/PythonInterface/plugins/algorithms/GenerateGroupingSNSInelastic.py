@@ -53,6 +53,17 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         return
 
+    def validateInputs(self):
+        errors = dict()
+
+        # only one can be set
+        if (self.getProperty("Instrument").value == "InstrumentDefinitionFile") and (
+            not self.getProperty("InstrumentDefinitionFile").value.strip()
+        ):
+            errors["InstrumentDefinitionFile"] = "You must select an instrument or instrument definition file"
+
+        return errors
+
     def PyExec(self):
         """Main execution body"""
         # 1. Get input
@@ -60,29 +71,24 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         pixelsx = int(self.getProperty("AcrossTubes").value)
         instrument = self.getProperty("Instrument").value
         filename = self.getProperty("Filename").value
-        InstrumentDefinitionFile = self.getProperty("InstrumentDefinitionFile").value
+        IDF = self.getProperty("InstrumentDefinitionFile").value
 
-        # if InstrumentDefinitionFile(IDF) has a path, the instrument must be set to
-        # "InstrumentDefinitionFile" to reduce confusion.
-        if InstrumentDefinitionFile and instrument == "InstrumentDefinitionFile":
-            IDF = InstrumentDefinitionFile
-            __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
-            # checks the instrument from the loaded IDF belongs to the DGS/SNS suite.
-            if __w.getInstrument().getName() not in ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]:
-                raise ValueError("Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC")
-            # set instrument to instrument name from the loaded IDF instead of drop down menu
-            instrument = __w.getInstrument().getName()
-        # if IDF file is loaded but instrument is not set to "InstrumentDefinitionFile",raise ValueError
-        elif InstrumentDefinitionFile and not instrument == "InstrumentDefinitionFile":
-            raise ValueError("Set instrument to InstrumentDefinitionFile")
-        # if user no file is loaded in IDF option but instrument is set to "InstrumentDefinitionFile",raise ValueError
-        elif not InstrumentDefinitionFile and instrument == "InstrumentDefinitionFile":
-            raise ValueError("Select an InstrumentDefinitionFile")
-        # If no IDF is loaded and instrument is not set to "InstrumentDefinitionFile",
-        # use the default(latest) IDF file.
-        else:
+        ###
+        __w = None
+        if instrument != "InstrumentDefinitionFile":
             IDF = mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
             __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
+
+        if IDF:
+            if __w:
+                mantid.kernel.logger.warning("Instrument definition file will be ignored if instrument is selected")
+            else:
+                __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
+                # checks the instrument from the loaded IDF belongs to the DGS/SNS suite.
+                if __w.getInstrument().getName() not in ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]:
+                    raise ValueError("Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC")
+                # set instrument to instrument name from the loaded IDF instead of drop down menu
+                instrument = __w.getInstrument().getName()
 
         i = 0
         spectrumInfo = __w.spectrumInfo()

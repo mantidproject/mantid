@@ -45,17 +45,29 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         """Test scenario: instrument == "CNCS" and InstrumentDefinitionFile is used.
         Catch an error to instruct user set instrument to InstrumentDeifinitionFile option in the drop down menu.
         """
-        with self.assertRaisesRegex(RuntimeError, "Set instrument to InstrumentDefinitionFile") as cm:
-            GenerateGroupingSNSInelastic(
-                instrument="CNCS", InstrumentDefinitionFile=self.CNCS_old_IDF, Filename="GenerateGroupingSNSInelasticTest.xml"
-            )
+        # with self.assertRaisesRegex(RuntimeError, "Set instrument to InstrumentDefinitionFile") as cm:
+
+        alg_test = run_algorithm(
+            "GenerateGroupingSNSInelastic",
+            instrument="SEQUOIA",
+            InstrumentDefinitionFile=self.CNCS_old_IDF,
+            Filename="GenerateGroupingSNSInelasticTest.xml",
+        )
+
+        self.assertTrue(alg_test.isExecuted())
+        outfilename = alg_test.getProperty("Filename").value
+        with open(outfilename) as f:
+            data = f.read()
+        self.assertTrue("SEQUOIA" in data)
+        self.assertFalse("CNCS" in data)
+        os.remove(outfilename)
 
     def test_Instrument_set_to_InstrumentDefinitionFile(self):
         """Test scenario: instrument == "InstrumentDefinitionFile" and InstrumentDefinitionFile is not used.
         Catch an error to remind user to put a valid file in InstrumentDefinitionFile.
         """
 
-        with self.assertRaisesRegex(RuntimeError, "Select an InstrumentDefinitionFile") as cm:
+        with self.assertRaisesRegex(RuntimeError, "invalid") as cm:
             GenerateGroupingSNSInelastic(
                 instrument="InstrumentDefinitionFile",
                 #  InstrumentDefinitionFile="",
