@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationEfficienciesWildes.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
@@ -213,14 +214,18 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 }
 
 void PolarizationEfficienciesWildes::exec() {
+  Progress progress(this, 0.0, 1.0, 10);
+  progress.report(0, "Calculating flipper efficiencies");
   calculateFlipperEfficienciesAndPhi();
 
   const bool solveForP = !isDefault(PropNames::OUTPUT_P_EFF_WS);
   const bool solveForA = !isDefault(PropNames::OUTPUT_A_EFF_WS);
   if (solveForP || solveForA) {
+    progress.report(3, "Finding polarizer and analyser efficiencies");
     calculatePolarizerAndAnalyserEfficiencies(solveForP, solveForA);
   }
 
+  progress.report(8, "Setting algorithm outputs");
   setOutputs();
 }
 
