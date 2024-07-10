@@ -34,13 +34,19 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         """Python initialization:  Define input parameters"""
         py = ["1", "2", "4", "8", "16", "32", "64", "128"]
         px = ["1", "2", "4", "8"]
-        instrument = ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]
+        instrument = ["ARCS", "CNCS", "HYSPEC", "SEQUOIA", "InstrumentDefinitionFile"]
 
         self.declareProperty("AlongTubes", "1", mantid.kernel.StringListValidator(py), "Number of pixels across tubes to be grouped")
         self.declareProperty("AcrossTubes", "1", mantid.kernel.StringListValidator(px), "Number of pixels across tubes to be grouped")
         self.declareProperty(
             "Instrument", instrument[0], mantid.kernel.StringListValidator(instrument), "The instrument for wich to create grouping"
         )
+
+        IDF_enabled = mantid.kernel.VisibleWhenProperty("Instrument", mantid.kernel.PropertyCriterion.IsEqualTo, "InstrumentDefinitionFile")
+        f_in = mantid.api.FileProperty("InstrumentDefinitionFile", "", mantid.api.FileAction.OptionalLoad, ".xml")
+        self.declareProperty(f_in, doc="Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC")
+        self.setPropertySettings("InstrumentDefinitionFile", IDF_enabled)
+
         f = mantid.api.FileProperty("Filename", "", mantid.api.FileAction.Save, ".xml")
 
         self.declareProperty(f, "Output filename.")
@@ -54,9 +60,29 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         pixelsx = int(self.getProperty("AcrossTubes").value)
         instrument = self.getProperty("Instrument").value
         filename = self.getProperty("Filename").value
+        InstrumentDefinitionFile = self.getProperty("InstrumentDefinitionFile").value
 
-        IDF = mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
-        __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
+        # if InstrumentDefinitionFile(IDF) has a path, the instrument must be set to
+        # "InstrumentDefinitionFile" to reduce confusion.
+        if InstrumentDefinitionFile and instrument == "InstrumentDefinitionFile":
+            IDF = InstrumentDefinitionFile
+            __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
+            # checks the instrument from the loaded IDF belongs to the DGS/SNS suite.
+            if __w.getInstrument().getName() not in ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]:
+                raise ValueError("Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC")
+            # set instrument to instrument name from the loaded IDF instead of drop down menu
+            instrument = __w.getInstrument().getName()
+        # if IDF file is loaded but instrument is not set to "InstrumentDefinitionFile",raise ValueError
+        elif InstrumentDefinitionFile and not instrument == "InstrumentDefinitionFile":
+            raise ValueError("Set instrument to InstrumentDefinitionFile")
+        # if user no file is loaded in IDF option but instrument is set to "InstrumentDefinitionFile",raise ValueError
+        elif not InstrumentDefinitionFile and instrument == "InstrumentDefinitionFile":
+            raise ValueError("Select an InstrumentDefinitionFile")
+        # If no IDF is loaded and instrument is not set to "InstrumentDefinitionFile",
+        # use the default(latest) IDF file.
+        else:
+            IDF = mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
+            __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i = 0
         spectrumInfo = __w.spectrumInfo()
