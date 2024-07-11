@@ -42,8 +42,8 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         os.remove(outfilename)
 
     def test_Instrument_and_instrumentDefinitionFile_both_selected(self):
-        """Test scenario: instrument == "CNCS" and InstrumentDefinitionFile is used.
-        Catch an error to instruct user set instrument to InstrumentDeifinitionFile option in the drop down menu.
+        """Test scenario: instrument == "SEQUOIA" and an old CNCS InstrumentDefinitionFile is used.
+        Checks the correct instrument("SEQUOIA") is used not CNCS.
         """
         # with self.assertRaisesRegex(RuntimeError, "Set instrument to InstrumentDefinitionFile") as cm:
 

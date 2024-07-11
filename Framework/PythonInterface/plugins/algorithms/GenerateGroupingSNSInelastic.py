@@ -76,8 +76,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         ###
         __w = None
         if instrument != "InstrumentDefinitionFile":
-            IDF = mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
-            __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
+            IDF_instrument = mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
+            __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF_instrument)
 
         if IDF:
             if __w:
