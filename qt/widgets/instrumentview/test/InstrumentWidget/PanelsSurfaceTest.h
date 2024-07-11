@@ -27,6 +27,10 @@ public:
   void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const override {
     PanelsSurface::project(detIndex, u, v, uscale, vscale);
   }
+  void project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
+               double &vscale) const override {
+    PanelsSurface::project(position, u, v, uscale, vscale);
+  }
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) {
     return PanelsSurface::calcBankRotation(detPos, normal);
   }
