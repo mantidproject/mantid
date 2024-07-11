@@ -440,7 +440,9 @@ class PeakFitter:
 
     def update_initial_peak_position(self, ws, peaks, ipk):
         itof = np.argmin(abs(self.tofs - self.pk.getTOF()))
-        peak_pos = find_nearest_peak_in_data_window(self.y, self.ispecs, self.tofs, ws, peaks, ipk, *self.peak_pos, itof, threshold=0.0)
+        peak_pos = find_nearest_peak_in_data_window(
+            self.y, self.ispecs, self.tofs, ws, peaks, ipk, (*self.peak_pos, itof), min_threshold=0.0
+        )
         self.peak_pos = (peak_pos[0], peak_pos[1]) if peak_pos is not None else None  # omit tof index
 
     def get_composite_function_with_initial_params(self, ws, peak_func_name, bg_func):

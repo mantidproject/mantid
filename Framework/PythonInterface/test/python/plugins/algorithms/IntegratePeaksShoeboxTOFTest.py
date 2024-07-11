@@ -76,7 +76,7 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         AnalysisDataService.clear()
         shutil.rmtree(cls._test_dir)
 
-    def _assert_found_correct_peaks(self, peak_ws, i_over_sigs=[6.4407, 2.4503]):
+    def _assert_found_correct_peaks(self, peak_ws, i_over_sigs=[6.4407, 4.0207]):
         self.assertEqual(peak_ws.getNumberPeaks(), 2)
         peak_ws = SortPeaksWorkspace(
             InputWorkspace=peak_ws, OutputWorkspace=peak_ws.name(), ColumnNameToSortBy="DetID", SortAscending=False
@@ -191,7 +191,7 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
             IntegrateIfOnEdge=True,
         )
         # check I/sigmas much worse if not optimised
-        self._assert_found_correct_peaks(out, i_over_sigs=[2.7001, 1.1531])
+        self._assert_found_correct_peaks(out, i_over_sigs=[4.4631, 2.3966])
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")
