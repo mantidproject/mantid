@@ -34,6 +34,8 @@ Systems of different dimensionality :math:`d` can simply be represented in terms
     D_{1}, D_{2} = D_{\parallel},         D_{3} = D_{\perp}          (d=2)
     D_{1}, D_{2}, D_{3} = D_{\parallel}                              (d=3)
 
+For the :math:`d=3` case, the :math:`D_{\perp}` parameter has no significance. It may be a good idea to fix this parameter to prevent the minimizer from performing unnecessary optimization steps in this case.
+
 .. attributes::
 
 .. properties::
