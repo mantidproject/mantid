@@ -34,6 +34,7 @@ set(TEST_PY_FILES
     PrimStretchedExpFTTest.py
     RedfieldTest.py
     RFresonanceTest.py
+    SpinDiffusionTest.py
     SpinGlassTest.py
     StandardSCTest.py
     StaticLorentzianKTTest.py
