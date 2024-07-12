@@ -127,7 +127,18 @@ void PolarizationEfficienciesWildes::init() {
 }
 
 namespace {
-void validateInputWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &propertyName,
+
+void validateMatchingBins(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                          const Mantid::API::MatrixWorkspace_sptr &refWs, const std::string &propertyName,
+                          std::map<std::string, std::string> &problems) {
+  if (!WorkspaceHelpers::matchingBins(*workspace, *refWs, true)) {
+    problems[propertyName] = "All input workspaces must have the same X values.";
+    return;
+  }
+}
+
+void validateInputWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                            const Mantid::API::MatrixWorkspace_sptr &refWs, const std::string &propertyName,
                             std::map<std::string, std::string> &problems) {
   if (workspace == nullptr) {
     problems[propertyName] = "All input workspaces must be matrix workspaces.";
@@ -144,6 +155,8 @@ void validateInputWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, 
     problems[propertyName] = "All input workspaces must contain only a single spectrum.";
     return;
   }
+
+  validateMatchingBins(workspace, refWs, propertyName, problems);
 }
 
 void validateInputWSGroup(const Mantid::API::WorkspaceGroup_sptr &groupWs, const std::string &propertyName,
@@ -158,9 +171,10 @@ void validateInputWSGroup(const Mantid::API::WorkspaceGroup_sptr &groupWs, const
     return;
   }
 
+  const MatrixWorkspace_sptr refWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(0));
   for (size_t i = 0; i < groupWs->size(); ++i) {
     const MatrixWorkspace_sptr childWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
-    validateInputWorkspace(childWs, propertyName, problems);
+    validateInputWorkspace(childWs, refWs, propertyName, problems);
   }
 }
 } // namespace
@@ -170,6 +184,7 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 
   const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
   validateInputWSGroup(nonMagWsGrp, PropNames::INPUT_NON_MAG_WS, problems);
+  const MatrixWorkspace_sptr nonMagRefWs = std::dynamic_pointer_cast<MatrixWorkspace>(nonMagWsGrp->getItem(0));
 
   const bool hasMagWsGrp = !isDefault(PropNames::INPUT_MAG_WS);
   const bool hasInputPWs = !isDefault(PropNames::INPUT_P_EFF_WS);
@@ -188,15 +203,20 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 
     const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
     validateInputWSGroup(magWsGrp, PropNames::INPUT_MAG_WS, problems);
+
+    if (problems.find(PropNames::INPUT_MAG_WS) == problems.end()) {
+      const MatrixWorkspace_sptr magWs = std::dynamic_pointer_cast<MatrixWorkspace>(magWsGrp->getItem(0));
+      validateMatchingBins(magWs, nonMagRefWs, PropNames::INPUT_MAG_WS, problems);
+    }
   } else {
     if (hasInputPWs) {
       const MatrixWorkspace_sptr inputPolEffWs = getProperty(PropNames::INPUT_P_EFF_WS);
-      validateInputWorkspace(inputPolEffWs, PropNames::INPUT_P_EFF_WS, problems);
+      validateInputWorkspace(inputPolEffWs, nonMagRefWs, PropNames::INPUT_P_EFF_WS, problems);
     }
 
     if (hasInputAWs) {
       const MatrixWorkspace_sptr inputAnaEffWs = getProperty(PropNames::INPUT_A_EFF_WS);
-      validateInputWorkspace(inputAnaEffWs, PropNames::INPUT_A_EFF_WS, problems);
+      validateInputWorkspace(inputAnaEffWs, nonMagRefWs, PropNames::INPUT_A_EFF_WS, problems);
     }
   }
 
