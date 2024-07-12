@@ -30,6 +30,7 @@ auto constexpr WS_GRP_SIZE_ERROR{"The input group must contain a workspace for a
 auto constexpr WS_GRP_CHILD_TYPE_ERROR{"All input workspaces must be matrix workspaces."};
 auto constexpr WS_UNIT_ERROR{"All input workspaces must be in units of Wavelength."};
 auto constexpr WS_SPECTRUM_ERROR{"All input workspaces must contain only a single spectrum."};
+auto constexpr WS_BINS_ERROR{"All input workspaces must have the same X values."};
 auto constexpr INPUT_EFF_WS_ERROR{
     "If a magnetic workspace group has been provided then input efficiency workspaces should not be provided."};
 auto constexpr OUTPUT_P_EFF_ERROR{"If output polarizer efficiency is requested then either the magnetic workspace or "
@@ -61,6 +62,11 @@ auto constexpr ALPHA_WS{"OutputAlpha"};
 auto constexpr TPMO_WS{"OutputTwoPMinusOne"};
 auto constexpr TAMO_WS{"OutputTwoAMinusOne"};
 } // namespace OutputPropNames
+
+namespace {
+// The default bin width used by the CreateSampleWorkspace algorithm
+auto constexpr DEFAULT_BIN_WIDTH = 200;
+} // unnamed namespace
 
 class PolarizationEfficienciesWildesTest : public CxxTest::TestSuite {
 public:
@@ -173,6 +179,44 @@ public:
     auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::WS_SPECTRUM_ERROR);
+  }
+
+  /// Validation tests - workspace bin boundaries
+
+  void test_non_mag_group_child_ws_bin_mismatch_throws_error() {
+    const auto group = createNonMagWSGroup("nonMagWs", true, true, true);
+    const auto alg = createEfficiencyAlg(group);
+    assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_BINS_ERROR);
+  }
+
+  void test_mag_group_child_ws_bin_mismatch_throws_error() {
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto magGrp = createMagWSGroup("magWs", true, true, true);
+    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+    assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_BINS_ERROR);
+  }
+
+  void test_non_mag_and_mag_group_ws_bin_mismatch_throws_error() {
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto magGrp = createMagWSGroup("magWs", true, true, false, DEFAULT_BIN_WIDTH + 100);
+    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+    assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_BINS_ERROR);
+  }
+
+  void test_input_polarizer_efficiency_ws_bin_mismatch_throws_error() {
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto polarizerEffWs = createWS("polEff", 0.9, true, true, 300);
+    auto alg = createEfficiencyAlg(nonMagGrp);
+    alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
+    assertValidationError(alg, InputPropNames::P_EFF_WS, PropErrors::WS_BINS_ERROR);
+  }
+
+  void test_input_analyser_efficiency_ws_bin_mismatch_throws_error() {
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto analyserEffWs = createWS("analyserEff", 0.9, true, true, 300);
+    auto alg = createEfficiencyAlg(nonMagGrp);
+    alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
+    assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::WS_BINS_ERROR);
   }
 
   /// Validation tests - input property types
@@ -361,24 +405,32 @@ private:
   const double EXPECTED_RHO = 0.72727273;
 
   WorkspaceGroup_sptr createNonMagWSGroup(const std::string &outName, const bool isWavelength = true,
-                                          const bool isSingleSpectrum = true) {
-    return createWSGroup(outName, NON_MAG_Y_VALS, isWavelength, isSingleSpectrum);
+                                          const bool isSingleSpectrum = true, const bool includeBinMismatch = false,
+                                          const double binWidth = DEFAULT_BIN_WIDTH) {
+    return createWSGroup(outName, NON_MAG_Y_VALS, isWavelength, isSingleSpectrum, includeBinMismatch, binWidth);
   }
 
   WorkspaceGroup_sptr createMagWSGroup(const std::string &outName, const bool isWavelength = true,
-                                       const bool isSingleSpectrum = true) {
-    return createWSGroup(outName, MAG_Y_VALS, isWavelength, isSingleSpectrum);
+                                       const bool isSingleSpectrum = true, const bool includeBinMismatch = false,
+                                       const double binWidth = DEFAULT_BIN_WIDTH) {
+    return createWSGroup(outName, MAG_Y_VALS, isWavelength, isSingleSpectrum, includeBinMismatch, binWidth);
   }
 
   WorkspaceGroup_sptr createWSGroup(const std::string &outName, const std::vector<double> &yValues,
-                                    const bool isWavelength = true, const bool isSingleSpectrum = true) {
+                                    const bool isWavelength = true, const bool isSingleSpectrum = true,
+                                    const bool includeBinMismatch = false, const double binWidth = DEFAULT_BIN_WIDTH) {
 
     const std::vector<std::string> &wsNames{outName + "_00", outName + "_01", outName + "_10", outName + "_11"};
+    const size_t lastWsIdx = wsNames.size() - 1;
 
-    for (size_t i = 0; i < 4; ++i) {
-      const auto ws = createWS(wsNames[i], yValues[i], isWavelength, isSingleSpectrum);
+    for (size_t i = 0; i < lastWsIdx; ++i) {
+      const auto ws = createWS(wsNames[i], yValues[i], isWavelength, isSingleSpectrum, binWidth);
       AnalysisDataService::Instance().addOrReplace(wsNames[i], ws);
     }
+
+    const auto finalWs = createWS(wsNames[lastWsIdx], yValues[lastWsIdx], isWavelength, isSingleSpectrum,
+                                  includeBinMismatch ? binWidth + 100 : binWidth);
+    AnalysisDataService::Instance().addOrReplace(wsNames[lastWsIdx], finalWs);
 
     GroupWorkspaces groupAlg;
     groupAlg.initialize();
@@ -391,13 +443,14 @@ private:
   }
 
   MatrixWorkspace_sptr createWS(const std::string &outName, const double yValue = 1, const bool isWavelength = true,
-                                const bool isSingleSpectrum = true) {
+                                const bool isSingleSpectrum = true, const double binWidth = DEFAULT_BIN_WIDTH) {
     CreateSampleWorkspace alg;
     alg.initialize();
     alg.setChild(true);
     alg.setPropertyValue("XUnit", isWavelength ? "wavelength" : "TOF");
     alg.setProperty("NumBanks", isSingleSpectrum ? 1 : 2);
     alg.setProperty("BankPixelWidth", 1);
+    alg.setProperty("BinWidth", binWidth);
     alg.setPropertyValue("Function", "User Defined");
     alg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=x*0+" + std::to_string(yValue));
     alg.setPropertyValue("OutputWorkspace", outName);
