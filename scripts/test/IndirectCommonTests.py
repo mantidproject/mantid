@@ -12,6 +12,7 @@ Data Analysis, and Bayes.
 import unittest
 import numpy as np
 
+from mantid.api import AnalysisDataService
 from mantid.simpleapi import *
 import IndirectCommon as indirect_common
 
@@ -277,6 +278,27 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
         self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
+
+    def test_identify_non_zero_bin_range_returns_the_non_zero_bin_range(self):
+        ws = self.make_dummy_QENS_workspace()
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(AnalysisDataService.retrieve(ws), 0)
+
+        self.assertEqual(0.0, e_min)
+        self.assertEqual(20000.0, e_max)
+
+    def test_identify_non_zero_bin_range_returns_the_expected_range_for_leading_zeros(self):
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="0,1,2,1,3", StoreInADS=False)
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(ws, 0)
+
+        self.assertEqual(2.0, e_min)
+        self.assertEqual(5.0, e_max)
+
+    def test_identify_non_zero_bin_range_returns_the_expected_range_for_trailing_zeros(self):
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="4,1,2,0,0", StoreInADS=False)
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(ws, 0)
+
+        self.assertEqual(1.0, e_min)
+        self.assertEqual(3.0, e_max)
 
     # -----------------------------------------------------------
     # Custom assertion functions

@@ -7,6 +7,8 @@
 # pylint: disable=invalid-name,redefined-builtin
 import mantid.simpleapi as s_api
 from mantid import config, logger
+from mantid.api import MatrixWorkspace
+from typing import Tuple
 
 import os.path
 import math
@@ -547,33 +549,21 @@ def transposeFitParametersTable(params_table, output_table=None):
     s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
-def IndentifyDataBoundaries(sample_ws):
+def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int) -> Tuple[float]:
     """
-    Identifies and returns the first and last no zero data point in a workspace
+    Identifies the bin range within which there is no trailing or leading zero values for a given workspace index.
 
-    For multiple workspace spectra, the data points that are closest to the centre
-    out of all the spectra in the workspace are returned
+    @param workspace: the workspace containing spectra with bins.
+    @param workspace_index: the workspace index to identify the non-zero bin range within.
+    @return a tuple of the first and last non-zero values in a spectrum
     """
-
-    sample_ws = s_api.mtd[sample_ws]
-    nhists = sample_ws.getNumberHistograms()
-    start_data_idx, end_data_idx = 0, 0
-    # For all spectra in the workspace
-    for spectra in range(0, nhists):
-        # Obtain first and last non zero values
-        y_data = sample_ws.readY(spectra)
-        spectra_start_data = firstNonZero(y_data)
-        spectra_end_data = firstNonZero(list(reversed(y_data)))
-        # Replace workspace start and end if data is closer to the center
-        if spectra_start_data > start_data_idx:
-            start_data_idx = spectra_start_data
-        if spectra_end_data > end_data_idx:
-            end_data_idx = spectra_end_data
-    # Convert Bin index to data value
-    x_data = sample_ws.readX(0)
-    first_data_point = x_data[start_data_idx]
-    last_data_point = x_data[len(x_data) - end_data_idx - 2]
-    return first_data_point, last_data_point
+    # Identify bin index of first and last non-zero y value
+    y_data = workspace.readY(workspace_index)
+    start_data_idx = firstNonZero(y_data)
+    end_data_idx = firstNonZero(list(reversed(y_data)))
+    # Assumes common bin boundaries for each spectra
+    x_data = workspace.readX(0)
+    return x_data[start_data_idx], x_data[len(x_data) - end_data_idx - 1]
 
 
 def firstNonZero(data):
