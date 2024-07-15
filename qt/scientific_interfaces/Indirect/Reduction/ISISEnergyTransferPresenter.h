@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
@@ -19,8 +20,8 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IIETPresenter {
 public:
+  virtual void notifyFindingRun() = 0;
   virtual void notifySaveClicked() = 0;
-  virtual void notifyRunClicked() = 0;
   virtual void notifyPlotRawClicked() = 0;
   virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
   virtual void notifyRunFinished() = 0;
@@ -28,32 +29,32 @@ public:
 
 class MANTIDQT_INDIRECT_DLL IETPresenter : public DataReductionTab,
                                            public IIETPresenter,
+                                           public IRunSubscriber,
                                            public API::IAlgorithmRunnerSubscriber {
 
 public:
   IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_ptr<IIETModel> model,
                std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
-
+  void notifyFindingRun() override;
   void notifySaveClicked() override;
-  void notifyRunClicked() override;
   void notifyPlotRawClicked() override;
   void notifySaveCustomGroupingClicked(std::string const &customGrouping) override;
   void notifyRunFinished() override;
 
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) override;
 
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
+
 private:
-  bool validateInstrumentDetails();
+  void validateInstrumentDetails(IUserInputValidator *validator) const;
   void updateInstrumentConfiguration() override;
 
   void handleReductionComplete();
   void handlePlotRawPreProcessComplete();
 
-  InstrumentData getInstrumentData();
+  InstrumentData getInstrumentData() const;
 
   void setFileExtensionsByName(bool filter) override;
 

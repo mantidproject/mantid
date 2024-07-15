@@ -60,12 +60,8 @@ public:
   void filterInputData(bool filter);
 
 public slots:
-  void runTab();
 
 signals:
-  /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
 
@@ -91,7 +87,6 @@ protected:
   std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
 
 private slots:
-  void tabExecutionComplete(bool error);
   void handleNewInstrumentConfiguration();
 
 private:
@@ -99,7 +94,6 @@ private:
   virtual void updateInstrumentConfiguration() = 0;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
-  bool m_tabRunning;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

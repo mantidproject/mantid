@@ -25,18 +25,13 @@ Mantid::Kernel::Logger g_log("TransmissionCalc");
 namespace MantidQt::CustomInterfaces {
 TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.setupUi(parent);
-  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
-}
 
-/*
- * Run any tab setup code.
- */
-void TransmissionCalc::setup() {
   QRegExp chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);

@@ -8,7 +8,6 @@
 
 #include "../DllConfig.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "SimulationTab.h"
 #include "ui_MolDyn.h"
 
@@ -34,7 +33,6 @@ private slots:
 private:
   void setSaveEnabled(bool enabled);
 
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::string m_outputWsName;
   // The ui form
   Ui::MolDyn m_uiForm;

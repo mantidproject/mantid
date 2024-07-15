@@ -57,7 +57,6 @@ void Corrections::initLayout() {
 
   // Set up all tabs
   for (auto &tab : m_tabs) {
-    tab.second->setupTab();
     connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 

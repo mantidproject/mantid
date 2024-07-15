@@ -32,7 +32,6 @@ void Tools::initLayout() {
   std::map<unsigned int, ToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
     connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
-    iter->second->setupTab();
   }
 
   loadSettings();
@@ -84,18 +83,6 @@ void Tools::loadSettings() {
   }
 
   settings.endGroup();
-}
-
-/**
- * Slot to run the underlying algorithm code based on the currently selected
- * tab.
- *
- * This method checks the tabs validate method is passing before calling
- * the run method.
- */
-void Tools::runClicked() {
-  int tabIndex = m_uiForm.ToolsTabs->currentIndex();
-  m_tabs[tabIndex]->runTab();
 }
 
 std::string Tools::documentationPage() const { return "Indirect Tools"; }

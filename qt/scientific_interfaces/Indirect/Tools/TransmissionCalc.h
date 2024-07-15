@@ -8,7 +8,6 @@
 
 #include "../DllConfig.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "ToolsTab.h"
 #include "ui_TransmissionCalc.h"
@@ -31,15 +30,11 @@ public:
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
 
-protected:
-  void setup() override;
-
 private slots:
   /// Handles completion of the algorithm
   void algorithmComplete(bool error);
 
 private:
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   /// The UI form
   Ui::TransmissionCalc m_uiForm;
   /// The name of the current instrument

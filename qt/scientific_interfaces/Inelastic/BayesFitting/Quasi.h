@@ -8,7 +8,6 @@
 
 #include "BayesFittingTab.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "ui_Quasi.h"
 
@@ -59,8 +58,6 @@ private:
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setPlotResultIsPlotting(bool plotting);
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 
   std::string m_outputBaseName;
   /// Current preview spectrum

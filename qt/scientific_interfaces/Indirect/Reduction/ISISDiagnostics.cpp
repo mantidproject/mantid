@@ -29,6 +29,7 @@ namespace MantidQt::CustomInterfaces {
  */
 ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 
@@ -108,19 +109,13 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
 
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this, SLOT(handleNewFile()));
-  // Shows message on run buton when user is inputting a run number
-  connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   // Shows message on run button when Mantid is finding the file for a given run
   // number
   connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
   // Handles running, plotting and saving
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   // Set default UI state
   sliceTwoRanges(nullptr, false);
@@ -136,9 +131,7 @@ ISISDiagnostics::~ISISDiagnostics() {
   m_propTrees["SlicePropTree"]->unsetFactoryForManager(m_blnManager);
 }
 
-void ISISDiagnostics::setup() {}
-
-void ISISDiagnostics::run() {
+void ISISDiagnostics::handleRun() {
   QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
@@ -175,41 +168,31 @@ void ISISDiagnostics::run() {
   runAlgorithm(sliceAlg);
 }
 
-bool ISISDiagnostics::validate() {
-  UserInputValidator uiv;
-
+void ISISDiagnostics::handleValidation(IUserInputValidator *validator) const {
   // Check raw input
-  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
+  validator->checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
   if (m_uiForm.ckUseCalibration->isChecked())
-    uiv.checkFileFinderWidgetIsValid("Calibration", m_uiForm.dsInputFiles);
+    validator->checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
 
   // Check peak range
   auto rangeOne =
       std::make_pair(m_dblManager->value(m_properties["PeakStart"]), m_dblManager->value(m_properties["PeakEnd"]));
-  uiv.checkValidRange("Range One", rangeOne);
+  validator->checkValidRange("Range One", rangeOne);
 
   // Check background range
   bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
   if (useTwoRanges) {
     auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]),
                                    m_dblManager->value(m_properties["BackgroundEnd"]));
-    uiv.checkValidRange("Range Two", rangeTwo);
+    validator->checkValidRange("Range Two", rangeTwo);
 
-    uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
+    validator->checkRangesDontOverlap(rangeOne, rangeTwo);
   }
 
   // Check spectra range
   auto specRange =
       std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
-  uiv.checkValidRange("Spectra Range", specRange);
-
-  auto const error = uiv.generateErrorMessage();
-  bool isError = error != "";
-
-  if (isError)
-    g_log.warning(error);
-
-  return !isError;
+  validator->checkValidRange("Spectra Range", specRange);
 }
 
 /**
@@ -219,6 +202,8 @@ bool ISISDiagnostics::validate() {
  */
 void ISISDiagnostics::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_runPresenter->setRunEnabled(true);
+  m_uiForm.pbSave->setEnabled(!error);
 
   if (error)
     return;
@@ -229,9 +214,6 @@ void ISISDiagnostics::algorithmComplete(bool error) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;
   }
-
-  // Enable plot and save buttons
-  m_uiForm.pbSave->setEnabled(true);
 
   // Update the preview plots
   sliceAlgDone(false);
@@ -451,17 +433,10 @@ void ISISDiagnostics::setFileExtensionsByName(bool filter) {
 }
 
 /**
- * Called when a user starts to type / edit the runs to load.
- */
-void ISISDiagnostics::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...", "Run numbers are curently being edited.");
-}
-
-/**
  * Called when the FileFinder starts finding the files.
  */
 void ISISDiagnostics::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...", "Searchig for data files for the run numbers entered...");
+  m_runPresenter->setRunText("Finding files...");
   m_uiForm.dsInputFiles->setEnabled(false);
 }
 
@@ -470,18 +445,11 @@ void ISISDiagnostics::pbRunFinding() {
  */
 void ISISDiagnostics::pbRunFinished() {
   if (!m_uiForm.dsInputFiles->isValid())
-    updateRunButton(false, "unchanged", "Invalid Run(s)",
-                    "Cannot find data files for some of the run numbers enetered.");
+    m_runPresenter->setRunText("Invalid Run(s)");
   else
-    updateRunButton();
-
+    m_runPresenter->setRunEnabled(true);
   m_uiForm.dsInputFiles->setEnabled(true);
 }
-
-/**
- * Handle when Run is clicked
- */
-void ISISDiagnostics::runClicked() { runTab(); }
 
 /**
  * Handles saving workspace
@@ -492,17 +460,6 @@ void ISISDiagnostics::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ISISDiagnostics::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void ISISDiagnostics::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void ISISDiagnostics::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                      QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
-}
 
 } // namespace MantidQt::CustomInterfaces

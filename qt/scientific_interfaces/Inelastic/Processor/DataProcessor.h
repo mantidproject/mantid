@@ -47,8 +47,6 @@ public:
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
-  /// Set the presenter for the run widget
-  void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
 
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
@@ -63,7 +61,6 @@ private slots:
 
 protected:
   virtual void runComplete(bool error) { (void)error; };
-  std::unique_ptr<RunPresenter> m_runPresenter;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };

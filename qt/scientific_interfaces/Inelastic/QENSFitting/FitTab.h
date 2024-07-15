@@ -8,7 +8,6 @@
 
 #include "Common/InelasticTab.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -114,8 +113,6 @@ public:
   void handleRun() override;
 
 private:
-  void setup() override;
-
   void updateParameterEstimationData();
   void updateDataReferences();
   void updateFitFunction();
@@ -127,7 +124,6 @@ private:
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FittingPresenter> m_fittingPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
 };
 

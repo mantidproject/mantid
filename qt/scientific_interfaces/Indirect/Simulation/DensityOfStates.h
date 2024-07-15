@@ -8,7 +8,6 @@
 
 #include "../DllConfig.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "SimulationTab.h"
 #include "ui_DensityOfStates.h"
 
@@ -40,7 +39,6 @@ private:
   std::string formatToFilePropName(InputFormat const &format) const;
   bool isPdosFile(InputFormat const &dosFileFormat) const;
 
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   /// The ui form
   Ui::DensityOfStates m_uiForm;
   /// Name of output workspace

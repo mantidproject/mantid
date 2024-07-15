@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "Common/RunWidget/RunPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -68,6 +69,9 @@ public:
   void displayWarning(std::string const &message);
 
 protected:
+  /// Set the presenter for the run widget
+  void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
+
   /// Run the load algorithms
   bool loadFile(const std::string &filename, const std::string &outputName, const int specMin = -1,
                 const int specMax = -1, bool loadHistory = true);
@@ -93,18 +97,11 @@ protected:
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
 
-  QString runPythonCode(const QString &code, bool no_output = false);
-
   /// Checks the ADS for a workspace named `workspaceName`,
   /// opens a warning box for plotting/saving if none found
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
-  /// Overidden by child class.
-  virtual void setup() {}
-  /// Overidden by child class.
-  virtual void run() { throw std::logic_error("InelasticTab::run() called but is not implemented."); }
-  /// Overidden by child class.
-  virtual bool validate() { throw std::logic_error("InelasticTab::validate() called but is not implemented."); }
+  std::unique_ptr<RunPresenter> m_runPresenter;
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;
@@ -146,9 +143,6 @@ protected:
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 
 public slots:
-  void runTab();
-  void setupTab();
-  bool validateTab();
   void exportPythonScript();
 
 protected slots:

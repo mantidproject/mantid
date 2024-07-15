@@ -8,7 +8,6 @@
 
 #include "BayesFittingTab.h"
 #include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -66,8 +65,6 @@ private:
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setPlotResultIsPlotting(bool plotting);
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 
   /// Current preview spectrum
   int m_previewSpec;

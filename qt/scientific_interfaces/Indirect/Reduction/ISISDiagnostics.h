@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -40,16 +41,15 @@ class IDataReduction;
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public DataReductionTab {
+class MANTIDQT_INDIRECT_DLL ISISDiagnostics : public DataReductionTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   ISISDiagnostics(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISDiagnostics() override;
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void algorithmComplete(bool error);
@@ -59,17 +59,12 @@ private slots:
   void rangeSelectorDropped(double /*min*/, double /*max*/);
   void doublePropertyChanged(QtProperty * /*prop*/, double /*val*/);
   void sliceAlgDone(bool error);
-  void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
   // files.
-  void runClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void updateInstrumentConfiguration() override;

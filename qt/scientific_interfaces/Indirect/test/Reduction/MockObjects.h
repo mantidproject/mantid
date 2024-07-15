@@ -74,12 +74,13 @@ public:
   MOCK_CONST_METHOD0(getPlotData, IETPlotData());
   MOCK_CONST_METHOD0(getSaveData, IETSaveData());
   MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptionsView, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
   MOCK_CONST_METHOD0(isRunFilesValid, bool());
-  MOCK_CONST_METHOD1(validateCalibrationFileType, void(UserInputValidator *uiv));
-  MOCK_CONST_METHOD1(validateRebinString, void(UserInputValidator *uiv));
+  MOCK_CONST_METHOD1(validateCalibrationFileType, void(IUserInputValidator *uiv));
+  MOCK_CONST_METHOD1(validateRebinString, void(IUserInputValidator *uiv));
   MOCK_CONST_METHOD2(validateGroupingProperties,
                      std::optional<std::string>(std::size_t const &spectraMin, std::size_t const &spectraMax));
   MOCK_CONST_METHOD0(showRebinWidthPrompt, bool());

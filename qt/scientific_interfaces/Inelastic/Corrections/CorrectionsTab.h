@@ -97,10 +97,6 @@ protected:
   /// QtCheckBoxFactory
   QtCheckBoxFactory *m_blnEdFac;
 
-protected slots:
-  /// Slot that can be called when a user eidts an input.
-  void inputChanged();
-
 private:
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
