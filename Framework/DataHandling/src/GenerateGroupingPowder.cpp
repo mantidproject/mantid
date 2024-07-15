@@ -9,21 +9,16 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
-#include "MantidDataHandling/SavePAR.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
@@ -244,7 +239,7 @@ void GenerateGroupingPowder::init() {
   fileExtensionXMLorHDF5->addAllowedValue(std::string("nxs"));
   fileExtensionXMLorHDF5->addAllowedValue(std::string("nx5"));
   declareProperty("FileFormat", std::string("xml"), fileExtensionXMLorHDF5,
-                  "File extension/format for saving output: either xml (default) or nxs/nx5.", PropertyMode::Optional);
+                  "File extension/format for saving output: either xml (default) or nxs/nx5.");
   declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::OptionalSave,
                                                  std::vector<std::string>{"xml", "nxs", "nx5"}),
                   "A grouping file that will be created.");
@@ -282,7 +277,11 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {
+  createGroups();
+  saveGroups();
+}
 
+void GenerateGroupingPowder::createGroups() {
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
   const auto &spectrumInfo = input_ws->spectrumInfo();
   const auto &detectorInfo = input_ws->detectorInfo();
@@ -336,6 +335,9 @@ void GenerateGroupingPowder::exec() {
       this->m_groupWS->setValue(ids, groupId);
     }
   }
+}
+
+void GenerateGroupingPowder::saveGroups() {
 
   // save if a filename was specified
   if (!isDefault("GroupingFilename")) {
