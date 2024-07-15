@@ -5,27 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/GenerateGroupingPowder2.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidDataHandling/SavePAR.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/XML/XMLWriter.h>
-
-#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
-using namespace Poco::XML;
 
 namespace Mantid::DataHandling {
 
@@ -77,72 +65,37 @@ void GenerateGroupingPowder2::saveAsPAR() {
   std::string PARfilename = getPropertyValue("GroupingFilename");
   PARfilename = parFilenameFromXmlFilename(PARfilename);
 
-  std::ofstream outPAR_file(PARfilename.c_str());
-  if (!outPAR_file) {
-    g_log.error("Unable to create file: " + PARfilename);
-    throw Exception::FileError("Unable to create file: ", PARfilename);
-  }
-  MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-  const auto &spectrumInfo = input_ws->spectrumInfo();
+  // create an empty workspace based on input to perform GroupDetectors with
+  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  inputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace, -1, 1, 1);
 
-  const double step = getProperty("AngleStep");
-  const auto numSteps = static_cast<size_t>(180. / step + 1);
+  auto groupDetectors = createChildAlgorithm("GroupDetectors", 0, 1, true, 2);
+  groupDetectors->initialize();
+  groupDetectors->setProperty("InputWorkspace", inputWorkspace);
+  groupDetectors->setProperty("CopyGroupingFromWorkspace", this->m_groupWS);
+  groupDetectors->execute();
 
-  std::vector<std::vector<detid_t>> groups(numSteps);
-  std::vector<double> twoThetaAverage(numSteps, 0.);
-  std::vector<double> rAverage(numSteps, 0.);
-  // run through spectrums
-  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    // skip invalid cases
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
-      continue;
-    }
-    const auto &det = spectrumInfo.detector(i);
-    // integer count angle slice
-    const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
-    const auto where = static_cast<size_t>(tt / step);
-    // create these averages at this slice?
-    twoThetaAverage[where] += tt;
-    rAverage[where] += spectrumInfo.l2(i);
-    if (spectrumInfo.hasUniqueDetector(i)) {
-      groups[where].emplace_back(det.getID());
-    } else {
-      const auto &group = dynamic_cast<const DetectorGroup &>(det);
-      const auto idv = group.getDetectorIDs();
-      groups[where].insert(groups[where].end(), idv.begin(), idv.end());
-    }
-  }
+  const MatrixWorkspace_sptr groupedWorkspace = groupDetectors->getProperty("OutputWorkspace");
 
-  size_t goodGroups(0);
-  for (size_t i = 0; i < numSteps; ++i) {
-    size_t gSize = groups.at(i).size();
-    if (gSize > 0)
-      ++goodGroups;
-  }
+  auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  spCalcDetPar->initialize();
+  spCalcDetPar->setProperty("InputWorkspace", groupedWorkspace);
+  spCalcDetPar->setProperty("ReturnLinearRanges", true);
+  spCalcDetPar->execute();
 
-  // Write the number of detectors to the file.
-  outPAR_file << " " << goodGroups << '\n';
+  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  const size_t nDetectors = pCalcDetPar->getNDetectors();
+  const std::vector<double> &secondary_flightpath = pCalcDetPar->getFlightPath();
 
-  for (size_t i = 0; i < numSteps; ++i) {
-    const size_t gSize = groups.at(i).size();
-    if (gSize > 0) {
-      outPAR_file << std::fixed << std::setprecision(3);
-      outPAR_file.width(10);
-      outPAR_file << rAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << twoThetaAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.;
-      outPAR_file.width(10);
-      outPAR_file << step * Geometry::deg2rad * rAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.01;
-      outPAR_file.width(10);
-      outPAR_file << (groups.at(i)).at(0) << '\n';
-    }
-  }
+  double stepSize = getProperty("AngleStep");
+  stepSize *= Geometry::deg2rad;
+  std::vector<double> polar_width;
 
-  // Close the file
-  outPAR_file.close();
+  std::transform(secondary_flightpath.cbegin(), secondary_flightpath.cend(), std::back_inserter(polar_width),
+                 [stepSize](const double r) { return r * stepSize; });
+
+  SavePAR::writePAR(PARfilename, std::vector<double>(nDetectors, -0.), pCalcDetPar->getPolar(),
+                    std::vector<double>(nDetectors, 0.01), polar_width, secondary_flightpath, pCalcDetPar->getDetID(),
+                    nDetectors);
 }
 } // namespace Mantid::DataHandling
