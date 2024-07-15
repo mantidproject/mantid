@@ -115,12 +115,13 @@ public:
   }
 
   void test_addWorkspace_throws_with_invalid_parameter() {
-    TS_ASSERT_THROWS(m_presenter->addWorkspace("WorkspaceName", "InvalidParameter", 0), std::invalid_argument &);
+    TS_ASSERT_THROWS(m_presenter->addWorkspace("WorkspaceName", "InvalidParameter", 0), std::logic_error &);
   }
 
-  void test_setActiveWidth_works() {
+  void test_setActiveSpectra_will_not_error() {
     ON_CALL(*m_model, getWorkspace(WorkspaceID(0))).WillByDefault(Return(m_workspace));
-    m_presenter->setActiveWidth(0, WorkspaceID(0), true);
+    std::vector<std::size_t> spectra{0u};
+    m_presenter->setActiveSpectra(spectra, 0, WorkspaceID(0), true);
   }
 
 private:

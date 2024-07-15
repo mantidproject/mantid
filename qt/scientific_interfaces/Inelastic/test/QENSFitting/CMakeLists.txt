@@ -6,6 +6,7 @@ set(TEST_FILES
     ConvFunctionTemplateModelTest.h
     FunctionQDataPresenterTest.h
     FunctionQModelTest.h
+    FunctionQParametersTest.h
     FitDataPresenterTest.h
     FitOutputTest.h
     FitOutputOptionsModelTest.h

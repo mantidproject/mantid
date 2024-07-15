@@ -64,6 +64,8 @@ I(Q, T) tab
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
 
+.. _convolution_inelastic_test:
+
 Convolution tab
 ---------------
 
@@ -104,7 +106,7 @@ Function (Q) tab
 
 *Preparation*
 
--  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
+-  The ``_Result`` workspace output from the :ref:`Convolution tab <convolution_inelastic_test>` test
 
 **Time required 3 - 5 minutes**
 
