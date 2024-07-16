@@ -473,6 +473,7 @@ set(TEST_FILES
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h
+    GenerateGroupingPowder2Test.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
     H5UtilTest.h
