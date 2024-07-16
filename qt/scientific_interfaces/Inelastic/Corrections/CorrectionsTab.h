@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"

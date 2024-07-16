@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 

@@ -1305,7 +1305,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Spectroscopy/OutputPlotOptionsView.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

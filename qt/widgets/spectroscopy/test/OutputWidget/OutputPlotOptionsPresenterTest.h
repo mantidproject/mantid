@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 

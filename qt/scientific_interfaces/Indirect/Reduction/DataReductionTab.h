@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "Common/InstrumentConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
