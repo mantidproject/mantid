@@ -9,14 +9,14 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "Common/DataValidationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include "Processor/MomentsModel.h"
 #include "Processor/MomentsPresenter.h"
 #include "Processor/MomentsView.h"
 
-#include "../Common/MockObjects.h"
 #include "../QENSFitting/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"

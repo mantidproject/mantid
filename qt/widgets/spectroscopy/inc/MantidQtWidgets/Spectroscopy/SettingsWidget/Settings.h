@@ -39,7 +39,7 @@ public:
   Settings(QWidget *parent = nullptr);
   ~Settings() = default;
 
-  void connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows);
+  void connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> const &windows);
 
   static QIcon icon();
   static std::map<std::string, QVariant> getSettings();

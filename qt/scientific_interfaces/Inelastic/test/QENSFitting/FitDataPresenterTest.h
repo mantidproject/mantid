@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../Common/MockObjects.h"
-#include "Common/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "QENSFitting/FitDataPresenter.h"
 #include "QENSFitting/FitDataView.h"
 #include "QENSFitting/FittingModel.h"
