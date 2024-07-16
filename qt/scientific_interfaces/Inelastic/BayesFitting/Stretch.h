@@ -25,6 +25,13 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  // Slot for when settings are changed
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
+  // Setup fit options, property browser, and plot options ui elements
+  void setupFitOptions();
+  void setupPropertyBrowser();
+  void setupPlotOptions();
 
 private slots:
   /// Slot for when the min range on the range selector changes

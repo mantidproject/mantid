@@ -19,7 +19,15 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Quasi");
-}
+
+struct PlotType {
+  inline static const std::string ALL = "All";
+  inline static const std::string AMPLITUDE = "Amplitude";
+  inline static const std::string FWHM = "FWHM";
+  inline static const std::string PROB = "Prob";
+  inline static const std::string GAMMA = "Gamma";
+};
+} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
@@ -33,31 +41,9 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
   connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
-  // Add the properties browser to the UI form
-  m_uiForm.treeSpace->addWidget(m_propTree);
-
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-  m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
-
-  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-  m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
-
-  m_propTree->addProperty(m_properties["EMin"]);
-  m_propTree->addProperty(m_properties["EMax"]);
-  m_propTree->addProperty(m_properties["SampleBinning"]);
-  m_propTree->addProperty(m_properties["ResBinning"]);
-
-  formatTreeWidget(m_propTree, m_properties);
-
-  // Set default values
-  m_dblManager->setValue(m_properties["SampleBinning"], 1);
-  m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
-  m_dblManager->setValue(m_properties["ResBinning"], 1);
-  m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
 
   // Connect optional form elements with enabling checkboxes
   connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
@@ -99,6 +85,114 @@ void Quasi::loadSettings(const QSettings &settings) {
   m_uiForm.mwFixWidthDat->readSettings(settings.group());
 }
 
+/**
+ * Get called whenever the settings are updated
+ *
+ * @param settings :: The current settings
+ */
+void Quasi::applySettings(std::map<std::string, QVariant> const &settings) {
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
+  filterInputData(settings.at("RestrictInput").toBool());
+}
+
+/**
+ * Setup the fit options based on the algorithm used
+ *
+ */
+void Quasi::setupFitOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_uiForm.cbBackground->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+
+    m_uiForm.chkFixWidth->hide();
+    m_uiForm.mwFixWidthDat->hide();
+
+    m_uiForm.chkUseResNorm->hide();
+    m_uiForm.dsResNorm->hide();
+
+    m_uiForm.chkSequentialFit->hide();
+  } else {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::SLOPING));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+
+    m_uiForm.chkFixWidth->show();
+    m_uiForm.mwFixWidthDat->show();
+
+    m_uiForm.dsResNorm->show();
+    m_uiForm.chkUseResNorm->show();
+
+    m_uiForm.chkSequentialFit->show();
+  }
+}
+
+/**
+ * Setup the property browser based on the algorithm used
+ *
+ */
+void Quasi::setupPropertyBrowser() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_properties.clear();
+  m_dblManager->clear();
+  m_propTree->clear();
+
+  m_uiForm.treeSpace->addWidget(m_propTree);
+  m_properties["EMin"] = m_dblManager->addProperty("EMin");
+  m_properties["EMax"] = m_dblManager->addProperty("EMax");
+
+  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
+
+  m_propTree->addProperty(m_properties["EMin"]);
+  m_propTree->addProperty(m_properties["EMax"]);
+
+  if (!useQuickBayes) {
+    m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
+    m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
+
+    m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
+    m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
+
+    m_propTree->addProperty(m_properties["SampleBinning"]);
+    m_propTree->addProperty(m_properties["ResBinning"]);
+
+    // Set default values
+    m_dblManager->setValue(m_properties["SampleBinning"], 1);
+    m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+    m_dblManager->setValue(m_properties["ResBinning"], 1);
+    m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+  }
+  formatTreeWidget(m_propTree, m_properties);
+}
+
+/**
+ * Setup the plot options based on the algorithm used
+ *
+ */
+void Quasi::setupPlotOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_uiForm.cbPlot->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::GAMMA));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
+  } else {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
+  }
+}
+
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Quasi");
@@ -136,11 +230,6 @@ void Quasi::handleValidation(IUserInputValidator *validator) const {
       validator->addErrorMessage("Stretched Exponential program can only be used with "
                                  "a resolution file.");
     }
-  }
-
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
-    validator->addErrorMessage("The 'quickBayes' package does not support a 'Sloping' background type.");
   }
 }
 
@@ -200,16 +289,14 @@ void Quasi::handleRun() {
   double const eMin = m_properties["EMin"]->valueText().toDouble();
   double const eMax = m_properties["EMax"]->valueText().toDouble();
 
-  auto const sampleBins = m_properties["SampleBinning"]->valueText().toInt();
-  auto const resBins = m_properties["ResBinning"]->valueText().toInt();
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
 
   // Construct an output base name for the output workspaces
   auto const resType = resName.substr(resName.length() - 3);
   auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
-  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName;
-
-  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  auto const algoType = useQuickBayes ? "_quickbayes" : "_quasielasticbayes";
+  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName + algoType;
 
   std::string const algorithmName = useQuickBayes ? "BayesQuasi2" : "BayesQuasi";
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create(algorithmName);
@@ -227,6 +314,9 @@ void Quasi::handleRun() {
     runAlg->setProperty("EMin", eMin);
     runAlg->setProperty("EMax", eMax);
   } else {
+    auto const sampleBins = m_properties["SampleBinning"]->valueText().toInt();
+    auto const resBins = m_properties["ResBinning"]->valueText().toInt();
+
     // Use quasielasticbayes package in BayesQuasi algorithm
     runAlg->setProperty("ResNormWorkspace", resNormFile);
     runAlg->setProperty("Background", background);
@@ -497,7 +587,7 @@ void Quasi::plotClicked() {
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   InelasticTab::checkADSForPlotSaveWorkspace(resultName, true);
-  auto const paramNames = {"amplitude", "fwhm", "beta"};
+  auto const paramNames = {"amplitude", "fwhm", "beta", "gamma"};
   for (std::string const &paramName : paramNames) {
 
     if (plot == paramName || plot == "all") {
