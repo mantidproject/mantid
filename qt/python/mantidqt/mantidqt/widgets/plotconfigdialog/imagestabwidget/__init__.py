@@ -27,7 +27,7 @@ class ImageProperties(dict):
 
         props["label"] = ""
         for ax in image.figure.axes:
-            if type(ax) == Axes:
+            if type(ax) is Axes:
                 props["label"] = ax.yaxis.label.get_text()
 
         cmap_name = image.cmap.name if hasattr(image, "cmap") else image.get_cmap().name
