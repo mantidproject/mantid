@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>

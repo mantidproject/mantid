@@ -10,7 +10,7 @@
 
 #include "ISettingsView.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 
 #include <memory>
 

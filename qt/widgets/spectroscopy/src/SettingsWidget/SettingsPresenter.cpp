@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Spectroscopy/SettingsPresenter.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 namespace MantidQt::CustomInterfaces {
 using namespace SettingsHelper;

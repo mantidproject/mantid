@@ -5,8 +5,8 @@ set(TEST_FILES
     OutputWidget/OutputPlotOptionsModelTest.h
     OutputWidget/OutputPlotOptionsPresenterTest.h
     RunWidget/RunPresenterTest.h
-    SettingsModelTest.h
-    SettingsPresenterTest.h
+    SettingsWidget/SettingsModelTest.h
+    SettingsWidget/SettingsPresenterTest.h
     ValidationUtilsTest.h
     InterfaceUtilsTest.h
 )

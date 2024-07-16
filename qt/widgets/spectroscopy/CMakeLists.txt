@@ -10,11 +10,11 @@ set(SRC_FILES
     src/OutputWidget/OutputPlotOptionsView.cpp
     src/RunWidget/RunPresenter.cpp
     src/RunWidget/RunView.cpp
-    src/Settings.cpp
-    src/SettingsHelper.cpp
-    src/SettingsModel.cpp
-    src/SettingsPresenter.cpp
-    src/SettingsView.cpp
+    src/SettingsWidget/Settings.cpp
+    src/SettingsWidget/SettingsHelper.cpp
+    src/SettingsWidget/SettingsModel.cpp
+    src/SettingsWidget/SettingsPresenter.cpp
+    src/SettingsWidget/SettingsView.cpp
     src/ValidationUtils.cpp
 )
 
@@ -23,8 +23,8 @@ set(MOC_FILES
     inc/MantidQtWidgets/Spectroscopy/InelasticTab.h
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.h
-    inc/MantidQtWidgets/Spectroscopy/Settings.h
-    inc/MantidQtWidgets/Spectroscopy/SettingsView.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsView.h
 )
 
 set(INC_FILES
@@ -33,21 +33,21 @@ set(INC_FILES
     inc/MantidQtWidgets/Spectroscopy/FitData.h
     inc/MantidQtWidgets/Spectroscopy/IDataModel.h
     inc/MantidQtWidgets/Spectroscopy/InterfaceUtils.h
-    inc/MantidQtWidgets/Spectroscopy/ISettingsView.h
     inc/MantidQtWidgets/Spectroscopy/MockObjects.h
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h
-    inc/MantidQtWidgets/Spectroscopy/SettingsHelper.h
-    inc/MantidQtWidgets/Spectroscopy/SettingsPresenter.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/ISettingsView.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsPresenter.h
     inc/MantidQtWidgets/Spectroscopy/ValidationUtils.h
 )
 
 set(UI_FILES
-    inc/MantidQtWidgets/Spectroscopy/InterfaceSettings.ui
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptions.ui
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.ui
+    inc/MantidQtWidgets/Spectroscopy/SettingsWidget/InterfaceSettings.ui
 )
 
 set(RES_FILES inc/MantidQtWidgets/Spectroscopy/InterfaceResources.qrc)

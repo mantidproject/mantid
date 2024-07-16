@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
