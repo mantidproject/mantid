@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ElwinView.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 #include <algorithm>
 

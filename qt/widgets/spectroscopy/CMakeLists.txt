@@ -31,6 +31,7 @@ set(INC_FILES
     inc/MantidQtWidgets/Spectroscopy/IDataModel.h
     inc/MantidQtWidgets/Spectroscopy/InterfaceUtils.h
     inc/MantidQtWidgets/Spectroscopy/ISettingsView.h
+    inc/MantidQtWidgets/Spectroscopy/MockObjects.h
     inc/MantidQtWidgets/Spectroscopy/OutputPlotOptionsModel.h
     inc/MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h

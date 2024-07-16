@@ -8,10 +8,10 @@
 
 #include "DllConfig.h"
 
-#include "Common/InelasticInterface.h"
-#include "Common/OutputPlotOptionsPresenter.h"
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "ui_DiffractionReduction.h"
 

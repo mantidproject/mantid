@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetrisePresenter.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 using namespace DataValidationHelper;
 using namespace Mantid::API;

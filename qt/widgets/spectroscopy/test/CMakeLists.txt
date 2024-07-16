@@ -20,7 +20,6 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS ${MOCK_HEADER_DIRS} ../../../../Framework/DataObjects/inc
-  TEST_HELPER_SRCS MockObjects.h
   LINK_LIBS Python::Python
             ${CORE_MANTIDLIBS}
             Mantid::PythonInterfaceCore

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "IMomentsView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MomentsModel.h"
 #include "MomentsView.h"
 

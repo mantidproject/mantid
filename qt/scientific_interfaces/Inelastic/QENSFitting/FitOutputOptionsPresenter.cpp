@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitOutputOptionsPresenter.h"
 
-#include "Common/SettingsHelper.h"
 #include "FitTab.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 

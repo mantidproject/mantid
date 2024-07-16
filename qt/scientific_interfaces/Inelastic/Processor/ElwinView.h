@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/RunView.h"
 #include "DataProcessor.h"
 #include "ElwinPresenter.h"
 #include "IElwinView.h"
@@ -14,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "ui_ElwinTab.h"
 
 namespace MantidQt {

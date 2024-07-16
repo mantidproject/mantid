@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DataValidationHelper.h"
 #include "DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include <typeinfo>
 
 using namespace Mantid::API;

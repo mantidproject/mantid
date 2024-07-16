@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -16,6 +14,8 @@
 #include "FunctionBrowser/TemplateSubType.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_FitTab.h"
 
 #include <memory>

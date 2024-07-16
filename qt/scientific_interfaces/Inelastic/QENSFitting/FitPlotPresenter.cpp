@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitPlotPresenter.h"
-#include "Common/SettingsHelper.h"
 #include "FitPlotModel.h"
 #include "FitPlotView.h"
 #include "FitTab.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
 
 #include <utility>
 

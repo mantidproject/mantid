@@ -7,10 +7,10 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ISISDiagnostics.h"
 
 // Suppress a warning coming out of code that isn't ours

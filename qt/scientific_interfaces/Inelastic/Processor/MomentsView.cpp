@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsView.h"
-#include "Common/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include "MomentsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"

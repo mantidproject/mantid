@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)

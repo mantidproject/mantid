@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Simulation.h"
-#include "Common/Settings.h"
 #include "DensityOfStates.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Spectroscopy/Settings.h"
 #include "MolDyn.h"
 #include "Sassena.h"
 

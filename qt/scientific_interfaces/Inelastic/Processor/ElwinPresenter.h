@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DataModel.h"
-#include "Common/IDataModel.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "DataProcessorInterface.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/IDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 
 #include "ElwinModel.h"
 #include "ElwinView.h"

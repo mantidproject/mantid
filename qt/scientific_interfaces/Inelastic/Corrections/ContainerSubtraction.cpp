@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 

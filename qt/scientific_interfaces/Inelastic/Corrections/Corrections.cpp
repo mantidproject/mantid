@@ -8,8 +8,8 @@
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
-#include "Common/Settings.h"
 #include "ContainerSubtraction.h"
+#include "MantidQtWidgets/Spectroscopy/Settings.h"
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)
