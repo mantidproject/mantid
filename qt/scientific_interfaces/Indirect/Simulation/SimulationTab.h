@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/InelasticTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/InelasticTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include <QSettings>
 #include <QWidget>
 

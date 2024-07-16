@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../MockObjects.h"
 #include "MantidQtWidgets/Common/MockUserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include <memory>

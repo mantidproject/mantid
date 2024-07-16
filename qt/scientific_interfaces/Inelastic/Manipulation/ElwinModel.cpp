@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ElwinModel.h"
-#include "Common/DataValidationHelper.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"

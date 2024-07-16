@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "ui_SqwTab.h"
 
 namespace MantidQt {

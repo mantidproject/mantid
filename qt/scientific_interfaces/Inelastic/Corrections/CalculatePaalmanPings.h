@@ -8,6 +8,7 @@
 
 #include "CorrectionsTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_CalculatePaalmanPings.h"
 
 #include "MantidGeometry/Instrument_fwd.h"

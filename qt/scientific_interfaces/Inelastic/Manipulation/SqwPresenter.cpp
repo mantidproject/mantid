@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwPresenter.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"

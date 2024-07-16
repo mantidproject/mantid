@@ -7,6 +7,7 @@
 #include "Sassena.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QFileInfo>
 #include <QString>

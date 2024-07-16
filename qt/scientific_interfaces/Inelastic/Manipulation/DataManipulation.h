@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -32,35 +33,28 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class DataReduction;
 
-/** DataManipulation
+/** DataProcessor
 
-  This class defines common functionality of tabs used in the Indirect Data
-  Manipulation interface.
+  This class defines common functionality of tabs used in the Inelastic Data
+  Processor interface.
 */
-class MANTIDQT_INELASTIC_DLL DataManipulation : public InelasticTab {
+class MANTIDQT_INELASTIC_DLL DataProcessor : public InelasticTab {
   Q_OBJECT
 
 public:
-  DataManipulation(QObject *parent = nullptr);
-  ~DataManipulation() override;
+  DataProcessor(QObject *parent = nullptr);
+  ~DataProcessor() override;
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
-  /// Set the active workspaces used in the plotting options
+
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
+  /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
-
-public slots:
-  void runTab();
-
-signals:
-  /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
 
 private slots:
   void tabExecutionComplete(bool error);
@@ -69,7 +63,7 @@ protected:
   virtual void runComplete(bool error) { (void)error; };
 
 private:
-  virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void setFileExtensionsByName(bool filter) { (void)filter; };
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
   bool m_tabRunning;

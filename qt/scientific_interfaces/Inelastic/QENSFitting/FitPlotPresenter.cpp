@@ -5,9 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitPlotPresenter.h"
-#include "Common/SettingsHelper.h"
+#include "FitPlotModel.h"
 #include "FitPlotView.h"
 #include "FitTab.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
 
 #include <utility>
 
@@ -27,8 +28,8 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-FitPlotPresenter::FitPlotPresenter(IFitTab *tab, IFitPlotView *view, std::unique_ptr<FitPlotModel> model)
-    : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
+FitPlotPresenter::FitPlotPresenter(IFitTab *tab, IFitPlotView *view, IFitPlotModel *model)
+    : m_tab(tab), m_view(view), m_model(model), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
 }
 
@@ -70,10 +71,6 @@ void FitPlotPresenter::setStartX(double value) { m_view->setFitRangeMinimum(valu
 void FitPlotPresenter::setEndX(double value) { m_view->setFitRangeMaximum(value); }
 
 void FitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) { m_view->setFitRangeBounds(bounds); }
-
-void FitPlotPresenter::setFittingData(std::vector<FitData> *fittingData) { m_model->setFittingData(fittingData); }
-
-void FitPlotPresenter::setFitOutput(IFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
 
 void FitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
@@ -240,7 +237,7 @@ void FitPlotPresenter::updateGuessAvailability() {
 void FitPlotPresenter::handlePlotGuess(bool doPlotGuess) {
   if (doPlotGuess) {
     const auto guessWorkspace = m_model->getGuessWorkspace();
-    if (guessWorkspace->x(0).size() >= 2) {
+    if (guessWorkspace && guessWorkspace->x(0).size() >= 2) {
       plotGuess(guessWorkspace);
     }
   } else {
@@ -266,7 +263,7 @@ void FitPlotPresenter::updateHWHMSelector() {
 }
 
 void FitPlotPresenter::setHWHM(double hwhm) {
-  const auto centre = m_model->getFirstPeakCentre().get_value_or(0.);
+  const auto centre = m_model->getFirstPeakCentre().value_or(0.);
   m_view->setHWHMMaximum(centre + hwhm);
   m_view->setHWHMMinimum(centre - hwhm);
 }
@@ -288,9 +285,7 @@ void FitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
     m_plotter->plotSpectra(m_model->getWorkspace()->getName(), std::to_string(spectrum.value), errorBars);
 }
 
-void FitPlotPresenter::handleFitSingleSpectrum() {
-  m_tab->handleSingleFitClicked(m_model->getActiveWorkspaceID(), m_model->getActiveWorkspaceIndex());
-}
+void FitPlotPresenter::handleFitSingleSpectrum() { m_tab->handleSingleFitClicked(); }
 
 void FitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
   m_tab->handleFwhmChanged(maximum - minimum);

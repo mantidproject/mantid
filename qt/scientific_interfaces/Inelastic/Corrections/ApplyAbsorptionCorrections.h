@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "ui_ApplyAbsorptionCorrections.h"
 

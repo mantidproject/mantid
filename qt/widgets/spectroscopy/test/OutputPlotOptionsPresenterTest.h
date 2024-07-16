@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
-#include "MockObjects.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 

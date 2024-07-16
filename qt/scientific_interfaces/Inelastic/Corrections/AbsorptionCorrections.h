@@ -12,6 +12,8 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 

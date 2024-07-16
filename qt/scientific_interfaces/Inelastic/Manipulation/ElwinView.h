@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DataManipulation.h"
+#include "DataProcessor.h"
 #include "ElwinPresenter.h"
 #include "IElwinView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
-#include "QENSFitting/FitDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "ui_ElwinTab.h"
 
 namespace MantidQt {
@@ -31,6 +31,7 @@ public:
   void subscribePresenter(IElwinPresenter *presenter) override;
   void setup() override;
 
+  IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptions() const override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
@@ -81,7 +82,6 @@ private slots:
   void notifyDoubleValueChanged(QtProperty *, double);
   void notifyCheckboxValueChanged(QtProperty *, bool);
   void notifyPlotPreviewClicked();
-  void notifyRunClicked();
   void notifySaveClicked();
   void notifySelectedSpectrumChanged(int);
   void notifyPreviewIndexChanged(int);
@@ -110,8 +110,6 @@ private:
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
   void showAddWorkspaceDialog();
   void setPreviewToDefault();
-  void setButtonsEnabled(const bool enabled);
-  void setRunEnabled(const bool enabled);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
   void addData(MantidWidgets::IAddWorkspaceDialog const *dialog);
 

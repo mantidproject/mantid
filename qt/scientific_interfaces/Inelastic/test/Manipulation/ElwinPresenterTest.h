@@ -14,8 +14,8 @@
 #include "Manipulation/ElwinView.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
-#include "../Common/MockObjects.h"
 #include "../QENSFitting/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"

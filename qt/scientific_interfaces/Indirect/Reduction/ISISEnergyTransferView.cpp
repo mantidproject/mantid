@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
-#include "Common/DataValidationHelper.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "ISISEnergyTransferPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"

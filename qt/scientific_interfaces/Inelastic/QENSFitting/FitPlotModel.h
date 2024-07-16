@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitData.h"
 #include "FitOutput.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
@@ -14,52 +13,79 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Spectroscopy/FitData.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL FitPlotModel {
+class MANTIDQT_INELASTIC_DLL IFitPlotModel {
 public:
-  FitPlotModel();
-  ~FitPlotModel();
+  virtual ~IFitPlotModel() = default;
 
-  Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
-  Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
-  Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const = 0;
+  virtual MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
 
-  WorkspaceID getActiveWorkspaceID() const;
-  WorkspaceIndex getActiveWorkspaceIndex() const;
-  FitDomainIndex getActiveDomainIndex() const;
-  WorkspaceID numberOfWorkspaces() const;
-  std::pair<double, double> getRange() const;
-  std::pair<double, double> getWorkspaceRange() const;
-  std::pair<double, double> getResultRange() const;
-  boost::optional<double> getFirstHWHM() const;
-  boost::optional<double> getFirstPeakCentre() const;
-  boost::optional<double> getFirstBackgroundLevel() const;
-  double calculateHWHMMaximum(double minimum) const;
-  double calculateHWHMMinimum(double maximum) const;
-  bool canCalculateGuess() const;
+  virtual WorkspaceID getActiveWorkspaceID() const = 0;
+  virtual WorkspaceIndex getActiveWorkspaceIndex() const = 0;
+  virtual FitDomainIndex getActiveDomainIndex() const = 0;
+  virtual WorkspaceID numberOfWorkspaces() const = 0;
+  virtual std::pair<double, double> getRange() const = 0;
+  virtual std::pair<double, double> getWorkspaceRange() const = 0;
+  virtual std::pair<double, double> getResultRange() const = 0;
+  virtual std::optional<double> getFirstHWHM() const = 0;
+  virtual std::optional<double> getFirstPeakCentre() const = 0;
+  virtual std::optional<double> getFirstBackgroundLevel() const = 0;
+  virtual double calculateHWHMMaximum(double minimum) const = 0;
+  virtual double calculateHWHMMinimum(double maximum) const = 0;
+  virtual bool canCalculateGuess() const = 0;
 
-  void setActiveIndex(WorkspaceID workspaceID);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
+  virtual void setActiveIndex(WorkspaceID workspaceID) = 0;
+  virtual void setActiveSpectrum(WorkspaceIndex spectrum) = 0;
 
-  void setFittingData(std::vector<FitData> *fittingData);
-  void setFitOutput(IFitOutput *fitOutput);
-  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
+  virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL FitPlotModel final : public IFitPlotModel {
+public:
+  FitPlotModel(std::vector<FitData> *fittingData, IFitOutput *fitOutput);
+
+  Mantid::API::MatrixWorkspace_sptr getWorkspace() const override;
+  Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const override;
+  Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const override;
+  MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
+
+  WorkspaceID getActiveWorkspaceID() const override;
+  WorkspaceIndex getActiveWorkspaceIndex() const override;
+  FitDomainIndex getActiveDomainIndex() const override;
+  WorkspaceID numberOfWorkspaces() const override;
+  std::pair<double, double> getRange() const override;
+  std::pair<double, double> getWorkspaceRange() const override;
+  std::pair<double, double> getResultRange() const override;
+  std::optional<double> getFirstHWHM() const override;
+  std::optional<double> getFirstPeakCentre() const override;
+  std::optional<double> getFirstBackgroundLevel() const override;
+  double calculateHWHMMaximum(double minimum) const override;
+  double calculateHWHMMinimum(double maximum) const override;
+  bool canCalculateGuess() const override;
+
+  void setActiveIndex(WorkspaceID workspaceID) override;
+  void setActiveSpectrum(WorkspaceIndex spectrum) override;
+
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
 
 private:
   std::pair<double, double> getGuessRange() const;
 
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
-  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  std::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   size_t numberOfSpectra(WorkspaceID workspaceID) const;
 
   Mantid::API::MatrixWorkspace_sptr createGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,

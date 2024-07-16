@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitDataModel.h"
 #include "FitDataView.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
@@ -34,9 +34,8 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
-  FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view);
+  FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
   ~FitDataPresenter();
-  std::vector<FitData> *getFittingData();
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
@@ -54,7 +53,7 @@ public:
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;
-  void validate(UserInputValidator &validator);
+  void validate(IUserInputValidator *validator);
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
     UNUSED_ARG(workspaceName);
@@ -62,18 +61,13 @@ public:
     UNUSED_ARG(spectrum_index);
   };
 
-  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) {
-    UNUSED_ARG(widthIndex);
+  virtual void setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra, std::size_t parameterIndex,
+                                WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(activeParameterSpectra);
+    UNUSED_ARG(parameterIndex);
     UNUSED_ARG(dataIndex);
     UNUSED_ARG(single);
   };
-  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) {
-    UNUSED_ARG(eisfIndex);
-    UNUSED_ARG(dataIndex);
-    UNUSED_ARG(single);
-  };
-
-  virtual void subscribeFitPropertyBrowser(IInelasticFitPropertyBrowser *browser) { UNUSED_ARG(browser); };
 
   std::string tabName() const override;
 
@@ -88,7 +82,7 @@ protected:
   virtual void addTableEntry(FitDomainIndex row);
 
   IFitTab *m_tab;
-  IFitDataModel *m_model;
+  IDataModel *m_model;
   IFitDataView *m_view;
 
 private:

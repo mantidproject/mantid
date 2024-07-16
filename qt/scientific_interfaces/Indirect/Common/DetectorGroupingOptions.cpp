@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorGroupingOptions.h"
-#include "Common/ValidationUtils.h"
 #include "MantidAPI/AlgorithmProperties.h"
+#include "MantidQtWidgets/Spectroscopy/ValidationUtils.h"
 
 #include <unordered_map>
 

@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitAddWorkspaceDialog.h"
 
-#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include <utility>
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;

@@ -9,6 +9,7 @@
 #include "BayesFittingTab.h"
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Stretch.h"
 
 namespace MantidQt {

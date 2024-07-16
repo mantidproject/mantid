@@ -256,52 +256,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QGroupBox" name="gbRun">
-            <property name="title">
-             <string>Run</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>7</number>
-             </property>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>385</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbRun">
-               <property name="text">
-                <string>Run</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>384</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
+           <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_44">
@@ -427,6 +382,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>

@@ -7,8 +7,8 @@
 #pragma once
 #include "ui_DataReduction.h"
 
-#include "Common/InelasticInterface.h"
 #include "DataReductionTab.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"

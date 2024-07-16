@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticInterface.h"
-#include "Common/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
 #include "ui_Corrections.h"
 

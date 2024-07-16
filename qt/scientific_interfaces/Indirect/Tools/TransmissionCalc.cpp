@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Material.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QTreeWidgetItem>
 

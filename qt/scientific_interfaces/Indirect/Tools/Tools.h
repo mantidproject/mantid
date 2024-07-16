@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_Tools.h"
 
-#include "Common/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "ToolsTab.h"
 
 #include "MantidKernel/ConfigService.h"

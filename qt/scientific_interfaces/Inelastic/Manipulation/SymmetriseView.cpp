@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetriseView.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "SymmetrisePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
