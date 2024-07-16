@@ -7,7 +7,7 @@
 #include "FitOutputOptionsPresenter.h"
 
 #include "FitTab.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 

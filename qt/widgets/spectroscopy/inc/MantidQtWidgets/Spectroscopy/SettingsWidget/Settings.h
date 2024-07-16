@@ -8,7 +8,7 @@
 
 #include "SettingsPresenter.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 
 #include <map>
 #include <memory>

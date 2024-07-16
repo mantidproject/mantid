@@ -7,7 +7,7 @@
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"

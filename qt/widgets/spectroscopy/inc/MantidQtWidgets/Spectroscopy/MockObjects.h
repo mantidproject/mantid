@@ -16,9 +16,9 @@
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsModel.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsModel.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsView.h"
 
 #include <string>
 #include <utility>

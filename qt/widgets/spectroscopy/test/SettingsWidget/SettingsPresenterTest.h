@@ -10,8 +10,8 @@
 #include <gmock/gmock.h>
 
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 

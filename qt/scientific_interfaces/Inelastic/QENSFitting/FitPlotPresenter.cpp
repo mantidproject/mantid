@@ -8,7 +8,7 @@
 #include "FitPlotModel.h"
 #include "FitPlotView.h"
 #include "FitTab.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <utility>
 

@@ -4,11 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 constexpr auto SETTINGS_ICON = "mdi.settings";
 

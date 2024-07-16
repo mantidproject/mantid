@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
-#include "MantidQtWidgets/Spectroscopy/SettingsModel.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsModel.h"
 
 using namespace MantidQt::CustomInterfaces;
 

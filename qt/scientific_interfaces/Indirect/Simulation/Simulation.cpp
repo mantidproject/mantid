@@ -7,7 +7,7 @@
 #include "Simulation.h"
 #include "DensityOfStates.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "MolDyn.h"
 #include "Sassena.h"
 

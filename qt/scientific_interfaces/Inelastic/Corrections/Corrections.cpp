@@ -9,7 +9,7 @@
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)

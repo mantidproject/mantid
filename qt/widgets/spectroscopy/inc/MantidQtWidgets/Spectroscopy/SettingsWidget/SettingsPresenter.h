@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 #include "SettingsModel.h"
 #include "SettingsView.h"
 

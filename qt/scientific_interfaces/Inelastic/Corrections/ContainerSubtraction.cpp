@@ -7,7 +7,7 @@
 #include "ContainerSubtraction.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 

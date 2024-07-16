@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Spectroscopy/SettingsView.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsPresenter.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 

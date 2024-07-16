@@ -8,7 +8,7 @@
 // Includes
 //----------------------
 #include "DataReduction.h"
-#include "MantidQtWidgets/Spectroscopy/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
