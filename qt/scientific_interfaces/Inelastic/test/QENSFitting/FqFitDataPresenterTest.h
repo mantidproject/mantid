@@ -9,11 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "QENSFitting/FitDataView.h"
-#include "QENSFitting/FqFitAddWorkspaceDialog.h"
-#include "QENSFitting/FqFitDataPresenter.h"
-#include "QENSFitting/FqFitModel.h"
 #include "QENSFitting/FunctionBrowser/SingleFunctionTemplateView.h"
+#include "QENSFitting/FunctionQAddWorkspaceDialog.h"
+#include "QENSFitting/FunctionQDataPresenter.h"
+#include "QENSFitting/FunctionQModel.h"
 #include "QENSFitting/InelasticFitPropertyBrowser.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -47,27 +48,24 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 } // namespace
 
-class FqFitDataPresenterTest : public CxxTest::TestSuite {
+class FunctionQDataPresenterTest : public CxxTest::TestSuite {
 public:
-  static FqFitDataPresenterTest *createSuite() { return new FqFitDataPresenterTest(); }
+  static FunctionQDataPresenterTest *createSuite() { return new FunctionQDataPresenterTest(); }
 
-  static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
+  static void destroySuite(FunctionQDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<FqFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
+    m_presenter = std::make_unique<FunctionQDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-
-    m_fitPropertyBrowser = std::make_unique<NiceMock<MockInelasticFitPropertyBrowser>>();
-    m_presenter->subscribeFitPropertyBrowser(m_fitPropertyBrowser.get());
   }
 
   void tearDown() override {
@@ -75,24 +73,21 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_fitPropertyBrowser.get()));
 
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
 
     m_dataTable.reset();
-    m_fitPropertyBrowser.reset();
   }
 
   void test_that_the_presenter_and_mock_objects_have_been_created() {
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
-    TS_ASSERT(m_fitPropertyBrowser);
   }
 
-  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_FunctionQ() {
     auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
@@ -120,12 +115,13 @@ public:
   }
 
   void test_addWorkspace_throws_with_invalid_parameter() {
-    TS_ASSERT_THROWS(m_presenter->addWorkspace("WorkspaceName", "InvalidParameter", 0), std::invalid_argument &);
+    TS_ASSERT_THROWS(m_presenter->addWorkspace("WorkspaceName", "InvalidParameter", 0), std::logic_error &);
   }
 
-  void test_setActiveWidth_works() {
+  void test_setActiveSpectra_will_not_error() {
     ON_CALL(*m_model, getWorkspace(WorkspaceID(0))).WillByDefault(Return(m_workspace));
-    m_presenter->setActiveWidth(0, WorkspaceID(0), true);
+    std::vector<std::size_t> spectra{0u};
+    m_presenter->setActiveSpectra(spectra, 0, WorkspaceID(0), true);
   }
 
 private:
@@ -133,10 +129,9 @@ private:
 
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
-  std::unique_ptr<FqFitDataPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockDataModel>> m_model;
+  std::unique_ptr<FunctionQDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<NiceMock<MockInelasticFitPropertyBrowser>> m_fitPropertyBrowser;
 };

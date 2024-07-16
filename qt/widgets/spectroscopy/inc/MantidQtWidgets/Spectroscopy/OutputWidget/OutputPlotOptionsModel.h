@@ -47,7 +47,7 @@ class MANTID_SPECTROSCOPY_DLL OutputPlotOptionsModel final : public IOutputPlotO
 public:
   OutputPlotOptionsModel(std::unique_ptr<IExternalPlotter> plotter,
                          std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
-  virtual ~OutputPlotOptionsModel() = default;
+  virtual ~OutputPlotOptionsModel() override = default;
 
   bool setWorkspace(std::string const &workspaceName) override;
   void removeWorkspace() override;

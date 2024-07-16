@@ -29,7 +29,7 @@ using namespace MantidWidgets;
 class MANTID_SPECTROSCOPY_DLL DataModel : public IDataModel {
 public:
   DataModel();
-  virtual ~DataModel() = default;
+  virtual ~DataModel() override = default;
   std::vector<FitData> *getFittingData() override;
 
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;

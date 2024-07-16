@@ -36,7 +36,7 @@ class MANTID_SPECTROSCOPY_DLL RunView final : public QWidget, public IRunView {
 
 public:
   RunView(QWidget *parent = nullptr);
-  ~RunView() = default;
+  ~RunView() override = default;
 
   void subscribePresenter(IRunPresenter *presenter) override;
 

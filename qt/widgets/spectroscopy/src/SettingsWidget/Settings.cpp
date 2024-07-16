@@ -26,7 +26,7 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
   setLayout(layout);
 }
 
-void Settings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows) {
+void Settings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> const &windows) {
   for (auto const &window : windows) {
     if (auto inelasticInterface = dynamic_cast<InelasticInterface *>(window.data())) {
       connect(this, SIGNAL(applySettings()), inelasticInterface, SLOT(applySettings()));

@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
+
+#include "QENSFitting/ConvolutionAddWorkspaceDialog.h"
+#include "QENSFitting/ConvolutionDataPresenter.h"
+#include "QENSFitting/ConvolutionModel.h"
+#include "QENSFitting/IFitDataView.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-
-#include "QENSFitting/ConvFitAddWorkspaceDialog.h"
-#include "QENSFitting/ConvFitDataPresenter.h"
-#include "QENSFitting/ConvFitModel.h"
-#include "QENSFitting/IFitDataView.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
@@ -35,20 +36,20 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 }
 } // namespace
 
-class ConvFitDataPresenterTest : public CxxTest::TestSuite {
+class ConvolutionDataPresenterTest : public CxxTest::TestSuite {
 public:
-  static ConvFitDataPresenterTest *createSuite() { return new ConvFitDataPresenterTest(); }
+  static ConvolutionDataPresenterTest *createSuite() { return new ConvolutionDataPresenterTest(); }
 
-  static void destroySuite(ConvFitDataPresenterTest *suite) { delete suite; }
+  static void destroySuite(ConvolutionDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 6);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
-    m_presenter = std::make_unique<ConvFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
+    m_presenter = std::make_unique<ConvolutionDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
 
     m_workspace = createWorkspace(6);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
@@ -82,13 +83,13 @@ public:
     TS_ASSERT_EQUALS(m_dataTable->columnCount(), 6);
   }
 
-  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_convfit() {
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_Convolution() {
     auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
-    auto dialog = new ConvFitAddWorkspaceDialog(nullptr);
+    auto dialog = new ConvolutionAddWorkspaceDialog(nullptr);
     TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
@@ -118,8 +119,8 @@ private:
 
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
-  std::unique_ptr<NiceMock<MockFitDataModel>> m_model;
-  std::unique_ptr<ConvFitDataPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockDataModel>> m_model;
+  std::unique_ptr<ConvolutionDataPresenter> m_presenter;
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
