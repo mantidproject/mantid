@@ -735,8 +735,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTrans
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:277
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:357
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:368
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:78
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:433
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:567
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveReflectometryAscii.h:79
