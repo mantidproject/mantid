@@ -8,12 +8,12 @@
 
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsModel.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsView.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 
-#include "DllConfig.h"
+#include "../DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

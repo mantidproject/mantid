@@ -12,8 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtWidgets/Spectroscopy/IDataModel.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsModel.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsView.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "MantidQtWidgets/Spectroscopy/Settings.h"

@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours

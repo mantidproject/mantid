@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

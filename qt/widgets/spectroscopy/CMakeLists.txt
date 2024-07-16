@@ -5,9 +5,9 @@ set(SRC_FILES
     src/InelasticInterface.cpp
     src/InelasticTab.cpp
     src/InterfaceUtils.cpp
-    src/OutputPlotOptionsModel.cpp
-    src/OutputPlotOptionsPresenter.cpp
-    src/OutputPlotOptionsView.cpp
+    src/OutputWidget/OutputPlotOptionsModel.cpp
+    src/OutputWidget/OutputPlotOptionsPresenter.cpp
+    src/OutputWidget/OutputPlotOptionsView.cpp
     src/RunWidget/RunPresenter.cpp
     src/RunWidget/RunView.cpp
     src/Settings.cpp
@@ -19,9 +19,12 @@ set(SRC_FILES
 )
 
 set(MOC_FILES
-    inc/MantidQtWidgets/Spectroscopy/InelasticInterface.h inc/MantidQtWidgets/Spectroscopy/InelasticTab.h
-    inc/MantidQtWidgets/Spectroscopy/OutputPlotOptionsView.h inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.h
-    inc/MantidQtWidgets/Spectroscopy/Settings.h inc/MantidQtWidgets/Spectroscopy/SettingsView.h
+    inc/MantidQtWidgets/Spectroscopy/InelasticInterface.h
+    inc/MantidQtWidgets/Spectroscopy/InelasticTab.h
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h
+    inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.h
+    inc/MantidQtWidgets/Spectroscopy/Settings.h
+    inc/MantidQtWidgets/Spectroscopy/SettingsView.h
 )
 
 set(INC_FILES
@@ -32,8 +35,8 @@ set(INC_FILES
     inc/MantidQtWidgets/Spectroscopy/InterfaceUtils.h
     inc/MantidQtWidgets/Spectroscopy/ISettingsView.h
     inc/MantidQtWidgets/Spectroscopy/MockObjects.h
-    inc/MantidQtWidgets/Spectroscopy/OutputPlotOptionsModel.h
-    inc/MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h
     inc/MantidQtWidgets/Spectroscopy/SettingsHelper.h
@@ -42,7 +45,8 @@ set(INC_FILES
 )
 
 set(UI_FILES
-    inc/MantidQtWidgets/Spectroscopy/InterfaceSettings.ui inc/MantidQtWidgets/Spectroscopy/OutputPlotOptions.ui
+    inc/MantidQtWidgets/Spectroscopy/InterfaceSettings.ui
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptions.ui
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.ui
 )
 

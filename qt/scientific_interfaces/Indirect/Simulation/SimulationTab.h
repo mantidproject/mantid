@@ -8,7 +8,7 @@
 
 #include "../DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include "MantidQtWidgets/Spectroscopy/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
