@@ -464,6 +464,9 @@ bool ProjectionSurface::canShowContextMenu() const {
  * @param y The Y coordinate in logical pixels
  */
 size_t ProjectionSurface::getPickID(int x, int y) const {
+  if (!m_pickImage)
+    return -1;
+
   // OpenGL canvases on high-pixel density monitors have a higher number of physical
   // pixels in the QImage. The pick coordinates are in logical coordinates so we need to scale them
   auto toImageCoord = [this](int logical) {
@@ -471,7 +474,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
   };
 
   const int imageX(toImageCoord(x)), imageY(toImageCoord(y));
-  if (!m_pickImage || !m_pickImage->valid(imageX, imageY))
+  if (!m_pickImage->valid(imageX, imageY))
     return -1;
 
   QRgb pixel = m_pickImage->pixel(imageX, imageY);
