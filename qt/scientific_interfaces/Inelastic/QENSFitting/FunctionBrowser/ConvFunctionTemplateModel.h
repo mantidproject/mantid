@@ -56,6 +56,8 @@ private:
   void clearData();
   void setModel() override;
 
+  void tieHeights();
+
   std::optional<std::string> getLor1Prefix() const;
   std::optional<std::string> getLor2Prefix() const;
   std::optional<std::string> getFitTypePrefix() const;
@@ -95,6 +97,7 @@ private:
   ConvTypes::DeltaType m_deltaType = ConvTypes::DeltaType::None;
   ConvTypes::TempCorrectionType m_tempCorrectionType = ConvTypes::TempCorrectionType::None;
   ConvTypes::BackgroundType m_backgroundType = ConvTypes::BackgroundType::None;
+  ConvTypes::TieHeightsType m_tieHeightsType = ConvTypes::TieHeightsType::False;
 
   BackgroundSubType m_backgroundSubtype;
 

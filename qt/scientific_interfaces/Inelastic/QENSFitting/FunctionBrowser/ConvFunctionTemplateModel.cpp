@@ -63,6 +63,7 @@ void ConvFunctionTemplateModel::setModel() {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model->setGlobalParameters(makeGlobalList());
+  tieHeights();
   estimateFunctionParameters();
 }
 
@@ -295,6 +296,9 @@ void ConvFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInd
   case ConvTypes::SubTypeIndex::Background:
     m_backgroundType = static_cast<ConvTypes::BackgroundType>(typeIndex);
     break;
+  case ConvTypes::SubTypeIndex::TieHeights:
+    m_tieHeightsType = static_cast<ConvTypes::TieHeightsType>(typeIndex);
+    break;
   default:
     throw std::logic_error("A matching ConvTypes::SubTypeIndex could not be found.");
   }
@@ -310,7 +314,19 @@ std::map<std::size_t, int> ConvFunctionTemplateModel::getSubTypes() const {
   subTypes[ConvTypes::SubTypeIndex::Delta] = static_cast<int>(m_deltaType);
   subTypes[ConvTypes::SubTypeIndex::TempCorrection] = static_cast<int>(m_tempCorrectionType);
   subTypes[ConvTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
+  subTypes[ConvTypes::SubTypeIndex::TieHeights] = static_cast<int>(m_tieHeightsType);
   return subTypes;
+}
+
+void ConvFunctionTemplateModel::tieHeights() {
+  auto const lor1AmplitudeName = getParameterName(ParamID::LOR1_AMPLITUDE);
+  auto const lor2AmplitudeName = getParameterName(ParamID::LOR2_AMPLITUDE);
+  if (!lor1AmplitudeName || !lor2AmplitudeName)
+    return;
+  auto const tie = m_tieHeightsType == TieHeightsType::True ? *lor2AmplitudeName : "";
+  for (auto i = 0; i < getNumberDomains(); ++i) {
+    setLocalParameterTie(*lor1AmplitudeName, i, tie);
+  }
 }
 
 int ConvFunctionTemplateModel::getNumberOfPeaks() const {
