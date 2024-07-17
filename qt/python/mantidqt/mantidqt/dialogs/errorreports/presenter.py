@@ -117,8 +117,10 @@ class ErrorReporterPresenter(object):
     @staticmethod
     def _trim_core_dump_file(content: str):
         lines = content.split("\n")
-        trace_begins_index = next(n for n, line in enumerate(lines) if line.startswith("#"))
-        return "\n".join(lines[trace_begins_index - 1 :])
+        trace_begins_index = next((n for n, line in enumerate(lines) if line.startswith("#")), None)
+        if trace_begins_index is not None:
+            return "\n".join(lines[trace_begins_index - 1 :])
+        return ""
 
     def forget_contact_info(self):
         settings = QSettings()
