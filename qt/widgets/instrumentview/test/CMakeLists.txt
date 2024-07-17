@@ -2,7 +2,7 @@
 set(TEST_FILES
     InstrumentRendererTest.h InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h
     InstrumentWidget/InstrumentDisplayTest.h InstrumentWidget/InstrumentWidgetTest.h
-    InstrumentWidget/PanelsSurfaceTest.h
+    InstrumentWidget/PanelsSurfaceTest.h InstrumentWidget/ProjectionSurfaceTest.h
 )
 
 set(MOCK_HEADER_DIRS InstrumentWidget)

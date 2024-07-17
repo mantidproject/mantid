@@ -390,7 +390,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
-            if type(ax) == Axes:
+            if type(ax) is Axes:
                 # Colorbar
                 continue
             elif isinstance(ax, Axes3D):

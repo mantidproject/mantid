@@ -278,7 +278,7 @@ class GenerateLogbook(PythonAlgorithm):
                     new_val = "N/A"
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
-            if type(new_val) == str():
+            if type(new_val) is str:
                 new_val = new_val.strip()
             values[ind1] = new_val
             values.pop(ind2)
