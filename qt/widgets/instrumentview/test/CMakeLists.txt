@@ -1,6 +1,8 @@
 # Testing
-set(TEST_FILES InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h InstrumentWidget/InstrumentDisplayTest.h
-               InstrumentWidget/InstrumentWidgetTest.h InstrumentWidget/PanelsSurfaceTest.h
+set(TEST_FILES
+    InstrumentRendererTest.h InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h
+    InstrumentWidget/InstrumentDisplayTest.h InstrumentWidget/InstrumentWidgetTest.h
+    InstrumentWidget/PanelsSurfaceTest.h
 )
 
 set(MOCK_HEADER_DIRS InstrumentWidget)
