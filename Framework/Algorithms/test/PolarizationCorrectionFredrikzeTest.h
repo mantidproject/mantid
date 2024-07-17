@@ -71,47 +71,15 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("PolarizationAnalysis", "_"), std::invalid_argument &);
   }
 
-  Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup() {
-    Mantid::API::WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
-    return group;
-  }
-
-  MatrixWorkspace_sptr makeEfficiencies(const Workspace_sptr &inWS, const std::string &rho, const std::string &pp,
-                                        const std::string &alpha = "", const std::string &ap = "") {
-    auto alg = AlgorithmManager::Instance().createUnmanaged("CreatePolarizationEfficiencies");
-    alg->setChild(true);
-    alg->setRethrows(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", inWS);
-    alg->setPropertyValue("Rho", rho);
-    alg->setPropertyValue("Pp", pp);
-    if (!ap.empty()) {
-      alg->setPropertyValue("Ap", ap);
-      alg->setPropertyValue("Alpha", alpha);
-    }
-    alg->setPropertyValue("OutputWorkspace", "dummy");
-    alg->execute();
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    return outWS;
-  }
-
   void test_throw_if_PA_and_group_is_wrong_size_throws() {
     Mantid::API::WorkspaceGroup_sptr inWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto alg = initializeAlgorithm(inWS, "PA", "1,1,1,1");
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Efficiencies", efficiencies);
-
-    alg.setPropertyValue("OutputWorkspace", outWSName);
-    TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(), std::invalid_argument &);
+    alg->setPropertyValue("OutputWorkspace", outWSName);
+    TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg->execute(), std::invalid_argument &);
   }
 
   void test_throw_if_PNR_and_group_is_wrong_size_throws() {
@@ -119,17 +87,9 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto alg = initializeAlgorithm(inWS, "PNR", "1,1,1,1");
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setProperty("Efficiencies", efficiencies);
-    TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg->execute(), std::invalid_argument &);
   }
 
   void test_throw_group_contains_other_workspace_types() {
@@ -142,17 +102,9 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto alg = initializeAlgorithm(inWS, "PNR", "1,1,1,1");
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setProperty("Efficiencies", efficiencies);
-    TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Wrong workspace types in group", alg->execute(), std::invalid_argument &);
   }
 
   MatrixWorkspace_sptr create1DWorkspace(int size, double signal, double error) {
@@ -163,23 +115,13 @@ public:
 
   // If polynomials are unity, no changes should be made.
   void test_run_PA_unity() {
-    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", groupWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Efficiencies", efficiencies);
-    alg.execute();
-    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    auto alg = initializeAlgorithm(groupWS, "PA", "", efficiencies);
+
+    alg->execute();
+    WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
@@ -207,24 +149,15 @@ public:
   }
 
   void test_run_PA_default() {
-    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
+
     setInstrument(groupWS, "POLREF");
     auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", groupWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Efficiencies", efficiencies);
-    alg.execute();
-    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+    auto alg = initializeAlgorithm(groupWS, "PA", "", efficiencies);
+
+    alg->execute();
+    WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
@@ -242,41 +175,21 @@ public:
   }
 
   void test_run_PA_default_no_instrument_parameters() {
-    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
     auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+    auto alg = initializeAlgorithm(groupWS, "PA", "", efficiencies);
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", groupWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Efficiencies", efficiencies);
-    TSM_ASSERT_THROWS("Instrument doesn't have default efficiencies, should throw", alg.execute(),
+    TSM_ASSERT_THROWS("Instrument doesn't have default efficiencies, should throw", alg->execute(),
                       std::invalid_argument &);
   }
 
   void test_run_PNR_unity() {
-    auto groupWS = std::make_shared<WorkspaceGroup>(); // Empty group ws.
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto groupWS = createGroupWorkspace(2, 4, 1, 1);
     auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+    auto alg = initializeAlgorithm(groupWS, "PNR", "", efficiencies);
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", groupWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setProperty("Efficiencies", efficiencies);
-    alg.execute();
-    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+    alg->execute();
+    WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
@@ -339,16 +252,10 @@ public:
     groupWS->addWorkspace(Iap);
     groupWS->addWorkspace(Iaa);
 
-    PolarizationCorrectionFredrikze alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", groupWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Efficiencies", efficiencies);
-    alg.execute();
-    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+    auto alg = initializeAlgorithm(groupWS, "PA", "", efficiencies);
+
+    alg->execute();
+    WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
@@ -361,5 +268,134 @@ public:
     TS_ASSERT_DELTA(out2->y(0)[0], 0.8, 1e-14);
     TS_ASSERT_DELTA(out3->y(0)[0], 0.7, 1e-14);
     TS_ASSERT_DELTA(out4->y(0)[0], 0.6, 1e-14);
+  }
+
+  void test_valid_spin_state_order_for_PA() {
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+
+    alg->setProperty("InputSpinStates", "pp,pa,ap,aa");
+    alg->setProperty("OutputSpinStates", "pa,pp,ap,aa");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
+  void test_invalid_input_and_output_spin_state_order_for_PA() {
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+
+    TSM_ASSERT_THROWS("Invalid value for property InputSpinStates (string) from string pu,pa,ap,aa: The spin states "
+                      "must either be one or two characters, "
+                      "with each being either a p or a",
+                      alg->setProperty("InputSpinStates", "pu,pa,ap,aa"), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Invalid value for property OutputSpinStates (string) from string xx,pa,ap,aa: The spin states "
+                      "must either be one or two characters, "
+                      "with each being either a p or a",
+                      alg->setProperty("OutputSpinStates", "xx,pp,ap,aa"), std::invalid_argument &);
+
+    alg->setProperty("InputSpinStates", "pp,aa");
+    TSM_ASSERT_THROWS("Invalid value for property InputSpinStates (string) from string pp,aa: The spin states must "
+                      "either be one or two characters, "
+                      "with each being either a p or a",
+                      alg->execute(), std::invalid_argument &);
+
+    alg->setProperty("OutputSpinStates", "pp,aa");
+    TSM_ASSERT_THROWS("Invalid value for property OutputSpinStates (string) from string pp,aa: The spin states must "
+                      "either be one or two characters, "
+                      "with each being either a p or a",
+                      alg->execute(), std::invalid_argument &);
+  }
+
+  // Test various combinations of spin state orders
+  void test_various_spin_state_orders_for_PA() {
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+
+    // Test different input and output spin state orders
+    std::vector<std::string> spinStateOrders = {"pp,pa,ap,aa", "pa,pp,aa,ap", "ap,aa,pa,pp", "aa,ap,pp,pa"};
+
+    for (const auto &inputOrder : spinStateOrders) {
+      for (const auto &outputOrder : spinStateOrders) {
+        alg->setProperty("InputSpinStates", inputOrder);
+        alg->setProperty("OutputSpinStates", outputOrder);
+        TS_ASSERT_THROWS_NOTHING(alg->execute());
+      }
+    }
+  }
+
+  void test_invalid_spin_state_order_for_PNR() {
+    auto groupWS = createGroupWorkspace(2, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+
+    TSM_ASSERT_THROWS(
+        "Invalid value for property InputSpinStateOrder (string) from string x, y: When setting value of property "
+        "InputSpinStateOrder: The spin states must either be one or two characters, with each being either a or p",
+        alg->setProperty("InputSpinStates", "x, y"), std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Invalid value for property OutputSpinStateOrder (string) from string y, x: When setting value of property "
+        "OutputSpinStateOrder: The spin states must either be one or two characters, with each being either a or p",
+        alg->setProperty("OutputSpinStates", "y, x"), std::invalid_argument &);
+  }
+
+  void test_valid_spin_state_order_for_PNR() {
+    auto groupWS = createGroupWorkspace(2, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+
+    alg->setProperty("InputSpinStates", "p, a");
+    alg->setProperty("OutputSpinStates", "a, p");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
+  Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup() {
+    Mantid::API::WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
+    return group;
+  }
+
+  MatrixWorkspace_sptr makeEfficiencies(const Workspace_sptr &inWS, const std::string &rho, const std::string &pp,
+                                        const std::string &alpha = "", const std::string &ap = "") {
+    auto alg = AlgorithmManager::Instance().createUnmanaged("CreatePolarizationEfficiencies");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("Rho", rho);
+    alg->setPropertyValue("Pp", pp);
+    if (!ap.empty()) {
+      alg->setPropertyValue("Ap", ap);
+      alg->setPropertyValue("Alpha", alpha);
+    }
+    alg->setPropertyValue("OutputWorkspace", "dummy");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    return outWS;
+  }
+
+  std::shared_ptr<WorkspaceGroup> createGroupWorkspace(int numWorkspaces, int bins, int xVal, int yVal) {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    for (int i = 0; i < numWorkspaces; ++i) {
+      groupWS->addWorkspace(create1DWorkspace(bins, xVal, yVal));
+    }
+    return groupWS;
+  }
+
+  std::unique_ptr<PolarizationCorrectionFredrikze>
+  initializeAlgorithm(std::shared_ptr<WorkspaceGroup> groupWS, const std::string &polarizationType,
+                      const std::string &efficienciesStr = "",
+                      std::shared_ptr<MatrixWorkspace> efficiencies = nullptr) {
+    auto alg = std::make_unique<PolarizationCorrectionFredrikze>();
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", groupWS);
+    alg->setPropertyValue("OutputWorkspace", "dummy");
+    alg->setProperty("PolarizationAnalysis", polarizationType);
+    if (efficiencies != nullptr) {
+      alg->setProperty("Efficiencies", efficiencies);
+    } else if (!efficienciesStr.empty()) {
+      auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), efficienciesStr, efficienciesStr,
+                                           efficienciesStr, efficienciesStr);
+      alg->setProperty("Efficiencies", efficiencies);
+    }
+
+    return alg;
   }
 };
