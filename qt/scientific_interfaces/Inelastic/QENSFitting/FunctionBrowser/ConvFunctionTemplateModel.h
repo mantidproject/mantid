@@ -56,7 +56,7 @@ private:
   void clearData();
   void setModel() override;
 
-  void tieAmplitudes();
+  void tiePeakCentres();
 
   std::optional<std::string> getLor1Prefix() const;
   std::optional<std::string> getLor2Prefix() const;
@@ -97,7 +97,7 @@ private:
   ConvTypes::DeltaType m_deltaType = ConvTypes::DeltaType::None;
   ConvTypes::TempCorrectionType m_tempCorrectionType = ConvTypes::TempCorrectionType::None;
   ConvTypes::BackgroundType m_backgroundType = ConvTypes::BackgroundType::None;
-  ConvTypes::TieAmplitudesType m_tieAmplitudesType = ConvTypes::TieAmplitudesType::False;
+  ConvTypes::TiePeakCentresType m_tiePeakCentresType = ConvTypes::TiePeakCentresType::False;
 
   BackgroundSubType m_backgroundSubtype;
 

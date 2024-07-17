@@ -63,7 +63,7 @@ void ConvFunctionTemplateModel::setModel() {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model->setGlobalParameters(makeGlobalList());
-  tieAmplitudes();
+  tiePeakCentres();
   estimateFunctionParameters();
 }
 
@@ -296,8 +296,8 @@ void ConvFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInd
   case ConvTypes::SubTypeIndex::Background:
     m_backgroundType = static_cast<ConvTypes::BackgroundType>(typeIndex);
     break;
-  case ConvTypes::SubTypeIndex::TieAmplitudes:
-    m_tieAmplitudesType = static_cast<ConvTypes::TieAmplitudesType>(typeIndex);
+  case ConvTypes::SubTypeIndex::TiePeakCentres:
+    m_tiePeakCentresType = static_cast<ConvTypes::TiePeakCentresType>(typeIndex);
     break;
   default:
     throw std::logic_error("A matching ConvTypes::SubTypeIndex could not be found.");
@@ -314,18 +314,18 @@ std::map<std::size_t, int> ConvFunctionTemplateModel::getSubTypes() const {
   subTypes[ConvTypes::SubTypeIndex::Delta] = static_cast<int>(m_deltaType);
   subTypes[ConvTypes::SubTypeIndex::TempCorrection] = static_cast<int>(m_tempCorrectionType);
   subTypes[ConvTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
-  subTypes[ConvTypes::SubTypeIndex::TieAmplitudes] = static_cast<int>(m_tieAmplitudesType);
+  subTypes[ConvTypes::SubTypeIndex::TiePeakCentres] = static_cast<int>(m_tiePeakCentresType);
   return subTypes;
 }
 
-void ConvFunctionTemplateModel::tieAmplitudes() {
-  auto const lor1AmplitudeName = getParameterName(ParamID::LOR1_AMPLITUDE);
-  auto const lor2AmplitudeName = getParameterName(ParamID::LOR2_AMPLITUDE);
-  if (!lor1AmplitudeName || !lor2AmplitudeName)
+void ConvFunctionTemplateModel::tiePeakCentres() {
+  auto const lor1PeakCentreName = getParameterName(ParamID::LOR1_PEAKCENTRE);
+  auto const lor2PeakCentreName = getParameterName(ParamID::LOR2_PEAKCENTRE);
+  if (!lor1PeakCentreName || !lor2PeakCentreName)
     return;
-  auto const tie = m_tieAmplitudesType == TieAmplitudesType::True ? *lor2AmplitudeName : "";
+  auto const tie = m_tiePeakCentresType == TiePeakCentresType::True ? *lor1PeakCentreName : "";
   for (auto i = 0; i < getNumberDomains(); ++i) {
-    setLocalParameterTie(*lor1AmplitudeName, i, tie);
+    setLocalParameterTie(*lor2PeakCentreName, i, tie);
   }
 }
 

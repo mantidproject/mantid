@@ -144,9 +144,9 @@ std::map<ConvTypes::TempCorrectionType, TemplateSubTypeDescriptor>
     };
 
 template <>
-std::map<ConvTypes::TieAmplitudesType, TemplateSubTypeDescriptor>
-    TemplateSubTypeImpl<ConvTypes::TieAmplitudesType>::g_typeMap{
-        {ConvTypes::TieAmplitudesType::False, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-        {ConvTypes::TieAmplitudesType::True, {"Tie Amplitudes", "", {ParamID::NONE, ParamID::NONE}}},
+std::map<ConvTypes::TiePeakCentresType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<ConvTypes::TiePeakCentresType>::g_typeMap{
+        {ConvTypes::TiePeakCentresType::False, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {ConvTypes::TiePeakCentresType::True, {"Tie Peak Centres", "", {ParamID::NONE, ParamID::NONE}}},
     };
 } // namespace MantidQt::CustomInterfaces::Inelastic
