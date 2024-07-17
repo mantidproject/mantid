@@ -82,10 +82,10 @@ static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 inline auto templateSubTypes() {
-  return packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(),
-                              std::make_unique<ConvTypes::FitSubType>(), std::make_unique<ConvTypes::DeltaSubType>(),
-                              std::make_unique<ConvTypes::TempSubType>(),
-                              std::make_unique<ConvTypes::BackgroundSubType>());
+  return packTemplateSubTypes(
+      std::make_unique<ConvTypes::LorentzianSubType>(), std::make_unique<ConvTypes::FitSubType>(),
+      std::make_unique<ConvTypes::DeltaSubType>(), std::make_unique<ConvTypes::TempSubType>(),
+      std::make_unique<ConvTypes::BackgroundSubType>(), std::make_unique<ConvTypes::TieHeightsSubType>());
 }
 
 } // namespace Convolution

@@ -142,4 +142,11 @@ std::map<ConvTypes::TempCorrectionType, TemplateSubTypeDescriptor>
         {ConvTypes::TempCorrectionType::Exponential,
          {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
     };
+
+template <>
+std::map<ConvTypes::TieHeightsType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<ConvTypes::TieHeightsType>::g_typeMap{
+        {ConvTypes::TieHeightsType::False, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {ConvTypes::TieHeightsType::True, {"Tie Heights", "", {ParamID::NONE, ParamID::NONE}}},
+    };
 } // namespace MantidQt::CustomInterfaces::Inelastic
