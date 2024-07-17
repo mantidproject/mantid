@@ -38,6 +38,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   const auto &componentInfo = actor.componentInfo();
 
   size_t textureIndex = 0;
+  if (componentInfo.size() <= 1) {
+    return;
+  }
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
     if (type == ComponentType::Rectangular || type == ComponentType::OutlineComposite || type == ComponentType::Grid) {

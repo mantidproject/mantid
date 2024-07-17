@@ -1,7 +1,11 @@
 # Testing
 set(TEST_FILES
-    InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h InstrumentWidget/InstrumentDisplayTest.h
-    InstrumentWidget/InstrumentWidgetTest.h InstrumentWidget/PanelsSurfaceTest.h
+    InstrumentRendererTest.h
+    InstrumentWidgetDecoderTest.h
+    InstrumentWidgetEncoderTest.h
+    InstrumentWidget/InstrumentDisplayTest.h
+    InstrumentWidget/InstrumentWidgetTest.h
+    InstrumentWidget/PanelsSurfaceTest.h
     InstrumentWidget/ProjectionSurfaceTest.h
 )
 
