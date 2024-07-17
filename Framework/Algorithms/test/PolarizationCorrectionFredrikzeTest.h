@@ -362,4 +362,146 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 0.7, 1e-14);
     TS_ASSERT_DELTA(out4->y(0)[0], 0.6, 1e-14);
   }
+
+  void test_validate_input_spin_state_order() {
+    PolarizationCorrectionFredrikze alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("PolarizationAnalysis", "PA");
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputSpinStateOrder", "pp,pa,ap,aa"));
+  }
+
+  void test_validate_output_spin_state_order() {
+    PolarizationCorrectionFredrikze alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("PolarizationAnalysis", "PA");
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa"));
+  }
+
+  void test_invalid_spin_state_order() {
+    PolarizationCorrectionFredrikze alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("PolarizationAnalysis", "PA");
+    TS_ASSERT_THROWS(alg.setProperty("InputSpinStateOrder", "xx,yy,zz,ww"), std::invalid_argument &);
+  }
+
+  void test_invalid_output_spin_state_order() {
+    PolarizationCorrectionFredrikze alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("PolarizationAnalysis", "PA");
+    TS_ASSERT_THROWS(alg.setProperty("OutputSpinStateOrder", "xx,yy,zz,ww"), std::invalid_argument &);
+  }
+
+  void test_valid_spin_state_order() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", create1DWorkspace(4, 1, 1));
+    alg.setProperty("InputSpinStateOrder", "pp,pa,ap,aa");
+    alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa");
+    // Ensure that the algorithm executes without throwing any errors
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void test_valid_spinstate_order_matches_input_workspaces() {
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Create group workspace
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+    alg.setProperty("InputSpinStateOrder", "pp,pa,ap,aa");
+    alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void test_invalid_spinstate_order_does_not_match_input_workspaces() {
+    auto groupWS = std::make_shared<WorkspaceGroup>(); // Create group workspace
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+    alg.setProperty("InputSpinStateOrder", "pp,pa,ap,aa");
+    alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa");
+
+    TSM_ASSERT_THROWS("Spin state order count does not match input workspaces count, should throw", alg.execute(),
+                      std::invalid_argument &);
+  }
+
+  // Test various combinations of spin state orders
+  void test_various_spin_state_orders() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+
+    // Test different input and output spin state orders
+    std::vector<std::string> spinStateOrders = {"pp,pa,ap,aa", "pa,pp,aa,ap", "ap,aa,pa,pp", "aa,ap,pp,pa"};
+
+    for (const auto &inputOrder : spinStateOrders) {
+      for (const auto &outputOrder : spinStateOrders) {
+        alg.setProperty("InputSpinStateOrder", inputOrder);
+        alg.setProperty("OutputSpinStateOrder", outputOrder);
+        TS_ASSERT_THROWS_NOTHING(alg.execute());
+      }
+    }
+  }
+
+  // New test added for invalid spin state order during execution
+  void test_invalid_spin_state_order_during_execution() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", create1DWorkspace(4, 1, 1));
+    alg.setProperty("InputSpinStateOrder", "pp,pa,xx,yy");
+    alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa");
+
+    TS_ASSERT_THROWS("Invalid input spin state order, should throw", alg.execute(), std::invalid_argument &);
+  }
 };
