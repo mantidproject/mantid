@@ -203,7 +203,7 @@ const std::string PolarizationCorrectionFredrikze::summary() const {
  * @param rhs : WS to multiply by (constant value)
  * @return Multiplied Workspace.
  */
-MatrixWorkspace_sptr PolarizationCorrectionFredrikze::multiply(MatrixWorkspace_sptr &lhsWS, const double &rhs) {
+MatrixWorkspace_sptr PolarizationCorrectionFredrikze::multiply(const MatrixWorkspace_sptr &lhsWS, const double &rhs) {
   auto multiply = this->createChildAlgorithm("Multiply");
   auto rhsWS = std::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   multiply->initialize();
@@ -220,7 +220,7 @@ MatrixWorkspace_sptr PolarizationCorrectionFredrikze::multiply(MatrixWorkspace_s
  * @param rhs Value to add
  * @return Summed workspace
  */
-MatrixWorkspace_sptr PolarizationCorrectionFredrikze::add(MatrixWorkspace_sptr &lhsWS, const double &rhs) {
+MatrixWorkspace_sptr PolarizationCorrectionFredrikze::add(const MatrixWorkspace_sptr &lhsWS, const double &rhs) {
   auto plus = this->createChildAlgorithm("Plus");
   auto rhsWS = std::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   plus->initialize();
