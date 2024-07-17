@@ -22,6 +22,13 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
+namespace SPIN_STATES {
+const std::string PP("pp");
+const std::string PA("pa");
+const std::string AP("ap");
+const std::string AA("aa");
+} // namespace SPIN_STATES
+
 namespace {
 
 const std::string pNRLabel("PNR");
@@ -37,6 +44,10 @@ const std::string cAlphaLabel("Alpha");
 const std::string cApLabel("Ap");
 
 const std::string efficienciesLabel("Efficiencies");
+
+const std::string inputSpinStateOrderLabel("InputSpinStateOrder");
+
+const std::string outputSpinStateOrderLabel("OutputSpinStateOrder");
 
 std::vector<std::string> modes() {
   std::vector<std::string> modes;
@@ -54,7 +65,12 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
   return matrixWS->getInstrument();
 }
 
-void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
+void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::vector<std::string> &spinStateOrder) {
+  // Check if the number of input workspaces matches the number of specified spin states
+  if (ws->size() != spinStateOrder.size()) {
+    throw std::invalid_argument("The number of input workspaces does not match the number of specified spin states.");
+  }
+
   MatrixWorkspace_sptr lastWS;
   for (size_t i = 0; i < ws->size(); ++i) {
 
@@ -104,6 +120,58 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
 }
 
 using VecDouble = std::vector<double>;
+
+std::vector<std::string> parseSpinStateOrder(const std::string &orderStr) {
+  std::vector<std::string> order;
+  std::stringstream ss(orderStr);
+  std::string item;
+  while (std::getline(ss, item, ',')) {
+    order.push_back(item);
+  }
+  return order;
+}
+
+/**
+ * Map the input workspaces according to the specified input order.
+ * @param inWS :: The input WorkspaceGroup.
+ * @param order :: The vector of strings representing the order.
+ * @return A map of spin state to MatrixWorkspace shared pointers.
+ */
+std::map<std::string, MatrixWorkspace_sptr> mapOrderToWorkspaces(const WorkspaceGroup_sptr &inWS,
+                                                                 const std::vector<std::string> &order) {
+  std::map<std::string, MatrixWorkspace_sptr> workspaceMap;
+  // Default order for backward compatibility
+  std::vector<std::string> defaultOrder = {SPIN_STATES::PP, SPIN_STATES::PA, SPIN_STATES::AP, SPIN_STATES::AA};
+  // If the order vector is empty, the default order is used
+  std::vector<std::string> effectiveOrder = order.empty() ? defaultOrder : order;
+
+  for (size_t i = 0; i < effectiveOrder.size(); ++i) {
+    workspaceMap[effectiveOrder[i]] = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(i));
+  }
+
+  return workspaceMap;
+}
+
+/**
+ * Map the corrected workspaces to the specified output order.
+ * @param workspaces :: The map of spin state to MatrixWorkspace shared pointers.
+ * @param order :: The vector of strings representing the output order.
+ * @return A WorkspaceGroup with workspaces in the specified order.
+ */
+WorkspaceGroup_sptr mapWorkspacesToOrder(const std::map<std::string, MatrixWorkspace_sptr> &workspaces,
+                                         const std::vector<std::string> &order) {
+  WorkspaceGroup_sptr dataOut = std::make_shared<WorkspaceGroup>();
+  // Default order for backward compatibility
+  std::vector<std::string> defaultOrder = {SPIN_STATES::PP, SPIN_STATES::PA, SPIN_STATES::AP, SPIN_STATES::AA};
+  // If the order vector is empty, use the default order
+  std::vector<std::string> effectiveOrder = order.empty() ? defaultOrder : order;
+
+  for (const auto &state : effectiveOrder) {
+    dataOut->addWorkspace(workspaces.at(state));
+  }
+
+  return dataOut;
+}
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -185,15 +253,41 @@ void PolarizationCorrectionFredrikze::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
+
+  // Declare properties for input and output spin state orders
+  declareProperty(inputSpinStateOrderLabel,
+                  SPIN_STATES::PP + "," + SPIN_STATES::PA + "," + SPIN_STATES::AP + "," + SPIN_STATES::AA,
+                  "The order of spin states in the input workspace group. The possible values are 'pp,pa,ap,aa'.\n"
+                  "pp: parallel-parallel\n"
+                  "pa: parallel-anti-parallel\n"
+                  "ap: anti-parallel-parallel\n"
+                  "aa: anti-parallel-anti-parallel",
+                  Direction::Input);
+
+  declareProperty(
+      outputSpinStateOrderLabel,
+      SPIN_STATES::PP + "," + SPIN_STATES::PA + "," + SPIN_STATES::AP + "," + SPIN_STATES::AA,
+      "The order of spin states in the output workspace group. The possible values are 'pp,pa,ap,aa' or 'p,a'.\n"
+      "pp: parallel-parallel\n"
+      "pa: parallel-anti-parallel\n"
+      "ap: anti-parallel-parallel\n"
+      "aa: anti-parallel-anti-parallel\n"
+      "p: parallel\n"
+      "a: anti-parallel",
+      Direction::Output);
 }
 
-WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS) {
+WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS,
+                                                            const std::vector<std::string> &inputOrder,
+                                                            const std::vector<std::string> &outputOrder) {
 
-  size_t itemIndex = 0;
-  MatrixWorkspace_sptr Ipp = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
-  MatrixWorkspace_sptr Ipa = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
-  MatrixWorkspace_sptr Iap = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
-  MatrixWorkspace_sptr Iaa = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+  // Map the input workspaces according to the specified input order
+  auto inputMap = mapOrderToWorkspaces(inWS, inputOrder);
+
+  MatrixWorkspace_sptr Ipp = inputMap[SPIN_STATES::PP];
+  MatrixWorkspace_sptr Ipa = inputMap[SPIN_STATES::PA];
+  MatrixWorkspace_sptr Iap = inputMap[SPIN_STATES::AP];
+  MatrixWorkspace_sptr Iaa = inputMap[SPIN_STATES::AA];
 
   Ipp->setTitle("Ipp");
   Iaa->setTitle("Iaa");
@@ -222,11 +316,15 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup
   const auto nIap = (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
   const auto nIpa = (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
 
-  WorkspaceGroup_sptr dataOut = std::make_shared<WorkspaceGroup>();
-  dataOut->addWorkspace(nIpp);
-  dataOut->addWorkspace(nIpa);
-  dataOut->addWorkspace(nIap);
-  dataOut->addWorkspace(nIaa);
+  // Map the corrected workspaces to the specified output order
+  std::map<std::string, MatrixWorkspace_sptr> outputMap;
+  outputMap[SPIN_STATES::PP] = nIpp;
+  outputMap[SPIN_STATES::PA] = nIpa;
+  outputMap[SPIN_STATES::AP] = nIap;
+  outputMap[SPIN_STATES::AA] = nIaa;
+
+  WorkspaceGroup_sptr dataOut = mapWorkspacesToOrder(outputMap, outputOrder);
+
   size_t totalGroupEntries(dataOut->getNumberOfEntries());
   for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
@@ -324,7 +422,15 @@ void PolarizationCorrectionFredrikze::exec() {
   const std::string analysisMode = getProperty("PolarizationAnalysis");
   const size_t nWorkspaces = inWS->size();
 
-  validateInputWorkspace(inWS);
+  // Retrieve the input and output spin state orders
+  std::string inputOrderStr = getProperty(inputSpinStateOrderLabel);
+  std::string outputOrderStr = getProperty(outputSpinStateOrderLabel);
+
+  // Parse the input and output order strings into vectors
+  std::vector<std::string> inputOrder = parseSpinStateOrder(inputOrderStr);
+  std::vector<std::string> outputOrder = parseSpinStateOrder(outputOrderStr);
+
+  validateInputWorkspace(inWS, inputOrder);
 
   WorkspaceGroup_sptr outWS;
   if (analysisMode == pALabel) {
@@ -332,7 +438,7 @@ void PolarizationCorrectionFredrikze::exec() {
       throw std::invalid_argument("For PA analysis, input group must have 4 periods.");
     }
     g_log.notice("PA polarization correction");
-    outWS = execPA(inWS);
+    outWS = execPA(inWS, inputOrder, outputOrder);
   } else if (analysisMode == pNRLabel) {
     if (nWorkspaces != 2) {
       throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
