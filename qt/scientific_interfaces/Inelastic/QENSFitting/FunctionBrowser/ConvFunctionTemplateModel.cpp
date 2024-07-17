@@ -71,10 +71,10 @@ void ConvFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-  bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
   } else if (fun->name() == "CompositeFunction") {
+    bool isBackgroundSet = false;
     for (size_t i = 0; i < fun->nFunctions(); ++i) {
       auto innerFunction = fun->getFunction(i);
       auto const name = innerFunction->name();

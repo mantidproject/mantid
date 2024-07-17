@@ -1690,7 +1690,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Processor
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Processor/ElwinModel.h:50
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Processor/IqtModel.h:42
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Processor/SymmetriseModel.h:39
-variableScope:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FunctionBrowser/ConvFunctionTemplateModel.cpp:73
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FittingModel.h:47
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/ConvolutionModel.h:21
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/QENSFitting/FittingModel.h:99
