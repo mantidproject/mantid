@@ -428,6 +428,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t max
   }
 }
 
+GNU_DIAG_OFF("maybe-uninitialized")
 //-----------------------------------------------------------------------------------------------
 /** Return all boxes contained within, limited by an implicit function.
  *
@@ -609,6 +610,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t max
       outBoxes.emplace_back(this);
   }
 }
+GNU_DIAG_ON("maybe-uninitialized")
 //-----------------------------------------------------------------------------------------------
 /** Return all boxes contained within.
  *
