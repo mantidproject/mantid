@@ -153,8 +153,8 @@ void SaveNXSPE::exec() {
   nxFile.openData("name");
   // TODO: Get the instrument short name
   nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
-  nxFile.writeData("run_number", inputWS->getRunNumber());
   nxFile.closeData();
+  nxFile.writeData("run_number", inputWS->getRunNumber());
 
   // NXfermi_chopper
   nxFile.makeGroup("fermi", "NXfermi_chopper", true);
