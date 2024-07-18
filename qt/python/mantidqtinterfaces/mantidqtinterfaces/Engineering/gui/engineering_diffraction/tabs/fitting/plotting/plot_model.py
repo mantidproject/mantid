@@ -94,10 +94,13 @@ class FittingPlotModel(object):
 
     def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
         fit_func_name = fit_func.name()
+        key_fwhm = fit_func_name + "_fwhm"
+        if key_fwhm.lower() in set([k.lower() for k in self._fit_results[ws_name]["results"].keys()]):
+            return  # Avoid re-calculating of FWHM if the results already contain it
+
         if fit_func_name in peak_func_names:
             peak_func = FunctionFactory.Instance().createPeakFunction(fit_func_name)
             [peak_func.setParameter(i_param, fit_func.getParameterValue(i_param)) for i_param in range(fit_func.nParams())]
-            key_fwhm = fit_func_name + "_fwhm"
             self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
 
     def _calculate_fwhm_values(self, ws_name, fit_functions):
