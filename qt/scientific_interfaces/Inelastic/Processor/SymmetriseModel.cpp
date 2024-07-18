@@ -8,12 +8,9 @@
 #include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include <QDoubleValidator>
-#include <QFileInfo>
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 
 using namespace DataValidationHelper;
 using namespace Mantid::API;
@@ -24,8 +21,7 @@ SymmetriseModel::SymmetriseModel()
     : m_inputWorkspace(), m_reflectedInputWorkspace(), m_negativeOutputWorkspace(), m_positiveOutputWorkspace(),
       m_eMin(), m_eMax(), m_isPositiveReflect(), m_spectraRange() {}
 
-void SymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::vector<int> const &spectraRange) {
+API::IConfiguredAlgorithm_sptr SymmetriseModel::setupPreviewAlgorithm(std::vector<int> const &spectraRange) {
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
@@ -34,20 +30,21 @@ void SymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner 
   // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
-  symmetriseAlg->setProperty("XMin", m_eMin);
-  symmetriseAlg->setProperty("XMax", m_eMax);
-  symmetriseAlg->setProperty("SpectraRange", spectraRange);
-  symmetriseAlg->setProperty("OutputWorkspace", "__Symmetrise_temp");
-  symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
   symmetriseAlg->setRethrows(true);
-
-  batchAlgoRunner->addAlgorithm(symmetriseAlg);
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  properties->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
+  properties->setProperty("XMin", m_eMin);
+  properties->setProperty("XMax", m_eMax);
+  properties->setProperty("SpectraRange", spectraRange);
+  properties->setProperty("OutputWorkspace", "__Symmetrise_temp");
+  properties->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
+  auto confAlg = std::make_shared<API::ConfiguredAlgorithm>(symmetriseAlg, std::move(properties));
+  return confAlg;
 }
 
-std::string SymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+API::IConfiguredAlgorithm_sptr SymmetriseModel::setupSymmetriseAlgorithm(std::string &outputWorkspace) {
 
-  std::string outputWorkspace = m_positiveOutputWorkspace;
+  outputWorkspace = m_positiveOutputWorkspace;
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
     outputWorkspace = m_negativeOutputWorkspace;
@@ -55,14 +52,14 @@ std::string SymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::BatchAlgori
 
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
-  symmetriseAlg->setProperty("XMin", m_eMin);
-  symmetriseAlg->setProperty("XMax", m_eMax);
-  symmetriseAlg->setProperty("OutputWorkspace", outputWorkspace);
-  symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
-
-  batchAlgoRunner->addAlgorithm(symmetriseAlg);
-  return outputWorkspace;
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  properties->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
+  properties->setProperty("XMin", m_eMin);
+  properties->setProperty("XMax", m_eMax);
+  properties->setProperty("OutputWorkspace", outputWorkspace);
+  properties->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
+  auto confAlg = std::make_shared<API::ConfiguredAlgorithm>(symmetriseAlg, std::move(properties));
+  return confAlg;
 }
 
 void SymmetriseModel::reflectNegativeToPositive() {

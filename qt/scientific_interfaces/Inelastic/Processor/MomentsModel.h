@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include <MantidQtWidgets/Common/IConfiguredAlgorithm.h>
 #include <typeinfo>
 
 using namespace Mantid::API;
@@ -18,7 +19,7 @@ class MANTIDQT_INELASTIC_DLL IMomentsModel {
 
 public:
   virtual ~IMomentsModel() = default;
-  virtual IAlgorithm_sptr setupAlgorithm() = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() = 0;
   virtual void setInputWorkspace(const std::string &workspace) = 0;
   virtual void setEMin(double eMin) = 0;
   virtual void setEMax(double eMax) = 0;
@@ -32,7 +33,7 @@ class MANTIDQT_INELASTIC_DLL MomentsModel : public IMomentsModel {
 public:
   MomentsModel();
   ~MomentsModel() = default;
-  IAlgorithm_sptr setupAlgorithm() override;
+  API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() override;
   void setInputWorkspace(const std::string &workspace) override;
   void setEMin(double eMin) override;
   void setEMax(double eMax) override;

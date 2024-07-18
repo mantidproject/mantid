@@ -21,8 +21,7 @@ class MANTIDQT_INELASTIC_DLL IIqtModel {
 
 public:
   virtual ~IIqtModel() = default;
-  virtual void setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                   std::string const &outputWorkspace) = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupTransformToIqt(std::string const &outputWorkspace) = 0;
   virtual void setSampleWorkspace(std::string const &sampleWorkspace) = 0;
   virtual void setResWorkspace(std::string const &resWorkspace) = 0;
   virtual void setNIterations(std::string const &nIterations) = 0;
@@ -40,8 +39,7 @@ class MANTIDQT_INELASTIC_DLL IqtModel : public IIqtModel {
 public:
   IqtModel();
   ~IqtModel() = default;
-  void setupTransformToIqt(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                           std::string const &outputWorkspace) override;
+  API::IConfiguredAlgorithm_sptr setupTransformToIqt(std::string const &outputWorkspace) override;
   void setSampleWorkspace(std::string const &sampleWorkspace) override;
   void setResWorkspace(std::string const &resWorkspace) override;
   void setNIterations(std::string const &nIterations) override;

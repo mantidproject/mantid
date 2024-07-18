@@ -14,6 +14,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include <MantidAPI/AlgorithmProperties.h>
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 #include <QDoubleValidator>
 #include <QFileInfo>
 
@@ -36,48 +38,52 @@ void ElwinModel::setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAl
   batchAlgoRunner->addAlgorithm(loadAlg);
 }
 
-void ElwinModel::setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                     std::string const &inputWorkspacesString, std::string const &inputGroupWsName) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupGroupAlgorithm(std::string const &inputWorkspacesString,
+                                                               std::string const &inputGroupWsName) {
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupWsAlg->initialize();
+  // groupWsAlg->initialize();
   auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
-  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
-  batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runtimeProps));
+  runtimeProps->setPropertyValue("OutputWorkspace", inputGroupWsName);
+  MantidQt::API::IConfiguredAlgorithm_sptr groupAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(groupWsAlg, std::move(runtimeProps));
+  return groupAlg;
 }
 
-void ElwinModel::setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::string const &workspaceBaseName, std::string const &inputGroupWsName,
-                                            std::string const &sampleEnvironmentLogName,
-                                            std::string const &sampleEnvironmentLogValue) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupElasticWindowMultiple(std::string const &workspaceBaseName,
+                                                                      std::string const &inputGroupWsName,
+                                                                      std::string const &sampleEnvironmentLogName,
+                                                                      std::string const &sampleEnvironmentLogValue) {
 
   setOutputWorkspaceNames(workspaceBaseName);
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  properties->setProperty("OutputInQ", m_outputWorkspaceNames["qWorkspace"]);
+  properties->setProperty("OutputInQSquared", m_outputWorkspaceNames["qSquaredWorkspace"]);
+  properties->setProperty("OutputELF", m_outputWorkspaceNames["elfWorkspace"]);
 
-  elwinMultAlg->setProperty("OutputInQ", m_outputWorkspaceNames["qWorkspace"]);
-  elwinMultAlg->setProperty("OutputInQSquared", m_outputWorkspaceNames["qSquaredWorkspace"]);
-  elwinMultAlg->setProperty("OutputELF", m_outputWorkspaceNames["elfWorkspace"]);
+  properties->setProperty("SampleEnvironmentLogName", sampleEnvironmentLogName);
+  properties->setProperty("SampleEnvironmentLogValue", sampleEnvironmentLogValue);
 
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", sampleEnvironmentLogName);
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", sampleEnvironmentLogValue);
-
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_integrationStart);
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_integrationEnd);
+  properties->setProperty("IntegrationRangeStart", m_integrationStart);
+  properties->setProperty("IntegrationRangeEnd", m_integrationEnd);
 
   if (m_backgroundSubtraction) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_backgroundStart);
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_backgroundEnd);
+    properties->setProperty("BackgroundRangeStart", m_backgroundStart);
+    properties->setProperty("BackgroundRangeEnd", m_backgroundEnd);
   }
 
   if (m_normalise) {
-    elwinMultAlg->setProperty("OutputELT", m_outputWorkspaceNames["eltWorkspace"]);
+    properties->setProperty("OutputELT", m_outputWorkspaceNames["eltWorkspace"]);
   }
-  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  runtimeProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
-  batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(runtimeProps));
+
+  properties->setProperty("InputWorkspaces", inputGroupWsName);
+  MantidQt::API::IConfiguredAlgorithm_sptr elwinAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(elwinMultAlg, std::move(properties));
+  return elwinAlg;
 }
 
 void ElwinModel::ungroupAlgorithm(std::string const &inputWorkspace) const {
