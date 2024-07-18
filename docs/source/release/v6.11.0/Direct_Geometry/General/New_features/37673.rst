@@ -1,0 +1,1 @@
+- SaveNXSPE now stores the run number of the input workspace in the instrument section.
