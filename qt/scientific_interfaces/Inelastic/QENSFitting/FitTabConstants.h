@@ -65,8 +65,8 @@ static const auto ALL_FITS =
 namespace IqtFit {
 static const auto TAB_NAME = "I(Q, t)";
 static const auto HIDDEN_PROPS =
-    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
-                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputWorkspace",
+                              "Output", "PeakRadius", "PlotParameter"});
 
 inline auto templateSubTypes() {
   return packTemplateSubTypes(std::make_unique<IqtTypes::ExponentialSubType>(),
