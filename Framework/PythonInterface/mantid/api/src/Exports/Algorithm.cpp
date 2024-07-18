@@ -17,6 +17,7 @@
 #include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/optional.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
@@ -78,6 +79,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload, PythonAlgorithm::
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
+GNU_DIAG_OFF("maybe-uninitialized")
 /**
  * Map a CancelException to a Python KeyboardInterupt
  * @param exc A cancel exception to translate. Unused here as the message is
@@ -174,6 +176,7 @@ object createChildWithProps(tuple args, dict kwargs) {
   return object(childAlg);
 }
 
+GNU_DIAG_ON("maybe-uninitialized")
 } // namespace
 
 void export_leaf_classes() {

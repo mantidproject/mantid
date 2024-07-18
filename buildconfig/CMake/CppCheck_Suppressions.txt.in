@@ -1065,7 +1065,7 @@ cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exp
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Instrument.cpp:54
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h:28
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:74
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:75
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:127
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:155
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/MeshObject.cpp:29
