@@ -51,7 +51,7 @@ std::string DataProcessorInterface::documentationPage() const { return "Inelasti
  */
 void DataProcessorInterface::exportTabPython() {
   auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
-  m_presenters[tabName]->exportPythonScript();
+  // m_presenters[tabName]->exportPythonScript();
 }
 
 /**
