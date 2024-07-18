@@ -78,7 +78,7 @@ class ErrorReporterPresenter(object):
         tmp_core_copy_fp = tempfile.NamedTemporaryFile()
         lz4_command = ["lz4", "-d", latest_core_dump.as_posix(), tmp_core_copy_fp.name]
         self.error_log.notice(f"Running {' '.join(lz4_command)} ...")
-        result = subprocess.run(lz4_command, capture_output=True, text=True)
+        result = subprocess.run(lz4_command)
         output = ""
         if result.returncode == 0:
             self.error_log.notice(f"Decompressed core file to {tmp_core_copy_fp.name}")
@@ -107,10 +107,11 @@ class ErrorReporterPresenter(object):
         CORE_DUMP_RECENCY_LIMIT = 30
         files = Path(dir).iterdir()
         sorted_files = sorted([file for file in files], key=lambda file: file.stat().st_ctime)
-        latest_core_dump = sorted_files[-1]
-        difference = datetime.now() - datetime.fromtimestamp(latest_core_dump.stat().st_ctime)
-        if difference.seconds < CORE_DUMP_RECENCY_LIMIT:
-            return Path(dir, sorted_files[-1])
+        if sorted_files:
+            latest_core_dump = sorted_files[-1]
+            difference = datetime.now() - datetime.fromtimestamp(latest_core_dump.stat().st_ctime)
+            if difference.seconds < CORE_DUMP_RECENCY_LIMIT:
+                return Path(dir, sorted_files[-1])
         self.error_log.notice(f"Did not find a core dump from within the last {CORE_DUMP_RECENCY_LIMIT} seconds.")
         return None
 
