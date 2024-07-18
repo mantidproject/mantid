@@ -54,7 +54,8 @@ class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataProcessor,
                                                    public ISymmetrisePresenter,
                                                    public IRunSubscriber {
 public:
-  SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
+  SymmetrisePresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                      ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;
 
   // run widget

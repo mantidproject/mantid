@@ -26,10 +26,11 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
-                                         std::unique_ptr<ISymmetriseModel> model)
-    : DataProcessor(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
-      m_model(std::move(model)), m_isPreview(false) {
+SymmetrisePresenter::SymmetrisePresenter(QWidget *parent,
+                                         std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                                         ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
+      m_view(view), m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -61,21 +62,22 @@ void SymmetrisePresenter::handleRun() {
   // Return if E range is incorrect
   if (!m_view->verifyERange(dataWorkspaceName))
     return;
-
+  API::IConfiguredAlgorithm_sptr configuredAlgorithm = {};
   if (m_isPreview) {
     int spectrumNumber = static_cast<int>(m_view->getPreviewSpec());
     std::vector<int> spectraRange(2, spectrumNumber);
 
-    m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
+    configuredAlgorithm = m_model->setupPreviewAlgorithm(spectraRange);
   } else {
     clearOutputPlotOptionsWorkspaces();
-    auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
+    auto outputWorkspaceName = std::string();
+    configuredAlgorithm = m_model->setupSymmetriseAlgorithm(outputWorkspaceName);
     // Set the workspace name for Python script export
     m_pythonExportWsName = outputWorkspaceName;
   }
 
   // Execute the algorithm(s) on a separated thread
-  m_batchAlgoRunner->executeBatchAsync();
+  m_algorithmRunner->execute(configuredAlgorithm);
 }
 
 /**
@@ -83,8 +85,7 @@ void SymmetrisePresenter::handleRun() {
  */
 void SymmetrisePresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatch();
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_pythonExportWsName, m_pythonExportWsName));
 }
 
 /**

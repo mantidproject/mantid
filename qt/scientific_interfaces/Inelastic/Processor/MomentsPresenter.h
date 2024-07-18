@@ -39,7 +39,8 @@ public:
 class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataProcessor, public IMomentsPresenter, public IRunSubscriber {
 
 public:
-  MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
+  MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                   IMomentsView *view, std::unique_ptr<IMomentsModel> model);
   ~MomentsPresenter() = default;
 
   // runWidget
