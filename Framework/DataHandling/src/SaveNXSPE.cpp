@@ -37,7 +37,7 @@ const double SaveNXSPE::MASK_FLAG = std::numeric_limits<double>::quiet_NaN();
 const double SaveNXSPE::MASK_ERROR = 0.0;
 // works fine but there were cases that some compilers crush on this (VS2008 in
 // mixed .net environment ?)
-const std::string SaveNXSPE::NXSPE_VER = "1.2";
+const std::string SaveNXSPE::NXSPE_VER = "1.3";
 // 4MB chunk size
 const size_t SaveNXSPE::MAX_CHUNK_SIZE = 4194304;
 
@@ -153,6 +153,7 @@ void SaveNXSPE::exec() {
   nxFile.openData("name");
   // TODO: Get the instrument short name
   nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
+  nxFile.writeData("run_number", inputWS->getRunNumber());
   nxFile.closeData();
 
   // NXfermi_chopper
