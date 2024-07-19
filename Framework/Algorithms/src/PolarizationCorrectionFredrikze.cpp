@@ -10,6 +10,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
@@ -120,16 +121,6 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::vector<std::stri
 }
 
 using VecDouble = std::vector<double>;
-
-std::vector<std::string> parseSpinStateOrder(const std::string &orderStr) {
-  std::vector<std::string> order;
-  std::stringstream ss(orderStr);
-  std::string item;
-  while (std::getline(ss, item, ',')) {
-    order.push_back(item);
-  }
-  return order;
-}
 
 /**
  * Map the input workspaces according to the specified input order.
@@ -427,8 +418,8 @@ void PolarizationCorrectionFredrikze::exec() {
   std::string outputOrderStr = getProperty(outputSpinStateOrderLabel);
 
   // Parse the input and output order strings into vectors
-  std::vector<std::string> inputOrder = parseSpinStateOrder(inputOrderStr);
-  std::vector<std::string> outputOrder = parseSpinStateOrder(outputOrderStr);
+  std::vector<std::string> inputOrder = PolarizationCorrectionsHelpers::splitSpinStateString(inputOrderStr);
+  std::vector<std::string> outputOrder = PolarizationCorrectionsHelpers::splitSpinStateString(outputOrderStr);
 
   validateInputWorkspace(inWS, inputOrder);
 

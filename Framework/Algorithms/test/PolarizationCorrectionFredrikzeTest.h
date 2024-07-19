@@ -502,6 +502,6 @@ public:
     alg.setProperty("InputSpinStateOrder", "pp,pa,xx,yy");
     alg.setProperty("OutputSpinStateOrder", "pp,pa,ap,aa");
 
-    TS_ASSERT_THROWS("Invalid input spin state order, should throw", alg.execute(), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Invalid input spin state order, should throw", alg.execute(), std::invalid_argument &);
   }
 };
