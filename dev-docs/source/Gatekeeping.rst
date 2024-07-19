@@ -131,6 +131,8 @@ From a fork
 
 Assuming your fork has the following remote setup
 
+.. code-block:: bash
+
     $ git remote -v
     mantid  https://github.com/mantidproject/mantid.git (fetch)
     mantid  https://github.com/mantidproject/mantid.git (push)
@@ -156,6 +158,8 @@ From a non-fork
 ---------------
 
 Assuming you have the following remote setup
+
+.. code-block:: bash
 
     $ git remote -v
     origin  https://github.com/mantidproject/mantid.git (fetch)
