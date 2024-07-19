@@ -16,6 +16,7 @@ from qtpy.QtCore import QSettings
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
+from mantidqt.utils.asynchronous import AsyncTask
 
 
 class ErrorReporterPresenter(object):
@@ -35,6 +36,7 @@ class ErrorReporterPresenter(object):
         self._traceback = traceback if traceback else ""
         self._view.set_report_callback(self.error_handler)
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)
+        self._async_recovery_task = AsyncTask(self._async_recovery_wrapper)
 
         if not traceback:
             traceback_file_path = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace.txt".format(application))
@@ -45,9 +47,12 @@ class ErrorReporterPresenter(object):
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
                 elif is_linux():
-                    self._traceback = self._recover_trace_from_core_dump()
+                    self._async_recovery_task.start()
             except OSError:
                 pass
+
+    def _async_recovery_wrapper(self):
+        self._traceback = self._recover_trace_from_core_dump()
 
     def _recover_trace_from_core_dump(self):
         # TODO check core dumps are enabled?
@@ -139,6 +144,9 @@ class ErrorReporterPresenter(object):
 
     def share_all_information(self, continue_working, new_name, new_email, text_box):
         uptime = UsageService.getUpTime()
+        if self._async_recovery_task.is_alive():
+            self.error_log.notice("gdb recpvery still running, waiting for completion before sharing.")
+            self._async_recovery_task.join()
         status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=new_name, email=new_email, text_box=text_box)
         self.error_log.notice("Sent full information")
         self._handle_exit(continue_working)
