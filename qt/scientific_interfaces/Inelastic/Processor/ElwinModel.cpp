@@ -29,13 +29,16 @@ ElwinModel::ElwinModel()
     : m_integrationStart(), m_integrationEnd(), m_backgroundStart(), m_backgroundEnd(), m_backgroundSubtraction(),
       m_normalise(), m_outputWorkspaceNames() {}
 
-void ElwinModel::setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                                    std::string const &outputName) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupLoadAlgorithm(std::string const &filepath,
+                                                              std::string const &outputName) {
   auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filepath);
-  loadAlg->setProperty("OutputWorkspace", outputName);
-  batchAlgoRunner->addAlgorithm(loadAlg);
+  auto runtimeProps = std::make_unique<AlgorithmRuntimeProps>();
+  runtimeProps->setProperty("Filename", filepath);
+  runtimeProps->setProperty("OutputWorkspace", outputName);
+  API::IConfiguredAlgorithm_sptr loadAlgo =
+      std::make_shared<API::ConfiguredAlgorithm>(loadAlg, std::move(runtimeProps));
+  return loadAlgo;
 }
 
 API::IConfiguredAlgorithm_sptr ElwinModel::setupGroupAlgorithm(std::string const &inputWorkspacesString,

@@ -22,8 +22,8 @@ namespace CustomInterfaces {
 class MANTIDQT_INELASTIC_DLL IElwinModel {
 public:
   virtual ~IElwinModel() = default;
-  virtual void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                                  std::string const &outputName) = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
+                                                            std::string const &outputName) = 0;
   virtual std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) = 0;
   virtual API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                              std::string const &inputGroupWsName) = 0;
@@ -48,8 +48,8 @@ class MANTIDQT_INELASTIC_DLL ElwinModel : public IElwinModel {
 public:
   ElwinModel();
   ~ElwinModel() = default;
-  void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                          std::string const &outputName) override;
+  API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
+                                                    std::string const &outputName) override;
   std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) override;
   API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                      std::string const &inputGroupWsName) override;

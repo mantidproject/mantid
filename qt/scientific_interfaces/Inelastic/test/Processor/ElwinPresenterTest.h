@@ -20,6 +20,8 @@
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <MantidQtWidgets/Common/MockAlgorithmRunner.h>
+
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
@@ -37,6 +39,9 @@ public:
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
     m_runView = std::make_unique<NiceMock<MockRunView>>();
 
+    auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
+    m_algorithmRunner = algorithmRunner.get();
+
     auto model = std::make_unique<NiceMock<MockElwinModel>>();
     auto dataModel = std::make_unique<NiceMock<MockDataModel>>();
     m_model = model.get();
@@ -46,7 +51,8 @@ public:
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     ON_CALL(*m_dataModel, getSpectra(WorkspaceID{0})).WillByDefault(Return(FunctionModelSpectra("0-1")));
 
-    m_presenter = std::make_unique<ElwinPresenter>(nullptr, m_view.get(), std::move(model), std::move(dataModel));
+    m_presenter = std::make_unique<ElwinPresenter>(nullptr, std::move(algorithmRunner), m_view.get(), std::move(model),
+                                                   std::move(dataModel));
 
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("workspace_test", m_workspace);
@@ -57,6 +63,7 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_algorithmRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_dataModel));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputPlotView.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runView.get()));
@@ -137,6 +144,7 @@ public:
 private:
   NiceMock<MockDataModel> *m_dataModel;
   NiceMock<MockElwinModel> *m_model;
+  NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockElwinView>> m_view;
