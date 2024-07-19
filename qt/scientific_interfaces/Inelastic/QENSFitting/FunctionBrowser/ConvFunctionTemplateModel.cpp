@@ -51,6 +51,7 @@ void ConvFunctionTemplateModel::clearData() {
   m_deltaType = DeltaType::None;
   m_tempCorrectionType = TempCorrectionType::None;
   m_backgroundType = BackgroundType::None;
+  m_tiePeakCentresType = TiePeakCentresType::False;
 
   m_model->clear();
 }

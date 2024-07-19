@@ -59,6 +59,7 @@ void IqtFunctionTemplateModel::clearData() {
   m_exponentialType = ExponentialType::None;
   m_fitType = FitType::None;
   m_backgroundType = BackgroundType::None;
+  m_tieIntensitiesType = TieIntensitiesType::False;
 
   m_model->clear();
 }
