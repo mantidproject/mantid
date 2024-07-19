@@ -44,7 +44,7 @@ void FlipperEfficiency::init() {
                   "Group workspace containing flipper transmissions for all 4 polarization states.");
   auto const spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropNames::SPIN_STATES, INITIAL_SPIN, spinValidator,
-                  "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
+                  "Order of individual flipper configurations in the input group workspace, e.g. \"01,11,00,10\"");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_WS, "", Direction::Output,
                                                                        PropertyMode::Optional),
                   "Workspace containing the wavelength-dependent efficiency for the flipper.");
@@ -129,10 +129,10 @@ void FlipperEfficiency::exec() {
 
 MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr const &groupWs) {
   auto const &spinConfig = getPropertyValue(PropNames::SPIN_STATES);
-  auto const &t11Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ONE_ONE);
-  auto const &t10Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ONE_ZERO);
-  auto const &t01Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ONE);
-  auto const &t00Ws = workspaceForSpinState(groupWs, spinConfig, SpinStateValidator::ZERO_ZERO);
+  auto const &t11Ws = workspaceForSpinState(groupWs, spinConfig, FlipperConfigurations::ON_ON);
+  auto const &t10Ws = workspaceForSpinState(groupWs, spinConfig, FlipperConfigurations::ON_OFF);
+  auto const &t01Ws = workspaceForSpinState(groupWs, spinConfig, FlipperConfigurations::OFF_ON);
+  auto const &t00Ws = workspaceForSpinState(groupWs, spinConfig, FlipperConfigurations::OFF_OFF);
 
   auto const &numerator = (t11Ws * t00Ws) - (t10Ws * t01Ws);
   auto const &denominator = (t11Ws + t10Ws) * (t00Ws - t01Ws);

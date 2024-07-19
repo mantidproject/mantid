@@ -29,13 +29,13 @@ public:
   }
 
   void testSpinStateSinglePairCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, false, false);
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, false, '+', '-');
     auto correctInputs = std::vector<std::string>{"-+", "--", "+-", "++", " -+", " -- ", "++ "};
     checkAllInputs(validator, correctInputs, true);
   }
 
   void testSpinStateSingleDigitCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, true, false);
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, true, '+', '-');
     auto correctInputs = std::vector<std::string>{"-+", "--", "+-", "++", " -+", " -- ", "++ ", "-", "+"};
     checkAllInputs(validator, correctInputs, true);
   }
@@ -77,7 +77,7 @@ public:
   }
 
   void testSpinStateMultipleStatesCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, false);
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, '+', '-');
     auto correctInputs = std::vector<std::string>{"-+, ++", "--,+-,++", "++,+-, --,-+", "--, +- "};
     checkAllInputs(validator, correctInputs, true);
   }
@@ -89,7 +89,7 @@ public:
   }
 
   void testSpinStateMixedWithFlipperConfig() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, false);
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, '+', '-');
     auto invalidInputs = std::vector<std::string>{"-+, 0+", "--,+-,11", "++,01, --,-+", "00, 1- "};
     checkAllInputs(validator, invalidInputs, false);
   }

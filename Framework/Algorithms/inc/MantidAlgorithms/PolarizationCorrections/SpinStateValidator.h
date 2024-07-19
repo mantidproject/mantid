@@ -25,7 +25,7 @@ particular ordering.
 class MANTID_ALGORITHMS_DLL SpinStateValidator : public Kernel::TypedValidator<std::string> {
 public:
   SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false,
-                     const bool useFlipperConfig = true, const bool optional = false);
+                     const char paraIndicator = '0', const char antiIndicator = '1', const bool optional = false);
   Kernel::IValidator_sptr clone() const override;
 
   static const std::string ZERO_ONE;
@@ -50,8 +50,11 @@ public:
 private:
   std::string checkValidity(const std::string &input) const override;
   std::unordered_set<int> m_allowedNumbersOfSpins = {1, 2, 3, 4};
+  const std::unordered_set<std::string> getAllowedPairStates() const;
+  const std::unordered_set<std::string> getAllowedSingleStates() const;
   bool m_acceptSingleStates = false;
-  bool m_useFlipperConfig = true;
+  std::string const m_para;
+  std::string const m_anti;
   bool m_optional = false;
 };
 } // namespace Mantid::Algorithms
