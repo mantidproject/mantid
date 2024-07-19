@@ -9,7 +9,15 @@
 import os
 import numpy as np
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, Progress
+from mantid.api import (
+    AlgorithmFactory,
+    AnalysisDataService,
+    PythonAlgorithm,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    WorkspaceGroupProperty,
+    Progress,
+)
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
@@ -173,14 +181,6 @@ class BayesQuasi(PythonAlgorithm):
         logger.information("Sample is " + self._samWS)
         logger.information("Resolution is " + self._resWS)
 
-        # Check for trailing and leading zeros in data
-        setup_prog.report("Checking for leading and trailing zeros in the data")
-        first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
-        self.check_energy_range_for_zeroes(first_data_point, last_data_point)
-
-        # update erange with new values
-        erange = [self._e_min, self._e_max]
-
         setup_prog.report("Checking Analysers")
         CheckAnalysersOrEFixed(self._samWS, self._resWS)
         setup_prog.report("Obtaining EFixed, theta and Q")
@@ -212,7 +212,6 @@ class BayesQuasi(PythonAlgorithm):
 
         logger.information("Version is {0}".format(prog))
         logger.information(" Number of spectra = {0} ".format(nsam))
-        logger.information(" Erange : {0}  to {1} ".format(erange[0], erange[1]))
 
         setup_prog.report("Reading files")
         Wy, We = self._read_width_file(self._width, self._wfile, totalNoSam)
@@ -243,8 +242,15 @@ class BayesQuasi(PythonAlgorithm):
         eProb = np.zeros(4 * nsam)
 
         group = ""
+        sample_workspace = AnalysisDataService.retrieve(self._samWS)
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam * 3)
         for spectrum in range(0, nsam):
+            # Check for trailing and leading zeros in data
+            e_min, e_max = identify_non_zero_bin_range(sample_workspace, spectrum)
+            self.check_energy_range_for_zeroes(e_min, e_max)
+
+            erange = [self._e_min, self._e_max]
+
             logger.information("Group {0} at angle {1} ".format(spectrum, theta[spectrum]))
             nsp = spectrum + 1
 

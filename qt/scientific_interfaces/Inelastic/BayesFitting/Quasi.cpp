@@ -65,9 +65,11 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 
   // Connect the data selector for the sample to the mini plot
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsSample, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleResolutionInputReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   // Connect the program selector to its handler
   connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
@@ -84,6 +86,14 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
+  m_uiForm.dsSample->setWorkspaceTypes({"Workspace2D"});
+  m_uiForm.dsResolution->setWorkspaceTypes({"Workspace2D"});
+}
+
+void Quasi::enableView(bool const enable) {
+  m_uiForm.dsSample->setEnabled(enable);
+  m_uiForm.dsResolution->setEnabled(enable);
+  m_runPresenter->setRunText(enable ? "Run" : "Loading...");
 }
 
 /**
@@ -322,8 +332,16 @@ void Quasi::updateMiniPlot() {
  * @param filename :: The name of the workspace to plot
  */
 void Quasi::handleSampleInputReady(const QString &filename) {
-  MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
-  int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
+  enableView(true);
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(filename.toStdString())) {
+    return;
+  }
+  auto const sampleWs = ads.retrieveWS<MatrixWorkspace>(filename.toStdString());
+  if (!sampleWs) {
+    return;
+  }
+  int numHist = static_cast<int>(sampleWs->getNumberHistograms()) - 1;
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
@@ -366,6 +384,8 @@ void Quasi::plotCurrentPreview() {
  * @param wsName The name of the workspace loaded
  */
 void Quasi::handleResolutionInputReady(const QString &wsName) {
+  enableView(true);
+
   bool isResolution(wsName.endsWith("_res"));
 
   m_uiForm.chkUseResNorm->setEnabled(isResolution);

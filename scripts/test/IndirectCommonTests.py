@@ -12,6 +12,7 @@ Data Analysis, and Bayes.
 import unittest
 import numpy as np
 
+from mantid.api import AnalysisDataService
 from mantid.simpleapi import *
 import IndirectCommon as indirect_common
 
@@ -72,6 +73,20 @@ class IndirectCommonTests(unittest.TestCase):
     def test_getEFixed_failure(self):
         ws = CreateSampleWorkspace()
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
+
+    def test_getEFixed_with_no_instrument_but_efixed_sample_log(self):
+        ws = self.make_dummy_workspace_without_instrument("test_ws1")
+        AddSampleLog(ws, LogName="EFixed", LogType="Number", LogText="1.83")
+
+        e_fixed = indirect_common.getEfixed(ws)
+        self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
+
+    def test_getEFixed_with_no_instrument_but_ei_sample_log(self):
+        ws = self.make_dummy_workspace_without_instrument("test_ws1")
+        AddSampleLog(ws, LogName="Ei", LogType="Number", LogText="1.83")
+
+        e_fixed = indirect_common.getEfixed(ws)
+        self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
 
     def test_getDefaultWorkingDirectory(self):
         path = os.path.join(os.path.expanduser("~"), "")
@@ -139,10 +154,10 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
-    def test_CheckAnalysersOrEFixed_raises_runtimeError_with_no_inst_data(self):
+    def test_CheckAnalysersOrEFixed_does_not_raise_error_with_no_inst_data(self):
         ws1 = self.make_dummy_workspace_without_instrument("test_ws1")
         ws2 = self.make_dummy_workspace_without_instrument("test_ws2")
-        self.assertRaises(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assert_does_not_raise(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
     def test_CheckHistZero(self):
         ws = self.make_dummy_QENS_workspace()
@@ -263,6 +278,27 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
         self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
+
+    def test_identify_non_zero_bin_range_returns_the_non_zero_bin_range(self):
+        ws = self.make_dummy_QENS_workspace()
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(AnalysisDataService.retrieve(ws), 0)
+
+        self.assertEqual(0.0, e_min)
+        self.assertEqual(20000.0, e_max)
+
+    def test_identify_non_zero_bin_range_returns_the_expected_range_for_leading_zeros(self):
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="0,1,2,1,3", StoreInADS=False)
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(ws, 0)
+
+        self.assertEqual(2.0, e_min)
+        self.assertEqual(5.0, e_max)
+
+    def test_identify_non_zero_bin_range_returns_the_expected_range_for_trailing_zeros(self):
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="4,1,2,0,0", StoreInADS=False)
+        e_min, e_max = indirect_common.identify_non_zero_bin_range(ws, 0)
+
+        self.assertEqual(1.0, e_min)
+        self.assertEqual(3.0, e_max)
 
     # -----------------------------------------------------------
     # Custom assertion functions

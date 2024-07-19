@@ -44,6 +44,7 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
+  void enableView(bool const enable = false);
 
   void plotClicked();
   void plotCurrentPreview();
