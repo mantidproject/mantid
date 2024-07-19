@@ -235,6 +235,10 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     }
   }
 
+  if (m_heightAxis.size() == 0) {
+    throw std::runtime_error("Height axis is undefined");
+  }
+
   m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
   m_endHeight = *max_element(m_heightAxis.begin(), m_heightAxis.end());
 
