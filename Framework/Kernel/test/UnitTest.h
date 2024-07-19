@@ -20,6 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
 
 GNU_DIAG_OFF("array-bounds")
+GNU_DIAG_OFF("stringop-overflow")
 
 // function checks if conversion within limits works reversibly
 std::string convert_units_check_range(const Unit &aUnit, std::vector<double> &samples, std::vector<double> &results,
