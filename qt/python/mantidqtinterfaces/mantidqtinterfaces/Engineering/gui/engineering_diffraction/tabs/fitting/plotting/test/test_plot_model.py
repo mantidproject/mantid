@@ -276,6 +276,73 @@ class FittingPlotModelTest(unittest.TestCase):
             },
         )
 
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".GroupWorkspaces")
+    @patch(plot_model_path + ".CreateWorkspace")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_with_func_having_fwhm_params(
+        self, mock_ads, mock_create_ws, mock_group_ws, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+    ):
+        mock_loaded_ws_list = mock.MagicMock()
+        mock_loaded_ws_list.__len__.return_value = 1
+        mock_active_ws_list = mock.MagicMock()
+        mock_log_ws_name = mock.MagicMock()
+        mock_log_ws_name.split.return_value = "log_workspace"
+        mock_table_return_values = {
+            "Name": [
+                "f0.Mixing",
+                "f0.Intensity",
+                "f0.PeakCentre",
+                "f0.FWHM",
+                "f1.Mixing",
+                "f1.Intensity",
+                "f1.PeakCentre",
+                "f1.FWHM",
+                "Cost function value",
+            ],
+            "Value": [0.999, 101.3, 25074.1, 98.7982, 1.0, 0.834, 25074.1, 0.939437, 2.2599485221142213],
+            "Error": [0.0338, 2.0421, 0.7936, 1.7157, 2.23e-05, nan, nan, nan, 0.0],
+        }
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        func_str = (
+            "name=PseudoVoigt,Mixing=0.999,Intensity=101.3,PeakCentre=25074.1,FWHM=98.7982;"
+            "name=PseudoVoigt,Mixing=1,Intensity=0.834,PeakCentre=25074.1,FWHM=0.939437"
+        )
+        fitprop = self._setup_update_fit_test(
+            mock_table_return_values,
+            mock_ads,
+            mock_get_diffs,
+            func_str,
+            peak_center_params=["PseudoVoigt_PeakCentre", "PseudoVoigt_PeakCentre"],
+        )
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
+        self.assertEqual(
+            self.model._fit_results["name1"]["results"],
+            {
+                "PseudoVoigt_Mixing": [[0.999, 0.0338], [1.0, 2.23e-05]],
+                "PseudoVoigt_Intensity": [[101.3, 2.0421], [0.834, nan]],
+                "PseudoVoigt_PeakCentre": [[25074.1, 0.7936], [25074.1, nan]],
+                "PseudoVoigt_PeakCentre_dSpacing": [[1.0, 0.5], [1.0, 0.5]],
+                "PseudoVoigt_FWHM": [[98.7982, 1.7157], [0.939437, nan]],
+            },
+        )
+        mock_create_ws.assert_has_calls(
+            calls=[
+                call(OutputWorkspace="PseudoVoigt_Mixing", DataX=[1, 2], DataY=[1, 2], NSpec=1),
+                call(OutputWorkspace="PseudoVoigt_PeakCentre_dSpacing", DataX=[1, 2], DataY=[1, 2], NSpec=1),
+                call(OutputWorkspace="PseudoVoigt_PeakCentre", DataX=[1, 2], DataY=[1, 2], NSpec=1),
+                call(OutputWorkspace="PseudoVoigt_Intensity", DataX=[1, 2], DataY=[1, 2], NSpec=1),
+                call(OutputWorkspace="PseudoVoigt_FWHM", DataX=[1, 2], DataY=[1, 2], NSpec=1),
+            ],
+            any_order=True,
+        )
+        mock_group_ws.assert_called_once()
+
     @patch("mantid.api.FunctionFactoryImpl.createPeakFunction")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
