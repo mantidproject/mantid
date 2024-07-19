@@ -31,26 +31,6 @@ static const std::string INPUT_WS{"InputWorkspaces"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
 } // namespace Prop
 
-/// Flipper configurations.
-namespace Flippers {
-using namespace Mantid::Algorithms;
-static const std::string Off{SpinStateValidator::ZERO};
-static const std::string OffOff{SpinStateValidator::ZERO_ZERO};
-static const std::string OffOn{SpinStateValidator::ZERO_ONE};
-static const std::string On{SpinStateValidator::ONE};
-static const std::string OnOff{SpinStateValidator::ONE_ZERO};
-static const std::string OnOn{SpinStateValidator::ONE_ONE};
-} // namespace Flippers
-
-/// Spin State configurations.
-namespace SpinStates {
-using namespace Mantid::Algorithms;
-static const std::string DnDn{SpinStateValidator::MINUS_MINUS};
-static const std::string DnUp{SpinStateValidator::MINUS_PLUS};
-static const std::string UpUp{SpinStateValidator::PLUS_PLUS};
-static const std::string UpDn{SpinStateValidator::PLUS_MINUS};
-} // namespace SpinStates
-
 /**
  * Throw if given ws is nullptr.
  * @param ws a workspace to check
@@ -345,10 +325,11 @@ void PolarizationCorrectionWildes::init() {
 
   const auto flipperConfigValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
   declareProperty(Prop::FLIPPERS,
-                  Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn,
+                  std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON + ", " +
+                      FlipperConfigurations::ON_OFF + ", " + FlipperConfigurations::ON_ON,
                   flipperConfigValidator, "Flipper configurations of the input workspaces.");
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 1, 2, 4}, true, false, true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 1, 2, 4}, true, '+', '-', true);
   declareProperty(Prop::SPIN_STATES, "", spinStateValidator, "The order of the spin states in the output workspace.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
@@ -463,16 +444,16 @@ void PolarizationCorrectionWildes::checkConsistentNumberHistograms(const Workspa
     }
   };
   if (inputs.mmWS) {
-    checkNHist(inputs.mmWS, Flippers::OnOn);
+    checkNHist(inputs.mmWS, FlipperConfigurations::ON_ON);
   }
   if (inputs.mpWS) {
-    checkNHist(inputs.mpWS, Flippers::OnOff);
+    checkNHist(inputs.mpWS, FlipperConfigurations::ON_OFF);
   }
   if (inputs.pmWS) {
-    checkNHist(inputs.pmWS, Flippers::OffOn);
+    checkNHist(inputs.pmWS, FlipperConfigurations::OFF_ON);
   }
   if (inputs.ppWS) {
-    checkNHist(inputs.ppWS, Flippers::OffOff);
+    checkNHist(inputs.ppWS, FlipperConfigurations::OFF_OFF);
   }
 }
 
@@ -509,16 +490,16 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
     }
   };
   if (inputs.mmWS) {
-    checkWS(inputs.mmWS, Flippers::OnOn);
+    checkWS(inputs.mmWS, FlipperConfigurations::ON_ON);
   }
   if (inputs.mpWS) {
-    checkWS(inputs.mpWS, Flippers::OnOff);
+    checkWS(inputs.mpWS, FlipperConfigurations::ON_OFF);
   }
   if (inputs.pmWS) {
-    checkWS(inputs.pmWS, Flippers::OffOn);
+    checkWS(inputs.pmWS, FlipperConfigurations::OFF_ON);
   }
   if (inputs.ppWS) {
-    checkWS(inputs.ppWS, Flippers::OffOff);
+    checkWS(inputs.ppWS, FlipperConfigurations::OFF_OFF);
   }
 }
 
@@ -538,16 +519,16 @@ API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const Workspa
   }
 
   if (outputs.ppWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStates::UpUp);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStateConfigurationsWildes::PLUS_PLUS);
   }
   if (outputs.pmWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStates::UpDn);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStateConfigurationsWildes::PLUS_MINUS);
   }
   if (outputs.mpWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStates::DnUp);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStateConfigurationsWildes::MINUS_PLUS);
   }
   if (outputs.mmWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStates::DnDn);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStateConfigurationsWildes::MINUS_MINUS);
   }
 
   auto group = createChildAlgorithm("GroupWorkspaces");
@@ -615,7 +596,7 @@ PolarizationCorrectionWildes::EfficiencyMap PolarizationCorrectionWildes::effici
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.ppWS, Flippers::Off);
+  checkInputExists(inputs.ppWS, FlipperConfigurations::OFF);
   WorkspaceMap outputs;
   outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const size_t nHisto = inputs.ppWS->getNumberHistograms();
@@ -652,8 +633,8 @@ PolarizationCorrectionWildes::directBeamCorrections(const WorkspaceMap &inputs, 
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.mmWS, Flippers::On);
-  checkInputExists(inputs.ppWS, Flippers::Off);
+  checkInputExists(inputs.mmWS, FlipperConfigurations::ON);
+  checkInputExists(inputs.ppWS, FlipperConfigurations::OFF);
   WorkspaceMap outputs;
   outputs.mmWS = createWorkspaceWithHistory(inputs.mmWS);
   outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
@@ -716,8 +697,8 @@ PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.mmWS, Flippers::OnOn);
-  checkInputExists(inputs.ppWS, Flippers::OffOff);
+  checkInputExists(inputs.mmWS, FlipperConfigurations::ON_ON);
+  checkInputExists(inputs.ppWS, FlipperConfigurations::OFF_OFF);
   WorkspaceMap fullInputs = inputs;
   fullInputs.mpWS = createWorkspaceWithHistory(inputs.mmWS);
   fullInputs.pmWS = createWorkspaceWithHistory(inputs.ppWS);
@@ -737,13 +718,13 @@ PolarizationCorrectionWildes::twoInputCorrections(const WorkspaceMap &inputs, co
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
-  checkInputExists(inputs.mmWS, Flippers::OnOn);
-  checkInputExists(inputs.ppWS, Flippers::OffOff);
+  checkInputExists(inputs.mmWS, FlipperConfigurations::ON_ON);
+  checkInputExists(inputs.ppWS, FlipperConfigurations::OFF_OFF);
   if (!inputs.mpWS) {
-    checkInputExists(inputs.pmWS, Flippers::OffOn);
+    checkInputExists(inputs.pmWS, FlipperConfigurations::OFF_ON);
     threeInputsSolve10(fullInputs, efficiencies);
   } else {
-    checkInputExists(inputs.mpWS, Flippers::OnOff);
+    checkInputExists(inputs.mpWS, FlipperConfigurations::ON_OFF);
     threeInputsSolve01(fullInputs, efficiencies);
   }
   return fullCorrections(fullInputs, efficiencies);
@@ -760,10 +741,10 @@ PolarizationCorrectionWildes::threeInputCorrections(const WorkspaceMap &inputs, 
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.mmWS, Flippers::OnOn);
-  checkInputExists(inputs.mpWS, Flippers::OnOff);
-  checkInputExists(inputs.pmWS, Flippers::OffOn);
-  checkInputExists(inputs.ppWS, Flippers::OffOff);
+  checkInputExists(inputs.mmWS, FlipperConfigurations::ON_ON);
+  checkInputExists(inputs.mpWS, FlipperConfigurations::ON_OFF);
+  checkInputExists(inputs.pmWS, FlipperConfigurations::OFF_ON);
+  checkInputExists(inputs.ppWS, FlipperConfigurations::OFF_OFF);
   WorkspaceMap outputs;
   outputs.mmWS = createWorkspaceWithHistory(inputs.mmWS);
   outputs.mpWS = createWorkspaceWithHistory(inputs.mpWS);
@@ -830,13 +811,13 @@ PolarizationCorrectionWildes::mapInputsToDirections(const std::vector<std::strin
       throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
     const auto &f = flippers[i];
-    if (f == Flippers::OnOn || f == Flippers::On) {
+    if (f == FlipperConfigurations::ON_ON || f == FlipperConfigurations::ON) {
       inputs.mmWS = ws;
-    } else if (f == Flippers::OnOff) {
+    } else if (f == FlipperConfigurations::ON_OFF) {
       inputs.mpWS = ws;
-    } else if (f == Flippers::OffOn) {
+    } else if (f == FlipperConfigurations::OFF_ON) {
       inputs.pmWS = ws;
-    } else if (f == Flippers::OffOff || f == Flippers::Off) {
+    } else if (f == FlipperConfigurations::OFF_OFF || f == FlipperConfigurations::OFF) {
       inputs.ppWS = ws;
     } else {
       throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);

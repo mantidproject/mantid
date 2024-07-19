@@ -11,41 +11,11 @@
 
 namespace Mantid::Algorithms {
 
-const std::string SpinStateValidator::ZERO_ONE = "01";
-const std::string SpinStateValidator::ONE_ZERO = "10";
-const std::string SpinStateValidator::ZERO_ZERO = "00";
-const std::string SpinStateValidator::ONE_ONE = "11";
-const std::string SpinStateValidator::ZERO = "0";
-const std::string SpinStateValidator::ONE = "1";
-
-const std::string SpinStateValidator::MINUS_PLUS = "-+";
-const std::string SpinStateValidator::PLUS_MINUS = "+-";
-const std::string SpinStateValidator::MINUS_MINUS = "--";
-const std::string SpinStateValidator::PLUS_PLUS = "++";
-const std::string SpinStateValidator::MINUS = "-";
-const std::string SpinStateValidator::PLUS = "+";
-
-namespace SpinStateStrings {
-static const std::unordered_set<std::string> ALLOWED_PAIR_FLIP_CONFIG{
-    SpinStateValidator::ZERO_ZERO, SpinStateValidator::ZERO_ONE, SpinStateValidator::ONE_ZERO,
-    SpinStateValidator::ONE_ONE};
-
-static const std::unordered_set<std::string> ALLOWED_SINGLE_FLIP_CONFIG{SpinStateValidator::ZERO,
-                                                                        SpinStateValidator::ONE};
-
-static const std::unordered_set<std::string> ALLOWED_PAIR_SPIN_STATES{
-    SpinStateValidator::MINUS_PLUS, SpinStateValidator::PLUS_MINUS, SpinStateValidator::MINUS_MINUS,
-    SpinStateValidator::PLUS_PLUS};
-
-static const std::unordered_set<std::string> ALLOWED_SINGLE_SPIN_STATES{SpinStateValidator::MINUS,
-                                                                        SpinStateValidator::PLUS};
-
-} // namespace SpinStateStrings
-
 SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
-                                       const bool useFlipperConfig, const bool optional)
+                                       const char paraIndicator, const char antiIndicator, const bool optional)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
-      m_acceptSingleStates(acceptSingleStates), m_useFlipperConfig(useFlipperConfig), m_optional(optional) {}
+      m_acceptSingleStates(acceptSingleStates), m_para(std::string(1, paraIndicator)),
+      m_anti(std::string(1, antiIndicator)), m_optional(optional) {}
 
 Kernel::IValidator_sptr SpinStateValidator::clone() const {
   return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates);
@@ -56,13 +26,11 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     if (m_optional) {
       return "";
     }
-    return m_useFlipperConfig ? "Enter a spin state string, it should be a comma-separated list, e.g. 01, 11, 10, 00"
-                              : "Enter a spin state string, it should be a comma-separated list, e.g. --, ++, -+, +-";
+    return "Enter a spin state string, it should be a comma-separated list, e.g. " + m_para + m_anti + ", " + m_anti +
+           m_anti + ", " + m_anti + m_para + ", " + m_para + m_para + ".";
   }
-  auto const &allowedPairs =
-      m_useFlipperConfig ? SpinStateStrings::ALLOWED_PAIR_FLIP_CONFIG : SpinStateStrings::ALLOWED_PAIR_SPIN_STATES;
-  auto const &allowedSingles =
-      m_useFlipperConfig ? SpinStateStrings::ALLOWED_SINGLE_FLIP_CONFIG : SpinStateStrings::ALLOWED_SINGLE_SPIN_STATES;
+  auto const &allowedPairs = getAllowedPairStates();
+  auto const &allowedSingles = getAllowedSingleStates();
 
   std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(input);
 
@@ -76,15 +44,10 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
         const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, s);
         return !isPair && !isSingle;
       })) {
-    if (m_useFlipperConfig) {
-      return m_acceptSingleStates
-                 ? "The spin states must either be one or two digits, with each being either a zero or one"
-                 : "The spin states must consist of two digits, either a zero or a one.";
-    }
     return m_acceptSingleStates
-               ? "The spin states must either be one or two characters, with each being either a plus (up) or minus "
-                 "(down)."
-               : "The spin states must consist of two characters, either a minus (down) or a plus (up).";
+               ? "The spin states must either be one or two characters, with each being either a " + m_para + " or " +
+                     m_anti + "."
+               : "The spin states must consist of two characters, either a " + m_para + " or a " + m_anti + ".";
   }
 
   // Single digits can't mix with pairs
@@ -111,4 +74,11 @@ bool SpinStateValidator::anyOfIsInSet(const std::vector<std::string> &anyOf,
                                       const std::unordered_set<std::string> &set) {
   return std::any_of(anyOf.cbegin(), anyOf.cend(), [&set](const std::string &s) { return setContains(set, s); });
 }
+
+const std::unordered_set<std::string> SpinStateValidator::getAllowedPairStates() const {
+  return {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
+}
+
+const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const { return {m_para, m_anti}; }
+
 } // namespace Mantid::Algorithms
