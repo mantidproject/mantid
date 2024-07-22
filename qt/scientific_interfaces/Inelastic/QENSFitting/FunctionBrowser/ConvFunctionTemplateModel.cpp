@@ -51,6 +51,7 @@ void ConvFunctionTemplateModel::clearData() {
   m_deltaType = DeltaType::None;
   m_tempCorrectionType = TempCorrectionType::None;
   m_backgroundType = BackgroundType::None;
+  m_tiePeakCentresType = TiePeakCentresType::False;
 
   m_model->clear();
 }
@@ -63,6 +64,7 @@ void ConvFunctionTemplateModel::setModel() {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model->setGlobalParameters(makeGlobalList());
+  tiePeakCentres();
   estimateFunctionParameters();
 }
 
@@ -70,10 +72,10 @@ void ConvFunctionTemplateModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-  bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
   } else if (fun->name() == "CompositeFunction") {
+    bool isBackgroundSet = false;
     for (size_t i = 0; i < fun->nFunctions(); ++i) {
       auto innerFunction = fun->getFunction(i);
       auto const name = innerFunction->name();
@@ -295,6 +297,9 @@ void ConvFunctionTemplateModel::setSubType(std::size_t subTypeIndex, int typeInd
   case ConvTypes::SubTypeIndex::Background:
     m_backgroundType = static_cast<ConvTypes::BackgroundType>(typeIndex);
     break;
+  case ConvTypes::SubTypeIndex::TiePeakCentres:
+    m_tiePeakCentresType = static_cast<ConvTypes::TiePeakCentresType>(typeIndex);
+    break;
   default:
     throw std::logic_error("A matching ConvTypes::SubTypeIndex could not be found.");
   }
@@ -310,7 +315,19 @@ std::map<std::size_t, int> ConvFunctionTemplateModel::getSubTypes() const {
   subTypes[ConvTypes::SubTypeIndex::Delta] = static_cast<int>(m_deltaType);
   subTypes[ConvTypes::SubTypeIndex::TempCorrection] = static_cast<int>(m_tempCorrectionType);
   subTypes[ConvTypes::SubTypeIndex::Background] = static_cast<int>(m_backgroundType);
+  subTypes[ConvTypes::SubTypeIndex::TiePeakCentres] = static_cast<int>(m_tiePeakCentresType);
   return subTypes;
+}
+
+void ConvFunctionTemplateModel::tiePeakCentres() {
+  auto const lor1PeakCentreName = getParameterName(ParamID::LOR1_PEAKCENTRE);
+  auto const lor2PeakCentreName = getParameterName(ParamID::LOR2_PEAKCENTRE);
+  if (!lor1PeakCentreName || !lor2PeakCentreName)
+    return;
+  auto const tie = m_tiePeakCentresType == TiePeakCentresType::True ? *lor1PeakCentreName : "";
+  for (auto i = 0; i < getNumberDomains(); ++i) {
+    setLocalParameterTie(*lor2PeakCentreName, i, tie);
+  }
 }
 
 int ConvFunctionTemplateModel::getNumberOfPeaks() const {
