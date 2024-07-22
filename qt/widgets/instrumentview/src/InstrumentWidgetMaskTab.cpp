@@ -476,7 +476,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
     return;
   }
 
-  size_t parentIndex = -1;
+  size_t parentIndex = componentInfo.hasParent(pickID) ? componentInfo.parent(pickID) : 0;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> detectorsId{pickID};
@@ -487,7 +487,6 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      parentIndex = componentInfo.parent(pickID);
       detectorsId = componentInfo.detectorsInSubtree(parentIndex);
     }
     storeDetectorMask(m_roi_on->isChecked(), detectorsId);
@@ -501,7 +500,6 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       if (!componentInfo.hasParent(pickID)) {
         return;
       }
-      parentIndex = componentInfo.parent(pickID);
       const auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parentIndex));
       m_detectorsToGroup.clear();
       std::copy(dets.cbegin(), dets.cend(), std::back_inserter(m_detectorsToGroup));
