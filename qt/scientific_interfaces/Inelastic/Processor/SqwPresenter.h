@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "ISqwView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SqwModel.h"
 #include "SqwView.h"
 

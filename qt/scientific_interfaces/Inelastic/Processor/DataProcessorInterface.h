@@ -7,8 +7,8 @@
 #pragma once
 #include "ui_DataProcessorInterface.h"
 
-#include "Common/InelasticInterface.h"
 #include "DataProcessor.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include "MantidGeometry/IComponent.h"
 

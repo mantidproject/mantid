@@ -7,10 +7,10 @@
 #pragma once
 
 #include "BayesFittingTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ResNorm.h"
 
 namespace MantidQt {

@@ -1633,7 +1633,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflecto
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/TransmissionStitchOptions.h:34
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:177
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.h:54
-constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/Settings.cpp:29
 noCopyConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225
 noOperatorEq:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Preview/PreviewModel.h:31
@@ -1669,10 +1668,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:2079
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/MuonAnalysisHelper.cpp:189
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/MuonAnalysisHelper.cpp:890
-returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/FitData.cpp:127
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/RunWidget/RunView.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/OutputPlotOptionsModel.h:50
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Common/DataModel.h:32
+returnTempReference:${CMAKE_SOURCE_DIR}/qt/widgets/spectroscopy/src/FitData.cpp:127
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h:112
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h:114
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h:135

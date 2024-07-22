@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FittingModel.h"
-#include "Common/DataModel.h"
 #include "FitOutput.h"
 #include "FitTabConstants.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

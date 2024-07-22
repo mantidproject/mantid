@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "IIqtView.h"
 #include "IqtModel.h"
 #include "IqtView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_IqtTab.h"
 
 namespace MantidQt {

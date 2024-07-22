@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvolutionDataView.h"
-#include "Common/InterfaceUtils.h"
 #include "ConvolutionAddWorkspaceDialog.h"
 #include "FitDataPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 #include <QComboBox>
 #include <QHeaderView>

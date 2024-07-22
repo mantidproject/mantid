@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DataModel.h"
 #include "FitDataView.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"

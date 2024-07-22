@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../../../Inelastic/test/Common/MockObjects.h"
 #include "../Common/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "MockObjects.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
 
-#include "Common/RunWidget/RunView.h"
 #include "FitPlotView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QString>
 

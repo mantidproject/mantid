@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IDataModel.h"
 #include "FitPlotModel.h"
 #include "IFitOutput.h"
 #include "IFittingModel.h"
+#include "MantidQtWidgets/Spectroscopy/IDataModel.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"

@@ -8,7 +8,7 @@
 #include "ui_Simulation.h"
 
 #include "../DllConfig.h"
-#include "Common/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "SimulationTab.h"
 
 #include "MantidKernel/ConfigService.h"
