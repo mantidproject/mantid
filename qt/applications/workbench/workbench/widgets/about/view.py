@@ -218,26 +218,32 @@ font-size: {self.rescale_w(28)}px"""
         lbl_welcome.setText("Welcome")
         left_layout.addWidget(lbl_welcome)
         # release notes
+        self.clb_release_notes.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_release_notes, "Release Notes", ":/images/Notepad-Bloc-notes-icon-48x48.png")
         left_layout.addWidget(self.clb_release_notes)
         # sample datasets
+        self.clb_sample_datasets.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets", ":/images/download-icon-48x48.png")
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
-        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
+        lbl_tutorials.setStyleSheet(f"color: ; font-size: {self.rescale_w(28)}px;")
         lbl_tutorials.setText("Tutorials")
         left_layout.addWidget(lbl_tutorials)
         # Mantid Introduction
+        self.clb_mantid_introduction.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_mantid_introduction, "Mantid Introduction", ":/images/Misc-Tutorial-icon-48x48.png")
         left_layout.addWidget(self.clb_mantid_introduction)
         # Introduction to python
+        self.clb_python_introduction.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_python_introduction, "Introduction to Python", ":/images/Python-icon-48x48.png")
         left_layout.addWidget(self.clb_python_introduction)
         # Python in Mantid
+        self.clb_python_in_mantid.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_python_in_mantid, "Python In Mantid", ":/images/Circle_cog_48x48.png")
         left_layout.addWidget(self.clb_python_in_mantid)
         # Extending Mantid with python
+        self.clb_extending_mantid.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_extending_mantid, "Extending Mantid with Python", ":/images/Plugin-Python-icon-48x48.png")
         left_layout.addWidget(self.clb_extending_mantid)
 
@@ -278,15 +284,18 @@ font: {self.rescale_w(12)}px;
         # default Facility
         lbl_default_facilty = QLabel()
         lbl_default_facilty.setText("Default Facility")
+        self.cb_facility.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_default_facilty, self.cb_facility)
         # default instrument
         lbl_default_instrument = QLabel()
         lbl_default_instrument.setText("Default Instrument")
+        self.cb_instrument.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_default_instrument, self.cb_instrument)
         # Set Data Directories
         lbl_mud = QLabel()
         lbl_mud.setText("Set data directories")
         self.pb_manage_user_directories.setText("Manage User Directories")
+        self.pb_manage_user_directories.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_mud, self.pb_manage_user_directories)
         # Usage data
         lbl_allow_usage_data = QLabel()
