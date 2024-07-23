@@ -89,7 +89,7 @@ void BayesFitting::loadSettings() {
 
 void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
-    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->applySettings(settings);
   }
 }
 
