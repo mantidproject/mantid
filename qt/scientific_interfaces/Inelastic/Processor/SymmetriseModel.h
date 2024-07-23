@@ -31,11 +31,11 @@ public:
   virtual bool getIsPositiveReflect() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL SymmetriseModel : public ISymmetriseModel {
+class MANTIDQT_INELASTIC_DLL SymmetriseModel final : public ISymmetriseModel {
 
 public:
   SymmetriseModel();
-  ~SymmetriseModel() = default;
+  ~SymmetriseModel() override = default;
   API::IConfiguredAlgorithm_sptr setupPreviewAlgorithm(std::vector<int> const &spectraRange) override;
   API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm(std::string &outputWorkspace) override;
   void reflectNegativeToPositive() override;

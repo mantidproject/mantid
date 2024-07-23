@@ -34,11 +34,11 @@ public:
   virtual double EMax() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IqtModel : public IIqtModel {
+class MANTIDQT_INELASTIC_DLL IqtModel final : public IIqtModel {
 
 public:
   IqtModel();
-  ~IqtModel() = default;
+  ~IqtModel() override = default;
   API::IConfiguredAlgorithm_sptr setupTransformToIqt(std::string const &outputWorkspace) override;
   void setSampleWorkspace(std::string const &sampleWorkspace) override;
   void setResWorkspace(std::string const &resWorkspace) override;

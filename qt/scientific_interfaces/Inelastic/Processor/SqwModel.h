@@ -45,11 +45,11 @@ public:
                                                        const std::string &reflection) const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL SqwModel : public ISqwModel {
+class MANTIDQT_INELASTIC_DLL SqwModel final : public ISqwModel {
 
 public:
   SqwModel();
-  ~SqwModel() = default;
+  ~SqwModel() override = default;
   API::IConfiguredAlgorithm_sptr setupRebinAlgorithm() override;
   API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() override;
   API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() override;

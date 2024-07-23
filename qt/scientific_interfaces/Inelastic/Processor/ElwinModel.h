@@ -43,11 +43,11 @@ public:
   virtual std::string getOutputWorkspaceNames() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinModel : public IElwinModel {
+class MANTIDQT_INELASTIC_DLL ElwinModel final : public IElwinModel {
 
 public:
   ElwinModel();
-  ~ElwinModel() = default;
+  ~ElwinModel() override = default;
   API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
                                                     std::string const &outputName) override;
   std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) override;

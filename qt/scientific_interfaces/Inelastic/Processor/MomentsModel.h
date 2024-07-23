@@ -28,11 +28,11 @@ public:
   virtual std::string getOutputWorkspace() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL MomentsModel : public IMomentsModel {
+class MANTIDQT_INELASTIC_DLL MomentsModel final : public IMomentsModel {
 
 public:
   MomentsModel();
-  ~MomentsModel() = default;
+  ~MomentsModel() override = default;
   API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() override;
   void setInputWorkspace(const std::string &workspace) override;
   void setEMin(double eMin) override;
