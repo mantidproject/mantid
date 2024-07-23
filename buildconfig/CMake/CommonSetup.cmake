@@ -72,6 +72,8 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
     set(BOOST_INCLUDEDIR /usr/include/boost169)
     set(BOOST_LIBRARYDIR /usr/lib64/boost169)
   endif()
+  # This allows the use of find_package(Boost ...), from cmake version 3.30 onwards
+  cmake_policy(SET CMP0167 OLD)
   find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS date_time regex serialization filesystem system)
   add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
   # Need this defined globally for our log time values

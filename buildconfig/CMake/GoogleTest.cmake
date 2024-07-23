@@ -20,11 +20,7 @@ fetchcontent_declare(
   GIT_TAG b007c54f2944e193ac44fba1bc997cb65826a0b9
 )
 
-fetchcontent_getproperties(googletest)
-if(NOT googletest_POPULATED)
-  fetchcontent_populate(googletest)
-  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+fetchcontent_makeavailable(googletest)
 
 mark_as_advanced(
   BUILD_GMOCK
