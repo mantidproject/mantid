@@ -33,9 +33,9 @@ API::IConfiguredAlgorithm_sptr ElwinModel::setupLoadAlgorithm(std::string const 
                                                               std::string const &outputName) {
   auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
   loadAlg->initialize();
+  loadAlg->setProperty("Filename", filepath);
+  loadAlg->setProperty("OutputWorkspace", outputName);
   auto runtimeProps = std::make_unique<AlgorithmRuntimeProps>();
-  runtimeProps->setProperty("Filename", filepath);
-  runtimeProps->setProperty("OutputWorkspace", outputName);
   API::IConfiguredAlgorithm_sptr loadAlgo =
       std::make_shared<API::ConfiguredAlgorithm>(loadAlg, std::move(runtimeProps));
   return loadAlgo;
