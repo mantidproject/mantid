@@ -35,6 +35,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
     free_text_edited = False
+    share_blocked_by_async = False
     interface_manager = InterfaceManager()
     CONTACT_INFO = "ContactInfo"
     NAME = "Name"
@@ -173,8 +174,16 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         else:
             self.input_email_line_edit.setStyleSheet("border: 1px solid gray")
 
+    def block_by_async(self, is_blocked: bool):
+        if is_blocked:
+            self.status_label.setText("Share blocked whilst GDB stacktrace recovery is running...")
+        self.status_label.setHidden(not is_blocked)
+        self.status_bar.setHidden(not is_blocked)
+        self.share_blocked_by_async = is_blocked
+        self.set_button_status()
+
     def set_button_status(self):
-        if not self.valid_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
+        if not self.valid_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH or self.share_blocked_by_async:
             self.fullShareButton.setEnabled(False)
         else:
             self.fullShareButton.setEnabled(True)
