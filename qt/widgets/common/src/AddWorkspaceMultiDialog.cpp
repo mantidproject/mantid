@@ -72,10 +72,9 @@ void AddWorkspaceMultiDialog::unifyRange() { return m_uiForm.tbWorkspace->unifyR
 void AddWorkspaceMultiDialog::handleFilesFound() {
   updateAddButtonState(false);
   auto fileNames = m_uiForm.dsInputFiles->getFilenames();
-  std::deque<API::IConfiguredAlgorithm_sptr> loadQueue = {};
-  for (auto const &fileName : fileNames) {
-    loadQueue.emplace_back(configureLoadAlgorithm(fileName));
-  }
+  std::deque<API::IConfiguredAlgorithm_sptr> loadQueue;
+  std::transform(fileNames.begin(), fileNames.end(), std::back_inserter(loadQueue),
+                 [](auto const &fileName) { return configureLoadAlgorithm(fileName); });
   m_algRunner->setAlgorithmQueue(loadQueue);
   m_algRunner->executeAlgorithmQueue();
 }
