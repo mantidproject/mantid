@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include <typeinfo>
 
-
 using namespace Mantid::API;
 
 namespace MantidQt {
