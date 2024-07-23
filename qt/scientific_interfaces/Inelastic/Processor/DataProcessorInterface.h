@@ -8,10 +8,10 @@
 #include "ui_DataProcessorInterface.h"
 
 #include "DataProcessor.h"
-#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include <string>
 #include <unordered_map>
