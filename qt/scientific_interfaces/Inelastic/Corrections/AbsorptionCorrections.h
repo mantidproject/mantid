@@ -96,8 +96,6 @@ private:
   std::shared_ptr<Densities> m_sampleDensities;
   std::shared_ptr<Densities> m_canDensities;
   Mantid::API::IAlgorithm_sptr m_absCorAlgo;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

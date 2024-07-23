@@ -67,8 +67,6 @@ private:
   Mantid::API::WorkspaceGroup_sptr m_ppCorrectionsGp;
 
   size_t m_spectra;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 
 } // namespace CustomInterfaces
