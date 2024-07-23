@@ -232,6 +232,8 @@ tab as seen in the :ref:`elwin-example-workflow`.
 8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
    Msd parameter which can be found within the _Results group workspace.
 
+.. _iqtfit:
+
 I(Q, t)
 -------
 
@@ -437,9 +439,20 @@ This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-The fit types available in Function(Q) are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`,
-:ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`,
-:ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
+This interface can load :math:`A0`, :math:`EISF`, :math:`Width` or :math:`FWHM` fitting
+parameters. The fit types available for each of these are listed below:
+
++----------------+---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Fit Parameter  | Produced on         | Available fit types                                                                                                                                               |
++================+=====================+===================================================================================================================================================================+
+| A0             | :ref:`iqtfit` tab   | :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`, :ref:`EISFDiffSphere <func-EISFDiffSphere>`, :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`               |
++----------------+---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| EISF           | :ref:`convfit` tab  | :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`, :ref:`EISFDiffSphere <func-EISFDiffSphere>`, :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`               |
++----------------+---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Width          | :ref:`convfit` tab  | :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`, :ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>` |
++----------------+---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| FWHM           | :ref:`convfit` tab  | :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`, :ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>` |
++----------------+---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. interface:: QENS Fitting
   :width: 450
