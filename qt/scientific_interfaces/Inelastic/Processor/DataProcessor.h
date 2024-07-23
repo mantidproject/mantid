@@ -8,12 +8,11 @@
 
 #include "DllConfig.h"
 
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
-
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -44,7 +43,6 @@ public:
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const QString &wsName, const QString &filename) = 0;
   virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
                                                             const std::string &filename = "") = 0;
 };
@@ -70,7 +68,6 @@ public:
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) override;
 
-  API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const QString &wsName, const QString &filename) override;
   API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
                                                     const std::string &filename = "") override;
   /// Prevent loading of data with incorrect naming

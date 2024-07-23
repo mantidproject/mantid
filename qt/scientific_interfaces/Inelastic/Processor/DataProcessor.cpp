@@ -41,9 +41,6 @@ void DataProcessor::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorith
 
 void DataProcessor::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
-API::IConfiguredAlgorithm_sptr DataProcessor::setupSaveAlgorithm(const QString &wsName, const QString &filename) {
-  return setupSaveAlgorithm(wsName.toStdString(), filename.toStdString());
-}
 API::IConfiguredAlgorithm_sptr DataProcessor::setupSaveAlgorithm(const std::string &wsName,
                                                                  const std::string &filename) {
   // Setup the input workspace property
