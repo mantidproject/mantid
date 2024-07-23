@@ -5,7 +5,7 @@ channels:
 
 dependencies:
   - ccache
-  - cmake>=3.21.0,<3.27
+  - cmake>=3.21.0
   - conda-wrappers
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*

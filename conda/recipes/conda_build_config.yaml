@@ -26,8 +26,8 @@ libboost_devel:
 libboost_python_devel:
   - 1.82 # Aim to follow conda-forge
 
-cmake: # Problem with fetching mslice repo in 3.27
-  - '>=3.21.0,<3.27'
+cmake:
+  - '>=3.21.0'
 
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
