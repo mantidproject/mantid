@@ -264,6 +264,14 @@ QGroupBox QLabel{{
 }}
 QGroupBox QComboBox{{
     font: {self.rescale_w(12)}px;
+    color: black;
+}}
+QGroupBox QComboBox QAbstractItemView{{
+     background-color: rgb(240, 240, 240);
+}}
+QGroupBox QPushButton{{
+    font: {self.rescale_w(12)}px;
+    color: black;
 }}
 font: {self.rescale_w(12)}px;
 """
@@ -284,18 +292,15 @@ font: {self.rescale_w(12)}px;
         # default Facility
         lbl_default_facilty = QLabel()
         lbl_default_facilty.setText("Default Facility")
-        self.cb_facility.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_default_facilty, self.cb_facility)
         # default instrument
         lbl_default_instrument = QLabel()
         lbl_default_instrument.setText("Default Instrument")
-        self.cb_instrument.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_default_instrument, self.cb_instrument)
         # Set Data Directories
         lbl_mud = QLabel()
         lbl_mud.setText("Set data directories")
         self.pb_manage_user_directories.setText("Manage User Directories")
-        self.pb_manage_user_directories.setStyleSheet("QCommandLinkButton { color: black; }")
         personal_setup_form_layout.addRow(lbl_mud, self.pb_manage_user_directories)
         # Usage data
         lbl_allow_usage_data = QLabel()
@@ -386,6 +391,7 @@ font: {self.rescale_w(12)}px;
         # Close button
         close_button_layout = QVBoxLayout()
         close_button_layout.addSpacerItem(QSpacerItem(20, self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
+        self.pb_close.setStyleSheet("color: black;")
         self.pb_close.setText("Close")
         self.pb_close.setDefault(True)
         close_button_layout.addWidget(self.pb_close)
