@@ -50,6 +50,9 @@ public:
 
   void tearDown() override {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", " ");
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
     verifyAndClear();
   }
 
