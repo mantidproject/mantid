@@ -36,6 +36,8 @@ requirements:
     - libcxx  {{ libcxx }}                   # [osx]
 
   host:
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - eigen
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
