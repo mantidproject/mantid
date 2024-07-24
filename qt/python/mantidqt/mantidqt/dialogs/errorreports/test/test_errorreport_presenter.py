@@ -27,6 +27,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock = errorreport_patcher.start()
         self.errorreport_mock.return_value = self.errorreport_mock_instance
 
+        self.gdb_runner_mock_instance = mock.MagicMock()
+        errorreport_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.GDBAsync")
+        self.addCleanup(errorreport_patcher.stop)
+        self.gdb_runner_mock = errorreport_patcher.start()
+        self.gdb_runner_mock.return_value = self.gdb_runner_mock_instance
+
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.app_name = "ErrorReportPresenterTest"
@@ -43,14 +49,14 @@ class ErrorReportPresenterTest(unittest.TestCase):
     def test_do_not_share_with_continue_performs_appropriate_logging(self):
         self.error_report_presenter.do_not_share(continue_working=True)
 
-        self.logger_mock_instance.notice.assert_called_with("No information shared")
+        self.logger_mock_instance.notice.assert_called_once_with("No information shared")
         self.logger_mock_instance.error.assert_called_once_with("Continue working.")
         self.assertEqual(self.view.quit.call_count, 0)
 
     def test_do_not_share_without_continue_performs_appropriate_logging(self):
         self.error_report_presenter.do_not_share(continue_working=False)
 
-        self.logger_mock_instance.notice.assert_called_with("No information shared")
+        self.logger_mock_instance.notice.assert_called_once_with("No information shared")
         self.logger_mock_instance.error.assert_called_once_with("Terminated by user.")
         self.assertEqual(self.view.quit.call_count, 1)
 
@@ -123,21 +129,6 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock_instance.sendErrorReport.return_value = 201
         self.error_report_presenter._send_report_to_server()
         self.error_report_presenter._cut_down_stacktrace.assert_called_once()
-
-    def test_trim_core_dump_file_with_empty_string(self):
-        self.assertEqual(self.error_report_presenter._trim_core_dump_file(""), "")
-
-    def test_trim_core_dump_with_no_trace_line(self):
-        text = "Welcome to gdb etc\n" "some information ..."
-        self.assertEqual(self.error_report_presenter._trim_core_dump_file(text), "")
-
-    def test_trim_core_dump_file(self):
-        intro_text = "Welcome to gdb etc\n" "version 1234 etc\n"
-        trace_text = (
-            "type of exception or fault ...\n" "# my error happened here\n" "# and previously here\n" "full stack below\n" "# more and more"
-        )
-        full_text = intro_text + trace_text
-        self.assertEqual(self.error_report_presenter._trim_core_dump_file(full_text), trace_text)
 
 
 if __name__ == "__main__":
