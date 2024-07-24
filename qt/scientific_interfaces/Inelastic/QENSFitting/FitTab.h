@@ -71,7 +71,7 @@ public:
   }
 
   template <typename FittingModel> void setupFittingPresenter() {
-    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
     auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
     auto model = std::make_unique<FittingModel>();
     m_fittingPresenter = std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser,

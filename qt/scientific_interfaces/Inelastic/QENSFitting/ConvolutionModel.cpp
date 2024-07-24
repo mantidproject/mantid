@@ -271,7 +271,12 @@ std::unordered_map<std::string, std::string> ConvolutionModel::mapDefaultParamet
 }
 
 void ConvolutionModel::addSampleLogs() {
-  AddSampleLogRunner addSampleLog(getResultWorkspace(), getResultGroup());
+  auto const result = getResultWorkspace();
+  auto const group = getResultGroup();
+  if (!result || !group) {
+    return;
+  }
+  AddSampleLogRunner addSampleLog(result, group);
   addSampleLog("resolution_filename", boost::algorithm::join(getNames(m_resolution), ","), "String");
 
   if (m_temperature && m_temperature.get() != 0.0) {
