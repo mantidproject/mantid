@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 import os
+import resource
 import subprocess
 import tempfile
 from datetime import datetime
@@ -170,7 +171,9 @@ class GDBAsync(IQtAsync):
         self._parent_presenter._traceback = self._recover_trace_from_core_dump()
 
     def _recover_trace_from_core_dump(self):
-        # TODO check core dumps are enabled?
+        if not self._core_dumps_enabled():
+            self.log.notice("Core dumps not enabled (enable with 'ulimit -c unlimited'); exiting")
+            return ""
         core_dump_dir = ConfigService.getString("errorreports.core_dumps")
         if not core_dump_dir:
             with open("/proc/sys/kernel/core_pattern") as fp:
@@ -191,6 +194,10 @@ class GDBAsync(IQtAsync):
             return ""
         self.log.notice("Trimming gdb output to extract back trace...")
         return self._trim_core_dump_file(output)
+
+    def _core_dumps_enabled(self):
+        size = resource.getrlimit(resource.RLIMIT_CORE)[1]
+        return size != 0
 
     def _decompress_lz4_then_run_gdb(self, latest_core_dump: Path):
         tmp_core_copy_fp = tempfile.NamedTemporaryFile()
