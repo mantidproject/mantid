@@ -90,8 +90,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_transformedContainerWS;
 
   std::size_t m_spectra;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 
 } // namespace CustomInterfaces
