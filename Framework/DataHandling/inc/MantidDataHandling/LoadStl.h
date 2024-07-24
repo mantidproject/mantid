@@ -53,7 +53,7 @@ public:
   LoadStl(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType,
           ReadMaterial::MaterialParameters params)
       : LoadSingleMesh(std::move(filename), mode, scaleType), m_setMaterial(true), m_params(std::move(params)) {}
-  virtual ~LoadStl() = default;
+  virtual ~LoadStl() override = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
