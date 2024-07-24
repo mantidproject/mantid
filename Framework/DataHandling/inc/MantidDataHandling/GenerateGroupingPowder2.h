@@ -22,6 +22,7 @@ private:
   void saveGroups();
   void saveAsXML();
   void saveAsPAR();
+  void init() override;
   void exec() override;
 };
 

@@ -31,6 +31,8 @@ public:
   static std::string parFilenameFromXmlFilename(const std::string &filename);
 
 protected:
+  void init() override;
+
   void createGroups();
   void saveAsNexus();
 
@@ -41,7 +43,6 @@ private:
   void saveAsXML();
   void saveAsPAR();
 
-  void init() override;
   void exec() override;
 
   std::map<std::string, std::string> validateInputs() override;

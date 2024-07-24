@@ -23,6 +23,15 @@ DECLARE_ALGORITHM(GenerateGroupingPowder2)
 /// Algorithm's version for identification. @see Algorithm::version
 int GenerateGroupingPowder2::version() const { return 2; }
 
+/** Initialize the algorithm's properties.
+ */
+void GenerateGroupingPowder2::init() {
+  GenerateGroupingPowder::init();
+
+  // This version will determine the file format from the extension of the GroupingFilename property
+  removeProperty("FileFormat");
+}
+
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder2::exec() {
@@ -35,7 +44,8 @@ void GenerateGroupingPowder2::saveGroups() {
   // save if a filename was specified
   if (!isDefault("GroupingFilename")) {
 
-    std::string ext = this->getProperty("FileFormat");
+    std::string filename = this->getProperty("GroupingFilename");
+    std::string ext = filename.substr(filename.length() - 3);
     if (ext == "xml") {
       this->saveAsXML();
     } else if (ext == "nxs" || ext == "nx5") {

@@ -71,7 +71,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
@@ -231,7 +230,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "nxs"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", NXS_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
@@ -296,7 +294,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
@@ -336,7 +333,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -386,7 +382,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", INPUT_WS));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "nxs"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", NXS_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", TWO_THETA_STEP));
