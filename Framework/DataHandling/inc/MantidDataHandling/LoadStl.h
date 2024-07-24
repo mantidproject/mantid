@@ -30,7 +30,8 @@ namespace DataHandling {
 
 struct HashV3DPair {
   size_t operator()(const std::pair<Kernel::V3D, uint32_t> &v) const {
-    size_t seed = std::hash<double>{}(v.first.X());
+    size_t seed = 0;
+    boost::hash_combine(seed, v.first.X());
     boost::hash_combine(seed, v.first.Y());
     boost::hash_combine(seed, v.first.Z());
     return seed;
