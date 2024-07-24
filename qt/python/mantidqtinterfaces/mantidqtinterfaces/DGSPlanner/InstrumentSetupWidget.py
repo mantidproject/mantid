@@ -136,7 +136,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
     def validDir(self, dirstring):
         d = numpy.fromstring(dirstring, dtype=float, sep=",")
         if len(d) == 3:
-            return numpy.alltrue(numpy.isfinite(d))
+            return numpy.all(numpy.isfinite(d))
         return False
 
     def validateGon(self):
