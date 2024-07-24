@@ -18,6 +18,7 @@ fetchcontent_declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG b007c54f2944e193ac44fba1bc997cb65826a0b9
+  EXCLUDE_FROM_ALL
 )
 
 fetchcontent_makeavailable(googletest)
@@ -36,7 +37,7 @@ mark_as_advanced(
 
 # Hide targets from "all" and put them in the UnitTests folder in MSVS
 foreach(target_var gmock gtest gmock_main gtest_main)
-  set_target_properties(${target_var} PROPERTIES EXCLUDE_FROM_ALL TRUE FOLDER "UnitTests/gmock")
+  set_target_properties(${target_var} PROPERTIES FOLDER "UnitTests/gmock")
 endforeach()
 
 # W4 logging doesn't work with MSVC address sanitizer, turn off sanitizer since not our code
