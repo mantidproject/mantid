@@ -5,10 +5,10 @@
 # made to something other than a .rst file.
 #
 # Script usage:
-# buildscript <path-to-workspace> <cmake-preset-name> [options]
+# conda-buildscript <path-to-workspace> <cmake-preset-name> [options]
 #
 # Example command to run a PR build on ubuntu:
-# buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
+# conda-buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
