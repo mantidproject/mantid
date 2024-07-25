@@ -264,7 +264,8 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
       r->setPeak(peak, i);
       addMarker(r);
     } catch (const std::runtime_error &ex) {
-      g_log.error(ex.what());
+      g_log.error("Error creating marker for peak " + std::to_string(i) + " with detector ID " +
+                  std::to_string(peak.getDetectorID()) + ". " + ex.what());
       return;
     }
   }
