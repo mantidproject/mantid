@@ -14,6 +14,8 @@ from pathlib import Path
 from mantid.kernel import ConfigService, Logger
 from mantidqt.utils.async_qt_adaptor import IQtAsync, qt_async_task
 
+CORE_DUMP_RECENCY_LIMIT = 30
+
 
 class GDBAsync(IQtAsync):
     def __init__(self, parent_presenter: "ErrorReporterPresenter"):
@@ -87,7 +89,6 @@ class GDBAsync(IQtAsync):
         return ""
 
     def _latest_core_dump(self, dir: str):
-        CORE_DUMP_RECENCY_LIMIT = 30
         files = Path(dir).iterdir()
         sorted_files = sorted([file for file in files], key=lambda file: file.stat().st_ctime)
         if sorted_files:
