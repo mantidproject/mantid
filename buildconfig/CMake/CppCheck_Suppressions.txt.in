@@ -842,8 +842,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransfor
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:368
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:50
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:78
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePAR.cpp:50
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveOpenGenieAscii.h:23
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:412
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:428

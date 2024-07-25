@@ -1,0 +1,1 @@
+- New version 2 of :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` that will save the grouping file with groups starting at 1 instead of 0 to make them consisted with ``GroupingWorkspace``. The ``FileFormat`` parameter has also been removed as it will now be determined from the extension of ``GroupingFilename``.
