@@ -605,3 +605,39 @@ class SliceViewYAxisEditor(YAxisEditor):
     def on_ok(self):
         super(SliceViewYAxisEditor, self).on_ok()
         self.dimensions_changed()
+
+
+class SliceViewerManager:
+    """
+    Singleton that keeps references to opened slice viewer.
+    """
+
+    """
+    Dictionary of opened slice viewer instances. The key is the name of the
+    workspace, the value is a list of instances.
+    """
+    view_dict = dict()
+
+    @staticmethod
+    def register(slice_viewer, ws_name):
+        """
+        Register a slice viewer instance in the manager.
+        :param slice_viewer: (SliceViewerDataView) the slice viewer instance
+        :param ws_name: (str) name of the workspace
+        """
+        if ws_name in SliceViewerManager.view_dict:
+            SliceViewerManager.view_dict[ws_name].append(slice_viewer)
+        else:
+            SliceViewerManager.view_dict[ws_name] = [slice_viewer]
+
+    @staticmethod
+    def remove(slice_viewer, ws_name):
+        """
+        Remove a slice viewer instance from the manager.
+        :param slice_viewer: (SliceViewerDataView) the slice viewer instance
+        :param ws_name: (str) name of the workspace
+        """
+        if ws_name in SliceViewerManager.view_dict:
+            SliceViewerManager.view_dict[ws_name].remove(slice_viewer)
+            if not SliceViewerManager.view_dict[ws_name]:
+                del SliceViewerManager.view_dict[ws_name]

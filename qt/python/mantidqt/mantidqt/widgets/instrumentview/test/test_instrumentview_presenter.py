@@ -29,7 +29,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         ws = mock.NonCallableMock()
         presenter = InstrumentViewPresenter(ws)
 
-        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=str(ws), window_flags=mock.ANY)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=str(ws), window_flags=mock.ANY, use_thread=mock.ANY)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
@@ -41,7 +41,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         mock_ads.retrieve.return_value = mock.NonCallableMock()
         ws_name = "my_workspace"
         presenter = InstrumentViewPresenter(ws_name)
-        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=ws_name, window_flags=mock.ANY)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter, name=ws_name, window_flags=mock.ANY, use_thread=False)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")

@@ -38,10 +38,17 @@ class InstrumentView(QWidget, ObservingView):
 
     close_signal = Signal()
 
-    def __init__(self, parent, presenter, name, window_flags=Qt.Window):
+    closing = Signal(str)
+
+    def __init__(self, parent, presenter, name, window_flags=Qt.Window, use_thread=False):
         super(InstrumentView, self).__init__(parent)
 
-        self.widget = InstrumentWidget(name)
+        scale_min = 0
+        scale_max = 0
+        reset_geometry = True
+        set_default_view = True
+        autoscaling = True
+        self.widget = InstrumentWidget(name, parent, reset_geometry, autoscaling, scale_min, scale_max, set_default_view, use_thread)
 
         # used by the observers view to delete the ADS observer
         self.presenter = presenter
@@ -58,6 +65,7 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
+        self.closing.connect(lambda ws_name: self.presenter.close(ws_name))
 
     def get_tab(self, tab_index):
         tab_name = [InstrumentWidget.RENDER, InstrumentWidget.PICK, InstrumentWidget.MASK, InstrumentWidget.TREE][tab_index]
@@ -107,7 +115,7 @@ class InstrumentView(QWidget, ObservingView):
             children = self.findChildren(InstrumentWidget)
             for child in children:
                 child.close()
-            self.presenter.close(self.name)
+            self.closing.emit(self.name)
         super(QWidget, self).closeEvent(event)
 
     @Slot()

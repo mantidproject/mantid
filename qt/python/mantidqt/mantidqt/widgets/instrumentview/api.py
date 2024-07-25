@@ -8,6 +8,8 @@
 #
 
 import functools
+from qtpy.QtCore import Qt
+
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.utils.qt.qappthreadcall import force_method_calls_to_qapp_thread
@@ -23,16 +25,19 @@ def safe_qthread(func):
     return _wrapped
 
 
-def get_instrumentview(workspace, wait=True):
+def get_instrumentview(workspace, wait=True, parent=None, window_flags=Qt.Window, use_thread=False):
     """Return a handle to the instrument view of given workspace
-    :param ws: input workspace
+    :param workspace: input workspace
+    :param parent: the parent of the instrument view
+    :param window_flags: the flags defining the behavior of the window
+    :param use_thread: whether the instrument viewer should do its painting in a background thread
     """
 
-    def _wrappper(ws):
-        return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws))
+    def _wrappper(ws, _parent=None, _window_flags=Qt.Window, _use_thread=False):
+        return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws, _parent, _window_flags, use_thread=_use_thread))
 
     # need to do some duck-typing here
-    ivp = QAppThreadCall(_wrappper)(workspace)
+    ivp = QAppThreadCall(_wrappper)(workspace, parent, window_flags, use_thread)
     # link nested method to top level
     # NOTE: setMin and setMax still leads to segfault, need to force
     #       wrapped in QAppThreadCall again
