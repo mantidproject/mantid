@@ -39,9 +39,6 @@ using MinMaxTuple = boost::tuple<double, double>;
 MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS, MatrixWorkspace_const_sptr &rhsWS) {
   return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
 }
-
-/// Check if a double is not zero and returns a bool indicating success
-bool isNonzero(double i) { return (0 != i); }
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -423,26 +420,14 @@ boost::tuple<int, int> Stitch1D::findStartEndIndexes(double startOverlap, double
  @return True if there are any non-zero errors in the workspace
  */
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
-  auto ws_size = static_cast<int64_t>(ws->getNumberHistograms());
-  bool hasNonZeroErrors = false;
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (int64_t i = 0; i < ws_size; ++i) {
-    PARALLEL_START_INTERRUPT_REGION
-    if (!hasNonZeroErrors) // Keep checking
-    {
-      const auto &e = ws->e(i);
-      auto it = std::find_if(e.begin(), e.end(), isNonzero);
-      if (it != e.end()) {
-        PARALLEL_CRITICAL(has_non_zero) {
-          hasNonZeroErrors = true; // Set flag. Should not need to check any more spectra.
-        }
-      }
+  for (auto i = 0u; i < ws->getNumberHistograms(); ++i) {
+    const auto &e = ws->e(i);
+    // Its faster to sum and then check the result is non-zero than to check each element is non-zero individually
+    if (std::accumulate(e.begin(), e.end(), 0.0) != 0.0) {
+      return true;
     }
-    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERRUPT_REGION
-
-  return hasNonZeroErrors;
+  return false;
 }
 
 /**
