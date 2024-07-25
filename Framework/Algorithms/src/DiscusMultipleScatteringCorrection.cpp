@@ -21,6 +21,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -181,6 +183,10 @@ void DiscusMultipleScatteringCorrection::init() {
                   "Enable normalization of supplied structure factor(s). May be required when running a calculation "
                   "involving more than one material where the normalization of the default S(Q)=1 structure factor "
                   "doesn't match the normalization of a supplied non-isotropic structure factor");
+  declareProperty("RadialCollimator", false,
+                  "Enable use of a radial collimator that assign zero weights to tracks where the final scatter "
+                  "is not in a position that allows the final track segment to pass through the collimator corridor "
+                  "which spans from the guage volume toward the each detector");
 }
 
 /**
@@ -332,6 +338,26 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       issues["SimulateEnergiesIndependently"] =
           "SimulateEnergiesIndependently is only applicable to inelastic direct geometry calculations. Different "
           "energy transfer bins are always simulated separately for indirect geometry";
+  }
+
+  const bool radialCollimator = getProperty("RadialCollimator");
+  if (radialCollimator) {
+    auto numberOfHist = inputWS->getNumberHistograms();
+    for (size_t histIdx = 0; histIdx < numberOfHist; ++histIdx) {
+      if (inputWS->spectrumInfo().hasDetectors(histIdx) && !inputWS->spectrumInfo().isMonitor(histIdx) &&
+          !inputWS->spectrumInfo().isMasked(histIdx)) {
+        const auto detector = inputWS->getDetector(histIdx);
+        if (!detector->shape()) {
+          issues["RadialCollimator"] = "RadialCollimator is only applicable when each detector has a valid shape";
+          break;
+        } else if ((detector->shape()->shape() != Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID)) {
+          issues["RadialCollimator"] = "RadialCollimator is only applicable when each detector has a cuboid shape. "
+                                       "A different shape was found at histogram index:" +
+                                       std::to_string(histIdx);
+          break;
+        }
+      }
+    }
   }
 
   return issues;
@@ -577,6 +603,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
 
   const auto &spectrumInfo = instrumentWS.spectrumInfo();
+  const auto &detectorInfo = instrumentWS.detectorInfo();
 
   PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < static_cast<int64_t>(nhists); ++i) { // signed int for openMP loop
@@ -598,8 +625,6 @@ void DiscusMultipleScatteringCorrection::exec() {
       // step size = index range / number of steps requested
       const size_t nsteps = std::max(static_cast<size_t>(1), nSimulationPoints - 1);
       const size_t xStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
-
-      const auto detPos = spectrumInfo.position(i);
 
       // create copy of the SQ workspaces vector and fully copy any members that will be modified
       auto componentWorkspaces = m_SQWSs;
@@ -626,7 +651,7 @@ void DiscusMultipleScatteringCorrection::exec() {
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
 
         auto [weights, weightsErrors] =
-            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
+            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, true, detectorInfo, i);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
           noAbsSimulationWS->getSpectrum(i).mutableE() += weightsErrors;
@@ -639,7 +664,7 @@ void DiscusMultipleScatteringCorrection::exec() {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
           std::tie(weights, weightsErrors) =
-              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
+              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, false, detectorInfo, i);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
             simulationWSs[ne]->getSpectrum(i).mutableE() += weightsErrors;
@@ -1345,14 +1370,15 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
  * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
- * @param detPos The position of the detector we're currently calculating a correction for
  * @param specialSingleScatterCalc Boolean indicating whether special single
+ * @param detectorInfo Obeject to get detector information
+ * @param histogramIndex Index for the current histogram being processed
  * @return An average weight across all of the paths
  */
 std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
     ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
-    const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
   std::vector<int> countZeroWeights(wValues.size(), 0);
   std::vector<double> sumOfWeights(wValues.size(), 0.);
@@ -1360,8 +1386,8 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
       weightsErrors(wValues.size(), 0.);
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weights] =
-        scatter(nScatters, rng, componentWorkspaces, kinc, wValues, detPos, specialSingleScatterCalc);
+    auto [success, weights] = scatter(nScatters, rng, componentWorkspaces, kinc, wValues, specialSingleScatterCalc,
+                                      detectorInfo, histogramIndex);
     if (success) {
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       std::transform(weights.begin(), weights.end(), countZeroWeights.begin(), countZeroWeights.begin(),
@@ -1400,17 +1426,17 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
  * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
- * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
- * scatter calculation should be performed
+ * @param detectorInfo Obeject to get detector information
+ * @param histogramIndex Index of the current histogram being processed
  * @return A tuple containing a success/fail boolean and the calculated weights
  * across the n-1 multiple scatters
  */
-std::tuple<bool, std::vector<double>>
-DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                            const ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
-                                            const std::vector<double> &wValues, const Kernel::V3D &detPos,
-                                            bool specialSingleScatterCalc) {
+std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatter(
+    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+    const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+
   double weight = 1;
 
   auto track = start_point(rng);
@@ -1451,6 +1477,16 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
         new_vector(shapeObjectWithScatter->material(), k, specialSingleScatterCalc);
   }
 
+  bool considerCollimator = getProperty("RadialCollimator");
+  if (considerCollimator) {
+    const auto &samplePos = detectorInfo.samplePosition();
+    auto hexahedron = createCollimatorHexahedronShape(samplePos, detectorInfo, histogramIndex);
+    // checking is the final scatter point inside the collimatorCorridor shape?
+    if (hexahedron && !hexahedron->isValid(track.startPoint()))
+      return {true, std::vector<double>(wValues.size(), 0.)};
+  }
+
+  const auto &detPos = detectorInfo.position(histogramIndex);
   Kernel::V3D directionToDetector = detPos - track.startPoint();
   Kernel::V3D prevDirection = track.direction();
   directionToDetector.normalize();
@@ -1507,6 +1543,138 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
     }
   }
   return {true, weights};
+}
+
+/*
+ * Construct a hexahedron shape extending from the detector's front face across the collimator openning window toward
+ the sample with a legth as twice the distance from sample to detector.
+ */
+std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createCollimatorHexahedronShape(
+    const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+  const auto shape = detectorInfo.detector(histogramIndex).shape();
+  try {
+    shape->shapeInfo();
+  } catch (std::exception &) {
+    return nullptr;
+  }
+
+  const auto &detectorId = detectorInfo.detector(histogramIndex).getID();
+  const auto &detectorAbsolPos = detectorInfo.position(detectorInfo.indexOf(detectorId));
+  const auto cuboidGeometry = shape->shapeInfo().cuboidGeometry();
+
+  // Positions of the detector's front face
+  const auto &detLeftFrontBottomPos = detectorAbsolPos + cuboidGeometry.leftFrontBottom;
+  const auto &detLeftFrontTopPos = detectorAbsolPos + cuboidGeometry.leftFrontTop;
+  const auto &detRightFrontBottomPos = detectorAbsolPos + cuboidGeometry.rightFrontBottom;
+  const auto detRightFrontTopPos = detLeftFrontTopPos + detRightFrontBottomPos - detLeftFrontBottomPos;
+
+  const auto detCentorPos =
+      (detLeftFrontBottomPos + detLeftFrontTopPos + detRightFrontBottomPos + detRightFrontTopPos) / 4.0;
+  const auto detTopMiddlePos = (detLeftFrontTopPos + detRightFrontTopPos) / 2.0;
+
+  // Sanity check to avoid dividing by zero
+  if ((detRightFrontTopPos == detLeftFrontTopPos) || (detTopMiddlePos == detCentorPos) || (detCentorPos == samplePos)) {
+    return nullptr;
+  }
+
+  // Define the unit vectors needed for calculations
+  const auto unitVecLeftToRight =
+      (detRightFrontTopPos - detLeftFrontTopPos) / (detRightFrontTopPos - detLeftFrontTopPos).norm();
+  const auto unitVecBottomToUp = (detTopMiddlePos - detCentorPos) / (detTopMiddlePos - detCentorPos).norm();
+  const auto unitVecSampleToDet = (detCentorPos - samplePos) / (detCentorPos - samplePos).norm();
+
+  // Collimator inner radius
+  const auto colInnerRadius = getDoubleParamFromIDF("col-radius");
+  // Half of the angular extend of the collimator seen from the sample
+  const double colHalfAngularExtent = 0.5 * getDoubleParamFromIDF("col-angular-extend");
+  // Height of collimator plate
+  const double colPlateHeight = getDoubleParamFromIDF("col-plate-height");
+
+  // Calculated positions of collimator openning plane that is parallell to the detector.
+  const auto colOpenningLeftTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
+                                     (unitVecBottomToUp * (colPlateHeight / 2.0)) -
+                                     (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
+  const auto colOpenningRightTopPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos +
+                                      (unitVecBottomToUp * (colPlateHeight / 2.0)) +
+                                      (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
+  const auto colOpenningLeftBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
+                                        (unitVecBottomToUp * (colPlateHeight / 2.0)) -
+                                        (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
+  const auto colOpenningRightBottomPos = (unitVecSampleToDet * colInnerRadius * cos(colHalfAngularExtent)) + samplePos -
+                                         (unitVecBottomToUp * (colPlateHeight / 2.0)) +
+                                         (unitVecLeftToRight * colInnerRadius * sin(colHalfAngularExtent));
+
+  // Sanity check to avoid dividing by zero
+  if ((colOpenningLeftTopPos == detLeftFrontTopPos) || (colOpenningLeftBottomPos == detLeftFrontBottomPos) ||
+      (colOpenningRightTopPos == detRightFrontTopPos) || (colOpenningRightBottomPos == detRightFrontBottomPos)) {
+    return nullptr;
+  }
+
+  // Unit vectors along the sides of hexahedron shape
+  const auto unitVecAlongLeftTopLeg =
+      (colOpenningLeftTopPos - detLeftFrontTopPos) / (colOpenningLeftTopPos - detLeftFrontTopPos).norm();
+  const auto unitVecAlongLeftBottomLeg =
+      (colOpenningLeftBottomPos - detLeftFrontBottomPos) / (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm();
+  const auto unitVecAlongRightTopLeg =
+      (colOpenningRightTopPos - detRightFrontTopPos) / (colOpenningRightTopPos - detRightFrontTopPos).norm();
+  const auto unitVecAlongRightBottomLeg = (colOpenningRightBottomPos - detRightFrontBottomPos) /
+                                          (colOpenningRightBottomPos - detRightFrontBottomPos).norm();
+
+  // Positions of the hexahedron extended towards the sample for each of its legs to have a length twice the lenght of
+  // sample to detector
+  double sampleCentreToDetDistance = (detCentorPos - samplePos).norm();
+  const auto leftFrontBottomPoint = detRightFrontTopPos + unitVecAlongRightTopLeg * sampleCentreToDetDistance * 2.0;
+  const auto hexaHedronLegsLenRatio =
+      (leftFrontBottomPoint - detRightFrontTopPos).norm() / (colOpenningRightTopPos - detRightFrontTopPos).norm();
+  const auto leftBackBottomPoint = detLeftFrontTopPos + unitVecAlongLeftTopLeg * hexaHedronLegsLenRatio *
+                                                            (colOpenningLeftTopPos - detLeftFrontTopPos).norm();
+  const auto rightFrontBottomPoint =
+      detRightFrontBottomPos +
+      unitVecAlongRightBottomLeg * hexaHedronLegsLenRatio * (colOpenningRightBottomPos - detRightFrontBottomPos).norm();
+  const auto rightBackBottomPoint =
+      detLeftFrontBottomPos +
+      unitVecAlongLeftBottomLeg * hexaHedronLegsLenRatio * (colOpenningLeftBottomPos - detLeftFrontBottomPos).norm();
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << "<hexahedron id=\"corridor-shape\" >"
+                 << "<left-back-bottom-point x=\"" << leftBackBottomPoint.X() << "\""
+                 << " y=\"" << leftBackBottomPoint.Y() << "\""
+                 << " z=\"" << leftBackBottomPoint.Z() << "\" />"
+                 << "<left-front-bottom-point x=\"" << leftFrontBottomPoint.X() << "\""
+                 << " y=\"" << leftFrontBottomPoint.Y() << "\""
+                 << " z=\"" << leftFrontBottomPoint.Z() << "\" />"
+                 << "<right-front-bottom-point x=\"" << rightFrontBottomPoint.X() << "\""
+                 << " y=\"" << rightFrontBottomPoint.Y() << "\""
+                 << " z=\"" << rightFrontBottomPoint.Z() << "\" />"
+                 << "<right-back-bottom-point x=\"" << rightBackBottomPoint.X() << "\""
+                 << " y=\"" << rightBackBottomPoint.Y() << "\""
+                 << " z=\"" << rightBackBottomPoint.Z() << "\" />"
+                 << "<left-back-top-point x=\"" << detLeftFrontTopPos.X() << "\""
+                 << " y=\"" << detLeftFrontTopPos.Y() << "\""
+                 << " z=\"" << detLeftFrontTopPos.Z() << "\" />"
+                 << "<left-front-top-point x=\"" << detRightFrontTopPos.X() << "\""
+                 << " y=\"" << detRightFrontTopPos.Y() << "\""
+                 << " z=\"" << detRightFrontTopPos.Z() << "\" />"
+                 << "<right-front-top-point x=\"" << detRightFrontBottomPos.X() << "\""
+                 << " y=\"" << detRightFrontBottomPos.Y() << "\""
+                 << " z=\"" << detRightFrontBottomPos.Z() << "\" />"
+                 << "<right-back-top-point x=\"" << detLeftFrontBottomPos.X() << "\""
+                 << " y=\"" << detLeftFrontBottomPos.Y() << "\""
+                 << " z=\"" << detLeftFrontBottomPos.Z() << "\" />"
+                 << "</hexahedron>";
+  Geometry::ShapeFactory shapeMaker;
+  return shapeMaker.createShape(xmlShapeStream.str());
+}
+
+double DiscusMultipleScatteringCorrection::getDoubleParamFromIDF(std::string paramName) {
+  if (!m_instrument->hasParameter(paramName)) {
+    throw std::runtime_error("Cannot find parameter:" + paramName + " from instrument parameter file");
+  }
+  std::vector<double> val_vec = m_instrument->getNumberParameter(paramName, true);
+  if (val_vec.empty()) {
+    throw std::runtime_error("No value specified for:" + paramName + " in the instrument parameter file");
+  }
+
+  return static_cast<double>(val_vec.front());
 }
 
 double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const double kinc) {
@@ -1981,10 +2149,11 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
     const auto &envBox = m_env->boundingBox();
     m_activeRegion.grow(envBox);
   }
-  auto instrument = inputWS->getInstrument();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
-  m_refframe = instrument->getReferenceFrame();
-  m_sourcePos = instrument->getSource()->getPos();
+  // auto instrument = inputWS->getInstrument();
+  m_instrument = inputWS->getInstrument();
+  m_beamProfile = BeamProfileFactory::createBeamProfile(*m_instrument, inputWS->sample());
+  m_refframe = m_instrument->getReferenceFrame();
+  m_sourcePos = m_instrument->getSource()->getPos();
 }
 
 } // namespace Mantid::Algorithms
