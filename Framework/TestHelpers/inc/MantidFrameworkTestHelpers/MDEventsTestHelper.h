@@ -22,6 +22,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace {
 template <typename MDE, size_t nd>
@@ -321,6 +322,12 @@ MDBox<MDLeanEvent<3>, 3> *makeMDBox3();
  */
 std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num);
 
+// The makeMDGridBox method makes a unique_ptr to an MDBox, passes the raw pointer to
+// another MBBox, then as the unique_ptr goes out of scope the first MDBox will be
+// deleted, potentially leaving a dangling pointer. However it seems to work, and it's
+// only used in tests. Would be good to fix this though.
+GNU_DIAG_OFF("array-bounds")
+
 //-------------------------------------------------------------------------------------
 /** Generate an empty MDBox with 2 dimensions, splitting in (default) 10x10
  *boxes.
@@ -343,7 +350,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t 
   if (nd > 1)
     splitter->setSplitInto(1, split1);
   // Set the size to 10.0 in all directions
-  auto box = new MDBox<MDLeanEvent<nd>, nd>(splitter);
+  auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
   for (size_t d = 0; d < nd; d++)
     // carefull! function with the side effects!
     box->setExtents(d, dimensionMin, dimensionMax);
@@ -351,9 +358,11 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeMDGridBox(size_t split0 = 10, size_t 
   box->calcVolume();
 
   // Split
-  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box);
+  auto out = new MDGridBox<MDLeanEvent<nd>, nd>(box.get());
   return out;
 }
+
+GNU_DIAG_ON("array-bounds")
 
 //-------------------------------------------------------------------------------------
 /** Feed a MDGridBox with evenly-spaced events
