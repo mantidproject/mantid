@@ -330,10 +330,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SpatialGroup
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch.cpp:267
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UpdateScriptRepository.cpp:51
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWPolygon.h:55
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:357
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:374
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:189
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:218
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:382
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409

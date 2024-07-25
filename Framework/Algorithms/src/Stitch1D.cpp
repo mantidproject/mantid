@@ -183,7 +183,7 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
  @return a double contianing the start of the overlapping region
  */
 double Stitch1D::getStartOverlap(const double intesectionMin, const double intesectionMax) const {
-  Property *startOverlapProp = this->getProperty("StartOverlap");
+  Property const *startOverlapProp = this->getProperty("StartOverlap");
   double startOverlapVal = this->getProperty("StartOverlap");
   startOverlapVal -= this->range_tolerance;
   const bool startOverlapBeyondRange = (startOverlapVal < intesectionMin) || (startOverlapVal > intesectionMax);
@@ -212,7 +212,7 @@ double Stitch1D::getStartOverlap(const double intesectionMin, const double intes
  @return a double contianing the end of the overlapping region
  */
 double Stitch1D::getEndOverlap(const double intesectionMin, const double intesectionMax) const {
-  Property *endOverlapProp = this->getProperty("EndOverlap");
+  Property const *endOverlapProp = this->getProperty("EndOverlap");
   double endOverlapVal = this->getProperty("EndOverlap");
   endOverlapVal += this->range_tolerance;
   const bool endOverlapBeyondRange = (endOverlapVal < intesectionMin) || (endOverlapVal > intesectionMax);
@@ -351,7 +351,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vec
  @param stop :: a double defining the end of the region to integrate
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input, const double start, const double stop) {
+MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr const &input, const double start, const double stop) {
   auto integration = this->createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", input);
@@ -368,7 +368,7 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input, const do
  @param inTwo :: The second input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne, MatrixWorkspace_sptr &inTwo) {
+MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr const &inOne, MatrixWorkspace_sptr const &inTwo) {
   auto weightedMean = this->createChildAlgorithm("WeightedMean");
   weightedMean->initialize();
   weightedMean->setProperty("InputWorkspace1", inOne);
@@ -382,7 +382,7 @@ MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne, MatrixW
  @param inTwo :: Second input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne, MatrixWorkspace_sptr &inTwo) {
+MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr const &inOne, MatrixWorkspace_sptr const &inTwo) {
   const std::string in1 = "__Stitch1D_intermediate_workspace_1__";
   const std::string in2 = "__Stitch1D_intermediate_workspace_2__";
   Mantid::API::AnalysisDataService::Instance().addOrReplace(in1, inOne);
