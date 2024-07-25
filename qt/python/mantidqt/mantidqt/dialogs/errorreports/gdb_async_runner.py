@@ -59,7 +59,7 @@ class GDBAsync(IQtAsync):
 
     def _decompress_lz4_then_run_gdb(self, latest_core_dump: Path):
         tmp_core_copy_fp = tempfile.NamedTemporaryFile()
-        lz4_command = ["lz4", "-d", latest_core_dump.as_posix(), tmp_core_copy_fp.name]
+        lz4_command = ["yes", "|", "lz4", "-d", latest_core_dump.as_posix(), tmp_core_copy_fp.name]
         self.log.notice(f"Running {' '.join(lz4_command)} ...")
         result = subprocess.run(lz4_command)
         output = ""
