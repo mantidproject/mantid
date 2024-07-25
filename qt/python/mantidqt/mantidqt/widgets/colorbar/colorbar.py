@@ -187,9 +187,10 @@ class ColorbarWidget(QWidget):
 
         if mappable_cmap.name.endswith("_r"):
             self.crev.setChecked(True)
+            self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name.replace("_r", "")))
         else:
             self.crev.setChecked(False)
-        self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name.replace("_r", "")))
+            self.cmap.setCurrentIndex(self.cmap_list.index(mappable_cmap.name))
 
         self.redraw()
 
