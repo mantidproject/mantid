@@ -182,11 +182,9 @@ private:
     TS_ASSERT_EQUALS(presenter.m_intOptions["RoundPrecision"], 5);
   }
 
-  void verifyAndClear(std::unique_ptr<NiceMock<MockOptionsDialogPresenterSubscriber>> mainWindowSubscriber =
-                          std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
+  void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulDefaults));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulLoad));
   }
