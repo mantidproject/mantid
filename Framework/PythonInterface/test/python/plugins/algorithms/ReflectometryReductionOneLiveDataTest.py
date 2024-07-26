@@ -136,6 +136,8 @@ AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesWithZeroTheta)
 
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
+    INPUT_WS_ERROR = "Invalid value for property InputWorkspace"
+
     def setUp(self):
         self._setup_environment()
         self._setup_workspaces()
@@ -173,16 +175,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertRaises(TypeError, ReflectometryReductionOneLiveData)
 
     def test_invalid_input_workspace(self):
-        self.assertRaises(ValueError, ReflectometryReductionOneLiveData, InputWorkspace="bad")
+        self.assertRaisesRegex(ValueError, self.INPUT_WS_ERROR, ReflectometryReductionOneLiveData, InputWorkspace="bad")
 
     def test_invalid_output_workspace(self):
-        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData, InputWorkspace=self.__class__._input_ws, OutputWorkspace="")
+        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData, InputWorkspace=self._input_ws, OutputWorkspace="")
 
     def test_invalid_property(self):
         self.assertRaises(
             TypeError,
             ReflectometryReductionOneLiveData,
-            InputWorkspace=self.__class__._input_ws,
+            InputWorkspace=self._input_ws,
             OutputWorkspace="output",
             Instrument="INTER",
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValue",
@@ -220,7 +222,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_instrument_was_not_set_on_input_workspace(self):
         workspace = self._run_algorithm_with_defaults()
         # The input workspace should be unchanged
-        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), "")
+        self.assertEqual(self._input_ws.getInstrument().getName(), "")
 
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
@@ -259,7 +261,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             RuntimeError,
             "Unknown algorithm 'GetFakeLiveInstrumentValueInvalidNames'",
             ReflectometryReductionOneLiveData,
-            InputWorkspace=self.__class__._input_ws,
+            InputWorkspace=self._input_ws,
             OutputWorkspace="output",
             Instrument="INTER",
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValueInvalidNames",
@@ -302,9 +304,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         config["default.instrument"] = self._old_instrument
 
     def _setup_workspaces(self):
-        self.__class__._input_ws = self._create_test_workspace()
+        self._input_ws = self._create_test_workspace()
         self._default_args = {
-            "InputWorkspace": self.__class__._input_ws,
+            "InputWorkspace": self._input_ws,
             "OutputWorkspace": "output",
             "Instrument": "INTER",
             "GetLiveValueAlgorithm": "GetFakeLiveInstrumentValue",
