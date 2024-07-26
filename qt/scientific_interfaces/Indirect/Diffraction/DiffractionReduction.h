@@ -39,6 +39,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "DiffractionReduction"; }
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);

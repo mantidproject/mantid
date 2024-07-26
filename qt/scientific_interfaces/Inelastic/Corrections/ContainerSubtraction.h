@@ -26,6 +26,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ContainerSubtraction"; }
 
 private slots:
   /// Handles a new sample being loaded

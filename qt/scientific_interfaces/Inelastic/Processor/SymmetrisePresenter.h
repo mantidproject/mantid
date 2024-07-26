@@ -60,6 +60,7 @@ public:
   // run widget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Symmetrise"; }
 
   void handleReflectTypeChanged(int value) override;
   void handleDoubleValueChanged(std::string const &propname, double value) override;

@@ -50,6 +50,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "ISISDiagnostics"; }
 
 private slots:
   void algorithmComplete(bool error);

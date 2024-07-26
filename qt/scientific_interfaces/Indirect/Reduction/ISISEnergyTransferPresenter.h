@@ -46,6 +46,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "ISISEnergyTransfer"; }
 
 private:
   void validateInstrumentDetails(IUserInputValidator *validator) const;

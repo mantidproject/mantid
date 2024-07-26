@@ -24,6 +24,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "MolDyn"; }
 
 private slots:
   void versionSelected(const QString & /*version*/);

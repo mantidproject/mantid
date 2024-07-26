@@ -27,6 +27,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ApplyAbsorptionCorrections"; }
 
 private slots:
   /// Handles a new sample being loaded
