@@ -12,7 +12,7 @@ jobs:
         with:
           keep_latest: 3
           # Nightly tags are of the form v{major}.{minor}.{date}.{time}
-          delete_tag_regex: v\d\.\d\.\d{8}\.\d{4}
+          delete_tag_regex: v\d+\.\d+\.\d{8}\.\d{4}
           prerelease_only: true
           delete_tags: true
         env:

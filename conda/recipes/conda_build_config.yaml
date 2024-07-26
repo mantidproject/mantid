@@ -1,19 +1,21 @@
+cdt_name:
+  - cos7
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
-  - 15                         # [osx]
-  - 10                         # [linux]
+  - 16                         # [osx]
+  - 12                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
-  - 15                         # [osx]
-  - 10                         # [linux]
+  - 16                         # [osx]
+  - 12                         # [linux]
 llvm_openmp:                   # [osx]
-  - 15                         # [osx]
+  - 16                         # [osx]
 
 python:
   - 3.10
