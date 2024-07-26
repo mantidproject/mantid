@@ -5,7 +5,7 @@ set(ALL_UI_FILES)
 
 add_subdirectory(BayesFitting)
 add_subdirectory(Corrections)
-add_subdirectory(Manipulation)
+add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 
 mtd_add_qt_library(

@@ -14,15 +14,13 @@
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitDataPresenter::FitDataPresenter(IFitTab *tab, IFitDataModel *model, IFitDataView *view)
+FitDataPresenter::FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);
 }
 
 FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
-
-std::vector<FitData> *FitDataPresenter::getFittingData() { return m_model->getFittingData(); }
 
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
@@ -75,7 +73,7 @@ std::vector<std::pair<std::string, size_t>> FitDataPresenter::getResolutionsForF
   return m_model->getResolutionsForFit();
 }
 
-void FitDataPresenter::validate(UserInputValidator &validator) { m_view->validate(validator); }
+void FitDataPresenter::validate(IUserInputValidator *validator) { m_view->validate(validator); }
 
 void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {

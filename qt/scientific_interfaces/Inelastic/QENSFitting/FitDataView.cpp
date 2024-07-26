@@ -68,16 +68,16 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
-void FitDataView::validate(UserInputValidator &validator) {
+void FitDataView::validate(IUserInputValidator *validator) {
   if (m_uiForm->tbFitData->rowCount() == 0)
-    validator.addErrorMessage("No input data has been provided.");
+    validator->addErrorMessage("No input data has been provided.");
 }
 
 void FitDataView::displayWarning(const std::string &warning) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(warning));
 }
 
-void FitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+void FitDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
   m_uiForm->tbFitData->insertRow(static_cast<int>(row));
 
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.name));

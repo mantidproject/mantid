@@ -37,7 +37,7 @@ void Simulation::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, SimulationTab *>::iterator iter;
   for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 
   loadSettings();

@@ -41,22 +41,14 @@ DECLARE_SUBWINDOW(DataReduction)
 
 DataReduction::DataReduction(QWidget *parent)
     : InelasticInterface(parent), m_settingsGroup("CustomInterfaces/DataReduction"),
-      m_algRunner(new MantidQt::API::QtAlgorithmRunner(this)),
       m_changeObserver(*this, &DataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
       m_instDetails() {
-  // Signals to report load instrument algo result
-  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
-
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 }
 
 DataReduction::~DataReduction() {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
-
-  // Make sure no algos are running after the window has been closed
-  m_algRunner->cancelRunningAlgorithm();
-
   saveSettings();
 }
 
@@ -97,7 +89,7 @@ void DataReduction::initLayout() {
           SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
           SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
 
-  auto const facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  auto const &facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
 
   // Update the instrument configuration across the UI
@@ -189,7 +181,7 @@ void DataReduction::loadInstrumentIfNotExist(const std::string &instrumentName, 
     loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
     loadAlg->execute();
     MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
-    m_instWorkspace = instWorkspace;
+    m_instWorkspace = std::move(instWorkspace);
 
     // Load the IPF if given an analyser and reflection
     if (!analyser.empty() && !reflection.empty()) {
@@ -280,7 +272,7 @@ void DataReduction::loadInstrumentDetails() {
       if (value.isEmpty() && component != nullptr)
         value = getInstrumentParameterFrom(component, key);
 
-      m_instDetails[QString::fromStdString(key)] = value;
+      m_instDetails[QString::fromStdString(key)] = std::move(value);
     }
     // In the case that the parameter does not exist
     catch (Mantid::Kernel::Exception::NotFoundError &nfe) {

@@ -70,10 +70,9 @@ public:
     m_model.reset();
   }
 
-  void test_that_the_model_is_instantiated_without_stored_workspaces_or_spectraToPlot() {
+  void test_that_the_model_is_instantiated_without_stored_workspaces() {
     TS_ASSERT(!m_model->getResultWorkspace());
     TS_ASSERT(!m_model->getPDFWorkspace());
-    TS_ASSERT(m_model->getSpectraToPlot().empty());
   }
 
   void test_that_setResultWorkspace_will_set_the_stored_result_group() {
@@ -131,66 +130,51 @@ public:
     TS_ASSERT(!m_model->isPDFGroupPlottable());
   }
 
-  void test_that_clearSpectraToPlot_will_remove_the_stored_spectraToPlot() {
-    m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("Amplitude");
-    m_model->clearSpectraToPlot();
-
-    TS_ASSERT(m_model->getSpectraToPlot().empty());
-  }
-
-  void test_that_getSpectraToPlot_will_return_an_empty_vector_if_none_of_the_workspaces_are_plottable() {
+  void test_that_plotResult_will_return_an_empty_vector_if_none_of_the_workspaces_are_plottable() {
     auto const resultGroup =
         createGroupWorkspaceWithTextAxes(NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA, 1);
 
     m_model->setResultWorkspace(resultGroup);
-    m_model->plotResult("Amplitude");
 
-    TS_ASSERT(m_model->getSpectraToPlot().empty());
+    TS_ASSERT(m_model->plotResult("Amplitude").empty());
   }
 
-  void test_that_getSpectraToPlot_will_return_an_empty_vector_if_the_parameter_passed_does_not_exist() {
+  void test_that_plotResult_will_return_an_empty_vector_if_the_parameter_passed_does_not_exist() {
     m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("Not a parameter");
-
-    TS_ASSERT(m_model->getSpectraToPlot().empty());
+    TS_ASSERT(m_model->plotResult("Not a parameter").empty());
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_with_the_correct_number_of_spectra_information_when_plotting_all() {
     m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("All");
 
     /// Here the size should be equal to numberOfWorkspaces * numberOfSpectra as
     /// it plots all the spectra in each of the workspaces
     auto const expectedSize = NUMBER_OF_WORKSPACES * toSizet(NUMBER_OF_SPECTRA);
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), expectedSize);
+    TS_ASSERT_EQUALS(m_model->plotResult("All").size(), expectedSize);
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_with_the_correct_number_of_spectra_information_when_plotting_a_parameter() {
     m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("Amplitude");
 
     /// Here the size should be equal to the numberOfWorkspaces as it will be
     /// plotting one spectra from each workspace
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), NUMBER_OF_WORKSPACES);
+    TS_ASSERT_EQUALS(m_model->plotResult("Amplitude").size(), NUMBER_OF_WORKSPACES);
   }
 
   void test_that_getSpectraToPlot_will_return_a_vector_containing_the_correct_spectra_indices_when_plotting_all() {
     m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("All");
 
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot(), getExpectedAllSpectra(NUMBER_OF_WORKSPACES, NUMBER_OF_SPECTRA));
+    TS_ASSERT_EQUALS(m_model->plotResult("All"), getExpectedAllSpectra(NUMBER_OF_WORKSPACES, NUMBER_OF_SPECTRA));
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_containing_the_correct_spectra_indices_when_plotting_a_parameter() {
     m_model->setResultWorkspace(m_groupWorkspace);
-    m_model->plotResult("HWHM");
 
     auto const parameterIndex(1); /// This parameter has a workspace index of 1
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot(), getExpectedParameterSpectra(NUMBER_OF_WORKSPACES, parameterIndex));
+    TS_ASSERT_EQUALS(m_model->plotResult("HWHM"), getExpectedParameterSpectra(NUMBER_OF_WORKSPACES, parameterIndex));
   }
 
   void test_that_plotResult_will_throw_when_there_is_no_result_workspace_set() {

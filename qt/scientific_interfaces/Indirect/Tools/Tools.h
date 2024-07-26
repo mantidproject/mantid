@@ -43,10 +43,6 @@ public: // public constructor, destructor and functions
 
   void initLayout() override;
 
-private slots:
-  /// Slot for clicking on the run button
-  void runClicked();
-
 private:
   std::string documentationPage() const override;
 
