@@ -1,3 +1,7 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 set(ALL_TEST_FILES)
 set(ALL_TEST_HELPERS)
 

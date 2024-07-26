@@ -608,7 +608,7 @@ void Quasi::plotClicked() {
   int const numSpectra = (int)resultWS->getNumberHistograms();
   InelasticTab::checkADSForPlotSaveWorkspace(resultName, true);
   auto const paramNames = {"amplitude", "fwhm", "beta", "gamma"};
-  for (std::string const &paramName : paramNames) {
+  for (auto const &paramName : paramNames) {
 
     if (plot == paramName || plot == "all") {
       std::vector<std::size_t> spectraIndices = {};

@@ -96,8 +96,8 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:408
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/UsageService.h:63
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:126
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:127
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventsListsShmemStorage.h:32
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/TimeSeriesProperty.h:133
@@ -243,7 +243,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Di
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FitPeak.h:67
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FitPeak.h:70
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:766
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:1354
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet3.cpp:218
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet3.cpp:261
@@ -734,16 +733,16 @@ integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:114
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:156
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:272
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:366
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:381
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:221
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:224
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:229
+unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:225
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:230
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:231
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:232
+unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:474
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:906
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
@@ -1066,7 +1065,7 @@ cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exp
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Instrument.cpp:54
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h:28
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:74
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:75
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:127
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:155
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/MeshObject.cpp:29

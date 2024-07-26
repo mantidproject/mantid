@@ -235,11 +235,18 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     }
   }
 
+  if (m_heightAxis.size() == 0) {
+    throw std::runtime_error("Height axis is undefined");
+  }
+
   m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
   m_endHeight = *max_element(m_heightAxis.begin(), m_heightAxis.end());
 
-  if (m_outputType == "1D")
-    m_heightAxis = {(m_heightAxis.front() + m_heightAxis.back()) * 0.5};
+  if (m_outputType == "1D") {
+    const double singleValue = (m_heightAxis.front() + m_heightAxis.back()) * 0.5;
+    m_heightAxis.clear();
+    m_heightAxis.emplace_back(singleValue);
+  }
 
   m_numHistograms = m_heightAxis.size();
 

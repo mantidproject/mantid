@@ -25,6 +25,7 @@ MSVC_DIAG_OFF(4290)
 GNU_DIAG_OFF("pedantic")
 GNU_DIAG_OFF("suggest-override")
 GNU_DIAG_OFF("missing-field-initializers")
+GNU_DIAG_OFF("maybe-uninitialized")
 
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;

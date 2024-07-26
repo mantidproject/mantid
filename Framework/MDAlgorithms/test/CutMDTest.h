@@ -49,7 +49,7 @@ private:
       eventWS->setDisplayNormalization(eventNorm);
       eventWS->setDisplayNormalizationHisto(histoNorm);
     } else {
-      eventWS->setDisplayNormalization(histoNorm);
+      histoWS->setDisplayNormalization(histoNorm);
     }
   }
 
