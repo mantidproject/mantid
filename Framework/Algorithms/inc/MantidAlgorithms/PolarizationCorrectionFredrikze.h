@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 #include <memory>
