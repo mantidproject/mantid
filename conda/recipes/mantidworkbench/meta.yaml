@@ -48,6 +48,7 @@ requirements:
     - mantiddocs {{ version }}
     {% endif %}
     - gdb  # [linux]
+    - lz4  # [linux]
 
 test:
   imports:

@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import lz4.frame
 import os
 import resource
 import subprocess
@@ -61,15 +62,10 @@ class GDBAsync(IQtAsync):
 
     def _decompress_lz4_then_run_gdb(self, latest_core_dump: Path):
         tmp_core_copy_fp = tempfile.NamedTemporaryFile()
-        lz4_command = ["yes", "|", "lz4", "-d", latest_core_dump.as_posix(), tmp_core_copy_fp.name]
-        self.log.notice(f"Running {' '.join(lz4_command)} ...")
-        result = subprocess.run(lz4_command)
-        output = ""
-        if result.returncode == 0:
-            self.log.notice(f"Decompressed core file to {tmp_core_copy_fp.name}")
-            output = self._run_gdb(tmp_core_copy_fp.name)
-        else:
-            self.log.notice(f"lz4 returned non-zero exit code:\n{result.stderr}")
+        with lz4.frame.open(latest_core_dump.as_posix(), "r") as lz4_fp:
+            tmp_core_copy_fp.write(lz4_fp.read())
+        self.log.notice(f"Decompressed core file to {tmp_core_copy_fp.name}")
+        output = self._run_gdb(tmp_core_copy_fp.name)
         tmp_core_copy_fp.close()
         return output
 
