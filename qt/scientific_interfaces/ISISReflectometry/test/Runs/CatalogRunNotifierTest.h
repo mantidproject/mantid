@@ -25,24 +25,28 @@ public:
   static CatalogRunNotifierTest *createSuite() { return new CatalogRunNotifierTest(); }
   static void destroySuite(CatalogRunNotifierTest *suite) { delete suite; }
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testConstructorSubscribesToView() {
     EXPECT_CALL(m_view, subscribeTimer(_)).Times(1);
     auto runNotifier = makeRunNotifier();
-    verifyAndClear();
   }
 
   void testStartPollingStartsTimer() {
     auto runNotifier = makeRunNotifier();
     EXPECT_CALL(m_view, startTimer(_)).Times(1);
     runNotifier.startPolling();
-    verifyAndClear();
   }
 
   void testStopPollingStopsTimer() {
     auto runNotifier = makeRunNotifier();
     EXPECT_CALL(m_view, stopTimer()).Times(1);
     runNotifier.stopPolling();
-    verifyAndClear();
   }
 
   void testTimerEventNotifiesPresenter() {
@@ -50,7 +54,6 @@ public:
     EXPECT_CALL(m_notifyee, notifyCheckForNewRuns()).Times(1);
     runNotifier.subscribe(&m_notifyee);
     runNotifier.notifyTimerEvent();
-    verifyAndClear();
   }
 
 private:

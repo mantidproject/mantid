@@ -304,6 +304,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MockJobRunner.h
+    inc/MantidQtWidgets/Common/MockUserInputValidator.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h

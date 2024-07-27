@@ -15,9 +15,9 @@ using namespace MantidQt::API;
 
 namespace MantidQt::API {
 
-QtJobRunner::QtJobRunner() : QObject(), m_batchAlgoRunner(this) {
+QtJobRunner::QtJobRunner(bool const stopOnFailure) : QObject(), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>("MantidQt::API::IConfiguredAlgorithm_sptr");
-  m_batchAlgoRunner.stopOnFailure(false);
+  m_batchAlgoRunner.stopOnFailure(stopOnFailure);
   connectBatchAlgoRunnerSlots();
 }
 

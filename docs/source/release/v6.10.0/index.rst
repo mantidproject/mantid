@@ -43,11 +43,11 @@ Other important highlights include:
 - New detector grouping options on the :ref:`interface-indirect-diffraction` interface
   (including ``All``, ``Groups``, ``Custom`` and ``File`` options).
 - New way to easily load multiple files into :ref:`Elwin Tab <elwin>` of
-  :ref:`Data Processor Interface <interface-inelastic-data-manipulation>`.
+  :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
 - The `Inelastic Data Analysis` interface has been renamed to the
   :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` interface
   and the `Inelastic Data Manipulation` interface has been renamed to the
-  :ref:`Inelastic Data Processor <interface-inelastic-data-manipulation>` interface.
+  :ref:`Inelastic Data Processor <interface-inelastic-data-processor>` interface.
   The new names provides better descriptions of what the interfaces do.
 
 
