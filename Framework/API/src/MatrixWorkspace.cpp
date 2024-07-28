@@ -1061,10 +1061,12 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // Check that the values of each histogram are identical.
   if (m_isCommonBinsFlag) {
-    const size_t lastSpec = numHist - 1;
-    for (size_t i = 0; i < lastSpec; ++i) {
-      const auto &xi = x(i);
-      const auto &xip1 = x(i + 1);
+    const auto lastSpec = static_cast<int>(numHist) - 1;
+    PARALLEL_FOR_IF(this->threadSafe())
+    for (int i = 0; i < lastSpec; ++i) {
+      const auto specIndex = static_cast<std::size_t>(i);
+      const auto &xi = x(specIndex);
+      const auto &xip1 = x(specIndex + 1);
       for (size_t j = 0; j < numBins; ++j) {
         const double a = xi[j];
         const double b = xip1[j];
