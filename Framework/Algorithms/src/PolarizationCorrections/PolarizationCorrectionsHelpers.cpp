@@ -27,10 +27,10 @@ API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, 
                                                 const std::string &targetSpinState) {
   const auto &spinStateOrderVec = splitSpinStateString(spinStateOrder);
   const auto &wsIndex = indexOfWorkspaceForSpinState(spinStateOrderVec, targetSpinState);
-  if (wsIndex >= spinStateOrderVec.size()) {
+  if (!wsIndex.has_value()) {
     return nullptr;
   }
-  return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
+  return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex.value()));
 }
 
 /*
@@ -38,9 +38,15 @@ For a given workspace group, spin state order, and desired spin state, this meth
 return the index of the specified workspace in the group, using the position of the desired spin
 state in the spin state order.
 */
-size_t indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder, std::string targetSpinState) {
+std::optional<size_t> indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
+                                                   std::string targetSpinState) {
   boost::trim(targetSpinState);
-  return std::find(spinStateOrder.cbegin(), spinStateOrder.cend(), targetSpinState) - spinStateOrder.cbegin();
+  size_t const index =
+      std::find(spinStateOrder.cbegin(), spinStateOrder.cend(), targetSpinState) - spinStateOrder.cbegin();
+  if (index == spinStateOrder.size()) {
+    return std::nullopt;
+  }
+  return index;
 }
 
 /*
