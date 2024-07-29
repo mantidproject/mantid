@@ -1,0 +1,1 @@
+- Disabled context menu on colorbar. Users can no longer right click on the colorbar axis to view the context menu.
