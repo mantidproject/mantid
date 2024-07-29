@@ -64,6 +64,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
         self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
 
+    def _set_colormap(self):
+        cmap = self._get_plot_styles()[0]
+        self.view.single_crystal_plot.set_cmap(cmap)
+        self.view.draw()
+
     def _want_plot(self, plot_type):
         axis_type = self.view.get_axis_type()
         self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
@@ -84,4 +89,5 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
+        self.view.sig_change_colormap.connect(self._set_colormap)
         self._plotted_script_number = 0

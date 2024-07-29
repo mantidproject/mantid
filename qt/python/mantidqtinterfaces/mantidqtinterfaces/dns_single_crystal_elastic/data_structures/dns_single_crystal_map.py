@@ -47,7 +47,7 @@ class DNSScMap(ObjectDict):
     Class for storing data of a single DNS single crystal plot.
     """
 
-    def __init__(self, two_theta=None, omega=None, z_mesh=None, error_mesh=None, parameter=None):
+    def __init__(self, parameter, two_theta=None, omega=None, z_mesh=None, error_mesh=None):
         super().__init__()
         # non interpolated data:
         omega_mesh, two_theta_mesh, z_mesh = _get_mesh(omega, two_theta, z_mesh)

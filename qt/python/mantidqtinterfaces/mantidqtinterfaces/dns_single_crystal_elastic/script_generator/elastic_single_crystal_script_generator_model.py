@@ -15,6 +15,8 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_
 import numpy as np
 from mantid.simpleapi import mtd
 
+INDENT_SPACE = 4 * " "
+
 
 class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def __init__(self, parent):
@@ -47,15 +49,22 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._norm = get_normalisation(options)
         self._setup_sample_data(paths, file_selector)
         self._set_loop()
-        error_message = ""
-        # starting writing script
-        self._add_lines_to_script(self._get_header_lines())
-        self._add_lines_to_script(self._get_sample_data_lines())
-        self._add_lines_to_script(self._get_param_lines(options))
-        self._add_lines_to_script(self._get_binning_lines(options))
-        self._add_lines_to_script(self._get_load_data_lines())
-        save_string = self._get_save_string()
-        self._add_lines_to_script(self._get_convert_to_matrix_lines(save_string))
+        # validate if input makes sense, otherwise return
+        # an empty script and error message
+        error = self._check_errors_in_selected_files(options)
+        if error:
+            self._script = [""]
+            error_message = error
+        else:
+            error_message = ""
+            # starting writing script
+            self._add_lines_to_script(self._get_header_lines())
+            self._add_lines_to_script(self._get_sample_data_lines())
+            self._add_lines_to_script(self._get_param_lines(options))
+            self._add_lines_to_script(self._get_binning_lines(options))
+            self._add_lines_to_script(self._get_load_data_lines())
+            save_string = self._get_save_string()
+            self._add_lines_to_script(self._get_convert_to_matrix_lines(save_string))
         return self._script, error_message
 
     def _setup_sample_data(self, paths, file_selector):
@@ -65,10 +74,10 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def _set_loop(self):
         if len(self._sample_data.keys()) == 1:
             self._loop = f"for workspace in wss_sample['{list(self._sample_data.keys())[0]}']:"
-            self._spacing = "\n" + " " * 4
+            self._spacing = "\n" + INDENT_SPACE
         else:
-            self._loop = "for sample, workspacelist in wss_sample.items():\n    for workspace in workspacelist:"
-            self._spacing = "\n" + " " * 8
+            self._loop = f"for sample, workspacelist in wss_sample.items():\n{INDENT_SPACE}for workspace in workspacelist:"
+            self._spacing = "\n" + 2 * INDENT_SPACE
 
     @staticmethod
     def _get_header_lines():
@@ -178,3 +187,16 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         bin_size = options["two_theta_bin_size"]
         binning_array = np.arange(min, max + bin_size, bin_size)
         return binning_array
+
+    def _check_errors_in_selected_files(self, options):
+        """
+        If any inconsistencies are found in the files selected for
+        data reduction, then this method will return a string with
+        the corresponding error_message. If no inconsistencies are
+        found then the empty string will be returned.
+        """
+        keys_to_check = ["wavelength", "dx", "dy", "hkl1", "hkl2", "omega_offset"]
+        for key in keys_to_check:
+            if options[key] == "" or options[key] == [] or options[key] is None:
+                return f"Missing input for {key}."
+        return ""

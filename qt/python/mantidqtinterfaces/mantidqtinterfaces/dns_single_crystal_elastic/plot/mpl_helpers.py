@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import matplotlib.cm as cm
+import matplotlib as mpl
 
 
 def get_cmap(colormap_name):
-    return cm.get_cmap(name=colormap_name, lut=None)
+    return mpl.colormaps[colormap_name]

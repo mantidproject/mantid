@@ -15,6 +15,11 @@ from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list import 
 
 
 class DNSDatalist(QObject):
+    """
+    Class for manipulations with workspaces available for user selection
+    and subsequent visualization.
+    """
+
     def __init__(self, parent, view):
         super().__init__(parent)
         self._view = view
@@ -26,18 +31,21 @@ class DNSDatalist(QObject):
     sig_datalist_changed = Signal()
 
     def up(self):
+        # up arrow click
         self._model.itemChanged.disconnect()
         self._model.up()
         self._model.itemChanged.connect(self._item_clicked)
         self.sig_datalist_changed.emit()
 
     def down(self):
+        # down arrow click
         self._model.itemChanged.disconnect()
         self._model.down()
         self._model.itemChanged.connect(self._item_clicked)
         self.sig_datalist_changed.emit()
 
     def check_first(self):
+        # check first available workspace
         self._model.itemChanged.disconnect()
         self._parent.draw()
         self._parent.app.processEvents()

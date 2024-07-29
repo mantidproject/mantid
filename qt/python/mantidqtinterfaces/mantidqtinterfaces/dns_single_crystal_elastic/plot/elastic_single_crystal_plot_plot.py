@@ -23,10 +23,9 @@ class DNSScPlot:
         self._ax.set_visible(False)
         self._parent = parent
         self._fig = figure
-        self._pm = None
+        self._plot = None
         self._colorbar = None
         self._ax_hist = [None, None]
-        self._cid = None
 
     def on_resize(self, _dummy=None):  # connected to canvas resize
         self._fig.tight_layout(pad=0.3)
@@ -36,23 +35,23 @@ class DNSScPlot:
         matplotlib.rcParams.update({"font.size": fontsize})
 
     def create_colorbar(self):
-        self._colorbar = self._fig.colorbar(self._pm, ax=self._ax, extend="max", pad=0.01)
+        self._colorbar = self._fig.colorbar(self._plot, ax=self._ax, extend="max", pad=0.01)
 
     def set_norm(self, norm):
-        self._pm.set_norm(norm)
+        self._plot.set_norm(norm)
 
     def set_shading(self, shading):
-        if self._pm is not None:
-            self._pm.set_shading(shading)
+        if self._plot is not None:
+            self._plot.set_shading(shading)
 
     def set_zlim(self, zlim):
-        if self._pm is not None:
-            self._pm.set_clim(zlim[0], zlim[1])
+        if self._plot is not None:
+            self._plot.set_clim(zlim[0], zlim[1])
             self._colorbar.mappable.set_clim(vmin=zlim[0], vmax=zlim[1])
 
     def set_cmap(self, cmap):
-        if self._pm is not None:
-            self._pm.set_cmap(cmap)
+        if self._plot is not None:
+            self._plot.set_cmap(cmap)
 
     def set_axis_labels(self, x_label, y_label):
         self._ax.set_xlabel(x_label)
@@ -60,4 +59,4 @@ class DNSScPlot:
 
     def plot_triangulation(self, triang, z, cmap, edge_colors, shading):
         self._ax.set_visible(True)
-        self._pm = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)

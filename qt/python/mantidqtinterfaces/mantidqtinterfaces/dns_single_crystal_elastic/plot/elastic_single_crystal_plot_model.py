@@ -48,7 +48,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         }
         if initial_values is not None:
             parameter.update(initial_values)
-        self._single_crystal_map = DNSScMap(two_theta=two_theta, omega=omega, z_mesh=z_mesh, error_mesh=error, parameter=parameter)
+        self._single_crystal_map = DNSScMap(parameter=parameter, two_theta=two_theta, omega=omega, z_mesh=z_mesh, error_mesh=error)
         return self._single_crystal_map
 
     def get_interpolated_triangulation(self, interpolate, axis_type, switch):

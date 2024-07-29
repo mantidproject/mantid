@@ -58,7 +58,10 @@ class DNSElasticSCPlotView(DNSView):
         self.datalist = DNSDatalist(self, self._map["datalist"])
         self._map["down"].clicked.connect(self.datalist.down)
         self._map["up"].clicked.connect(self.datalist.up)
-        self.datalist.sig_datalist_changed.connect(self._something_changed)
+        self.datalist.sig_datalist_changed.connect(self._plot)
+
+        # connecting signals
+        self._attach_signal_slots()
 
         # setting up custom menu for single crystal plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
@@ -76,11 +79,12 @@ class DNSElasticSCPlotView(DNSView):
 
     # Signals
     sig_plot = Signal()
+    sig_change_colormap = Signal()
+
+    def _change_colormap(self):
+        self.sig_change_colormap.emit()
 
     def _plot(self):
-        self.sig_plot.emit()
-
-    def _something_changed(self):
         self.sig_plot.emit()
 
     # gui options
@@ -92,3 +96,6 @@ class DNSElasticSCPlotView(DNSView):
 
     def draw(self):
         self.canvas.draw()
+
+    def _attach_signal_slots(self):
+        self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
