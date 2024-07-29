@@ -380,7 +380,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors, const sp
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto const *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -402,7 +402,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  *vector.
  */
 std::vector<size_t> MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto const *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -1634,13 +1634,11 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
                                 "Workspace can only have 2 axes, found " +
                                 std::to_string(this->axes()));
 
-  coord_t xCoord = coords[0];
-  coord_t yCoord = coords[1];
   // First, find the workspace index
-  Axis *ax1 = this->getAxis(1);
+  Axis const *ax1 = this->getAxis(1);
   size_t wi(-1);
   try {
-    wi = ax1->indexOfValue(yCoord);
+    wi = ax1->indexOfValue(coords[1]);
   } catch (std::out_of_range &) {
     return std::numeric_limits<double>::quiet_NaN();
   }
@@ -1663,6 +1661,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
     const auto &xVals = x(wi);
     size_t i;
     try {
+      coord_t xCoord = coords[0];
       if (isHistogramData())
         i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(), xCoord);
       else
@@ -2125,7 +2124,7 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string 
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
