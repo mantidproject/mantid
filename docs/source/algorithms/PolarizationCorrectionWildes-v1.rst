@@ -153,6 +153,8 @@ References
 .. [#WILDES] A. R. Wildes, *Neutron News*, **17** 17 (2006)
              `doi: 10.1080/10448630600668738 <https://doi.org/10.1080/10448630600668738>`_
 
+.. seealso :: Algorithm :ref:`algm-PolarizationEfficienciesWildes`
+
 .. categories::
 
 .. sourcelink::
