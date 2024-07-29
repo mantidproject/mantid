@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes, axesfunctions
+from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D
 from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -433,7 +433,8 @@ class FigureInteraction(object):
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type == FigureType.Surface:
-            self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+            if isinstance(event.inaxes, MantidAxes3D):
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type != FigureType.Wireframe:
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
