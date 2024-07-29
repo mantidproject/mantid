@@ -60,13 +60,13 @@ std::string const PolarizationEfficienciesWildes::summary() const {
 void PolarizationEfficienciesWildes::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_NON_MAG_WS, "", Direction::Input),
-      "Group workspace containing the transmission measurements for the non-magnetic sample.");
+      "Group workspace containing the transmission measurements for the non-magnetic sample");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_MAG_WS, "", Direction::Input,
                                                                       PropertyMode::Optional),
                   "Group workspace containing the transmission measurements for the magnetic sample.");
   const auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropNames::FLIPPERS, INITIAL_CONFIG, spinValidator,
-                  "Flipper configurations of the input group workspace(s)");
+                  "Flipper configurations of the input group workspace(s).");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::INPUT_P_EFF_WS, "", Direction::Input,
                                                                        PropertyMode::Optional),
                   "Workspace containing the known wavelength-dependent efficiency for the polarizer.");
@@ -75,32 +75,32 @@ void PolarizationEfficienciesWildes::init() {
                   "Workspace containing the known wavelength-dependent efficiency for the analyser.");
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_F_P_EFF_WS, "", Direction::Output),
-      "Workspace containing the wavelength-dependent efficiency for the polarizing flipper.");
+      "Output workspace containing the polarizing flipper efficiencies");
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_F_A_EFF_WS, "", Direction::Output),
-      "Workspace containing the wavelength-dependent efficiency for the analysing flipper.");
+      "Output workspace containing the analysing flipper efficiencies");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_P_EFF_WS, "",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent efficiency for the polarizer.");
+                  "Output workspace containing the polarizer efficiencies.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_A_EFF_WS, "",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent efficiency for the analyser.");
+                  "Output workspace containing the analyser efficiencies.");
   declareProperty(PropNames::INCLUDE_DIAGNOSTICS, false, "Whether to include additional diagnostic outputs.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_PHI_WS, "phi",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent value for the Phi.");
+                  "Output workspace containing the values for Phi.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_RHO_WS, "rho",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent value for Rho.");
+                  "Output workspace containing the values for Rho.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_ALPHA_WS, "alpha",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent value for Alpha.");
+                  "Output workspace containing the values for Alpha.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_TPMO_WS, "two_p_minus_one",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent value for the term (2p-1).");
+                  "Output workspace containing the values for the term (2p-1).");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::OUTPUT_TAMO_WS, "two_a_minus_one",
                                                                        Direction::Output, PropertyMode::Optional),
-                  "Workspace containing the wavelength-dependent value for the term (2a-1).");
+                  "Output workspace containing the values for the term (2a-1).");
 
   auto makeSettingIncludeDiagnosticsIsSelected = [] {
     return std::make_unique<Kernel::EnabledWhenProperty>(PropNames::INCLUDE_DIAGNOSTICS, IS_EQUAL_TO, "1");

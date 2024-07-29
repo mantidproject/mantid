@@ -29,6 +29,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   /// A convenience set of workspaces corresponding flipper configurations.

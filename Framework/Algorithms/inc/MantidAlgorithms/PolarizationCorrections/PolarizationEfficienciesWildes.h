@@ -26,6 +26,9 @@ public:
   /// The category of the algorithm. @see Algorithm::category
   std::string const category() const override { return "Reflectometry\\PolarizationCorrections"; }
 
+  /// Returns related algorithms. @see Algorithm::seeAlso
+  const std::vector<std::string> seeAlso() const override { return {"PolarizationCorrectionWildes"}; }
+
   /// The version number of the algorithm. @see Algorithm::version
   int version() const override { return 1; }
 
