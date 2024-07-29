@@ -1,2 +1,0 @@
-- The order of the spin state workspaces in the WorkspaceGroup output of :ref:`algm-PolarizationCorrectionWildes` can
-  now be determined using the ``SpinStates`` property.
