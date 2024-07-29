@@ -544,7 +544,7 @@ API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const Workspa
  * Add an output name in the correct position in the vector and to the ADS.
  * @param names A list of the names of the workspaces the algorithm has generated.
  * @param spinStateOrder The order the output should be in.
- * @param baseName The base name for the output workspaces (<BASENAME>_<SPIN_STATE> e.g OUT_+-)
+ * @param baseName The base name for the output workspaces ("BASENAME_SPINSTATE" e.g "OUTNAME_+-")
  * @param ws The workspace to add to the vector and ADS.
  * @param spinState The spin state the workspace represents.
  */
