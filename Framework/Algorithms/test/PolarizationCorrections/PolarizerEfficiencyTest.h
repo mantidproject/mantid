@@ -79,6 +79,11 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
+  void testNonMatchingBinsFails() {
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(nullptr, true, true);
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+  }
+
   void testFailsWithTooManyHistograms() {
     auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0", 2);
     auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0", 2);
@@ -276,9 +281,12 @@ private:
   }
 
   IAlgorithm_sptr createPolarizerEfficiencyAlgorithm(WorkspaceGroup_sptr inputGrp = nullptr,
-                                                     const bool setOutputWs = true) {
+                                                     const bool setOutputWs = true, const bool skipRebin = false) {
     if (inputGrp == nullptr) {
       inputGrp = createExampleGroupWorkspace("wsGrp");
+    }
+    if (!skipRebin) {
+      rebinWorkspaces(inputGrp, ANALYSER_EFFICIENCY_WS_NAME);
     }
     auto polarizerEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polarizerEfficiency->initialize();
@@ -288,5 +296,14 @@ private:
       polarizerEfficiency->setProperty("OutputWorkspace", "psm");
     }
     return polarizerEfficiency;
+  }
+
+  void rebinWorkspaces(WorkspaceGroup_sptr const &inputGrp, std::string const &analyzerWsName) {
+    auto rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebin->initialize();
+    rebin->setPropertyValue("WorkspaceToRebin", analyzerWsName);
+    rebin->setProperty("WorkspaceToMatch", inputGrp->getItem(0));
+    rebin->setPropertyValue("OutputWorkspace", analyzerWsName);
+    rebin->execute();
   }
 };

@@ -45,12 +45,15 @@ void validateInputWorkspace(MatrixWorkspace_sptr const &ws, std::string const &p
   }
   if (ws->getNumberHistograms() != 1) {
     errorList[propertyName] = "All input workspaces must contain a single histogram.";
+    return;
   }
   if (ws->getAxis(0)->unit()->unitID() != "Wavelength") {
     errorList[propertyName] = "All input workspaces must be in units of Wavelength.";
+    return;
   }
   if (!ws->isHistogramData() && ws->isDistribution()) {
     errorList[propertyName] = "All input workspaces must be using distributed histogram data.";
+    return;
   }
 }
 
@@ -119,6 +122,12 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
                                             "SpinStates.";
   }
 
+  if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
+    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
+                                                    " and " + PropertyNames::ANALYSER_EFFICIENCY +
+                                                    "workspace do not match.";
+  }
+
   // Check outputs.
   auto const &outputWs = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
   auto const &outputFile = getPropertyValue(PropertyNames::OUTPUT_FILE_PATH);
@@ -143,14 +152,6 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
                                                                             SpinStateValidator::ZERO_ZERO);
 
   MatrixWorkspace_sptr effCell = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
-
-  auto rebin = createChildAlgorithm("RebinToWorkspace");
-  rebin->initialize();
-  rebin->setProperty("WorkspaceToRebin", effCell);
-  rebin->setProperty("WorkspaceToMatch", t00Ws);
-  rebin->setProperty("OutputWorkspace", "rebinToWorkspace");
-  rebin->execute();
-  effCell = rebin->getProperty("OutputWorkspace");
 
   auto &&effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
 
