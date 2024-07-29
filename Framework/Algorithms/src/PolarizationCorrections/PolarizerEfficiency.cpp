@@ -120,12 +120,12 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   if (t01Ws == nullptr || t00Ws == nullptr) {
     errorList[PropertyNames::SPIN_STATES] = "The required spin configurations (00, 01) could not be found in the given"
                                             "SpinStates.";
-  }
-
-  if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
-    errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
-                                                    " and " + PropertyNames::ANALYSER_EFFICIENCY +
-                                                    "workspace do not match.";
+  } else {
+    if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
+      errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
+                                                      " and " + PropertyNames::ANALYSER_EFFICIENCY +
+                                                      "workspace do not match.";
+    }
   }
 
   // Check outputs.

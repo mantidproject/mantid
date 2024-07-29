@@ -70,6 +70,12 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
   }
 
+  void testMissingRequiredSpinConfig() {
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
+    polariserEfficiency->setProperty("SpinStates", "11, 10");
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+  }
+
   void testNonWavelengthInput() {
     // The units of the input workspace should be wavelength
     auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
@@ -81,6 +87,12 @@ public:
 
   void testNonMatchingBinsFails() {
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(nullptr, true, true);
+    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
+  }
+
+  void testInvalidAnalyzerWsFails() {
+    generateFunctionDefinedWorkspace(ANALYSER_EFFICIENCY_WS_NAME, "1 + x*0", 2);
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
