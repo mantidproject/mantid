@@ -25,7 +25,7 @@ IqtModel::IqtModel()
     : m_sampleWorkspace(), m_resWorkspace(), m_nIterations(), m_energyMin(), m_energyMax(), m_numBins(),
       m_calculateErrors(), m_enforceNormalization() {}
 
-API::IConfiguredAlgorithm_sptr IqtModel::setupTransformToIqt(std::string const &outputWorkspace) {
+API::IConfiguredAlgorithm_sptr IqtModel::setupTransformToIqt(std::string const &outputWorkspace) const {
   auto IqtAlg = AlgorithmManager::Instance().create("TransformToIqt");
   IqtAlg->initialize();
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();

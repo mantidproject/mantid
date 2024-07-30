@@ -23,10 +23,10 @@ class MANTIDQT_INELASTIC_DLL IElwinModel {
 public:
   virtual ~IElwinModel() = default;
   virtual API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
-                                                            std::string const &outputName) = 0;
+                                                            std::string const &outputName) const = 0;
   virtual std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) = 0;
   virtual API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
-                                                             std::string const &inputGroupWsName) = 0;
+                                                             std::string const &inputGroupWsName) const = 0;
   virtual API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
                                                                     std::string const &inputGroupWsName,
                                                                     std::string const &sampleEnvironmentLogName,
@@ -49,10 +49,10 @@ public:
   ElwinModel();
   ~ElwinModel() override = default;
   API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
-                                                    std::string const &outputName) override;
+                                                    std::string const &outputName) const override;
   std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) override;
   API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
-                                                     std::string const &inputGroupWsName) override;
+                                                     std::string const &inputGroupWsName) const override;
   API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
                                                             std::string const &inputGroupWsName,
                                                             std::string const &sampleEnvironmentLogName,

@@ -30,7 +30,7 @@ ElwinModel::ElwinModel()
       m_normalise(), m_outputWorkspaceNames() {}
 
 API::IConfiguredAlgorithm_sptr ElwinModel::setupLoadAlgorithm(std::string const &filepath,
-                                                              std::string const &outputName) {
+                                                              std::string const &outputName) const {
   auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath);
@@ -42,9 +42,8 @@ API::IConfiguredAlgorithm_sptr ElwinModel::setupLoadAlgorithm(std::string const 
 }
 
 API::IConfiguredAlgorithm_sptr ElwinModel::setupGroupAlgorithm(std::string const &inputWorkspacesString,
-                                                               std::string const &inputGroupWsName) {
+                                                               std::string const &inputGroupWsName) const {
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  // groupWsAlg->initialize();
   auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   runtimeProps->setPropertyValue("OutputWorkspace", inputGroupWsName);

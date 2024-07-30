@@ -109,7 +109,6 @@ public:
     batch.setQueue(algoQueue);
     batch.executeBatch();
 
-    auto outputWs = std::string();
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
   }

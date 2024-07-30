@@ -99,9 +99,6 @@ private:
 
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,
-    //        SLOT(showMessageBox(const std::string &)));
-
     m_presenters[name] = std::move(presenter);
 
     // Add all tabs to UI initially

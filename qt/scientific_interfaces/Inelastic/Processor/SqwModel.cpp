@@ -44,7 +44,7 @@ SqwModel::SqwModel()
     : m_inputWorkspace(), m_baseName(), m_eFixed(), m_qLow(), m_qWidth(0.05), m_qHigh(), m_eLow(), m_eWidth(0.005),
       m_eHigh(), m_rebinInEnergy(false) {}
 
-API::IConfiguredAlgorithm_sptr SqwModel::setupRebinAlgorithm() {
+API::IConfiguredAlgorithm_sptr SqwModel::setupRebinAlgorithm() const {
   std::string eRebinString = std::to_string(m_eLow) + "," + std::to_string(m_eWidth) + "," + std::to_string(m_eHigh);
   auto const eRebinWsName = m_baseName + "_r";
   auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
@@ -59,7 +59,7 @@ API::IConfiguredAlgorithm_sptr SqwModel::setupRebinAlgorithm() {
   return rebinAlg;
 }
 
-API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() {
+API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() const {
   std::string qRebinString = std::to_string(m_qLow) + "," + std::to_string(m_qWidth) + "," + std::to_string(m_qHigh);
 
   auto const sqwWsName = getOutputWorkspace();
@@ -82,7 +82,7 @@ API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() {
   return qwAlg;
 }
 
-API::IConfiguredAlgorithm_sptr SqwModel::setupAddSampleLogAlgorithm() {
+API::IConfiguredAlgorithm_sptr SqwModel::setupAddSampleLogAlgorithm() const {
   auto const sqwWsName = getOutputWorkspace();
   // Add sample log for S(Q, w) algorithm used
   auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");

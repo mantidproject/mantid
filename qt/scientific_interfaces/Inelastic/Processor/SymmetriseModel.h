@@ -22,7 +22,7 @@ class MANTIDQT_INELASTIC_DLL ISymmetriseModel {
 public:
   virtual ~ISymmetriseModel() = default;
   virtual API::IConfiguredAlgorithm_sptr setupPreviewAlgorithm(std::vector<int> const &spectraRange) = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm(std::string &outputWorkspace) = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm() = 0;
   virtual void reflectNegativeToPositive() = 0;
   virtual void setWorkspaceName(std::string const &workspaceName) = 0;
   virtual void setEMin(double value) = 0;
@@ -37,7 +37,7 @@ public:
   SymmetriseModel();
   ~SymmetriseModel() override = default;
   API::IConfiguredAlgorithm_sptr setupPreviewAlgorithm(std::vector<int> const &spectraRange) override;
-  API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm(std::string &outputWorkspace) override;
+  API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm() override;
   void reflectNegativeToPositive() override;
   void setWorkspaceName(std::string const &workspaceName) override;
   void setEMin(double value) override;

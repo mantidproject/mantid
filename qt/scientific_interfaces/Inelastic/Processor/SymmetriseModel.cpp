@@ -42,12 +42,10 @@ API::IConfiguredAlgorithm_sptr SymmetriseModel::setupPreviewAlgorithm(std::vecto
   return confAlg;
 }
 
-API::IConfiguredAlgorithm_sptr SymmetriseModel::setupSymmetriseAlgorithm(std::string &outputWorkspace) {
+API::IConfiguredAlgorithm_sptr SymmetriseModel::setupSymmetriseAlgorithm() {
 
-  outputWorkspace = m_positiveOutputWorkspace;
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
-    outputWorkspace = m_negativeOutputWorkspace;
   }
 
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
@@ -56,7 +54,8 @@ API::IConfiguredAlgorithm_sptr SymmetriseModel::setupSymmetriseAlgorithm(std::st
   properties->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
   properties->setProperty("XMin", m_eMin);
   properties->setProperty("XMax", m_eMax);
-  properties->setProperty("OutputWorkspace", outputWorkspace);
+  properties->setProperty("OutputWorkspace",
+                          m_isPositiveReflect ? m_positiveOutputWorkspace : m_negativeOutputWorkspace);
   properties->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
   auto confAlg = std::make_shared<API::ConfiguredAlgorithm>(symmetriseAlg, std::move(properties));
   return confAlg;

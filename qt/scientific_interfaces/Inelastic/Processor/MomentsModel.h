@@ -19,7 +19,7 @@ class MANTIDQT_INELASTIC_DLL IMomentsModel {
 
 public:
   virtual ~IMomentsModel() = default;
-  virtual API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() const = 0;
   virtual void setInputWorkspace(const std::string &workspace) = 0;
   virtual void setEMin(double eMin) = 0;
   virtual void setEMax(double eMax) = 0;
@@ -33,7 +33,7 @@ class MANTIDQT_INELASTIC_DLL MomentsModel final : public IMomentsModel {
 public:
   MomentsModel();
   ~MomentsModel() override = default;
-  API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() override;
+  API::IConfiguredAlgorithm_sptr setupMomentsAlgorithm() const override;
   void setInputWorkspace(const std::string &workspace) override;
   void setEMin(double eMin) override;
   void setEMax(double eMax) override;

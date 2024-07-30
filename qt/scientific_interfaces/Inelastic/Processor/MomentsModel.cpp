@@ -23,7 +23,7 @@ namespace MantidQt::CustomInterfaces {
 
 MomentsModel::MomentsModel() : m_inputWorkspace(), m_outputWorkspaceName(), m_eMin(), m_eMax(), m_scale(false) {}
 
-API::IConfiguredAlgorithm_sptr MomentsModel::setupMomentsAlgorithm() {
+API::IConfiguredAlgorithm_sptr MomentsModel::setupMomentsAlgorithm() const {
   auto momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
   auto properties = std::make_unique<AlgorithmRuntimeProps>();

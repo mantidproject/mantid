@@ -168,7 +168,6 @@ public:
     auto previewAlgo = m_model->setupSymmetriseAlgorithm(outputWsName);
     batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
-    // m_jobRunner->executeAlgorithm(previewAlgo);
 
     ITableWorkspace_sptr outputWS =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("outputWS");

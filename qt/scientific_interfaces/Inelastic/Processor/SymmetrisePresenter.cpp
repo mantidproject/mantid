@@ -71,9 +71,9 @@ void SymmetrisePresenter::handleRun() {
   } else {
     clearOutputPlotOptionsWorkspaces();
     auto outputWorkspaceName = std::string();
-    configuredAlgorithm = m_model->setupSymmetriseAlgorithm(outputWorkspaceName);
+    configuredAlgorithm = m_model->setupSymmetriseAlgorithm();
     // Set the workspace name for Python script export
-    m_pythonExportWsName = outputWorkspaceName;
+    m_pythonExportWsName = configuredAlgorithm->getAlgorithmRuntimeProps().getPropertyValue("OutputWorkspace");
   }
 
   // Execute the algorithm(s) on a separated thread

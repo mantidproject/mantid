@@ -22,9 +22,9 @@ class MANTIDQT_INELASTIC_DLL ISqwModel {
 
 public:
   virtual ~ISqwModel() = default;
-  virtual API::IConfiguredAlgorithm_sptr setupRebinAlgorithm() = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupRebinAlgorithm() const = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() const = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() const = 0;
   virtual void setInputWorkspace(const std::string &workspace) = 0;
   virtual void setQMin(double qMin) = 0;
   virtual void setQWidth(double qWidth) = 0;
@@ -50,9 +50,9 @@ class MANTIDQT_INELASTIC_DLL SqwModel final : public ISqwModel {
 public:
   SqwModel();
   ~SqwModel() override = default;
-  API::IConfiguredAlgorithm_sptr setupRebinAlgorithm() override;
-  API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() override;
-  API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() override;
+  API::IConfiguredAlgorithm_sptr setupRebinAlgorithm() const override;
+  API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() const override;
+  API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() const override;
   void setInputWorkspace(const std::string &workspace) override;
   void setQMin(double qMin) override;
   void setQWidth(double qWidth) override;
