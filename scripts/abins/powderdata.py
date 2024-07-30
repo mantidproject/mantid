@@ -4,8 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
 from typing import Dict, Optional
+
+import numpy as np
+from pydantic import validate_call
+from pydantic.types import PositiveInt
 
 PowderDict = Dict[str, Dict[int, np.ndarray]]
 
@@ -21,22 +24,22 @@ class PowderData:
     :param frequencies: frequencies corresponding to data in b_tensors; usually
         this has already been pruned to remove imaginary modes.
 
-    :param num_atoms: Expected number of atoms in tensor data. If provided,
-        this value is used for sanity-checking
-
     :param n_plus_1: Bose occupation <n+1> values corresponding to
         modes. b_tensors should already be scaled by <n+1>, a_tensors by <2n+1>
 
+    :param num_atoms: Expected number of atoms in tensor data. If provided,
+        this value is used for sanity-checking
     """
 
+    @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(
         self,
         *,
         a_tensors: Dict[int, np.ndarray],
         b_tensors: Dict[int, np.ndarray],
         frequencies: Dict[int, np.ndarray],
-        num_atoms: Optional[int] = None,
         n_plus_1: Dict[int, np.ndarray],
+        num_atoms: Optional[PositiveInt] = None,
     ):
         self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies, "n_plus_1": n_plus_1}  # type: PowderDict
 
@@ -83,20 +86,7 @@ class PowderData:
         return cls(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=frequencies, num_atoms=num_atoms, n_plus_1=n_plus_1)
 
     def _check_data(self) -> None:
-        for key in "a_tensors", "b_tensors", "frequencies":
-            if not isinstance(self._data[key], dict):
-                raise TypeError(f"Value of {key} should be a dictionary.")
-
-            for k, data in self._data[key].items():
-                if not isinstance(data, np.ndarray):
-                    raise TypeError(f"Items in {key} dict should be numpy arrays")
-
         if self._num_atoms is not None:
-            self._num_atoms = int(self._num_atoms)
-
-            if self._num_atoms <= 0:
-                raise ValueError("Invalid value of num_atoms.")
-
             for _, tensor in self.get_a_tensors().items():
                 if tensor.shape[0] != self._num_atoms:
                     raise ValueError("Invalid dimension of a_tensors.")
