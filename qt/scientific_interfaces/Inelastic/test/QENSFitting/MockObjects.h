@@ -483,12 +483,13 @@ class MockElwinModel : public IElwinModel {
 public:
   virtual ~MockElwinModel() = default;
 
-  MOCK_METHOD2(setupLoadAlgorithm,
-               MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath, std::string const &outputName));
+  MOCK_CONST_METHOD2(setupLoadAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath,
+                                                                                  std::string const &outputName));
   MOCK_METHOD2(createGroupedWorkspaces,
                std::string(MatrixWorkspace_sptr workspce, FunctionModelSpectra const &spectra));
-  MOCK_METHOD2(setupGroupAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
-                                                                             std::string const &inputGroupWsName));
+  MOCK_CONST_METHOD2(setupGroupAlgorithm,
+                     MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
+                                                              std::string const &inputGroupWsName));
   MOCK_METHOD4(setupElasticWindowMultiple,
                MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &workspaceBaseName,
                                                         std::string const &inputGroupWsName,
@@ -536,7 +537,7 @@ class MockMomentsModel : public IMomentsModel {
 public:
   virtual ~MockMomentsModel() = default;
 
-  MOCK_METHOD0(setupMomentsAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr());
+  MOCK_CONST_METHOD0(setupMomentsAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr());
   MOCK_METHOD1(setInputWorkspace, void(const std::string &workspace));
   MOCK_METHOD1(setEMin, void(double eMin));
   MOCK_METHOD1(setEMax, void(double eMax));

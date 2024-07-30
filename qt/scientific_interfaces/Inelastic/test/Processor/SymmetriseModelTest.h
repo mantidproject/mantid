@@ -138,8 +138,7 @@ public:
     m_model->setEMax(0.6);
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(true);
-    auto outputWsName = std::string();
-    auto const previewAlgo = m_model->setupSymmetriseAlgorithm(outputWsName);
+    auto const previewAlgo = m_model->setupSymmetriseAlgorithm();
     batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
@@ -164,8 +163,7 @@ public:
     m_model->setEMax(0.6);
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(false);
-    auto outputWsName = std::string();
-    auto previewAlgo = m_model->setupSymmetriseAlgorithm(outputWsName);
+    auto previewAlgo = m_model->setupSymmetriseAlgorithm();
     batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
