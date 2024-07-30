@@ -4,7 +4,6 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
   - cmake>=3.21.0,<3.27
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
@@ -15,6 +14,8 @@ dependencies:
   - h5py
   - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jsoncpp>=1.9.4,<2
+  - libboost-devel=1.82.* # Use the same version as conda-forge
+  - libboost-python-devel=1.82.* # Use the same version as conda-forge
   - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed, v0.3.25 causing a system test failure.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
@@ -57,6 +58,6 @@ dependencies:
 
   # Use conda version of clang to get matching CXXFLAGS.
   # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
-  - clang_osx-64=15
-  - clangxx_osx-64=15
-  - llvm-openmp=15
+  - clang_osx-64=16
+  - clangxx_osx-64=16
+  - llvm-openmp=16

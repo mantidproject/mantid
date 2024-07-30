@@ -7,34 +7,30 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SimulationTab.h"
 #include "ui_Sassena.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL Sassena : public SimulationTab {
+class MANTIDQT_INDIRECT_DLL Sassena : public SimulationTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   Sassena(QWidget *parent = nullptr);
 
-  void setup() override;
-  bool validate() override;
-  void run() override;
-
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   /// Handle completion of the algorithm batch
   void handleAlgorithmFinish(bool error);
-  void runClicked();
   void saveClicked();
 
 private:
-  void setRunIsRunning(bool running);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
   /// The ui form

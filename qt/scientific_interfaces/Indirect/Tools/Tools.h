@@ -7,7 +7,7 @@
 #pragma once
 #include "ui_Tools.h"
 
-#include "Common/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "ToolsTab.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -42,10 +42,6 @@ public: // public constructor, destructor and functions
   static QString categoryInfo() { return "Indirect"; }
 
   void initLayout() override;
-
-private slots:
-  /// Slot for clicking on the run button
-  void runClicked();
 
 private:
   std::string documentationPage() const override;

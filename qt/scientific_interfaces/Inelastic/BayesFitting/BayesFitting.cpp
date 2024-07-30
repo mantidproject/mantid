@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BayesFitting.h"
-#include "Common/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
@@ -33,7 +33,7 @@ void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 
   loadSettings();
@@ -89,7 +89,7 @@ void BayesFitting::loadSettings() {
 
 void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
-    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->applySettings(settings);
   }
 }
 

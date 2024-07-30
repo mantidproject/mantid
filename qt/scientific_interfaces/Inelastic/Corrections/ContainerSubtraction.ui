@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>973</width>
-        <height>776</height>
+        <width>970</width>
+        <height>745</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -275,52 +275,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbRun">
-         <property name="title">
-          <string>Run</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>439</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbRun">
-            <property name="text">
-             <string>Run</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>439</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+        <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
        </item>
        <item>
         <widget class="QGroupBox" name="gbOutput">
@@ -371,15 +326,21 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
-   <extends>QWidget</extends>
-   <header>Common/OutputPlotOptionsView.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>

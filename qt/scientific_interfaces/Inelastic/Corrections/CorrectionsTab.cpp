@@ -53,11 +53,6 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) { loadSettings(s
 void CorrectionsTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
- * Slot that can be called when a user edits an input.
- */
-void CorrectionsTab::inputChanged() { validate(); }
-
-/**
  * Check that the binning between two workspaces matches.
  *
  * @param left :: left hand workspace for the equality operator
@@ -137,8 +132,8 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
  * @param log           The logger for sending log messages.
  */
 void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log) {
-  QString errorMessage = "Invalid workspace loaded, ensure a MatrixWorkspace is "
-                         "entered into the field.\n";
+  std::string errorMessage = "Invalid workspace loaded, ensure a MatrixWorkspace is "
+                             "entered into the field.\n";
 
   if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName)) {
     errorMessage += "Consider loading the WorkspaceGroup first into mantid, "

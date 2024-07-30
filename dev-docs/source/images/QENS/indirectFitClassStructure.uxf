@@ -90,7 +90,7 @@
       <w>216</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>IndirectDataAnalysisConvFitTab
+    <panel_attributes>IndirectDataAnalysisConvolutionTab
 
 </panel_attributes>
     <additional_attributes/>
@@ -117,7 +117,7 @@
       <w>216</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>IndirectDataAnalysisMSDFitTab
+    <panel_attributes>IndirectDataAnalysisMSDTab
 </panel_attributes>
     <additional_attributes/>
   </element>
@@ -129,7 +129,7 @@
       <w>216</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>IndirectDataAnalysisFqFitTab
+    <panel_attributes>IndirectDataAnalysisFunctionQTab
 
 
 </panel_attributes>
@@ -242,7 +242,7 @@
       <w>216</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>ConvFitAddWorkspaceDialog</panel_attributes>
+    <panel_attributes>ConvolutionAddWorkspaceDialog</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -253,7 +253,7 @@
       <w>216</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>FqFitAddWorkspaceDialog</panel_attributes>
+    <panel_attributes>FunctionQAddWorkspaceDialog</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -319,7 +319,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>ConvFitDataPresenter</panel_attributes>
+    <panel_attributes>ConvolutionDataPresenter</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -363,7 +363,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>FqFitDataPresenter</panel_attributes>
+    <panel_attributes>FunctionQDataPresenter</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -440,7 +440,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>ConvFitModel</panel_attributes>
+    <panel_attributes>ConvolutionModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -451,7 +451,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>FqFitModel</panel_attributes>
+    <panel_attributes>FunctionQModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -473,7 +473,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>MSDFitModel</panel_attributes>
+    <panel_attributes>MSDModel</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -539,7 +539,7 @@
       <w>144</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>FQFitConstants</panel_attributes>
+    <panel_attributes>FunctionQConstants</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -1051,7 +1051,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>FqFitDataView</panel_attributes>
+    <panel_attributes>FunctionQDataView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -1062,7 +1062,7 @@
       <w>180</w>
       <h>36</h>
     </coordinates>
-    <panel_attributes>ConvFitDataView</panel_attributes>
+    <panel_attributes>ConvolutionDataView</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

@@ -33,13 +33,14 @@ requirements:
     - libcxx  {{ libcxx }}                   # [osx]
 
   host:
-    - boost {{ boost }}
     - eigen
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
     - jemalloc  {{ jemalloc }} # [osx or linux]
     - jsoncpp
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
@@ -55,7 +56,6 @@ requirements:
     - versioningit
     - libglu  # [linux]
   run:
-    - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}

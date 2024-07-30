@@ -1,8 +1,11 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 set(ALL_TEST_FILES)
 set(ALL_TEST_HELPERS)
 
-add_subdirectory(Common)
-add_subdirectory(Manipulation)
+add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
@@ -20,7 +23,7 @@ mtd_add_qt_tests(
             ${Boost_LIBRARIES}
             Mantid::PythonInterfaceCore
             ${PYTHON_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL Qt5::Concurrent
+  QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS MantidScientificInterfacesInelastic MantidQtWidgetsCommon MantidQtWidgetsPlotting
                    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests

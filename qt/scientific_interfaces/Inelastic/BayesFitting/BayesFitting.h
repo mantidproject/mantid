@@ -8,8 +8,8 @@
 #include "ui_BayesFitting.h"
 
 #include "BayesFittingTab.h"
-#include "Common/InelasticInterface.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>

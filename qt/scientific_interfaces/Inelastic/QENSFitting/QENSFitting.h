@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/InelasticInterface.h"
-#include "Common/InelasticTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include "ui_QENSFitting.h"
 
 namespace MantidQt {

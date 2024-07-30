@@ -1,0 +1,1 @@
+- Fixed a bug in the Monte Carlo error calculation on the I(Q, t) tab of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` where the first bin had an error of zero.

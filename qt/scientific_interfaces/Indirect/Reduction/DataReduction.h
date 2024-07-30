@@ -7,12 +7,13 @@
 #pragma once
 #include "ui_DataReduction.h"
 
-#include "Common/InelasticInterface.h"
 #include "DataReductionTab.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <string>
 #include <unordered_map>
@@ -134,10 +135,10 @@ private:
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     DataReductionTab *tabIDRContent = new T(this, tabContent);
-    tabIDRContent->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(tabIDRContent, SIGNAL(showMessageBox(const std::string &)), this,
+            SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
@@ -169,12 +170,15 @@ private:
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto presenter = std::make_unique<TabPresenter>(this, new TabView(tabContent), std::make_unique<TabModel>());
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+    auto presenter = std::make_unique<TabPresenter>(this, new TabView(tabContent), std::make_unique<TabModel>(),
+                                                    std::move(algorithmRunner));
 
-    presenter->setupTab();
     tabContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(presenter.get(), SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(presenter.get(), SIGNAL(showMessageBox(const std::string &)), this,
+            SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, presenter.get());
@@ -189,8 +193,6 @@ private:
   Ui::DataReduction m_uiForm;
   /// The settings group
   QString m_settingsGroup;
-  /// Runner for insturment load algorithm
-  MantidQt::API::QtAlgorithmRunner *m_algRunner;
 
   // All indirect tabs - this should be removed when the interface is in MVP
   QMap<std::string, QPair<QWidget *, DataReductionTab *>> m_tabs;

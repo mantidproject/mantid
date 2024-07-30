@@ -11,6 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "Poco/String.h"
 
 namespace Mantid::Reflectometry {
@@ -87,6 +88,8 @@ void RefRoi::exec() {
 
   extract2D();
 }
+
+GNU_DIAG_OFF("free-nonheap-object")
 
 void RefRoi::extract2D() {
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -213,5 +216,7 @@ void RefRoi::extract2D() {
 
   setProperty("OutputWorkspace", outputWS);
 }
+
+GNU_DIAG_ON("free-nonheap-object")
 
 } // namespace Mantid::Reflectometry

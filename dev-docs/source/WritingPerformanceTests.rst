@@ -168,17 +168,15 @@ and the benchmark will become useless.
 Jobs that monitor performance
 #############################
 
-There is a job in Jenkins (our continuous integration system) that runs
-the performance test suite and generates output that enables us to
-easily monitor timings. The job runs a set of `performance tests on the
-main branch of
-Mantid <http://builds.mantidproject.org/job/main_performancetests2/>`__.
-This job runs on a machine at the ESS, everytime that changes are merged
-into the Mantid master branch, and stores the timing information in a
-database, also generating HTML output via a `set of python
-scripts <https://github.com/mantidproject/mantid/tree/main/Testing/PerformanceTests>`__.
+There are currently no jobs that run the performance tests. See `here
+<https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/performancetests>`__
+for the build script that was used to run the tests on Jenkins.
+Anyone attempting to resurrect the job will have to modify it
+to work with the new Conda build system. There is a `set of python scripts
+<https://github.com/mantidproject/mantid/tree/main/Testing/PerformanceTests>`__
+for controlling and monitoring the performance tests.
 
-The timing output of these jobs are typically monitored manually on a
+The timing output of these jobs were typically monitored manually on a
 weekly basis to pick up any notable performance degradation. Although
 automatic checking is available within the python scripts, the level of
 instability in the timings meant that it always produced way too many

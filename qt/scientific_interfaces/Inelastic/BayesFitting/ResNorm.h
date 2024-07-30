@@ -10,22 +10,22 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ResNorm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL ResNorm : public BayesFittingTab {
+class MANTIDQT_INELASTIC_DLL ResNorm : public BayesFittingTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   ResNorm(QWidget *parent = nullptr);
 
-  // Inherited methods from BayesFittingTab
-  void setup() override;
-  bool validate() override;
-  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   /// Handle completion of the algorithm
@@ -43,7 +43,6 @@ private slots:
   /// Slot to handle the preview spectrum being changed
   void previewSpecChanged(int value);
   /// Slots to handle plot and save
-  void runClicked();
   void saveClicked();
   void plotClicked();
   void plotCurrentPreview();
@@ -62,11 +61,9 @@ private:
   void copyLogs(const Mantid::API::MatrixWorkspace_sptr &resultWorkspace,
                 const Mantid::API::Workspace_sptr &workspace) const;
 
-  void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
   /// Current preview spectrum

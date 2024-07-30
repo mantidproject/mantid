@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
@@ -122,6 +123,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const boost::py
   }
 }
 
+GNU_DIAG_OFF("maybe-uninitialized")
 /**
  * Declare an attribute on the given function from a python object, with a validator
  * @param name :: The name of the new attribute
@@ -146,6 +148,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const boost::py
     // nothing to do
   }
 }
+GNU_DIAG_ON("maybe-uninitialized")
 
 /**
  * Get the value of the named attribute as a Python object

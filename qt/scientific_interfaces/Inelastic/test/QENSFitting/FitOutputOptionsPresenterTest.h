@@ -17,6 +17,7 @@
 #include "QENSFitting/IFitOutputOptionsView.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidQtWidgets/Plotting/MockExternalPlotter.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -36,12 +37,13 @@ public:
   static void destroySuite(FitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_tab = std::make_unique<NiceMock<MockFitTab>>();
     m_view = std::make_unique<NiceMock<MockFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockFitOutputOptionsModel>>();
     m_model = model.get();
+    auto plotter = std::make_unique<NiceMock<MockExternalPlotter>>();
+    m_plotter = plotter.get();
 
-    m_presenter = std::make_unique<FitOutputOptionsPresenter>(m_tab.get(), m_view.get(), std::move(model));
+    m_presenter = std::make_unique<FitOutputOptionsPresenter>(m_view.get(), std::move(model), std::move(plotter));
   }
 
   void tearDown() override {
@@ -60,15 +62,6 @@ public:
     TS_ASSERT(m_view);
     TS_ASSERT(m_model);
     TS_ASSERT(m_presenter);
-  }
-
-  void test_that_calling_a_presenter_method_will_invoke_the_relevant_model_and_view_methods() {
-    std::string const selectedGroup("Result Group");
-
-    EXPECT_CALL(*m_view, clearPlotTypes()).Times(1);
-    EXPECT_CALL(*m_model, getWorkspaceParameters(selectedGroup)).Times(1);
-
-    m_presenter->setPlotTypes(selectedGroup);
   }
 
   ///----------------------------------------------------------------------
@@ -131,15 +124,16 @@ public:
   void test_that_handlePlotClicked_will_invoke_plotResult_if_the_selected_group_is_the_result_group() {
     std::string const selectedGroup("Result Group");
     std::string const plotType("All");
+    std::string const workspaceName("Name");
+    std::size_t const workspaceIndex(2u);
+    std::vector<SpectrumToPlot> spectraToPlot;
+    spectraToPlot.emplace_back(std::make_pair(workspaceName, workspaceIndex));
 
     ON_CALL(*m_view, getSelectedGroupWorkspace()).WillByDefault(Return(selectedGroup));
     ON_CALL(*m_model, isResultGroupSelected(selectedGroup)).WillByDefault(Return(true));
     ON_CALL(*m_view, getSelectedPlotType()).WillByDefault(Return(plotType));
-
-    ExpectationSet getSelectedWorkspace =
-        EXPECT_CALL(*m_view, getSelectedGroupWorkspace()).Times(1).WillOnce(Return(selectedGroup));
-    getSelectedWorkspace += EXPECT_CALL(*m_model, isResultGroupSelected(selectedGroup)).Times(1);
-    EXPECT_CALL(*m_model, plotResult(plotType)).Times(1).After(getSelectedWorkspace);
+    ON_CALL(*m_model, plotResult(plotType)).WillByDefault(Return(spectraToPlot));
+    EXPECT_CALL(*m_plotter, plotSpectra(workspaceName, std::to_string(workspaceIndex), false)).Times(1);
 
     m_presenter->handlePlotClicked();
   }
@@ -147,15 +141,16 @@ public:
   void test_that_handlePlotClicked_will_invoke_plotPDF_if_the_selected_group_is_the_pdf_group() {
     std::string const selectedGroup("PDF Group");
     std::string const plotType("All");
+    std::string const workspaceName("Name");
+    std::size_t const workspaceIndex(2u);
+    std::vector<SpectrumToPlot> spectraToPlot;
+    spectraToPlot.emplace_back(std::make_pair(workspaceName, workspaceIndex));
 
     ON_CALL(*m_view, getSelectedGroupWorkspace()).WillByDefault(Return(selectedGroup));
     ON_CALL(*m_model, isResultGroupSelected(selectedGroup)).WillByDefault(Return(false));
     ON_CALL(*m_view, getSelectedPlotType()).WillByDefault(Return(plotType));
-
-    ExpectationSet getSelectedWorkspace =
-        EXPECT_CALL(*m_view, getSelectedGroupWorkspace()).Times(1).WillOnce(Return(selectedGroup));
-    getSelectedWorkspace += EXPECT_CALL(*m_model, isResultGroupSelected(selectedGroup)).Times(1);
-    EXPECT_CALL(*m_model, plotPDF("", plotType)).Times(1).After(getSelectedWorkspace);
+    ON_CALL(*m_model, plotPDF("", plotType)).WillByDefault(Return(spectraToPlot));
+    EXPECT_CALL(*m_plotter, plotSpectra(workspaceName, std::to_string(workspaceIndex), false)).Times(1);
 
     m_presenter->handlePlotClicked();
   }
@@ -181,24 +176,12 @@ public:
     m_presenter->handleSaveClicked();
   }
 
-  ///----------------------------------------------------------------------
-  /// Unit Tests that test the methods of the presenter
-  ///----------------------------------------------------------------------
-
   void test_that_setResultWorkspace_will_invoke_setResultWorkspace_in_the_model() {
     auto const groupWorkspace = createGroupWorkspaceWithTextAxes(2, getThreeParameters(), 3);
 
     EXPECT_CALL(*m_model, setResultWorkspace(groupWorkspace)).Times(1);
 
-    m_presenter->setResultWorkspace(groupWorkspace);
-  }
-
-  void test_that_setPDFWorkspace_will_invoke_setPDFWorkspace_in_the_model() {
-    auto const groupWorkspace = createGroupWorkspaceWithTextAxes(2, getThreeParameters(), 3);
-
-    EXPECT_CALL(*m_model, setPDFWorkspace(groupWorkspace)).Times(1);
-
-    m_presenter->setPDFWorkspace(groupWorkspace);
+    m_presenter->enableOutputOptions(true, groupWorkspace, "basename", "FABADA");
   }
 
   void
@@ -226,20 +209,6 @@ public:
     EXPECT_CALL(*m_view, setPlotTypeIndex(0)).Times(1).After(setAvailablePlotTypes);
 
     m_presenter->setPlotTypes(selectedGroup);
-  }
-
-  void test_that_removePDFWorkspace_will_invoke_removePDFWorkspace_in_the_model() {
-    EXPECT_CALL(*m_model, removePDFWorkspace()).Times(1);
-    m_presenter->removePDFWorkspace();
-  }
-
-  void test_that_isSelectedGroupPlottable_will_invoke_isSelectedGroupPlottable_in_the_model() {
-    std::string const selectedGroup("Result Group");
-    ON_CALL(*m_view, getSelectedGroupWorkspace()).WillByDefault(Return(selectedGroup));
-
-    EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).Times(1);
-
-    m_presenter->isSelectedGroupPlottable();
   }
 
   void test_that_setPlotting_will_attempt_to_set_the_plot_button_text_and_disable_all_buttons_when_passed_true() {
@@ -286,34 +255,14 @@ public:
     m_presenter->setPlotEnabled(true);
   }
 
-  void test_that_setEditResultEnabled_will_invoke_setEditResultEnabled_in_the_view() {
-    EXPECT_CALL(*m_view, setEditResultEnabled(true)).Times(1);
-    m_presenter->setEditResultEnabled(true);
-  }
-
-  void test_that_setSaveEnabled_will_invoke_setSaveEnabled_in_the_view() {
-    EXPECT_CALL(*m_view, setSaveEnabled(true)).Times(1);
-    m_presenter->setSaveEnabled(true);
-  }
-
-  void test_that_clearSpectraToPlot_will_invoke_clearSpectraToPlot_in_the_model() {
-    EXPECT_CALL(*m_model, clearSpectraToPlot()).Times(1);
-    m_presenter->clearSpectraToPlot();
-  }
-
-  void test_that_getSpectraToPlot_will_invoke_getSpectraToPlot_in_the_model() {
-    EXPECT_CALL(*m_model, getSpectraToPlot()).Times(1);
-    m_presenter->getSpectraToPlot();
-  }
-
   void test_that_setEditResultVisible_will_invoke_setEditResultVisible_in_the_view() {
     EXPECT_CALL(*m_view, setEditResultVisible(true)).Times(1);
     m_presenter->setEditResultVisible(true);
   }
 
 private:
-  std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitOutputOptionsView>> m_view;
   NiceMock<MockFitOutputOptionsModel> *m_model;
+  NiceMock<MockExternalPlotter> *m_plotter;
   std::unique_ptr<FitOutputOptionsPresenter> m_presenter;
 };

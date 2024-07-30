@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 using namespace Mantid::API;
 
@@ -18,43 +19,31 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Quasi");
-}
+
+struct PlotType {
+  inline static const std::string ALL = "All";
+  inline static const std::string AMPLITUDE = "Amplitude";
+  inline static const std::string FWHM = "FWHM";
+  inline static const std::string PROB = "Prob";
+  inline static const std::string GAMMA = "Gamma";
+};
+} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
 Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
+
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
   connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
   connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
-  // Add the properties browser to the UI form
-  m_uiForm.treeSpace->addWidget(m_propTree);
-
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-  m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
-
-  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-  m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
-
-  m_propTree->addProperty(m_properties["EMin"]);
-  m_propTree->addProperty(m_properties["EMax"]);
-  m_propTree->addProperty(m_properties["SampleBinning"]);
-  m_propTree->addProperty(m_properties["ResBinning"]);
-
-  formatTreeWidget(m_propTree, m_properties);
-
-  // Set default values
-  m_dblManager->setValue(m_properties["SampleBinning"], 1);
-  m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
-  m_dblManager->setValue(m_properties["ResBinning"], 1);
-  m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
 
   // Connect optional form elements with enabling checkboxes
   connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
@@ -62,9 +51,11 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 
   // Connect the data selector for the sample to the mini plot
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsSample, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleResolutionInputReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
 
   // Connect the program selector to its handler
   connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
@@ -75,13 +66,20 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   // Plot current preview
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
+  m_uiForm.dsSample->setWorkspaceTypes({"Workspace2D"});
+  m_uiForm.dsResolution->setWorkspaceTypes({"Workspace2D"});
+}
+
+void Quasi::enableView(bool const enable) {
+  m_uiForm.dsSample->setEnabled(enable);
+  m_uiForm.dsResolution->setEnabled(enable);
+  m_runPresenter->setRunText(enable ? "Run" : "Loading...");
 }
 
 /**
@@ -97,6 +95,114 @@ void Quasi::loadSettings(const QSettings &settings) {
   m_uiForm.mwFixWidthDat->readSettings(settings.group());
 }
 
+/**
+ * Get called whenever the settings are updated
+ *
+ * @param settings :: The current settings
+ */
+void Quasi::applySettings(std::map<std::string, QVariant> const &settings) {
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
+  filterInputData(settings.at("RestrictInput").toBool());
+}
+
+/**
+ * Setup the fit options based on the algorithm used
+ *
+ */
+void Quasi::setupFitOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_uiForm.cbBackground->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+
+    m_uiForm.chkFixWidth->hide();
+    m_uiForm.mwFixWidthDat->hide();
+
+    m_uiForm.chkUseResNorm->hide();
+    m_uiForm.dsResNorm->hide();
+
+    m_uiForm.chkSequentialFit->hide();
+  } else {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::SLOPING));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+
+    m_uiForm.chkFixWidth->show();
+    m_uiForm.mwFixWidthDat->show();
+
+    m_uiForm.dsResNorm->show();
+    m_uiForm.chkUseResNorm->show();
+
+    m_uiForm.chkSequentialFit->show();
+  }
+}
+
+/**
+ * Setup the property browser based on the algorithm used
+ *
+ */
+void Quasi::setupPropertyBrowser() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_properties.clear();
+  m_dblManager->clear();
+  m_propTree->clear();
+
+  m_uiForm.treeSpace->addWidget(m_propTree);
+  m_properties["EMin"] = m_dblManager->addProperty("EMin");
+  m_properties["EMax"] = m_dblManager->addProperty("EMax");
+
+  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
+
+  m_propTree->addProperty(m_properties["EMin"]);
+  m_propTree->addProperty(m_properties["EMax"]);
+
+  if (!useQuickBayes) {
+    m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
+    m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
+
+    m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
+    m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
+
+    m_propTree->addProperty(m_properties["SampleBinning"]);
+    m_propTree->addProperty(m_properties["ResBinning"]);
+
+    // Set default values
+    m_dblManager->setValue(m_properties["SampleBinning"], 1);
+    m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+    m_dblManager->setValue(m_properties["ResBinning"], 1);
+    m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+  }
+  formatTreeWidget(m_propTree, m_properties);
+}
+
+/**
+ * Setup the plot options based on the algorithm used
+ *
+ */
+void Quasi::setupPlotOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_uiForm.cbPlot->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::GAMMA));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
+  } else {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
+  }
+}
+
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Quasi");
@@ -106,66 +212,47 @@ void Quasi::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void Quasi::setup() {}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool Quasi::validate() {
-  UserInputValidator uiv;
-  QString errors("");
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+void Quasi::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   // check that the ResNorm file is valid if we are using it
   if (m_uiForm.chkUseResNorm->isChecked()) {
-    uiv.checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
+    validator->checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
   }
 
   // check fixed width file exists
   if (m_uiForm.chkFixWidth->isChecked() && !m_uiForm.mwFixWidthDat->isValid()) {
-    uiv.checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
+    validator->checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
   }
 
   // check eMin and eMax values
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
-    errors.append("EMin must be strictly less than EMax.\n");
-
-  // Create and show error messages
-  errors.append(uiv.generateErrorMessage());
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
+    validator->addErrorMessage("EMin must be strictly less than EMax.\n");
 
   // Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
     if (!resName.endsWith("_res")) {
-      emit showMessageBox("Stretched Exponential program can only be used with "
-                          "a resolution file.");
-      return false;
+      validator->addErrorMessage("Stretched Exponential program can only be used with "
+                                 "a resolution file.");
+    }
+  }
+}
+
+void Quasi::handleRun() {
+  auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result == QMessageBox::No) {
+      m_runPresenter->setRunEnabled(true);
+      return;
     }
   }
 
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
-    emit showMessageBox("The 'quickBayes' package does not support a 'Sloping' background type.");
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Run the BayesQuasi algorithm
- */
-void Quasi::run() {
   m_uiForm.ppPlot->watchADS(false);
 
   bool elasticPeak = false;
@@ -212,16 +299,14 @@ void Quasi::run() {
   double const eMin = m_properties["EMin"]->valueText().toDouble();
   double const eMax = m_properties["EMax"]->valueText().toDouble();
 
-  auto const sampleBins = m_properties["SampleBinning"]->valueText().toInt();
-  auto const resBins = m_properties["ResBinning"]->valueText().toInt();
+  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
 
   // Construct an output base name for the output workspaces
   auto const resType = resName.substr(resName.length() - 3);
   auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
-  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName;
-
-  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  auto const algoType = useQuickBayes ? "_quickbayes" : "_quasielasticbayes";
+  m_outputBaseName = sampleName.substr(0, sampleName.length() - 3) + programName + algoType;
 
   std::string const algorithmName = useQuickBayes ? "BayesQuasi2" : "BayesQuasi";
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create(algorithmName);
@@ -239,6 +324,9 @@ void Quasi::run() {
     runAlg->setProperty("EMin", eMin);
     runAlg->setProperty("EMax", eMax);
   } else {
+    auto const sampleBins = m_properties["SampleBinning"]->valueText().toInt();
+    auto const resBins = m_properties["ResBinning"]->valueText().toInt();
+
     // Use quasielasticbayes package in BayesQuasi algorithm
     runAlg->setProperty("ResNormWorkspace", resNormFile);
     runAlg->setProperty("Background", background);
@@ -260,17 +348,17 @@ void Quasi::run() {
 
   m_batchAlgoRunner->executeBatchAsync();
 }
+
 /**
  * Enable plotting and saving and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setPlotResultEnabled(!error);
+  setSaveResultEnabled(!error);
   if (!error) {
     updateMiniPlot();
     m_uiForm.ppPlot->watchADS(true);
-  } else {
-    setPlotResultEnabled(false);
-    setSaveResultEnabled(false);
   }
 }
 
@@ -334,8 +422,16 @@ void Quasi::updateMiniPlot() {
  * @param filename :: The name of the workspace to plot
  */
 void Quasi::handleSampleInputReady(const QString &filename) {
-  MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
-  int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
+  enableView(true);
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(filename.toStdString())) {
+    return;
+  }
+  auto const sampleWs = ads.retrieveWS<MatrixWorkspace>(filename.toStdString());
+  if (!sampleWs) {
+    return;
+  }
+  int numHist = static_cast<int>(sampleWs->getNumberHistograms()) - 1;
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
@@ -378,6 +474,8 @@ void Quasi::plotCurrentPreview() {
  * @param wsName The name of the workspace loaded
  */
 void Quasi::handleResolutionInputReady(const QString &wsName) {
+  enableView(true);
+
   bool isResolution(wsName.endsWith("_res"));
 
   m_uiForm.chkUseResNorm->setEnabled(isResolution);
@@ -478,26 +576,6 @@ void Quasi::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Quasi::runClicked() {
-  if (validateTab()) {
-    auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    displayMessageAndRun(saveDirectory);
-  }
-}
-
-void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
-  if (saveDirectory.empty()) {
-    int const result = displaySaveDirectoryMessage();
-    if (result != QMessageBox::No) {
-      setRunIsRunning(true);
-      runTab();
-    }
-  } else {
-    setRunIsRunning(true);
-    runTab();
-  }
-}
-
 int Quasi::displaySaveDirectoryMessage() {
   char const *textMessage = "BayesQuasi requires a default save directory and "
                             "one is not currently set."
@@ -529,8 +607,8 @@ void Quasi::plotClicked() {
   auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   InelasticTab::checkADSForPlotSaveWorkspace(resultName, true);
-  auto const paramNames = {"amplitude", "fwhm", "beta"};
-  for (std::string const &paramName : paramNames) {
+  auto const paramNames = {"amplitude", "fwhm", "beta", "gamma"};
+  for (auto const &paramName : paramNames) {
 
     if (plot == paramName || plot == "all") {
       std::vector<std::size_t> spectraIndices = {};
@@ -559,8 +637,6 @@ void Quasi::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
-void Quasi::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void Quasi::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
@@ -569,14 +645,9 @@ void Quasi::setPlotResultEnabled(bool enabled) {
 void Quasi::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void Quasi::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
+  m_runPresenter->setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
-}
-
-void Quasi::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
 void Quasi::setPlotResultIsPlotting(bool plotting) {

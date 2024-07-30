@@ -5,7 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="SXD" valid-from   ="2019-05-25 00:00:01"
-		    last-modified="2023-04-19 16:00:00">
+            valid-to     ="2024-01-01 00:00:00"
+            last-modified="2024-05-31 15:00:00">
 
   <!--DEFAULTS-->
   <defaults>

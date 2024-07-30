@@ -52,6 +52,7 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FindGoniometerFromUBTest.py
     FindGlobalBMatrixTest.py
+    FindMultipleUMatricesTest.py
     FindSXPeaksConvolveTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py

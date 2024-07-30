@@ -11,6 +11,7 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,26 +30,11 @@ public:
 
 class MANTIDQT_INELASTIC_DLL FitOutputOptionsPresenter final : public IFitOutputOptionsPresenter {
 public:
-  FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model);
+  FitOutputOptionsPresenter(IFitOutputOptionsView *view, std::unique_ptr<IFitOutputOptionsModel> model,
+                            std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter);
 
-  void setMultiWorkspaceOptionsVisible(bool visible);
-
-  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
-  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
-  void setPlotWorkspaces();
-  void setPlotTypes(std::string const &selectedGroup);
-
-  void removePDFWorkspace();
-
-  bool isSelectedGroupPlottable() const;
-
-  void setPlotting(bool plotting);
-  void setPlotEnabled(bool enable);
-  void setEditResultEnabled(bool enable);
-  void setSaveEnabled(bool enable);
-
-  void clearSpectraToPlot();
-  std::vector<SpectrumToPlot> getSpectraToPlot() const;
+  void enableOutputOptions(bool const enable, Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                           std::optional<std::string> const &basename, std::string const &minimizer);
 
   void setEditResultVisible(bool visible);
 
@@ -58,8 +44,22 @@ public:
   void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
                                     std::string const &outputName) override;
 
+  // Public for testing purposes
+  void setPlotting(bool plotting);
+  void setPlotWorkspaces();
+  void setPlotTypes(std::string const &selectedGroup);
+  void setPlotEnabled(bool enable);
+
 private:
-  void plotResult(std::string const &selectedGroup);
+  bool isSelectedGroupPlottable() const;
+
+  void setMultiWorkspaceOptionsVisible(bool visible);
+  void setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer);
+
+  void setEditResultEnabled(bool enable);
+  void setSaveEnabled(bool enable);
+
+  std::vector<SpectrumToPlot> getSpectraToPlot(std::string const &selectedGroup) const;
   void setSaving(bool saving);
 
   void setEditingResult(bool editing);
@@ -69,9 +69,9 @@ private:
 
   void displayWarning(std::string const &message);
 
-  IFitTab *m_tab;
   IFitOutputOptionsView *m_view;
   std::unique_ptr<IFitOutputOptionsModel> m_model;
+  std::unique_ptr<Widgets::MplCpp::IExternalPlotter> m_plotter;
 };
 
 } // namespace Inelastic

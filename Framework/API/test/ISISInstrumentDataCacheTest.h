@@ -1,3 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+
 #pragma once
 
 #include <cxxtest/TestSuite.h>
@@ -6,7 +13,9 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ISISInstrumentDataCache.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 
@@ -89,15 +98,32 @@ public:
 
   void testMissingIndexFile() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
-    TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("WISH12345"), const std::invalid_argument &e,
-                            std::string(e.what()),
-                            "Could not open index file: " + m_dataCacheDir + "/WISH/WISH_index.json");
+    TS_ASSERT_THROWS_EQUALS(
+        dc.getFileParentDirectoryPath("WISH12345"), const std::invalid_argument &e, std::string(e.what()),
+        "Could not open index file: " + (std::filesystem::path(m_dataCacheDir) / "WISH" / "WISH_index.json").string());
   }
 
   void testRunNumberNotFound() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
     TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("SANS2D1234"), const std::invalid_argument &e,
                             std::string(e.what()), "Run number 1234 not found for instrument SANS2D.");
+  }
+
+  void testIndexFileExistsWhenExists() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT(dc.isIndexFileAvailable("MARI"));
+  }
+
+  void testIndexFileExistsWhenDoesNotExist() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    TS_ASSERT(!dc.isIndexFileAvailable("MARO"));
+  }
+
+  void testRunNumberInCacheTrimming() {
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::vector<std::string> expectedResult{"25054"};
+    auto const &result = dc.getRunNumbersInCache("MARI");
+    TS_ASSERT_EQUALS(result, expectedResult);
   }
 
 private:

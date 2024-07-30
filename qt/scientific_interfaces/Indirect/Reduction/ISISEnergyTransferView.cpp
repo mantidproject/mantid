@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
-#include "Common/DataValidationHelper.h"
 #include "Common/DetectorGroupingOptions.h"
 #include "ISISEnergyTransferPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -24,11 +25,9 @@ IETView::IETView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
-  connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
   connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.dsCalibrationFile->isOptional(true);
@@ -96,18 +95,20 @@ std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutpu
 
 bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
+IRunView *IETView::getRunView() const { return m_uiForm.runWidget; }
+
 IOutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
 
 std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 
 bool IETView::isRunFilesValid() const { return m_uiForm.dsRunFiles->isValid(); }
 
-void IETView::validateCalibrationFileType(UserInputValidator &uiv) const {
+void IETView::validateCalibrationFileType(IUserInputValidator *uiv) const {
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 }
 
-void IETView::validateRebinString(UserInputValidator &uiv) const {
-  uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
+void IETView::validateRebinString(IUserInputValidator *uiv) const {
+  uiv->checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
 }
 
 std::optional<std::string> IETView::validateGroupingProperties(std::size_t const &spectraMin,
@@ -272,13 +273,6 @@ void IETView::setInstrumentSpecDefault(std::map<std::string, bool> &specMap) {
   m_uiForm.ckFold->setChecked(specMap["defaultFoldMultiple"]);
 }
 
-void IETView::setRunButtonText(std::string const &runText) {
-  m_uiForm.pbRun->setText(QString::fromStdString(runText));
-  m_uiForm.pbRun->setEnabled(runText == "Run");
-  m_uiForm.pbRun->setToolTip(runText == "Invalid Run(s)" ? "Cannot find data files for some of the run numbers entered."
-                                                         : "");
-}
-
 void IETView::setEnableOutputOptions(bool const enable) {
   setPlotTimeEnabled(enable);
   setSaveEnabled(enable);
@@ -290,8 +284,6 @@ void IETView::showMessageBox(std::string const &message) {
 
 void IETView::saveClicked() { m_presenter->notifySaveClicked(); }
 
-void IETView::runClicked() { m_presenter->notifyRunClicked(); }
-
 void IETView::plotRawClicked() { m_presenter->notifyPlotRawClicked(); }
 
 void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
@@ -301,18 +293,16 @@ void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
 void IETView::pbRunFinished() { m_presenter->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage.toStdString());
+  auto const errorMessage = uiv->generateErrorMessage();
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
 }
 
-void IETView::pbRunEditing() { setRunButtonText("Editing..."); }
-
 void IETView::pbRunFinding() {
-  setRunButtonText("Finding files...");
+  m_presenter->notifyFindingRun();
   m_uiForm.dsRunFiles->setEnabled(false);
 }
 

@@ -87,7 +87,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
-    m_model->addOutput(group, parameters, result);
+    m_model->addOutput(group, parameters, result, FitDomainIndex{0});
 
     TS_ASSERT(!m_model->isEmpty());
   }
@@ -101,7 +101,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
-    m_model->addOutput(group, parameters, result);
+    m_model->addOutput(group, parameters, result, FitDomainIndex{0});
     TS_ASSERT(m_model->isSpectrumFit(FitDomainIndex{0}));
   }
 
@@ -118,7 +118,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
-    m_model->addOutput(group, parameters, result);
+    m_model->addOutput(group, parameters, result, FitDomainIndex{0});
     TS_ASSERT(!m_model->isSpectrumFit(FitDomainIndex{6}));
   }
 
@@ -131,7 +131,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
-    m_model->addOutput(group, parameters, result);
+    m_model->addOutput(group, parameters, result, FitDomainIndex{0});
     auto params = m_model->getParameters(FitDomainIndex{0});
     TS_ASSERT_EQUALS(params["f0.A0"].value, 0.00);
   }
@@ -150,7 +150,7 @@ public:
     auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
     auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
     auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
-    m_model->addOutput(group, parameters, result);
+    m_model->addOutput(group, parameters, result, FitDomainIndex{0});
     auto const index = FitDomainIndex{0};
     auto resultLocation = ResultLocationNew(result, WorkspaceID{static_cast<size_t>(index.value)});
     TS_ASSERT_EQUALS(m_model->getResultLocation(index)->index, resultLocation.index);

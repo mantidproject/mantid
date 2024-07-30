@@ -30,7 +30,7 @@ from mantid.kernel import (
 )
 from mantid.fitfunctions import FunctionWrapper
 import numpy as np
-from numpy.distutils.misc_util import is_sequence
+from collections.abc import Sequence
 from scipy.optimize import approx_fprime, minimize
 from scipy.ndimage import binary_dilation
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
@@ -188,14 +188,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             name="NRowsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NRowsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NColsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NColsEdge from the detector edge are defined as on the edge.",
         )
         edge_check_enabled = EnabledWhenProperty("IntegrateIfOnEdge", PropertyCriterion.IsDefault)
@@ -440,7 +440,9 @@ class PeakFitter:
 
     def update_initial_peak_position(self, ws, peaks, ipk):
         itof = np.argmin(abs(self.tofs - self.pk.getTOF()))
-        peak_pos = find_nearest_peak_in_data_window(self.y, self.ispecs, self.tofs, ws, peaks, ipk, *self.peak_pos, itof, threshold=0.0)
+        peak_pos = find_nearest_peak_in_data_window(
+            self.y, self.ispecs, self.tofs, ws, peaks, ipk, (*self.peak_pos, itof), min_threshold=0.0
+        )
         self.peak_pos = (peak_pos[0], peak_pos[1]) if peak_pos is not None else None  # omit tof index
 
     def get_composite_function_with_initial_params(self, ws, peak_func_name, bg_func):
@@ -682,10 +684,18 @@ def calc_sigma_from_hessian(result, profile_func, x, y, weights, cost_func, nfix
     return np.sqrt(cov[0, 0])  # first parameter is intenisity for BackToBackExponential (only func supported)
 
 
+def is_sequence(seq):
+    # Strings are sequences so check for those separately
+    if isinstance(seq, str):
+        return False
+    # NumPy array is not a Sequence
+    return isinstance(seq, np.ndarray) or isinstance(seq, Sequence)
+
+
 def calc_hessian(func, x0, step_size, *args):
     nparam = len(x0)
     if not is_sequence(step_size):
-        step_size = nparam * [epsilon]
+        step_size = nparam * [step_size]
     hessian = np.zeros((nparam, nparam))
     jac = approx_fprime(x0, func, step_size, *args)
     for iparam in range(nparam):

@@ -6,16 +6,16 @@ set(SRC_FILES
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
-    ISISEnergyTransferValidator.cpp
     ISISEnergyTransferModel.cpp
-    ISISEnergyTransferView.cpp
     ISISEnergyTransferPresenter.cpp
+    ISISEnergyTransferValidator.cpp
+    ISISEnergyTransferView.cpp
     ReductionAlgorithmUtils.cpp
     Transmission.cpp
 )
 
 set(INC_FILES ISISEnergyTransferData.h ISISEnergyTransferValidator.h ISISEnergyTransferModelUtils.h
-              ISISEnergyTransferModel.h ReductionAlgorithmUtils.h
+              ISISEnergyTransferModel.h ISISEnergyTransferPresenter.h ReductionAlgorithmUtils.h
 )
 
 set(MOC_FILES
@@ -25,7 +25,6 @@ set(MOC_FILES
     ISISCalibration.h
     ISISDiagnostics.h
     ISISEnergyTransferView.h
-    ISISEnergyTransferPresenter.h
     Transmission.h
 )
 

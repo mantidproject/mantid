@@ -36,8 +36,8 @@ public:
   virtual QTableWidget *getDataTable() const = 0;
   virtual bool isTableEmpty() const = 0;
 
-  virtual void validate(UserInputValidator &validator) = 0;
-  virtual void addTableEntry(size_t row, FitDataRow newRow) = 0;
+  virtual void validate(IUserInputValidator *validator) = 0;
+  virtual void addTableEntry(size_t row, FitDataRow const &newRow) = 0;
   virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) = 0;
   virtual int getColumnIndexFromName(std::string const &ColName) = 0;
   virtual void clearTable() = 0;

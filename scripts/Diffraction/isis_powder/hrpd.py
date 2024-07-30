@@ -135,12 +135,7 @@ class HRPD(AbstractInst):
                 multiple_scattering=self._inst_settings.multiple_scattering,
                 msevents=self._inst_settings.mayers_mult_scat_events,
             )
-        elif self._sample_details is None:
-            raise RuntimeError(
-                "Absorption corrections cannot be run without sample details."
-                " Please set sample details using set_sample before running absorption corrections."
-            )
-        elif self._sample_details.shape_type() == "slab":
+        elif self._check_sample_details() and self._sample_details.shape_type() == "slab":
             return hrpd_algs.calculate_slab_absorb_corrections(ws_to_correct=ws_to_correct, sample_details_obj=self._sample_details)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(

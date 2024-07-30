@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/InelasticTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -33,11 +33,6 @@ public:
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;
-
-protected:
-  void setup() override = 0;
-  void run() override = 0;
-  bool validate() override = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

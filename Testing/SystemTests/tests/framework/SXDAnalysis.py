@@ -55,7 +55,7 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
         a, alpha = 5.6402, 90
         CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha)
         # load an empty workspace as MoveCOmpoennt etc. only work on Matrix workspaces
-        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
+        self.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty")
 
         self.xml_path = SXD.calibrate_sxd_panels(self.ws, self.peaks, self._temp_dir, tol=0.25, SearchRadiusTransBank=0.025)
 
@@ -92,7 +92,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         ADS.clear()
 
     def runTest(self):
-        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768, scale_integrated=False)
         sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
         sxd.set_sample(
             Geometry={"Shape": "CSG", "Value": sxd.sphere_shape},
@@ -156,7 +156,7 @@ class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SHOEBOX)
 
     def validate(self):
-        intens_over_sigma = [0.0, 10.50, 9.56, 135.83, 0.0]
+        intens_over_sigma = [0.0, 9.638, 10.265, 136.535, 0.0]
         self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
 
 

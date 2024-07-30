@@ -5,7 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitOutputOptionsPresenter.h"
+
 #include "FitTab.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
+
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <utility>
 
@@ -13,9 +17,10 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
-FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitTab *tab, IFitOutputOptionsView *view,
-                                                     std::unique_ptr<IFitOutputOptionsModel> model)
-    : m_tab(tab), m_view(view), m_model(std::move(model)) {
+FitOutputOptionsPresenter::FitOutputOptionsPresenter(IFitOutputOptionsView *view,
+                                                     std::unique_ptr<IFitOutputOptionsModel> model,
+                                                     std::unique_ptr<Widgets::MplCpp::IExternalPlotter> plotter)
+    : m_view(view), m_model(std::move(model)), m_plotter(std::move(plotter)) {
   setMultiWorkspaceOptionsVisible(false);
   m_view->subscribePresenter(this);
 }
@@ -33,12 +38,34 @@ void FitOutputOptionsPresenter::handleGroupWorkspaceChanged(std::string const &s
   m_view->setPlotEnabled(isSelectedGroupPlottable());
 }
 
-void FitOutputOptionsPresenter::setResultWorkspace(WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setResultWorkspace(std::move(groupWorkspace));
+void FitOutputOptionsPresenter::enableOutputOptions(bool const enable, WorkspaceGroup_sptr resultWorkspace,
+                                                    std::optional<std::string> const &basename,
+                                                    std::string const &minimizer) {
+  if (enable) {
+    m_model->setResultWorkspace(resultWorkspace);
+    if (basename) {
+      setPDFWorkspace(*basename + "_PDFs", minimizer);
+    }
+    setPlotTypes("Result Group");
+  } else {
+    setMultiWorkspaceOptionsVisible(enable);
+  }
+
+  setPlotEnabled(enable);
+  m_view->setEditResultEnabled(enable);
+  m_view->setSaveEnabled(enable);
 }
 
-void FitOutputOptionsPresenter::setPDFWorkspace(WorkspaceGroup_sptr groupWorkspace) {
-  m_model->setPDFWorkspace(std::move(groupWorkspace));
+void FitOutputOptionsPresenter::setPDFWorkspace(std::string const &workspaceName, std::string const &minimizer) {
+  auto const enablePDFOptions = WorkspaceUtils::doesExistInADS(workspaceName) && minimizer == "FABADA";
+
+  if (enablePDFOptions) {
+    m_model->setPDFWorkspace(WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(workspaceName));
+    setPlotWorkspaces();
+  } else {
+    m_model->removePDFWorkspace();
+  }
+  setMultiWorkspaceOptionsVisible(enablePDFOptions);
 }
 
 void FitOutputOptionsPresenter::setPlotWorkspaces() {
@@ -59,23 +86,23 @@ void FitOutputOptionsPresenter::setPlotTypes(std::string const &selectedGroup) {
   }
 }
 
-void FitOutputOptionsPresenter::removePDFWorkspace() { m_model->removePDFWorkspace(); }
-
 void FitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
   try {
-    plotResult(m_view->getSelectedGroupWorkspace());
-    m_tab->handlePlotSelectedSpectra();
+    for (auto const &spectrum : getSpectraToPlot(m_view->getSelectedGroupWorkspace()))
+      m_plotter->plotSpectra(spectrum.first, std::to_string(spectrum.second), errorBars);
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
+  setPlotting(false);
 }
 
-void FitOutputOptionsPresenter::plotResult(std::string const &selectedGroup) {
-  if (m_model->isResultGroupSelected(selectedGroup))
-    m_model->plotResult(m_view->getSelectedPlotType());
-  else
-    m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
+std::vector<SpectrumToPlot> FitOutputOptionsPresenter::getSpectraToPlot(std::string const &selectedGroup) const {
+  if (m_model->isResultGroupSelected(selectedGroup)) {
+    return m_model->plotResult(m_view->getSelectedPlotType());
+  }
+  return m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
 }
 
 void FitOutputOptionsPresenter::handleSaveClicked() {
@@ -114,10 +141,6 @@ void FitOutputOptionsPresenter::setPlotEnabled(bool enable) {
 void FitOutputOptionsPresenter::setEditResultEnabled(bool enable) { m_view->setEditResultEnabled(enable); }
 
 void FitOutputOptionsPresenter::setSaveEnabled(bool enable) { m_view->setSaveEnabled(enable); }
-
-void FitOutputOptionsPresenter::clearSpectraToPlot() { m_model->clearSpectraToPlot(); }
-
-std::vector<SpectrumToPlot> FitOutputOptionsPresenter::getSpectraToPlot() const { return m_model->getSpectraToPlot(); }
 
 void FitOutputOptionsPresenter::setEditResultVisible(bool visible) { m_view->setEditResultVisible(visible); }
 

@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
-#include "Common/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -37,7 +38,8 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 DiffractionReduction::DiffractionReduction(QWidget *parent)
     : InelasticInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_plotWorkspaces(), m_runPresenter(),
+      m_plotOptionsPresenter(), m_groupingWidget() {}
 
 DiffractionReduction::~DiffractionReduction() { saveSettings(); }
 
@@ -48,6 +50,7 @@ void DiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 
@@ -61,7 +64,6 @@ void DiffractionReduction::initLayout() {
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
@@ -106,47 +108,47 @@ void DiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileF
   connect(file_field, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
 }
 
-/**
- * Runs a diffraction reduction when the user clicks Run.
- */
-void DiffractionReduction::run() {
-  m_plotOptionsPresenter->clearWorkspaces();
-
-  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
+void DiffractionReduction::handleValidation(IUserInputValidator *validator) const {
   auto const sampleProblem = validateFileFinder(m_uiForm.rfSampleFiles);
-  if (!sampleProblem.isEmpty()) {
-    showInformationBox("Sample: " + sampleProblem);
-    return;
+  if (!sampleProblem.empty()) {
+    validator->addErrorMessage("Sample: " + sampleProblem);
   }
 
   auto const vanadiumProblem = validateFileFinder(m_uiForm.rfVanFile, m_uiForm.ckUseVanadium->isChecked());
-  if (!vanadiumProblem.isEmpty()) {
-    showInformationBox("Vanadium: " + vanadiumProblem);
-    return;
+  if (!vanadiumProblem.empty()) {
+    validator->addErrorMessage("Vanadium: " + vanadiumProblem);
   }
 
   auto const calibrationProblem = validateFileFinder(m_uiForm.rfCalFile, m_uiForm.ckUseCalib->isChecked());
-  if (!calibrationProblem.isEmpty()) {
-    showInformationBox("Calibration: " + calibrationProblem);
-    return;
+  if (!calibrationProblem.empty()) {
+    validator->addErrorMessage("Calibration: " + calibrationProblem);
   }
 
   auto const spectraMin = static_cast<std::size_t>(m_uiForm.spSpecMin->value());
   auto const spectraMax = static_cast<std::size_t>(m_uiForm.spSpecMax->value());
   if (auto const message = m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax)) {
-    showInformationBox(QString::fromStdString(*message));
-    return;
+    validator->addErrorMessage(*message);
   }
+
+  auto const &instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const &mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+
+  if (instName != "OSIRIS" || mode != "diffonly") {
+    if (!validateRebin()) {
+      validator->addErrorMessage("Rebinning parameters are incorrect.");
+    }
+  }
+}
+
+void DiffractionReduction::handleRun() {
+  m_plotOptionsPresenter->clearWorkspaces();
+
+  auto const &instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  auto const &mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (instName == "OSIRIS" && mode == "diffonly") {
     runOSIRISdiffonlyReduction();
   } else {
-    if (!validateRebin()) {
-      showInformationBox("Rebinning parameters are incorrect.");
-      return;
-    }
     runGenericReduction(instName, mode);
   }
 }
@@ -160,7 +162,8 @@ void DiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
 
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setSaveEnabled(!error);
 
   if (!error) {
     // Ungroup the output workspace if generic reducer was used
@@ -177,7 +180,6 @@ void DiffractionReduction::algorithmComplete(bool error) {
       m_plotOptionsPresenter->setWorkspaces(m_plotWorkspaces);
     }
   } else {
-    setSaveEnabled(false);
     showInformationBox("Error running diffraction reduction.\nSee Results Log for details.");
   }
 }
@@ -315,8 +317,6 @@ IAlgorithm_sptr DiffractionReduction::convertUnitsAlgorithm(const std::string &i
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
 void DiffractionReduction::runGenericReduction(const QString &instName, const QString &mode) {
-  setRunIsRunning(true);
-
   QString rebinStart = m_uiForm.leRebinStart->text();
   QString rebinWidth = m_uiForm.leRebinWidth->text();
   QString rebinEnd = m_uiForm.leRebinEnd->text();
@@ -378,8 +378,6 @@ void DiffractionReduction::runGenericReduction(const QString &instName, const QS
  * OSIRISDiffractionReduction algorithm.
  */
 void DiffractionReduction::runOSIRISdiffonlyReduction() {
-  setRunIsRunning(true);
-
   // Get the files names from FileFinderWidget widget, and convert them from Qt
   // forms into stl equivalents.
   QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
@@ -608,7 +606,7 @@ void DiffractionReduction::saveSettings() {
  *
  * @returns True if reining options are valid, false otherwise
  */
-bool DiffractionReduction::validateRebin() {
+bool DiffractionReduction::validateRebin() const {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
   QString rebStepTxt = m_uiForm.leRebinWidth->text();
   QString rebEndTxt = m_uiForm.leRebinEnd->text();
@@ -648,10 +646,10 @@ bool DiffractionReduction::validateRebin() {
  *
  * @returns A message if the file finder has a problem.
  */
-QString DiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
-                                                 bool const isChecked) const {
+std::string DiffractionReduction::validateFileFinder(const MantidQt::API::FileFinderWidget *fileFinder,
+                                                     bool const isChecked) const {
   if (!fileFinder->isOptional() || isChecked) {
-    return fileFinder->getFileProblem();
+    return fileFinder->getFileProblem().toStdString();
   }
   return "";
 }
@@ -664,49 +662,26 @@ void DiffractionReduction::useCalibStateChanged(int state) { m_uiForm.rfCalFile-
  * Disables and shows message on run button indicating that run files have been
  * changed.
  */
-void DiffractionReduction::runFilesChanged() {
-  m_uiForm.pbRun->setEnabled(false);
-  m_uiForm.pbRun->setText("Editing...");
-}
+void DiffractionReduction::runFilesChanged() { m_runPresenter->setRunText("Editing..."); }
 
 /**
  * Disables and shows message on run button to indicate searching for data
  * files.
  */
-void DiffractionReduction::runFilesFinding() {
-  m_uiForm.pbRun->setEnabled(false);
-  m_uiForm.pbRun->setText("Finding files...");
-}
+void DiffractionReduction::runFilesFinding() { m_runPresenter->setRunText("Finding files..."); }
 
 /**
  * Updates run button with result of file search.
  */
 void DiffractionReduction::runFilesFound() {
   bool valid = m_uiForm.rfSampleFiles->isValid();
-  m_uiForm.pbRun->setEnabled(valid);
-
-  if (valid)
-    m_uiForm.pbRun->setText("Run");
-  else
-    m_uiForm.pbRun->setText("Invalid Run");
+  m_runPresenter->setRunText(valid ? "Run" : "Invalid Run");
 
   // Disable sum files if only one file is given
   int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
 }
-
-void DiffractionReduction::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void DiffractionReduction::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveEnabled(enabled);
-}
-
-void DiffractionReduction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void DiffractionReduction::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);

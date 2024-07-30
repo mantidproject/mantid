@@ -8,11 +8,13 @@
 
 #include "CorrectionsTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 #include "ui_ContainerSubtraction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL ContainerSubtraction : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL ContainerSubtraction : public CorrectionsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -21,6 +23,9 @@ public:
 
   void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace, const std::string &name);
   void setTransformedContainer(const Mantid::API::MatrixWorkspace_sptr &workspace);
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   /// Handles a new sample being loaded
@@ -37,12 +42,8 @@ private slots:
   void plotCurrentPreview();
 
   void saveClicked();
-  void runClicked();
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
@@ -77,10 +78,7 @@ private:
                                                      const std::string &name, const std::string &type,
                                                      const std::string &value) const;
 
-  void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;

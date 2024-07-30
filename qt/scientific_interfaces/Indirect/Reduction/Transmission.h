@@ -9,37 +9,33 @@
 #include "../DllConfig.h"
 #include "DataReductionTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Transmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 class IDataReduction;
 
-class MANTIDQT_INDIRECT_DLL Transmission : public DataReductionTab {
+class MANTIDQT_INDIRECT_DLL Transmission : public DataReductionTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   Transmission(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~Transmission() override;
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void transAlgDone(bool error);
-  void setInstrument();
 
-  void runClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void setInstrument(QString const &instrumentName);
+  void updateInstrumentConfiguration() override;
 
   Ui::Transmission m_uiForm;
 };

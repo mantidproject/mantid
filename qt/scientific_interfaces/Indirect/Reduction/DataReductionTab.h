@@ -7,9 +7,11 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/InelasticTab.h"
 #include "Common/InstrumentConfig.h"
-#include "Common/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
+
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -46,6 +48,7 @@ class MANTIDQT_INDIRECT_DLL DataReductionTab : public InelasticTab {
 
 public:
   DataReductionTab(IDataReduction *idrUI, QObject *parent = nullptr);
+  DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
   ~DataReductionTab() override;
 
   /// Set the presenter for the output plotting options
@@ -57,12 +60,8 @@ public:
   void filterInputData(bool filter);
 
 public slots:
-  void runTab();
 
 signals:
-  /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
 
@@ -85,15 +84,16 @@ protected:
 
 protected:
   IDataReduction *m_idrUI;
+  std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
 
 private slots:
-  void tabExecutionComplete(bool error);
+  void handleNewInstrumentConfiguration();
 
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void updateInstrumentConfiguration() = 0;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
-  bool m_tabRunning;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -1,0 +1,1 @@
+- Fixed crash in the instrument view when trying to overlay peaks that do not have a corresponding detector.

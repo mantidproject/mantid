@@ -64,7 +64,7 @@ Integrating into Workbench
 --------------------------
 
 In order to implement a new interface into Mantid Workbench it is best to
-start with a up to date build from master. For this demo our interface does
+start with a up to date build from ``main``. For this demo our interface does
 not need any presenter or model, those can be added later, all that is needed
 is a ``.ui`` file and a script that will open it as an application. Take view
 from above and use the following as your main:

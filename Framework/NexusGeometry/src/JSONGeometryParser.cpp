@@ -427,8 +427,8 @@ void JSONGeometryParser::extractDetectorContent() {
       else if (child[NAME] == DEPENDS_ON)
         verifyDependency(*m_root, child);
       else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS)) {
-        m_translations.emplace_back(Eigen::Vector3d());
-        m_orientations.emplace_back(Eigen::Quaterniond());
+        m_translations.emplace_back(Eigen::Vector3d::Zero());
+        m_orientations.emplace_back(Eigen::Quaterniond::Identity());
         extractTransformations(child, m_translations.back(), m_orientations.back());
       }
     }

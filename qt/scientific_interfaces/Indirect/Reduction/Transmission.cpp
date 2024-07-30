@@ -30,19 +30,14 @@ namespace MantidQt::CustomInterfaces {
  */
 Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2"));
-
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrument()));
 
   // Update the preview plot when the algorithm is complete
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -50,14 +45,9 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   m_uiForm.dsCanInput->setTypeSelectorVisible(false);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 Transmission::~Transmission() = default;
 
-void Transmission::setup() {}
-
-void Transmission::run() {
+void Transmission::handleRun() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
   QString outWsName = sampleWsName.toLower() + "_transmission_group";
@@ -75,24 +65,24 @@ void Transmission::run() {
   m_pythonExportWsName = outWsName.toStdString();
 }
 
-bool Transmission::validate() {
+void Transmission::handleValidation(IUserInputValidator *validator) const {
   // Check if we have an appropriate instrument
   QString currentInst = getInstrumentName();
   if (currentInst != "IRIS" && currentInst != "OSIRIS")
-    return false;
+    validator->addErrorMessage("The selected instrument must be IRIS or OSIRIS");
 
   // Check for an invalid sample input
   if (!m_uiForm.dsSampleInput->isValid())
-    return false;
+    validator->addErrorMessage("Sample: " + m_uiForm.dsSampleInput->getProblem().toStdString());
 
   // Check for an invalid can input
   if (!m_uiForm.dsCanInput->isValid())
-    return false;
-
-  return true;
+    validator->addErrorMessage("Resolution: " + m_uiForm.dsCanInput->getProblem().toStdString());
 }
 
 void Transmission::transAlgDone(bool error) {
+  m_runPresenter->setRunEnabled(true);
+  m_uiForm.pbSave->setEnabled(!error);
   if (error)
     return;
 
@@ -110,12 +100,9 @@ void Transmission::transAlgDone(bool error) {
   m_uiForm.ppPlot->addSpectrum("Sample", sampleWsName + "_Sam", 0, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Transmission", sampleWsName + "_Trans", 0, Qt::blue);
   m_uiForm.ppPlot->resizeX();
-
-  // Enable plot and save
-  m_uiForm.pbSave->setEnabled(true);
 }
 
-void Transmission::setInstrument() {
+void Transmission::updateInstrumentConfiguration() {
   try {
     setInstrument(getInstrumentDetail("instrument"));
   } catch (std::exception const &ex) {
@@ -129,11 +116,6 @@ void Transmission::setInstrument(QString const &instrumentName) {
 }
 
 /**
- * Handle when Run is clicked
- */
-void Transmission::runClicked() { runTab(); }
-
-/**
  * Handle saving of workspace
  */
 void Transmission::saveClicked() {
@@ -142,17 +124,6 @@ void Transmission::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Transmission::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void Transmission::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void Transmission::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                   QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
-}
 
 } // namespace MantidQt::CustomInterfaces

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <tuple>
 #include <utility>
 
 #include "MantidParallel/IO/Chunker.h"
@@ -52,10 +53,8 @@ std::pair<int, std::vector<size_t>> buildPartition(const int totalWorkers, const
 }
 
 int numberOfWorkers(const std::vector<std::pair<int, std::vector<size_t>>> &partitioning) {
-  int workers = 0;
-  for (const auto &item : partitioning)
-    workers += std::get<0>(item);
-  return workers;
+  return std::accumulate(partitioning.cbegin(), partitioning.cend(), 0,
+                         [](const int sum, const auto &item) { return sum + std::get<0>(item); });
 }
 
 size_t taskSize(const std::pair<int, std::vector<size_t>> &partition, const std::vector<size_t> &tasks) {
@@ -176,12 +175,10 @@ std::vector<std::pair<int, std::vector<size_t>>> Chunker::makeBalancedPartitioni
   // Indexed size vector such that we can sort it but still know original index.
   // Elements are <size, original index, done flag>
   std::vector<std::tuple<size_t, size_t, bool>> sortedSizes;
-  for (const auto size : sizes)
-    sortedSizes.emplace_back(size, sortedSizes.size(), false);
+  std::transform(sizes.cbegin(), sizes.cend(), std::back_inserter(sortedSizes),
+                 [&sortedSizes](const auto &size) { return std::make_tuple(size, sortedSizes.size(), false); });
   std::sort(sortedSizes.begin(), sortedSizes.end(),
-            [](const std::tuple<size_t, size_t, bool> &a, const std::tuple<size_t, size_t, bool> &b) {
-              return std::get<0>(a) > std::get<0>(b);
-            });
+            [](const auto &a, const auto &b) { return std::get<0>(a) > std::get<0>(b); });
 
   std::vector<std::pair<int, std::vector<size_t>>> partitioning;
   size_t numProcessed = 0;

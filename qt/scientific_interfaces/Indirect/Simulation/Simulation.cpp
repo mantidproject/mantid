@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Simulation.h"
-#include "Common/Settings.h"
 #include "DensityOfStates.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "MolDyn.h"
 #include "Sassena.h"
 
@@ -37,7 +37,7 @@ void Simulation::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, SimulationTab *>::iterator iter;
   for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
+    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 
   loadSettings();

@@ -507,6 +507,12 @@ search or if there are no runs in the experiment yet, the table will remain
 empty. If an experiment is currently running, you can re-run the search to
 check for new runs and they will be added to the results table.
 
+When working on IDAaaS with the "Search Data Archive" setting set to "Off", only
+runs that are available in the ISIS Instrument Data Cache will appear in the
+search results. This does not take user permissions into account. The user must
+still have access to these files in order to process them, otherwise a "File Not
+Found" error will occur when the reduction is run.
+
 Note that some runs will be highlighted in blue. This indicates that they are
 not valid for reduction, e.g. transmission runs, or runs without a valid
 angle. Hover over the row to see a tooltip with the reason the run is invalid.
