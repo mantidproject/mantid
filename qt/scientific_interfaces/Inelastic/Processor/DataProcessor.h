@@ -43,6 +43,7 @@ public:
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
+  virtual void exportPythonDialog() = 0;
   virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
                                                             const std::string &filename = "") = 0;
 };
@@ -72,6 +73,8 @@ public:
                                                     const std::string &filename = "") override;
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter) override;
+
+  void exportPythonDialog() override;
 
 protected:
   virtual void runComplete(bool error) { (void)error; };

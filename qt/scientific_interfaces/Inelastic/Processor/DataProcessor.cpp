@@ -59,6 +59,8 @@ API::IConfiguredAlgorithm_sptr DataProcessor::setupSaveAlgorithm(const std::stri
   return confAlg;
 }
 
+void DataProcessor::exportPythonDialog() { exportPythonScript(); }
+
 void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
