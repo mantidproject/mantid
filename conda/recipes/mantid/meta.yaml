@@ -75,6 +75,8 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes
+  run_constrained:
+    - matplotlib {{ matplotlib }}
 
 test:
   imports:
@@ -85,7 +87,7 @@ about:
   home: https://github.com/mantidproject/mantid
   license: GPL-3.0-or-later
   summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
-  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib 3.5.2 to ensure correct compatibility.
+  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
 
 extra:
   recipe-maintainers:
