@@ -17,6 +17,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
@@ -27,6 +28,11 @@
 #include <functional>
 #include <numeric>
 #include <sstream>
+
+namespace {
+Mantid::Kernel::Logger g_log("FFT");
+
+}
 
 namespace Mantid::Algorithms {
 
@@ -78,8 +84,11 @@ void FFT::init() {
  *  (unless AcceptXRoundingErrors is set to true)
  */
 void FFT::exec() {
+  g_log.warning() << "FFT 0" << std::endl;
+
   m_inWS = getProperty("InputWorkspace");
   m_inImagWS = getProperty("InputImagWorkspace");
+  g_log.warning() << "FFT 1" << std::endl;
 
   if (m_inImagWS == nullptr)
     m_inImagWS = m_inWS; // workspaces are one and the same
@@ -103,6 +112,8 @@ void FFT::exec() {
     addPositiveOnly = true;
   }
 
+  g_log.warning() << "FFT 2" << std::endl;
+
   m_outWS = create<HistoWorkspace>(*m_inWS, nOut, Points(nPoints));
 
   for (int i = 0; i < nOut; ++i)
@@ -115,6 +126,7 @@ void FFT::exec() {
   createUnitsLabels(df);
 
   setupTAxis(nOut, addPositiveOnly);
+  g_log.warning() << "FFT 3" << std::endl;
 
   const int dys = nPoints % 2;
 
@@ -131,6 +143,7 @@ void FFT::exec() {
   } else { // Backward
     transformBackward(data, nPoints, nPoints, dys, centerShift, isComplex, iReal, iImag, df);
   }
+  g_log.warning() << "FFT 4" << std::endl;
 
   m_outWS->setSharedX(1, m_outWS->sharedX(0));
   m_outWS->setSharedX(2, m_outWS->sharedX(0));
@@ -142,6 +155,7 @@ void FFT::exec() {
 
   gsl_fft_complex_wavetable_free(m_wavetable);
   gsl_fft_complex_workspace_free(m_workspace);
+  g_log.warning() << "FFT 5" << std::endl;
 
   setProperty("OutputWorkspace", m_outWS);
 }
