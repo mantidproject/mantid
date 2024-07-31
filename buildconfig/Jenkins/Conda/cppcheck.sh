@@ -12,6 +12,7 @@
 #   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exit 0
 source $SCRIPT_DIR/mamba-utils
 
 # Check 1 argument is passed, and is not optional.

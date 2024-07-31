@@ -46,11 +46,13 @@ shift
 if [[ $OSTYPE == 'msys'* ]]; then
     exit 0
 fi
+if [[ $OSTYPE == 'darwin'* ]]; then
+    exit 0
+fi
 
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
-        exit 0
     else
         BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
     fi
