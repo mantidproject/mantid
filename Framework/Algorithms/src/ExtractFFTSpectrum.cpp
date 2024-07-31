@@ -89,7 +89,7 @@ void ExtractFFTSpectrum::exec() {
       outputWS->getAxis(0)->unit() = fftTemp->getAxis(0)->unit();
     outputWS->setHistogram(i, fftTemp->histogram(fftPart));
 
-    prog.report();
+    // prog.report();
 
     PARALLEL_END_INTERRUPT_REGION
   }
