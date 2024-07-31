@@ -48,9 +48,6 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         filename = self.getPropertyValue("Filename")
 
-        B = ws.getExperimentInfo(0).sample().getOrientedLattice().getB()
-        B = B / np.linalg.norm(B, axis=0)
-
         x = ws.getXDimension()
         X = np.linspace(x.getMinimum(), x.getMaximum(), x.getNBoundaries())
         y = ws.getYDimension()
@@ -59,7 +56,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         Z = np.linspace(z.getMinimum(), z.getMaximum(), z.getNBoundaries())
 
         boundingBoxInModelCoordinates = [x.getMinimum(), x.getMaximum(), y.getMinimum(), y.getMaximum(), z.getMinimum(), z.getMaximum()]
-        extent = f"0 {x.getNBins()} 0 {y.getNBins()} 0 {z.getNBins()} "
+        extent = f"0 {x.getNBins()} 0 {y.getNBins()} 0 {z.getNBins()}"
         Xaxis = x.name
         Yaxis = y.name
         Zaxis = z.name
@@ -69,8 +66,18 @@ class SaveMDHistoToVTK(PythonAlgorithm):
 
         changeOfBasisMatrix = np.eye(4)
         if x.getMDFrame().isQ() and y.getMDFrame().isQ() and z.getMDFrame().isQ():
-            changeOfBasisMatrix[:3, :3] = B
-            XYZ = np.dot(B, XYZ)
+            B = ws.getExperimentInfo(0).sample().getOrientedLattice().getB()
+
+            basis = np.eye(3)
+            basis[0] = list(ws.getBasisVector(0))
+            basis[1] = list(ws.getBasisVector(1))
+            basis[2] = list(ws.getBasisVector(2))
+
+            skew = basis.dot(B.dot(basis.T))
+            skew = skew / np.linalg.norm(skew, axis=0)
+
+            changeOfBasisMatrix[:3, :3] = skew
+            XYZ = np.dot(skew, XYZ)
 
         XYZ = XYZ.flatten("F")
 
@@ -111,7 +118,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         celldata.append(signal)
 
         mask = np.isfinite(signal_array)
-        ghost_array = np.full_like(signal_array, 32, dtype=int)
+        ghost_array = np.full_like(signal_array, 32, dtype=int)  # 32 == CellGhostTypes::HIDDENCELL
         ghost_array[mask] = 0
 
         ghost = etree.Element("DataArray", Name="vtkGhostType", type="UInt8", format="ascii")
