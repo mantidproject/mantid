@@ -45,6 +45,7 @@ public:
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Moments"; }
 
   void handleDataReady(std::string const &dataName) override;
 

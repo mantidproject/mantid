@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -18,6 +19,7 @@ public:
 
   virtual void handleValidation(IUserInputValidator *validator) const = 0;
   virtual void handleRun() = 0;
+  virtual const std::string getSubscriberName() const = 0;
 };
 
 } // namespace CustomInterfaces

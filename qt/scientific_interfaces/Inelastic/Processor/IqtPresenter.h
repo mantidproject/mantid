@@ -39,6 +39,7 @@ public:
   // runWidget
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "IQT Data Processor"; }
 
   void handleSampDataReady(const std::string &wsname) override;
   void handleResDataReady(const std::string &resWorkspace) override;

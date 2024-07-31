@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
+#include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 namespace MantidQt {
@@ -27,6 +28,8 @@ void RunPresenter::handleRunClicked() {
       m_view->displayWarning(ex.what());
       setRunEnabled(true);
     }
+    Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
+                                                                  m_subscriber->getSubscriberName(), false);
   }
 }
 

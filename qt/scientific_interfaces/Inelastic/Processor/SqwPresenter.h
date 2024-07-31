@@ -47,6 +47,7 @@ public:
   // runSubscriber
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Sqw"; }
 
   void handleDataReady(std::string const &dataName) override;
 
