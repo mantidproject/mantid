@@ -75,14 +75,14 @@ void ExtractFFTSpectrum::exec() {
 
     auto childFFT = createChildAlgorithm("FFT");
     childFFT->setProperty("InputWorkspace", inputWS);
-    childFFT->setProperty("Real", i);
+    // childFFT->setProperty("Real", i);
     // if (inputImagWS) {
     //  childFFT->setProperty<MatrixWorkspace_sptr>("InputImagWorkspace", inputImagWS);
     //  childFFT->setProperty<int>("Imaginary", i);
     //}
-    childFFT->setProperty("Shift", shift);
-    childFFT->setProperty("AutoShift", autoShift);
-    childFFT->setProperty("AcceptXRoundingErrors", xRoundingErrs);
+    // childFFT->setProperty("Shift", shift);
+    // childFFT->setProperty("AutoShift", autoShift);
+    // childFFT->setProperty("AcceptXRoundingErrors", xRoundingErrs);
     // childFFT->execute();
     // MatrixWorkspace_const_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
     // if (i == 0) // Only need to do this once
