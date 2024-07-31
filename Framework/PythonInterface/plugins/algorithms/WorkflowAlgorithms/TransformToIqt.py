@@ -90,9 +90,10 @@ class TransformToIqt(PythonAlgorithm):
 
         if not self._dry_run:
             self._output_workspace = self._transform()
+            logger.warning("After transform")
 
             self._add_logs()
-
+            logger.warning("After add logs")
         else:
             skip_prog = Progress(self, start=0.3, end=1.0, nreports=2)
             skip_prog.report("skipping transform")
@@ -196,7 +197,7 @@ class TransformToIqt(PythonAlgorithm):
 
         workflow_prog.report("Creating Parameter table")
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
-
+        logger.warning("After CreateEmptyTableWorkspace")
         workflow_prog.report("Populating Parameter table")
         param_table.addColumn("int", "SampleInputBins")
         param_table.addColumn("float", "BinReductionFactor")
@@ -206,6 +207,7 @@ class TransformToIqt(PythonAlgorithm):
         param_table.addColumn("float", "EnergyWidth")
         param_table.addColumn("float", "Resolution")
         param_table.addColumn("int", "ResolutionBins")
+        logger.warning("After addColumn")
 
         param_table.addRow(
             [
@@ -219,6 +221,7 @@ class TransformToIqt(PythonAlgorithm):
                 resolution_bins,
             ]
         )
+        logger.warning("After addRow")
 
         self.setProperty("ParameterWorkspace", param_table)
 
@@ -242,10 +245,15 @@ class TransformToIqt(PythonAlgorithm):
         from IndirectCommon import CheckHistZero, CheckHistSame
 
         # Process resolution data
+        logger.warning("Before CheckHistZero")
         res_number_of_histograms = CheckHistZero(self._resolution)[0]
         sample_number_of_histograms = CheckHistZero(self._sample)[0]
+        logger.warning("After CheckHistZero")
         if res_number_of_histograms > 1 and sample_number_of_histograms is not res_number_of_histograms:
             CheckHistSame(self._sample, "Sample", self._resolution, "Resolution")
+            logger.warning("After CheckHistSame")
+
+        logger.warning("Before CalculateIqt")
 
         calculateiqt_alg = self.createChildAlgorithm(name="CalculateIqt", startProgress=0.3, endProgress=1.0, enableLogging=True)
         calculateiqt_alg.setAlwaysStoreInADS(False)
@@ -264,6 +272,7 @@ class TransformToIqt(PythonAlgorithm):
         for key, value in args.items():
             calculateiqt_alg.setProperty(key, value)
         calculateiqt_alg.execute()
+        logger.warning("After CalculateIqt")
 
         iqt = calculateiqt_alg.getProperty("OutputWorkspace").value
 
