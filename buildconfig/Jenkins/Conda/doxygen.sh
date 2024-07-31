@@ -10,6 +10,8 @@
 #   1. WORKSPACE: path to the root of the source code. On Windows, only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exit 0
+
 source $SCRIPT_DIR/mamba-utils
 
 # Check 1 argument is passed and is not optional

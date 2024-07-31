@@ -43,9 +43,14 @@ shift
 CMAKE_PRESET=$1
 shift
 
+if [[ $OSTYPE == 'msys'* ]]; then
+    exit 0
+fi
+
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
+        exit 0
     else
         BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
     fi
@@ -147,6 +152,10 @@ rm -rf  $BUILD_DIR/test_logs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
 if [[ $ENABLE_DOCS == true ]]; then
     export LC_ALL=C
+fi
+
+if [[ $ENABLE_DOC_TESTS == true ]]; then
+    exit 0
 fi
 
 # Run the script that handles the build

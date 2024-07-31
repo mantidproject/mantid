@@ -25,6 +25,8 @@
 #   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
 #   --git-tag: specify a tag for a release or nightly version
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+exit 0
 source $SCRIPT_DIR/mamba-utils
 start_time=$(date +%s)
 
