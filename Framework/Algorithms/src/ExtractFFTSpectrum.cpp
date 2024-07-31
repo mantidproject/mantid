@@ -12,9 +12,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+
+namespace {
+Mantid::Kernel::Logger g_log("ExtractFFTSpectrum");
+
+}
 
 namespace Mantid::Algorithms {
 
@@ -56,9 +62,11 @@ void ExtractFFTSpectrum::exec() {
   const bool xRoundingErrs = getProperty("AcceptXRoundingErrors");
   const int fftPart = getProperty("FFTPart");
   const auto numHists = static_cast<int>(inputWS->getNumberHistograms());
+  g_log.warning() << "ExtractFFTSpectrum - Start" << std::endl;
   MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS);
 
   Progress prog(this, 0.0, 1.0, numHists);
+  g_log.warning() << "ExtractFFTSpectrum - Before parallel" << std::endl;
 
   Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
@@ -85,6 +93,7 @@ void ExtractFFTSpectrum::exec() {
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+  g_log.warning() << "ExtractFFTSpectrum - After parallel" << std::endl;
 
   outputWS->getAxis(0)->unit() = unit;
 
@@ -98,6 +107,7 @@ void ExtractFFTSpectrum::exec() {
     extractSpectra->setProperty("XMax", xMax);
     extractSpectra->execute();
   }
+  g_log.warning() << "ExtractFFTSpectrum - After extract" << std::endl;
 
   setProperty("OutputWorkspace", outputWS);
 }

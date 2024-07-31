@@ -290,8 +290,11 @@ MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sp
 
 MatrixWorkspace_sptr CalculateIqt::fourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
   workspace = rebin(workspace, rebinParams);
+  g_log.warning() << "fourierTransform - After rebin" << std::endl;
   workspace = convertToPointData(workspace);
+  g_log.warning() << "fourierTransform - After convertToPointData" << std::endl;
   workspace = extractFFTSpectrum(workspace);
+  g_log.warning() << "fourierTransform - After extractFFTSpectrum" << std::endl;
   return workspace;
 }
 
@@ -299,8 +302,11 @@ MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 const MatrixWorkspace_sptr &resolutionWorkspace,
                                                 const std::string &rebinParams, const bool enforceNormalization) {
   workspace = fourierTransform(workspace, rebinParams);
+  g_log.warning() << "calculateIqt - After fourierTransform" << std::endl;
+
   if (enforceNormalization) {
     workspace = divide(workspace, m_sampleIntegral);
+    g_log.warning() << "calculateIqt - After divide1" << std::endl;
   }
   return divide(workspace, resolutionWorkspace);
 }
