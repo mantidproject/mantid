@@ -11,6 +11,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <cmath>
@@ -23,6 +24,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 
 namespace {
+Mantid::Kernel::Logger g_log("CalcIqt");
+
 constexpr int DEFAULT_ITERATIONS = 100;
 constexpr int DEFAULT_SEED = 89631139;
 
@@ -139,18 +142,27 @@ void CalculateIqt::exec() {
   const int nIterations = getProperty("NumberOfIterations");
   const int seed = getProperty("SeedValue");
 
+  g_log.warning() << "Before Integration/Rebin" << std::endl;
+
   m_sampleIntegral = integration(rebin(sampleWorkspace, rebinParams));
   m_resolutionIntegral = integration(rebin(resolution, rebinParams));
+  g_log.warning() << "After Integration/Rebin" << std::endl;
 
   resolution = fourierTransform(resolution, rebinParams);
+  g_log.warning() << "After fourierTransform" << std::endl;
+
   if (enforceNormalization) {
     resolution = divide(resolution, m_resolutionIntegral);
+    g_log.warning() << "After divide" << std::endl;
   }
 
   auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed, calculateErrors,
                                                     nIterations, enforceNormalization);
+  g_log.warning() << "After monteCarloErrorCalculation" << std::endl;
 
   outputWorkspace = replaceSpecialValues(outputWorkspace);
+  g_log.warning() << "After replaceSpecialValues" << std::endl;
+
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -167,6 +179,8 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorksp
                                                               const bool calculateErrors, const int nIterations,
                                                               const bool enforceNormalization) {
   auto outputWorkspace = calculateIqt(sample, resolution, rebinParams, enforceNormalization);
+  g_log.warning() << "After calculateIqt in monteCarloErrorCalculation" << std::endl;
+
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
   simulatedWorkspaces.emplace_back(outputWorkspace);
@@ -178,6 +192,8 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorksp
     for (auto i = 0; i < nIterations - 1; ++i) {
       errorCalculationProg.report("Calculating Monte Carlo errors...");
       PARALLEL_START_INTERRUPT_REGION
+      g_log.warning() << "monteCarloErrorCalculation: " << std::to_string(i) << std::endl;
+
       auto simulated = doSimulation(sample->clone(), resolution, rebinParams, mTwister, enforceNormalization);
       PARALLEL_CRITICAL(emplace_back)
       simulatedWorkspaces.emplace_back(simulated);
