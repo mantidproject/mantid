@@ -106,15 +106,6 @@ Working with CMake:
 
 Caveats and Known Issues
 ########################
-* Then you likely need to install the build tools for your platform if you receive an error such as the following (on Linux, this is typically the ``build-essential`` package. On Windows, you need to install the Visual Studio Build Tools):
-
-.. code-block:: sh
-
-  CMake Error: CMake was unable to find a build program corresponding to "Unix Makefiles".  CMAKE_MAKE_PROGRAM is not set.  You probably need to select a different build tool.
-  CMake Error: CMAKE_C_COMPILER not set, after EnableLanguage
-  CMake Error: CMAKE_CXX_COMPILER not set, after EnableLanguage
-  -- Configuring incomplete, errors occurred!
-
 
 * For Visual Studio & XCode, the libraries and executable are put into ``Mantid/bin/Release``, ``Debug``, etc.
 * There is a known issue with using source control with Eclipse on an out of source build. Set the cache variable ``ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT`` to true and CMake will generate a set of 'dummy' project files within the source tree so that you can import that project and use it for source control actions.
