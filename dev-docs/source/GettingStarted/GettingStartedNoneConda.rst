@@ -1,8 +1,8 @@
 .. _GettingStartedNoneConda:
 
-=============================
-Getting Started without Conda
-=============================
+=====================
+Develop without Conda
+=====================
 
 Environment
 ###########

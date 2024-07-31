@@ -4,10 +4,19 @@
 Develop with Conda on Linux
 ===========================
 
-Install `Git <https://git-scm.com/>`_
--------------------------------------
-* On Debian based systems (Ubuntu) install using apt with the following command: ``sudo apt-get install git``
-* On CentOS based systems (RHEL) install using yum with the following command: ``sudo yum install git``
+Install system dependencies
+---------------------------
+Mantid requires a number of system dependencies to be installed via your system's package manager before building. These include:
+
+* GCC, g++, make, etc.
+    * For Ubuntu/Debian based systems install using apt with the following command: ``sudo apt install build-essential``
+    * For CentOS/RHEL based systems install using yum with the following command: ``sudo yum groupinstall 'Development Tools'``
+* OpenGL
+    * For Ubuntu/Debian based systems install using apt with the following command: ``sudo apt install libgl1-mesa-dev``
+    * For CentOS/RHEL based systems install using yum with the following command: ``sudo yum install mesa-libGL-devel``
+* `Git <https://git-scm.com/>`_
+    * On Debian based systems (Ubuntu) install using apt with the following command: ``sudo apt install git``
+    * On CentOS based systems (RHEL) install using yum with the following command: ``sudo yum install git``
 
 Clone the mantid source code
 ----------------------------

@@ -31,12 +31,12 @@ If you're build with ``ccache`` exhibits warnings that are not usually present t
 Network Drives
 --------------
 
-The default location for the cache directory is ``$HOME/.ccache`` on Linux/macOS, and ``$HOME/AppData/Roaming/ccache`` on Windows. If you're home directory is on a network-mounted drive then the location of this cache be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
+The default location for the cache directory is ``$HOME/.ccache`` on Linux/macOS, and ``$HOME/AppData/Roaming/ccache`` on Windows. If you're home directory is on a network-mounted drive, the location of this cache can be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
 
 Configuring your build
 ######################
 
-CMake encourages the use of 'out of source' builds. This means that all generated files are placed in a separate directory structure to the source files. This separation makes a full clean easier (you just delete everything) and means that you can have different types of build (Release, Debug, different compiler versions, ....) in separate places (N.B. For Visual Studio & XCode, you can still select the type of build from within the IDE).
+CMake encourages the use of 'out of source' builds. This means that all generated files are placed in a separate directory structure to the source files. This separation makes a full clean easier (you just delete everything) and means that you can have different types of build (Release, Debug, different compiler versions, etc.) in separate places (Note that for Visual Studio & XCode, you can still select the type of build from within the IDE).
 
 CMake generators
 ----------------
@@ -49,7 +49,7 @@ Using an `extra generator <https://cmake.org/cmake/help/latest/manual/cmake-gene
 From the command line
 ---------------------
 
-* If wanting an out of source build, create the directory you want to build in and ``cd`` into it.
+* If wanting an out of source build, create the directory you want to build in and ``cd`` into it. Alternatively, you can specify the build and source directories separately by running ``cmake -B /path/to/build -S /path/to/source``.
 * On Windows, you may need to be in a Visual Studio Command Prompt.
 * Run ``cmake /path/to/Mantid``, or to ``/path/to/Mantid/Framework`` if you only want a build of the Framework (typically not recommended, but possible nonetheless). This will generate build files using the default generator for your platform (e.g. Unix Makefiles on Linux).
 * If you want to use a specific generator (run ``cmake --help`` for a list of available generators for your platform), use the ``-G`` option, e.g. ``cmake -G"NMake Makefiles" /path/to/Mantid``.
@@ -106,6 +106,15 @@ Working with CMake:
 
 Caveats and Known Issues
 ########################
+* Then you likely need to install the build tools for your platform if you receive an error such as the following (on Linux, this is typically the ``build-essential`` package. On Windows, you need to install the Visual Studio Build Tools):
+
+.. code-block:: sh
+
+  CMake Error: CMake was unable to find a build program corresponding to "Unix Makefiles".  CMAKE_MAKE_PROGRAM is not set.  You probably need to select a different build tool.
+  CMake Error: CMAKE_C_COMPILER not set, after EnableLanguage
+  CMake Error: CMAKE_CXX_COMPILER not set, after EnableLanguage
+  -- Configuring incomplete, errors occurred!
+
 
 * For Visual Studio & XCode, the libraries and executable are put into ``Mantid/bin/Release``, ``Debug``, etc.
 * There is a known issue with using source control with Eclipse on an out of source build. Set the cache variable ``ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT`` to true and CMake will generate a set of 'dummy' project files within the source tree so that you can import that project and use it for source control actions.
