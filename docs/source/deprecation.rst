@@ -40,10 +40,10 @@ To ensure users are aware of deprecated algorithms and other features
 - Add deprecation to release notes
 
 When the code is being removed from the release that is being developed
-- Post to the Mantid Forum
-- E-mail the Mantid Announcements e-mail list
+- Post to the `Mantid Forum <https://forum.mantidproject.org/>`_
+- E-mail the Mantid Announcements e-mail list (to join this list see our `Contact Us <https://www.mantidproject.org/contact>`_ page.
 - Facilities to contact users as per their own policies
-- A list of removed algorithms/features will be listed in the release notes for that release
+- A list of removed algorithms/features will be listed in the :ref:`release_notes` for that release
 
 Process of deprecating an algorithm
 -----------------------------------
