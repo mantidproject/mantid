@@ -81,6 +81,8 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
+# This policy setting allows a target to link to a target aliased to itself, but this behaviour is deprecated.
+cmake_policy(SET CMP0108 OLD)
 # Add a precompiled header where they are supported enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h
 # SRC_FILES ) Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
