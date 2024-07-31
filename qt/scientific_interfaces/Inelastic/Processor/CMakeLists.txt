@@ -21,6 +21,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    DataProcessor.h
     ElwinModel.h
     ElwinPresenter.h
     IqtModel.h
@@ -38,15 +39,7 @@ set(INC_FILES
     IIqtView.h
 )
 
-set(MOC_FILES
-    DataProcessor.h
-    DataProcessorInterface.h
-    ElwinView.h
-    IqtView.h
-    MomentsView.h
-    SqwView.h
-    SymmetriseView.h
-)
+set(MOC_FILES DataProcessorInterface.h ElwinView.h IqtView.h MomentsView.h SqwView.h SymmetriseView.h)
 
 set(UI_FILES DataProcessorInterface.ui ElwinTab.ui IqtTab.ui MomentsTab.ui SqwTab.ui SymmetriseTab.ui)
 
