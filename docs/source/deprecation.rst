@@ -24,6 +24,8 @@ What will we deprecate?
 - Soft deprecation of Algorithms superseded by newer versions of an algorithm e.g. v1 deprecated when v2 has been created.
   See below for more about soft deprecation.
 
+Apart from soft deprecation, the decision to mark an algorithm or feature as deprecated must be agreed with the `Technical
+Working Group <https://github.com/mantidproject/governance/tree/main/technical-working-group>`_.
 
 Timescales
 ----------
@@ -42,14 +44,15 @@ To ensure users are aware of deprecated algorithms and other features
 When the code is being removed from the release that is being developed
 - Post to the `Mantid Forum <https://forum.mantidproject.org/>`_
 - E-mail the Mantid Announcements e-mail list (to join this list see our `Contact Us <https://www.mantidproject.org/contact>`_ page.
-- Facilities to contact users as per their own policies
+- Technical Working Group members will communicate the removal to the facilities they represent
 - A list of removed algorithms/features will be listed in the :ref:`release_notes` for that release
 
 Process of deprecating an algorithm
 -----------------------------------
 
 - Check usage reporting as to whether algorithm/feature has been used within last 3 years.
-- If it has not be used within last three years follow Communication guide above.
+- If it has not be used within last three years make a request to the Technical Working Group (TWG) to have it deprecated
+- If approved by the TWG follow the guidance under the Communication section above.
 
 Soft Deprecation
 ----------------
