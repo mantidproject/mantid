@@ -73,8 +73,8 @@ void ExtractFFTSpectrum::exec() {
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
-    auto childFFT = createChildAlgorithm("FFT");
-    childFFT->setProperty("InputWorkspace", inputWS);
+    // auto childFFT = createChildAlgorithm("FFT");
+    // childFFT->setProperty("InputWorkspace", inputWS);
     // childFFT->setProperty("Real", i);
     // if (inputImagWS) {
     //  childFFT->setProperty<MatrixWorkspace_sptr>("InputImagWorkspace", inputImagWS);
