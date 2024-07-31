@@ -69,7 +69,7 @@ void ExtractFFTSpectrum::exec() {
   g_log.warning() << "ExtractFFTSpectrum - Before parallel" << std::endl;
 
   Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
-  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *inputImagWS, *outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
