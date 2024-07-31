@@ -69,9 +69,9 @@ void ExtractFFTSpectrum::exec() {
   g_log.warning() << "ExtractFFTSpectrum - Before parallel" << std::endl;
 
   // Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *inputImagWS, *outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
-    PARALLEL_START_INTERRUPT_REGION
+    // PARALLEL_START_INTERRUPT_REGION
 
     // auto childFFT = createChildAlgorithm("FFT");
     // childFFT->setProperty("InputWorkspace", inputWS);
@@ -91,9 +91,9 @@ void ExtractFFTSpectrum::exec() {
 
     // prog.report();
 
-    PARALLEL_END_INTERRUPT_REGION
+    // PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERRUPT_REGION
+  // PARALLEL_CHECK_INTERRUPT_REGION
   g_log.warning() << "ExtractFFTSpectrum - After parallel" << std::endl;
 
   // outputWS->getAxis(0)->unit() = unit;
