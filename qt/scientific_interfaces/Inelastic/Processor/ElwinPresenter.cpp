@@ -230,17 +230,17 @@ void ElwinPresenter::handleRun() {
   std::string const inputGroupWsName = "Elwin_Input";
   std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
   // Load input files
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
-
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
-    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    auto spectraWS = workspace->getName() + "_extracted_spectra";
+    algQueue.emplace_back(m_model->setupExtractSpectra(workspace, spectra, spectraWS));
     inputWorkspacesString += spectraWS + ",";
   }
 
   // Group input workspaces
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
   algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
