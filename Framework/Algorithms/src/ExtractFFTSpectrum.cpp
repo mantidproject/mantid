@@ -74,19 +74,19 @@ void ExtractFFTSpectrum::exec() {
     PARALLEL_START_INTERRUPT_REGION
 
     auto childFFT = createChildAlgorithm("FFT");
-    childFFT->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    childFFT->setProperty<int>("Real", i);
+    childFFT->setProperty("InputWorkspace", inputWS);
+    childFFT->setProperty("Real", i);
     // if (inputImagWS) {
     //  childFFT->setProperty<MatrixWorkspace_sptr>("InputImagWorkspace", inputImagWS);
     //  childFFT->setProperty<int>("Imaginary", i);
     //}
-    childFFT->setProperty<double>("Shift", shift);
-    childFFT->setProperty<bool>("AutoShift", autoShift);
-    childFFT->setProperty<bool>("AcceptXRoundingErrors", xRoundingErrs);
+    childFFT->setProperty("Shift", shift);
+    childFFT->setProperty("AutoShift", autoShift);
+    childFFT->setProperty("AcceptXRoundingErrors", xRoundingErrs);
     childFFT->execute();
     MatrixWorkspace_const_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
-    if (i == 0) // Only need to do this once
-      outputWS->getAxis(0)->unit() = fftTemp->getAxis(0)->unit();
+    // if (i == 0) // Only need to do this once
+    //  outputWS->getAxis(0)->unit() = fftTemp->getAxis(0)->unit();
     outputWS->setHistogram(i, fftTemp->histogram(fftPart));
 
     // prog.report();
