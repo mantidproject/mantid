@@ -31,7 +31,7 @@ If you're build with ``ccache`` exhibits warnings that are not usually present t
 Network Drives
 --------------
 
-The default location for the cache directory is ``$HOME/.ccache`` on Linux/macOS, and ``$HOME/AppData/Roaming/ccache`` on Windows. If you're home directory is on a network-mounted drive, the location of this cache can be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
+The default location for the cache directory is ``$HOME/.ccache`` on Linux/macOS, and ``$HOME/AppData/Roaming/ccache`` on Windows. If your home directory is on a network-mounted drive, the location of this cache can be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
 
 Configuring your build
 ######################
