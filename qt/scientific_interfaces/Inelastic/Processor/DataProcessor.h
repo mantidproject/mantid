@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
@@ -61,7 +62,6 @@ public:
   ~DataProcessor() override = default;
   /// Overridden from IAlgorithmRunnerSubscriber: Notifies when a batch of algorithms is completed
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
-
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces() override;
   /// Set the active workspaces used in the plotting options
