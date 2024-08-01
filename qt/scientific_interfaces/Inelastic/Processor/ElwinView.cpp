@@ -26,6 +26,7 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
+auto const tabName("Elwin");
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -40,6 +41,7 @@ ElwinView::ElwinView(QWidget *parent) : QWidget(parent), m_presenter(), m_elwTre
   m_grpManager = new QtGroupPropertyManager();
 
   m_uiForm.setupUi(parent);
+  m_uiForm.outNameWidget->setWsSuffixes(InterfaceUtils::getSampleWSSuffixes(tabName));
 }
 
 ElwinView::~ElwinView() {
@@ -181,6 +183,8 @@ void ElwinView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
 IRunView *ElwinView::getRunView() const { return m_uiForm.runWidget; }
 
 IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+
+IOutputName *ElwinView::getOutputName() const { return m_uiForm.outNameWidget; }
 
 void ElwinView::setHorizontalHeaders() {
   QStringList headers;
