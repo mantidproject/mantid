@@ -10,14 +10,12 @@ if(CMAKE_COMPILER_IS_GNUCXX
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
 endif()
 
-# This allows the use of find_package(Boost ...), from cmake version 3.30 onwards
-cmake_policy(SET CMP0167 OLD)
-
 # Keep boost python separate from other boost
 set(_boost_libs_orig ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
+set(Boost_VERBOSE "ON")
 find_package(
-  Boost ${BOOST_VERSION_REQUIRED}
+  Boost CONFIG
   COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
   REQUIRED
 )
