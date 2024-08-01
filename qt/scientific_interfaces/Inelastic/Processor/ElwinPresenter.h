@@ -92,6 +92,7 @@ private:
   WorkspaceID findWorkspaceID();
 
   IElwinView *m_view;
+  IOutputName *m_outputName;
   std::unique_ptr<IElwinModel> m_model;
   std::unique_ptr<IDataModel> m_dataModel;
   int m_selectedSpectrum;
