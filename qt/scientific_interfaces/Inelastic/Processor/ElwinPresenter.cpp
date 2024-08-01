@@ -44,6 +44,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmR
       m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
+  m_outputName = m_view->getOutputName();
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
@@ -60,6 +61,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
       m_dataModel(std::move(dataModel)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
+  m_outputName = m_view->getOutputName();
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
@@ -72,7 +74,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
 void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
   (void)algorithm;
   m_view->setRunIsRunning(false);
-
+  m_outputName->generateLabelWarning();
   if (!error) {
     if (!m_view->isGroupInput()) {
       m_model->ungroupAlgorithm("Elwin_Input");
@@ -196,11 +198,11 @@ void ElwinPresenter::handleRun() {
   m_view->setRunIsRunning(true);
 
   // Get workspace names
-  std::string const inputGroupWsName = "Elwin_Input";
-  std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
+  std::string inputGroupWsName = "Elwin_Input";
   // Load input files
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   std::string inputWorkspacesString;
+  m_model->setOutputWorkspaceNames(m_outputName->generateOutputLabel());
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
@@ -208,14 +210,13 @@ void ElwinPresenter::handleRun() {
     algQueue.emplace_back(m_model->setupExtractSpectra(workspace, spectra, spectraWS));
     inputWorkspacesString += spectraWS + ",";
   }
-
   // Group input workspaces
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
-  algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
+  algQueue.emplace_back(m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
   m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
-  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
+  m_pythonExportWsName = m_outputName->generateOutputLabel() + "_elwin_eq2";
 }
 
 /**
