@@ -4,16 +4,9 @@
 Develop with Conda on Linux
 ===========================
 
-Install system dependencies
----------------------------
-Mantid requires a number of system dependencies to be installed via your system's package manager before building. These include:
+Install Git
+-----------
 
-* GCC, g++, make, etc.
-    * For Ubuntu/Debian based systems install using apt with the following command: ``sudo apt install build-essential``
-    * For CentOS/RHEL based systems install using yum with the following command: ``sudo yum groupinstall 'Development Tools'``
-* OpenGL
-    * For Ubuntu/Debian based systems install using apt with the following command: ``sudo apt install libgl1-mesa-dev``
-    * For CentOS/RHEL based systems install using yum with the following command: ``sudo yum install mesa-libGL-devel``
 * `Git <https://git-scm.com/>`_
     * On Debian based systems (Ubuntu) install using apt with the following command: ``sudo apt install git``
     * On CentOS based systems (RHEL) install using yum with the following command: ``sudo yum install git``
@@ -44,7 +37,9 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 
 Setup the mantid conda environment
 ----------------------------------
-* With your restarted terminal.
+
+Dependencies are managed by conda via Mambaforge. The dependencies are defined in the ``mantid-developer-linux.yml`` file, located in the root of the mantid source code directory. With your restarted terminal:
+
 * Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-linux.yml``
 
 Configure CMake and generate build files

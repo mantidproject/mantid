@@ -15,15 +15,8 @@ Getting Started
    GettingStartedCondaOSX
    GettingStartedNoneConda
 
-Dependencies
-############
-
-The dependencies required to build Mantid will vary depending on your platform and the method you choose to setup with. At the very least you will need:
-
-* `Git <https://git-scm.com/>`_
-* `CMake <https://cmake.org/download/>`_ >= 3.15
-* OpenGL
-* GCC
+Environment Setup
+#################
 
 With the addition of Conda to our workflow we at present have two different methods of Getting Started with mantid development.
 Therefore you can choose which method to setup with (We recommend Conda as it will be the only supported
