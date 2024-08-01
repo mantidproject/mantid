@@ -8,6 +8,7 @@ set(SRC_FILES
     src/OutputWidget/OutputPlotOptionsModel.cpp
     src/OutputWidget/OutputPlotOptionsPresenter.cpp
     src/OutputWidget/OutputPlotOptionsView.cpp
+    src/OutputWidget/OutputName.cpp
     src/RunWidget/RunPresenter.cpp
     src/RunWidget/RunView.cpp
     src/SettingsWidget/Settings.cpp
@@ -21,6 +22,7 @@ set(SRC_FILES
 set(MOC_FILES
     inc/MantidQtWidgets/Spectroscopy/InelasticInterface.h
     inc/MantidQtWidgets/Spectroscopy/InelasticTab.h
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputName.h
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h
     inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.h
     inc/MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h
@@ -46,7 +48,7 @@ set(INC_FILES
 
 set(UI_FILES
     inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptions.ui
-    inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.ui
+    inc/MantidQtWidgets/Spectroscopy/OutputWidget/OutputName.ui inc/MantidQtWidgets/Spectroscopy/RunWidget/RunView.ui
     inc/MantidQtWidgets/Spectroscopy/SettingsWidget/InterfaceSettings.ui
 )
 
