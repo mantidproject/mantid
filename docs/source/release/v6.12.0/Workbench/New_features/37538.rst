@@ -1,0 +1,2 @@
+- Add ``mantidworkbench`` as an entry point to launch the mantidworkbench Conda package.
+- Configure the Conda ``workbench`` and ``mantidworkbench`` entry points to launch workbench with jemalloc on Linux.
