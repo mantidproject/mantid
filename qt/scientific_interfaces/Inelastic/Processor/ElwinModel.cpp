@@ -52,13 +52,10 @@ API::IConfiguredAlgorithm_sptr ElwinModel::setupGroupAlgorithm(std::string const
   return groupAlg;
 }
 
-API::IConfiguredAlgorithm_sptr ElwinModel::setupElasticWindowMultiple(std::string const &workspaceBaseName,
-                                                                      std::string const &inputGroupWsName,
+API::IConfiguredAlgorithm_sptr ElwinModel::setupElasticWindowMultiple(std::string const &inputGroupWsName,
                                                                       std::string const &sampleEnvironmentLogName,
                                                                       std::string const &sampleEnvironmentLogValue) {
-
-  setOutputWorkspaceNames(workspaceBaseName);
-
+  
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
