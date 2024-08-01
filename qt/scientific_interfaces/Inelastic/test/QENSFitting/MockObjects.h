@@ -435,6 +435,7 @@ public:
   MOCK_METHOD0(setup, void());
   MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
+  MOCK_CONST_METHOD0(getOutputName, IOutputName *());
 
   MOCK_METHOD2(setAvailableSpectra,
                void(MantidQt::MantidWidgets::WorkspaceIndex minimum, MantidQt::MantidWidgets::WorkspaceIndex maximum));
@@ -494,8 +495,7 @@ public:
                      MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
                                                               std::string const &inputGroupWsName));
   MOCK_METHOD4(setupElasticWindowMultiple,
-               MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &workspaceBaseName,
-                                                        std::string const &inputGroupWsName,
+               MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputGroupWsName,
                                                         std::string const &sampleEnvironmentLogName,
                                                         std::string const &sampleEnvironmentLogValue));
   MOCK_CONST_METHOD1(ungroupAlgorithm, void(std::string const &inputWorkspaces));

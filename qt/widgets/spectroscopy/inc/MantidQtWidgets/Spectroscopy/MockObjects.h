@@ -12,6 +12,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtWidgets/Spectroscopy/IDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputName.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
@@ -61,6 +62,19 @@ public:
   MOCK_METHOD1(addIndicesSuggestion, void(QString const &spectra));
 
   MOCK_METHOD1(displayWarning, void(QString const &message));
+};
+
+class MockOutputNameWidget : public IOutputName {
+public:
+  virtual ~MockOutputNameWidget() = default;
+
+  MOCK_METHOD1(findInsertIndexLabel, int(QString const &basename));
+  MOCK_CONST_METHOD0(getCurrentLabel, std::string());
+  MOCK_METHOD0(generateOutputLabel, std::string());
+  MOCK_CONST_METHOD0(generateLabelWarning, void());
+
+  MOCK_METHOD1(setWsSuffixes, void(QStringList const &suffixes));
+  MOCK_METHOD2(setOutputWsBasename, void(std::string const &outputBasename, std::string const &outputSuffix));
 };
 
 class MockOutputPlotOptionsModel : public IOutputPlotOptionsModel {

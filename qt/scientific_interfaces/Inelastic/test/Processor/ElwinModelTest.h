@@ -98,9 +98,14 @@ public:
     m_model->setBackgroundSubtraction(true);
     m_model->setNormalise(true);
 
+    m_model->setOutputWorkspaceNames(wsBaseName);
     auto const elwinAlg =
-        m_model->setupElasticWindowMultiple(wsBaseName, "Workspace_name_sqw", "sampleLogName", "sampleLogValue");
+        m_model->setupElasticWindowMultiple("Workspace_name_sqw", "sampleLogName", "sampleLogValue");
     batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{elwinAlg});
+
+    m_model->setOutputWorkspaceNames(wsBaseName);
+    m_model->setupElasticWindowMultiple(&batch, "Workspace_name_sqw", "sampleLogName", "sampleLogValue");
+
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =
