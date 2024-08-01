@@ -34,7 +34,7 @@ start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
-    echo "Pass 2 arguments followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+    echo "Pass 2 arguments followed by optional flags usage: conda-buildscript <path-to-workspace> <cmake-preset-name> [options]"
     exit 1
 fi
 
