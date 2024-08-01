@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import base64
 import numpy as np
+from lxml import etree
 from mantid.api import AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, IMDHistoWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction
-from lxml import etree
 
 
 class SaveMDHistoToVTK(PythonAlgorithm):
@@ -73,13 +74,15 @@ class SaveMDHistoToVTK(PythonAlgorithm):
             basis[1] = list(ws.getBasisVector(1))
             basis[2] = list(ws.getBasisVector(2))
 
+            if np.linalg.norm(basis) == 0:
+                basis = np.eye(3)
+
             skew = basis.dot(B.dot(basis.T))
+
             skew = skew / np.linalg.norm(skew, axis=0)
 
             changeOfBasisMatrix[:3, :3] = skew
             XYZ = np.dot(skew, XYZ)
-
-        XYZ = XYZ.flatten("F")
 
         root = etree.Element("VTKFile", type="StructuredGrid", version="2.2", byte_order="LittleEndian", header_type="UInt64")
         grid = etree.Element("StructuredGrid", WholeExtent=extent)
@@ -95,15 +98,15 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         fielddata.append(bb)
 
         x_axis = etree.Element("Array", type="String", Name="AxisTitleForX", ComponentName0=Xaxis, NumberOfTuples="1", format="ascii")
-        x_axis.text = " ".join(str(ord(x)) for x in Xaxis) + " 0"
+        x_axis.text = " ".join(str(ord(x)) for x in Xaxis) + " 0"  # NULL terminated
         fielddata.append(x_axis)
 
         y_axis = etree.Element("Array", type="String", Name="AxisTitleForY", ComponentName0=Yaxis, NumberOfTuples="1", format="ascii")
-        y_axis.text = " ".join(str(ord(x)) for x in Yaxis) + " 0"
+        y_axis.text = " ".join(str(ord(x)) for x in Yaxis) + " 0"  # NULL terminated
         fielddata.append(y_axis)
 
         z_axis = etree.Element("Array", type="String", Name="AxisTitleForZ", ComponentName0=Zaxis, NumberOfTuples="1", format="ascii")
-        z_axis.text = " ".join(str(ord(x)) for x in Zaxis) + " 0"
+        z_axis.text = " ".join(str(ord(x)) for x in Zaxis) + " 0"  # NULL terminated
         fielddata.append(z_axis)
 
         grid.append(fielddata)
@@ -112,17 +115,17 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         celldata = etree.Element("CellData", Scalers="Signal")
 
         signal_array = ws.getSignalArray()
-        signal = etree.Element("DataArray", Name="Signal", type="Float64", format="ascii")
-        signal.text = " ".join(f"{x:g}" for x in signal_array.ravel("F"))
+        signal = etree.Element("DataArray", Name="Signal", type=str(signal_array.dtype).capitalize(), format="binary")
+        signal.text = base64.b64encode(np.uint64(signal_array.nbytes).tobytes() + signal_array.ravel("F").tobytes())
 
         celldata.append(signal)
 
         mask = np.isfinite(signal_array)
-        ghost_array = np.full_like(signal_array, 32, dtype=int)  # 32 == CellGhostTypes::HIDDENCELL
+        ghost_array = np.full_like(signal_array, 32, dtype=np.uint8)  # 32 == CellGhostTypes::HIDDENCELL
         ghost_array[mask] = 0
 
-        ghost = etree.Element("DataArray", Name="vtkGhostType", type="UInt8", format="ascii")
-        ghost.text = " ".join(f"{x:g}" for x in ghost_array.ravel("F"))
+        ghost = etree.Element("DataArray", Name="vtkGhostType", type="UInt8", format="binary")
+        ghost.text = base64.b64encode(np.uint64(ghost_array.nbytes).tobytes() + ghost_array.ravel("F").tobytes())
 
         celldata.append(ghost)
 
@@ -130,8 +133,8 @@ class SaveMDHistoToVTK(PythonAlgorithm):
 
         points = etree.Element("Points")
 
-        xyz = etree.Element("DataArray", type="Float64", NumberOfComponents="3", format="ascii", Name="Points")
-        xyz.text = " ".join(f"{x:g}" for x in XYZ)
+        xyz = etree.Element("DataArray", type="Float64", NumberOfComponents="3", format="binary", Name="Points")
+        xyz.text = base64.b64encode(np.uint64(XYZ.nbytes).tobytes() + XYZ.ravel("F").tobytes())
 
         points.append(xyz)
         piece.append(points)
