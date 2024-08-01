@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>841</height>
+    <width>788</width>
+    <height>851</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -323,7 +323,23 @@
     </widget>
    </item>
    <item>
-    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="MantidQt::CustomInterfaces::OutputName" name="outNameWidget" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -385,6 +401,12 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::OutputName</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputName.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
