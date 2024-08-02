@@ -604,7 +604,7 @@ below have to be processed rather then spectra list
 intervals
 **/
 void LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
-                                                   DataBlockComposite &dataBlockComposite) {
+                                                   DataBlockComposite const &dataBlockComposite) {
 
   if (range_supplied || hasSpectraList || true) {
     auto generator = dataBlockComposite.getGenerator();
@@ -947,9 +947,10 @@ double LoadISISNexus2::dblSqrt(double in) { return sqrt(in); }
  *                               (contain different number of time channels)
  *
  */
-bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
-                                               int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
-                                               bool excludeMonitors, bool separateMonitors) {
+bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry const &entry, std::vector<specnum_t> &spectrum_index,
+                                               int64_t ndets, int64_t n_vms_compat_spectra,
+                                               std::map<specnum_t, std::string> const &monitors, bool excludeMonitors,
+                                               bool separateMonitors) {
   size_t nmons = monitors.size();
 
   if (nmons > 0) {
