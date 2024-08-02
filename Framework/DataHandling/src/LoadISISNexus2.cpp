@@ -745,16 +745,16 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
         data.load(static_cast<int>(blocksize * fullblocks), static_cast<int>(period_index),
                   static_cast<int>(filestart));
         for (int64_t i = 0; i < fullblocks; ++i) {
-          loadBlock(data, blocksize, i, hist_index, spectra_no, local_workspace, nLoadBlockChannels,
-                    nDetectorBlockChannels, binEdges);
+          loadBlock(data, blocksize, i, hist_index, local_workspace, nLoadBlockChannels, nDetectorBlockChannels,
+                    binEdges);
           filestart += blocksize;
         }
       }
       int64_t finalblock = rangesize - (fullblocks * blocksize);
       if (finalblock > 0) {
         data.load(static_cast<int>(finalblock), static_cast<int>(period_index), static_cast<int>(filestart));
-        loadBlock(data, finalblock, 0, hist_index, spectra_no, local_workspace, nLoadBlockChannels,
-                  nDetectorBlockChannels, binEdges);
+        loadBlock(data, finalblock, 0, hist_index, local_workspace, nLoadBlockChannels, nDetectorBlockChannels,
+                  binEdges);
       }
     }
   }
@@ -793,13 +793,11 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
  * @param blocksize :: The block-size to use
  * @param blockNumber :: The number of the block to process
  * @param hist :: The workspace index to start reading into
- * @param spec_num :: The spectrum number that matches the hist variable
  * @param local_workspace :: The workspace to fill the data with
  */
 void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t blockNumber, int64_t &hist,
-                               int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace,
-                               std::size_t const nLoadBlockChannels, std::size_t const nDetectorBlockChannels,
-                               BinEdges const &binEdges) {
+                               DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nLoadBlockChannels,
+                               std::size_t const nDetectorBlockChannels, BinEdges const &binEdges) {
   int *data_start = data() + blockNumber * blocksize * nLoadBlockChannels;
   int *data_end = data_start + nLoadBlockChannels;
   int64_t final(hist + blocksize);
@@ -817,7 +815,6 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int
     }
 
     ++hist;
-    ++spec_num;
   }
 }
 
