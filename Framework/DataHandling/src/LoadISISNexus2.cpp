@@ -796,7 +796,6 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int
   int *data_end = data_start + m_loadBlockInfo.getNumberOfChannels();
   int64_t final(hist + blocksize);
   while (hist < final) {
-    m_progress->report("Loading data");
     local_workspace->setHistogram(hist, BinEdges(m_tof_data), Counts(data_start, data_end));
     data_start += m_detBlockInfo.getNumberOfChannels();
     data_end += m_detBlockInfo.getNumberOfChannels();
