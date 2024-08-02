@@ -422,7 +422,7 @@ boost::tuple<int, int> Stitch1D::findStartEndIndexes(double startOverlap, double
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
   for (auto i = 0u; i < ws->getNumberHistograms(); ++i) {
     const auto &e = ws->e(i);
-    // Its faster to sum and then check the result is non-zero than to check each element is non-zero individually
+    // It's faster to sum and then check the result is non-zero than to check each element is non-zero individually
     if (std::accumulate(e.begin(), e.end(), 0.0) != 0.0) {
       return true;
     }
