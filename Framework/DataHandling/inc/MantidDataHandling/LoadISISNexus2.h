@@ -108,7 +108,9 @@ private:
                       bool update_spectra2det_mapping = false);
   // Load a data block
   void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize, int64_t blockNumber, int64_t &hist,
-                 int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace);
+                 int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace,
+                 std::size_t const nLoadBlockChannels, std::size_t const nDetectorBlockChannels,
+                 HistogramData::BinEdges const &binEdges);
 
   // Create period logs
   void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace);
