@@ -136,7 +136,14 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         celldata = etree.Element("CellData", Scalers="Signal")
 
         signal_array = ws.getSignalArray()
-        signal = etree.Element("DataArray", Name="Signal", type=str(signal_array.dtype).capitalize(), format="binary")
+        signal = etree.Element(
+            "DataArray",
+            Name="Signal",
+            type=str(signal_array.dtype).capitalize(),
+            format="binary",
+            RangeMin=str(np.nanmin(signal_array)),
+            RangeMax=str(np.nanmax(signal_array)),
+        )
         signal.text = base64.b64encode(np.uint64(signal_array.nbytes).tobytes() + signal_array.ravel("F").tobytes())
 
         celldata.append(signal)
