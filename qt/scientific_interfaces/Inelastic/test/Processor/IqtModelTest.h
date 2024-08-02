@@ -78,12 +78,12 @@ public:
   void setUp() override { m_model = std::make_unique<IqtModel>(); }
 
   void test_algorrithm_set_up() {
-    MantidQt::API::BatchAlgorithmRunner batch;
     // The Moments algorithm is a python algorithm and so can not be called in c++ tests
     m_sampWorkspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("sample_name_sqw", m_sampWorkspace);
     m_resWorkspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("res_name_sqw", m_resWorkspace);
+    MantidQt::API::BatchAlgorithmRunner batch;
 
     m_model->setSampleWorkspace("sample_name_sqw");
     m_model->setResWorkspace("res_name_sqw");
@@ -94,7 +94,8 @@ public:
     m_model->setEnforceNormalization(true);
     m_model->setNIterations("50");
 
-    m_model->setupTransformToIqt(&batch, "outputWS");
+    auto const transformAlgo = m_model->setupTransformToIqt("outputWS");
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{transformAlgo});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =

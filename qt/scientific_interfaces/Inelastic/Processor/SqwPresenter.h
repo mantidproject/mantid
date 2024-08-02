@@ -41,7 +41,8 @@ public:
 class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataProcessor, public ISqwPresenter, public IRunSubscriber {
 
 public:
-  SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);
+  SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, ISqwView *view,
+               std::unique_ptr<ISqwModel> model);
   ~SqwPresenter() = default;
 
   // runSubscriber

@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 #include <QDoubleValidator>
 #include <QFileInfo>
 
@@ -43,20 +44,22 @@ SqwModel::SqwModel()
     : m_inputWorkspace(), m_baseName(), m_eFixed(), m_qLow(), m_qWidth(0.05), m_qHigh(), m_eLow(), m_eWidth(0.005),
       m_eHigh(), m_rebinInEnergy(false) {}
 
-void SqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
-  if (m_rebinInEnergy) {
-    std::string eRebinString = std::to_string(m_eLow) + "," + std::to_string(m_eWidth) + "," + std::to_string(m_eHigh);
-    auto const eRebinWsName = m_baseName + "_r";
-    auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
-    energyRebinAlg->initialize();
-    energyRebinAlg->setProperty("InputWorkspace", m_inputWorkspace);
-    energyRebinAlg->setProperty("OutputWorkspace", eRebinWsName);
-    energyRebinAlg->setProperty("Params", eRebinString);
-    batchAlgoRunner->addAlgorithm(energyRebinAlg);
-  }
+API::IConfiguredAlgorithm_sptr SqwModel::setupRebinAlgorithm() const {
+  std::string eRebinString = std::to_string(m_eLow) + "," + std::to_string(m_eWidth) + "," + std::to_string(m_eHigh);
+  auto const eRebinWsName = m_baseName + "_r";
+  auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
+  energyRebinAlg->initialize();
+  auto rebinProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  rebinProps->setProperty("InputWorkspace", m_inputWorkspace);
+  rebinProps->setProperty("OutputWorkspace", eRebinWsName);
+  rebinProps->setProperty("Params", eRebinString);
+
+  MantidQt::API::IConfiguredAlgorithm_sptr rebinAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(energyRebinAlg, std::move(rebinProps));
+  return rebinAlg;
 }
 
-void SqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() const {
   std::string qRebinString = std::to_string(m_qLow) + "," + std::to_string(m_qWidth) + "," + std::to_string(m_qHigh);
 
   auto const sqwWsName = getOutputWorkspace();
@@ -64,32 +67,35 @@ void SqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlg
 
   auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
   sqwAlg->initialize();
-  sqwAlg->setProperty("OutputWorkspace", sqwWsName);
-  sqwAlg->setProperty("QAxisBinning", qRebinString);
-  sqwAlg->setProperty("EMode", "Indirect");
-  sqwAlg->setProperty("EFixed", m_eFixed);
-  sqwAlg->setProperty("Method", "NormalisedPolygon");
-  sqwAlg->setProperty("ReplaceNaNs", true);
-
   auto sqwInputProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  sqwInputProps->setProperty("OutputWorkspace", sqwWsName);
+  sqwInputProps->setProperty("QAxisBinning", qRebinString);
+  sqwInputProps->setProperty("EMode", "Indirect");
+  sqwInputProps->setProperty("EFixed", m_eFixed);
+  sqwInputProps->setProperty("Method", "NormalisedPolygon");
+  sqwInputProps->setProperty("ReplaceNaNs", true);
+
   sqwInputProps->setPropertyValue("InputWorkspace", m_rebinInEnergy ? eRebinWsName : m_inputWorkspace);
 
-  batchAlgoRunner->addAlgorithm(sqwAlg, std::move(sqwInputProps));
+  MantidQt::API::IConfiguredAlgorithm_sptr qwAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(sqwAlg, std::move(sqwInputProps));
+  return qwAlg;
 }
 
-void SqwModel::setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+API::IConfiguredAlgorithm_sptr SqwModel::setupAddSampleLogAlgorithm() const {
   auto const sqwWsName = getOutputWorkspace();
   // Add sample log for S(Q, w) algorithm used
   auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
   sampleLogAlg->initialize();
-  sampleLogAlg->setProperty("LogName", "rebin_type");
-  sampleLogAlg->setProperty("LogType", "String");
-  sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
-
   auto inputToAddSampleLogProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  inputToAddSampleLogProps->setPropertyValue("Workspace", sqwWsName);
+  inputToAddSampleLogProps->setProperty("LogName", "rebin_type");
+  inputToAddSampleLogProps->setProperty("LogType", "String");
+  inputToAddSampleLogProps->setProperty("LogText", "NormalisedPolygon");
+  inputToAddSampleLogProps->setProperty("Workspace", sqwWsName);
 
-  batchAlgoRunner->addAlgorithm(sampleLogAlg, std::move(inputToAddSampleLogProps));
+  MantidQt::API::IConfiguredAlgorithm_sptr sampLogAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(sampleLogAlg, std::move(inputToAddSampleLogProps));
+  return sampLogAlg;
 }
 
 void SqwModel::setInputWorkspace(const std::string &workspace) {
@@ -113,6 +119,8 @@ void SqwModel::setEMax(double eMax) { m_eHigh = eMax; }
 void SqwModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
 
 void SqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
+
+bool SqwModel::isRebinInEnergy() const { return m_rebinInEnergy; }
 
 std::string SqwModel::getOutputWorkspace() const { return m_baseName + "_sqw"; }
 
