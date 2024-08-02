@@ -9,7 +9,7 @@ import base64
 import numpy as np
 from lxml import etree
 from mantid.api import AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, IMDHistoWorkspaceProperty, PropertyMode
-from mantid.kernel import Direction
+from mantid.kernel import Direction, SpecialCoordinateSystem
 
 
 class SaveMDHistoToVTK(PythonAlgorithm):
@@ -66,7 +66,14 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         XYZ = np.stack((xyz[2].ravel(), xyz[1].ravel(), xyz[0].ravel()))
 
         changeOfBasisMatrix = np.eye(4)
-        if x.getMDFrame().isQ() and y.getMDFrame().isQ() and z.getMDFrame().isQ():
+        if (
+            ws.getSpecialCoordinateSystem() == SpecialCoordinateSystem.HKL
+            and x.getMDFrame().isQ()
+            and y.getMDFrame().isQ()
+            and z.getMDFrame().isQ()
+            and ws.getNumExperimentInfo() > 0
+            and ws.getExperimentInfo(0).sample().hasOrientedLattice()
+        ):
             B = ws.getExperimentInfo(0).sample().getOrientedLattice().getB()
 
             basis = np.eye(3)
@@ -90,7 +97,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         fielddata = etree.Element("FieldData")
 
         change = etree.Element("DataArray", type="Float64", Name="ChangeOfBasisMatrix", NumberOfComponents="16", NumberOfTuples="1")
-        change.text = " ".join(str(x) for x in changeOfBasisMatrix.flatten())
+        change.text = " ".join(f"{x:g}" for x in changeOfBasisMatrix.flatten())
         fielddata.append(change)
 
         bb = etree.Element("DataArray", type="Float64", Name="BoundingBoxInModelCoordinates", NumberOfComponents="6", NumberOfTuples="1")
