@@ -109,10 +109,11 @@ set(PYTHON_ARGS " -Wdefault::DeprecationWarning -Werror:::mantid -Werror:::manti
 set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
 set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
 set(LOCAL_PYPATH "${CMAKE_CURRENT_BINARY_DIR}/bin/")
+# The python command to start workbench
+set(MANTIDWORKBENCH_EXEC "-c \"from workbench.app.main import main; main()\"")
 
 # used by mantidworkbench
 if(ENABLE_WORKBENCH)
-  set(MANTIDWORKBENCH_EXEC "-m workbench") # what the actual thing is called
   configure_file(
     ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh @ONLY
@@ -138,13 +139,11 @@ if(ENABLE_WORKBENCH)
       set(LOCAL_PYPATH "\${CONDA_PREFIX}/bin:\${CONDA_PREFIX}/lib:\${CONDA_PREFIX}/plugins")
       set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
       set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
-      set(MANTIDWORKBENCH_EXEC "-m workbench") # what the actual thing is called
       set(DEST_FILENAME_SUFFIX "")
     elseif(${install_type} STREQUAL "standalone")
       set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
       set(PYTHON_EXEC_LOCAL "\${INSTALLDIR}/bin/python")
       set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
-      set(MANTIDWORKBENCH_EXEC "-m workbench")
       set(DEST_FILENAME_SUFFIX ".standalone")
     else()
       message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")
