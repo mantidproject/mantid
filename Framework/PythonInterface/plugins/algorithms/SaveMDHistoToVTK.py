@@ -10,6 +10,7 @@ import numpy as np
 from lxml import etree
 from mantid.api import AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, IMDHistoWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, SpecialCoordinateSystem
+from mantid.geometry import UnitCell
 
 
 class SaveMDHistoToVTK(PythonAlgorithm):
@@ -76,15 +77,28 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         ):
             B = ws.getExperimentInfo(0).sample().getOrientedLattice().getB()
 
-            basis = np.eye(3)
-            basis[0] = list(ws.getBasisVector(0))
-            basis[1] = list(ws.getBasisVector(1))
-            basis[2] = list(ws.getBasisVector(2))
+            skew = B
 
-            if np.linalg.norm(basis) == 0:
+            run = ws.getExperimentInfo(0).run()
+            if run.hasProperty("W_MATRIX"):
+                W = np.array(run.getProperty("W_MATRIX").value).reshape((3, 3))
+                B = B.dot(W)
+                uc = UnitCell()
+                uc.recalculateFromGstar(B.T.dot(B))
+                skew = uc.getB()
+            else:
                 basis = np.eye(3)
 
-            skew = basis.dot(B.dot(basis.T))
+                try:
+                    basis[0] = list(ws.getBasisVector(0))
+                    basis[1] = list(ws.getBasisVector(1))
+                    basis[2] = list(ws.getBasisVector(2))
+                except ValueError:
+                    # log error
+                    pass
+                else:
+                    if np.linalg.norm(basis) != 0:
+                        skew = basis.dot(B.dot(basis.T))
 
             skew = skew / np.linalg.norm(skew, axis=0)
 
