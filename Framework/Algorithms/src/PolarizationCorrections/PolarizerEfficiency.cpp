@@ -37,24 +37,32 @@ static const std::string OUTPUT_FILE_PATH = "OutputFilePath";
 namespace {
 static const std::string FILE_EXTENSION = ".nxs";
 
-void validateInputWorkspace(MatrixWorkspace_sptr const &ws, std::string const &propertyName,
+/**
+ * Validate the given workspace to ensure it is usable in the corrections.
+ * @param ws The workspace to check.
+ * @param propertyName The property the workspace came from.
+ * @param errorList The list of errors currently found during the validation.
+ * @return True if validation can continue afterwards. Stops nullptrs being accessed/checked later in the validation.
+ */
+bool validateInputWorkspace(MatrixWorkspace_sptr const &ws, std::string const &propertyName,
                             std::map<std::string, std::string> &errorList) {
   if (ws == nullptr) {
     errorList[propertyName] = "All input workspaces must be of type MatrixWorkspace.";
-    return;
+    return false;
   }
   if (ws->getNumberHistograms() != 1) {
     errorList[propertyName] = "All input workspaces must contain a single histogram.";
-    return;
+    return true;
   }
   if (ws->getAxis(0)->unit()->unitID() != "Wavelength") {
     errorList[propertyName] = "All input workspaces must be in units of Wavelength.";
-    return;
+    return true;
   }
   if (!ws->isHistogramData() && ws->isDistribution()) {
     errorList[propertyName] = "All input workspaces must be using distributed histogram data.";
-    return;
+    return true;
   }
+  return true;
 }
 
 } // unnamed namespace
@@ -100,7 +108,9 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   } else {
     for (size_t i = 0; i < inputWsCount; ++i) {
       const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(i));
-      validateInputWorkspace(stateWs, PropertyNames::INPUT_WORKSPACE, errorList);
+      if (!validateInputWorkspace(stateWs, PropertyNames::INPUT_WORKSPACE, errorList)) {
+        return errorList;
+      };
     }
   }
   const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
