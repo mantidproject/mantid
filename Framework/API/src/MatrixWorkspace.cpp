@@ -114,10 +114,11 @@ MatrixWorkspace::MatrixWorkspace()
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
       m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
-      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
+      m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
+  m_isCommonBinsFlag.store(other.m_isCommonBinsFlag.load());
   m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
@@ -1055,15 +1056,15 @@ bool MatrixWorkspace::isCommonBins() const {
   for (size_t i = 1; i < numHist; ++i) {
     if (x(i).size() != numBins) {
       m_isCommonBinsFlag = false;
-      break;
+      return m_isCommonBinsFlag;
     }
   }
 
   // Check that the values of each histogram are identical.
-  if (m_isCommonBinsFlag) {
-    const auto lastSpec = static_cast<int>(numHist) - 1;
-    PARALLEL_FOR_IF(this->threadSafe())
-    for (int i = 0; i < lastSpec; ++i) {
+  const auto lastSpec = static_cast<int>(numHist) - 1;
+  PARALLEL_FOR_IF(this->threadSafe())
+  for (int i = 0; i < lastSpec; ++i) {
+    if (m_isCommonBinsFlag) {
       const auto specIndex = static_cast<std::size_t>(i);
       const auto &xi = x(specIndex);
       const auto &xip1 = x(specIndex + 1);
