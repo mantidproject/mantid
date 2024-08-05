@@ -30,7 +30,7 @@ from mantid.kernel import (
 from mantid.fitfunctions import FunctionWrapper
 import numpy as np
 from scipy.ndimage import binary_dilation
-from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
+from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
 from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
 from typing import Callable
@@ -585,10 +585,10 @@ class PeakFitter:
         return list(zip(*np.where(mask)))
 
     def estimate_intensity_sigma_and_background(self, irow, icol):
-        ipositive = self.y[irow, icol, :] > 0
-        if not ipositive.any():
+        if not np.any(self.y[irow, icol, :] > 0):
             return 0.0, 0.0, 0.0
-        bg = np.min(self.y[irow, icol, ipositive])
+        ibg, _ = PeakData.find_bg_pts_seed_skew(self.y[irow, icol, :])
+        bg = np.mean(self.y[irow, icol, ibg])
         bin_width = np.diff(self.tofs)
         intensity = np.sum((0.5 * (self.y[irow, icol, 1:] + self.y[irow, icol, :-1]) - bg) * bin_width)
         sigma = np.sqrt(np.sum(0.5 * (self.esq[irow, icol, 1:] + self.esq[irow, icol, :-1]) * (bin_width**2)))
