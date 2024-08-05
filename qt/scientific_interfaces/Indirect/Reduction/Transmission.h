@@ -35,6 +35,7 @@ private slots:
   void setSaveEnabled(bool enabled);
 
 private:
+  void setLoadHistory(bool doLoadHistory) override;
   void setInstrument(QString const &instrumentName);
   void updateInstrumentConfiguration() override;
 

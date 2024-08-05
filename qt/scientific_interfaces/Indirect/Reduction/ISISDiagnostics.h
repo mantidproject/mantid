@@ -73,6 +73,7 @@ private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void setPeakRangeLimits(double peakMin, double peakMax);
   void setBackgroundRangeLimits(double backgroundMin, double backgroundMax);
