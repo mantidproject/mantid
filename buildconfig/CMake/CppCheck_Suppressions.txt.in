@@ -150,7 +150,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:43
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/WorkspaceJoiners.h:35
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CalculateCountRate.h:31
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:115
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddNote.cpp:109
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateCountRate.cpp:204
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddTimeSeriesLog.cpp:111
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AppendSpectra.cpp:142
