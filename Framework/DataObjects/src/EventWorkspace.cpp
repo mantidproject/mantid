@@ -684,7 +684,7 @@ void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress *prog
   // Create the thread pool using tbb
   EventSortingTask task(this, sortType, prog);
   constexpr size_t GRAINSIZE_DEFAULT{100}; // somewhat arbitrary
-  const size_t grainsize = std::min<size_t>(GRAINSIZE_DEFAULT, this->getNumberHistograms() / GRAINSIZE_DEFAULT);
+  const size_t grainsize = std::min<size_t>(GRAINSIZE_DEFAULT, (this->getNumberHistograms() / GRAINSIZE_DEFAULT) + 1);
   tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size(), grainsize), task);
 }
 
