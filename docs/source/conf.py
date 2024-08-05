@@ -237,4 +237,10 @@ intersphinx_mapping = {
 # Suppress build warnings of the type:
 # "WARNING: document isn't included in any toctree"
 # for individual release notes files.
-exclude_patterns = ["release/templates/*.rst", "release/**/Bugfixes/*.rst", "release/**/New_features/*.rst", "release/**/Used/*.rst"]
+exclude_patterns = [
+    "release/templates/*.rst",
+    "release/**/Bugfixes/*.rst",
+    "release/**/New_features/*.rst",
+    "release/**/Used/*.rst",
+    "release/**/Deprecations/*.rst",
+]
