@@ -39,6 +39,9 @@ public:
   void setPlotErrorBarsChecked(bool check) override;
   bool isPlotErrorBarsChecked() const override;
 
+  void setLoadHistoryChecked(bool check) override;
+  bool isLoadHistoryChecked() const override;
+
   void setDeveloperFeatureFlags(QStringList const &flags) override;
   QStringList developerFeatureFlags() const override;
 
