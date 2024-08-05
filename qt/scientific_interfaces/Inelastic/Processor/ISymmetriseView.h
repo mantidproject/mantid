@@ -39,6 +39,7 @@ public:
 
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
+  virtual void setLoadHistory(bool doLoad) = 0;
 
   virtual double getElow() const = 0;
   virtual double getEhigh() const = 0;

@@ -76,6 +76,7 @@ protected:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoad) override;
 
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   ISymmetriseView *m_view;

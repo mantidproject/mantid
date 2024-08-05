@@ -287,6 +287,11 @@ void IqtView::setResolutionFBSuffixes(const QStringList &suffix) { m_uiForm.dsRe
 
 void IqtView::setResolutionWSSuffixes(const QStringList &suffix) { m_uiForm.dsResolution->setWSSuffixes(suffix); }
 
+void IqtView::setLoadHistory(bool doLoad) {
+  m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoad);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoad);
+}
+
 void IqtView::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void IqtView::setWatchADS(bool watch) { m_uiForm.ppPlot->watchADS(watch); }

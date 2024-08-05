@@ -33,6 +33,7 @@ public:
 
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
+  virtual void setLoadHistory(bool doLoad) = 0;
   virtual std::tuple<double, double> getQRangeFromPlot() const = 0;
   virtual std::tuple<double, double> getERangeFromPlot() const = 0;
   virtual std::string getDataName() const = 0;

@@ -82,6 +82,7 @@ void DataProcessorInterface::initLayout() {
 void DataProcessorInterface::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_presenters.begin(); tab != m_presenters.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->enableLoadHistoryProperty(settings.at("LoadHistory").toBool());
   }
 }
 
