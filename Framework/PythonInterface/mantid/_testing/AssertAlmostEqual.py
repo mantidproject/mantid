@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import CompareWorkspaces
+from mantid.kernel import Property
 
 
-def assert_almost_equal(Workspace1, Workspace2, rtol=EMPTY_DBL, atol=EMPTY_DBL, **kwargs):
+def assert_almost_equal(Workspace1, Workspace2, rtol=Property.EMPTY_DBL, atol=Property.EMPTY_DBL, **kwargs):
     """
     Raises an assertion error if two workspaces are not within specified tolerance.
 
@@ -29,25 +30,23 @@ def assert_almost_equal(Workspace1, Workspace2, rtol=EMPTY_DBL, atol=EMPTY_DBL, 
         If atol and rtol are both provided
 
     """
-    rtol = kwargs.pop("rtol", None)
-    atol = kwargs.pop("atol", None)
-    _rel = False
-    tolerance = 1e-10
+    # check arguments
+    if len(set(kwargs.keys()).intersection({"Workspace1", "Workspace2", "Tolerance", "ToleranceRelErr"})) > 0:
+        raise ValueError("Workspace1, Workspace2, Tolerance, ToleranceRelErr cannot be in passed as additional parameters")
 
-    if rtol is not None and atol is not None:
-        raise ValueError("Specify rtol or atol, not both")
-    elif rtol is None and atol is None:
+    if rtol == Property.EMPTY_DBL and atol == Property.EMPTY_DBL:
         raise ValueError("Specify rtol or atol")
-    elif atol is not None:
-        if atol > 0.0:
-            tolerance = atol
-    elif rtol is not None:
-        if rtol > 0.0:
-            tolerance = rtol
-            _rel = True
 
-    result, message = CompareWorkspaces(Workspace1, Workspace2, Tolerance=tolerance, ToleranceRelErr=_rel, **kwargs)
-    msg_dict = message.toDict()
-    if not result:
-        msg = ", ".join(msg_dict["Message"]) + f", Workspaces are not within tolerance ({tolerance})"
-        raise AssertionError(msg)
+    if rtol > Property.EMPTY_DBL:
+        result, message = CompareWorkspaces(Workspace1, Workspace2, Tolerance=rtol, ToleranceRelErr=True, **kwargs)
+        msg_dict = message.toDict()
+        if not result:
+            msg = ", ".join(msg_dict["Message"]) + f", Workspaces are not within relative tolerance ({rtol})"
+            raise AssertionError(msg)
+
+    if atol > Property.EMPTY_DBL:
+        result, message = CompareWorkspaces(Workspace1, Workspace2, Tolerance=atol, ToleranceRelErr=False, **kwargs)
+        msg_dict = message.toDict()
+        if not result:
+            msg = ", ".join(msg_dict["Message"]) + f", Workspaces are not within absolute tolerance ({atol})"
+            raise AssertionError(msg)
