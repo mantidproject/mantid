@@ -98,7 +98,7 @@
          <item>
           <widget class="QCheckBox" name="ckLoadHistory">
            <property name="text">
-            <string>Load History</string>
+            <string>Load Workspace History (slower)</string>
            </property>
            <property name="checked">
             <bool>true</bool>
