@@ -52,7 +52,7 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) { loadSettings(s
  */
 void CorrectionsTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
-void CorrectionsTab::enableLoadHistoryProperty(bool doLoad) { setLoadHistory(doLoad); }
+void CorrectionsTab::enableLoadHistoryProperty(bool doLoadHistory) { setLoadHistory(doLoadHistory); }
 
 /**
  * Check that the binning between two workspaces matches.

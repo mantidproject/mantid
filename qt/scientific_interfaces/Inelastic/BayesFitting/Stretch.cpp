@@ -69,9 +69,9 @@ void Stretch::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void Stretch::setLoadHistory(bool doLoad) {
-  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoad);
-  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoad);
+void Stretch::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void Stretch::handleValidation(IUserInputValidator *validator) const {

@@ -47,7 +47,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
-  void setLoadHistory(bool doLoad) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 

@@ -80,7 +80,7 @@ public:
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
-  void enableLoadHistoryProperty(bool doLoad);
+  void enableLoadHistoryProperty(bool doLoadHistory);
 
 protected:
   /// Check the binning between two workspaces match
@@ -101,7 +101,7 @@ protected:
 private:
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setLoadHistory(bool doLoad) { (void)doLoad; };
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; };
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };

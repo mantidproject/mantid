@@ -78,9 +78,9 @@ void ResNorm::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void ResNorm::setLoadHistory(bool doLoad) {
-  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoad);
-  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoad);
+void ResNorm::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void ResNorm::handleValidation(IUserInputValidator *validator) const {

@@ -163,7 +163,7 @@ void IqtPresenter::setFileExtensionsByName(bool filter) {
   m_view->setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void IqtPresenter::setLoadHistory(bool doLoad) { m_view->setLoadHistory(doLoad); }
+void IqtPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 /**
  * Retrieves the selected spectrum.

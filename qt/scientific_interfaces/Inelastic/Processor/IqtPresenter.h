@@ -58,7 +58,7 @@ protected:
 
 private:
   void setFileExtensionsByName(bool filter) override;
-  void setLoadHistory(bool doLoad) override;
+  void setLoadHistory(bool doLoadHistory) override;
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
   /// Sets the selected spectrum

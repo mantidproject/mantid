@@ -108,7 +108,9 @@ void MomentsView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->s
 
 void MomentsView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
-void MomentsView::setLoadHistory(bool doLoad) { m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoad); }
+void MomentsView::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoadHistory);
+}
 
 IOutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 

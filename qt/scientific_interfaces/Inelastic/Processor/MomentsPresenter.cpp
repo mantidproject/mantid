@@ -117,7 +117,7 @@ void MomentsPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void MomentsPresenter::setLoadHistory(bool doLoad) { m_view->setLoadHistory(doLoad); }
+void MomentsPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 /**
  * Handle when Run is clicked

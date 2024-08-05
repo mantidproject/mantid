@@ -55,7 +55,7 @@ private slots:
 
 private:
   void setFileExtensionsByName(bool filter) override;
-  void setLoadHistory(bool doLoad) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void populateContourWorkspaceComboBox();
   int displaySaveDirectoryMessage();

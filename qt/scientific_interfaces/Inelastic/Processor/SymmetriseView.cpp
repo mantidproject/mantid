@@ -282,7 +282,9 @@ void SymmetriseView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput
 
 void SymmetriseView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
-void SymmetriseView::setLoadHistory(bool doLoad) { return m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoad); }
+void SymmetriseView::setLoadHistory(bool doLoadHistory) {
+  return m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoadHistory);
+}
 
 /**
  * Plots a new workspace in the mini plot when it is loaded form the data
