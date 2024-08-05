@@ -584,7 +584,7 @@ void InstrumentWidget::setSurfaceType(int type) {
       showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
       // By default this is should be off for now.
       showPeakRelativeIntensity = settings.value("ShowPeakRelativeIntensities", false).toBool();
-      backgroundColor = settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>();
+      backgroundColor = settings.value("BackgroundColor", QColor("black")).value<QColor>();
       settings.endGroup();
     }
 
