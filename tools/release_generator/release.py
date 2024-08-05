@@ -131,6 +131,7 @@ inelastic = ["Algorithms"]
 muon = ["FDA", "Muon_Analysis", "MA_FDA", "ALC", "Elemental_Analysis", "Algorithms"]
 
 subfolders = ["Bugfixes", "New_features"]
+deprecated_subfolders = ["Bugfixes", "New_features", "Deprecated", "Removed"]
 muon_subfolders = ["Bugfixes"]
 #################################################################################
 
@@ -225,18 +226,29 @@ def makeSubDirectoriesFromList(directoryList, upperDirectory, HigherLevel):
         makeReleaseNoteSubfolders(combinedDirectory, HigherLevel)
 
 
+def subfolder_creation(directory, HigherLevel, folder):
+    subfolderName = HigherLevel / directory / folder
+    subfolderName.mkdir(parents=True, exist_ok=True)
+    makeGitkeep(subfolderName)
+
+
 def makeReleaseNoteSubfolders(directory, HigherLevel):
     directoryStr = str(directory)
     for folder in subfolders:
         if "Muon" in directoryStr:
             for single_folder in muon_subfolders:
-                subfolderName = HigherLevel / directory / single_folder
-                subfolderName.mkdir(parents=True, exist_ok=True)
-                makeGitkeep(subfolderName)
+                subfolder_creation(directory, HigherLevel, single_folder)
+        if "Framework" in directoryStr:
+            if "Algorithm" in directoryStr:
+                for single_folder in deprecated_subfolders:
+                    subfolder_creation(directory, HigherLevel, single_folder)
+            if "Fit_Functions" in directoryStr:
+                for single_folder in deprecated_subfolders:
+                    subfolder_creation(directory, HigherLevel, single_folder)
+            else:
+                subfolder_creation(directory, HigherLevel, folder)
         else:
-            subfolderName = HigherLevel / directory / folder
-            subfolderName.mkdir(parents=True, exist_ok=True)
-            makeGitkeep(subfolderName)
+            subfolder_creation(directory, HigherLevel, folder)
 
 
 def makeGitkeep(subfolderName):
