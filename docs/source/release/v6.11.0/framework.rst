@@ -16,8 +16,8 @@ Bugfixes
 ############
 .. amalgamate:: Framework/Algorithms/Bugfixes
 
-Deprecations
-############
+Removed
+#######
 .. amalgamate:: Framework/Algorithms/Deprecations
 
 Fit Functions

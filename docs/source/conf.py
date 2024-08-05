@@ -242,5 +242,5 @@ exclude_patterns = [
     "release/**/Bugfixes/*.rst",
     "release/**/New_features/*.rst",
     "release/**/Used/*.rst",
-    "release/**/Deprecations/*.rst",
+    "release/**/Removed/*.rst",
 ]
