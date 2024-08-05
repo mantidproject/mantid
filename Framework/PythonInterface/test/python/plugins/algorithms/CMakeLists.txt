@@ -116,6 +116,7 @@ set(TEST_PY_FILES
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveMDHistoToVTKTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py

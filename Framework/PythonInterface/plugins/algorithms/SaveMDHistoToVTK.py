@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -57,7 +57,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         z = ws.getZDimension()
         Z = np.linspace(z.getMinimum(), z.getMaximum(), z.getNBoundaries())
 
-        boundingBoxInModelCoordinates = [x.getMinimum(), x.getMaximum(), y.getMinimum(), y.getMaximum(), z.getMinimum(), z.getMaximum()]
+        boundingBoxInModelCoordinates = (x.getMinimum(), x.getMaximum(), y.getMinimum(), y.getMaximum(), z.getMinimum(), z.getMaximum())
         extent = f"0 {x.getNBins()} 0 {y.getNBins()} 0 {z.getNBins()}"
         Xaxis = x.name
         Yaxis = y.name
@@ -111,7 +111,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         fielddata = etree.Element("FieldData")
 
         change = etree.Element("DataArray", type="Float64", Name="ChangeOfBasisMatrix", NumberOfComponents="16", NumberOfTuples="1")
-        change.text = " ".join(f"{x:g}" for x in changeOfBasisMatrix.flatten())
+        change.text = " ".join(f"{x:.16g}" for x in changeOfBasisMatrix.flatten())
         fielddata.append(change)
 
         bb = etree.Element("DataArray", type="Float64", Name="BoundingBoxInModelCoordinates", NumberOfComponents="6", NumberOfTuples="1")
