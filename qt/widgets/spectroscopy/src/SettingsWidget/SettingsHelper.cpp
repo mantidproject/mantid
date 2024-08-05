@@ -10,6 +10,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <iostream>
 
 namespace {
 
@@ -28,6 +29,7 @@ QVariant getSetting(std::string const &settingGroup, std::string const &settingN
 
   return settingValue;
 }
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::SettingsHelper {
@@ -62,6 +64,12 @@ void setExternalPlotErrorBars(bool errorBars) { setSetting(INDIRECT_SETTINGS_GRO
 
 void setDeveloperFeatureFlags(QStringList const &flags) {
   setSetting(INDIRECT_SETTINGS_GROUP, FEATURE_FLAGS_PROPERTY, flags);
+}
+
+bool indirectSettingsCreated() {
+  // Any Indirect Settings path will suffice, as all indirect settings are created in the same function call.
+  auto const settingPath = QString::fromStdString(INDIRECT_SETTINGS_GROUP + "/" + LOAD_HISTORY_PROPERTY);
+  return QSettings().contains(settingPath);
 }
 
 } // namespace MantidQt::CustomInterfaces::SettingsHelper

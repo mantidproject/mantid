@@ -25,6 +25,7 @@ MANTID_SPECTROSCOPY_DLL bool externalPlotErrorBars();
 MANTID_SPECTROSCOPY_DLL bool loadHistory();
 MANTID_SPECTROSCOPY_DLL QStringList developerFeatureFlags();
 MANTID_SPECTROSCOPY_DLL bool hasDevelopmentFlag(std::string const &flag);
+MANTID_SPECTROSCOPY_DLL bool indirectSettingsCreated();
 
 } // namespace SettingsHelper
 } // namespace CustomInterfaces

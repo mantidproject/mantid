@@ -14,12 +14,21 @@ using namespace SettingsHelper;
 SettingsPresenter::SettingsPresenter(std::unique_ptr<SettingsModel> model, ISettingsView *view)
     : m_model(std::move(model)), m_view(view) {
   m_view->subscribePresenter(this);
+  iniSettings();
   loadSettings();
 }
 
 QWidget *SettingsPresenter::getView() { return m_view->getView(); }
 
 void SettingsPresenter::subscribeParent(ISettings *parent) { m_parent = parent; }
+
+void SettingsPresenter::iniSettings() {
+  if (!indirectSettingsCreated()) {
+    setRestrictInputDataByName(true);
+    setExternalPlotErrorBars(false);
+    setLoadHistory(true);
+  }
+}
 
 void SettingsPresenter::notifyOkClicked() {
   saveSettings();

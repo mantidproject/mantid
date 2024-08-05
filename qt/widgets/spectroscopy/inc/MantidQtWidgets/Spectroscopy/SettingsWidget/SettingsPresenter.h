@@ -24,6 +24,7 @@ public:
   QWidget *getView();
   void subscribeParent(ISettings *parent);
 
+  void iniSettings();
   void loadSettings();
 
   void notifyOkClicked();
