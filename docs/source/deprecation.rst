@@ -53,6 +53,8 @@ Process of deprecating an algorithm
 - Check usage reporting as to whether algorithm/feature has been used within last 3 years.
 - If it has not be used within last three years make a request to the Technical Working Group (TWG) to have it deprecated
 - If approved by the TWG follow the guidance under the Communication section above.
+- If removing more than one algorithm/feature from the code base do each one in a separate pull request. This is to allow
+  for deprecations to be reversed if necessary.
 
 Soft Deprecation
 ----------------
