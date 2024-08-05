@@ -711,7 +711,6 @@ set(INC_FILES
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
-    AddNoteTest.h
     AddPeakTest.h
     AddSampleLogTest.h
     AddTimeSeriesLogTest.h
