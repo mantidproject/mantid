@@ -50,6 +50,7 @@ private slots:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoad) override;
 
   void processLogs();
   void addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;

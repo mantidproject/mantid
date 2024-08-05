@@ -69,6 +69,11 @@ void Stretch::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
+void Stretch::setLoadHistory(bool doLoad) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoad);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoad);
+}
+
 void Stretch::handleValidation(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
@@ -250,7 +255,8 @@ void Stretch::applySettings(std::map<std::string, QVariant> const &settings) {
   setupFitOptions();
   setupPropertyBrowser();
   setupPlotOptions();
-  filterInputData(settings.at("RestrictInput").toBool());
+  setFileExtensionsByName(settings.at("RestrictInput").toBool());
+  setLoadHistory(settings.at("LoadHistory").toBool());
 }
 
 /**

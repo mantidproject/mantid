@@ -62,6 +62,7 @@ private:
   int displaySaveDirectoryMessage();
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoad) override;
 
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
