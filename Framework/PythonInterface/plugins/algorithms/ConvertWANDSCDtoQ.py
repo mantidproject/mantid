@@ -276,9 +276,6 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         dim0_bins = int(dim0_bins)
         dim1_bins = int(dim1_bins)
         dim2_bins = int(dim2_bins)
-        dim0_bin_size = (dim0_max - dim0_min) / dim0_bins
-        dim1_bin_size = (dim1_max - dim1_min) / dim1_bins
-        dim2_bin_size = (dim2_max - dim2_min) / dim2_bins
 
         data_array = inWS.getSignalArray()  # getSignalArray returns a F_CONTIGUOUS view of the signal array
 
@@ -302,6 +299,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             scale = np.ones(number_of_runs)
 
         if _norm:
+            norm_scale = 1.0
             if normaliseBy == "Monitor":
                 if instrument == "HB3A":
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("monitor").value)
@@ -312,9 +310,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("time").value)
                 else:
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("duration").value)
-            else:
-                norm_scale = 1.0
             norm_array = normWS.getSignalArray().sum(axis=2)
+            norm_array /= norm_scale
+        else:
+            norm_array = np.ones_like(data_array[:, :, 0])
 
         if _bkg:
             if normaliseBy == "Monitor":
@@ -364,12 +363,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 ol.qFromHKL(W[:, 0]).norm(), ol.qFromHKL(W[:, 1]).norm(), ol.qFromHKL(W[:, 2]).norm()
             )
             frames = "HKL,HKL,HKL"
-            k = 1 / self.getProperty("Wavelength").value  # Not 2pi/wavelength to save dividing by 2pi later
         else:
             names = "Q_sample_x,Q_sample_y,Q_sample_z"
             units = "Angstrom^-1,Angstrom^-1,Angstrom^-1"
             frames = "QSample,QSample,QSample"
-            k = 2 * np.pi / self.getProperty("Wavelength").value
+        k = 2 * np.pi / self.getProperty("Wavelength").value
 
         progress.report("Calculating Qlab for each pixel")
         if inWS.getExperimentInfo(0).run().hasProperty("twotheta"):
@@ -396,96 +394,71 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         qlab = np.vstack((np.sin(polar) * np.cos(azim), np.sin(polar) * np.sin(azim) * cop, np.cos(polar) - 1)).T * -k  # Kf - Ki(0,0,1)
 
-        progress.report("Calculating Q volume")
+        data_hist = np.zeros((dim0_bins, dim1_bins, dim2_bins))
 
-        output = np.zeros((dim0_bins + 2, dim1_bins + 2, dim2_bins + 2))
-
-        if _norm:
-            output_norm_data = np.zeros_like(output)
-            if _bkg:
-                output_norm_bkg = np.zeros_like(output)
+        norm_hist = np.zeros_like(data_hist)
         if _bkg:
-            output_bkg = np.zeros_like(output)
+            bkg_data_hist = np.zeros_like(data_hist)
+            bkg_norm_hist = np.zeros_like(data_hist)
 
-        bin_size = np.array([[dim0_bin_size], [dim1_bin_size], [dim2_bin_size]])
+        dim0_bin_edges = np.linspace(dim0_min, dim0_max, dim0_bins + 1)
+        dim1_bin_edges = np.linspace(dim1_min, dim1_max, dim1_bins + 1)
+        dim2_bin_edges = np.linspace(dim2_min, dim2_max, dim2_bins + 1)
 
-        offset = np.array([[dim0_min / dim0_bin_size], [dim1_min / dim1_bin_size], [dim2_min / dim2_bin_size]]) - 0.5
-
-        assert not data_array[:, :, 0].flags.owndata
-        assert not data_array[:, :, 0].ravel("F").flags.owndata
-        assert data_array[:, :, 0].flags.fnc
+        progress.report("Calculating Q volume")
 
         s1offset = np.deg2rad(self.getProperty("S1Offset").value)
         s1offset = np.array([[np.cos(s1offset), 0, np.sin(s1offset)], [0, 1, 0], [-np.sin(s1offset), 0, np.cos(s1offset)]])
+
+        # Rs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()) for n in for n in range(number_of_runs)]
+        # RT_invs = [np.linalg.inv(np.dot(R, T)) for R in Rs]
+
+        # qvals = np.einsum('nij,kj->nki', RT_invs, qlab).reshape(-1, 3)
+
         for sym_op in sym_ops:
-            _output = np.zeros_like(output)
-            _outputr = _output.ravel()
-
-            _output_scale = np.zeros_like(output)
-            _output_scaler = _output_scale.ravel()
-
-            if _norm:
-                _output_norm = np.zeros_like(output)
-                _output_normr = _output_norm.ravel()
-                _output_norm_scale = np.zeros_like(output)
-                _output_norm_scaler = _output_norm_scale.ravel()
-            if _bkg:
-                _output_bkg = np.zeros_like(output)
-                _output_bkgr = _output_bkg.ravel()
-                _output_bkg_scale = np.zeros_like(output)
-                _output_bkg_scaler = _output_bkg_scale.ravel()
 
             S = np.zeros((3, 3))
             S[:, 0] = sym_op.transformHKL([1, 0, 0])
             S[:, 1] = sym_op.transformHKL([0, 1, 0])
             S[:, 2] = sym_op.transformHKL([0, 0, 1])
+
             if _hkl:
-                UBSW = np.linalg.multi_dot([UB, S, W])
+                T = np.linalg.multi_dot([2 * np.pi * UB, S, W])
             else:
-                UBSW = np.dot(S, W)
+                T = np.dot(S, W)
+
             for n in range(number_of_runs):
                 R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
                 R = np.dot(s1offset, R)
-                RUBW = np.dot(R, UBSW)
-                q = np.round(np.dot(np.linalg.inv(RUBW), qlab.T) / bin_size - offset).astype(int)
-                q_index = np.ravel_multi_index(q, (dim0_bins + 2, dim1_bins + 2, dim2_bins + 2), mode="clip")
-                q_uniq, inverse = np.unique(q_index, return_inverse=True)
-                _outputr[q_uniq] += np.bincount(inverse, data_array[:, :, n].ravel("F"))
-                _output_scaler[q_uniq] += np.bincount(inverse) * scale[n]
-                if _norm:
-                    _output_normr[q_uniq] += np.bincount(inverse, norm_array.ravel("F"))
-                    _output_norm_scaler[q_uniq] += np.bincount(inverse)
-                if _bkg:
-                    _output_bkgr[q_uniq] += np.bincount(inverse, bkg_data_array[:, :, n].ravel("F"))
-                    _output_bkg_scaler[q_uniq] += np.bincount(inverse) * bkg_scale[n]
 
-                progress.report()
+                RT = np.dot(R, T)
+                qvals = np.einsum("ij,kj->ki", np.linalg.inv(RT), qlab)
 
-            if _norm:
-                _output *= _output_norm_scale * norm_scale
-                _output_norm_data = _output_norm * _output_scale
+                data_hist += np.histogramdd(
+                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=data_array[:, :, n].ravel()
+                )[0]
+                norm_hist += np.histogramdd(
+                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=norm_array[:, :].ravel() * scale[n]
+                )[0]
                 if _bkg:
-                    _output_bkg *= _output_norm_scale * norm_scale
-                    _output_norm_bkg = _output_norm * _output_bkg_scale
-            else:
-                _output_norm = _output_scale
+                    bkg_data_hist += np.histogramdd(
+                        qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_data_array[:, :, n].ravel()
+                    )[0]
+                    bkg_norm_hist += np.histogramdd(
+                        qvals,
+                        bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges],
+                        density=False,
+                        weights=norm_array[:, :].ravel() * bkg_scale[n],
+                    )[0]
 
-            output += _output
-            if _norm:
-                output_norm_data += _output_norm_data
-                if _bkg:
-                    output_norm_bkg += _output_norm_bkg
-            else:
-                output_norm_data = _output_scale
-            if _bkg:
-                output_bkg += _output_bkg
+            progress.report()
 
         if keep_temp:
             # Create data workspace
             progress.report("Creating data MDHistoWorkspace")
             createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-            createWS_alg.setProperty("SignalInput", output[1:-1, 1:-1, 1:-1].ravel("F"))
-            createWS_alg.setProperty("ErrorInput", np.sqrt(output[1:-1, 1:-1, 1:-1].ravel("F")))
+            createWS_alg.setProperty("SignalInput", data_hist.ravel("F"))
+            createWS_alg.setProperty("ErrorInput", np.sqrt(data_hist).ravel("F"))
             createWS_alg.setProperty("Dimensionality", 3)
             createWS_alg.setProperty("Extents", "{},{},{},{},{},{}".format(dim0_min, dim0_max, dim1_min, dim1_max, dim2_min, dim2_max))
             createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(dim0_bins, dim1_bins, dim2_bins))
@@ -502,8 +475,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             # Create normalisation workspace
             progress.report("Creating norm MDHistoWorkspace")
             createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-            createWS_alg.setProperty("SignalInput", output_norm_data[1:-1, 1:-1, 1:-1].ravel("F"))
-            createWS_alg.setProperty("ErrorInput", np.sqrt(output_norm_data[1:-1, 1:-1, 1:-1].ravel("F")))
+            createWS_alg.setProperty("SignalInput", norm_hist.ravel("F"))
+            createWS_alg.setProperty("ErrorInput", np.sqrt(norm_hist).ravel("F"))
             createWS_alg.setProperty("Dimensionality", 3)
             createWS_alg.setProperty("Extents", "{},{},{},{},{},{}".format(dim0_min, dim0_max, dim1_min, dim1_max, dim2_min, dim2_max))
             createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(dim0_bins, dim1_bins, dim2_bins))
@@ -521,8 +494,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 # Create background data workspace
                 progress.report("Creating background data MDHistoWorkspace")
                 createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-                createWS_alg.setProperty("SignalInput", output_bkg[1:-1, 1:-1, 1:-1].ravel("F"))
-                createWS_alg.setProperty("ErrorInput", np.sqrt(output_bkg[1:-1, 1:-1, 1:-1].ravel("F")))
+                createWS_alg.setProperty("SignalInput", bkg_data_hist.ravel("F"))
+                createWS_alg.setProperty("ErrorInput", np.sqrt(bkg_data_hist).ravel("F"))
                 createWS_alg.setProperty("Dimensionality", 3)
                 createWS_alg.setProperty("Extents", "{},{},{},{},{},{}".format(dim0_min, dim0_max, dim1_min, dim1_max, dim2_min, dim2_max))
                 createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(dim0_bins, dim1_bins, dim2_bins))
@@ -539,8 +512,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 # Create background normalisation workspace
                 progress.report("Creating background normalization MDHistoWorkspace")
                 createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-                createWS_alg.setProperty("SignalInput", output_norm_bkg[1:-1, 1:-1, 1:-1].ravel("F"))
-                createWS_alg.setProperty("ErrorInput", np.sqrt(output_norm_bkg[1:-1, 1:-1, 1:-1].ravel("F")))
+                createWS_alg.setProperty("SignalInput", bkg_norm_hist.ravel("F"))
+                createWS_alg.setProperty("ErrorInput", np.sqrt(bkg_norm_hist).ravel("F"))
                 createWS_alg.setProperty("Dimensionality", 3)
                 createWS_alg.setProperty("Extents", "{},{},{},{},{},{}".format(dim0_min, dim0_max, dim1_min, dim1_max, dim2_min, dim2_max))
                 createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(dim0_bins, dim1_bins, dim2_bins))
@@ -555,15 +528,17 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                     mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_background_normalization", outWS_bkgNorm)
 
         old_settings = np.seterr(divide="ignore", invalid="ignore")  # Ignore RuntimeWarning: invalid value encountered in true_divide
-        output /= output_norm_data  # We often divide by zero here and we get NaN's, this is desired behaviour
+        result = data_hist / norm_hist  # We often divide by zero here and we get NaN's, this is desired behaviour
+        result_var = np.sqrt(data_hist) / norm_hist**2
         if _bkg:
-            output -= output_bkg / output_norm_bkg
+            result -= bkg_data_hist / bkg_norm_hist
+            result_var += bkg_data_hist / bkg_norm_hist**2
         np.seterr(**old_settings)
 
         progress.report("Creating MDHistoWorkspace")
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-        createWS_alg.setProperty("SignalInput", output[1:-1, 1:-1, 1:-1].ravel("F"))
-        createWS_alg.setProperty("ErrorInput", (np.sqrt(output / output_norm_data))[1:-1, 1:-1, 1:-1].ravel("F"))
+        createWS_alg.setProperty("SignalInput", result.ravel("F"))
+        createWS_alg.setProperty("ErrorInput", np.sqrt(result_var).ravel("F"))
         createWS_alg.setProperty("Dimensionality", 3)
         createWS_alg.setProperty("Extents", "{},{},{},{},{},{}".format(dim0_min, dim0_max, dim1_min, dim1_max, dim2_min, dim2_max))
         createWS_alg.setProperty("NumberOfBins", "{},{},{}".format(dim0_bins, dim1_bins, dim2_bins))
