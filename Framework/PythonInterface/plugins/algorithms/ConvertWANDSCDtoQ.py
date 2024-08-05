@@ -410,10 +410,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         s1offset = np.deg2rad(self.getProperty("S1Offset").value)
         s1offset = np.array([[np.cos(s1offset), 0, np.sin(s1offset)], [0, 1, 0], [-np.sin(s1offset), 0, np.cos(s1offset)]])
 
-        # Rs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()) for n in for n in range(number_of_runs)]
-        # RT_invs = [np.linalg.inv(np.dot(R, T)) for R in Rs]
-
-        # qvals = np.einsum('nij,kj->nki', RT_invs, qlab).reshape(-1, 3)
+        Rs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()) for n in range(number_of_runs)]
 
         for sym_op in sym_ops:
 
@@ -427,29 +424,30 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             else:
                 T = np.dot(S, W)
 
-            for n in range(number_of_runs):
-                R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
-                R = np.dot(s1offset, R)
+            RT_invs = [np.linalg.inv(np.dot(R, T)) for R in Rs]
 
-                RT = np.dot(R, T)
-                qvals = np.einsum("ij,kj->ki", np.linalg.inv(RT), qlab)
+            qvals = np.einsum("nij,kj->kni", RT_invs, qlab).reshape(-1, 3)
 
-                data_hist += np.histogramdd(
-                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=data_array[:, :, n].ravel()
+            data_weights = np.swapaxes(data_array, 0, 1).ravel()
+            norm_weights = np.einsum("ij,k->ijk", norm_array, scale).ravel()
+
+            data_hist += np.histogramdd(qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=data_weights)[
+                0
+            ]
+            norm_hist += np.histogramdd(qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=norm_weights)[
+                0
+            ]
+
+            if _bkg:
+                bkg_data_weights = np.swapaxes(bkg_data_array, 0, 1).ravel()
+                bkg_norm_weights = np.einsum("ij,k->ijk", norm_array, bkg_scale).ravel()
+
+                bkg_data_hist += np.histogramdd(
+                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_data_weights
                 )[0]
-                norm_hist += np.histogramdd(
-                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=norm_array[:, :].ravel() * scale[n]
+                bkg_norm_hist += np.histogramdd(
+                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_norm_weights
                 )[0]
-                if _bkg:
-                    bkg_data_hist += np.histogramdd(
-                        qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_data_array[:, :, n].ravel()
-                    )[0]
-                    bkg_norm_hist += np.histogramdd(
-                        qvals,
-                        bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges],
-                        density=False,
-                        weights=norm_array[:, :].ravel() * bkg_scale[n],
-                    )[0]
 
             progress.report()
 
@@ -529,7 +527,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         old_settings = np.seterr(divide="ignore", invalid="ignore")  # Ignore RuntimeWarning: invalid value encountered in true_divide
         result = data_hist / norm_hist  # We often divide by zero here and we get NaN's, this is desired behaviour
-        result_var = np.sqrt(data_hist) / norm_hist**2
+        result_var = data_hist / norm_hist**2
         if _bkg:
             result -= bkg_data_hist / bkg_norm_hist
             result_var += bkg_data_hist / bkg_norm_hist**2
