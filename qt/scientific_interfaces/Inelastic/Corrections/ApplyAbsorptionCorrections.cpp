@@ -474,6 +474,12 @@ void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   m_uiForm.dsCorrections->setWSSuffixes(filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
 }
 
+void ApplyAbsorptionCorrections::setLoadHistory(bool doLoad) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoad);
+  m_uiForm.dsContainer->setLoadProperty("LoadHistory", doLoad);
+  m_uiForm.dsCorrections->setLoadProperty("LoadHistory", doLoad);
+}
+
 /**
  * Replots the preview plot.
  *
