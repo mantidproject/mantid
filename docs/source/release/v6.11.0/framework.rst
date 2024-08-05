@@ -16,6 +16,10 @@ Bugfixes
 ############
 .. amalgamate:: Framework/Algorithms/Bugfixes
 
+Deprecations
+############
+.. amalgamate:: Framework/Algorithms/Deprecations
+
 Fit Functions
 -------------
 
