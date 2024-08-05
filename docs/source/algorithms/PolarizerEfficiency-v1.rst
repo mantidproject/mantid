@@ -14,8 +14,7 @@ Calculates how the efficiency of a polarizer varies with wavelength. The
 ordering of the workspaces in ``InputWorkspace`` is taken from the ``SpinStates`` parameter, and the analyser
 efficiency, :math:`\epsilon_{cell}`, is given by ``AnalyserEfficiency``.
 
-First the ``AnalyserEfficiency`` workspace is rebinned to match the binning of the input workspace that corresponds to the "00" spin state.
-Having done this, the polarization of the polarizer, :math:`P_{SM}`, is given by [#KRYCKA]_
+The polarization of the polarizer, :math:`P_{SM}`, is given by [#KRYCKA]_
 
 .. math::
     P_{SM} = \frac{T_{00} - T_{01}}{2P_{cell}(T_{00} + T_{01})}
@@ -56,7 +55,7 @@ Usage
     wsAnti1 = CloneWorkspace(wsAnti)
 
     grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
-    eCell = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=(1 + tanh(0.0733 * 12 * x * 0.2))/2',XUnit='Wavelength', xMin='1',XMax='16', BinWidth='1', NumBanks='1', BankPixelWidth='1')
+    eCell = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=(1 + tanh(0.0733 * 12 * x * 0.2))/2',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1', NumBanks='1', BankPixelWidth='1')
 
     psm = PolarizerEfficiency(grp, eCell)
     print("Polarizer efficiency at a wavelength of " + str(mtd['psm'].dataX(0)[3]) + " Å is " + str(mtd['psm'].dataY(0)[3]))
