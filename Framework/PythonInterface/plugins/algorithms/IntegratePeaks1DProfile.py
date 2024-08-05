@@ -435,6 +435,7 @@ class PeakFitter:
         self.nfixed: int = None
 
         self.get_and_clip_data_arrays(peak_data, nbins)
+        self.calc_limits_on_fwhm()
         self.ysum = self.y.sum(axis=2)
         self.yfit_foc: np.ndarray = np.zeros(self.tofs.shape)
         self.successful: np.ndarray = np.zeros(self.ispecs.shape, dtype=bool)
@@ -473,6 +474,10 @@ class PeakFitter:
         self.y = y[:, :, self.tof_slice]
         self.esq = esq[:, :, self.tof_slice]
 
+    def calc_limits_on_fwhm(self):
+        self.min_fwhm = self.tofs[1 + (len(self.tofs) // 2)] - self.tofs[len(self.tofs) // 2]  # FWHM > bin-width
+        self.max_fwhm = (self.tofs[-1] - self.tofs[0]) / 3  # must be at least 3 FWHM in data range
+
     def update_peak_position(self):
         # search for pixel with highest TOF integrated counts in 3x3 window around peak position
         irow_min = np.clip(self.peak_pos[0] - 1, a_min=0, a_max=self.ysum.shape[0])
@@ -499,8 +504,7 @@ class PeakFitter:
         peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
         if np.isclose(peak_func.fwhm(), 0.0):
             # width not set by default - set width based max of d-spacing tolerance or bin-width
-            bin_width = self.tofs[len(self.tofs) // 2] - self.tofs[1 + len(self.tofs) // 2]
-            fwhm = max(self.frac_dspac_delta * tof_pk, bin_width)
+            fwhm = np.clip(self.frac_dspac_delta * tof_pk, a_min=self.min_fwhm, a_max=self.max_fwhm)
             peak_func.setFwhm(fwhm)
         peak_func.setIntensity(intensity)
         # fix parameters
@@ -517,7 +521,10 @@ class PeakFitter:
         [peak_func.addConstraints(f"0<{peak_func.parameterName(ipar)}") for ipar in range(peak_func.nParams())]
         # constrain centre and width
         peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
-        peak_func.addConstraints(f"{MIN_TOF_WIDTH}<{peak_func.getWidthParameterName()}")
+        # assume constant scale factor between FWHM and width parameter
+        width_par_name = peak_func.getWidthParameterName()
+        scale_factor = peak_func.getParameterValue(width_par_name) / peak_func.fwhm()
+        peak_func.addConstraints(f"{self.min_fwhm*scale_factor}<{width_par_name}<{self.max_fwhm*scale_factor}")
 
     def fit_spectrum(self, profile_func, ispec):
         return self.exec_fit(ispec, Function=str(profile_func), **self.fit_kwargs)
@@ -557,8 +564,7 @@ class PeakFitter:
                     profile_func = profile_func_final
                 # make peak function and get fwhm and intensity
                 [peak_func.setParameter(iparam, profile_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
-                fwhm = peak_func.fwhm()
-                if fwhm < 0.5 * (self.tofs[1] - self.tofs[0]) or fwhm > self.tofs[-1] - self.tofs[0]:
+                if not self.min_fwhm < peak_func.fwhm() < self.max_fwhm:
                     continue  # skip
                 intens = peak_func.intensity()
                 if self.error_strategy == "Hessian":
