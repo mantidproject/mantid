@@ -20,7 +20,7 @@ What will we deprecate?
 - Algorithms that have not been used for 3 years or more. We will use Usage Data to determine this. For more information
   about how we record Usage data please see our `Privacy Policy: Usage Data Recorded in Mantid
   <https://www.mantidproject.org/privacy.html#usage-data-recorded-in-mantid>`_
-- Other Features covered by Usage Data that have not need used for 3 or more years
+- Other Features covered by Usage Data that have not been used for 3 or more years
 - Soft deprecation of Algorithms superseded by newer versions of an algorithm e.g. v1 deprecated when v2 has been created.
   See below for more about soft deprecation.
 
@@ -60,8 +60,8 @@ Soft Deprecation
 ----------------
 
 When algorithms are replaced with newer versions, the previous version(s) will be subject to a soft deprecation. We will
-make it clear that we are not longer supporting (i.e. no longer developing) the previous version(s). Although previous
-versions will still be available and safe to use users will be encouraged to use more recent versions.
+make it clear that we are no longer supporting (i.e. no longer developing) the previous version(s). Although previous
+versions will still be available and safe to use, users will be encouraged to use more recent versions.
 
 Once older versions have gone out of use for at least 3 years they will then be subject to the deprecation process as
 outlined above.
