@@ -36,7 +36,7 @@ def assert_almost_equal(Workspace1, Workspace2, **kwargs):
 
     if rtol is not None and atol is not None:
         raise ValueError("Specify rtol or atol, not both")
-    elif rtol in None and atol is None:
+    elif rtol is None and atol is None:
         raise ValueError("Specify rtol or atol")
     elif atol is not None:
         if atol > 0.0:
