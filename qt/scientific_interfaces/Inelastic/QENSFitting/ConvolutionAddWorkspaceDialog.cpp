@@ -50,6 +50,11 @@ void ConvolutionAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
+void ConvolutionAddWorkspaceDialog::setLoadProperty(const std::string &propName, bool enable) {
+  m_uiForm.dsWorkspace->setLoadProperty(propName, enable);
+  m_uiForm.dsResolution->setLoadProperty(propName, enable);
+}
+
 void ConvolutionAddWorkspaceDialog::setResolutionWSSuffices(const QStringList &suffices) {
   m_uiForm.dsResolution->setWSSuffixes(suffices);
 }
