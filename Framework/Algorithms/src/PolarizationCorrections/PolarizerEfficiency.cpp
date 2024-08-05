@@ -102,7 +102,7 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   }
 
   auto const &inputWsCount = inputWorkspace->size();
-  if (inputWsCount < 2 || inputWsCount > 4) {
+  if (inputWsCount < 2) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
         "The input group workspace must have at least two periods corresponding to the spin configurations.";
   } else {
@@ -114,23 +114,27 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     }
   }
   const MatrixWorkspace_sptr analyserWs = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
-  validateInputWorkspace(analyserWs, PropertyNames::ANALYSER_EFFICIENCY, errorList);
-
-  const auto &spinConfigurationInput = getPropertyValue(PropertyNames::SPIN_STATES);
-  const auto &spinStateCount = PolarizationCorrectionsHelpers::splitSpinStateString(spinConfigurationInput).size();
-  if (spinStateCount != inputWsCount) {
-    errorList[PropertyNames::SPIN_STATES] =
-        "The number of workspaces in the input WorkspaceGroup ( " + std::to_string(inputWsCount) +
-        ") does not match the number of spin states provided (" + std::to_string(spinStateCount) + ").";
+  if (!validateInputWorkspace(analyserWs, PropertyNames::ANALYSER_EFFICIENCY, errorList)) {
+    return errorList;
   }
-  const auto &t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(inputWorkspace, spinConfigurationInput,
-                                                                            SpinStateValidator::ZERO_ONE);
-  const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(inputWorkspace, spinConfigurationInput,
-                                                                            SpinStateValidator::ZERO_ZERO);
-  if (t01Ws == nullptr || t00Ws == nullptr) {
-    errorList[PropertyNames::SPIN_STATES] = "The required spin configurations (00, 01) could not be found in the given"
-                                            "SpinStates.";
+
+  const auto &spinStates =
+      PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(PropertyNames::SPIN_STATES));
+  if (spinStates.size() != inputWsCount) {
+    errorList[PropertyNames::SPIN_STATES] =
+        "The number of workspaces in the input WorkspaceGroup (" + std::to_string(inputWsCount) +
+        ") does not match the number of spin states provided (" + std::to_string(spinStates.size()) + ").";
+  }
+  const auto &t01WsIndex =
+      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, SpinStateValidator::ZERO_ONE);
+  const auto &t00WsIndex =
+      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, SpinStateValidator::ZERO_ZERO);
+  if (!t01WsIndex.has_value() || !t00WsIndex.has_value()) {
+    errorList[PropertyNames::SPIN_STATES] =
+        "The required spin configurations (00, 01) could not be found in the given SpinStates.";
   } else {
+    const MatrixWorkspace_sptr t00Ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(t00WsIndex.value()));
     if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
       errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
                                                       " and " + PropertyNames::ANALYSER_EFFICIENCY +
@@ -161,7 +165,7 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
                                                                             SpinStateValidator::ZERO_ZERO);
 
-  MatrixWorkspace_sptr effCell = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
+  const MatrixWorkspace_sptr effCell = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
 
   auto &&effPolarizer = (t00Ws - t01Ws) / (4 * (2 * effCell - 1) * (t00Ws + t01Ws)) + 0.5;
 
