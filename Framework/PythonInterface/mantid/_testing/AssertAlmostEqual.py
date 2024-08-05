@@ -8,7 +8,7 @@
 from mantid.simpleapi import CompareWorkspaces
 
 
-def assert_almost_equal(Workspace1, Workspace2, **kwargs):
+def assert_almost_equal(Workspace1, Workspace2, rtol=EMPTY_DBL, atol=EMPTY_DBL, **kwargs):
     """
     Raises an assertion error if two workspaces are not within specified tolerance.
 
