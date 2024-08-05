@@ -8,8 +8,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
 
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataHandling::AlignAndFocusPowderSlim;
 
 class AlignAndFocusPowderSlimTest : public CxxTest::TestSuite {
@@ -26,27 +28,28 @@ public:
   }
 
   void test_exec() {
-    // Create test input if necessary
-    MatrixWorkspace_sptr
-        inputWS = //-- Fill in appropriate code. Consider using MantidFrameworkTestHelpers/WorkspaceCreationHelper.h --
-
-        AlignAndFocusPowderSlim alg;
+    const std::string wksp_name("VULCAN_1GiB");
+    AlignAndFocusPowderSlim alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "/home/pf9/build/mantid/vulcanperf/VULCAN_218075.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    // LoadEventNexus 4 seconds
+    // tof 6463->39950
+
+    // verify the output
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 3349); // observed value
+
+    // do not need to cleanup because workspace did not go into the ADS
   }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  //  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };

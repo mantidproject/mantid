@@ -9,6 +9,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
+namespace NeXus {
+class File;
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -20,10 +24,14 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   void init() override;
   void exec() override;
+
+  void loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file);
+  void loadDetid(std::unique_ptr<std::vector<uint32_t>> &data, ::NeXus::File &h5file);
 };
 
 } // namespace DataHandling
