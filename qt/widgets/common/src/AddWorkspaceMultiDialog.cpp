@@ -69,8 +69,8 @@ void AddWorkspaceMultiDialog::setFBSuffices(const QStringList &suffices) {
  * Set an extra property on the load algorithm  of the workspace multi dialog
  * before execution
  *
- * @param propertyName :: The name of the Load algorithm property to be set
- * @param value :: The value of the Load algorithm property to be set
+ * @param propName :: The name of the Load algorithm property to be set
+ * @param enable :: The value of the Load algorithm property to be set
  */
 
 void AddWorkspaceMultiDialog::setLoadProperty(const std::string &propName, bool enable) {
