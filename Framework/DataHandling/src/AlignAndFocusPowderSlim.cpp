@@ -17,7 +17,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusIOHelper.h"
+#include "tbb/parallel_for.h"
 
+#include <atomic>
 #include <regex>
 
 namespace Mantid::DataHandling {
@@ -63,6 +65,42 @@ const std::string AlignAndFocusPowderSlim::category() const { return "TODO: FILL
 const std::string AlignAndFocusPowderSlim::summary() const { return "TODO: FILL IN A SUMMARY"; }
 
 const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return {"AlignAndFocusPowderFromFiles"}; }
+
+//----------------------------------------------------------------------------------------------
+namespace { // anonymous
+class ProcessEventsTask {
+public:
+  ProcessEventsTask(const std::vector<double> *binedges, const double bin_divisor, const double bin_offset,
+                    const std::vector<uint32_t> *detids, const std::vector<float> *tofs,
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration,
+                    std::vector<std::atomic_uint32_t> *y_temp)
+      : m_bin_divisor(bin_divisor), m_bin_offset(bin_offset), m_binedges(binedges), m_detids(detids), m_tofs(tofs),
+        m_calibration(calibration), y_temp(y_temp) {}
+
+  void operator()(const tbb::blocked_range<size_t> &range) const {
+    for (size_t i = range.begin(); i < range.end(); ++i) {
+      const auto detid = static_cast<detid_t>(m_detids->at(i));
+      const auto tof = static_cast<double>(m_tofs->at(i)) * m_calibration->value(detid);
+      if (!(tof < m_binedges->front() || tof >= m_binedges->back())) {
+
+        const auto binnum = DataObjects::EventList::findLinearBin(*m_binedges, static_cast<double>(tof), m_bin_divisor,
+                                                                  m_bin_offset, true);
+        if (binnum)
+          y_temp->at(binnum.get())++;
+      }
+    }
+  }
+
+private:
+  const double m_bin_divisor;
+  const double m_bin_offset;
+  const std::vector<double> *m_binedges;
+  const std::vector<uint32_t> *m_detids;
+  const std::vector<float> *m_tofs;
+  const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
+  std::vector<std::atomic_uint32_t> *y_temp;
+};
+} // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -150,6 +188,12 @@ void AlignAndFocusPowderSlim::exec() {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
 
+    // TODO should re-use vectors to save malloc/free calls
+    std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
+    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+    // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
+    // std::unique_ptr<std::vector<uint64_t>> event_index; matching pulse-times with events
+
     size_t specnum = 0;
     for (const std::string &classEntry : classEntries) {
       if (std::regex_match(classEntry, groups, classRegex)) {
@@ -158,12 +202,6 @@ void AlignAndFocusPowderSlim::exec() {
         // skip entries with junk data
         if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
           continue;
-
-        // TODO should re-use vectors to save malloc/free calls
-        std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
-        std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-        // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
-        // std::unique_ptr<std::vector<uint64_t>> event_index; matching pulse-times with events
 
         g_log.information() << "Loading bank " << entry_name << '\n';
         h5file.openGroup(entry_name, "NXevent_data");
@@ -190,18 +228,12 @@ void AlignAndFocusPowderSlim::exec() {
         auto &spectrum = wksp->getSpectrum(specnum);
         const auto &x_values = spectrum.readX();
         const auto numEvent = event_time_of_flight->size();
+        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+        ProcessEventsTask task(&x_values, divisor, offset, event_detid.get(), event_time_of_flight.get(), &calibration,
+                               &y_temp);
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent), task);
         auto &y_values = spectrum.dataY();
-        for (size_t i = 0; i < numEvent; ++i) {
-          const auto detid = event_detid->at(i);
-
-          const auto tof = event_time_of_flight->at(i) * calibration.value(detid); // calibConstant->second;
-          if (!(tof < x_values.front() || tof >= x_values.back())) {
-
-            const auto binnum = binFinder(x_values, static_cast<double>(tof), divisor, offset, true);
-            if (binnum)
-              y_values[binnum.get()]++;
-          }
-        }
+        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
         addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
 
         h5file.closeGroup();
