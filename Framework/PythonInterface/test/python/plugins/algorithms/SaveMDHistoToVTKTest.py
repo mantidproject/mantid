@@ -10,7 +10,7 @@ import tempfile
 import os
 import unittest
 import numpy as np
-from lxml import etree
+import xml.etree.ElementTree as etree
 from mantid.simpleapi import SaveMDHistoToVTK, CreateMDHistoWorkspace, CreateMDWorkspace, AddSampleLog, SetUB, BinMD, FakeMDEventData
 
 
@@ -196,19 +196,19 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         root = etree.parse(filename)
 
         # check ChangeOfBasisMatrix
-        cob = root.xpath("//DataArray[@Name='ChangeOfBasisMatrix']")
+        cob = root.findall(".//DataArray[@Name='ChangeOfBasisMatrix']")
         assert len(cob) == 1
         cob = np.array(cob[0].text.split(), dtype=float)
         np.testing.assert_allclose(cob, expected_cob.flatten(), atol=1e-15)
 
         # check BoundingBoxInModelCoordinates
-        bb = root.xpath("//DataArray[@Name='BoundingBoxInModelCoordinates']")
+        bb = root.findall(".//DataArray[@Name='BoundingBoxInModelCoordinates']")
         assert len(bb) == 1
         bb = np.array(bb[0].text.split(), dtype=float)
         np.testing.assert_equal(bb, [-1.0, 1.0, -2.0, 2.0, -3.0, 3.0])
 
         # check axes labels
-        axes_labels = root.xpath("//Array")
+        axes_labels = root.findall(".//Array")
         assert len(axes_labels) == 3
 
         x = axes_labels[0]
@@ -227,7 +227,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         assert data == axes[2]
 
         # check signal array
-        signal = root.xpath("//DataArray[@Name='Signal']")
+        signal = root.findall(".//DataArray[@Name='Signal']")
         assert len(signal) == 1
         signal = signal[0]
         assert float(signal.attrib["RangeMin"]) == np.nanmin(expected_signal)
@@ -239,7 +239,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         np.testing.assert_equal(s, expected_signal)
 
         # check ghost array
-        ghost = root.xpath("//DataArray[@Name='vtkGhostType']")
+        ghost = root.findall(".//DataArray[@Name='vtkGhostType']")
         assert len(ghost) == 1
         ghost = ghost[0]
         data = base64.b64decode(ghost.text)
@@ -251,7 +251,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         np.testing.assert_equal(g, expected_ghost)
 
         # check boundary points
-        points = root.xpath("//DataArray[@Name='Points']")
+        points = root.findall(".//DataArray[@Name='Points']")
         assert len(points) == 1
         points = points[0]
         assert points.attrib["NumberOfComponents"] == "3"

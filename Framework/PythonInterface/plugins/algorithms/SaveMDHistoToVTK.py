@@ -7,7 +7,7 @@
 
 import base64
 import numpy as np
-from lxml import etree
+import xml.etree.ElementTree as etree
 from mantid.api import AlgorithmFactory, PythonAlgorithm, FileAction, FileProperty, IMDHistoWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, SpecialCoordinateSystem
 from mantid.geometry import UnitCell
@@ -23,7 +23,7 @@ NUMPY_TYPE_TO_VTK = {
 
 class SaveMDHistoToVTK(PythonAlgorithm):
     def category(self):
-        return "DataHandling/XML"
+        return "DataHandling\\XML"
 
     def summary(self):
         """
@@ -115,7 +115,7 @@ class SaveMDHistoToVTK(PythonAlgorithm):
         root.append(grid)
 
         et = etree.ElementTree(root)
-        et.write(filename, pretty_print=True)
+        et.write(filename)
 
     def createSkewInformation(self, ws):
         # logic here is based on vtkDataSetToNonOrthogonalDataSet::createSkewInformation from mantid v5.1.1
@@ -196,7 +196,7 @@ def createDataArrayBinary(name, data, number_of_componets=1):
         RangeMax=str(np.nanmax(data)),
         NumberOfComponents=str(number_of_componets),
     )
-    dataArray.text = base64.b64encode(np.uint64(data.nbytes).tobytes() + data.tobytes())
+    dataArray.text = base64.b64encode(np.uint64(data.nbytes).tobytes() + data.tobytes()).decode()
     return dataArray
 
 
