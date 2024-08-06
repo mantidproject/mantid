@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
@@ -21,6 +22,7 @@ using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::PolarizationEfficienciesWildes;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::DataObjects::TableWorkspace;
 
@@ -241,6 +243,20 @@ public:
     assertSetPropertyThrowsInvalidArgumentError<TableWorkspace>(InputPropNames::A_EFF_WS, invalidWsType);
   }
 
+  void test_input_non_mag_not_matrix_ws_group_throws_error() {
+    const auto nonMagGrp = createTableWorkspaceGrp("nonMagWs");
+    const auto magGrp = createMagWSGroup("magWs");
+    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+    assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
+  }
+
+  void test_input_mag_not_matrix_ws_group_throws_error() {
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto magGrp = createTableWorkspaceGrp("magWs");
+    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+    assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
+  }
+
   /// Validation tests - valid property combinations
 
   void test_providing_both_mag_and_input_polarizer_efficiency_ws_throws_error() {
@@ -457,6 +473,23 @@ private:
     alg.execute();
 
     return alg.getProperty("OutputWorkspace");
+  }
+
+  WorkspaceGroup_sptr createTableWorkspaceGrp(const std::string &outName) {
+    const std::vector<std::string> &wsNames{outName + "_00", outName + "_01", outName + "_10", outName + "_11"};
+    for (const auto &wsName : wsNames) {
+      const auto ws = WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace(wsName, ws);
+    }
+
+    GroupWorkspaces groupAlg;
+    groupAlg.initialize();
+    groupAlg.setChild(true);
+    groupAlg.setProperty("InputWorkspaces", wsNames);
+    groupAlg.setPropertyValue("OutputWorkspace", outName);
+    groupAlg.execute();
+
+    return groupAlg.getProperty("OutputWorkspace");
   }
 
   std::unique_ptr<PolarizationEfficienciesWildes> createEfficiencyAlg(const WorkspaceGroup_sptr &nonMagWSGroup,
