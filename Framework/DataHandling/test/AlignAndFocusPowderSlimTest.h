@@ -10,6 +10,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "MantidKernel/Timer.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataHandling::AlignAndFocusPowderSlim;
@@ -27,17 +28,20 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() {
-    const std::string wksp_name("VULCAN_1GiB");
+  void run_test(const std::string &filename) {
+    std::cout << "==================> " << filename << '\n';
+    Mantid::Kernel::Timer timer;
+    const std::string wksp_name("VULCAN");
     AlignAndFocusPowderSlim alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "/home/pf9/build/mantid/vulcanperf/VULCAN_218075.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
+    std::cout << "==================> " << timer << '\n';
 
     // LoadEventNexus 4 seconds
     // tof 6463->39950
@@ -50,6 +54,12 @@ public:
 
     // do not need to cleanup because workspace did not go into the ADS
   }
+
+  void test_exec1GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218075.nxs.h5"); }
+
+  void test_exec10GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218092.nxs.h5"); }
+
+  void test_exec18GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_217967.nxs.h5"); }
 
   //  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
