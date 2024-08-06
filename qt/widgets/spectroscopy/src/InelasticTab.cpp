@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>

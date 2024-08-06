@@ -14,6 +14,9 @@
 
 namespace {
 
+QMap<std::string, QVariant> defaultSettings = {
+    {"restrict-input-by-name", true}, {"plot-error-bars-external", false}, {"load-history", true}};
+
 template <typename T> void setSetting(std::string const &settingGroup, std::string const &settingName, T const &value) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
@@ -24,7 +27,7 @@ template <typename T> void setSetting(std::string const &settingGroup, std::stri
 QVariant getSetting(std::string const &settingGroup, std::string const &settingName) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
-  auto const settingValue = settings.value(QString::fromStdString(settingName));
+  auto const settingValue = settings.value(QString::fromStdString(settingName), defaultSettings[settingName]);
   settings.endGroup();
 
   return settingValue;
@@ -65,11 +68,4 @@ void setExternalPlotErrorBars(bool errorBars) { setSetting(INDIRECT_SETTINGS_GRO
 void setDeveloperFeatureFlags(QStringList const &flags) {
   setSetting(INDIRECT_SETTINGS_GROUP, FEATURE_FLAGS_PROPERTY, flags);
 }
-
-bool indirectSettingsCreated() {
-  // Any Indirect Settings path will suffice, as all indirect settings are created in the same function call.
-  auto const settingPath = QString::fromStdString(INDIRECT_SETTINGS_GROUP + "/" + LOAD_HISTORY_PROPERTY);
-  return QSettings().contains(settingPath);
-}
-
 } // namespace MantidQt::CustomInterfaces::SettingsHelper
