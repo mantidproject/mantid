@@ -28,15 +28,6 @@ public:
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override;
 
-private:
-  void init() override;
-  void exec() override;
-
-  void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
-
-  void loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file);
-  void loadDetid(std::unique_ptr<std::vector<uint32_t>> &data, ::NeXus::File &h5file);
-
   class MANTID_DATAHANDLING_DLL BankCalibration {
   public:
     BankCalibration(const detid_t idmin, const detid_t idmax, const std::map<detid_t, double> &calibration_map);
@@ -46,6 +37,15 @@ private:
     std::vector<double> m_calibration;
     detid_t m_detid_offset;
   };
+
+private:
+  void init() override;
+  void exec() override;
+
+  void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
+
+  void loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file);
+  void loadDetid(std::unique_ptr<std::vector<uint32_t>> &data, ::NeXus::File &h5file);
 
   std::map<detid_t, double> m_calibration;
 };
