@@ -80,7 +80,7 @@ void ResNorm::setFileExtensionsByName(bool filter) {
 
 void ResNorm::setLoadHistory(bool doLoadHistory) {
   m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoadHistory);
-  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void ResNorm::handleValidation(IUserInputValidator *validator) const {
