@@ -96,6 +96,13 @@ class LoadWANDSCD(PythonAlgorithm):
             "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
         )
 
+        # apply goniometer tilt
+        self.declareProperty(
+            "ApplyGoniometerTilt",
+            False,
+            "Apply the goniometer sgl and sgu tilts to the UB-matrix. This is for backwards compatability only.",
+        )
+
         # Output workspace/data info
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
@@ -283,7 +290,16 @@ class LoadWANDSCD(PythonAlgorithm):
             ).reshape(3, 3)
             SetUB(_tmp_ws, UB=UB, EnableLogging=False)
         except (RuntimeError, ValueError):
-            SetUB(_tmp_ws, EnableLogging=False)
+            UB = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+
+        if self.getProperty("ApplyGoniometerTilt").value:
+            sgl = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgl.RBV").value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgu.RBV").value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
+            sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
+            UB = sgl_a.dot(sgu_a).dot(UB)  # Apply the Goniometer tilts to the UB matrix
+
+        SetUB(_tmp_ws, UB=UB, EnableLogging=False)
 
         if grouping > 1:
             detector_list = ""

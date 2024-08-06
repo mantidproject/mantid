@@ -15,9 +15,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadMD("HB2C_WANDSCD_data.nxs", OutputWorkspace="ConvertWANDSCDtoQTest_data")
-        SetGoniometer(
-            "ConvertWANDSCDtoQTest_data", Axis0="s1,0,1,0,1", Axis1="HB2C:Mot:sgl,1,0,0,-1", Axis2="HB2C:Mot:sgu,0,0,1,-1", Average=False
-        )
+        SetGoniometer("ConvertWANDSCDtoQTest_data", Axis0="s1,0,1,0,1", Average=False)
         LoadMD("HB2C_WANDSCD_norm.nxs", OutputWorkspace="ConvertWANDSCDtoQTest_norm")
         ConvertWANDSCDtoQTest_Q = ConvertWANDSCDtoQ(
             InputWorkspace="ConvertWANDSCDtoQTest_data", NormalisationWorkspace="ConvertWANDSCDtoQTest_norm"
@@ -37,11 +35,11 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
         np.testing.assert_allclose(peak.getQSampleFrame(), [6.560115, 0.001306865, -2.520578], rtol=1e-5)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
-        # SetUB(
-        #     "ConvertWANDSCDtoQTest_data",
-        #     UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
-        #     "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01",
-        # )
+        SetUB(
+            "ConvertWANDSCDtoQTest_data",
+            UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
+            "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01",
+        )
 
         ConvertWANDSCDtoQ(
             InputWorkspace="ConvertWANDSCDtoQTest_data",
@@ -136,9 +134,7 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
         angleOffset = 45
         # ---
         LoadMD("HB2C_WANDSCD_data.nxs", OutputWorkspace="ConvertWANDSCDtoQTest_data")
-        SetGoniometer(
-            "ConvertWANDSCDtoQTest_data", Axis0="s1,0,1,0,1", Axis1="HB2C:Mot:sgl,1,0,0,-1", Axis2="HB2C:Mot:sgu,0,0,1,-1", Average=False
-        )
+        SetGoniometer("ConvertWANDSCDtoQTest_data", Axis0="s1,0,1,0,1", Average=False)
         LoadMD("HB2C_WANDSCD_norm.nxs", OutputWorkspace="ConvertWANDSCDtoQTest_norm")
 
         Q = ConvertWANDSCDtoQ(InputWorkspace="ConvertWANDSCDtoQTest_data", NormalisationWorkspace="ConvertWANDSCDtoQTest_norm")
