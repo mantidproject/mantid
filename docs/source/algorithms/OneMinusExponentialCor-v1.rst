@@ -45,9 +45,9 @@ Output:
 .. testoutput:: ExOneMinusExp
 
     You can divide the data by the factor
-    [ 0.38550588  0.33955245  0.33416164]
+    [0.38550588 0.33955245 0.33416164]
     Or multiply
-    [ 2.59399415  2.94505308  2.99256374]
+    [2.59399415 2.94505308 2.99256374]
 
 .. categories::
 

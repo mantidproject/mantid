@@ -42,8 +42,8 @@ Output:
 
 .. testoutput:: ExMDHistoToWorkspace2D
 
-   part of MD workspace [ 0.  5.  4.  0.]
-   corresponding part of 2D workspace [ 0.  5.  4.  0.]
+   part of MD workspace [0. 5. 4. 0.]
+   corresponding part of 2D workspace [0. 5. 4. 0.]
 
 .. categories::
 

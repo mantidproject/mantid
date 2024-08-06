@@ -73,8 +73,8 @@ Output:
 
 .. testoutput:: ConvertToGroup
 
-    X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [  40.   80.  120.   80.   40.]
+    X values are : [0. 1. 2. 3. 4. 5.]
+    Y values are : [ 40.  80. 120.  80.  40.]
 
 **Example - Using Only MuonGroupingCounts on Single Period Data**
 
@@ -105,8 +105,8 @@ Output:
 
 .. testoutput:: ConvertToGroup
 
-    X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [  40.   80.  120.   80.   40.]
+    X values are : [0. 1. 2. 3. 4. 5.]
+    Y values are : [ 40.  80. 120.  80.  40.]
 
 **Example - Multi Period Data**
 
@@ -145,8 +145,8 @@ Output:
 
 .. testoutput:: ExampleTimeOffset
 
-    X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [  80.  160.  240.  160.   80.]
+    X values are : [0. 1. 2. 3. 4. 5.]
+    Y values are : [ 80. 160. 240. 160.  80.]
 
 .. categories::
 
