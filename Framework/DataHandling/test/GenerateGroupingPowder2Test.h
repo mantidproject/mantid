@@ -61,7 +61,7 @@ public:
   }
 
   void test_exec() {
-    const std::string XML_OUT_FILE("PowderGrouping_fulltest.xml");
+    const std::string XML_OUT_FILE("PowderGrouping2_fulltest.xml");
     const std::string PAR_OUT_FILE{GenerateGroupingPowder2::parFilenameFromXmlFilename(XML_OUT_FILE)};
     const std::string GROUP_WS("plainExecTestWS");
     constexpr double step = 10;
@@ -131,7 +131,7 @@ public:
   }
 
   void test_turning_off_par_file_generation() {
-    const std::string XML_OUT_FILE("PowderGrouping_nopar.xml");
+    const std::string XML_OUT_FILE("PowderGrouping2_nopar.xml");
     const std::string GROUP_WS("noParFileWS");
     constexpr double step = 10;
 
@@ -167,7 +167,7 @@ public:
   }
 
   void test_ignore_detectors_without_spectra() {
-    const std::string XML_OUT_FILE("PowderGrouping_det_wo_spectra.xml");
+    const std::string XML_OUT_FILE("PowderGrouping2_det_wo_spectra.xml");
     const std::string GROUP_WS("noDetNoSpecWS");
 
     auto histogram = m_emptyInstrument->histogram(0);
@@ -219,7 +219,7 @@ public:
 
   // save as nexus, reload, and compare
   void test_save_nexus_processed() {
-    const std::string NXS_OUT_FILE("PowderGrouping.nxs");
+    const std::string NXS_OUT_FILE("PowderGrouping2.nxs");
     const std::string GROUP_WS("saveNXSWS");
     constexpr double step = 10;
 
@@ -284,7 +284,7 @@ public:
 
   // azimuthal grouping with a par file isn't currently supported
   void test_azimuth_with_par_fail() {
-    const std::string XML_OUT_FILE("PowderGrouping_azi_with_par.xml");
+    const std::string XML_OUT_FILE("PowderGrouping2_azi_with_par.xml");
     const std::string PAR_OUT_FILE{GenerateGroupingPowder2::parFilenameFromXmlFilename(XML_OUT_FILE)};
     const std::string GROUP_WS("aziWithParTestWS");
     constexpr double step = 10;
@@ -313,7 +313,7 @@ public:
   }
 
   void test_grouping_rectangular_instrument() {
-    const std::string XML_OUT_FILE("PowderGrouping_rectangular.xml");
+    const std::string XML_OUT_FILE("PowderGrouping2_rectangular.xml");
     const std::string GROUP_WS("_unused_for_child");
     constexpr int numBanks{1};
     constexpr int bankSize{6};
@@ -367,7 +367,7 @@ public:
   void run_SNAPliteTest(const std::string &groupWSName, const double ang1, const double ang2, const bool numberByAngle,
                         const bool splitSides, const std::vector<int> &groups_exp,
                         const std::vector<double> &pixel_groups_exp) {
-    const std::string NXS_OUT_FILE("PowderGrouping.nxs");
+    const std::string NXS_OUT_FILE("PowderGrouping2.nxs");
     constexpr double TWO_THETA_STEP{18};
     const std::string INPUT_WS("SNAPlite");
     const detid_t PIXELS_PER_BANK{32 * 32};
