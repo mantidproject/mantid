@@ -1,4 +1,5 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -101,6 +102,8 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
+
+void SqwPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 void SqwPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
