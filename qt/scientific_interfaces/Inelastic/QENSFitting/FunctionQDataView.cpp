@@ -51,6 +51,7 @@ void FunctionQDataView::showAddWorkspaceDialog() {
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
 }
