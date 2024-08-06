@@ -13,6 +13,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusIOHelper.h"
 
@@ -28,6 +30,8 @@ using Mantid::Kernel::Direction;
 namespace { // anonymous namespace
 namespace PropertyNames {
 const std::string FILENAME("Filename");
+const std::string CAL_FILE("CalFileName");
+const std::string LOAD_IDF_FROM_NXS("LoadNexusInstrumentXML");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 } // namespace PropertyNames
 
@@ -69,6 +73,10 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::FILENAME, "", FileProperty::Load, exts),
                   "The name of the Event NeXus file to read, including its full or relative path. "
                   "The file name is typically of the form INST_####_event.nxs.");
+  // this property is needed so the correct load instrument is called
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<bool>>(PropertyNames::LOAD_IDF_FROM_NXS, true, Direction::Input),
+      "Reads the embedded Instrument XML from the NeXus file");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -95,12 +103,15 @@ void AlignAndFocusPowderSlim::exec() {
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   const Kernel::NexusHDF5Descriptor descriptor(filename);
 
-  /*
-  // TODO load instrument
+  const std::string ENTRY_TOP_LEVEL("entry");
+
   // Load the instrument
   // prog->doReport("Loading instrument"); TODO add progress bar stuff
-  //LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, "entry", this, &descriptor);
+  // LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, "entry", this, &descriptor);
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
+  this->initCalibrationConstants(wksp);
 
+  /*
   // load run metadata
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
@@ -126,11 +137,13 @@ void AlignAndFocusPowderSlim::exec() {
   ::NeXus::File h5file(filename);
 
   h5file.openPath("/");
-  h5file.openGroup("entry", "NXentry"); // TODO should this allow other entries?
+  h5file.openGroup(ENTRY_TOP_LEVEL, "NXentry"); // TODO should this allow other entries?
 
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
   auto itClassEntries = allEntries.find("NXevent_data");
+
+  // temporary "map" for detid -> calibration constant
 
   if (itClassEntries != allEntries.end()) {
     const std::set<std::string> &classEntries = itClassEntries->second;
@@ -155,20 +168,41 @@ void AlignAndFocusPowderSlim::exec() {
         g_log.information() << "Loading bank " << entry_name << '\n';
         h5file.openGroup(entry_name, "NXevent_data");
 
-        loadTOF(event_time_of_flight, h5file);
-        loadDetid(event_detid, h5file);
+        {
+          const auto startTime = std::chrono::high_resolution_clock::now();
+          loadTOF(event_time_of_flight, h5file);
+          addTimer("readTOF" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+        }
+        {
+          const auto startTime = std::chrono::high_resolution_clock::now();
+          loadDetid(event_detid, h5file);
+          addTimer("readDetID" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+        }
+
+        const auto startTimeProcess = std::chrono::high_resolution_clock::now();
+        const auto [minval, maxval] = std::minmax_element(event_detid->cbegin(), event_detid->cend());
+        BankCalibration calibration(*minval, *maxval, m_calibration);
 
         auto binFinder = DataObjects::EventList::findLinearBin;
         const auto divisor{.1};
         const auto offset{xmin * divisor};
 
         auto &spectrum = wksp->getSpectrum(specnum);
+        const auto &x_values = spectrum.readX();
+        const auto numEvent = event_time_of_flight->size();
+        auto &y_values = spectrum.dataY();
+        for (size_t i = 0; i < numEvent; ++i) {
+          const auto detid = event_detid->at(i);
 
-        for (const auto &tof : *event_time_of_flight) {
-          const auto binnum = binFinder(spectrum.dataX(), static_cast<double>(tof), divisor, offset, false);
-          if (binnum)
-            spectrum.dataY()[binnum.get()] += 1;
+          const auto tof = event_time_of_flight->at(i) * calibration.value(detid); // calibConstant->second;
+          if (!(tof < x_values.front() || tof >= x_values.back())) {
+
+            const auto binnum = binFinder(x_values, static_cast<double>(tof), divisor, offset, true);
+            if (binnum)
+              y_values[binnum.get()]++;
+          }
         }
+        addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
 
         h5file.closeGroup();
         specnum++;
@@ -183,6 +217,18 @@ void AlignAndFocusPowderSlim::exec() {
   // TODO load logs
 
   setProperty("OutputWorkspace", std::move(wksp));
+}
+
+void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp) {
+  const auto detInfo = wksp->detectorInfo();
+  // TODO currently arbitrary
+  const auto difCFocus = 1. / Kernel::Units::tofToDSpacingFactor(detInfo.l1(), 1., 0.5 * M_PI, 0.);
+
+  for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+    if (!iter->isMonitor()) {
+      m_calibration.emplace(iter->detid(), difCFocus / detInfo.difcUncalibrated(iter->index()));
+    }
+  }
 }
 
 void AlignAndFocusPowderSlim::loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file) {
@@ -221,6 +267,38 @@ void AlignAndFocusPowderSlim::loadDetid(std::unique_ptr<std::vector<uint32_t>> &
 
   // close the sds
   h5file.closeData();
+}
+
+// ------------------------ BankCalibration object
+AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
+                                                          const std::map<detid_t, double> &calibration_map)
+    : m_detid_offset(idmin) {
+  // error check the id-range
+  if (idmax < idmin)
+    throw std::runtime_error("BAD!"); // TODO better message
+
+  std::cout << "Setting size " << static_cast<size_t>(idmax - idmin + 1) << "\n";
+  // allocate memory and set the default value to 1
+  m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
+
+  // copy over values that matter
+  auto iter = calibration_map.find(idmin);
+  if (iter == calibration_map.end())
+    throw std::runtime_error("ALSO BAD!");
+  auto iter_end = calibration_map.find(idmax);
+  if (iter_end != calibration_map.end())
+    ++iter_end;
+  for (; iter != iter_end; ++iter) {
+    const auto index = static_cast<size_t>(iter->first - m_detid_offset);
+    m_calibration[index] = iter->second;
+  }
+}
+
+/*
+ * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
+ */
+double AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
+  return m_calibration[detid - m_detid_offset];
 }
 
 } // namespace Mantid::DataHandling
