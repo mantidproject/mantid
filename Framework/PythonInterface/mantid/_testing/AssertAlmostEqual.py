@@ -27,12 +27,12 @@ def assert_almost_equal(Workspace1, Workspace2, rtol=Property.EMPTY_DBL, atol=Pr
     AssertionError
         If Workspace1 and Workspace2 are not equal up to specified precision
     ValueError
-        If atol and rtol are both provided
+        If atol and rtol are both not provided
 
     """
     # check arguments
-    if not len(set(kwargs.keys()).intersection({"Workspace1", "Workspace2", "Tolerance", "ToleranceRelErr"})):
-        raise ValueError("Workspace1, Workspace2, Tolerance, ToleranceRelErr cannot be in passed as additional parameters")
+    if len(set(kwargs.keys()).intersection({"Workspace1", "Workspace2", "Tolerance", "ToleranceRelErr"})):
+        raise ValueError("Workspace1, Workspace2, Tolerance, ToleranceRelErr cannot be passed as additional parameters")
 
     if rtol == Property.EMPTY_DBL and atol == Property.EMPTY_DBL:
         raise ValueError("Specify rtol or atol")
