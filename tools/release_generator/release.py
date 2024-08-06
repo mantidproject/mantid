@@ -131,7 +131,7 @@ inelastic = ["Algorithms"]
 muon = ["FDA", "Muon_Analysis", "MA_FDA", "ALC", "Elemental_Analysis", "Algorithms"]
 
 subfolders = ["Bugfixes", "New_features"]
-deprecated_subfolders = ["Bugfixes", "New_features", "Deprecated", "Removed"]
+deprecated_subfolders = subfolders + ["Deprecated", "Removed"]
 muon_subfolders = ["Bugfixes"]
 #################################################################################
 
@@ -239,10 +239,7 @@ def makeReleaseNoteSubfolders(directory, HigherLevel):
             for single_folder in muon_subfolders:
                 subfolder_creation(directory, HigherLevel, single_folder)
         if "Framework" in directoryStr:
-            if "Algorithm" in directoryStr:
-                for single_folder in deprecated_subfolders:
-                    subfolder_creation(directory, HigherLevel, single_folder)
-            if "Fit_Functions" in directoryStr:
+            if "Algorithm" in directoryStr or "Fit_Functions" in directoryStr:
                 for single_folder in deprecated_subfolders:
                     subfolder_creation(directory, HigherLevel, single_folder)
             else:
