@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace NeXus {
 class File;
@@ -30,8 +32,22 @@ private:
   void init() override;
   void exec() override;
 
+  void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
+
   void loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file);
   void loadDetid(std::unique_ptr<std::vector<uint32_t>> &data, ::NeXus::File &h5file);
+
+  class MANTID_DATAHANDLING_DLL BankCalibration {
+  public:
+    BankCalibration(const detid_t idmin, const detid_t idmax, const std::map<detid_t, double> &calibration_map);
+    double value(const detid_t detid) const;
+
+  private:
+    std::vector<double> m_calibration;
+    detid_t m_detid_offset;
+  };
+
+  std::map<detid_t, double> m_calibration;
 };
 
 } // namespace DataHandling
