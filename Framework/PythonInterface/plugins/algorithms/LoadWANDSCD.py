@@ -293,8 +293,8 @@ class LoadWANDSCD(PythonAlgorithm):
             UB = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
 
         if self.getProperty("ApplyGoniometerTilt").value:
-            sgl = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgl.RBV").value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
-            sgu = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgu.RBV").value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            sgl = np.deg2rad(np.mean(sgl_array))  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(np.mean(sgu_array))  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
             sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
             sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
             UB = sgl_a.dot(sgu_a).dot(UB)  # Apply the Goniometer tilts to the UB matrix
