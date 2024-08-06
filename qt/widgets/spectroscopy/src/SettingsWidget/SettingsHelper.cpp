@@ -10,7 +10,6 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include <iostream>
 
 namespace {
 
