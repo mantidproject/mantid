@@ -127,68 +127,87 @@ void PolarizationEfficienciesWildes::init() {
 }
 
 namespace {
-
-void validateMatchingBins(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                          const Mantid::API::MatrixWorkspace_sptr &refWs, const std::string &propertyName,
-                          std::map<std::string, std::string> &problems) {
+bool hasMatchingBins(const Mantid::API::MatrixWorkspace_sptr &workspace, const Mantid::API::MatrixWorkspace_sptr &refWs,
+                     const std::string &propertyName, std::map<std::string, std::string> &problems) {
   if (!WorkspaceHelpers::matchingBins(*workspace, *refWs, true)) {
     problems[propertyName] = "All input workspaces must have the same X values.";
-    return;
+    return false;
   }
+
+  return true;
 }
 
-void validateInputWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                            const Mantid::API::MatrixWorkspace_sptr &refWs, const std::string &propertyName,
-                            std::map<std::string, std::string> &problems) {
+bool isValidInputWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                           const Mantid::API::MatrixWorkspace_sptr &refWs, const std::string &propertyName,
+                           std::map<std::string, std::string> &problems) {
   if (workspace == nullptr) {
     problems[propertyName] = "All input workspaces must be matrix workspaces.";
-    return;
+    return false;
   }
 
   Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
   if (unit->unitID() != "Wavelength") {
     problems[propertyName] = "All input workspaces must be in units of Wavelength.";
-    return;
+    return false;
   }
 
   if (workspace->getNumberHistograms() != 1) {
     problems[propertyName] = "All input workspaces must contain only a single spectrum.";
-    return;
+    return false;
   }
 
-  validateMatchingBins(workspace, refWs, propertyName, problems);
+  return hasMatchingBins(workspace, refWs, propertyName, problems);
 }
 
-void validateInputWSGroup(const Mantid::API::WorkspaceGroup_sptr &groupWs, const std::string &propertyName,
-                          std::map<std::string, std::string> &problems) {
+bool isValidInputWSGroup(const Mantid::API::WorkspaceGroup_sptr &groupWs, const std::string &propertyName,
+                         std::map<std::string, std::string> &problems) {
   if (groupWs == nullptr) {
     problems[propertyName] = "The input workspace must be a group workspace.";
-    return;
+    return false;
   }
 
   if (groupWs->size() != 4) {
     problems[propertyName] = "The input group must contain a workspace for all four flipper configurations.";
-    return;
+    return false;
   }
 
   const MatrixWorkspace_sptr refWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(0));
   for (size_t i = 0; i < groupWs->size(); ++i) {
     const MatrixWorkspace_sptr childWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
-    validateInputWorkspace(childWs, refWs, propertyName, problems);
+    if (!isValidInputWorkspace(childWs, refWs, propertyName, problems)) {
+      return false;
+    }
   }
+
+  return true;
 }
 } // namespace
 
 std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInputs() {
   std::map<std::string, std::string> problems;
 
-  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
-  validateInputWSGroup(nonMagWsGrp, PropNames::INPUT_NON_MAG_WS, problems);
-  const MatrixWorkspace_sptr nonMagRefWs = std::dynamic_pointer_cast<MatrixWorkspace>(nonMagWsGrp->getItem(0));
-
   const bool hasMagWsGrp = !isDefault(PropNames::INPUT_MAG_WS);
   const bool hasInputPWs = !isDefault(PropNames::INPUT_P_EFF_WS);
   const bool hasInputAWs = !isDefault(PropNames::INPUT_A_EFF_WS);
+
+  if (!isDefault(PropNames::OUTPUT_P_EFF_WS) && !hasMagWsGrp && !hasInputPWs && !hasInputAWs) {
+    problems[PropNames::OUTPUT_P_EFF_WS] = "If output polarizer efficiency is requested then either the magnetic "
+                                           "workspace or the known analyser efficiency should be provided.";
+  }
+
+  if (!isDefault(PropNames::OUTPUT_A_EFF_WS) && !hasMagWsGrp && !hasInputPWs && !hasInputAWs) {
+    problems[PropNames::OUTPUT_A_EFF_WS] = "If output analyser efficiency is requested then either the magnetic "
+                                           "workspace or the known polarizer efficiency should be provided.";
+  }
+
+  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
+  if (!isValidInputWSGroup(nonMagWsGrp, PropNames::INPUT_NON_MAG_WS, problems)) {
+    // We need to use a child workspace from the nonMag group as a reference for later checks, so stop here if there are
+    // any issues with this input
+    return problems;
+  }
+
+  const MatrixWorkspace_sptr nonMagRefWs = std::dynamic_pointer_cast<MatrixWorkspace>(nonMagWsGrp->getItem(0));
 
   // If a magnetic workspace has been provided then we will use that to calculate the polarizer and analyser
   // efficiencies, so individual efficiency workspaces should not be provided as well
@@ -202,32 +221,21 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
     }
 
     const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
-    validateInputWSGroup(magWsGrp, PropNames::INPUT_MAG_WS, problems);
-
-    if (problems.find(PropNames::INPUT_MAG_WS) == problems.end()) {
+    if (isValidInputWSGroup(magWsGrp, PropNames::INPUT_MAG_WS, problems)) {
+      // Check that bins match between the input mag and nonMag workspace groups
       const MatrixWorkspace_sptr magWs = std::dynamic_pointer_cast<MatrixWorkspace>(magWsGrp->getItem(0));
-      validateMatchingBins(magWs, nonMagRefWs, PropNames::INPUT_MAG_WS, problems);
+      hasMatchingBins(magWs, nonMagRefWs, PropNames::INPUT_MAG_WS, problems);
     }
   } else {
     if (hasInputPWs) {
       const MatrixWorkspace_sptr inputPolEffWs = getProperty(PropNames::INPUT_P_EFF_WS);
-      validateInputWorkspace(inputPolEffWs, nonMagRefWs, PropNames::INPUT_P_EFF_WS, problems);
+      isValidInputWorkspace(inputPolEffWs, nonMagRefWs, PropNames::INPUT_P_EFF_WS, problems);
     }
 
     if (hasInputAWs) {
       const MatrixWorkspace_sptr inputAnaEffWs = getProperty(PropNames::INPUT_A_EFF_WS);
-      validateInputWorkspace(inputAnaEffWs, nonMagRefWs, PropNames::INPUT_A_EFF_WS, problems);
+      isValidInputWorkspace(inputAnaEffWs, nonMagRefWs, PropNames::INPUT_A_EFF_WS, problems);
     }
-  }
-
-  if (!isDefault(PropNames::OUTPUT_P_EFF_WS) && !hasMagWsGrp && !hasInputPWs && !hasInputAWs) {
-    problems[PropNames::OUTPUT_P_EFF_WS] = "If output polarizer efficiency is requested then either the magnetic "
-                                           "workspace or the known analyser efficiency should be provided.";
-  }
-
-  if (!isDefault(PropNames::OUTPUT_A_EFF_WS) && !hasMagWsGrp && !hasInputPWs && !hasInputAWs) {
-    problems[PropNames::OUTPUT_A_EFF_WS] = "If output analyser efficiency is requested then either the magnetic "
-                                           "workspace or the known polarizer efficiency should be provided.";
   }
 
   return problems;
