@@ -784,30 +784,32 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
 }
 
 /**
- * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given
- * block-size
+ * Load a histogram given by the offset index for data in a NXDataSetTyped
  * @param data :: The NXDataSet object
- * @param blocksize :: The block-size to use
- * @param blockNumber :: The number of the block to process
- * @param hist :: The workspace index to start reading into
- * @param local_workspace :: The workspace to fill the data with
+ * @param offsetIndex :: The offset index at which to start reading data from.
+ * @param histIndex :: The index of the histogram to be loaded.
+ * @param localWorkspace :: The workspace to fill the data with.
+ * @param nDetectorBlockChannels :: The number of data elements per histogram.
+ * @param binEdges :: The bin edges to use for the histogram.
  */
-void LoadISISNexus2::loadHistogram(NXDataSetTyped<int> &data, int64_t dataOffset, int64_t histIndex,
+void LoadISISNexus2::loadHistogram(NXDataSetTyped<int> &data, int64_t offsetIndex, int64_t histIndex,
                                    DataObjects::Workspace2D_sptr &localWorkspace,
                                    std::size_t const nDetectorBlockChannels, BinEdges const &binEdges) {
-  int *data_start = data() + dataOffset * nDetectorBlockChannels;
+  int *data_start = data() + offsetIndex * nDetectorBlockChannels;
   int *data_end = data_start + nDetectorBlockChannels;
 
   localWorkspace->setHistogram(histIndex, binEdges, Counts(data_start, data_end));
   data_start += nDetectorBlockChannels;
   data_end += nDetectorBlockChannels;
   if (m_load_selected_spectra) {
-    auto &spec = localWorkspace->getSpectrum(histIndex);
-    specnum_t specNum = m_wsInd2specNum_map.at(histIndex);
-    // set detectors corresponding to spectra Number
-    spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
-    // set correct spectra Number
-    spec.setSpectrumNo(specNum);
+    PARALLEL_CRITICAL(setDetectors) {
+      auto &spec = localWorkspace->getSpectrum(histIndex);
+      specnum_t specNum = m_wsInd2specNum_map.at(histIndex);
+      // set detectors corresponding to spectra Number
+      spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+      // set correct spectra Number
+      spec.setSpectrumNo(specNum);
+    }
   }
 }
 
