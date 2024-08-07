@@ -13,14 +13,12 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
-
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
-
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -361,8 +359,7 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   for (int64_t i = 0; i < nHist; ++i) {
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
       // a detector but not a monitor and not masked for indirect instrument should have efixed
-      spectrumInfo.getDetectorValues(inUnit, outUnit,
-                                     DeltaEMode::Indirect, true, i, pmap);
+      spectrumInfo.getDetectorValues(inUnit, outUnit, DeltaEMode::Indirect, true, i, pmap);
       AllEnergies[nDet] = pmap[UnitParams::efixed];
       mean = mean + AllEnergies[nDet];
       nDet++;
