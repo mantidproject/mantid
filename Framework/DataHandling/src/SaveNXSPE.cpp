@@ -370,10 +370,9 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
     return std::move(AllEnergies); // no energies,
 
   mean = mean / double(nDet);
-  double max_difr(0);
-  for (auto it = AllEnergies.begin(); it != AllEnergies.end(); it++) {
-    max_difr = std::max(max_difr, std::abs(*it - mean));
-  }
+  double max_difr = std::accumulate(AllEnergies.begin(), AllEnergies.end(), 0., [mean](double x, double y) -> double {
+    return std::max<double>(x, std::abs(y - mean));
+  });
   if (max_difr < std::numeric_limits<float>::epsilon()) {
     AllEnergies.resize(1);
     AllEnergies[0] = mean;
