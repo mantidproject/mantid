@@ -84,12 +84,18 @@ private:
 
 class ISISJournalTest : public CxxTest::TestSuite {
 public:
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void test_getRuns_requests_correct_url() {
     auto journal = makeJournal();
     auto url = std::string("http://data.isis.rl.ac.uk/journals/ndxinter/journal_19_4.xml");
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getRuns();
-    verifyAndClear();
   }
 
   void test_getCycleNames_requests_correct_url() {
@@ -97,7 +103,6 @@ public:
     auto url = std::string("http://data.isis.rl.ac.uk/journals/ndxinter/journal_main.xml");
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getCycleNames();
-    verifyAndClear();
   }
 
   void test_getRuns_when_server_returns_journalFile() {
@@ -106,7 +111,6 @@ public:
     auto const expected =
         std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}}, {{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
   void test_getCycleNames_when_server_returns_indexFile() {
@@ -114,40 +118,34 @@ public:
     auto results = journal.getCycleNames();
     auto const expected = std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
   void test_getRuns_throws_if_url_not_found() {
     auto journal = makeJournal();
     expectURLNotFound();
     TS_ASSERT_THROWS(journal.getRuns(), InternetError const &);
-    verifyAndClear();
   }
 
   void test_getCycleNames_throws_if_url_not_found() {
     auto journal = makeJournal(indexFile);
     expectURLNotFound();
     TS_ASSERT_THROWS(journal.getCycleNames(), InternetError const &);
-    verifyAndClear();
   }
 
   void test_getRuns_with_empty_file_throws() {
     auto journal = makeJournal(emptyFile);
     TS_ASSERT_THROWS(journal.getRuns(), std::runtime_error const &);
-    verifyAndClear();
   }
 
   void test_getRuns_with_bad_xml_throws() {
     auto journal = makeJournal(badFile);
     TS_ASSERT_THROWS(journal.getRuns(), std::runtime_error const &);
-    verifyAndClear();
   }
 
   void test_getRuns_with_empty_xml_file_returns_empty_results() {
     auto journal = makeJournal(emptyJournalFile);
     auto results = journal.getRuns(valuesToLookup(), filters());
     TS_ASSERT_EQUALS(results, std::vector<ISISJournal::RunData>{});
-    verifyAndClear();
   }
 
   void test_getRuns_still_returns_run_names_when_requested_values_list_is_empty() {
@@ -161,7 +159,6 @@ public:
     auto results = journal.getRuns();
     auto const expected =
         std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}}, {{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
-    verifyAndClear();
   }
 
   void test_getRuns_returns_requested_values_filtered_by_one_filter() {
@@ -171,7 +168,6 @@ public:
         {{"name", "INTER12345"}, {"run_number", "12345"}, {"title", "Experiment 1 run 1"}},
         {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
   void test_getRuns_returns_requested_values_filtered_by_multiple_filters() {
@@ -180,7 +176,6 @@ public:
     auto const expected = std::vector<ISISJournal::RunData>{
         {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
   void test_getRuns_returns_requested_values_for_all_entries_when_no_filter_is_set() {
@@ -191,32 +186,27 @@ public:
         {{"name", "INTER12345"}, {"run_number", "12345"}, {"title", "Experiment 1 run 1"}},
         {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
   void test_getCycleList_with_empty_file_throws() {
     auto journal = makeJournal(emptyFile);
     TS_ASSERT_THROWS(journal.getCycleNames(), std::runtime_error const &);
-    verifyAndClear();
   }
 
   void test_getCycleList_with_bad_xml_throws() {
     auto journal = makeJournal(badFile);
     TS_ASSERT_THROWS(journal.getCycleNames(), std::runtime_error const &);
-    verifyAndClear();
   }
 
   void test_getCycleList_with_empty_xml_file_returns_empty_results() {
     auto journal = makeJournal(emptyIndexFile);
     auto results = journal.getCycleNames();
     TS_ASSERT_EQUALS(results, std::vector<std::string>{});
-    verifyAndClear();
   }
 
   void test_getCycleList_throws_when_invalid_element_names() {
     auto journal = makeJournal(invalidIndexFile);
     TS_ASSERT_THROWS(journal.getCycleNames(), std::invalid_argument const &);
-    verifyAndClear();
   }
 
   void test_getCycleList_returns_all_valid_cycles() {
@@ -224,7 +214,6 @@ public:
     auto results = journal.getCycleNames();
     auto const expected = std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
     TS_ASSERT_EQUALS(results, expected);
-    verifyAndClear();
   }
 
 private:

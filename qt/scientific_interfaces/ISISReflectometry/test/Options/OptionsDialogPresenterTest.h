@@ -31,12 +31,16 @@ public:
 
   void setUp() override {}
 
-  void tearDown() override {}
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testInitOptionsClearsVariables() {
@@ -45,8 +49,6 @@ public:
     presenter.initOptions();
     TS_ASSERT_EQUALS(presenter.m_boolOptions.size(), 0);
     TS_ASSERT_EQUALS(presenter.m_intOptions.size(), 0);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulLoad));
   }
 
   void testInitOptionsAttemptsToLoadFromModel() {
@@ -57,7 +59,6 @@ public:
     EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).WillOnce(Return());
     presenter.initOptions();
     assertLoadOptions(presenter);
-    verifyAndClear();
   }
 
   void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
@@ -67,8 +68,6 @@ public:
     EXPECT_CALL(*m_modelUnsuccessfulDefaults, applyDefaultOptionsProxy(_, _)).WillOnce(Return());
     presenter.initOptions();
     assertDefaultOptions(presenter);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulDefaults));
   }
 
   void testLoadOptionsQueriesModel() {
@@ -79,8 +78,6 @@ public:
     EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
     EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.notifyLoadOptions();
-    verifyAndClear(std::move(mainWindowSubscriber));
-    verifyAndClear(std::move(mainWindowSubscriber));
   }
 
   void testLoadOptionsUpdatesView() {
@@ -92,7 +89,6 @@ public:
     EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.notifyLoadOptions();
     assertLoadOptions(presenter);
-    verifyAndClear(std::move(mainWindowSubscriber));
   }
 
   void testLoadOptionsNotifiesMainWindow() {
@@ -102,7 +98,6 @@ public:
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifyLoadOptions();
     assertLoadOptions(presenter);
-    verifyAndClear(std::move(mainWindowSubscriber));
   }
 
   void testSaveOptionsUpdatesModel() {
@@ -112,7 +107,6 @@ public:
     presenter.notifyLoadOptions();
     EXPECT_CALL(*m_model, saveSettings(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
     presenter.notifySaveOptions();
-    verifyAndClear();
   }
 
   void testSaveOptionsNotifiesMainWindow() {
@@ -121,7 +115,6 @@ public:
     EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    verifyAndClear(std::move(mainWindowSubscriber));
   }
 
   void testSaveOptionsQueriesView() {
@@ -132,7 +125,6 @@ public:
     presenter.notifyLoadOptions();
     EXPECT_CALL(m_view, getOptions(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
     presenter.notifySaveOptions();
-    verifyAndClear();
   }
 
 private:
@@ -190,10 +182,10 @@ private:
     TS_ASSERT_EQUALS(presenter.m_intOptions["RoundPrecision"], 5);
   }
 
-  void verifyAndClear(std::unique_ptr<NiceMock<MockOptionsDialogPresenterSubscriber>> mainWindowSubscriber =
-                          std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
+  void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulDefaults));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_modelUnsuccessfulLoad));
   }
 };
