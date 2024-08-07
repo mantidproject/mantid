@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from itertools import repeat
+from functools import partial
 import json
 from multiprocessing import Pool
 import numbers
@@ -558,6 +558,19 @@ class SPowderSemiEmpiricalCalculator:
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
 
+    @staticmethod
+    def _apply_resolution(frequencies: np.ndarray, bins: np.ndarray, s_dft: np.ndarray, scheme: str, instrument: Instrument) -> np.ndarray:
+        """Apply instrument resolution function to a row of data
+
+        This is a pure function for use with multiprocessing Pool.map;
+        otherwise we have to pickle self and that fails when hitting the
+        logger.  (In principle the problem could also be avoided by
+        composition; a simpler class with the calculation state/parameters
+        could be stored.)
+
+        """
+        return instrument.convolve_with_resolution_function(frequencies=frequencies, bins=bins, s_dft=s_dft, scheme=scheme)[1]
+
     def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
         """
         Apply instrumental broadening to scattering data
@@ -573,12 +586,12 @@ class SPowderSemiEmpiricalCalculator:
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
             with Pool(n_threads) as p:
-                broadened_spectra = p.starmap(
-                    _apply_resolution,
-                    zip(repeat(frequencies), repeat(self._bins), spectra._y_data, repeat(broadening_scheme), repeat(self._instrument)),
+                broadened_spectra = p.map(
+                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
+                    spectra._y_data,
                     chunksize=chunksize,
                 )
-                broadened_spectra = list(broadened_spectra)
+            broadened_spectra = list(broadened_spectra)
 
             return AbinsSpectrum1DCollection(
                 x_data=spectra.x_data,
@@ -599,9 +612,9 @@ class SPowderSemiEmpiricalCalculator:
             s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
 
             with Pool(n_threads) as p:
-                broadened_spectra = p.starmap(
-                    _apply_resolution,
-                    zip(repeat(frequencies), repeat(self._bins), s_rows, repeat(broadening_scheme), repeat(self._instrument)),
+                broadened_spectra = p.map(
+                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
+                    s_rows,
                     chunksize=chunksize,
                 )
 
@@ -921,12 +934,3 @@ class SPowderSemiEmpiricalCalculator:
                   ) / (15. * factor)
         # fmt: on
         return s
-
-
-def _apply_resolution(frequencies: np.ndarray, bins: np.ndarray, s_dft: np.ndarray, scheme: str, instrument: Instrument) -> np.ndarray:
-    """Apply instrument resolution function to a row of data
-
-    This is a top-level function for use with multiprocessing Pool.starmap
-
-    """
-    return instrument.convolve_with_resolution_function(frequencies=frequencies, bins=bins, s_dft=s_dft, scheme=scheme)[1]
