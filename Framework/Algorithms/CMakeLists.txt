@@ -57,7 +57,6 @@ set(SRC_FILES
     src/ConvertAxesToRealSpace.cpp
     src/ConvertAxisByFormula.cpp
     src/ConvertDiffCal.cpp
-    src/ConvertEmptyToTof.cpp
     src/ConvertFromDistribution.cpp
     src/ConvertSpectrumAxis.cpp
     src/ConvertSpectrumAxis2.cpp
@@ -409,7 +408,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ConvertAxesToRealSpace.h
     inc/MantidAlgorithms/ConvertAxisByFormula.h
     inc/MantidAlgorithms/ConvertDiffCal.h
-    inc/MantidAlgorithms/ConvertEmptyToTof.h
     inc/MantidAlgorithms/ConvertFromDistribution.h
     inc/MantidAlgorithms/ConvertSpectrumAxis.h
     inc/MantidAlgorithms/ConvertSpectrumAxis2.h
