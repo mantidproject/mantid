@@ -41,6 +41,7 @@
 
 #include <H5Cpp.h>
 #include <cstddef>
+#include <cstdio>
 #include <string>
 #include <variant>
 #include <vector>
