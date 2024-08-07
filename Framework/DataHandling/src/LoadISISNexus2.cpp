@@ -734,7 +734,6 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
       const int64_t fullblocks = rangesize / blocksize;
       int64_t spectra_no = spectraBlock.first;
 
-      auto const nLoadBlockChannels = m_loadBlockInfo.getNumberOfChannels();
       auto const nDetectorBlockChannels = m_detBlockInfo.getNumberOfChannels();
       auto const binEdges = BinEdges(m_tof_data);
 
@@ -745,16 +744,14 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
         data.load(static_cast<int>(blocksize * fullblocks), static_cast<int>(period_index),
                   static_cast<int>(filestart));
         for (int64_t i = 0; i < fullblocks; ++i) {
-          loadBlock(data, blocksize, i, hist_index, local_workspace, nLoadBlockChannels, nDetectorBlockChannels,
-                    binEdges);
+          loadBlock(data, blocksize, i, hist_index, local_workspace, nDetectorBlockChannels, binEdges);
           filestart += blocksize;
         }
       }
       int64_t finalblock = rangesize - (fullblocks * blocksize);
       if (finalblock > 0) {
         data.load(static_cast<int>(finalblock), static_cast<int>(period_index), static_cast<int>(filestart));
-        loadBlock(data, finalblock, 0, hist_index, local_workspace, nLoadBlockChannels, nDetectorBlockChannels,
-                  binEdges);
+        loadBlock(data, finalblock, 0, hist_index, local_workspace, nDetectorBlockChannels, binEdges);
       }
     }
   }
@@ -796,10 +793,10 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
  * @param local_workspace :: The workspace to fill the data with
  */
 void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t blockNumber, int64_t &hist,
-                               DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nLoadBlockChannels,
-                               std::size_t const nDetectorBlockChannels, BinEdges const &binEdges) {
-  int *data_start = data() + blockNumber * blocksize * nLoadBlockChannels;
-  int *data_end = data_start + nLoadBlockChannels;
+                               DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nDetectorBlockChannels,
+                               BinEdges const &binEdges) {
+  int *data_start = data() + blockNumber * blocksize * nDetectorBlockChannels;
+  int *data_end = data_start + nDetectorBlockChannels;
   int64_t final(hist + blocksize);
   while (hist < final) {
     local_workspace->setHistogram(hist, binEdges, Counts(data_start, data_end));
