@@ -13,11 +13,14 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
+
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -115,15 +118,46 @@ void SaveNXSPE::exec() {
 
   // Get the value out of the property first
   double efixed = getProperty("Efixed");
-  if (isEmpty(efixed))
+  bool efixed_provided(true);
+  if (isEmpty(efixed)) {
     efixed = MASK_FLAG;
-  // Now lets check to see if the workspace knows better.
-  // TODO: Check that this is the way round we want to do it.
-  const API::Run &run = inputWS->run();
-  if (run.hasProperty("Ei")) {
-    efixed = run.getPropertyValueAsType<double>("Ei");
+    efixed_provided = false;
   }
-  nxFile.writeData("fixed_energy", efixed);
+
+  bool write_single_energy(true);
+  auto eMode = inputWS->getEMode();
+  if (!efixed_provided) {
+    // efixed identified differently for different types of inelastic instruments
+    // Now lets check to see if we can retrieve energy from workspace.
+    switch (eMode) {
+    case (Kernel::DeltaEMode::Direct): {
+      const API::Run &run = inputWS->run();
+      if (run.hasProperty("Ei")) {
+        efixed = run.getPropertyValueAsType<double>("Ei");
+      }
+      break;
+    }
+    case (Kernel::DeltaEMode::Indirect): {
+      // here workspace detectors should always have the energy
+      auto allEi = getIndirectEfixed(inputWS);
+      if (allEi.size() == 1) {
+        efixed = allEi[0];
+      } else if (allEi.size() > 1) {
+        write_single_energy = false; // do not write single energy, write array of energies here
+        nxFile.writeData("fixed_energy", allEi);
+      }
+      // empty array will keep masked efixed
+      break;
+    }
+    case (Kernel::DeltaEMode::Elastic): {
+      // no efixed for elastic, whatever retrieved from property remains unchanged
+      break;
+    }
+    }
+  }
+  if (write_single_energy) // if multiple energies, they have already been written
+    nxFile.writeData("fixed_energy", efixed);
+
   nxFile.openData("fixed_energy");
   nxFile.putAttr("units", "meV");
   nxFile.closeData();
@@ -156,11 +190,12 @@ void SaveNXSPE::exec() {
   nxFile.closeData();
   nxFile.writeData("run_number", inputWS->getRunNumber());
 
-  // NXfermi_chopper
-  nxFile.makeGroup("fermi", "NXfermi_chopper", true);
-
-  nxFile.writeData("energy", efixed);
-  nxFile.closeGroup(); // NXfermi_chopper
+  if (eMode == Kernel::DeltaEMode::Direct) {
+    // NXfermi_chopper
+    nxFile.makeGroup("fermi", "NXfermi_chopper", true);
+    nxFile.writeData("energy", efixed);
+    nxFile.closeGroup(); // NXfermi_chopper
+  }                      // TODO: Do not know what indirect people want for their instrument, This is for the future
 
   nxFile.closeGroup(); // NXinstrument
 
@@ -304,4 +339,47 @@ void SaveNXSPE::exec() {
   nxFile.closeGroup(); // Top level NXentry
 }
 
+/**
+ * Calculate fixed energy for indirect instrument. Depending on actual workspace, this may be the same energy for all
+ * detectors or array of energies for all active detectors if some energies are different.
+ *
+ * @param inputWS pointer to matrix workspace with indirect instrument attached to it.
+ *
+ * @returns vector containing analyzer energies for each detector if the energies are different or single energy if they
+ * are the same
+ */
+std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inputWS) {
+  // Number of spectra
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  Mantid::MantidVec AllEnergies(nHist);
+  size_t nDet(0);
+  double mean(0);
+  UnitParametersMap pmap;
+  Units::Time inUnit;
+  Units::DeltaE outUnit;
+  for (int64_t i = 0; i < nHist; ++i) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
+      // a detector but not a monitor and not masked for indirect instrument should have efixed
+      spectrumInfo.getDetectorValues(inUnit, outUnit,
+                                     DeltaEMode::Indirect, true, i, pmap);
+      AllEnergies[nDet] = pmap[UnitParams::efixed];
+      mean = mean + AllEnergies[nDet];
+      nDet++;
+    }
+  }
+  AllEnergies.resize(nDet);
+  if (nDet == 0)
+    return std::move(AllEnergies); // no energies,
+
+  mean = mean / double(nDet);
+  double max_difr(0);
+  for (auto it = AllEnergies.begin(); it != AllEnergies.end(); it++) {
+    max_difr = std::max(max_difr, std::abs(*it - mean));
+  }
+  if (max_difr < std::numeric_limits<float>::epsilon()) {
+    AllEnergies.resize(1);
+  }
+  return std::move(AllEnergies);
+}
 } // namespace Mantid::DataHandling
