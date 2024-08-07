@@ -743,10 +743,14 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
 
       data.load(static_cast<int>(blocksize * fullblocks + finalblock), static_cast<int>(period_index),
                 static_cast<int>(filestart));
-      for (int64_t i = 0; i < fullblocks + (finalblock > 0 ? 1 : 0); ++i) {
-        loadBlock(data, i != fullblocks ? blocksize : finalblock, i * blocksize, hist_index, local_workspace,
-                  nDetectorBlockChannels, binEdges);
+      auto const totalHistograms = fullblocks * blocksize + finalblock;
+      for (int64_t i = 0; i < totalHistograms; ++i) {
+        auto const blockIndex = i / blocksize;
+        auto const withinBlockIndex = i % blocksize;
+        loadHistogram(data, blockIndex * blocksize + withinBlockIndex, hist_index + i, local_workspace,
+                      nDetectorBlockChannels, binEdges);
       }
+      hist_index += totalHistograms;
     }
   }
 
@@ -786,26 +790,22 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
  * @param hist :: The workspace index to start reading into
  * @param local_workspace :: The workspace to fill the data with
  */
-void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t offset, int64_t &hist,
-                               DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nDetectorBlockChannels,
-                               BinEdges const &binEdges) {
-  int *data_start = data() + offset * nDetectorBlockChannels;
+void LoadISISNexus2::loadHistogram(NXDataSetTyped<int> &data, int64_t dataOffset, int64_t histIndex,
+                                   DataObjects::Workspace2D_sptr &localWorkspace,
+                                   std::size_t const nDetectorBlockChannels, BinEdges const &binEdges) {
+  int *data_start = data() + dataOffset * nDetectorBlockChannels;
   int *data_end = data_start + nDetectorBlockChannels;
-  int64_t final(hist + blocksize);
-  while (hist < final) {
-    local_workspace->setHistogram(hist, binEdges, Counts(data_start, data_end));
-    data_start += nDetectorBlockChannels;
-    data_end += nDetectorBlockChannels;
-    if (m_load_selected_spectra) {
-      auto &spec = local_workspace->getSpectrum(hist);
-      specnum_t specNum = m_wsInd2specNum_map.at(hist);
-      // set detectors corresponding to spectra Number
-      spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
-      // set correct spectra Number
-      spec.setSpectrumNo(specNum);
-    }
 
-    ++hist;
+  localWorkspace->setHistogram(histIndex, binEdges, Counts(data_start, data_end));
+  data_start += nDetectorBlockChannels;
+  data_end += nDetectorBlockChannels;
+  if (m_load_selected_spectra) {
+    auto &spec = localWorkspace->getSpectrum(histIndex);
+    specnum_t specNum = m_wsInd2specNum_map.at(histIndex);
+    // set detectors corresponding to spectra Number
+    spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+    // set correct spectra Number
+    spec.setSpectrumNo(specNum);
   }
 }
 

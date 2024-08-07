@@ -107,9 +107,9 @@ private:
   void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry, DataObjects::Workspace2D_sptr &local_workspace,
                       bool update_spectra2det_mapping = false);
   // Load a data block
-  void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize, int64_t offset, int64_t &hist,
-                 DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nDetectorBlockChannels,
-                 HistogramData::BinEdges const &binEdges);
+  void loadHistogram(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t dataOffset, int64_t histIndex,
+                     DataObjects::Workspace2D_sptr &localWorkspace, std::size_t const nDetectorBlockChannels,
+                     HistogramData::BinEdges const &binEdges);
 
   // Create period logs
   void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace);
