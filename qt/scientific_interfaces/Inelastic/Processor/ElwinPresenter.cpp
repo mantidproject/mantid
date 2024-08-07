@@ -244,8 +244,8 @@ void ElwinPresenter::handleRun() {
   // Group input workspaces
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
-  algQueue.emplace_back(m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(),
-                                                            m_view->getLogValue()));
+  algQueue.emplace_back(
+      m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(), m_view->getLogValue()));
   m_algorithmRunner->execute(algQueue);
 
   // Set the result workspace for Python script export
@@ -384,6 +384,16 @@ void ElwinPresenter::handlePlotPreviewClicked() {
     m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
   } else
     m_view->showMessageBox("Workspace not found - data may not be loaded.");
+}
+
+/**
+ * Overriding function called when changing file extensions in indirect settings:
+ * For Elwin Presenter, this function is reimplemented just to update the suffices in the
+ * output label widget.
+ */
+void ElwinPresenter::setFileExtensionsByName(bool filter) {
+  (void)filter;
+  m_outputName->setWsSuffixes(InterfaceUtils::getSampleWSSuffixes("Elwin"));
 }
 
 /**
