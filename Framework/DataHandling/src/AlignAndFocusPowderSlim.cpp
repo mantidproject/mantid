@@ -18,6 +18,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusIOHelper.h"
 #include "tbb/parallel_for.h"
+#include "tbb/parallel_reduce.h"
 
 #include <atomic>
 #include <regex>
@@ -68,38 +69,107 @@ const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return
 
 //----------------------------------------------------------------------------------------------
 namespace { // anonymous
-class ProcessEventsTask {
+class Histogrammer {
 public:
-  ProcessEventsTask(const std::vector<double> *binedges, const double bin_divisor, const double bin_offset,
-                    const std::vector<uint32_t> *detids, const std::vector<float> *tofs,
-                    const AlignAndFocusPowderSlim::BankCalibration *calibration,
-                    std::vector<std::atomic_uint32_t> *y_temp)
-      : m_bin_divisor(bin_divisor), m_bin_offset(bin_offset), m_binedges(binedges), m_detids(detids), m_tofs(tofs),
-        m_calibration(calibration), y_temp(y_temp) {}
+  Histogrammer(const std::vector<double> *binedges, const double width, const bool linear_bins) : m_binedges(binedges) {
+    m_xmin = binedges->front();
+    m_xmax = binedges->back();
+
+    if (linear_bins) {
+      m_findBin = DataObjects::EventList::findLinearBin;
+      m_bin_divisor = 1. / width;
+      m_bin_offset = m_xmin * m_bin_divisor;
+    } else {
+      m_findBin = DataObjects::EventList::findLogBin;
+      m_bin_divisor = 1. / log1p(abs(width)); // use this to do change of base
+      m_bin_offset = log(m_xmin) * m_bin_divisor;
+    }
+  }
+
+  boost::optional<size_t> findBin(const double tof) const {
+    // return boost::none;
+    if (tof < m_xmin || tof >= m_xmax) {
+      return boost::none;
+    } else {
+      return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
+    }
+  }
+
+private:
+  double m_bin_divisor;
+  double m_bin_offset;
+  double m_xmin;
+  double m_xmax;
+  const std::vector<double> *m_binedges;
+  boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
+};
+
+template <typename CountsType> class ProcessEventsTask {
+public:
+  ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<uint32_t> *detids,
+                    const std::vector<float> *tofs, const AlignAndFocusPowderSlim::BankCalibration *calibration,
+                    std::vector<CountsType> *y_temp)
+      : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t i = range.begin(); i < range.end(); ++i) {
       const auto detid = static_cast<detid_t>(m_detids->at(i));
       const auto tof = static_cast<double>(m_tofs->at(i)) * m_calibration->value(detid);
-      if (!(tof < m_binedges->front() || tof >= m_binedges->back())) {
 
-        const auto binnum = DataObjects::EventList::findLinearBin(*m_binedges, static_cast<double>(tof), m_bin_divisor,
-                                                                  m_bin_offset, true);
-        if (binnum)
-          y_temp->at(binnum.get())++;
-      }
+      const auto binnum = m_histogrammer->findBin(tof);
+      if (binnum)
+        y_temp->at(binnum.get())++;
     }
   }
 
 private:
-  const double m_bin_divisor;
-  const double m_bin_offset;
-  const std::vector<double> *m_binedges;
+  const Histogrammer *m_histogrammer;
   const std::vector<uint32_t> *m_detids;
   const std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
-  std::vector<std::atomic_uint32_t> *y_temp;
+  std::vector<CountsType> *y_temp;
 };
+
+template <typename Type> class MinMax {
+  const std::vector<Type> *vec;
+
+public:
+  Type minval;
+  Type maxval;
+  void operator()(const tbb::blocked_range<size_t> &range) {
+    const auto [minele, maxele] = std::minmax_element(vec->cbegin() + range.begin(), vec->cbegin() + range.end());
+    if (*minele < minval)
+      minval = *minele;
+    if (*maxele > maxval)
+      maxval = *maxele;
+  }
+
+  MinMax(MinMax &other, tbb::split)
+      : vec(other.vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+
+  MinMax(const std::vector<Type> *vec)
+      : vec(vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+
+  void join(const MinMax &other) {
+    if (other.minval < minval)
+      minval = other.minval;
+    if (other.maxval > maxval)
+      maxval = other.maxval;
+  }
+};
+
+template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector<Type> *vec) {
+  constexpr size_t grainsize{2000};
+
+  if (vec->size() < grainsize) {
+    const auto [minval, maxval] = std::minmax_element(vec->cbegin(), vec->cend());
+    return std::make_pair(*minval, *maxval);
+  } else {
+    MinMax<Type> finder(vec);
+    tbb::parallel_reduce(tbb::blocked_range<size_t>(0, vec->size(), grainsize), finder);
+    return std::make_pair(finder.minval, finder.maxval);
+  }
+}
 } // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
@@ -130,7 +200,9 @@ void AlignAndFocusPowderSlim::exec() {
   constexpr double xmax{39950};
 
   HistogramData::BinEdges XValues_new(0);
-  UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams({xmin, 10, xmax}, XValues_new.mutableRawData(), true,
+  const double binWidth{10.};
+  const bool linearBins = bool(binWidth > 0.);
+  UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams({xmin, binWidth, xmax}, XValues_new.mutableRawData(), true,
                                                              false, xmin, xmax));
   const size_t numBins = XValues_new.size() - 1;
   MatrixWorkspace_sptr wksp = WorkspaceFactory::Instance().create("Workspace2D", numHist, numBins + 1, numBins);
@@ -198,6 +270,7 @@ void AlignAndFocusPowderSlim::exec() {
     for (const std::string &classEntry : classEntries) {
       if (std::regex_match(classEntry, groups, classRegex)) {
         const std::string entry_name(groups[2].str());
+        const auto startTimeBank = std::chrono::high_resolution_clock::now();
 
         // skip entries with junk data
         if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
@@ -217,24 +290,25 @@ void AlignAndFocusPowderSlim::exec() {
           addTimer("readDetID" + entry_name, startTime, std::chrono::high_resolution_clock::now());
         }
 
-        const auto startTimeProcess = std::chrono::high_resolution_clock::now();
-        const auto [minval, maxval] = std::minmax_element(event_detid->cbegin(), event_detid->cend());
-        BankCalibration calibration(*minval, *maxval, m_calibration);
-
-        auto binFinder = DataObjects::EventList::findLinearBin;
-        const auto divisor{.1};
-        const auto offset{xmin * divisor};
+        const auto startTimeSetup = std::chrono::high_resolution_clock::now();
+        const auto [minval, maxval] = parallel_minmax(event_detid.get());
+        BankCalibration calibration(static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
 
         auto &spectrum = wksp->getSpectrum(specnum);
-        const auto &x_values = spectrum.readX();
+        Histogrammer histogrammer(&spectrum.readX(), binWidth, linearBins);
         const auto numEvent = event_time_of_flight->size();
+        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+        // counting things
         std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        ProcessEventsTask task(&x_values, divisor, offset, event_detid.get(), event_time_of_flight.get(), &calibration,
-                               &y_temp);
+        addTimer("setup" + entry_name, startTimeSetup, std::chrono::high_resolution_clock::now());
+
+        const auto startTimeProcess = std::chrono::high_resolution_clock::now();
+        ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp);
         tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent), task);
         auto &y_values = spectrum.dataY();
         std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
         addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
+        addTimer(entry_name, startTimeBank, std::chrono::high_resolution_clock::now());
 
         h5file.closeGroup();
         specnum++;
