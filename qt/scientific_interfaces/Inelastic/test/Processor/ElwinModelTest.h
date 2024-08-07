@@ -99,8 +99,7 @@ public:
     m_model->setNormalise(true);
 
     m_model->setOutputWorkspaceNames(wsBaseName);
-    auto const elwinAlg =
-        m_model->setupElasticWindowMultiple("Workspace_name_sqw", "sampleLogName", "sampleLogValue");
+    auto const elwinAlg = m_model->setupElasticWindowMultiple("Workspace_name_sqw", "sampleLogName", "sampleLogValue");
     batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{elwinAlg});
 
     m_model->setOutputWorkspaceNames(wsBaseName);
