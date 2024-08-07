@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from copy import deepcopy
+from functools import partial
 from itertools import chain, groupby, repeat
 from multiprocessing import Pool
 from numbers import Integral, Real
@@ -158,7 +159,6 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
 
     def iter_metadata(self) -> Generator[OneLineData, None, None]:
         common_metadata = dict((key, self.metadata[key]) for key in self.metadata.keys() - set("line_data"))
-        from itertools import repeat
 
         line_data = self.metadata.get("line_data")
         if line_data is None:
@@ -399,7 +399,6 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
 
     def iter_metadata(self) -> Generator[OneLineData, None, None]:
         common_metadata = dict((key, self.metadata[key]) for key in self.metadata.keys() - set("line_data"))
-        from itertools import repeat
 
         line_data = self.metadata.get("line_data")
         if line_data is None:
@@ -653,10 +652,10 @@ def add_autoconvolution_spectra(
     x_data = spectra.x_data
 
     with Pool(N_THREADS) as p:
-        output_spectra = p.starmap(_autoconvolve_atom_spectra, zip(map(list, spectra_by_atom), repeat(x_data), repeat(max_order)))
+        output_spectra = p.map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), map(list, spectra_by_atom))
 
         if output_bins is not None:
-            output_spectra = p.starmap(_resample_spectra, zip(output_spectra, repeat(x_data), repeat(output_bins)))
+            output_spectra = p.map(partial(_resample_spectra, input_bins=x_data, output_bins=output_bins), output_spectra)
 
     return _fast_1d_from_spectra(chain(*output_spectra))
 
