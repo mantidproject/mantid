@@ -16,8 +16,8 @@ dependencies:
   - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jsoncpp>=1.9.4,<2
   - lib3mf # windows only
-  - libboost-devel=1.82.* # Use the same version as conda-forge
-  - libboost-python-devel=1.82.* # Use the same version as conda-forge
+  - libboost-devel=1.84.* # Use the same version as conda-forge
+  - libboost-python-devel=1.84.* # Use the same version as conda-forge
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
