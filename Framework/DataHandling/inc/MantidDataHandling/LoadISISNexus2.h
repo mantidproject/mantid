@@ -145,7 +145,7 @@ private:
   // Is there a VMS block
   bool m_hasVMSBlock;
   /// if true, a spectra list or range of spectra is supplied
-  bool m_load_selected_spectra;
+  std::atomic<bool> m_load_selected_spectra;
   /// map of workspace Index to spectra Number (spectraID)
   std::map<int64_t, specnum_t> m_wsInd2specNum_map;
   /// spectra Number to detector ID (multi)map

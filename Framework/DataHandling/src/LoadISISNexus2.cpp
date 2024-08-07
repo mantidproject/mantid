@@ -744,6 +744,8 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
       data.load(static_cast<int>(blocksize * fullblocks + finalblock), static_cast<int>(period_index),
                 static_cast<int>(filestart));
       auto const totalHistograms = fullblocks * blocksize + finalblock;
+
+      PARALLEL_FOR_IF(Kernel::threadSafe(*local_workspace))
       for (int64_t i = 0; i < totalHistograms; ++i) {
         auto const blockIndex = i / blocksize;
         auto const withinBlockIndex = i % blocksize;
