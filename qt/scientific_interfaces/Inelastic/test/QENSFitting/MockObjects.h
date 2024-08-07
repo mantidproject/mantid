@@ -494,7 +494,7 @@ public:
   MOCK_CONST_METHOD2(setupGroupAlgorithm,
                      MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
                                                               std::string const &inputGroupWsName));
-  MOCK_METHOD4(setupElasticWindowMultiple,
+  MOCK_METHOD3(setupElasticWindowMultiple,
                MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputGroupWsName,
                                                         std::string const &sampleEnvironmentLogName,
                                                         std::string const &sampleEnvironmentLogValue));
