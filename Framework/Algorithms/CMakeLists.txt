@@ -767,7 +767,6 @@ set(TEST_FILES
     ConvertAxesToRealSpaceTest.h
     ConvertAxisByFormulaTest.h
     ConvertDiffCalTest.h
-    ConvertEmptyToTofTest.h
     ConvertFromDistributionTest.h
     ConvertSpectrumAxis2Test.h
     ConvertSpectrumAxisTest.h
