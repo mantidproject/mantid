@@ -8,7 +8,7 @@ import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData
+from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -289,6 +289,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEqual(slit1vg[0], 1.001)
         self.assertEqual(slit2vg[0], 0.5)
 
+    def test_workspace_groups_are_handled_correctly(self):
+        ws_grp_name = "input_grp"
+        self._create_test_workspace_group(["ws1", "ws2"], ws_grp_name)
+        self._default_args["InputWorkspace"] = ws_grp_name
+        self._run_algorithm_with_defaults()
+
+        # The algorithm should not loop through workspace groups, it should pass them straight through.
+        # We only output an IvsLam workspace from the reduction when workspace groups are correctly handled this way.
+        self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
+
     def _setup_environment(self):
         self._old_facility = config["default.facility"]
         if self._old_facility.strip() == "":
@@ -315,7 +325,12 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def _reset_workspaces(self):
         mtd.clear()
 
-    def _create_test_workspace(self):
+    def _create_test_workspace_group(self, ws_names, grp_name):
+        for ws_name in ws_names:
+            self._create_test_workspace(ws_name)
+        GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=grp_name)
+
+    def _create_test_workspace(self, ws_name="input_ws"):
         """Create a test workspace with reflectometry data but no instrument or sample logs"""
         nSpec = 4
         x = range(5, 100000, 1000)
@@ -529,8 +544,8 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         dataX += x
         dataY += y
 
-        CreateWorkspace(NSpec=nSpec, UnitX="TOF", DataX=dataX, DataY=dataY, OutputWorkspace="input_ws")
-        return mtd["input_ws"]
+        CreateWorkspace(NSpec=nSpec, UnitX="TOF", DataX=dataX, DataY=dataY, OutputWorkspace=ws_name)
+        return mtd[ws_name]
 
     def _run_algorithm_with_defaults(self):
         alg = create_algorithm("ReflectometryReductionOneLiveData", **self._default_args)
