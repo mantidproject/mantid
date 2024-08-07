@@ -580,16 +580,16 @@ class SPowderSemiEmpiricalCalculator:
         implementations to accept 2-D input.)
         """
         n_threads = abins.parameters.performance.get("threads")
-        chunksize = abins.parameters.performance.get("broadening_chunksize")
+        # chunksize = abins.parameters.performance.get("broadening_chunksize")
 
         if isinstance(spectra, AbinsSpectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
-            with Pool(n_threads) as p:
-                broadened_spectra = p.map(
+            with Pool(n_threads):
+                broadened_spectra = map(
                     partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
                     spectra._y_data,
-                    chunksize=chunksize,
+                    # chunksize=chunksize,
                 )
             broadened_spectra = list(broadened_spectra)
 
@@ -611,12 +611,13 @@ class SPowderSemiEmpiricalCalculator:
             z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
             s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
 
-            with Pool(n_threads) as p:
-                broadened_spectra = p.map(
+            with Pool(n_threads):
+                broadened_spectra = map(
                     partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
                     s_rows,
-                    chunksize=chunksize,
+                    # chunksize=chunksize,
                 )
+                broadened_spectra = list(broadened_spectra)
 
             return AbinsSpectrum2DCollection(
                 x_data=spectra.x_data,
