@@ -379,6 +379,7 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   }
   if (max_difr < std::numeric_limits<float>::epsilon()) {
     AllEnergies.resize(1);
+    AllEnergies[0] = mean;
   }
   return std::move(AllEnergies);
 }
