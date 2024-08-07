@@ -232,20 +232,21 @@ def subfolder_creation(directory, HigherLevel, folder):
     makeGitkeep(subfolderName)
 
 
-def makeReleaseNoteSubfolders(directory, HigherLevel):
+def getSubfoldersForDirectory(directory):
     directoryStr = str(directory)
-    for folder in subfolders:
-        if "Muon" in directoryStr:
-            for single_folder in muon_subfolders:
-                subfolder_creation(directory, HigherLevel, single_folder)
-        if "Framework" in directoryStr:
-            if "Algorithm" in directoryStr or "Fit_Functions" in directoryStr:
-                for single_folder in deprecated_subfolders:
-                    subfolder_creation(directory, HigherLevel, single_folder)
-            else:
-                subfolder_creation(directory, HigherLevel, folder)
-        else:
-            subfolder_creation(directory, HigherLevel, folder)
+
+    if "Muon" in directoryStr:
+        return muon_subfolders
+
+    if "Framework" in directoryStr and ("Algorithm" in directoryStr or "Fit_Functions" in directoryStr):
+        return deprecated_subfolders
+
+    return subfolders
+
+
+def makeReleaseNoteSubfolders(directory, HigherLevel):
+    for folder in getSubfoldersForDirectory(directory):
+        subfolder_creation(directory, HigherLevel, folder)
 
 
 def makeGitkeep(subfolderName):
