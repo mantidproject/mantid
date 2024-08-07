@@ -212,6 +212,7 @@ void ElwinPresenter::handleRun() {
   algQueue.emplace_back(m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
   m_algorithmRunner->execute(std::move(algQueue));
+
   // Set the result workspace for Python script export
   m_pythonExportWsName = m_outputName->generateOutputLabel() + "_elwin_eq2";
 }
