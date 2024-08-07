@@ -737,21 +737,15 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
       auto const nDetectorBlockChannels = m_detBlockInfo.getNumberOfChannels();
       auto const binEdges = BinEdges(m_tof_data);
 
-      // For this to work correctly, we assume that the spectrum list increases
-      // monotonically
+      // For this to work correctly, we assume that the spectrum list increases monotonically
       int64_t filestart = std::lower_bound(spec_begin, m_spec_end, spectra_no) - spec_begin;
-      if (fullblocks > 0) {
-        data.load(static_cast<int>(blocksize * fullblocks), static_cast<int>(period_index),
-                  static_cast<int>(filestart));
-        for (int64_t i = 0; i < fullblocks; ++i) {
-          loadBlock(data, blocksize, i, hist_index, local_workspace, nDetectorBlockChannels, binEdges);
-          filestart += blocksize;
-        }
-      }
       int64_t finalblock = rangesize - (fullblocks * blocksize);
-      if (finalblock > 0) {
-        data.load(static_cast<int>(finalblock), static_cast<int>(period_index), static_cast<int>(filestart));
-        loadBlock(data, finalblock, 0, hist_index, local_workspace, nDetectorBlockChannels, binEdges);
+
+      data.load(static_cast<int>(blocksize * fullblocks + finalblock), static_cast<int>(period_index),
+                static_cast<int>(filestart));
+      for (int64_t i = 0; i < fullblocks + (finalblock > 0 ? 1 : 0); ++i) {
+        loadBlock(data, i != fullblocks ? blocksize : finalblock, i * blocksize, hist_index, local_workspace,
+                  nDetectorBlockChannels, binEdges);
       }
     }
   }
@@ -792,10 +786,10 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
  * @param hist :: The workspace index to start reading into
  * @param local_workspace :: The workspace to fill the data with
  */
-void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t blockNumber, int64_t &hist,
+void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t offset, int64_t &hist,
                                DataObjects::Workspace2D_sptr &local_workspace, std::size_t const nDetectorBlockChannels,
                                BinEdges const &binEdges) {
-  int *data_start = data() + blockNumber * blocksize * nDetectorBlockChannels;
+  int *data_start = data() + offset * nDetectorBlockChannels;
   int *data_end = data_start + nDetectorBlockChannels;
   int64_t final(hist + blocksize);
   while (hist < final) {
