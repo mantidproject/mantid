@@ -14,15 +14,23 @@
 #include <vector>
 
 namespace Mantid::Algorithms::PolarizationCorrectionsHelpers {
-/*
-For a given workspace group, spin state order, and desired spin state, this method will
-extract the specified workspace from the group, using the position of the desired spin
-state in the spin state order as the index of the workspace in the group.
-*/
+
+/**
+ * Returns the workspace in the group associated with the given targetSpinState according to the order defined by
+ * spinStateOrder.
+ * @param group Workspace group containing spin states.
+ * @param spinStateOrder The order of the different spin states within the group.
+ * @param targetSpinState The spin state workspace to extract from the group.
+ * @return The MatrixWorkspace containing the target spin state. nullptr if not present.
+ */
 API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
                                                 const std::string &targetSpinState) {
-  const auto wsIndex = indexOfWorkspaceForSpinState(spinStateOrder, targetSpinState);
-  return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex));
+  const auto &spinStateOrderVec = splitSpinStateString(spinStateOrder);
+  const auto &wsIndex = indexOfWorkspaceForSpinState(spinStateOrderVec, targetSpinState);
+  if (!wsIndex.has_value()) {
+    return nullptr;
+  }
+  return std::dynamic_pointer_cast<API::MatrixWorkspace>(group->getItem(wsIndex.value()));
 }
 
 /*
@@ -30,11 +38,15 @@ For a given workspace group, spin state order, and desired spin state, this meth
 return the index of the specified workspace in the group, using the position of the desired spin
 state in the spin state order.
 */
-size_t indexOfWorkspaceForSpinState(const std::string &spinStateOrder, const std::string &targetSpinState) {
-  std::vector<std::string> spinStateVector = splitSpinStateString(spinStateOrder);
-  auto trimmedTargetSpinState = targetSpinState;
-  boost::trim(trimmedTargetSpinState);
-  return std::find(spinStateVector.cbegin(), spinStateVector.cend(), trimmedTargetSpinState) - spinStateVector.cbegin();
+std::optional<size_t> indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
+                                                   std::string targetSpinState) {
+  boost::trim(targetSpinState);
+  size_t const index =
+      std::find(spinStateOrder.cbegin(), spinStateOrder.cend(), targetSpinState) - spinStateOrder.cbegin();
+  if (index == spinStateOrder.size()) {
+    return std::nullopt;
+  }
+  return index;
 }
 
 /*
