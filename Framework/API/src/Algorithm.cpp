@@ -33,6 +33,7 @@
 #include <Poco/RWLock.h>
 #include <Poco/Void.h>
 
+#include <H5Cpp.h>
 #include <json/json.h>
 
 #include <algorithm>
@@ -733,9 +734,21 @@ bool Algorithm::executeInternal() {
     this->unlockWorkspaces();
 
     throw;
-  }
+  } catch (H5::Exception &ex) {
 
-  catch (...) {
+    std::string errmsg;
+    errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
+
+    m_runningAsync = false;
+    getLogger().error() << "H5 Exception in execution of algorithm " << this->name() << ":\n" << errmsg << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(new ErrorNotification(this, errmsg));
+    this->unlockWorkspaces();
+
+    throw;
+  } catch (...) {
     // Execution failed with an unknown exception object
     m_runningAsync = false;
 
