@@ -212,9 +212,6 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   // Remove old sample and fit curves from plot
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
-  // Remove the subtracted workspace if option is checked
-  if (m_uiForm.ckRemoveSub->isChecked())
-    removeOutput();
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
   // Get new workspace
@@ -244,9 +241,6 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Container");
-  // Remove the subtracted workspace if option is checked
-  if (m_uiForm.ckRemoveSub->isChecked())
-    removeOutput();
 
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
