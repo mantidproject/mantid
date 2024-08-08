@@ -136,9 +136,12 @@ void SaveNXSPE::exec() {
         write_single_energy = false; // do not write single energy, write array of energies here
         nxFile.writeData("fixed_energy", allEi);
       }
-      if (allEi.size() > 0) // this is generally incorrect, but following historical practice
-        break;              // assume that indirect instrument without energy attached to detectors
-                            // may have energy specified in Ei log. Some user scripts may depend on it.
+      if (!write_single_energy || (allEi[0] > std::numeric_limits<float>::epsilon()))
+        // this is generally incorrect, but following historical practice
+        break; // assume that indirect instrument without energy attached to detectors
+               // may have energy specified in Ei log. Some user scripts may depend on it.
+               // so here we break only if Ei is defined on detectors and look for
+               // Ei log otherwise
     }
     case (Kernel::DeltaEMode::Elastic):   // no efixed for elastic,
                                           // whatever retrieved from the property should remain unchanged.
@@ -355,7 +358,7 @@ void SaveNXSPE::exec() {
  * @returns vector containing analyzer energies for each detector if the energies are different or single energy if they
  * are the same
  */
-std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inputWS) {
+std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inputWS) const {
   // Number of spectra
   const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -366,7 +369,7 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   Units::Time inUnit;
   Units::DeltaE outUnit;
   for (int64_t i = 0; i < nHist; ++i) {
-    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor and not masked for indirect instrument should have efixed
       spectrumInfo.getDetectorValues(inUnit, outUnit, DeltaEMode::Indirect, true, i, pmap);
       AllEnergies[nDet] = pmap[UnitParams::efixed];

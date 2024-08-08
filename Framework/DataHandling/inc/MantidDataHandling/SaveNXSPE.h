@@ -56,7 +56,7 @@ public:
     return R"(DataHandling\Nexus;DataHandling\SPE;Inelastic\DataHandling)";
   }
   // public for testing only
-  std::vector<double> getIndirectEfixed(const Mantid::API::MatrixWorkspace_sptr &inputWS);
+  std::vector<double> getIndirectEfixed(const Mantid::API::MatrixWorkspace_sptr &inputWS) const;
 
 private:
   /// Initialisation code
