@@ -128,19 +128,6 @@ void SaveNXSPE::exec() {
     // efixed identified differently for different types of inelastic instruments
     // Now lets check to see if we can retrieve energy from workspace.
     switch (eMode) {
-    case (Kernel::DeltaEMode::Elastic):
-      // no efixed for elastic, whatever retrieved from the property should remain unchanged.
-      // Despite it is incorrect, previous tests were often using Instrument in Elastic
-      // mode as the source of data for Direct inelastic. Despite correct action would
-      // be no efixed for elastic, to keep tests happy here we derive efixed from Ei log
-      // similarly to Direct inelastic case if no external efixed provided to the algorithm.
-    case (Kernel::DeltaEMode::Direct): {
-      const API::Run &run = inputWS->run();
-      if (run.hasProperty("Ei")) {
-        efixed = run.getPropertyValueAsType<double>("Ei");
-      }
-      break;
-    }
     case (Kernel::DeltaEMode::Indirect): {
       // here workspace detectors should always have the energy
       auto allEi = getIndirectEfixed(inputWS);
@@ -150,6 +137,26 @@ void SaveNXSPE::exec() {
         write_single_energy = false; // do not write single energy, write array of energies here
         nxFile.writeData("fixed_energy", allEi);
       }
+      if (allEi.size() > 0) // this is generally incorrect, but following historical practice
+        break;              // assume that indirect instrument without energy attached to detectors
+                            // may have energy specified in Ei log
+    }
+    case (Kernel::DeltaEMode::Elastic):   // no efixed for elastic,
+                                          // whatever retrieved from the property should remain unchanged.
+                                          // Despite it is incorrect, previous tests were often using Instrument in
+                                          // Elastic mode as the source of data for Direct inelastic. Despite correct
+                                          // action would be no efixed for elastic, to keep tests happy here we try to
+                                          // derive efixed from Ei log similarly to Direct inelastic case if no external
+                                          // efixed provided to the algorithm.
+    case (Kernel::DeltaEMode::Undefined): // This should not happen
+                                          // but following historical agreement and some dodgy tests, assume Direct
+                                          // instrument in this case.
+    case (Kernel::DeltaEMode::Direct): {
+      const API::Run &run = inputWS->run();
+      if (run.hasProperty("Ei")) {
+        efixed = run.getPropertyValueAsType<double>("Ei");
+      }
+      break;
     }
     }
   }
@@ -189,13 +196,14 @@ void SaveNXSPE::exec() {
   nxFile.writeData("run_number", inputWS->getRunNumber());
 
   if (eMode == Kernel::DeltaEMode::Direct ||
-      eMode == Kernel::DeltaEMode::Elastic) { // this is also not entirely correct but
+      eMode == Kernel::DeltaEMode::Elastic) { // Elastic is also not entirely correct but
     // to maintain consistency with previous code, assume Direct instrument in Elastic mode.
     // NXfermi_chopper
     nxFile.makeGroup("fermi", "NXfermi_chopper", true);
     nxFile.writeData("energy", efixed);
     nxFile.closeGroup(); // NXfermi_chopper
-  }                      // TODO: Do not know what indirect people want for their instrument, This is for the future
+  }                      // TODO: Do not know what indirect people want for their instrument,
+                         // This is for them to decide in a future.
 
   nxFile.closeGroup(); // NXinstrument
 
@@ -369,7 +377,7 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   }
   AllEnergies.resize(nDet);
   if (nDet == 0)
-    return std::move(AllEnergies); // no energies,
+    return AllEnergies; // Empty vector, no energies,
 
   mean = mean / double(nDet);
   double max_difr = std::accumulate(AllEnergies.begin(), AllEnergies.end(), 0., [mean](double x, double y) -> double {
@@ -379,6 +387,6 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
     AllEnergies.resize(1);
     AllEnergies[0] = mean;
   }
-  return std::move(AllEnergies);
+  return AllEnergies;
 }
 } // namespace Mantid::DataHandling
