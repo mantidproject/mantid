@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>970</width>
-        <height>745</height>
+        <width>966</width>
+        <height>796</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -207,13 +207,6 @@
              </widget>
             </item>
            </layout>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="ckRemoveSub">
-            <property name="text">
-             <string>Remove subtracted workspace when new data is added</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
