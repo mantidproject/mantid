@@ -121,9 +121,8 @@ void SaveNXSPE::exec() {
     efixed = MASK_FLAG;
     efixed_provided = false;
   }
-
-  bool write_single_energy(true);
   auto eMode = inputWS->getEMode();
+  bool write_single_energy(true);
   if (!efixed_provided) {
     // efixed identified differently for different types of inelastic instruments
     // Now lets check to see if we can retrieve energy from workspace.
@@ -139,7 +138,7 @@ void SaveNXSPE::exec() {
       }
       if (allEi.size() > 0) // this is generally incorrect, but following historical practice
         break;              // assume that indirect instrument without energy attached to detectors
-                            // may have energy specified in Ei log
+                            // may have energy specified in Ei log. Some user scripts may depend on it.
     }
     case (Kernel::DeltaEMode::Elastic):   // no efixed for elastic,
                                           // whatever retrieved from the property should remain unchanged.
@@ -149,7 +148,7 @@ void SaveNXSPE::exec() {
                                           // derive efixed from Ei log similarly to Direct inelastic case if no external
                                           // efixed provided to the algorithm.
     case (Kernel::DeltaEMode::Undefined): // This should not happen
-                                          // but following historical agreement and some dodgy tests, assume Direct
+                                          // but to keep cpp-check happy, assume Direct
                                           // instrument in this case.
     case (Kernel::DeltaEMode::Direct): {
       const API::Run &run = inputWS->run();
