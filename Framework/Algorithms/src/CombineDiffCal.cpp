@@ -288,6 +288,11 @@ void CombineDiffCal::exec() {
   // and therefore a map and not a vector is necessary.
   auto wkspIndices = calibrationWS->getDetectorIDToWorkspaceIndexMap();
 
+  // access the spectrum info outside of the loop
+  // this prevents constantly re-calling the method,
+  // which can have some O(N) behavior
+  auto spectrumInfo = calibrationWS->spectrumInfo();
+
   // loop through all rows in the grouped calibration table
   // this will calculate an updated row or copy the row if it is missing from the pixel calibration
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
@@ -309,7 +314,7 @@ void CombineDiffCal::exec() {
         double difcArb;
         const auto difcArbIter = difcArbMap.find(wkspIndex);
         if (difcArbIter == difcArbMap.end()) {
-          difcArb = calibrationWS->spectrumInfo().diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
+          difcArb = spectrumInfo.diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
           difcArbMap[wkspIndex] = difcArb;
         } else {
           difcArb = difcArbIter->second;
