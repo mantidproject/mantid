@@ -146,6 +146,42 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="loShift">
+            <item>
+             <widget class="QDoubleSpinBox" name="spShift">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="decimals">
+               <number>5</number>
+              </property>
+              <property name="minimum">
+               <double>-999.990000000000009</double>
+              </property>
+              <property name="maximum">
+               <double>999.990000000000009</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="ckShiftCan">
+            <property name="text">
+             <string>Shift x-values of container by adding:</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="loScaleFactor">
             <item>
@@ -172,41 +208,12 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="ckShiftCan">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="ckRemoveSub">
             <property name="text">
-             <string>Shift x-values of container by adding:</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
+             <string>Remove subtracted workspace when new data is added</string>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <layout class="QHBoxLayout" name="loShift">
-            <item>
-             <widget class="QDoubleSpinBox" name="spShift">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="decimals">
-               <number>5</number>
-              </property>
-              <property name="minimum">
-               <double>-999.990000000000009</double>
-              </property>
-              <property name="maximum">
-               <double>999.990000000000009</double>
-              </property>
-              <property name="singleStep">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="value">
-               <double>0.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
          </layout>
         </widget>
@@ -326,27 +333,27 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::RunView</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
