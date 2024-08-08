@@ -40,6 +40,7 @@
 #include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+#include <H5Cpp.h>
 #include <cstddef>
 #include <string>
 #include <variant>
@@ -88,6 +89,29 @@ GNU_DIAG_OFF("maybe-uninitialized")
 void translateCancel(const Algorithm::CancelException &exc) {
   UNUSED_ARG(exc);
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
+}
+
+/**
+ * @brief Map an H5::Exception to a Python RuntimeError. Its error stack will be reported
+ *
+ * @param exc - The caught H5::Exception. Its error stack is reported
+ */
+void translateH5Exception(const H5::Exception &exc) {
+  char *buffer;
+  size_t size_buffer;
+
+  FILE *stream = open_memstream(&buffer, &size_buffer);
+
+  exc.printErrorStack(stream);
+
+  std::fflush(stream);
+  std::fclose(stream);
+
+  std::string errorStack(buffer, size_buffer);
+
+  free(buffer);
+
+  PyErr_SetString(PyExc_RuntimeError, errorStack.c_str());
 }
 
 template <typename T> boost::optional<T> extractArg(ssize_t index, const tuple &args) {
@@ -182,6 +206,7 @@ GNU_DIAG_ON("maybe-uninitialized")
 void export_leaf_classes() {
   register_ptr_to_python<std::shared_ptr<Algorithm>>();
   register_exception_translator<Algorithm::CancelException>(&translateCancel);
+  register_exception_translator<H5::Exception>(&translateH5Exception);
 
   // Export Algorithm but the actual held type in Python is
   // std::shared_ptr<AlgorithmAdapter>
