@@ -753,7 +753,6 @@ set(TEST_FILES
     ChangePulsetime2Test.h
     ChangePulsetimeTest.h
     ChangeTimeZeroTest.h
-    CheckWorkspacesMatchTest.h
     ChopDataTest.h
     CircularBeamProfileTest.h
     ClearCacheTest.h
