@@ -5,11 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,redefined-builtin
-import mantid.simpleapi as s_api
 from mantid import config, logger
-from mantid.api import MatrixWorkspace
-from typing import Tuple
+from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.simpleapi import (
+    CheckForSampleLogs,
+    CloneWorkspace,
+    ConvertSpectrumAxis,
+    CreateEmptyTableWorkspace,
+    CreateLogPropertyTable,
+    RenameWorkspace,
+)
 
+from typing import Tuple
 import math
 import re
 import numpy as np
@@ -26,7 +33,7 @@ def get_run_number(ws_name):
     @return Parsed run number
     """
 
-    workspace = s_api.mtd[ws_name]
+    workspace = AnalysisDataService.retrieve(ws_name)
     run_number = str(workspace.getRunNumber())
     if run_number == "0":
         # Attempt to parse run number off of name
@@ -55,7 +62,7 @@ def get_instrument_and_run(ws_name):
 
     run_number = get_run_number(ws_name)
 
-    instrument = s_api.mtd[ws_name].getInstrument().getName()
+    instrument = AnalysisDataService.retrieve(ws_name).getInstrument().getName()
     if instrument != "":
         for facility in config.getFacilities():
             try:
@@ -77,7 +84,7 @@ def get_workspace_name_prefix(wsname):
     if wsname == "":
         return ""
 
-    workspace = s_api.mtd[wsname]
+    workspace = AnalysisDataService.retrieve(wsname)
     facility = config["default.facility"]
 
     ws_run = workspace.getRun()
@@ -107,7 +114,7 @@ def get_workspace_name_prefix(wsname):
 
 def get_efixed(workspace):
     if isinstance(workspace, str):
-        inst = s_api.mtd[workspace].getInstrument()
+        inst = AnalysisDataService.retrieve(workspace).getInstrument()
     else:
         inst = workspace.getInstrument()
 
@@ -132,7 +139,7 @@ def get_efixed(workspace):
 
 def get_two_theta_angles(inWS):
     if isinstance(inWS, str):
-        ws = s_api.mtd[inWS]
+        ws = AnalysisDataService.retrieve(inWS)
     else:
         ws = inWS
     num_hist = ws.getNumberHistograms()  # get no. of histograms/groups
@@ -155,7 +162,7 @@ def get_theta_q(ws_in):
     @returns A tuple containing a list of theta values and a list of Q values
     """
     if isinstance(ws_in, str):
-        ws = s_api.mtd[ws_in]
+        ws = AnalysisDataService.retrieve(ws_in)
     else:
         ws = ws_in
     e_fixed = get_efixed(ws)
@@ -231,14 +238,14 @@ def _check_analysers_are_equal(in1WS, in2WS):
       @exception ValueError - workspaces have different analysers
       @exception ValueError - workspaces have different reflections
     """
-    ws1 = s_api.mtd[in1WS]
+    ws1 = AnalysisDataService.retrieve(in1WS)
     try:
         analyser_1 = ws1.getInstrument().getStringParameter("analyser")[0]
         reflection_1 = ws1.getInstrument().getStringParameter("reflection")[0]
     except IndexError:
         # Ignore this check if an analyser or reflection cannot be found
         return
-    ws2 = s_api.mtd[in2WS]
+    ws2 = AnalysisDataService.retrieve(in2WS)
     try:
         analyser_2 = ws2.getInstrument().getStringParameter("analyser")[0]
         reflection_2 = ws2.getInstrument().getStringParameter("reflection")[0]
@@ -255,13 +262,13 @@ def _check_analysers_are_equal(in1WS, in2WS):
 
 
 def _get_sample_log(workspace, log_name):
-    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
+    table = CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
     log_value = table.cell(0, 0) if table else None
     return log_value
 
 
 def _try_get_sample_log(workspace, log_name):
-    messages = s_api.CheckForSampleLogs(workspace, log_name, EnableLogging=False)
+    messages = CheckForSampleLogs(workspace, log_name, EnableLogging=False)
     return _get_sample_log(workspace, log_name) if not messages else None
 
 
@@ -305,10 +312,10 @@ def check_hist_zero(inWS):
     Raises:
       @exception ValueError - Worskpace has no histograms
     """
-    num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+    num_hist = AnalysisDataService.retrieve(inWS).getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
         raise ValueError("Workspace " + inWS + " has NO histograms")
-    x_in = s_api.mtd[inWS].readX(0)
+    x_in = AnalysisDataService.retrieve(inWS).readX(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
         raise ValueError("Workspace " + inWS + " has NO points")
@@ -332,11 +339,11 @@ def check_dimensions_equal(in1WS, name1, in2WS, name2):
       Valuerror: number of histograms is different
       Valuerror: number of bin boundaries in the histograms is different
     """
-    num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = s_api.mtd[in1WS].readX(0)
+    num_hist_1 = AnalysisDataService.retrieve(in1WS).getNumberHistograms()  # no. of hist/groups in WS1
+    x_1 = AnalysisDataService.retrieve(in1WS).readX(0)
     x_len_1 = len(x_1)
-    num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = s_api.mtd[in2WS].readX(0)
+    num_hist_2 = AnalysisDataService.retrieve(in2WS).getNumberHistograms()  # no. of hist/groups in WS2
+    x_2 = AnalysisDataService.retrieve(in2WS).readX(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
         error_1 = "%s (%s) histograms (%d)" % (name1, in1WS, num_hist_1)
@@ -374,17 +381,17 @@ def convert_to_elastic_q(input_ws, output_ws=None):
     if output_ws is None:
         output_ws = input_ws
 
-    axis = s_api.mtd[input_ws].getAxis(1)
+    axis = AnalysisDataService.retrieve(input_ws).getAxis(1)
     if axis.isSpectra():
         e_fixed = get_efixed(input_ws)
-        s_api.ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
+        ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
         if axis.getUnit().unitID() != "MomentumTransfer":
             raise RuntimeError("Input must have axis values of Q")
 
-        s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        CloneWorkspace(input_ws, OutputWorkspace=output_ws)
 
     else:
         raise RuntimeError("Input workspace must have either spectra or numeric axis.")
@@ -399,10 +406,10 @@ def transpose_fit_parameters_table(params_table, output_table=None):
     @param output_table - name to call the transposed table. If omitted,
             the output_table will be the same as the params_table
     """
-    params_table = s_api.mtd[params_table]
+    params_table = AnalysisDataService.retrieve(params_table)
 
     table_ws = "__tmp_table_ws"
-    table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+    table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
     param_names = params_table.column(0)[:-1]  # -1 to remove cost function
     param_values = params_table.column(1)[:-1]
@@ -436,7 +443,7 @@ def transpose_fit_parameters_table(params_table, output_table=None):
     if output_table is None:
         output_table = params_table.name()
 
-    s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+    RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
 def _first_non_zero(data):
