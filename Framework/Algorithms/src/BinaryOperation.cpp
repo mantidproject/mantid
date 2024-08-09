@@ -134,8 +134,16 @@ void BinaryOperation::exec() {
   m_rhs = getProperty(inputPropName2());
   m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
 
-  m_lhsBlocksize = m_lhs->blocksize();
-  m_rhsBlocksize = m_rhs->blocksize();
+  try {
+    m_lhsBlocksize = m_lhs->blocksize();
+  } catch (std::length_error &) {
+    m_lhsRagged = true;
+  }
+  try {
+    m_rhsBlocksize = m_rhs->blocksize();
+  } catch (std::length_error &) {
+    m_rhsRagged = true;
+  }
 
   // Special handling for 1-WS and 1/WS.
   if (this->handleSpecialDivideMinus())
@@ -167,6 +175,7 @@ void BinaryOperation::exec() {
     std::swap(m_lhs, m_rhs);
     std::swap(m_elhs, m_erhs);
     std::swap(m_lhsBlocksize, m_rhsBlocksize);
+    std::swap(m_lhsRagged, m_rhsRagged);
   }
 
   // Check that the input workspaces are compatible
@@ -228,6 +237,8 @@ void BinaryOperation::exec() {
       auto specialRHS = dynamic_cast<const SpecialWorkspace2D *>(m_rhs.get());
       if (specialLHS && specialRHS) {
         m_out = create<SpecialWorkspace2D>(*specialLHS);
+      } else if (m_lhsRagged) {
+        m_out = createRagged<HistoWorkspace>(*m_lhs);
       } else {
         m_out = create<HistoWorkspace>(*m_lhs);
       }
@@ -307,7 +318,7 @@ bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr l
   const std::string rhs_unitID = (rhs_unit ? rhs_unit->unitID() : "");
 
   // Check the workspaces have the same units and distribution flag
-  if (lhs_unitID != rhs_unitID && m_lhsBlocksize > 1 && m_rhsBlocksize > 1) {
+  if (lhs_unitID != rhs_unitID && m_lhsBlocksize != 1 && m_rhsBlocksize != 1) {
     g_log.error("The two workspace are not compatible because they have "
                 "different units on the X axis.");
     return false;
@@ -372,8 +383,8 @@ std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_c
   if (m_rhsBlocksize == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms())
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
-  // the first spectrum
-  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
+  // the first spectrum except for ragged workspaces
+  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, !m_lhsRagged && !m_rhsRagged)) {
     return "X arrays must match when performing this operation on a 2D "
            "workspaces.";
   }
