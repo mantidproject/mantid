@@ -7,14 +7,7 @@
 # pylint: disable=invalid-name,redefined-builtin
 from mantid import config, logger
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.simpleapi import (
-    CheckForSampleLogs,
-    CloneWorkspace,
-    ConvertSpectrumAxis,
-    CreateEmptyTableWorkspace,
-    CreateLogPropertyTable,
-    RenameWorkspace,
-)
+import mantid.simpleapi as s_api
 
 from typing import List, Tuple, Union
 import math
@@ -260,13 +253,13 @@ def _check_analysers_are_equal(workspace_name1: str, workspace_name2: str) -> No
 
 
 def _get_sample_log(workspace: MatrixWorkspace, log_name: str) -> Union[str, None]:
-    table = CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
+    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
     log_value = table.cell(0, 0) if table else None
     return log_value
 
 
 def _try_get_sample_log(workspace: MatrixWorkspace, log_name: str) -> Union[str, None]:
-    messages = CheckForSampleLogs(workspace, log_name, EnableLogging=False)
+    messages = s_api.CheckForSampleLogs(workspace, log_name, EnableLogging=False)
     return _get_sample_log(workspace, log_name) if not messages else None
 
 
@@ -380,13 +373,13 @@ def convert_to_elastic_q(input_ws: str, output_ws: Union[str, None] = None) -> N
     axis = AnalysisDataService.retrieve(input_ws).getAxis(1)
     if axis.isSpectra():
         e_fixed = get_efixed(input_ws)
-        ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
+        s_api.ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
         if axis.getUnit().unitID() != "MomentumTransfer":
             raise RuntimeError("Input must have axis values of Q")
 
-        CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
     else:
         raise RuntimeError("Input workspace must have either spectra or numeric axis.")
 
@@ -403,7 +396,7 @@ def transpose_fit_parameters_table(params_table: str, output_table: Union[str, N
     params_table = AnalysisDataService.retrieve(params_table)
 
     table_ws = "__tmp_table_ws"
-    table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+    table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
     param_names = params_table.column(0)[:-1]  # -1 to remove cost function
     param_values = params_table.column(1)[:-1]
@@ -437,7 +430,7 @@ def transpose_fit_parameters_table(params_table: str, output_table: Union[str, N
     if output_table is None:
         output_table = params_table.name()
 
-    RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+    s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
 def _first_non_zero(data: List) -> Union[int, None]:
