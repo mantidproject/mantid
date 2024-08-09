@@ -11,6 +11,7 @@
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
@@ -109,5 +110,39 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
       return;
 
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 220);
+  }
+
+  void test_md() {
+    // Create an MDHisto workspace with several ExperimentInfo
+    MDHistoWorkspace_sptr histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
+    for (int i = 0; i < 4; i++) {
+      ExperimentInfo_sptr ei = std::make_shared<ExperimentInfo>();
+      histo->addExperimentInfo(ei);
+    }
+    TS_ASSERT(histo);
+    TS_ASSERT_EQUALS(histo->getNumExperimentInfo(), 5);
+    AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_MD", histo);
+
+    // Run the algorithm
+    LoadIsawUB alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "TOPAZ_3007.mat"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_MD"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Check the results
+    OrientedLattice latt;
+    for (uint16_t i = 0; i < 5; i++) {
+      TS_ASSERT_THROWS_NOTHING(latt = histo->getExperimentInfo(i)->sample().getOrientedLattice());
+      TS_ASSERT_DELTA(latt.a(), 14.1526, 1e-4);
+      TS_ASSERT_DELTA(latt.b(), 19.2903, 1e-4);
+      TS_ASSERT_DELTA(latt.c(), 8.5813, 1e-4);
+      TS_ASSERT_DELTA(latt.alpha(), 90.0000, 1e-4);
+      TS_ASSERT_DELTA(latt.beta(), 105.0738, 1e-4);
+      TS_ASSERT_DELTA(latt.gamma(), 90.0000, 1e-4);
+    }
+    AnalysisDataService::Instance().remove("LoadIsawUBTest_MD");
   }
 };
