@@ -13,6 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
@@ -30,6 +31,8 @@ static const std::string INPUT_WORKSPACES{"InputWorkspaces"};
 static const std::string INPUT_WORKSPACE_GROUP{"InputWorkspaceGroup"};
 static const std::string OUTPUT_WORKSPACES{"OutputWorkspace"};
 static const std::string CORRECTION_METHOD{"CorrectionMethod"};
+static const std::string inputSpinStateOrderLabel("InputSpinStateOrder");
+static const std::string outputSpinStateOrderLabel("OutputSpinStateOrder");
 } // namespace Prop
 
 /// Flipper configurations.
@@ -109,12 +112,33 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(Prop::FLIPPERS, "", std::make_shared<Kernel::ListValidator<std::string>>(setups),
                   "Flipper configurations of the input workspaces  (Wildes method only)");
 
+  setPropertySettings(Prop::FLIPPERS, std::make_unique<Kernel::EnabledWhenProperty>(
+                                          Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO, CorrectionMethod::WILDES));
+
   std::vector<std::string> propOptions{"", "PA", "PNR"};
   declareProperty("PolarizationAnalysis", "", std::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA "
                   "(Fredrikze method only)");
+
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>(Prop::inputSpinStateOrderLabel, "", Direction::Input),
+      "The order of spin states in the input workspace group. The possible values are 'pp,pa,ap,aa' or 'p,a' "
+      "(Fredrikze method only)");
+
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>(Prop::outputSpinStateOrderLabel, "", Direction::Input),
+      "The order of spin states in the output workspace group. The possible values are 'pp,pa,ap,aa' or 'p,a' "
+      "(Fredrikze method only)");
+
+  setPropertySettings(Prop::outputSpinStateOrderLabel,
+                      std::make_unique<Kernel::EnabledWhenProperty>(Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO,
+                                                                    CorrectionMethod::FREDRIKZE));
+
+  setPropertySettings(Prop::inputSpinStateOrderLabel,
+                      std::make_unique<Kernel::EnabledWhenProperty>(Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO,
+                                                                    CorrectionMethod::FREDRIKZE));
 
   declareProperty(
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>(Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
