@@ -21,10 +21,10 @@ python:
   - 3.10
 
 libboost_devel:
-  - 1.82 # Aim to follow conda-forge
+  - 1.84 # Aim to follow conda-forge
 
 libboost_python_devel:
-  - 1.82 # Aim to follow conda-forge
+  - 1.84 # Aim to follow conda-forge
 
 cmake:
   - '>=3.21.0'
