@@ -37,6 +37,11 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def seeAlso(self):
         return ["ReflectometryISISLoadAndProcess", "StartLiveData"]
 
+    def checkGroups(self):
+        """Prevent the default behaviour when a workspace group is passed in so that we can pass the whole group
+        through to the reduction algorithm"""
+        return False
+
     def PyInit(self):
         instruments = ["CRISP", "INTER", "OFFSPEC", "POLREF", "SURF"]
         defaultInstrument = str(config.getInstrument())
@@ -171,12 +176,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         """Set up instrument parameters for the slits"""
         s1 = liveValues[self._s1vg_name()].value
         s2 = liveValues[self._s2vg_name()].value
-        SetInstrumentParameter(
-            Workspace=self._temp_ws_name, ParameterName="vertical gap", ParameterType="Number", ComponentName="slit1", Value=str(s1)
-        )
-        SetInstrumentParameter(
-            Workspace=self._temp_ws_name, ParameterName="vertical gap", ParameterType="Number", ComponentName="slit2", Value=str(s2)
-        )
+        output_ws = AnalysisDataService.retrieve(self._temp_ws_name)
+
+        ws_list = output_ws if isinstance(output_ws, WorkspaceGroup) else [output_ws]
+        for ws in ws_list:
+            SetInstrumentParameter(Workspace=ws, ParameterName="vertical gap", ParameterType="Number", ComponentName="slit1", Value=str(s1))
+            SetInstrumentParameter(Workspace=ws, ParameterName="vertical gap", ParameterType="Number", ComponentName="slit2", Value=str(s2))
 
     def _copy_property_values_to(self, alg):
         for prop in self._child_properties:

@@ -8,7 +8,7 @@ import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData
+from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -136,6 +136,8 @@ AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesWithZeroTheta)
 
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
+    INPUT_WS_ERROR = "Invalid value for property InputWorkspace"
+
     def setUp(self):
         self._setup_environment()
         self._setup_workspaces()
@@ -173,16 +175,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertRaises(TypeError, ReflectometryReductionOneLiveData)
 
     def test_invalid_input_workspace(self):
-        self.assertRaises(ValueError, ReflectometryReductionOneLiveData, InputWorkspace="bad")
+        self.assertRaisesRegex(ValueError, self.INPUT_WS_ERROR, ReflectometryReductionOneLiveData, InputWorkspace="bad")
 
     def test_invalid_output_workspace(self):
-        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData, InputWorkspace=self.__class__._input_ws, OutputWorkspace="")
+        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData, InputWorkspace=self._input_ws, OutputWorkspace="")
 
     def test_invalid_property(self):
         self.assertRaises(
             TypeError,
             ReflectometryReductionOneLiveData,
-            InputWorkspace=self.__class__._input_ws,
+            InputWorkspace=self._input_ws,
             OutputWorkspace="output",
             Instrument="INTER",
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValue",
@@ -220,7 +222,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_instrument_was_not_set_on_input_workspace(self):
         workspace = self._run_algorithm_with_defaults()
         # The input workspace should be unchanged
-        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), "")
+        self.assertEqual(self._input_ws.getInstrument().getName(), "")
 
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
@@ -259,7 +261,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             RuntimeError,
             "Unknown algorithm 'GetFakeLiveInstrumentValueInvalidNames'",
             ReflectometryReductionOneLiveData,
-            InputWorkspace=self.__class__._input_ws,
+            InputWorkspace=self._input_ws,
             OutputWorkspace="output",
             Instrument="INTER",
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValueInvalidNames",
@@ -287,6 +289,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEqual(slit1vg[0], 1.001)
         self.assertEqual(slit2vg[0], 0.5)
 
+    def test_workspace_groups_are_handled_correctly(self):
+        ws_grp_name = "input_grp"
+        self._create_test_workspace_group(["ws1", "ws2"], ws_grp_name)
+        self._default_args["InputWorkspace"] = ws_grp_name
+        self._run_algorithm_with_defaults()
+
+        # The algorithm should not loop through workspace groups, it should pass them straight through.
+        # We only output an IvsLam workspace from the reduction when workspace groups are correctly handled this way.
+        self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
+
     def _setup_environment(self):
         self._old_facility = config["default.facility"]
         if self._old_facility.strip() == "":
@@ -302,9 +314,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         config["default.instrument"] = self._old_instrument
 
     def _setup_workspaces(self):
-        self.__class__._input_ws = self._create_test_workspace()
+        self._input_ws = self._create_test_workspace()
         self._default_args = {
-            "InputWorkspace": self.__class__._input_ws,
+            "InputWorkspace": self._input_ws,
             "OutputWorkspace": "output",
             "Instrument": "INTER",
             "GetLiveValueAlgorithm": "GetFakeLiveInstrumentValue",
@@ -313,7 +325,12 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def _reset_workspaces(self):
         mtd.clear()
 
-    def _create_test_workspace(self):
+    def _create_test_workspace_group(self, ws_names, grp_name):
+        for ws_name in ws_names:
+            self._create_test_workspace(ws_name)
+        GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=grp_name)
+
+    def _create_test_workspace(self, ws_name="input_ws"):
         """Create a test workspace with reflectometry data but no instrument or sample logs"""
         nSpec = 4
         x = range(5, 100000, 1000)
@@ -527,8 +544,8 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         dataX += x
         dataY += y
 
-        CreateWorkspace(NSpec=nSpec, UnitX="TOF", DataX=dataX, DataY=dataY, OutputWorkspace="input_ws")
-        return mtd["input_ws"]
+        CreateWorkspace(NSpec=nSpec, UnitX="TOF", DataX=dataX, DataY=dataY, OutputWorkspace=ws_name)
+        return mtd[ws_name]
 
     def _run_algorithm_with_defaults(self):
         alg = create_algorithm("ReflectometryReductionOneLiveData", **self._default_args)
