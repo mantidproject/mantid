@@ -8,10 +8,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <locale>
-#include <nexus/NeXusException.hpp>
 
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -19,10 +18,11 @@
 #include <Poco/Glob.h>
 #include <Poco/Path.h>
 
-#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <boost/scoped_array.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <algorithm>
+#include <locale>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
