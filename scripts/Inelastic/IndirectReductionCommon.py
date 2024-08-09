@@ -429,34 +429,32 @@ def add_run_numbers(workspace_names):
 # ---------------------------------------------------------------------------------
 
 
-def get_instrument_parameter(ws, param_name):
+def get_instrument_parameter(workspace_name: str, param_name: str):
     """Get an named instrument parameter from a workspace.
 
     Args:
       @param ws The workspace to get the instrument from.
       @param param_name The name of the parameter to look up.
     """
-    inst = mtd[ws].getInstrument()
+    instrument = AnalysisDataService.retrieve(workspace_name).getInstrument()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements because there's no way to dynamically get the type.
     func_map = {
-        "double": inst.getNumberParameter,
-        "string": inst.getStringParameter,
-        "int": inst.getIntParameter,
-        "bool": inst.getBoolParameter,
+        "double": instrument.getNumberParameter,
+        "string": instrument.getStringParameter,
+        "int": instrument.getIntParameter,
+        "bool": instrument.getBoolParameter,
     }
 
-    if inst.hasParameter(param_name):
-        param_type = inst.getParameterType(param_name)
-        if param_type != "":
-            param = func_map[param_type](param_name)[0]
-        else:
-            raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
-    else:
-        raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
+    if not instrument.hasParameter(param_name):
+        raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
 
-    return param
+    param_type = instrument.getParameterType(param_name)
+    if param_type == "":
+        raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
+
+    return func_map[param_type](param_name)[0]
 
 
 def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
