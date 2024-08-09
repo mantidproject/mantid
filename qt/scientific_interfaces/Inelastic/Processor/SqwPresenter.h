@@ -69,6 +69,7 @@ protected:
 private:
   void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   ISqwView *m_view;
   std::unique_ptr<ISqwModel> m_model;

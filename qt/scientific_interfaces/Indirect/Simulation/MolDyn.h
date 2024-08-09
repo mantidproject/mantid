@@ -32,6 +32,7 @@ private slots:
   void algorithmComplete(bool error);
 
 private:
+  void setLoadHistory(bool doLoadHistory) override;
   void setSaveEnabled(bool enabled);
 
   std::string m_outputWsName;

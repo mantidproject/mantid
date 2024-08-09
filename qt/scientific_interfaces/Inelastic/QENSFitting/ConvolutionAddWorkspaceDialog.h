@@ -27,6 +27,7 @@ public:
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
+  void setLoadProperty(const std::string &propname, bool enable) override;
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
 

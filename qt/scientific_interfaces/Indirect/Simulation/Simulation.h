@@ -47,6 +47,8 @@ public: // public constructor, destructor and functions
 private:
   std::string documentationPage() const override;
 
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.

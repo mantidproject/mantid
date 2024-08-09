@@ -13,10 +13,13 @@
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <algorithm>
 
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
+
+#include <MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -152,6 +155,7 @@ void ElwinView::showAddWorkspaceDialog() {
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->show();
 }
 

@@ -39,6 +39,7 @@ void SettingsPresenter::loadSettings() {
 
   m_view->setRestrictInputByNameChecked(restrictInputDataByName());
   m_view->setPlotErrorBarsChecked(externalPlotErrorBars());
+  m_view->setLoadHistoryChecked(loadHistory());
 
   m_view->setDeveloperFeatureFlags(developerFeatureFlags());
 }
@@ -48,6 +49,7 @@ void SettingsPresenter::saveSettings() {
 
   setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
   setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
+  setLoadHistory(m_view->isLoadHistoryChecked());
 
   setDeveloperFeatureFlags(m_view->developerFeatureFlags());
 

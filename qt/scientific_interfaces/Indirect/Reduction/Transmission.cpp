@@ -126,4 +126,9 @@ void Transmission::saveClicked() {
 
 void Transmission::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
+void Transmission::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSampleInput->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsCanInput->setLoadProperty("LoadHistory", doLoadHistory);
+};
+
 } // namespace MantidQt::CustomInterfaces

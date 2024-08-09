@@ -31,6 +31,9 @@ public:
   virtual void setPlotErrorBarsChecked(bool check) = 0;
   virtual bool isPlotErrorBarsChecked() const = 0;
 
+  virtual void setLoadHistoryChecked(bool check) = 0;
+  virtual bool isLoadHistoryChecked() const = 0;
+
   virtual void setDeveloperFeatureFlags(QStringList const &flags) = 0;
   virtual QStringList developerFeatureFlags() const = 0;
 

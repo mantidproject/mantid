@@ -71,6 +71,8 @@ void SqwView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setFB
 
 void SqwView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
+void SqwView::setLoadHistory(bool doLoadHistory) { m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoadHistory); }
+
 bool SqwView::validate() {
   auto uiv = std::make_unique<UserInputValidator>();
   validateDataIsOfType(uiv.get(), m_uiForm.dsInput, "Sample", DataType::Red);

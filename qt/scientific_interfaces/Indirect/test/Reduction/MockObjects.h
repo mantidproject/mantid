@@ -107,6 +107,7 @@ public:
   MOCK_METHOD1(setSaveEnabled, void(bool enable));
   MOCK_METHOD1(setPlotTimeIsPlotting, void(bool plotting));
   MOCK_METHOD2(setFileExtensionsByName, void(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes));
+  MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
   MOCK_METHOD1(setRunButtonText, void(std::string const &runText));
   MOCK_METHOD1(setEnableOutputOptions, void(bool const enable));
 

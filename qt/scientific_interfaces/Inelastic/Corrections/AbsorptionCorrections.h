@@ -52,6 +52,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
   void validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;

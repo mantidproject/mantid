@@ -79,6 +79,7 @@ protected:
 
 private:
   virtual void setFileExtensionsByName(bool filter);
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
 };
 
 } // namespace CustomInterfaces

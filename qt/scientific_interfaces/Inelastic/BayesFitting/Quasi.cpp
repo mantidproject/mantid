@@ -104,7 +104,8 @@ void Quasi::applySettings(std::map<std::string, QVariant> const &settings) {
   setupFitOptions();
   setupPropertyBrowser();
   setupPlotOptions();
-  filterInputData(settings.at("RestrictInput").toBool());
+  setFileExtensionsByName(settings.at("RestrictInput").toBool());
+  setLoadHistory(settings.at("LoadHistory").toBool());
 }
 
 /**
@@ -210,6 +211,12 @@ void Quasi::setFileExtensionsByName(bool filter) {
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
   m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
+}
+
+void Quasi::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResNorm->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void Quasi::handleValidation(IUserInputValidator *validator) const {

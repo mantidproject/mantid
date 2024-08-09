@@ -117,6 +117,8 @@ void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void SymmetrisePresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 void SymmetrisePresenter::handleReflectTypeChanged(int value) {
   if (m_runPresenter->validate()) {
     m_model->setIsPositiveReflect(value == 0);

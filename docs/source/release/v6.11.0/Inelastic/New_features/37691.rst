@@ -1,0 +1,1 @@
+- Add `Load Workspace History` option to the settings dialog for Indirect/Inelastic interfaces.

@@ -38,6 +38,10 @@ void AddWorkspaceDialog::setWSSuffices(const QStringList &suffices) { m_uiForm.d
 
 void AddWorkspaceDialog::setFBSuffices(const QStringList &suffices) { m_uiForm.dsWorkspace->setFBSuffixes(suffices); }
 
+void AddWorkspaceDialog::setLoadProperty(const std::string &propName, bool enable) {
+  m_uiForm.dsWorkspace->setLoadProperty(propName, enable);
+}
+
 void AddWorkspaceDialog::updateSelectedSpectra() {
   auto const state = m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
   selectAllSpectra(state);

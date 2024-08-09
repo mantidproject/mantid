@@ -17,13 +17,14 @@ namespace SettingsHelper {
 
 MANTID_SPECTROSCOPY_DLL void setRestrictInputDataByName(bool restricted);
 MANTID_SPECTROSCOPY_DLL void setExternalPlotErrorBars(bool errorBars);
+MANTID_SPECTROSCOPY_DLL void setLoadHistory(bool loadHistory);
 MANTID_SPECTROSCOPY_DLL void setDeveloperFeatureFlags(QStringList const &flags);
 
 MANTID_SPECTROSCOPY_DLL bool restrictInputDataByName();
 MANTID_SPECTROSCOPY_DLL bool externalPlotErrorBars();
+MANTID_SPECTROSCOPY_DLL bool loadHistory();
 MANTID_SPECTROSCOPY_DLL QStringList developerFeatureFlags();
 MANTID_SPECTROSCOPY_DLL bool hasDevelopmentFlag(std::string const &flag);
-
 } // namespace SettingsHelper
 } // namespace CustomInterfaces
 } // namespace MantidQt

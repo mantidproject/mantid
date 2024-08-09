@@ -35,6 +35,7 @@ public:
 
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
+  void setLoadHistory(bool doLoadHistory) override;
   std::tuple<double, double> getQRangeFromPlot() const override;
   std::tuple<double, double> getERangeFromPlot() const override;
   std::string getDataName() const override;

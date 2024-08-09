@@ -35,6 +35,7 @@ public:
 
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   double getElow() const override;
   double getEhigh() const override;
