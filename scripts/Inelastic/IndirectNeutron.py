@@ -13,24 +13,11 @@ Force for ILL backscattering raw
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
 from mantidqt.plotting.functions import pcolormesh
-import datetime
 import sys
 import math
 import os.path
 import numpy as np
 from IndirectCommon import extract_float, extract_int, get_efixed
-
-
-def StartTime(prog):
-    logger.notice("----------")
-    message = "Program " + prog + " started @ " + str(datetime.datetime.now())
-    logger.notice(message)
-
-
-def EndTime(prog):
-    message = "Program " + prog + " ended @ " + str(datetime.datetime.now())
-    logger.notice(message)
-    logger.notice("----------")
 
 
 #  Routines for Ascii file of raw data
@@ -156,7 +143,6 @@ def loadFile(path):
 
 
 def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # Ascii start routine
-    StartTime("Iback")
     workdir = config["defaultsave.directory"]
 
     path, fname = getFilePath(run, ".asc", instr)
@@ -275,7 +261,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         logger.information("Output file : " + opath)
     if Plot:
         plotForce(outWS, Plot)
-    EndTime("Iback")
 
 
 # Routines for Inx ascii file
@@ -299,7 +284,6 @@ def ReadInxGroup(asc, n, lgrp):  # read ascii x,y,e
 
 
 def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
-    StartTime("Inx")
     workdir = config["defaultsave.directory"]
 
     path, fname = getFilePath(run, ".inx", instr)
@@ -368,7 +352,6 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         logger.information("Output file : " + opath)
     if Plot:
         plotForce(outWS, Plot)
-    EndTime("Inx")
 
 
 # General routines
@@ -486,9 +469,7 @@ def RunParas(ascWS, _instr, run, title):
 
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
-    StartTime("IN13")
     IN13Read(instr, run, ana, refl, Plot, Save)
-    EndTime("IN13")
 
 
 def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
