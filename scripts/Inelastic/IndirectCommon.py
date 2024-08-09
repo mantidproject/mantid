@@ -16,13 +16,13 @@ from mantid.simpleapi import (
     RenameWorkspace,
 )
 
-from typing import Tuple
+from typing import List, Tuple, Union
 import math
 import re
 import numpy as np
 
 
-def get_run_number(ws_name):
+def get_run_number(ws_name: str) -> str:
     """
     Gets the run number for a given workspace.
 
@@ -32,66 +32,66 @@ def get_run_number(ws_name):
     @param ws_name Name of workspace
     @return Parsed run number
     """
-
     workspace = AnalysisDataService.retrieve(ws_name)
     run_number = str(workspace.getRunNumber())
-    if run_number == "0":
-        # Attempt to parse run number off of name
-        match = re.match(r"([a-zA-Z]+)([0-9]+)", ws_name)
-        if match:
-            run_number = match.group(2)
-        else:
-            # attempt reading from the logs (ILL)
-            run = workspace.getRun()
-            if run.hasProperty("run_number"):
-                log = run.getLogData("run_number").value
-                run_number = log.split(",")[0]
-            else:
-                raise RuntimeError("Could not find run number associated with workspace.")
+    if run_number != "0":
+        return run_number
 
-    return run_number
+    # Attempt to parse run number off of name
+    match = re.match(r"([a-zA-Z]+)([0-9]+)", ws_name)
+    if match:
+        return match.group(2)
+
+    # attempt reading from the logs (ILL)
+    run = workspace.getRun()
+    if not run.hasProperty("run_number"):
+        raise RuntimeError("Could not find run number associated with workspace.")
+
+    log = run.getLogData("run_number").value
+    return log.split(",")[0]
 
 
-def get_instrument_and_run(ws_name):
+def get_instrument_and_run(ws_name: str) -> Tuple[str, str]:
     """
     Get the instrument name and run number from a workspace.
 
     @param ws_name - name of the workspace
     @return tuple of form (instrument, run number)
     """
-
     run_number = get_run_number(ws_name)
 
     instrument = AnalysisDataService.retrieve(ws_name).getInstrument().getName()
-    if instrument != "":
-        for facility in config.getFacilities():
-            try:
-                instrument = facility.instrument(instrument).filePrefix(int(run_number))
-                instrument = instrument.lower()
-                break
-            except RuntimeError:
-                continue
+    if instrument == "":
+        return instrument, run_number
+
+    for facility in config.getFacilities():
+        try:
+            instrument = facility.instrument(instrument).filePrefix(int(run_number))
+            instrument = instrument.lower()
+            break
+        except RuntimeError:
+            continue
 
     return instrument, run_number
 
 
-def get_workspace_name_prefix(wsname):
+def get_workspace_name_prefix(ws_name: str) -> str:
     """
     Returns a string of the form '<ins><run>_<analyser><refl>_' on which
     all of our other naming conventions are built. The workspace is used to get the
     instrument parameters.
     """
-    if wsname == "":
+    if ws_name == "":
         return ""
 
-    workspace = AnalysisDataService.retrieve(wsname)
+    workspace = AnalysisDataService.retrieve(ws_name)
     facility = config["default.facility"]
 
     ws_run = workspace.getRun()
     if "facility" in ws_run:
         facility = ws_run.getLogData("facility").value
 
-    instrument, run_number = get_instrument_and_run(wsname)
+    instrument, run_number = get_instrument_and_run(ws_name)
     if facility == "ILL":
         run_name = instrument + "_" + run_number
     else:
@@ -112,7 +112,7 @@ def get_workspace_name_prefix(wsname):
     return prefix
 
 
-def get_efixed(workspace):
+def get_efixed(workspace: Union[str, MatrixWorkspace]) -> float:
     if isinstance(workspace, str):
         inst = AnalysisDataService.retrieve(workspace).getInstrument()
     else:
@@ -137,43 +137,41 @@ def get_efixed(workspace):
     raise ValueError("No Efixed parameter found")
 
 
-def get_two_theta_angles(inWS):
-    if isinstance(inWS, str):
-        ws = AnalysisDataService.retrieve(inWS)
-    else:
-        ws = inWS
-    num_hist = ws.getNumberHistograms()  # get no. of histograms/groups
-    source_pos = ws.getInstrument().getSource().getPos()
-    sample_pos = ws.getInstrument().getSample().getPos()
+def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
+    if isinstance(workspace, str):
+        workspace = AnalysisDataService.retrieve(workspace)
+
+    num_hist = workspace.getNumberHistograms()  # get no. of histograms/groups
+    source_pos = workspace.getInstrument().getSource().getPos()
+    sample_pos = workspace.getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
     angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = ws.getDetector(index)  # get index
+        detector = workspace.getDetector(index)  # get index
         two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
         angles.append(two_theta)  # add angle
     return angles
 
 
-def get_theta_q(ws_in):
+def get_theta_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    @param ws Workspace to get theta and Q for
+    @param workspace Workspace name or workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
-    if isinstance(ws_in, str):
-        ws = AnalysisDataService.retrieve(ws_in)
-    else:
-        ws = ws_in
-    e_fixed = get_efixed(ws)
+    if isinstance(workspace, str):
+        workspace = AnalysisDataService.retrieve(workspace)
+
+    e_fixed = get_efixed(workspace)
     wavelas = math.sqrt(81.787 / e_fixed)  # Elastic wavelength
     k0 = 4.0 * math.pi / wavelas
 
-    axis = ws.getAxis(1)
+    axis = workspace.getAxis(1)
 
     # If axis is in spec number need to retrieve angles and calculate Q
     if axis.isSpectra():
-        theta = np.array(get_two_theta_angles(ws))
+        theta = np.array(get_two_theta_angles(workspace))
         q = k0 * np.sin(0.5 * np.radians(theta))
 
     # If axis is in Q need to calculate back to angles and just return axis values
@@ -188,12 +186,12 @@ def get_theta_q(ws_in):
 
     # Out of options here
     else:
-        raise RuntimeError("Cannot get theta and Q for workspace %s" % ws)
+        raise RuntimeError("Cannot get theta and Q for workspace %s" % workspace)
 
     return theta, q
 
 
-def extract_float(data_string):
+def extract_float(data_string: str) -> List[float]:
     """
     Extract float values from an ASCII string
     """
@@ -202,7 +200,7 @@ def extract_float(data_string):
     return values
 
 
-def extract_int(data_string):
+def extract_int(data_string: str) -> List[int]:
     """
     Extract int values from an ASCII string
     """
@@ -223,13 +221,13 @@ def pad_array(inarray, nfixed):
     return outarray
 
 
-def _check_analysers_are_equal(in1WS, in2WS):
+def _check_analysers_are_equal(workspace_name1: str, workspace_name2: str) -> None:
     """
     Check workspaces have identical analysers and reflections
 
     Args:
-      @param in1WS - first 2D workspace
-      @param in2WS - second 2D workspace
+      @param workspace_name1 - first 2D workspace
+      @param workspace_name2 - second 2D workspace
 
     Returns:
       @return None
@@ -238,14 +236,14 @@ def _check_analysers_are_equal(in1WS, in2WS):
       @exception ValueError - workspaces have different analysers
       @exception ValueError - workspaces have different reflections
     """
-    ws1 = AnalysisDataService.retrieve(in1WS)
+    ws1 = AnalysisDataService.retrieve(workspace_name1)
     try:
         analyser_1 = ws1.getInstrument().getStringParameter("analyser")[0]
         reflection_1 = ws1.getInstrument().getStringParameter("reflection")[0]
     except IndexError:
         # Ignore this check if an analyser or reflection cannot be found
         return
-    ws2 = AnalysisDataService.retrieve(in2WS)
+    ws2 = AnalysisDataService.retrieve(workspace_name2)
     try:
         analyser_2 = ws2.getInstrument().getStringParameter("analyser")[0]
         reflection_2 = ws2.getInstrument().getStringParameter("reflection")[0]
@@ -261,27 +259,27 @@ def _check_analysers_are_equal(in1WS, in2WS):
         logger.information("Analyser is %s, reflection %s" % (analyser_1, reflection_1))
 
 
-def _get_sample_log(workspace, log_name):
+def _get_sample_log(workspace: MatrixWorkspace, log_name: str) -> Union[str, None]:
     table = CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
     log_value = table.cell(0, 0) if table else None
     return log_value
 
 
-def _try_get_sample_log(workspace, log_name):
+def _try_get_sample_log(workspace: MatrixWorkspace, log_name: str) -> Union[str, None]:
     messages = CheckForSampleLogs(workspace, log_name, EnableLogging=False)
     return _get_sample_log(workspace, log_name) if not messages else None
 
 
-def _check_e_fixed_are_equal(workspace1, workspace2):
+def _check_e_fixed_are_equal(workspace1: Union[str, MatrixWorkspace], workspace2: Union[str, MatrixWorkspace]) -> None:
     if get_efixed(workspace1) != get_efixed(workspace2):
-        raise ValueError("Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.")
+        raise ValueError(f"Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.")
 
 
-def _is_technique_direct(workspace):
+def _is_technique_direct(workspace: MatrixWorkspace) -> bool:
     return _try_get_sample_log(workspace, "deltaE-mode") == "Direct"
 
 
-def check_analysers_or_e_fixed(workspace1, workspace2):
+def check_analysers_or_e_fixed(workspace1: Union[str, MatrixWorkspace], workspace2: Union[str, MatrixWorkspace]) -> None:
     """
     Check that the workspaces have EFixed if the technique is direct, otherwise check that the analysers and
     reflections are identical
@@ -293,7 +291,7 @@ def check_analysers_or_e_fixed(workspace1, workspace2):
         _check_analysers_are_equal(workspace1, workspace2)
 
 
-def check_hist_zero(inWS):
+def check_hist_zero(workspace_name: str) -> Tuple[int, int]:
     """
     Retrieves basic info on a workspace
 
@@ -312,25 +310,25 @@ def check_hist_zero(inWS):
     Raises:
       @exception ValueError - Worskpace has no histograms
     """
-    num_hist = AnalysisDataService.retrieve(inWS).getNumberHistograms()  # no. of hist/groups in WS
+    num_hist = AnalysisDataService.retrieve(workspace_name).getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
-        raise ValueError("Workspace " + inWS + " has NO histograms")
-    x_in = AnalysisDataService.retrieve(inWS).readX(0)
+        raise ValueError("Workspace " + workspace_name + " has NO histograms")
+    x_in = AnalysisDataService.retrieve(workspace_name).readX(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
-        raise ValueError("Workspace " + inWS + " has NO points")
+        raise ValueError("Workspace " + workspace_name + " has NO points")
     return num_hist, ntc
 
 
-def check_dimensions_equal(in1WS, name1, in2WS, name2):
+def check_dimensions_equal(workspace_name1: str, descriptor1: str, workspace_name2: str, descriptor2: str) -> None:
     """
     Check workspaces have the same number of histograms and bin boundaries
 
     Args:
-      @param in1WS - first 2D workspace
-      @param name1 - single-word descriptor of first 2D workspace
-      @param in2WS - second 2D workspace
-      @param name2 - single-word descriptor of second 2D workspace
+      @param workspace_name1 - first 2D workspace
+      @param descriptor1 - single-word descriptor of first 2D workspace
+      @param workspace_name2 - second 2D workspace
+      @param descriptor2 - single-word descriptor of second 2D workspace
 
     Returns:
       @return None
@@ -339,25 +337,25 @@ def check_dimensions_equal(in1WS, name1, in2WS, name2):
       Valuerror: number of histograms is different
       Valuerror: number of bin boundaries in the histograms is different
     """
-    num_hist_1 = AnalysisDataService.retrieve(in1WS).getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = AnalysisDataService.retrieve(in1WS).readX(0)
+    num_hist_1 = AnalysisDataService.retrieve(workspace_name1).getNumberHistograms()  # no. of hist/groups in WS1
+    x_1 = AnalysisDataService.retrieve(workspace_name1).readX(0)
     x_len_1 = len(x_1)
-    num_hist_2 = AnalysisDataService.retrieve(in2WS).getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = AnalysisDataService.retrieve(in2WS).readX(0)
+    num_hist_2 = AnalysisDataService.retrieve(workspace_name2).getNumberHistograms()  # no. of hist/groups in WS2
+    x_2 = AnalysisDataService.retrieve(workspace_name2).readX(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
-        error_1 = "%s (%s) histograms (%d)" % (name1, in1WS, num_hist_1)
-        error_2 = "%s (%s) histograms (%d)" % (name2, in2WS, num_hist_2)
+        error_1 = "%s (%s) histograms (%d)" % (descriptor1, workspace_name1, num_hist_1)
+        error_2 = "%s (%s) histograms (%d)" % (descriptor2, workspace_name2, num_hist_2)
         error = error_1 + " not = " + error_2
         raise ValueError(error)
     elif x_len_1 != x_len_2:
-        error_1 = "%s (%s) array length (%d)" % (name1, in1WS, x_len_1)
-        error_2 = "%s (%s) array length (%d)" % (name2, in2WS, x_len_2)
+        error_1 = "%s (%s) array length (%d)" % (descriptor1, workspace_name1, x_len_1)
+        error_2 = "%s (%s) array length (%d)" % (descriptor2, workspace_name2, x_len_2)
         error = error_1 + " not = " + error_2
         raise ValueError(error)
 
 
-def check_x_range(x_range, range_type):
+def check_x_range(x_range: List[float], range_type: str) -> None:
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
         raise ValueError(range_type + " - Range must contain either 2 or 4 numbers")
 
@@ -370,7 +368,7 @@ def check_x_range(x_range, range_type):
             raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
 
 
-def convert_to_elastic_q(input_ws, output_ws=None):
+def convert_to_elastic_q(input_ws: str, output_ws: Union[str, None] = None) -> None:
     """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
 
@@ -397,7 +395,7 @@ def convert_to_elastic_q(input_ws, output_ws=None):
         raise RuntimeError("Input workspace must have either spectra or numeric axis.")
 
 
-def transpose_fit_parameters_table(params_table, output_table=None):
+def transpose_fit_parameters_table(params_table: str, output_table: Union[str, None] = None) -> None:
     """
     Transpose the parameter table created from a multi domain Fit.
 
@@ -446,7 +444,7 @@ def transpose_fit_parameters_table(params_table, output_table=None):
     RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
-def _first_non_zero(data):
+def _first_non_zero(data: List) -> Union[int, None]:
     """
     Returns the index of the first non zero value in the list
     """
@@ -472,7 +470,7 @@ def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int
     return x_data[start_data_idx], x_data[len(x_data) - end_data_idx - 1]
 
 
-def format_runs(runs, instrument_name):
+def format_runs(runs: List[str], instrument_name: str) -> List[int]:
     """
     :return: A list of runs prefixed with the given instrument name
     """
