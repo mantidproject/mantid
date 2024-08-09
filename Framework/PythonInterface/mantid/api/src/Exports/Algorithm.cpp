@@ -97,10 +97,10 @@ void translateCancel(const Algorithm::CancelException &exc) {
  * @param exc - The caught H5::Exception. Its error stack is reported
  */
 void translateH5Exception(const H5::Exception &exc) {
-  auto handleFrame = [](unsigned int n, const H5E_error_t *err, void *ss_) -> herr_t {
-    std::stringstream &strstream = *((std::stringstream *)ss_);
+  auto handleFrame = [](unsigned int n, const H5E_error_t *err, void *ss_arg) -> herr_t {
+    std::stringstream &ss_ = *((std::stringstream *)ss_arg);
 
-    strstream << "  #" << n << ": " << err->desc << "\n";
+    ss_ << "  #" << n << ": " << err->desc << "\n";
 
     return (herr_t)0;
   };
