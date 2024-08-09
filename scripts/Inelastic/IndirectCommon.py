@@ -186,7 +186,7 @@ def get_theta_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.
 
     # Out of options here
     else:
-        raise RuntimeError("Cannot get theta and Q for workspace %s" % workspace)
+        raise RuntimeError(f"Cannot get theta and Q for workspace {str(workspace)}")
 
     return theta, q
 
@@ -252,11 +252,11 @@ def _check_analysers_are_equal(workspace_name1: str, workspace_name2: str) -> No
         return
 
     if analyser_1 != analyser_2:
-        raise ValueError("Workspace %s and %s have different analysers" % (ws1, ws2))
+        raise ValueError(f"Workspace {str(ws1)} and {str(ws2)} have different analysers")
     elif reflection_1 != reflection_2:
-        raise ValueError("Workspace %s and %s have different reflections" % (ws1, ws2))
+        raise ValueError(f"Workspace {str(ws1)} and {str(ws2)} have different reflections")
     else:
-        logger.information("Analyser is %s, reflection %s" % (analyser_1, reflection_1))
+        logger.information(f"Analyser is {str(analyser_1)}, reflection {str(reflection_1)}")
 
 
 def _get_sample_log(workspace: MatrixWorkspace, log_name: str) -> Union[str, None]:
@@ -312,11 +312,11 @@ def check_hist_zero(workspace_name: str) -> Tuple[int, int]:
     """
     num_hist = AnalysisDataService.retrieve(workspace_name).getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
-        raise ValueError("Workspace " + workspace_name + " has NO histograms")
+        raise ValueError(f"The '{workspace_name}' workspace has zero histograms")
     x_in = AnalysisDataService.retrieve(workspace_name).readX(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
-        raise ValueError("Workspace " + workspace_name + " has NO points")
+        raise ValueError(f"The '{workspace_name}' workspace has zero bins")
     return num_hist, ntc
 
 
@@ -344,28 +344,26 @@ def check_dimensions_equal(workspace_name1: str, descriptor1: str, workspace_nam
     x_2 = AnalysisDataService.retrieve(workspace_name2).readX(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
-        error_1 = "%s (%s) histograms (%d)" % (descriptor1, workspace_name1, num_hist_1)
-        error_2 = "%s (%s) histograms (%d)" % (descriptor2, workspace_name2, num_hist_2)
-        error = error_1 + " not = " + error_2
-        raise ValueError(error)
+        error_1 = f"{descriptor1} ({workspace_name1}) histograms ({num_hist_1})"
+        error_2 = f"{descriptor2} ({workspace_name2}) histograms ({num_hist_2})"
+        raise ValueError(f"{error_1} not = {error_2}")
     elif x_len_1 != x_len_2:
-        error_1 = "%s (%s) array length (%d)" % (descriptor1, workspace_name1, x_len_1)
-        error_2 = "%s (%s) array length (%d)" % (descriptor2, workspace_name2, x_len_2)
-        error = error_1 + " not = " + error_2
-        raise ValueError(error)
+        error_1 = f"{descriptor1} ({workspace_name1}) array length ({x_len_1})"
+        error_2 = f"{descriptor2} ({workspace_name2}) array length ({x_len_2})"
+        raise ValueError(f"{error_1} not = {error_2}")
 
 
 def check_x_range(x_range: List[float], range_type: str) -> None:
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
-        raise ValueError(range_type + " - Range must contain either 2 or 4 numbers")
+        raise ValueError(f"{range_type} - Range must contain either 2 or 4 numbers")
 
     for lower, upper in zip(x_range[::2], x_range[1::2]):
         if math.fabs(lower) < 1e-5:
-            raise ValueError("%s - input minimum (%f) is zero" % (range_type, lower))
+            raise ValueError(f"{range_type} - input minimum ({lower}) is zero")
         if math.fabs(upper) < 1e-5:
-            raise ValueError("%s - input maximum (%f) is zero" % (range_type, upper))
+            raise ValueError(f"{range_type} - input maximum ({upper}) is zero")
         if upper < lower:
-            raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
+            raise ValueError(f"{range_type} - input maximum ({upper}) < minimum ({lower})")
 
 
 def convert_to_elastic_q(input_ws: str, output_ws: Union[str, None] = None) -> None:
@@ -383,14 +381,12 @@ def convert_to_elastic_q(input_ws: str, output_ws: Union[str, None] = None) -> N
     if axis.isSpectra():
         e_fixed = get_efixed(input_ws)
         ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
-
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
         if axis.getUnit().unitID() != "MomentumTransfer":
             raise RuntimeError("Input must have axis values of Q")
 
         CloneWorkspace(input_ws, OutputWorkspace=output_ws)
-
     else:
         raise RuntimeError("Input workspace must have either spectra or numeric axis.")
 
