@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>970</width>
-        <height>745</height>
+        <width>966</width>
+        <height>796</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -146,42 +146,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <layout class="QHBoxLayout" name="loScaleFactor">
-            <item>
-             <widget class="QDoubleSpinBox" name="spCanScale">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="decimals">
-               <number>5</number>
-              </property>
-              <property name="minimum">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>999.990000000000009</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="ckShiftCan">
-            <property name="text">
-             <string>Shift x-values of container by adding:</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <layout class="QHBoxLayout" name="loShift">
             <item>
@@ -203,6 +167,42 @@
               </property>
               <property name="value">
                <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="ckShiftCan">
+            <property name="text">
+             <string>Shift x-values of container by adding:</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="loScaleFactor">
+            <item>
+             <widget class="QDoubleSpinBox" name="spCanScale">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="decimals">
+               <number>5</number>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999.990000000000009</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -326,27 +326,27 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::RunView</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
