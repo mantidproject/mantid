@@ -738,14 +738,12 @@ bool Algorithm::executeInternal() {
 
   catch (H5::Exception &ex) {
     m_runningAsync = false;
+    std::string errmsg;
+    errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
     getLogger().error() << "H5 Exception in execution of algorithm " << this->name() << ":\n" << errmsg << "\n";
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
-
-    std::string errmsg;
-    errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
-
     notificationCenter().postNotification(new ErrorNotification(this, errmsg));
     this->unlockWorkspaces();
 
