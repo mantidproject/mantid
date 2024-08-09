@@ -43,7 +43,7 @@ public:
   virtual void loadSettings(const QSettings &settings) = 0;
 
 private:
-  virtual void setLoadHistory(bool doLoadHistory){UNUSED_ARG(doLoadHistory)};
+  virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
