@@ -283,7 +283,7 @@ class IndirectCommonTests(unittest.TestCase):
         try:
             func(*args)
         except exception_type:
-            self.fail("%s should not of raised anything but it did." % func.__name__)
+            self.fail(f"{func.__name__} should not of raised anything but it did.")
 
     def assert_workspace_units_match_expected(self, expected_unit_ID, ws, axis_number=1):
         axis = AnalysisDataService.retrieve(ws).getAxis(axis_number)
@@ -304,12 +304,12 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertEqual(
             expected_row_count,
             actual_row_count,
-            "Number of rows does not match expected (%d != %d)" % (expected_row_count, actual_row_count),
+            f"Number of rows does not match expected ({expected_row_count} != {actual_row_count})",
         )
         self.assertEqual(
             expected_column_count,
             actual_column_count,
-            "Number of columns does not match expected (%d != %d)" % (expected_column_count, actual_column_count),
+            f"Number of columns does not match expected ({expected_column_count} != {actual_column_count})",
         )
 
     def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
@@ -318,22 +318,22 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertEqual(
             actual_num_histograms,
             expected_num_histograms,
-            "Number of histograms does not match expected (%d != %d)" % (expected_num_histograms, actual_num_histograms),
+            f"Number of histograms does not match expected ({expected_num_histograms} != {actual_num_histograms})",
         )
         self.assertEqual(
             expected_blocksize,
             actual_blocksize,
-            "Workspace blocksize does not match expected (%d != %d)" % (expected_blocksize, actual_blocksize),
+            f"Workspace blocksize does not match expected ({expected_blocksize} != {actual_blocksize})",
         )
 
     def assert_logs_match_expected(self, workspace, expected_logs):
         run = AnalysisDataService.retrieve(workspace).getRun()
         for log_name, log_value in expected_logs.items():
-            self.assertTrue(run.hasProperty(log_name), "The log %s is missing from the workspace" % log_name)
+            self.assertTrue(run.hasProperty(log_name), f"The log {log_name} is missing from the workspace")
             self.assertEqual(
                 str(run.getProperty(log_name).value),
                 str(log_value),
-                "The expected value of log %s did not match (%s != %s)" % (log_name, str(log_value), run.getProperty(log_name).value),
+                f"The expected value of log {log_name} did not match ({str(log_value)} != {run.getProperty(log_name).value})",
             )
 
     # -----------------------------------------------------------
@@ -361,15 +361,15 @@ class IndirectCommonTests(unittest.TestCase):
     def make_multi_domain_function(self, ws, function):
         """Make a multi domain function from a regular function string"""
         multi_domain_composite = "composite=MultiDomainFunction,NumDeriv=1;"
-        component = "(composite=CompositeFunction,$domains=i;%s);" % function
+        component = f"(composite=CompositeFunction,$domains=i;{function});"
 
         fit_kwargs = {}
         num_spectra = AnalysisDataService.retrieve(ws).getNumberHistograms()
         for i in range(0, num_spectra):
             multi_domain_composite += component
             if i > 0:
-                fit_kwargs["WorkspaceIndex_%d" % i] = i
-                fit_kwargs["InputWorkspace_%d" % i] = ws
+                fit_kwargs[f"WorkspaceIndex_{i}"] = i
+                fit_kwargs[f"InputWorkspace_{i}"] = ws
 
         return multi_domain_composite, fit_kwargs
 
@@ -386,7 +386,7 @@ class IndirectCommonTests(unittest.TestCase):
             Output=table_name,
             CreateOutput=True,
             MaxIterations=0,
-            **fit_kwargs
+            **fit_kwargs,
         )
         return table_name + "_Parameters"
 
@@ -395,7 +395,7 @@ class IndirectCommonTests(unittest.TestCase):
         LoadInstrument(ws, InstrumentName=instrument, RewriteSpectraMap=True)
 
         if config["default.facility"] != "ILL":
-            parameter_file_name = "%s_%s_%s_Parameters.xml" % (instrument, analyser, reflection)
+            parameter_file_name = f"{instrument}_{analyser}_{reflection}_Parameters.xml"
             ipf = join(config["instrumentDefinition.directory"], parameter_file_name)
             LoadParameterFile(ws, Filename=ipf)
 
