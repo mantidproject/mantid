@@ -24,4 +24,6 @@ void SimulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> cons
 
 void SimulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
+void SimulationTab::enableLoadHistoryProperty(bool doLoadHistory) { setLoadHistory(doLoadHistory); }
+
 } // namespace MantidQt::CustomInterfaces
