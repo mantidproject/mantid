@@ -27,175 +27,175 @@ class IndirectCommonTests(unittest.TestCase):
     def tearDown(self):
         mantid.kernel.config = self._config_defaults
 
-    def test_getInstrRun_from_name(self):
+    def test_get_instrument_and_run_from_name(self):
         ws = self.make_dummy_QENS_workspace()
-        (instrument, run_number) = indirect_common.getInstrRun(ws)
+        (instrument, run_number) = indirect_common.get_instrument_and_run(ws)
 
         self.assertEqual(run_number, "1")
         self.assertEqual(instrument, "irs")
 
-    def test_getInstrRun_from_workspace(self):
+    def test_get_instrument_and_run_from_workspace(self):
         ws = self.make_dummy_QENS_workspace(add_logs=False)
         ws = RenameWorkspace(ws, OutputWorkspace="IRS26173")
 
-        (instrument, run_number) = indirect_common.getInstrRun(ws.name())
+        (instrument, run_number) = indirect_common.get_instrument_and_run(ws.name())
 
         self.assertEqual(run_number, "26173")
         self.assertEqual(instrument, "irs")
 
-    def test_getInstrRun_failure(self):
+    def test_get_instrument_and_run_failure(self):
         ws = self.make_dummy_QENS_workspace(add_logs=False)
-        self.assertRaises(RuntimeError, indirect_common.getInstrRun, ws)
+        self.assertRaises(RuntimeError, indirect_common.get_instrument_and_run, ws)
 
-    def test_getWSprefix_ISIS(self):
+    def test_get_workspace_name_prefix_ISIS(self):
         config["default.facility"] = "ISIS"
         ws = self.make_dummy_QENS_workspace()
 
-        ws_name = indirect_common.getWSprefix(ws)
+        ws_name = indirect_common.get_workspace_name_prefix(ws)
 
         self.assertEqual(ws_name, "irs1_graphite002_", "The workspace prefix does not match the expected value")
 
-    def test_getWSprefix_ILL(self):
+    def test_get_workspace_name_prefix_ILL(self):
         config["default.facility"] = "ILL"
         ws = self.make_dummy_QENS_workspace(instrument_name="IN16B")
 
-        ws_name = indirect_common.getWSprefix(ws)
+        ws_name = indirect_common.get_workspace_name_prefix(ws)
 
         self.assertEqual(ws_name, "in16b_1_", "The workspace prefix does not match the expected value")
 
-    def test_getEFixed(self):
+    def test_get_efixed(self):
         ws = CreateSampleWorkspace()
         ws = self.load_instrument(ws, "IRIS")
 
-        e_fixed = indirect_common.getEfixed(ws.name())
+        e_fixed = indirect_common.get_efixed(ws.name())
         self.assertEqual(e_fixed, 1.8450, "The EFixed value does not match the expected value")
 
-    def test_getEFixed_failure(self):
+    def test_get_efixed_failure(self):
         ws = CreateSampleWorkspace()
-        self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
+        self.assertRaises(ValueError, indirect_common.get_efixed, ws.name())
 
-    def test_getEFixed_with_no_instrument_but_efixed_sample_log(self):
+    def test_get_efixed_with_no_instrument_but_efixed_sample_log(self):
         ws = self.make_dummy_workspace_without_instrument("test_ws1")
         AddSampleLog(ws, LogName="EFixed", LogType="Number", LogText="1.83")
 
-        e_fixed = indirect_common.getEfixed(ws)
+        e_fixed = indirect_common.get_efixed(ws)
         self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
 
-    def test_getEFixed_with_no_instrument_but_ei_sample_log(self):
+    def test_get_efixed_with_no_instrument_but_ei_sample_log(self):
         ws = self.make_dummy_workspace_without_instrument("test_ws1")
         AddSampleLog(ws, LogName="Ei", LogType="Number", LogText="1.83")
 
-        e_fixed = indirect_common.getEfixed(ws)
+        e_fixed = indirect_common.get_efixed(ws)
         self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
 
-    def test_GetWSangles(self):
+    def test_get_two_theta_angles(self):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
-        actual_result = indirect_common.GetWSangles(ws)
+        actual_result = indirect_common.get_two_theta_angles(ws)
         self.assert_lists_almost_match(expected_result, actual_result)
 
-    def test_GetThetaQ(self):
+    def test_get_theta_q(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
         expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
-        actual_theta_result, actual_Q_result = indirect_common.GetThetaQ(ws)
+        actual_theta_result, actual_Q_result = indirect_common.get_theta_q(ws)
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
-    def test_ExtractFloat(self):
+    def test_extract_float(self):
         data = "0.0 1 .2 3e-3 4.3 -5.5 6.0"
         expected_result = [0, 1, 0.2, 3e-3, 4.3, -5.5, 6.0]
-        actual_result = indirect_common.ExtractFloat(data)
+        actual_result = indirect_common.extract_float(data)
         self.assert_lists_almost_match(expected_result, actual_result)
 
-    def test_ExtractInt(self):
+    def test_extract_int(self):
         data = "-2 -1 0 1 2 3 4 5"
         expected_result = [-2, -1, 0, 1, 2, 3, 4, 5]
-        actual_result = indirect_common.ExtractInt(data)
+        actual_result = indirect_common.extract_int(data)
         self.assert_lists_match(expected_result, actual_result)
 
-    def test_PadArray(self):
+    def test_pad_array(self):
         data = [0, 1, 2, 3, 4, 5]
         expected_result = [0, 1, 2, 3, 4, 5, 0, 0, 0, 0]
-        actual_result = indirect_common.PadArray(data, 10)
+        actual_result = indirect_common.pad_array(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
-    def test_CheckAnalysersOrEFixed(self):
+    def test_check_analysers_or_e_fixed(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
 
-        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assert_does_not_raise(ValueError, indirect_common.check_analysers_or_e_fixed, ws1, ws2)
 
-    def test_CheckAnalysersOrEFixed_fails_on_analyser_mismatch(self):
+    def test_check_analysers_or_e_fixed_fails_on_analyser_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", analyser="graphite")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", analyser="fmica")
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assertRaises(ValueError, indirect_common.check_analysers_or_e_fixed, ws1, ws2)
 
-    def test_CheckAnalysersOrEFixed_fails_on_reflection_mismatch(self):
+    def test_check_analysers_or_e_fixed_fails_on_reflection_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", reflection="002")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", reflection="004")
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assertRaises(ValueError, indirect_common.check_analysers_or_e_fixed, ws1, ws2)
 
-    def test_CheckAnalysersOrEFixed_does_not_raise_error_with_no_inst_data(self):
+    def test_check_analysers_or_e_fixed_does_not_raise_error_with_no_inst_data(self):
         ws1 = self.make_dummy_workspace_without_instrument("test_ws1")
         ws2 = self.make_dummy_workspace_without_instrument("test_ws2")
-        self.assert_does_not_raise(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
+        self.assert_does_not_raise(RuntimeError, indirect_common.check_analysers_or_e_fixed, ws1, ws2)
 
-    def test_CheckHistZero(self):
+    def test_check_hist_zero(self):
         ws = self.make_dummy_QENS_workspace()
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistZero, ws)
+        self.assert_does_not_raise(ValueError, indirect_common.check_hist_zero, ws)
 
-    def test_CheckHistSame(self):
+    def test_check_dimensions_equal(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistSame, ws1, "ws1", ws2, "ws2")
+        self.assert_does_not_raise(ValueError, indirect_common.check_dimensions_equal, ws1, "ws1", ws2, "ws2")
 
-    def test_CheckHistSame_fails_on_x_range_mismatch(self):
+    def test_check_dimensions_equal_fails_on_x_range_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
         CropWorkspace(ws2, XMin=10, OutputWorkspace=ws2)
 
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, "ws1", ws2, "ws2")
+        self.assertRaises(ValueError, indirect_common.check_dimensions_equal, ws1, "ws1", ws2, "ws2")
 
-    def test_CheckHistSame_fails_on_spectrum_range_mismatch(self):
+    def test_check_dimensions_equal_fails_on_spectrum_range_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
         CropWorkspace(ws2, StartWorkspaceIndex=2, OutputWorkspace=ws2)
 
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, "ws1", ws2, "ws2")
+        self.assertRaises(ValueError, indirect_common.check_dimensions_equal, ws1, "ws1", ws2, "ws2")
 
-    def test_CheckXrange(self):
+    def test_check_x_range(self):
         x_range = [1, 10]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, "A Range")
+        self.assert_does_not_raise(ValueError, indirect_common.check_x_range, x_range, "A Range")
 
-    def test_CheckXrange_with_two_ranges(self):
+    def test_check_x_range_with_two_ranges(self):
         x_range = [1, 10, 15, 20]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, "A Range")
+        self.assert_does_not_raise(ValueError, indirect_common.check_x_range, x_range, "A Range")
 
-    def test_CheckXrange_lower_close_to_zero(self):
+    def test_check_x_range_lower_close_to_zero(self):
         x_range = [-5, 0]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, "A Range")
+        self.assertRaises(ValueError, indirect_common.check_x_range, x_range, "A Range")
 
-    def test_CheckXrange_upper_close_to_zero(self):
+    def test_check_x_range_upper_close_to_zero(self):
         x_range = [0, 5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, "A Range")
+        self.assertRaises(ValueError, indirect_common.check_x_range, x_range, "A Range")
 
-    def test_CheckXrange_invalid_range(self):
+    def test_check_x_range_invalid_range(self):
         x_range = [10, 5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, "A Range")
+        self.assertRaises(ValueError, indirect_common.check_x_range, x_range, "A Range")
 
-    def test_convertToElasticQ(self):
+    def test_convert_to_elastic_q(self):
         ws = self.make_dummy_QENS_workspace()
-        indirect_common.convertToElasticQ(ws)
+        indirect_common.convert_to_elastic_q(ws)
         self.assert_workspace_units_match_expected("MomentumTransfer", ws)
         self.assert_has_numeric_axis(ws)
 
-    def test_convertToElasticQ_output_in_different_workspace(self):
+    def test_convert_to_elastic_q_output_in_different_workspace(self):
         ws = self.make_dummy_QENS_workspace()
         output_workspace = "ws2"
-        indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
+        indirect_common.convert_to_elastic_q(ws, output_ws=output_workspace)
 
         # check original wasn't modified
         self.assert_workspace_units_match_expected("Label", ws)
@@ -205,40 +205,40 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_workspace_units_match_expected("MomentumTransfer", output_workspace)
         self.assert_has_numeric_axis(output_workspace)
 
-    def test_convertToElasticQ_workspace_already_in_Q(self):
+    def test_convert_to_elastic_q_workspace_already_in_Q(self):
         ws = self.make_dummy_QENS_workspace()
-        e_fixed = indirect_common.getEfixed(ws)
+        e_fixed = indirect_common.get_efixed(ws)
         ConvertSpectrumAxis(ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=ws)
 
-        indirect_common.convertToElasticQ(ws)
+        indirect_common.convert_to_elastic_q(ws)
 
         self.assert_workspace_units_match_expected("MomentumTransfer", ws)
         self.assert_has_numeric_axis(ws)
 
-    def test_convertToElasticQ_with_numeric_axis_not_in_Q(self):
+    def test_convert_to_elastic_q_with_numeric_axis_not_in_Q(self):
         ws = self.make_dummy_QENS_workspace()
 
         # convert spectrum axis to units of Q
-        e_fixed = indirect_common.getEfixed(ws)
+        e_fixed = indirect_common.get_efixed(ws)
         ConvertSpectrumAxis(ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=ws)
         # set the units to be something we didn't expect
         unit = mtd[ws].getAxis(1).setUnit("Label")
         unit.setLabel("Random Units", "")
 
-        self.assertRaises(RuntimeError, indirect_common.convertToElasticQ, ws)
+        self.assertRaises(RuntimeError, indirect_common.convert_to_elastic_q, ws)
 
-    def test_transposeFitParametersTable(self):
+    def test_transpose_fit_parameters_table(self):
         ws = self.make_dummy_QENS_workspace()
         params_table = self.make_multi_domain_parameter_table(ws)
-        indirect_common.transposeFitParametersTable(params_table)
+        indirect_common.transpose_fit_parameters_table(params_table)
         self.assert_table_workspace_dimensions(params_table, expected_row_count=5, expected_column_count=11)
 
-    def test_transposeFitParametersTable_rename_output(self):
+    def test_transpose_fit_parameters_table_rename_output(self):
         ws = self.make_dummy_QENS_workspace()
         params_table = self.make_multi_domain_parameter_table(ws)
         output_name = "new_table"
 
-        indirect_common.transposeFitParametersTable(params_table, output_name)
+        indirect_common.transpose_fit_parameters_table(params_table, output_name)
 
         self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
         self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)

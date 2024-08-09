@@ -36,7 +36,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
         workflow_prog.report("Validating input")
         input_workspace = mtd[self._input_ws]
-        num_spectra, num_w = self._CheckHistZero(self._input_ws)
+        num_spectra, num_w = self._check_hist_zero(self._input_ws)
         logger.information("Sample %s has %d Q values & %d w values" % (self._input_ws, num_spectra, num_w))
         self._CheckElimits([self._energy_min, self._energy_max], self._input_ws)
 
@@ -248,7 +248,7 @@ class SofQWMoments(DataProcessorAlgorithm):
         self._energy_max = self.getProperty("EnergyMax").value
         self._output_ws = self.getPropertyValue("OutputWorkspace")
 
-    def _CheckHistZero(self, ws):
+    def _check_hist_zero(self, ws):
         """
         Retrieves basic info on a workspace
 

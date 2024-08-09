@@ -98,7 +98,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
         self._setup()
 
@@ -108,7 +108,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             n_prog_reports += 1
         prog = Progress(self, 0.0, 1.0, n_prog_reports)
 
-        efixed = getEfixed(self._sample_ws_name)
+        efixed = get_efixed(self._sample_ws_name)
 
         sample_wave_ws = "__sam_wave"
         ConvertUnits(

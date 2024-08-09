@@ -45,7 +45,7 @@ def get_run_number(ws_name):
     return run_number
 
 
-def getInstrRun(ws_name):
+def get_instrument_and_run(ws_name):
     """
     Get the instrument name and run number from a workspace.
 
@@ -68,7 +68,7 @@ def getInstrRun(ws_name):
     return instrument, run_number
 
 
-def getWSprefix(wsname):
+def get_workspace_name_prefix(wsname):
     """
     Returns a string of the form '<ins><run>_<analyser><refl>_' on which
     all of our other naming conventions are built. The workspace is used to get the
@@ -84,7 +84,7 @@ def getWSprefix(wsname):
     if "facility" in ws_run:
         facility = ws_run.getLogData("facility").value
 
-    (instrument, run_number) = getInstrRun(wsname)
+    instrument, run_number = get_instrument_and_run(wsname)
     if facility == "ILL":
         run_name = instrument + "_" + run_number
     else:
@@ -105,7 +105,7 @@ def getWSprefix(wsname):
     return prefix
 
 
-def getEfixed(workspace):
+def get_efixed(workspace):
     if isinstance(workspace, str):
         inst = s_api.mtd[workspace].getInstrument()
     else:
@@ -121,16 +121,16 @@ def getEfixed(workspace):
         if analyser_comp is not None and analyser_comp.hasParameter("Efixed"):
             return analyser_comp.getNumberParameter("EFixed")[0]
 
-    if efixed_log := try_get_sample_log(workspace, "EFixed"):
+    if efixed_log := _try_get_sample_log(workspace, "EFixed"):
         return float(efixed_log)
     # For Direct data, we can use "Ei" in the sample logs as EFixed
-    if ei_log := try_get_sample_log(workspace, "Ei"):
+    if ei_log := _try_get_sample_log(workspace, "Ei"):
         return float(ei_log)
 
     raise ValueError("No Efixed parameter found")
 
 
-def GetWSangles(inWS):
+def get_two_theta_angles(inWS):
     if isinstance(inWS, str):
         ws = s_api.mtd[inWS]
     else:
@@ -147,7 +147,7 @@ def GetWSangles(inWS):
     return angles
 
 
-def GetThetaQ(ws_in):
+def get_theta_q(ws_in):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
@@ -158,7 +158,7 @@ def GetThetaQ(ws_in):
         ws = s_api.mtd[ws_in]
     else:
         ws = ws_in
-    e_fixed = getEfixed(ws)
+    e_fixed = get_efixed(ws)
     wavelas = math.sqrt(81.787 / e_fixed)  # Elastic wavelength
     k0 = 4.0 * math.pi / wavelas
 
@@ -166,7 +166,7 @@ def GetThetaQ(ws_in):
 
     # If axis is in spec number need to retrieve angles and calculate Q
     if axis.isSpectra():
-        theta = np.array(GetWSangles(ws))
+        theta = np.array(get_two_theta_angles(ws))
         q = k0 * np.sin(0.5 * np.radians(theta))
 
     # If axis is in Q need to calculate back to angles and just return axis values
@@ -186,7 +186,7 @@ def GetThetaQ(ws_in):
     return theta, q
 
 
-def ExtractFloat(data_string):
+def extract_float(data_string):
     """
     Extract float values from an ASCII string
     """
@@ -195,7 +195,7 @@ def ExtractFloat(data_string):
     return values
 
 
-def ExtractInt(data_string):
+def extract_int(data_string):
     """
     Extract int values from an ASCII string
     """
@@ -204,7 +204,7 @@ def ExtractInt(data_string):
     return values
 
 
-def PadArray(inarray, nfixed):
+def pad_array(inarray, nfixed):
     """
     Pad a list to specified size.
     """
@@ -216,7 +216,7 @@ def PadArray(inarray, nfixed):
     return outarray
 
 
-def check_analysers_are_equal(in1WS, in2WS):
+def _check_analysers_are_equal(in1WS, in2WS):
     """
     Check workspaces have identical analysers and reflections
 
@@ -254,39 +254,39 @@ def check_analysers_are_equal(in1WS, in2WS):
         logger.information("Analyser is %s, reflection %s" % (analyser_1, reflection_1))
 
 
-def get_sample_log(workspace, log_name):
+def _get_sample_log(workspace, log_name):
     table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False, StoreInADS=False)
     log_value = table.cell(0, 0) if table else None
     return log_value
 
 
-def try_get_sample_log(workspace, log_name):
+def _try_get_sample_log(workspace, log_name):
     messages = s_api.CheckForSampleLogs(workspace, log_name, EnableLogging=False)
-    return get_sample_log(workspace, log_name) if not messages else None
+    return _get_sample_log(workspace, log_name) if not messages else None
 
 
-def check_e_fixed_are_equal(workspace1, workspace2):
-    if getEfixed(workspace1) != getEfixed(workspace2):
+def _check_e_fixed_are_equal(workspace1, workspace2):
+    if get_efixed(workspace1) != get_efixed(workspace2):
         raise ValueError("Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.")
 
 
-def is_technique_direct(workspace):
-    return try_get_sample_log(workspace, "deltaE-mode") == "Direct"
+def _is_technique_direct(workspace):
+    return _try_get_sample_log(workspace, "deltaE-mode") == "Direct"
 
 
-def CheckAnalysersOrEFixed(workspace1, workspace2):
+def check_analysers_or_e_fixed(workspace1, workspace2):
     """
     Check that the workspaces have EFixed if the technique is direct, otherwise check that the analysers and
     reflections are identical
     """
-    if is_technique_direct(workspace1) or is_technique_direct(workspace2):
+    if _is_technique_direct(workspace1) or _is_technique_direct(workspace2):
         logger.warning("Could not find an analyser for the input workspaces because the energy mode is Direct")
-        check_e_fixed_are_equal(workspace1, workspace2)
+        _check_e_fixed_are_equal(workspace1, workspace2)
     else:
-        check_analysers_are_equal(workspace1, workspace2)
+        _check_analysers_are_equal(workspace1, workspace2)
 
 
-def CheckHistZero(inWS):
+def check_hist_zero(inWS):
     """
     Retrieves basic info on a workspace
 
@@ -315,9 +315,9 @@ def CheckHistZero(inWS):
     return num_hist, ntc
 
 
-def CheckHistSame(in1WS, name1, in2WS, name2):
+def check_dimensions_equal(in1WS, name1, in2WS, name2):
     """
-    Check workspaces have same number of histograms and bin boundaries
+    Check workspaces have the same number of histograms and bin boundaries
 
     Args:
       @param in1WS - first 2D workspace
@@ -350,7 +350,7 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
         raise ValueError(error)
 
 
-def CheckXrange(x_range, range_type):
+def check_x_range(x_range, range_type):
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
         raise ValueError(range_type + " - Range must contain either 2 or 4 numbers")
 
@@ -363,7 +363,7 @@ def CheckXrange(x_range, range_type):
             raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
 
 
-def convertToElasticQ(input_ws, output_ws=None):
+def convert_to_elastic_q(input_ws, output_ws=None):
     """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
 
@@ -376,7 +376,7 @@ def convertToElasticQ(input_ws, output_ws=None):
 
     axis = s_api.mtd[input_ws].getAxis(1)
     if axis.isSpectra():
-        e_fixed = getEfixed(input_ws)
+        e_fixed = get_efixed(input_ws)
         s_api.ConvertSpectrumAxis(input_ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
@@ -390,7 +390,7 @@ def convertToElasticQ(input_ws, output_ws=None):
         raise RuntimeError("Input workspace must have either spectra or numeric axis.")
 
 
-def transposeFitParametersTable(params_table, output_table=None):
+def transpose_fit_parameters_table(params_table, output_table=None):
     """
     Transpose the parameter table created from a multi domain Fit.
 
@@ -439,6 +439,15 @@ def transposeFitParametersTable(params_table, output_table=None):
     s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
+def _first_non_zero(data):
+    """
+    Returns the index of the first non zero value in the list
+    """
+    for i in range(len(data)):
+        if data[i] != 0:
+            return i
+
+
 def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int) -> Tuple[float]:
     """
     Identifies the bin range within which there is no trailing or leading zero values for a given workspace index.
@@ -449,23 +458,14 @@ def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int
     """
     # Identify bin index of first and last non-zero y value
     y_data = workspace.readY(workspace_index)
-    start_data_idx = firstNonZero(y_data)
-    end_data_idx = firstNonZero(list(reversed(y_data)))
+    start_data_idx = _first_non_zero(y_data)
+    end_data_idx = _first_non_zero(list(reversed(y_data)))
     # Assumes common bin boundaries for each spectra
     x_data = workspace.readX(0)
     return x_data[start_data_idx], x_data[len(x_data) - end_data_idx - 1]
 
 
-def firstNonZero(data):
-    """
-    Returns the index of the first non zero value in the list
-    """
-    for i in range(len(data)):
-        if data[i] != 0:
-            return i
-
-
-def formatRuns(runs, instrument_name):
+def format_runs(runs, instrument_name):
     """
     :return: A list of runs prefixed with the given instrument name
     """
