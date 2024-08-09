@@ -40,8 +40,8 @@ Output:
    Length of y array: 1
    Length of e array: 1
    Length of x array: 1
-   y value: [ 5.]
-   e value: [ 0.]
+   y value: [5.]
+   e value: [0.]
 
 **Workspace with single y and e value:**
 
@@ -65,8 +65,8 @@ Output:
    Length of y array: 1
    Length of e array: 1
    Length of x array: 1
-   y value: [ 5.]
-   e value: [ 0.1]
+   y value: [5.]
+   e value: [0.1]
 
 .. categories::
 

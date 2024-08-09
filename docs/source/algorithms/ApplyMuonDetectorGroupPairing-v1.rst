@@ -108,13 +108,13 @@ Usage
     output = mtd['MUSR00015193; Pair; pairTest; Asym; #1_Raw']
 
 
-    print(output.readY(0).mean())
+    print('{:.8f}'.format(output.readY(0).mean()))
 
 Output:
 
 .. testoutput:: ExMUSRPairAsymmetry
 
-   -0.0141980129084
+   -0.01419801
 
 .. categories::
 

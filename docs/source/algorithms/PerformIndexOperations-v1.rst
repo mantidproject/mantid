@@ -48,9 +48,9 @@ Output:
 
 .. testoutput:: ExPerformIndexOperationsSimple
 
-   [ 32.  34.]
-   [ 41.  42.]
-   [ 51.  52.]
+   [32. 34.]
+   [41. 42.]
+   [51. 52.]
 
 .. categories::
 

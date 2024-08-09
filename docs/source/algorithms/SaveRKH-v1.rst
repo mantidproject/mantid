@@ -53,7 +53,7 @@ Output:
 
 .. testoutput:: ExSimpleSavingRoundtrip
 
-   Contents of the file  = [ 8.  4.  9.  7.]
+   Contents of the file  = [8. 4. 9. 7.]
 
 .. categories::
 

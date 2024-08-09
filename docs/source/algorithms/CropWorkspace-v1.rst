@@ -47,8 +47,8 @@ Output:
 
 .. testoutput:: ExCropWorkspace
 
-   TOF Before CropWorkspace [  0.  10.  20.  30.  40.  50.]
-   TOF After CropWorkspace [ 10.  20.  30.  40.]
+   TOF Before CropWorkspace [ 0. 10. 20. 30. 40. 50.]
+   TOF After CropWorkspace [10. 20. 30. 40.]
 
 .. categories::
 

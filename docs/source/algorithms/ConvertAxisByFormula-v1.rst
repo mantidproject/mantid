@@ -96,7 +96,7 @@ Output:
 
 .. testoutput:: ExSquareXAxis
 
-   New X values: [  1.   4.   9.  16.  25.]
+   New X values: [ 1.  4.  9. 16. 25.]
    New X units: x^2
    New X title: Squared X
 
@@ -134,7 +134,7 @@ Output:
 
 .. testoutput:: ExDoubleYAxis
 
-   New Y values: [  2.   4.   6.   8.  10.]
+   New Y values: [ 2.  4.  6.  8. 10.]
    New Y units: y*2
    New Y title: Doubled Y
 

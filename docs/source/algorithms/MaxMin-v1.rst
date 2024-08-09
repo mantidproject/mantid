@@ -39,15 +39,15 @@ Output:
 .. testoutput:: ExMaxMinForMax
 
    Maximum of each spectrum
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
-   [ 10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
+   [10.3]
 
 
 **Example - Get minimum values for 9 spectra**
@@ -69,15 +69,15 @@ Output:
 .. testoutput:: ExMaxMinForMin
 
    Minimum of each spectrum
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
-   [ 0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
+   [0.3]
 
 .. categories::
 

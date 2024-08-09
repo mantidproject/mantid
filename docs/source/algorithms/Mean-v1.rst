@@ -48,8 +48,8 @@ Output:
 
 .. testoutput::
 
-   Mean of y values in first spectrum: [ 2.  3.  4.  5.]
-   Mean of y values in second spectrum: [ 6.  7.  8.  9.]
+   Mean of y values in first spectrum: [2. 3. 4. 5.]
+   Mean of y values in second spectrum: [6. 7. 8. 9.]
 
 .. categories::
 

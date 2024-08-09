@@ -111,10 +111,10 @@ Output:
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     Y values without normalization:
-    [[ ... ...]
-     [  ... ...]]
+    [[... ...]
+     [ ... ...]]
     Y values with normalization by bin area:
-    [[ ... ...]
+    [[... ...]
      [ ... ...]]
 
 

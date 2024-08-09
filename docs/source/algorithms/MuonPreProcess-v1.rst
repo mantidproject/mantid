@@ -72,8 +72,8 @@ Output:
 
     Input workspace is a Workspace2D
     Output workspace is a WorkspaceGroup
-    X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [ 10.  20.  30.  20.  10.]
+    X values are : [0. 1. 2. 3. 4. 5.]
+    Y values are : [10. 20. 30. 20. 10.]
 
 **Example - Applying only a time offset**
 
@@ -94,8 +94,8 @@ Output:
 
 .. testoutput:: ExampleTimeOffset
 
-    X values are : [ 0.5  1.5  2.5  3.5  4.5  5.5]
-    Y values are : [ 10.  20.  30.  20.  10.]
+    X values are : [0.5 1.5 2.5 3.5 4.5 5.5]
+    Y values are : [10. 20. 30. 20. 10.]
 
 **Example - Applying only a rebin**
 
@@ -116,8 +116,8 @@ Output:
 
 .. testoutput:: ExampleRebin
 
-    X values are : [ 0.  2.  4.  5.]
-    Y values are : [ 30.  50.  10.]
+    X values are : [0. 2. 4. 5.]
+    Y values are : [30. 50. 10.]
 
 **Example - Applying only a crop**
 
@@ -139,8 +139,8 @@ Output:
 
 .. testoutput:: ExampleCrop
 
-    X values are : [ 2.  3.  4.]
-    Y values are : [ 30.  20.]
+    X values are : [2. 3. 4.]
+    Y values are : [30. 20.]
 
 **Example - Applying only a dead time correction**
 
@@ -167,8 +167,8 @@ Output:
 
 .. testoutput:: ExampleDeadTime
 
-    X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [ 100.3  201.2  302.8  201.2  100.3]
+    X values are : [0. 1. 2. 3. 4. 5.]
+    Y values are : [100.3 201.2 302.8 201.2 100.3]
 
 **Example - Applying only a time zero correction**
 

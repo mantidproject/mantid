@@ -45,7 +45,7 @@ Output:
 .. testoutput:: CorelliCrossCorrelateExample
 
     The detector 172305 has 3 events.
-    The event weights before cross-correlation are [ 1.  1.  1.]
+    The event weights before cross-correlation are [1. 1. 1.]
     The event weights after  cross-correlation are [-0.99391854  1.          1.        ]
 
 .. categories::

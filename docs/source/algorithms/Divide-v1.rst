@@ -47,10 +47,10 @@ Output:
 
 .. testoutput:: ExDivideAsAlg
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [ 0.   0.5  1.   1.5  2.   2.5  3.   3.5  4. ]
-    The updated Error values are: [ 0.          0.90138782  1.80277564  2.70416346  3.60555128  4.50693909
-      5.40832691  6.30971473  7.21110255]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [0.  0.5 1.  1.5 2.  2.5 3.  3.5 4. ]
+    The updated Error values are: [0.         0.90138782 1.80277564 2.70416346 3.60555128 4.50693909
+     5.40832691 6.30971473 7.21110255]
 
 **Example - Divide as an operator**
 
@@ -77,10 +77,10 @@ Output:
 
 .. testoutput:: ExDivideAsOpperand
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [ 0.   0.5  1.   1.5  2.   2.5  3.   3.5  4. ]
-    The updated Error values are: [ 0.          0.90138782  1.80277564  2.70416346  3.60555128  4.50693909
-      5.40832691  6.30971473  7.21110255]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [0.  0.5 1.  1.5 2.  2.5 3.  3.5 4. ]
+    The updated Error values are: [0.         0.90138782 1.80277564 2.70416346 3.60555128 4.50693909
+     5.40832691 6.30971473 7.21110255]
 
 **Example - Divide using in-place operator**
 
@@ -107,10 +107,10 @@ Output:
 
 .. testoutput:: ExDivideInPlace
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [ 0.   0.5  1.   1.5  2.   2.5  3.   3.5  4. ]
-    The updated Error values are: [ 0.          0.90138782  1.80277564  2.70416346  3.60555128  4.50693909
-      5.40832691  6.30971473  7.21110255]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [0.  0.5 1.  1.5 2.  2.5 3.  3.5 4. ]
+    The updated Error values are: [0.         0.90138782 1.80277564 2.70416346 3.60555128 4.50693909
+     5.40832691 6.30971473 7.21110255]
 
 **Example - Divide by a scalar**
 
@@ -133,9 +133,9 @@ Output:
 
 .. testoutput:: ExDivideWithSingleVal
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [ 0.   0.4  0.8  1.2  1.6  2.   2.4  2.8  3.2]
-    The updated Error values are: [ 0.   0.4  0.8  1.2  1.6  2.   2.4  2.8  3.2]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [0.  0.4 0.8 1.2 1.6 2.  2.4 2.8 3.2]
+    The updated Error values are: [0.  0.4 0.8 1.2 1.6 2.  2.4 2.8 3.2]
 
 .. categories::
 

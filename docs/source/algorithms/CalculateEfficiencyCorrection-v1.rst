@@ -85,10 +85,10 @@ Ouptut:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithAlpha
 
-    Input workspace: [ 40.  40.  40.  40.  40.]
-    Correction workspace: [ 10.26463773   9.81128219   9.39826191   9.02042771   8.67347109]
-    Output workspace: [ 410.58550929  392.45128759  375.93047648  360.81710849  346.93884349]
-    Output workspace using WavelengthRange: [ 410.58550929  392.45128759  375.93047648  360.81710849  346.93884349]
+    Input workspace: [40. 40. 40. 40. 40.]
+    Correction workspace: [10.26463773  9.81128219  9.39826191  9.02042771  8.67347109]
+    Output workspace: [410.58550929 392.45128759 375.93047648 360.81710849 346.93884349]
+    Output workspace using WavelengthRange: [410.58550929 392.45128759 375.93047648 360.81710849 346.93884349]
 
 **Example - Basics of running CalculateEfficiencyCorrection with Density and ChemicalFormula.**
 
@@ -122,10 +122,10 @@ Ouptut:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithDensity
 
-    Input workspace: [ 40.  40.  40.  40.  40.]
-    Correction workspace: [ 24.40910309  23.29738394  22.28449939  21.35783225  20.50682528]
-    Output workspace: [ 976.3641235   931.8953577   891.37997557  854.31328983  820.2730111 ]
-    Output workspace using WavelengthRange: [ 976.3641235   931.8953577   891.37997557  854.31328983  820.2730111 ]
+    Input workspace: [40. 40. 40. 40. 40.]
+    Correction workspace: [24.40910309 23.29738394 22.28449939 21.35783225 20.50682528]
+    Output workspace: [976.3641235  931.8953577  891.37997557 854.31328983 820.2730111 ]
+    Output workspace using WavelengthRange: [976.3641235  931.8953577  891.37997557 854.31328983 820.2730111 ]
 
 **Example - Basics of running CalculateEfficiencyCorrection with MeasuredEfficiency and ChemicalFormula.**
 
@@ -161,12 +161,12 @@ Ouptut:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
 
-    Input workspace: [ 40.  40.  40.  40.  40.]
-    Correction workspace: [ 873.27762699  832.68332786  795.69741128  761.85923269  730.78335476]
-    Output workspace: [ 34931.10507965  33307.33311431  31827.89645133  30474.36930745
-      29231.33419051]
-    Output workspace using WavelengthRange: [ 34931.10507965  33307.33311431  31827.89645133  30474.36930745
-      29231.33419051]
+    Input workspace: [40. 40. 40. 40. 40.]
+    Correction workspace: [873.27762699 832.68332786 795.69741128 761.85923269 730.78335476]
+    Output workspace: [34931.10507965 33307.33311431 31827.89645133 30474.36930745
+     29231.33419051]
+    Output workspace using WavelengthRange: [34931.10507965 33307.33311431 31827.89645133 30474.36930745
+     29231.33419051]
 
 **Example - Basics of running CalculateEfficiencyCorrection with MeasuredEfficiency and ChemicalFormula using the total cross section.**
 
@@ -204,12 +204,12 @@ Ouptut:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
 
-    Input workspace: [ 40.  40.  40.  40.  40.]
-    Correction workspace: [ 865.7208838   825.85320701  789.49774383  756.20995361  725.61727932]
-    Output workspace: [ 34628.83535201  33034.12828025  31579.90975329  30248.39814428
-      29024.69117275]
-    Output workspace using WavelengthRange: [ 34628.83535201  33034.12828025  31579.90975329  30248.39814428
-      29024.69117275]
+    Input workspace: [40. 40. 40. 40. 40.]
+    Correction workspace: [865.7208838  825.85320701 789.49774383 756.20995361 725.61727932]
+    Output workspace: [34628.83535201 33034.12828025 31579.90975329 30248.39814428
+     29024.69117275]
+    Output workspace using WavelengthRange: [34628.83535201 33034.12828025 31579.90975329 30248.39814428
+     29024.69117275]
 
 The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lambda)}` where :math:`\sigma_t (\lambda) = \sigma_s + \sigma_a (\lambda)` is the total cross-section. This can be calculatd directly by the :ref:`algm-CalculateSampleTransmission-v1` algorithm. Yet, we can also back out the transmission with the ``CalculateEfficiencyCorrection`` algorithm. The example below shows how:
 
@@ -238,8 +238,8 @@ Output:
 
 .. testoutput:: ExTransmissionCalcualteEfficiencyCorrection
 
-    Transmission: [ 0.94506317  0.94505148  0.94503979] ...
-    Transmission using efficiency correction: [ 0.9450632   0.94505151  0.94503982] ...
+    Transmission: [0.94506317 0.94505148 0.94503979] ...
+    Transmission using efficiency correction: [0.9450632  0.94505151 0.94503982] ...
 
 The discrepancies are due to the differenc in :math:`\lambda_{ref}` = 1.7982 :math:`\AA` in ``CalculateEfficiencyCorrection``, consistent with `ReferenceLambda <https://github.com/mantidproject/mantid/blob/32ed0b2cbbe4fbfb230570d5a53032f6101743de/Framework/Kernel/src/NeutronAtom.cpp#L23>`_ where :ref:`algm-CalculateSampleTransmission-v1`  uses :math:`\lambda_{ref}` = 1.798 :math:`\AA`.
 
@@ -325,9 +325,9 @@ Output:
 
 .. testoutput:: ExIncidentSpectrum
 
-   Measured incident spectrum: [ 694.61415533  685.71520053  677.21326605  669.0696332   661.25022644]
-   Corrected incident spectrum: [ 5244.9385468   4953.63834159  4690.60136547  4451.98728342  4234.6092648 ]
-   Re-corrected incident spectrum: [ 5244.9385468   4953.63834159  4690.60136547  4451.98728342  4234.6092648 ]
+   Measured incident spectrum: [694.61415533 685.71520053 677.21326605 669.0696332  661.25022644]
+   Corrected incident spectrum: [5244.9385468  4953.63834159 4690.60136547 4451.98728342 4234.6092648 ]
+   Re-corrected incident spectrum: [5244.9385468  4953.63834159 4690.60136547 4451.98728342 4234.6092648 ]
 
 References
 ------------

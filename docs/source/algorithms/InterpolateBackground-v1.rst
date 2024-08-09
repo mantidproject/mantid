@@ -59,7 +59,7 @@ Output:
 
 .. testoutput::
 
-   Interpolated Y values are: [ 3.  3.  3.  3.  3.  3.  3.  3.  3.  3.]
+   Interpolated Y values are: [3. 3. 3. 3. 3. 3. 3. 3. 3. 3.]
 
 
 .. categories::

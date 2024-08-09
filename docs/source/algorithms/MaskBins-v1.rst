@@ -46,8 +46,8 @@ Output:
 
 .. testoutput:: exMaskBinsSimple
 
-   Before masking: [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
-   After masking: [  0.3   0.    0.    0.    0.3  10.3   0.3   0.3   0.3   0.3]
+   Before masking: [ 0.3  0.3  0.3  0.3  0.3 10.3  0.3  0.3  0.3  0.3]
+   After masking: [ 0.3  0.   0.   0.   0.3 10.3  0.3  0.3  0.3  0.3]
 
 
 Related Algorithms

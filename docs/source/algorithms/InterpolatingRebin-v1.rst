@@ -67,8 +67,8 @@ Output:
 
 .. testoutput::
 
-   First 5 rebinned X values are: [ 0.   0.5  1.   1.5  2. ]
-   First 5 rebinned Y values are: [ 0.5  0.5  0.5  0.5  0.5]
+   First 5 rebinned X values are: [0.  0.5 1.  1.5 2. ]
+   First 5 rebinned Y values are: [0.5 0.5 0.5 0.5 0.5]
 
 
 For further examples with more complex parameter strings see :ref:`Rebin examples <rebin-usage>`.

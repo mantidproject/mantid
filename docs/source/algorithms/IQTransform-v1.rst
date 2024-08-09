@@ -72,8 +72,8 @@ Output:
 
 .. testoutput:: ExZimm
 
-   Output Y: [ 1.          0.5         0.33333333]
-   Output X: [ 1.  4.  9.]
+   Output Y: [1.         0.5        0.33333333]
+   Output X: [1. 4. 9.]
 
 **Example - Zimm transformation and background:**
 
@@ -94,8 +94,8 @@ Output:
 
 .. testoutput:: ExZimmBg
 
-   Output Y: [ 2.          0.66666667  0.4       ]
-   Output X: [ 1.  4.  9.]
+   Output Y: [2.         0.66666667 0.4       ]
+   Output X: [1. 4. 9.]
 
 **Example - General transformation:**
 
@@ -119,8 +119,8 @@ Output:
 
 .. testoutput:: ExGeneral
 
-   Output Y: [  1.  16.  81.]
-   Output X: [  1.   8.  27.]
+   Output Y: [ 1. 16. 81.]
+   Output X: [ 1.  8. 27.]
 
 .. categories::
 
