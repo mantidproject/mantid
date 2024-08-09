@@ -181,6 +181,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
       ws = MDWS->getExperimentInfo(i);
       ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(*latt));
     }
+    ws = MDWS->getExperimentInfo(0);
   }
   // Save it into the main workspace
   ws->mutableSample().setOrientedLattice(std::move(latt));
