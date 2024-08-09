@@ -97,21 +97,18 @@ void translateCancel(const Algorithm::CancelException &exc) {
  * @param exc - The caught H5::Exception. Its error stack is reported
  */
 void translateH5Exception(const H5::Exception &exc) {
-  char *buffer;
-  size_t size_buffer;
+  auto handleFrame = [](unsigned int n, const H5E_error_t *err, void *ss_) -> herr_t {
+    std::stringstream &strstream = *((std::stringstream *)ss_);
 
-  FILE *stream = open_memstream(&buffer, &size_buffer);
+    strstream << "  #" << n << ": " << err->desc << "\n";
 
-  exc.printErrorStack(stream);
+    return (herr_t)0;
+  };
 
-  std::fflush(stream);
-  std::fclose(stream);
+  std::stringstream ss;
+  exc.walkErrorStack(H5E_WALK_DOWNWARD, handleFrame, /*client_data*/ &ss);
 
-  std::string errorStack(buffer, size_buffer);
-
-  free(buffer);
-
-  PyErr_SetString(PyExc_RuntimeError, errorStack.c_str());
+  PyErr_SetString(PyExc_RuntimeError, ss.str().c_str());
 }
 
 template <typename T> boost::optional<T> extractArg(ssize_t index, const tuple &args) {
