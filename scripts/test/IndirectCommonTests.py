@@ -4,28 +4,30 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test suite for the utility functions in the IndirectCommon script file
-
-These scripts are used by the ISIS Indirect geometry interfaces such as Indirect Convert to Energy,
-Data Analysis, and Bayes.
-"""
 import unittest
 import numpy as np
+from os.path import join
 
+from mantid import config
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddSampleLog,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    ConvertSpectrumAxis,
+    CropWorkspace,
+    Fit,
+    LoadInstrument,
+    LoadParameterFile,
+    RenameWorkspace,
+)
 import IndirectCommon as indirect_common
 
 
 class IndirectCommonTests(unittest.TestCase):
-    _default_config = {}
 
     def setUp(self):
-        self._config_defaults = config
         config["default.facility"] = "ISIS"
-
-    def tearDown(self):
-        mantid.kernel.config = self._config_defaults
 
     def test_get_instrument_and_run_from_name(self):
         ws = self.make_dummy_QENS_workspace()
@@ -222,7 +224,7 @@ class IndirectCommonTests(unittest.TestCase):
         e_fixed = indirect_common.get_efixed(ws)
         ConvertSpectrumAxis(ws, Target="ElasticQ", EMode="Indirect", EFixed=e_fixed, OutputWorkspace=ws)
         # set the units to be something we didn't expect
-        unit = mtd[ws].getAxis(1).setUnit("Label")
+        unit = AnalysisDataService.retrieve(ws).getAxis(1).setUnit("Label")
         unit.setLabel("Random Units", "")
 
         self.assertRaises(RuntimeError, indirect_common.convert_to_elastic_q, ws)
@@ -284,21 +286,21 @@ class IndirectCommonTests(unittest.TestCase):
             self.fail("%s should not of raised anything but it did." % func.__name__)
 
     def assert_workspace_units_match_expected(self, expected_unit_ID, ws, axis_number=1):
-        axis = mtd[ws].getAxis(axis_number)
+        axis = AnalysisDataService.retrieve(ws).getAxis(axis_number)
         actual_unit_ID = axis.getUnit().unitID()
         self.assertEqual(expected_unit_ID, actual_unit_ID)
 
     def assert_has_spectrum_axis(self, ws, axis_number=1):
-        axis = mtd[ws].getAxis(axis_number)
+        axis = AnalysisDataService.retrieve(ws).getAxis(axis_number)
         self.assertTrue(axis.isSpectra())
 
     def assert_has_numeric_axis(self, ws, axis_number=1):
-        axis = mtd[ws].getAxis(axis_number)
+        axis = AnalysisDataService.retrieve(ws).getAxis(axis_number)
         self.assertTrue(axis.isNumeric())
 
     def assert_table_workspace_dimensions(self, workspace, expected_column_count, expected_row_count):
-        actual_row_count = mtd[workspace].rowCount()
-        actual_column_count = mtd[workspace].columnCount()
+        actual_row_count = AnalysisDataService.retrieve(workspace).rowCount()
+        actual_column_count = AnalysisDataService.retrieve(workspace).columnCount()
         self.assertEqual(
             expected_row_count,
             actual_row_count,
@@ -311,8 +313,8 @@ class IndirectCommonTests(unittest.TestCase):
         )
 
     def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
-        actual_blocksize = mtd[workspace].blocksize()
-        actual_num_histograms = mtd[workspace].getNumberHistograms()
+        actual_blocksize = AnalysisDataService.retrieve(workspace).blocksize()
+        actual_num_histograms = AnalysisDataService.retrieve(workspace).getNumberHistograms()
         self.assertEqual(
             actual_num_histograms,
             expected_num_histograms,
@@ -325,7 +327,7 @@ class IndirectCommonTests(unittest.TestCase):
         )
 
     def assert_logs_match_expected(self, workspace, expected_logs):
-        run = mtd[workspace].getRun()
+        run = AnalysisDataService.retrieve(workspace).getRun()
         for log_name, log_value in expected_logs.items():
             self.assertTrue(run.hasProperty(log_name), "The log %s is missing from the workspace" % log_name)
             self.assertEqual(
@@ -362,7 +364,7 @@ class IndirectCommonTests(unittest.TestCase):
         component = "(composite=CompositeFunction,$domains=i;%s);" % function
 
         fit_kwargs = {}
-        num_spectra = mtd[ws].getNumberHistograms()
+        num_spectra = AnalysisDataService.retrieve(ws).getNumberHistograms()
         for i in range(0, num_spectra):
             multi_domain_composite += component
             if i > 0:
@@ -394,7 +396,7 @@ class IndirectCommonTests(unittest.TestCase):
 
         if config["default.facility"] != "ILL":
             parameter_file_name = "%s_%s_%s_Parameters.xml" % (instrument, analyser, reflection)
-            ipf = os.path.join(config["instrumentDefinition.directory"], parameter_file_name)
+            ipf = join(config["instrumentDefinition.directory"], parameter_file_name)
             LoadParameterFile(ws, Filename=ipf)
 
         return ws
