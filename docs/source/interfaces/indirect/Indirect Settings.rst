@@ -60,7 +60,7 @@ Load Workspace History
   workspace loading speeds.
   For many Indirect/Inelastic interfaces, workspaces to be processed by the interface are preloaded into the ADS.
   The history of a workspace is loaded by default when a workspace is loaded into the ADS from the interface.
-  In some cases, knowledge of the history may not be necessary for latter analysis.
+  In some cases, knowledge of the history may not be necessary for later analysis.
 
 
 Advanced
