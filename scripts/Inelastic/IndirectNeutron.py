@@ -17,7 +17,7 @@ import sys
 import math
 import os.path
 import numpy as np
-from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
+from IndirectCommon import extract_float, extract_int, get_efixed
 
 
 #  Routines for Ascii file of raw data
@@ -26,7 +26,7 @@ from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfix
 def Iblock(a, first):  # read Ascii block of Integers
     line1 = a[first]
     line2 = a[first + 1]
-    val = ExtractInt(line2)
+    val = extract_int(line2)
     numb = val[0]
     lines = numb // 10
     last = numb - 10 * lines
@@ -39,11 +39,11 @@ def Iblock(a, first):  # read Ascii block of Integers
     ival = []
     for m in range(0, lines):
         mm = first + 2 + m
-        val = ExtractInt(a[mm])
+        val = extract_int(a[mm])
         for n in range(0, 10):
             ival.append(val[n])
     mm += 1
-    val = ExtractInt(a[mm])
+    val = extract_int(a[mm])
     for n in range(0, last):
         ival.append(val[n])
     mm += 1
@@ -53,7 +53,7 @@ def Iblock(a, first):  # read Ascii block of Integers
 def Fblock(a, first):  # read Ascii block of Floats
     line1 = a[first]
     line2 = a[first + 1]
-    val = ExtractInt(line2)
+    val = extract_int(line2)
     numb = val[0]
     lines = numb // 5
     last = numb - 5 * lines
@@ -66,11 +66,11 @@ def Fblock(a, first):  # read Ascii block of Floats
     fval = []
     for m in range(0, lines):
         mm = first + 2 + m
-        val = ExtractFloat(a[mm])
+        val = extract_float(a[mm])
         for n in range(0, 5):
             fval.append(val[n])
     mm += 1
-    val = ExtractFloat(a[mm])
+    val = extract_float(a[mm])
     for n in range(0, last):
         fval.append(val[n])
     mm += 1
@@ -143,7 +143,6 @@ def loadFile(path):
 
 
 def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # Ascii start routine
-    StartTime("Iback")
     workdir = config["defaultsave.directory"]
 
     path, fname = getFilePath(run, ".asc", instr)
@@ -178,10 +177,10 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     for m in range(0, nsp):
         theta.append(Fval[m])
     # raw spectra
-    val = ExtractInt(asc[next + 3])
+    val = extract_int(asc[next + 3])
     npt = val[0]
     lgrp = 5 + npt // 10
-    val = ExtractInt(asc[next + 1])
+    val = extract_int(asc[next + 1])
     if instr == "IN10":
         nsp = int(val[2])
     logger.information("Number of spectra : " + str(nsp))
@@ -262,7 +261,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         logger.information("Output file : " + opath)
     if Plot:
         plotForce(outWS, Plot)
-    EndTime("Iback")
 
 
 # Routines for Inx ascii file
@@ -274,10 +272,10 @@ def ReadInxGroup(asc, n, lgrp):  # read ascii x,y,e
     e = []
     first = n * lgrp
     last = (n + 1) * lgrp
-    val = ExtractFloat(asc[first + 2])
+    val = extract_float(asc[first + 2])
     Q = val[0]
     for m in range(first + 4, last):
-        val = ExtractFloat(asc[m])
+        val = extract_float(asc[m])
         x.append(val[0] / 1000.0)
         y.append(val[1])
         e.append(val[2])
@@ -286,7 +284,6 @@ def ReadInxGroup(asc, n, lgrp):  # read ascii x,y,e
 
 
 def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
-    StartTime("Inx")
     workdir = config["defaultsave.directory"]
 
     path, fname = getFilePath(run, ".inx", instr)
@@ -296,7 +293,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
     asc = loadFile(path)
     lasc = len(asc)
 
-    val = ExtractInt(asc[0])
+    val = extract_int(asc[0])
     lgrp = int(val[0])
     ngrp = int(val[2])
     title = asc[1]
@@ -355,7 +352,6 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         logger.information("Output file : " + opath)
     if Plot:
         plotForce(outWS, Plot)
-    EndTime("Inx")
 
 
 # General routines
@@ -382,7 +378,7 @@ def ReadMap(path):
 
     lasc = len(asc)
     logger.information("Map file : " + path + " ; spectra = " + str(lasc - 1))
-    val = ExtractInt(asc[0])
+    val = extract_int(asc[0])
     numb = val[0]
     if numb != (lasc - 1):
         error = "Number of lines  not equal to number of spectra"
@@ -390,7 +386,7 @@ def ReadMap(path):
         sys.exit(error)
     map = []
     for n in range(1, lasc):
-        val = ExtractInt(asc[n])
+        val = extract_int(asc[n])
         map.append(val[1])
     return map
 
@@ -454,7 +450,7 @@ def RunParas(ascWS, _instr, run, title):
     AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
     ws.getRun()["run_number"] = run
     ws.getRun()["run_title"] = title
-    efixed = getEfixed(ascWS)
+    efixed = get_efixed(ascWS)
 
     facility = ws.getRun().getLogData("facility").value
     logger.information("Facility is " + facility)
@@ -473,9 +469,7 @@ def RunParas(ascWS, _instr, run, title):
 
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
-    StartTime("IN13")
     IN13Read(instr, run, ana, refl, Plot, Save)
-    EndTime("IN13")
 
 
 def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
@@ -525,7 +519,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     psd = next + (nspec + 2048) * lspec
     l1m1 = psd + 1
     l2m1 = l1m1 + 3
-    mon1 = ExtractFloat(asc[l2m1])
+    mon1 = extract_float(asc[l2m1])
     logger.information("Mon1 : Line " + str(l2m1) + " : " + asc[l2m1])
     # raw spectra
     first = next
@@ -539,7 +533,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
         logger.information("Line " + str(l1) + " : " + asc[l1])
         for l in range(0, ltemp):
             l2 = l1 + 3 + l
-            val = ExtractFloat(asc[l2])
+            val = extract_float(asc[l2])
             nval = len(val)
             for m in range(0, nval):
                 ylist.append(val[m] / mon1[m])

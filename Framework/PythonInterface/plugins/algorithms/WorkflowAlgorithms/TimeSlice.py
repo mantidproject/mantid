@@ -120,11 +120,8 @@ class TimeSlice(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        # from IndirectCommon import CheckXrange
-
         self._setup()
 
-        # CheckXrange(xRange, 'Time')
         out_ws_list = []
         i = 0
         workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files) * 3)
@@ -225,7 +222,7 @@ class TimeSlice(PythonAlgorithm):
 
         @param raw_file Name of file to process
         """
-        from IndirectCommon import CheckHistZero
+        from IndirectCommon import check_hist_zero
 
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
@@ -236,7 +233,7 @@ class TimeSlice(PythonAlgorithm):
             EndWorkspaceIndex=int(self._spectra_range[1]) - 1,
         )
 
-        num_hist = CheckHistZero(raw_file)[0]
+        num_hist = check_hist_zero(raw_file)[0]
 
         # Use calibration file if desired
         if self._calib_ws is not None:

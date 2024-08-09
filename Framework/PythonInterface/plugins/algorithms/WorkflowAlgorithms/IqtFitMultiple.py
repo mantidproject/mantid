@@ -129,7 +129,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue("OutputWorkspaceGroup")
 
     def PyExec(self):
-        from IndirectCommon import convertToElasticQ, transposeFitParametersTable
+        from IndirectCommon import convert_to_elastic_q, transpose_fit_parameters_table
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report("generating output name")
@@ -171,7 +171,7 @@ class IqtFitMultiple(PythonAlgorithm):
         convert_to_hist_alg.execute()
         mtd.addOrReplace(tmp_fit_workspace, convert_to_hist_alg.getProperty("OutputWorkspace").value)
         setup_prog.report("Convert to Elastic Q")
-        convertToElasticQ(tmp_fit_workspace)
+        convert_to_elastic_q(tmp_fit_workspace)
 
         # fit multi-domain function to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
@@ -203,7 +203,7 @@ class IqtFitMultiple(PythonAlgorithm):
             rename_alg.setProperty("OutputWorkspace", self._parameter_name)
             rename_alg.execute()
         conclusion_prog.report("Transposing parameter table")
-        transposeFitParametersTable(self._parameter_name)
+        transpose_fit_parameters_table(self._parameter_name)
 
         # set first column of parameter table to be axis values
         x_axis = mtd[tmp_fit_workspace].getAxis(1)

@@ -130,7 +130,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._background_range_end = self.getProperty("BackgroundRangeEnd").value
 
     def PyExec(self):
-        from IndirectCommon import getInstrRun
+        from IndirectCommon import get_instrument_and_run
 
         # Do setup
         self._setup()
@@ -168,7 +168,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_workspace)
 
             # Get the run number
-            run_no = getInstrRun(input_ws.name())[1]
+            run_no = get_instrument_and_run(input_ws.name())[1]
             run_numbers.append(run_no)
 
             # Get the sample environment unit
@@ -251,9 +251,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         @param workspace The workspace
         @returns sample in given units or None if not found
         """
-        from IndirectCommon import getInstrRun
+        from IndirectCommon import get_instrument_and_run
 
-        instr, run_number = getInstrRun(workspace.name())
+        instr, run_number = get_instrument_and_run(workspace.name())
 
         pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = "0" * (pad_num - len(run_number))

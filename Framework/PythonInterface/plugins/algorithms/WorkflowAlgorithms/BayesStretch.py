@@ -107,7 +107,7 @@ class BayesStretch(PythonAlgorithm):
         from quasielasticbayes import Quest as Que
 
         from IndirectBayes import CalcErange, GetXYE
-        from IndirectCommon import CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero
+        from IndirectCommon import check_x_range, check_analysers_or_e_fixed, get_efixed, get_two_theta_and_q, check_hist_zero
 
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
         logger.warning("This algorithm is deprecated, please use BayesStretch2 instead.")
@@ -122,16 +122,16 @@ class BayesStretch(PythonAlgorithm):
         workdir = self._establish_save_path()
 
         setup_prog.report("Checking X Range")
-        CheckXrange(self._erange, "Energy")
+        check_x_range(self._erange, "Energy")
 
         setup_prog.report("Checking Analysers")
-        CheckAnalysersOrEFixed(self._sam_name, self._res_name)
+        check_analysers_or_e_fixed(self._sam_name, self._res_name)
         setup_prog.report("Obtaining EFixed, theta and Q")
-        efix = getEfixed(self._sam_name)
-        theta, Q = GetThetaQ(self._sam_name)
+        efix = get_efixed(self._sam_name)
+        theta, Q = get_two_theta_and_q(self._sam_name)
 
         setup_prog.report("Checking Histograms")
-        nsam, ntc = CheckHistZero(self._sam_name)
+        nsam, ntc = check_hist_zero(self._sam_name)
 
         # check if we're performing a sequential fit
         if not self._loop:
