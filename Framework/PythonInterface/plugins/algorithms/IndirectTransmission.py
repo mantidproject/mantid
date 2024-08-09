@@ -204,7 +204,7 @@ class IndirectTransmission(PythonAlgorithm):
             GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, SpectraList=spectra_list)
             wsHandle = mtd[workspace]
             det = wsHandle.getDetector(0)
-            efixed = wsHandle.get_efixed(det.getID())
+            efixed = wsHandle.getEFixed(det.getID())
 
         return efixed
 

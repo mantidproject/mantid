@@ -96,11 +96,11 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.get_two_theta_angles(ws)
         self.assert_lists_almost_match(expected_result, actual_result)
 
-    def test_get_theta_q(self):
+    def test_get_two_theta_and_q(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
         expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
-        actual_theta_result, actual_Q_result = indirect_common.get_theta_q(ws)
+        actual_theta_result, actual_Q_result = indirect_common.get_two_theta_and_q(ws)
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 

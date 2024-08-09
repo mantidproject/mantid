@@ -153,7 +153,7 @@ def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
     return angles
 
 
-def get_theta_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.ndarray]:
+def get_two_theta_and_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
@@ -171,8 +171,8 @@ def get_theta_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.
 
     # If axis is in spec number need to retrieve angles and calculate Q
     if axis.isSpectra():
-        theta = np.array(get_two_theta_angles(workspace))
-        q = k0 * np.sin(0.5 * np.radians(theta))
+        two_theta = np.array(get_two_theta_angles(workspace))
+        q = k0 * np.sin(0.5 * np.radians(two_theta))
 
     # If axis is in Q need to calculate back to angles and just return axis values
     elif axis.isNumeric() and axis.getUnit().unitID() == "MomentumTransfer":
@@ -182,13 +182,13 @@ def get_theta_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.
             q_centre = ((q_bin_edge[i] - q_bin_edge[i - 1]) / 2) + q_bin_edge[i - 1]
             q.append(q_centre)
         np_q = np.array(q)
-        theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
+        two_theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
 
     # Out of options here
     else:
         raise RuntimeError(f"Cannot get theta and Q for workspace {str(workspace)}")
 
-    return theta, q
+    return two_theta, q
 
 
 def extract_float(data_string: str) -> List[float]:

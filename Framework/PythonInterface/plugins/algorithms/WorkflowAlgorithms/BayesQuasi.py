@@ -185,7 +185,7 @@ class BayesQuasi(PythonAlgorithm):
         check_analysers_or_e_fixed(self._samWS, self._resWS)
         setup_prog.report("Obtaining EFixed, theta and Q")
         efix = get_efixed(self._samWS)
-        theta, Q = get_theta_q(self._samWS)
+        theta, Q = get_two_theta_and_q(self._samWS)
 
         nsam, ntc = check_hist_zero(self._samWS)
 
