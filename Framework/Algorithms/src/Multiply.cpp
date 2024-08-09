@@ -170,8 +170,8 @@ std::string Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sp
 
     if (m_matchXSize) {
       // Past this point, for a 2D WS operation, we require the X arrays to
-      // match. Note this only checks the first spectrum
-      if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
+      // match. Note this only checks the first spectrum except for ragged workspaces
+      if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, !m_lhsRagged && !m_rhsRagged)) {
         return "X arrays must match when multiplying 2D workspaces.";
       }
     }
