@@ -88,22 +88,6 @@ class IndirectCommonTests(unittest.TestCase):
         e_fixed = indirect_common.getEfixed(ws)
         self.assertEqual(e_fixed, 1.83, "The EFixed value does not match the expected value")
 
-    def test_getDefaultWorkingDirectory(self):
-        path = os.path.join(os.path.expanduser("~"), "")
-        config["defaultsave.directory"] = path
-        workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEqual(path, workdir, "The working directory does not match the expected one")
-
-    def test_getDefaultWorkingDirectory_failure(self):
-        config["defaultsave.directory"] = ""
-        self.assertRaises(IOError, indirect_common.getDefaultWorkingDirectory)
-
-    def test_createQaxis(self):
-        ws = self.make_dummy_QENS_workspace()
-        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
-        actual_result = indirect_common.createQaxis(ws)
-        self.assert_lists_almost_match(expected_result, actual_result)
-
     def test_GetWSangles(self):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
@@ -201,26 +185,6 @@ class IndirectCommonTests(unittest.TestCase):
     def test_CheckXrange_invalid_range(self):
         x_range = [10, 5]
         self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, "A Range")
-
-    def test_CheckElimits(self):
-        energy_range = [-0.5, 0.5]
-        x_range = np.arange(-0.6, 0.61, 0.01)
-        self.assert_does_not_raise(ValueError, indirect_common.CheckElimits, energy_range, x_range)
-
-    def test_CheckElimits_lower_bound(self):
-        energy_range = [-0.5, 0.4]
-        x_range = np.arange(-0.49, 0.5, 0.01)
-        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
-
-    def test_CheckElimits_upper_bound(self):
-        energy_range = [-0.5, 0.5]
-        x_range = np.arange(-0.5, 0.5, 0.01)
-        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
-
-    def test_CheckElimits_invalid_range(self):
-        energy_range = [0.5, -0.5]
-        x_range = np.arange(-0.5, 0.51, 0.01)
-        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
 
     def test_convertToElasticQ(self):
         ws = self.make_dummy_QENS_workspace()

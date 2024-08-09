@@ -10,23 +10,9 @@ from mantid import config, logger
 from mantid.api import MatrixWorkspace
 from typing import Tuple
 
-import os.path
 import math
-import datetime
 import re
 import numpy as np
-
-
-def StartTime(prog):
-    logger.notice("----------")
-    message = "Program " + prog + " started @ " + str(datetime.datetime.now())
-    logger.notice(message)
-
-
-def EndTime(prog):
-    message = "Program " + prog + " ended @ " + str(datetime.datetime.now())
-    logger.notice(message)
-    logger.notice("----------")
 
 
 def get_run_number(ws_name):
@@ -142,57 +128,6 @@ def getEfixed(workspace):
         return float(ei_log)
 
     raise ValueError("No Efixed parameter found")
-
-
-def checkUnitIs(ws, unit_id, axis_index=0):
-    """
-    Check that the workspace has the correct units by comparing
-    against the UnitID.
-    """
-    axis = s_api.mtd[ws].getAxis(axis_index)
-    unit = axis.getUnit()
-    return unit.unitID() == unit_id
-
-
-def getDefaultWorkingDirectory():
-    """
-    Get the default save directory and check it's valid.
-    """
-    workdir = config["defaultsave.directory"]
-
-    if not os.path.isdir(workdir):
-        raise IOError("Default save directory is not a valid path!")
-
-    return workdir
-
-
-def createQaxis(inputWS):
-    result = []
-    workspace = s_api.mtd[inputWS]
-    num_hist = workspace.getNumberHistograms()
-    if workspace.getAxis(1).isSpectra():
-        inst = workspace.getInstrument()
-        sample_pos = inst.getSample().getPos()
-        beam_pos = sample_pos - inst.getSource().getPos()
-        for i in range(0, num_hist):
-            efixed = getEfixed(inputWS)
-            detector = workspace.getDetector(i)
-            theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
-            lamda = math.sqrt(81.787 / efixed)
-            q = 4 * math.pi * math.sin(theta) / lamda
-            result.append(q)
-    else:
-        axis = workspace.getAxis(1)
-        msg = "Creating Axis based on Detector Q value: "
-        if not axis.isNumeric():
-            msg += "Input workspace must have either spectra or numeric axis."
-            raise ValueError(msg)
-        if axis.getUnit().unitID() != "MomentumTransfer":
-            msg += "Input must have axis values of Q"
-            raise ValueError(msg)
-        for i in range(0, num_hist):
-            result.append(float(axis.label(i)))
-    return result
 
 
 def GetWSangles(inWS):
@@ -426,21 +361,6 @@ def CheckXrange(x_range, range_type):
             raise ValueError("%s - input maximum (%f) is zero" % (range_type, upper))
         if upper < lower:
             raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
-
-
-def CheckElimits(erange, Xin):
-    len_x = len(Xin) - 1
-
-    if math.fabs(erange[0]) < 1e-5:
-        raise ValueError("Elimits - input emin (%f) is Zero" % (erange[0]))
-    if erange[0] < Xin[0]:
-        raise ValueError("Elimits - input emin (%f) < data emin (%f)" % (erange[0], Xin[0]))
-    if math.fabs(erange[1]) < 1e-5:
-        raise ValueError("Elimits - input emax (%f) is Zero" % (erange[1]))
-    if erange[1] > Xin[len_x]:
-        raise ValueError("Elimits - input emax (%f) > data emax (%f)" % (erange[1], Xin[len_x]))
-    if erange[1] < erange[0]:
-        raise ValueError("Elimits - input emax (%f) < emin (%f)" % (erange[1], erange[0]))
 
 
 def getInstrumentParameter(ws, param_name):

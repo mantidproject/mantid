@@ -13,11 +13,24 @@ Force for ILL backscattering raw
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
 from mantidqt.plotting.functions import pcolormesh
+import datetime
 import sys
 import math
 import os.path
 import numpy as np
-from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
+from IndirectCommon import ExtractFloat, ExtractInt, getEfixed
+
+
+def StartTime(prog):
+    logger.notice("----------")
+    message = "Program " + prog + " started @ " + str(datetime.datetime.now())
+    logger.notice(message)
+
+
+def EndTime(prog):
+    message = "Program " + prog + " ended @ " + str(datetime.datetime.now())
+    logger.notice(message)
+    logger.notice("----------")
 
 
 #  Routines for Ascii file of raw data
