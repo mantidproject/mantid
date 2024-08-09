@@ -560,7 +560,7 @@ bool Algorithm::executeInternal() {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const auto &props = getProperties();
     for (auto &prop : props) {
-      const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
         prop->setValue(prop->value());
@@ -889,7 +889,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
   // validator
   const std::vector<Property *> &props = alg->getProperties();
   for (auto prop : props) {
-    const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
       if (prop->value().empty() && !wsProp->isOptional()) {
         prop->createTemporaryValue();
