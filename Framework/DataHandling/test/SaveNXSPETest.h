@@ -194,10 +194,9 @@ public:
     const int nhist(3), nx(10);
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
 
-    auto &specInfo = input->mutableSpectrumInfo();
     std::vector<double> EiValues(nhist);
     for (int i = 0; i < nhist; i++)
-      EiValues[i] = i + 2;
+      EiValues[i] = double(i + 2);
 
     input = makeWS_indirect(input, EiValues);
 
@@ -214,10 +213,9 @@ public:
     const int nhist(3), nx(10);
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
 
-    auto &specInfo = input->mutableSpectrumInfo();
     std::vector<double> EiValues(nhist);
     for (int i = 0; i < nhist; i++)
-      EiValues[i] = i + 2;
+      EiValues[i] = double(i + 2);
 
     input = makeWS_indirect(input, EiValues);
 
@@ -240,10 +238,12 @@ private:
           new Mantid::Kernel::PropertyWithValue<double>("Ei", detEi[0]));
       inputWS->mutableRun().addLogData(EiLog.release());
     } else {
-      const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+      const auto nHist = static_cast<size_t>(inputWS->getNumberHistograms());
+      // auto &specInfo = inputWS->mutableSpectrumInfo(); //TODO: may be used to change detector energy. May be not
       for (size_t i = 0; i < nHist; i++) {
         // TODO:
-        // here should be code which sets different energies from detEi to each mutable detector.
+        // here should be code which sets different energies from detEi to each mutable detector
+        // possibly retrieved from spectrumInfo or instrument
         continue;
       }
     }
