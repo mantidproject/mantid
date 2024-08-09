@@ -54,9 +54,9 @@ The buttons below the **Plotting** tab have the following functionality (from le
 The rest of the buttons have the same functionality as in matplotlib's navigation toolbar.
 
 When the mouse cursor is hovered over the plot, the cursor's :math:`(x, y)` coordinates together with the coresponding
-:math:`hkl` values will be displayed on the right hand side of matplotlib's control buttons. In addition, the correponding
-value of intensity (with an error-bar) of the closest measured data point will be displayed as well. (This does not give the
-intensity of the quadrilateral, which could involve interpolation.)
+:math:`hkl` values (in relative lattice units, r.l.u.) will be displayed on the right hand side of matplotlib's control buttons.
+In addition, the correponding value of intensity (with an error-bar) of the closest measured data point will be displayed as well.
+(This does not give the intensity of the quadrilateral, which could involve interpolation.)
 
 The **X**, **Y** and **Z** input lines below the navigation buttons allow to manually specify the region to zoom into. The
 syntax to be used inside these lines is similar to the python's list slicing (or dnsplot's range). For example, **0:2** in the
