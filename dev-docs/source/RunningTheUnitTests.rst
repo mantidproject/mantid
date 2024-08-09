@@ -112,7 +112,7 @@ Open the Mantid solution in Visual Studio. To run a subset of tests (for example
 
 -  In the Solution Explorer, right click the project for the tests (in this case ``UnitTests/AlgorithmsTest``) and select Properties.
 
--  In the Debugging tab of Properties change the Command Arguments box to the name of the test, for example "AddNoteTest".
+-  In the Debugging tab of Properties change the Command Arguments box to the name of the test, for example "AddPeakTest".
 
 -  Right click the directory again and select Debug->Start new instance.
 
@@ -120,7 +120,7 @@ Open the Mantid solution in Visual Studio. To run a subset of tests (for example
 
    .. code-block:: sh
 
-     ctest -C Debug -V -R AddNoteTest
+     ctest -C Debug -V -R AddPeakTest
 
    For this example, there should be several lines of output ending with the time taken and the line
 
@@ -128,7 +128,7 @@ Open the Mantid solution in Visual Studio. To run a subset of tests (for example
 
      100% tests passed, 0 tests failed out of 1
 
-   Omitting the ``-R AddNoteTest`` option runs all the tests, but note that any tests which were not built according to the above instructions will fail. Adding the ``-V`` increases the output verbosity.
+   Omitting the ``-R AddPeakTest`` option runs all the tests, but note that any tests which were not built according to the above instructions will fail. Adding the ``-V`` increases the output verbosity.
 
 
 Running Unit Tests With Visual Studio

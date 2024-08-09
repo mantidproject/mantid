@@ -76,7 +76,7 @@ Improved
 Deprecated
 ##########
 
--  :ref:`AddNote <algm-AddNote>` v1 is deprecated in favour of :ref:`Comment <algm-Comment>` v1.
+-  AddNote v1 is deprecated in favour of :ref:`Comment <algm-Comment>` v1.
 -  :ref:`LoadAscii <algm-LoadAscii>` v1 is deprecated in favour of v2.
 -  :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` v1 is deprecated in favour of v2.
 
