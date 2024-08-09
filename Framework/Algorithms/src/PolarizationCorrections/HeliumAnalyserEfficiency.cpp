@@ -105,12 +105,6 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
   WorkspaceGroup_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
 
-  //  const std::string inputWorkspaceName = getProperty(PropertyNames::INPUT_WORKSPACE);
-  // if (!AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
-  // errorList[PropertyNames::INPUT_WORKSPACE] =
-  //      "The input workspace " + inputWorkspaceName + " does not exist in the ADS.";
-  // } else {
-  // const auto ws = AnalysisDataService::Instance().retrieve(getProperty(PropertyNames::INPUT_WORKSPACE));
   if (!ws->isGroup()) {
     errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
   } else {
@@ -145,8 +139,6 @@ void HeliumAnalyserEfficiency::exec() { calculateAnalyserEfficiency(); }
 
 void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  // const auto groupWorkspace =
-  //     AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
   WorkspaceGroup_sptr groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
