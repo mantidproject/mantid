@@ -429,9 +429,37 @@ def add_run_numbers(workspace_names):
 # ---------------------------------------------------------------------------------
 
 
-def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
-    from IndirectCommon import getInstrumentParameter
+def get_instrument_parameter(ws, param_name):
+    """Get an named instrument parameter from a workspace.
 
+    Args:
+      @param ws The workspace to get the instrument from.
+      @param param_name The name of the parameter to look up.
+    """
+    inst = mtd[ws].getInstrument()
+
+    # Create a map of type parameters to functions. This is so we avoid writing lots of
+    # if statements because there's no way to dynamically get the type.
+    func_map = {
+        "double": inst.getNumberParameter,
+        "string": inst.getStringParameter,
+        "int": inst.getIntParameter,
+        "bool": inst.getBoolParameter,
+    }
+
+    if inst.hasParameter(param_name):
+        param_type = inst.getParameterType(param_name)
+        if param_type != "":
+            param = func_map[param_type](param_name)[0]
+        else:
+            raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
+    else:
+        raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
+
+    return param
+
+
+def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
     ipf_filename = os.path.join(
         config["instrumentDefinition.directory"], instrument + "_" + analyser + "_" + reflection + "_Parameters.xml"
     )
@@ -442,7 +470,7 @@ def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, pa
         do_load(instrument + str(run_number), run_workspace, ipf_filename, False, {})
 
         for parameter in parameters:
-            results[parameter] = getInstrumentParameter(run_workspace, parameter)
+            results[parameter] = get_instrument_parameter(run_workspace, parameter)
 
         DeleteWorkspace(run_workspace)
     except ValueError or RuntimeError:

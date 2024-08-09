@@ -363,36 +363,6 @@ def CheckXrange(x_range, range_type):
             raise ValueError("%s - input maximum (%f) < minimum (%f)" % (range_type, upper, lower))
 
 
-def getInstrumentParameter(ws, param_name):
-    """Get an named instrument parameter from a workspace.
-
-    Args:
-      @param ws The workspace to get the instrument from.
-      @param param_name The name of the parameter to look up.
-    """
-    inst = s_api.mtd[ws].getInstrument()
-
-    # Create a map of type parameters to functions. This is so we avoid writing lots of
-    # if statements because there's no way to dynamically get the type.
-    func_map = {
-        "double": inst.getNumberParameter,
-        "string": inst.getStringParameter,
-        "int": inst.getIntParameter,
-        "bool": inst.getBoolParameter,
-    }
-
-    if inst.hasParameter(param_name):
-        param_type = inst.getParameterType(param_name)
-        if param_type != "":
-            param = func_map[param_type](param_name)[0]
-        else:
-            raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
-    else:
-        raise ValueError("Unable to retrieve %s from Instrument Parameter file." % param_name)
-
-    return param
-
-
 def convertToElasticQ(input_ws, output_ws=None):
     """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
