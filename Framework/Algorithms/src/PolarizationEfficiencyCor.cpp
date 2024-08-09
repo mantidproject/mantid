@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
@@ -24,6 +26,7 @@ namespace {
 /// Property names.
 namespace Prop {
 static const std::string FLIPPERS{"Flippers"};
+static const std::string SPIN_STATES{"SpinStates"};
 static const std::string POLARIZATION_ANALYSIS{"PolarizationAnalysis"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WORKSPACES{"InputWorkspaces"};
@@ -31,16 +34,6 @@ static const std::string INPUT_WORKSPACE_GROUP{"InputWorkspaceGroup"};
 static const std::string OUTPUT_WORKSPACES{"OutputWorkspace"};
 static const std::string CORRECTION_METHOD{"CorrectionMethod"};
 } // namespace Prop
-
-/// Flipper configurations.
-namespace Flippers {
-static const std::string Off{"0"};
-static const std::string OffOff{"00"};
-static const std::string OffOn{"01"};
-static const std::string On{"1"};
-static const std::string OnOff{"10"};
-static const std::string OnOn{"11"};
-} // namespace Flippers
 
 namespace CorrectionMethod {
 static const std::string WILDES{"Wildes"};
@@ -99,15 +92,23 @@ void PolarizationEfficiencyCor::init() {
       "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, "
       "Ap, Rho and Alpha for Fredrikze.");
 
-  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
-  const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
-  const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
-  const std::string directBeam = Flippers::Off;
+  const std::string full = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON + ", " +
+                           FlipperConfigurations::ON_OFF + ", " + FlipperConfigurations::ON_ON;
+  const std::string missing01 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::ON_OFF +
+                                ", " + FlipperConfigurations::ON_ON;
+  const std::string missing10 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON +
+                                ", " + FlipperConfigurations::ON_ON;
+  const std::string missing0110 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::ON_ON;
+  const std::string noAnalyzer = std::string(FlipperConfigurations::OFF) + ", " + FlipperConfigurations::ON;
+  const std::string directBeam = std::string(FlipperConfigurations::OFF);
   const std::vector<std::string> setups{{"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
   declareProperty(Prop::FLIPPERS, "", std::make_shared<Kernel::ListValidator<std::string>>(setups),
                   "Flipper configurations of the input workspaces  (Wildes method only)");
+
+  const auto spinStateValidator =
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, true, '+', '-', true);
+  declareProperty(Prop::SPIN_STATES, "", spinStateValidator,
+                  "The order of the spin states in the output workspace. (Wildes method only).");
 
   std::vector<std::string> propOptions{"", "PA", "PNR"};
   declareProperty("PolarizationAnalysis", "", std::make_shared<StringListValidator>(propOptions),
@@ -145,6 +146,9 @@ void PolarizationEfficiencyCor::execWildes() {
   alg->setProperty("Efficiencies", efficiencies);
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
+  }
+  if (!isDefault(Prop::SPIN_STATES)) {
+    alg->setPropertyValue("SpinStates", getPropertyValue(Prop::SPIN_STATES));
   }
   auto out = getPropertyValue(Prop::OUTPUT_WORKSPACES);
   alg->setPropertyValue("OutputWorkspace", out);
@@ -205,6 +209,9 @@ void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
 
   if (!isDefault(Prop::FLIPPERS)) {
     throw std::invalid_argument("Property Flippers cannot be used with the Fredrikze method.");
+  }
+  if (!isDefault(Prop::SPIN_STATES)) {
+    throw std::invalid_argument("Property SpinStates cannot be used with the Fredrikze method.");
   }
 }
 

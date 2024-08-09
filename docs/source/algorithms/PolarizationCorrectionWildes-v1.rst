@@ -3,6 +3,8 @@
 
 .. summary::
 
+.. relatedalgorithms::
+
 .. properties::
 
 Description
@@ -18,7 +20,9 @@ This algorithm corrects for non-ideal instrument component efficiencies in a pol
    \Sigma^{-+} \\
    \Sigma^{--}
    \end{bmatrix}
-   = \bm{M}
+   = \begin{bmatrix}
+        M
+     \end{bmatrix}
    \begin{bmatrix}
    I^{00} \\
    I^{01} \\
@@ -26,7 +30,8 @@ This algorithm corrects for non-ideal instrument component efficiencies in a pol
    I^{11}
    \end{bmatrix},
 
-where :math:`I^{jk}` are the experimental count rates for flipper configuration :math:`jk` and :math:`\bm{M}` is the four-by-four correction matrix as defined by equations (4) in [#WILDES]_.
+where :math:`I^{jk}` are the experimental count rates for flipper configuration :math:`jk` and
+:math:`\begin{bmatrix}M\end{bmatrix}` is the four-by-four correction matrix as defined by equations (4) in [#WILDES]_.
 
 Flipper configurations
 ######################
@@ -48,10 +53,32 @@ Flipper configurations
 :literal:`'0'`
    Polarization corrections for a direct beam measurement in a reflectometry experiment.
 
+Spin States
+###########
+
+The order of the workspaces in the output group workspace can be defined by setting the values in the *SpinStates*
+property. Supported configurations are:
+
+:literal:`''`
+    Default behaviour. The output workspace group will be in the order :literal:`'++, +-, -+, --'` for all outputs. In
+    instances where not all outputs are produced, the order is maintained with the missing workspaces omitted (e.g.
+    :literal:`'++, --'`).
+
+:literal:`'++, --, +-, --'`
+    For polarization corrections where both an analyzer and polarizer are used. The order of the states in the string
+    will be the same as the order of the workspaces in the *OutputWorkspace* group. Only allowed if flipper
+    configuration accounts for both flippers (contains two digits).
+
+:literal:`'--, ++'`
+    For polarization corrections when no analyzer has been used. Only allowed if the flipper configuration is also
+    setup this way (e.g. :literal:`'1, 0'`).
+
+*Note:* Output order cannot be set for direct beam measurements as there is only a single workspace in the output.
+
 Output
 ######
 
-The algorithm's output is a group workspace containing the corrected workspaces. The names of each corrected workspace is prefixed by :literal:`_++`, :literal:`_+-`, :literal:`_-+` or :literal:`_--` depending on which :math:`\Sigma^{mn}` they correspond to.
+The algorithm's output is a group workspace containing the corrected workspaces. The names of each corrected workspace is suffixed by :literal:`_++`, :literal:`_+-`, :literal:`_-+` or :literal:`_--` depending on which :math:`\Sigma^{mn}` they correspond to.
 
 Efficiency factors
 ##################
