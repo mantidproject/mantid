@@ -101,7 +101,7 @@ private:
   size_t determineFirstPulseIndex() const;
   size_t determineLastPulseIndex() const;
   /// returns true when the roi says the pulse should be used
-  bool includedPulse(const size_t pulseIndex) const;
+  bool includedPulse(const size_t pulseIndex, const size_t prevPulseIndex = 0) const;
 
   /// vector of indices (length of # of pulses) into the event arrays
   const std::shared_ptr<std::vector<uint64_t>> m_event_index;

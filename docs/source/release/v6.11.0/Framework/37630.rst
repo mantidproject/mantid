@@ -1,0 +1,1 @@
+- Improve performance of the ``PulseIndexer`` class for having many regions of interest. This will have an effect when using the ``FilterBadPulsesLowerCutoff`` of :ref:`LoadEventNexus <algm-LoadEventNexus>`.
