@@ -76,8 +76,8 @@ Output:
 
 .. testoutput:: ExRemoveBinsSimple
 
-   Before RemoveBins [ 10.3   0.3   0.3   0.3   0.3]
-   After RemoveBins [ 10.3    0.     0.     0.15   0.3 ]
+   Before RemoveBins [10.3  0.3  0.3  0.3  0.3]
+   After RemoveBins [10.3   0.    0.    0.15  0.3 ]
 
 .. categories::
 

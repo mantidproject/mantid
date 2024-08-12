@@ -67,7 +67,7 @@ Output:
 
 .. testoutput:: ExSimpleSavingRoundtrip
 
-   Contents of the first spectrum = [ 10.  50.  30.  60.].
+   Contents of the first spectrum = [10. 50. 30. 60.].
    Initial and loaded workspaces comparison is: True
    Loaded workspace has attached incident energy Ei=321.0 and rotation angle Psi= 32.0deg
 

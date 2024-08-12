@@ -65,8 +65,8 @@ Output:
 
 .. testoutput::
 
-   First 5 values of input: [ 1.  1.  1.  1.]
-   First 5 values of background: [ 1.00053363  1.00054706  1.00056074  1.0005747 ]
+   First 5 values of input: [1. 1. 1. 1.]
+   First 5 values of background: [1.00053363 1.00054706 1.00056074 1.0005747 ]
    First 5 values of corrected: [-0.00053363 -0.00054706 -0.00056074 -0.0005747 ]
 
 **Example: Correcting all spectra**

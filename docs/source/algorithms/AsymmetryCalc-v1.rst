@@ -63,7 +63,7 @@ Output:
 .. testoutput:: ExSimple
 
    Asymmetry: [-0.2         0.6        -0.33333333]
-   Errors: [ 0.5396295   0.69971423  0.28688766]
+   Errors: [0.5396295  0.69971423 0.28688766]
 
 .. categories::
 

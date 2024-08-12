@@ -69,7 +69,7 @@ Output:
     Without a StartTime or EndTime all of the values are included
     The default statistic is mean: 85
     The filtered result is
-    [ 100.  100.  100.  100.   15.  100.]
+    [100. 100. 100. 100.  15. 100.]
     The max is: 100
     The min is: 15
     The median is: 100
@@ -77,7 +77,7 @@ Output:
     Adding a start time and optionally an end time allows you to filter the values
     The filtered mean is: 100
     The filtered result is
-    [ 100.  100.  100.]
+    [100. 100. 100.]
 
 
 .. categories::

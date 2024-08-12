@@ -48,7 +48,7 @@ Output:
 
 .. testoutput:: ExSubLinFit
 
-   Values with subtracted background: [ 2.  0.  0.  0.  6.  0.]
+   Values with subtracted background: [2. 0. 0. 0. 6. 0.]
 
 **Example - Returning background using Mean (using a histogram):**
 
@@ -79,7 +79,7 @@ Output:
 .. testoutput:: ExReturnMean
 
    Calculated Mean background: [ 3.  3.  2.  3. -3.]
-   Background subtracted: [ 0.  1.  0.  0.  0.]
+   Background subtracted: [0. 1. 0. 0. 0.]
 
 **Example - Returning background using Moving Average (using a histogram):**
 
