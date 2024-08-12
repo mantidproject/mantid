@@ -140,12 +140,13 @@ void ElwinPresenter::handleValueChanged(std::string const &propName, bool value)
  */
 void ElwinPresenter::newInputDataFromDialog() {
   // Clear the existing list of files
-  m_view->clearPreviewFile();
-  m_view->newInputDataFromDialog(m_dataModel->getWorkspaceNames());
+  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
 
-  std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
-  setInputWorkspace(inputWs);
+  // sets last added workspace as input workspace
+  auto const lastAddedWSIndex = m_dataModel->getNumberOfWorkspaces() - 1;
+  m_view->setPreviewWorkspaceName(static_cast<int>(lastAddedWSIndex.value));
+  auto lastAddedWS = m_dataModel->getWorkspace(lastAddedWSIndex);
+  setInputWorkspace(lastAddedWS);
 }
 
 /**
@@ -158,37 +159,23 @@ void ElwinPresenter::newInputDataFromDialog() {
 
 void ElwinPresenter::handlePreviewIndexChanged(int index) {
   auto const workspaceName = m_view->getPreviewWorkspaceName(index);
-  auto const filename = m_view->getPreviewFilename(index);
 
   if (!workspaceName.empty()) {
-    if (!filename.empty())
-      newPreviewFileSelected(workspaceName, filename);
-    else
-      newPreviewWorkspaceSelected(workspaceName);
+    newPreviewWorkspaceSelected(index);
   }
 }
 
-void ElwinPresenter::newPreviewFileSelected(const std::string &workspaceName, const std::string &filename) {
-  auto loadHistory = true;
-  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-    auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
-
-    setInputWorkspace(workspace);
-
-    updateAvailableSpectra();
-    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  }
-}
-
-void ElwinPresenter::newPreviewWorkspaceSelected(const std::string &workspaceName) {
-  auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
+void ElwinPresenter::newPreviewWorkspaceSelected(int index) {
+  auto const workspace = m_dataModel->getWorkspace(WorkspaceID(index));
   setInputWorkspace(workspace);
   updateAvailableSpectra();
+  setSelectedSpectrum(m_view->getPreviewSpec());
+  m_view->updateSelectorRange(workspace);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void ElwinPresenter::handlePreviewSpectrumChanged(int spectrum) {
-  if (m_view->getPreviewSpec())
+  if (m_view->getPreviewSpec() >= 0)
     setSelectedSpectrum(spectrum);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
@@ -309,6 +296,7 @@ void ElwinPresenter::handleRemoveSelectedData() {
     m_view->isRowCollapsed() ? m_dataModel->removeWorkspace(WorkspaceID(item->row()))
                              : m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
+  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
   updateTableFromModel();
   updateAvailableSpectra();
 }
@@ -354,8 +342,8 @@ MatrixWorkspace_sptr ElwinPresenter::getInputWorkspace() const { return m_inputW
  *
  * @param inputWorkspace  The workspace to set.
  */
-void ElwinPresenter::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
-  m_inputWorkspace = std::move(inputWorkspace);
+void ElwinPresenter::setInputWorkspace(const MatrixWorkspace_sptr &inputWorkspace) {
+  m_inputWorkspace = inputWorkspace;
   updateIntegrationRange();
 }
 

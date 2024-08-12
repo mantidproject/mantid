@@ -110,8 +110,8 @@ void ElwinView::setup() {
   connect(m_uiForm.pbSelAll, SIGNAL(clicked()), this, SLOT(notifySelectAllClicked()));
 
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
   connect(m_uiForm.ckCollapse, SIGNAL(stateChanged(int)), this, SLOT(notifyRowModeChanged()));
 
   // Handle plot and save
@@ -134,7 +134,7 @@ void ElwinView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
 void ElwinView::notifyPlotPreviewClicked() { m_presenter->handlePlotPreviewClicked(); }
 
-void ElwinView::notifySelectedSpectrumChanged(int index) { m_presenter->handlePreviewSpectrumChanged(index); }
+void ElwinView::notifySelectedSpectrumChanged() { m_presenter->handlePreviewSpectrumChanged(getPreviewSpec()); }
 
 void ElwinView::notifyPreviewIndexChanged(int index) { m_presenter->handlePreviewIndexChanged(index); }
 
@@ -209,6 +209,14 @@ void ElwinView::addTableEntry(int row, std::string const &name, std::string cons
   setCell(std::move(cell), row, 1);
 }
 
+void ElwinView::updatePreviewWorkspaceNames(const std::vector<std::string> &names) {
+  disconnectSignals();
+  m_uiForm.cbPreviewFile->clear();
+  m_uiForm.cbPreviewFile->addItems(stdVectorToQStringList(names));
+  m_uiForm.cbPreviewFile->setCurrentIndex(0);
+  connectSignals();
+}
+
 void ElwinView::setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column) {
   m_uiForm.tbElwinData->setItem(static_cast<int>(row), column, cell.release());
 }
@@ -237,27 +245,7 @@ void ElwinView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_spt
   }
 }
 
-/**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void ElwinView::newInputDataFromDialog(std::vector<std::string> const &names) {
-  // Populate the combo box with the filenames
-  QString workspaceNames;
-  QString filename;
-  m_uiForm.cbPreviewFile->addItems(MantidWidgets::stdVectorToQStringList(names));
-
-  // Default to the first file
-  setPreviewToDefault();
-}
-
-void ElwinView::clearPreviewFile() { m_uiForm.cbPreviewFile->clear(); }
-
-void ElwinView::setPreviewToDefault() {
-  m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname.toStdString());
+void ElwinView::updateSelectorRange(const MatrixWorkspace_sptr &inputWs) {
   const auto range = WorkspaceUtils::getXRangeFromWorkspace(inputWs);
 
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
@@ -311,14 +299,15 @@ void ElwinView::notifyMinChanged(double val) {
 
 void ElwinView::notifyMaxChanged(double val) {
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-  auto prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")) ? m_properties["IntegrationEnd"]
-                                                                                   : m_properties["BackgroundEnd"];
+  auto const prop = (from == m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"))
+                        ? m_properties["IntegrationEnd"]
+                        : m_properties["BackgroundEnd"];
   m_dblManager->setValue(prop, val);
 }
 
 void ElwinView::notifyDoubleValueChanged(QtProperty *prop, double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
+  auto const integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+  auto const backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), val);
 
   disconnectSignals();
@@ -335,7 +324,7 @@ void ElwinView::notifyDoubleValueChanged(QtProperty *prop, double val) {
   connectSignals();
 }
 
-void ElwinView::disconnectSignals() {
+void ElwinView::disconnectSignals() const {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(notifyDoubleValueChanged(QtProperty *, double)));
   disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
@@ -348,7 +337,7 @@ void ElwinView::disconnectSignals() {
              SLOT(notifyMinChanged(double)));
 }
 
-void ElwinView::connectSignals() {
+void ElwinView::connectSignals() const {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(notifyDoubleValueChanged(QtProperty *, double)));
   connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
@@ -443,26 +432,28 @@ void ElwinView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maxim
   m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
   m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
   m_uiForm.spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum.value));
+  m_uiForm.spPlotSpectrum->setValue(m_uiForm.spPlotSpectrum->minimum());
 }
 
 void ElwinView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                     const std::vector<WorkspaceIndex>::const_iterator &to) {
-  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
+  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
     m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged(int)));
+
+  m_uiForm.cbPlotSpectrum->setCurrentIndex(0);
+
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
 }
 
 std::string ElwinView::getPreviewWorkspaceName(int index) const {
   return m_uiForm.cbPreviewFile->itemText(index).toStdString();
 }
 
-std::string ElwinView::getPreviewFilename(int index) const {
-  return m_uiForm.cbPreviewFile->itemData(index).toString().toStdString();
-}
+void ElwinView::setPreviewWorkspaceName(int index) { m_uiForm.cbPreviewFile->setCurrentIndex(index); }
 
 int ElwinView::getPreviewSpec() const {
   int tabIndex = m_uiForm.elwinPreviewSpec->currentIndex();

@@ -41,6 +41,7 @@ public:
   virtual void handleRemoveSelectedData() = 0;
   virtual void handleRowModeChanged() = 0;
   virtual void updateAvailableSpectra() = 0;
+  virtual MatrixWorkspace_sptr getInputWorkspace() const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
@@ -68,10 +69,10 @@ public:
   void handleRowModeChanged() override;
   void updateAvailableSpectra() override;
 
-  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
+  void setInputWorkspace(const MatrixWorkspace_sptr &inputWorkspace);
   virtual void setSelectedSpectrum(int spectrum);
   int getSelectedSpectrum() const;
-  MatrixWorkspace_sptr getInputWorkspace() const;
+  MatrixWorkspace_sptr getInputWorkspace() const override;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
 
@@ -87,8 +88,7 @@ private:
   std::vector<std::string> getOutputWorkspaceNames();
   std::string getOutputBasename();
   bool checkForELTWorkspace();
-  void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
-  void newPreviewWorkspaceSelected(const std::string &workspaceName);
+  void newPreviewWorkspaceSelected(int index);
   WorkspaceID findWorkspaceID();
 
   IElwinView *m_view;
