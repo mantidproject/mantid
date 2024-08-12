@@ -5,7 +5,6 @@ set(SRC_FILES
     src/AddPeak.cpp
     src/AddSampleLog.cpp
     src/AddTimeSeriesLog.cpp
-    src/AlignDetectors.cpp
     src/AnnularRingAbsorption.cpp
     src/AnyShapeAbsorption.cpp
     src/ApodizationFunctions.cpp
@@ -355,7 +354,6 @@ set(INC_FILES
     inc/MantidAlgorithms/AddPeak.h
     inc/MantidAlgorithms/AddSampleLog.h
     inc/MantidAlgorithms/AddTimeSeriesLog.h
-    inc/MantidAlgorithms/AlignDetectors.h
     inc/MantidAlgorithms/AnnularRingAbsorption.h
     inc/MantidAlgorithms/AnyShapeAbsorption.h
     inc/MantidAlgorithms/ApodizationFunctions.h
