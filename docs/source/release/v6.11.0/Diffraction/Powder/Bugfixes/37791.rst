@@ -1,0 +1,1 @@
+- Fix bug in the calibration diagnostics plotting where the solid angle of detectors were not extracted successfully
