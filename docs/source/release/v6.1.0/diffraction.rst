@@ -10,7 +10,7 @@ Powder Diffraction
 New features
 ############
 
-- The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a calibration when converting between d spacing, momentum transfer and TOF. A calibration can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm and then viewed in the Show Detectors screen. The calibration consists of the diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic relationship between d spacing and TOF. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will provide several benefits:
+- The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a calibration when converting between d spacing, momentum transfer and TOF. A calibration can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm and then viewed in the Show Detectors screen. The calibration consists of the diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic relationship between d spacing and TOF. This functionality was previously only available in ``AlignDetectors`` which only performed the conversion in the direction TOF to d spacing. This change will provide several benefits:
 
   - Allow the user to choose the calibration to use when converting focused data from d-spacing to TOF
   - Improved integration with GSAS e.g. both the calibration and the data will be loaded from GSAS files when running the algorithm :ref:`LoadGSS <algm-LoadGSS>` and subsequent unit conversions will respect the calibration
