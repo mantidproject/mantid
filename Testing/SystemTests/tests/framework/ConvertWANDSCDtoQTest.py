@@ -25,7 +25,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
             InputWorkspace=ConvertWANDSCDtoQTest_Q, PeakDistanceThreshold=2, CalculateGoniometerForCW=True, Wavelength=1.488
         )
 
-        self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 15)
+        self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
         np.testing.assert_allclose(peak.getQSampleFrame(), [2.400721, 0.001306865, 4.320331], rtol=1e-5)

@@ -395,15 +395,18 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         qlab = np.vstack((np.sin(polar) * np.cos(azim), np.sin(polar) * np.sin(azim) * cop, np.cos(polar) - 1)).T * -k  # Kf - Ki(0,0,1)
 
         data_hist = np.zeros((dim0_bins, dim1_bins, dim2_bins))
-
         norm_hist = np.zeros_like(data_hist)
         if _bkg:
             bkg_data_hist = np.zeros_like(data_hist)
             bkg_norm_hist = np.zeros_like(data_hist)
 
-        dim0_bin_edges = np.linspace(dim0_min, dim0_max, dim0_bins + 1)
-        dim1_bin_edges = np.linspace(dim1_min, dim1_max, dim1_bins + 1)
-        dim2_bin_edges = np.linspace(dim2_min, dim2_max, dim2_bins + 1)
+        bins = [
+            np.linspace(dim0_min, dim0_max, dim0_bins + 1),
+            np.linspace(dim1_min, dim1_max, dim1_bins + 1),
+            np.linspace(dim2_min, dim2_max, dim2_bins + 1),
+        ]
+
+        valid_range = [(0, len(bins[i]) - 2) for i in range(3)]
 
         progress.report("Calculating Q volume")
 
@@ -412,6 +415,15 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         Rs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()) for n in range(number_of_runs)]
 
+        # calculate histogram weights
+        data_weights = np.swapaxes(data_array, 0, 1).ravel()  # never scale the raw counts array
+        norm_weights = np.einsum("yx,n->xyn", norm_array, scale).ravel()
+
+        if _bkg:
+            bkg_data_weights = np.swapaxes(bkg_data_array, 0, 1).ravel()  # never scale the raw background counts array
+            bkg_norm_weights = np.einsum("yx,n->xyn", norm_array, bkg_scale).ravel()
+
+        # loop over symmetry operations for memory efficiency
         for sym_op in sym_ops:
 
             S = np.zeros((3, 3))
@@ -419,6 +431,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             S[:, 1] = sym_op.transformHKL([0, 1, 0])
             S[:, 2] = sym_op.transformHKL([0, 0, 1])
 
+            # transform matrix
             if _hkl:
                 T = np.linalg.multi_dot([2 * np.pi * UB, S, W])
             else:
@@ -426,28 +439,23 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
             RT_invs = [np.linalg.inv(np.dot(R, T)) for R in Rs]
 
-            qvals = np.einsum("nij,kj->kni", RT_invs, qlab).reshape(-1, 3)
+            # (n_runs x 3 x 3) x (n_det x 3) = (n_det x n_runs x 3)
+            qvals = np.einsum("nij,kj->kni", RT_invs, qlab)
 
-            data_weights = np.swapaxes(data_array, 0, 1).ravel()
-            norm_weights = np.einsum("ij,k->ijk", norm_array, scale).ravel()
+            # map q values to bin edges
+            bin_indices = np.array([np.digitize(qvals[..., i].ravel(), bins[i]) - 1 for i in range(3)]).T
 
-            data_hist += np.histogramdd(qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=data_weights)[
-                0
-            ]
-            norm_hist += np.histogramdd(qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=norm_weights)[
-                0
-            ]
+            # mask to exclude out-of-bound data
+            mask = np.all([(bin_indices[:, i] >= valid_range[i][0]) & (bin_indices[:, i] <= valid_range[i][1]) for i in range(3)], axis=0)
+
+            bin_indices = tuple(bin_indices[mask].T)
+
+            np.add.at(data_hist, bin_indices, data_weights[mask])
+            np.add.at(norm_hist, bin_indices, norm_weights[mask])
 
             if _bkg:
-                bkg_data_weights = np.swapaxes(bkg_data_array, 0, 1).ravel()
-                bkg_norm_weights = np.einsum("ij,k->ijk", norm_array, bkg_scale).ravel()
-
-                bkg_data_hist += np.histogramdd(
-                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_data_weights
-                )[0]
-                bkg_norm_hist += np.histogramdd(
-                    qvals, bins=[dim0_bin_edges, dim1_bin_edges, dim2_bin_edges], density=False, weights=bkg_norm_weights
-                )[0]
+                np.add.at(bkg_data_hist, bin_indices, bkg_data_weights[mask])
+                np.add.at(bkg_norm_hist, bin_indices, bkg_norm_weights[mask])
 
             progress.report()
 

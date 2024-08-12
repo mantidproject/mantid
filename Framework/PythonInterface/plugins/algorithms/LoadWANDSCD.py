@@ -345,8 +345,9 @@ class LoadWANDSCD(PythonAlgorithm):
         setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
         setGoniometer_alg.setProperty("Workspace", outWS)
         setGoniometer_alg.setProperty("Axis0", "HB2C:Mot:s1,0,1,0,1")
-        setGoniometer_alg.setProperty("Axis1", "HB2C:Mot:sgl,1,0,0,-1")
-        setGoniometer_alg.setProperty("Axis2", "HB2C:Mot:sgu,0,0,1,-1")
+        if not self.getProperty("ApplyGoniometerTilt").value:
+            setGoniometer_alg.setProperty("Axis1", "HB2C:Mot:sgl,1,0,0,-1")
+            setGoniometer_alg.setProperty("Axis2", "HB2C:Mot:sgu,0,0,1,-1")
         setGoniometer_alg.setProperty("Average", False)
         setGoniometer_alg.execute()
 
