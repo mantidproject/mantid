@@ -87,6 +87,9 @@ void export_AlgorithmHistory() {
 
       .def("getChildAlgorithm", &AlgorithmHistory::getChildAlgorithm, (arg("self"), arg("index")),
            "Returns the algorithm at the given index in the history")
+
+      .def("getStoreInADS", &AlgorithmHistory::getStoreInADS, arg("self"), return_value_policy<copy_const_reference>(),
+           "Return storeInADS property")
       // ----------------- Operators --------------------------------------
       .def(self_ns::str(self));
 }
