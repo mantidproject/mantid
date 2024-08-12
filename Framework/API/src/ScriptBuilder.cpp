@@ -234,6 +234,10 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
   // Third case is we never specify the version, so do nothing.
 
+  if (!algHistory.getStoreInADS()) {
+    properties << "StoreInADS=False, ";
+  }
+
   std::string propStr = properties.str();
   if (propStr.length() > 0) {
     // remove trailing comma & space

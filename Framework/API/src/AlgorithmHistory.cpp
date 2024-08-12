@@ -51,7 +51,7 @@ static boost::uuids::random_generator uuidGen;
 AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg, const Types::Core::DateAndTime &start,
                                    const double &duration, std::size_t uexeccount)
     : m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),
-      m_execCount(uexeccount), m_childHistories() {
+      m_execCount(uexeccount), m_childHistories(), m_storeInADS(alg->getAlwaysStoreInADS()) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
@@ -109,6 +109,7 @@ void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg, const Ty
   m_executionDate = start;
   m_executionDuration = duration;
   m_execCount = uexeccount;
+  m_storeInADS = alg->getAlwaysStoreInADS();
   setProperties(alg);
 }
 
@@ -234,6 +235,7 @@ AlgorithmHistory &AlgorithmHistory::operator=(const AlgorithmHistory &A) {
     m_executionDate = A.m_executionDate;
     m_executionDuration = A.m_executionDuration;
     m_properties = A.m_properties;
+    m_storeInADS = A.m_storeInADS;
     // required to prevent destruction of descendant if assigning a descendant
     // to an ancestor
     auto temp = A.m_childHistories;
