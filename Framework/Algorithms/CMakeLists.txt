@@ -714,7 +714,6 @@ set(TEST_FILES
     AddPeakTest.h
     AddSampleLogTest.h
     AddTimeSeriesLogTest.h
-    AlignDetectorsTest.h
     AnnularRingAbsorptionTest.h
     AnyShapeAbsorptionTest.h
     AppendSpectraTest.h
