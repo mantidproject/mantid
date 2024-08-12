@@ -122,9 +122,9 @@ public:
     auto dialog = new MantidQt::MantidWidgets::AddWorkspaceDialog(nullptr);
     m_presenter->setSelectedSpectrum(0);
 
-    ON_CALL(*m_view, getPreviewWorkspaceName(0)).WillByDefault(Return("workspace_test"));
-    EXPECT_CALL(*m_view, clearPreviewFile()).Times(Exactly(1));
-    EXPECT_CALL(*m_view, newInputDataFromDialog(m_dataModel->getWorkspaceNames())).Times(Exactly(1));
+    ON_CALL(*m_dataModel, getNumberOfWorkspaces()).WillByDefault(Return(1));
+    ON_CALL(*m_dataModel, getWorkspace(WorkspaceID(0))).WillByDefault(Return(m_workspace));
+    EXPECT_CALL(*m_view, updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames())).Times(Exactly(1));
     EXPECT_CALL(*m_view, plotInput(m_workspace, 0)).Times(Exactly(1));
     m_presenter->handleAddData(dialog);
   }
