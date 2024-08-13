@@ -17,7 +17,7 @@ function(UiToPy5 ui_files target_name)
     # Command to run the translation
     add_custom_command(
       OUTPUT ${generated_file}
-      COMMAND ${py_exec} ${py_uic_py} ${source_file} -o ${generated_file}
+      COMMAND ${py_exec} -m PyQt5.uic.pyuic -x ${source_file} -o ${generated_file}
       COMMAND ${py_exec} ${CMAKE_SOURCE_DIR}/buildconfig/wrap_pyui.py ${generated_file}
       DEPENDS ${source_file}
     )
