@@ -219,8 +219,7 @@ void BinaryOperation::exec() {
 
     // Always clear the MRUs.
     m_eout->clearMRU();
-    if (m_elhs)
-      m_elhs->clearMRU();
+    m_elhs->clearMRU();
     if (m_erhs)
       m_erhs->clearMRU();
 
