@@ -25,6 +25,14 @@ public:
   static LoadEventAsWorkspace2DTest *createSuite() { return new LoadEventAsWorkspace2DTest(); }
   static void destroySuite(LoadEventAsWorkspace2DTest *suite) { delete suite; }
 
+  void xtest_filterbytime() {
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_event.nxs"))
+  }
+
   void test_EQSANS() {
     LoadEventAsWorkspace2D alg;
     alg.setChild(true);
