@@ -13,6 +13,8 @@ import unittest
 
 # third-party library imports
 import matplotlib
+from matplotlib.axes import Axes
+import matplotlib.transforms
 
 matplotlib.use("AGG")
 import matplotlib.pyplot as plt
@@ -724,6 +726,33 @@ class FigureInteractionTest(unittest.TestCase):
 
         mock_y_editor.assert_called_once()
 
+    @mock.patch("workbench.plotting.figureinteraction.ColorbarAxisEditor")
+    def test_click_colorbar_launches_colorbar_editor(self, mock_colorbar_editor):
+        self.interactor.canvas.figure = MagicMock()
+        axes = self._create_axes_for_axes_editor_test("yaxis")
+        axes[0]._label = "<colorbar>"
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_colorbar_editor.assert_called_once()
+
+    @mock.patch("workbench.plotting.figureinteraction.YAxisEditor")
+    def test_click_y_axis_with_axes_instead_of_mantidaxes(self, mock_y_editor):
+        fig = MagicMock()
+        fig.transSubfigure = matplotlib.transforms.IdentityTransform()
+        self.interactor.canvas.figure = fig
+        axes = [Axes(fig, matplotlib.transforms.Bbox([[0, 0], [1, 1]]))]
+        axes[0].yaxis = MagicMock()
+        axes[0].xaxis = MagicMock()
+        axes[0].title = MagicMock()
+        axes[0].get_xticklabels = MagicMock()
+        axes[0].get_yticklabels = MagicMock()
+        self._mock_out_axes_for_axes_editor("yaxis_tick", axes[0])
+        self.interactor.canvas.figure.get_axes.return_value = axes
+        self.interactor._show_axis_editor(event=MagicMock())
+
+        mock_y_editor.assert_called_once()
+
     def test_keyboard_shortcut_switch_x_scale(self):
         key_press_event = self._create_mock_key_press_event("k")
         key_press_event.inaxes.get_xscale.return_value = "linear"
@@ -817,6 +846,10 @@ class FigureInteractionTest(unittest.TestCase):
 
     def _create_axes_for_axes_editor_test(self, mouse_over: str):
         ax = MagicMock()
+        self._mock_out_axes_for_axes_editor(mouse_over, ax)
+        return [ax]
+
+    def _mock_out_axes_for_axes_editor(self, mouse_over: str, ax):
         ax.xaxis.contains.return_value = (mouse_over == "xaxis", {})
         ax.yaxis.contains.return_value = (mouse_over == "yaxis", {})
         ax.title.contains.return_value = (False, {})
@@ -829,7 +862,6 @@ class FigureInteractionTest(unittest.TestCase):
         ytick.contains.return_value = (mouse_over == "yaxis_tick", {})
         ax.get_xticklabels.return_value = [xtick]
         ax.get_yticklabels.return_value = [ytick]
-        return [ax]
 
     def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
         fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on, plot_kwargs=plot_kwargs)
