@@ -91,7 +91,7 @@ void AddWorkspaceMultiDialog::handleFilesFound() {
   std::deque<API::IConfiguredAlgorithm_sptr> loadQueue;
   std::transform(fileNames.begin(), fileNames.end(), std::back_inserter(loadQueue),
                  [&](auto const &fileName) { return configureLoadAlgorithm(fileName, m_loadProperties); });
-  m_algRunner->setAlgorithmQueue(loadQueue);
+  m_algRunner->setAlgorithmQueue(std::move(loadQueue));
   m_algRunner->executeAlgorithmQueue();
 }
 

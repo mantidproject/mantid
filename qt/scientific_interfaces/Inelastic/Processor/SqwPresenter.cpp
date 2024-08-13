@@ -112,7 +112,7 @@ void SqwPresenter::handleRun() {
   algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
   algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
   m_view->setEnableOutputOptions(false);
-  m_algorithmRunner->execute(algoQueue);
+  m_algorithmRunner->execute(std::move(algoQueue));
 }
 
 void SqwPresenter::handleSaveClicked() {
