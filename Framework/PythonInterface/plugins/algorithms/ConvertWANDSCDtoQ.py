@@ -392,11 +392,9 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         cop = self.getProperty("ObliquityParallaxCoefficient").value
 
-        qlab = np.ascontiguousarray(
-            np.vstack((np.sin(polar) * np.cos(azim), np.sin(polar) * np.sin(azim) * cop, np.cos(polar) - 1)).T * -k
-        )  # Kf - Ki(0,0,1)
+        qlab = np.vstack((np.sin(polar) * np.cos(azim), np.sin(polar) * np.sin(azim) * cop, np.cos(polar) - 1)) * -k  # Kf - Ki(0,0,1)
 
-        data_hist = np.zeros((dim0_bins, dim1_bins, dim2_bins))
+        data_hist = np.zeros(dim0_bins * dim1_bins * dim2_bins)
         norm_hist = np.zeros_like(data_hist)
         if _bkg:
             bkg_data_hist = np.zeros_like(data_hist)
@@ -408,26 +406,28 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             np.linspace(dim2_min, dim2_max, dim2_bins + 1),
         ]
 
+        dim_bins = [dim0_bins, dim1_bins, dim2_bins]
+
         valid_range = [(0, len(bins[i]) - 2) for i in range(3)]
+        valid_range_min = np.array([valid_range[i][0] for i in range(3)])
+        valid_range_max = np.array([valid_range[i][1] for i in range(3)])
 
         progress.report("Calculating Q volume")
+
+        assert not data_array[:, :, 0].flags.owndata
+        assert not data_array[:, :, 0].ravel("F").flags.owndata
+        assert data_array[:, :, 0].flags.fnc
 
         s1offset = np.deg2rad(self.getProperty("S1Offset").value)
         s1offset = np.array([[np.cos(s1offset), 0, np.sin(s1offset)], [0, 1, 0], [-np.sin(s1offset), 0, np.cos(s1offset)]])
 
-        R_invs = np.ascontiguousarray(
-            [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()).T for n in range(number_of_runs)]
-        )
+        R_invs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()).T for n in range(number_of_runs)]
 
-        # calculate histogram weights
-        data_weights = np.ascontiguousarray(np.swapaxes(data_array, 0, 1).ravel())  # never scale the raw counts array
-        norm_weights = np.ascontiguousarray(np.einsum("yx,n->xyn", norm_array, scale).ravel())
-
+        # flat array
+        data_array_flat = data_array.T.reshape(number_of_runs, -1)
+        norm_array_flat = norm_array.ravel(order="F")
         if _bkg:
-            bkg_data_weights = np.ascontiguousarray(
-                np.swapaxes(bkg_data_array, 0, 1).ravel()
-            )  # never scale the raw background counts array
-            bkg_norm_weights = np.ascontiguousarray(np.einsum("yx,n->xyn", norm_array, bkg_scale).ravel())
+            bkg_data_array_flat = bkg_data_array.T.reshape(number_of_runs, -1)
 
         # loop over symmetry operations for memory efficiency
         for sym_op in sym_ops:
@@ -444,33 +444,38 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 T = np.dot(S, W)
             T_inv = np.linalg.inv(T)
 
-            # (3 x 3) x (n_runs x 3 x 3) x (n_det x 3) = (n_det x n_runs x 3)
-            # NOTE: equivalent but slower method, qvals = np.einsum("ij,njk,qk->qni", T_inv, R_invs, qlab, optimize=True)
+            for i_gon, R_inv in enumerate(R_invs):
+                # transformation matrix
+                combined_matrix = np.matmul(T_inv, R_inv)  # (3 x 3) x (3 x 3) = (3 x 3)
 
-            # Step 1: Multiply T_inv with R_invs using broadcasting
-            RT_invs = np.matmul(T_inv, R_invs)  # shape: (n_runs, 3, 3)
+                # matrix-vector multiplication for all q
+                qvals = np.matmul(combined_matrix, qlab)  # (3 x 3) x (3 x n_det) = (3 x n_det)
 
-            # Step 2: Multiply the result with qlab
-            qvals = np.matmul(RT_invs, qlab.T).transpose(2, 0, 1)  # shape: (n_det, n_det, 3)
+                # map q values to bin edges
+                bin_indices = np.stack([np.digitize(qvals[i], bins[i]) - 1 for i in range(3)], axis=-1)
 
-            # map q values to bin edges
-            bin_indices = np.stack([np.digitize(qvals[..., i].ravel(), bins[i]) - 1 for i in range(3)], axis=-1)
+                # mask to exclude out-of-bound data
+                mask = np.all((bin_indices >= valid_range_min) & (bin_indices <= valid_range_max), axis=1)
 
-            # mask to exclude out-of-bound data
-            mask = np.logical_and.reduce(
-                [(bin_indices[:, i] >= valid_range[i][0]) & (bin_indices[:, i] <= valid_range[i][1]) for i in range(3)]
-            )
+                bin_indices = np.ravel_multi_index(bin_indices[mask].T, dim_bins)
+                unique_indices, inverse_indices = np.unique(bin_indices, return_inverse=True)
 
-            bin_indices = tuple(bin_indices[mask].T)
+                # sum weights for each unique bin index
+                data_hist[unique_indices] += np.bincount(inverse_indices, data_array_flat[i_gon][mask])
+                norm_hist[unique_indices] += np.bincount(inverse_indices, norm_array_flat[mask]) * scale[i_gon]
 
-            np.add.at(data_hist, bin_indices, data_weights[mask])
-            np.add.at(norm_hist, bin_indices, norm_weights[mask])
+                if _bkg:
+                    # sum weights for each unique bin index
+                    bkg_data_hist[unique_indices] += np.bincount(inverse_indices, bkg_data_array_flat[i_gon][mask])
+                    bkg_norm_hist[unique_indices] += np.bincount(inverse_indices, norm_array_flat[mask]) * bkg_scale[i_gon]
 
-            if _bkg:
-                np.add.at(bkg_data_hist, bin_indices, bkg_data_weights[mask])
-                np.add.at(bkg_norm_hist, bin_indices, bkg_norm_weights[mask])
+                progress.report()
 
-            progress.report()
+        data_hist = data_hist.reshape(dim_bins)
+        norm_hist = norm_hist.reshape(dim_bins)
+        if _bkg:
+            bkg_data_hist = bkg_data_hist.reshape(dim_bins)
+            bkg_norm_hist = bkg_norm_hist.reshape(dim_bins)
 
         if keep_temp:
             # Create data workspace
