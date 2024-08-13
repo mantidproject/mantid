@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/BankPulseTimes.h"
-
 #include <nexus/NeXusFile.hpp>
 #include <numeric>
 
@@ -54,7 +53,12 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
     : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), have_period_info(true),
       m_sorting_info(PulseSorting::UNKNOWN) {
-  file.openData("event_time_zero");
+
+  try {
+    file.openData("event_time_zero");
+  } catch (std::exception &e) {
+    file.openData("pulse_time");
+  }
   // Read the offset (time zero)
 
   // Use the offset if it is present
@@ -191,6 +195,7 @@ std::size_t getFirstExcludedIndex(const std::vector<Mantid::Types::Core::DateAnd
 }
 } // namespace
 
+// use this to get timeof interest into pulseindexter
 std::vector<size_t> BankPulseTimes::getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
                                                     const Mantid::Types::Core::DateAndTime &stop) const {
   std::vector<size_t> roi;
