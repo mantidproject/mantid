@@ -16,7 +16,7 @@ from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.plots.datafunctions import get_axes_labels
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.utility import colormap_as_plot_color
-from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd, SolidAngle
+from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd, LoadEmptyInstrument, SolidAngle
 
 
 # Diamond peak positions in d-space which may differ from actual sample
