@@ -237,8 +237,6 @@ void BinaryOperation::exec() {
       auto specialRHS = dynamic_cast<const SpecialWorkspace2D *>(m_rhs.get());
       if (specialLHS && specialRHS) {
         m_out = create<SpecialWorkspace2D>(*specialLHS);
-      } else if (m_lhsRagged) {
-        m_out = createRagged<HistoWorkspace>(*m_lhs);
       } else {
         m_out = create<HistoWorkspace>(*m_lhs);
       }
