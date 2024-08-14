@@ -43,7 +43,8 @@ When not specified using the ``MaskWorkspace`` parameter, the default name for t
 
 The resulting calibration table can be saved with
 :ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and
-applied to a workspace with :ref:`algm-ConvertUnits`. There are also
+applied to a workspace with :ref:`algm-ConvertUnits`. The calibration can also be used with :ref:`algm-ApplyDiffCal` which uses the calibration table
+and updates the diffractometer constants in the ``UnitParams`` map of the workspace that is then used in :ref:`algm-ConvertUnits`. There are also
 three workspaces placed in the ``DiagnosticWorkspace`` group. They are:
 
 * evaluated fit functions (``_fitted``) which is the ``OutputPeakParametersWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>`
