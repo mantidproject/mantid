@@ -13,6 +13,7 @@
 
 #include <vector>
 
+#include <MantidAPI/AlgorithmRuntimeProps.h>
 #include <QDialog>
 
 namespace MantidQt {
@@ -31,6 +32,7 @@ public:
   bool isEmpty() const;
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
+  void setLoadProperty(const std::string &propname, bool enable) override;
   void setup();
 
   void notifyBatchComplete(bool error) override;
@@ -54,6 +56,7 @@ private:
   Ui::AddWorkspaceMultiDialog m_uiForm;
   /// Algorithm Runner used to run the load algorithm
   std::unique_ptr<MantidQt::API::QtJobRunner> m_algRunner;
+  Mantid::API::AlgorithmRuntimeProps m_loadProperties;
 };
 
 } // namespace MantidWidgets

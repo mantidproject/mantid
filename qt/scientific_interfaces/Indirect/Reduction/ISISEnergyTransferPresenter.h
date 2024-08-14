@@ -58,6 +58,7 @@ private:
   InstrumentData getInstrumentData() const;
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   IIETView *m_view;
   std::unique_ptr<IIETModel> m_model;

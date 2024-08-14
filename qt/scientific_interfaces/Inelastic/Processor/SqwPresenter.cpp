@@ -102,6 +102,8 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void SqwPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 void SqwPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
   std::deque<API::IConfiguredAlgorithm_sptr> algoQueue = {};

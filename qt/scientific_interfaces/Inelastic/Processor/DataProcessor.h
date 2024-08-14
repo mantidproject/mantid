@@ -43,6 +43,7 @@ public:
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
+  virtual void enableLoadHistoryProperty(bool doLoadHistory) = 0;
   virtual void exportPythonDialog() = 0;
   virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
                                                             const std::string &filename = "") = 0;
@@ -73,6 +74,7 @@ public:
                                                     const std::string &filename = "") override;
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter) override;
+  void enableLoadHistoryProperty(bool doLoadHistory) override;
 
   void exportPythonDialog() override;
 
@@ -82,6 +84,7 @@ protected:
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces

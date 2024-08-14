@@ -62,6 +62,7 @@ protected:
 private:
   void plotNewData(std::string const &filename);
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   IMomentsView *m_view;
   std::unique_ptr<IMomentsModel> m_model;

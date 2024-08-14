@@ -197,6 +197,11 @@ void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
+void ContainerSubtraction::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsContainer->setLoadProperty("LoadHistory", doLoadHistory);
+};
+
 /**
  * Displays the sample data on the plot preview
  * @param dataName Name of new data source

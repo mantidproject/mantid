@@ -521,6 +521,7 @@ public:
 
   MOCK_METHOD1(setFBSuffixes, void(QStringList const &suffix));
   MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
+  MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
 
   MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
   MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));

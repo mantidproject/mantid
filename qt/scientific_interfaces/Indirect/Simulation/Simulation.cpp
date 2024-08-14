@@ -91,4 +91,11 @@ void Simulation::loadSettings() {
   settings.endGroup();
 }
 
+void Simulation::applySettings(std::map<std::string, QVariant> const &settings) {
+  std::map<unsigned int, SimulationTab *>::iterator iter;
+  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
+    iter->second->enableLoadHistoryProperty(settings.at("LoadHistory").toBool());
+  }
+}
+
 std::string Simulation::documentationPage() const { return "Indirect Simulation"; }

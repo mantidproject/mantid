@@ -40,6 +40,7 @@ std::map<std::string, QVariant> Settings::getSettings() {
   std::map<std::string, QVariant> interfaceSettings;
   interfaceSettings["RestrictInput"] = SettingsHelper::restrictInputDataByName();
   interfaceSettings["ErrorBars"] = SettingsHelper::externalPlotErrorBars();
+  interfaceSettings["LoadHistory"] = SettingsHelper::loadHistory();
   return interfaceSettings;
 }
 

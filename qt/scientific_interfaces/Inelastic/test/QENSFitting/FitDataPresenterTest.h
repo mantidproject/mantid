@@ -60,6 +60,10 @@ public:
   virtual std::string workspaceName() const override { return "Name"; }
   virtual void setWSSuffices(const QStringList &suffices) override { (void)suffices; }
   virtual void setFBSuffices(const QStringList &suffices) override { (void)suffices; }
+  virtual void setLoadProperty(const std::string &propName, bool enabled) override {
+    (void)propName;
+    (void)enabled;
+  }
 
   virtual void updateSelectedSpectra() override {}
 };
