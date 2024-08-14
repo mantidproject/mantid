@@ -214,6 +214,11 @@ class PyChopGui(QMainWindow):
         # Checks for independent phases
         phases = []
         for key, widget in self.widgets.items():
+            if "MERLIN" in str(self.engine.instname) and key.endswith("Phase") and widget["Label"].isHidden():
+                # Special case for MERLIN
+                # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
+                phase = float(widget["Edit"].text())
+                phases.append(phase)
             if key.endswith("Phase") and not widget["Label"].isHidden():
                 idx = int(key[7])
                 phase = widget["Edit"].text()
@@ -642,9 +647,9 @@ class PyChopGui(QMainWindow):
         txt += "# Ei = %8.2f meV\n" % (ei)
         txt += "# Flux = %8.2f n/cm2/s\n" % (flux)
         txt += "# Elastic resolution = %6.2f meV\n" % (res[0])
-        txt += "# Time width at sample = %6.2f us, of which:\n" % (1e6 * np.sqrt(tsqvan))
+        txt += "# Time width at sample = %6.2f us, of which:\n" % (1e6 * np.sqrt(tsqvan[0]))
         for ky, val in list(tsqdic.items()):
-            txt += "#     %20s : %6.2f us\n" % (ky, 1e6 * np.sqrt(val))
+            txt += "#     %20s : %6.2f us\n" % (ky, 1e6 * np.sqrt(val[0]))
         txt += "# %s distances:\n" % (obj.instname)
         txt += "#     x0 = %6.2f m (%s to Fermi)\n" % (x0, first_component)
         txt += "#     x1 = %6.2f m (Fermi to sample)\n" % (x1)
