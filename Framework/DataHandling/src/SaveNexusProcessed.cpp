@@ -286,6 +286,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
 
     // check if all X() are in fact the same array
     const bool uniformSpectra = matrixWorkspace->isCommonBins();
+    const bool raggedSpectra = matrixWorkspace->isRaggedWorkspace();
 
     // Retrieve the workspace indices (from params)
     std::vector<int> indices;
@@ -294,7 +295,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
     prog_init.reportIncrement(1, "Writing data");
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
-      this->execEvent(nexusFile.get(), uniformSpectra, indices);
+      this->execEvent(nexusFile.get(), uniformSpectra, raggedSpectra, indices);
     } else {
       std::string workspaceTypeGroupName;
       if (offsetsWorkspace)
@@ -306,8 +307,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
       else
         workspaceTypeGroupName = "workspace";
 
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, indices, workspaceTypeGroupName.c_str(),
-                                           true);
+      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, raggedSpectra, indices,
+                                           workspaceTypeGroupName.c_str(), true);
     }
 
     if (saveLegacyInstrument()) {
@@ -408,11 +409,11 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
  * This will make one long event list for all events contained.
  * */
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
-                                   const std::vector<int> &spec) {
+                                   const bool raggedSpectra, const std::vector<int> &spec) {
   m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap
-  nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
+  nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, raggedSpectra, spec, "event_workspace", false);
 
   // Make a super long list of tofs, weights, etc.
   std::vector<int64_t> indices;
