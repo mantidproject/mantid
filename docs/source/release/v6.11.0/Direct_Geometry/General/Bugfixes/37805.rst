@@ -1,0 +1,1 @@
+- Fix for random phase values on Merlin when using PyChop not in instrument scientist mode.
