@@ -788,7 +788,6 @@ public:
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1,
       int loopOrientation, double expectedValue=-1.0, double expectedError=-1.0  )
   {
-    std::cout << "hello world!\n";
     TSM_ASSERT_LESS_THAN( message, 0, work_out1->getNumberHistograms());
     if (work_out1->isRaggedWorkspace()) {
       TSM_ASSERT_LESS_THAN( message, 0, work_out1->y(0).size());
