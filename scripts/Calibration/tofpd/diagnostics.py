@@ -16,7 +16,7 @@ from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.plots.datafunctions import get_axes_labels
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.utility import colormap_as_plot_color
-from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
+from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd, LoadEmptyInstrument, SolidAngle
 
 
 # Diamond peak positions in d-space which may differ from actual sample
@@ -264,10 +264,13 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
             value_array.append(percent)
 
     # Use the largest solid angle for circle radius
-    sample_position = info.samplePosition()
     maximum_solid_angle = 0.0
-    for det_id in range(info.size()):
-        maximum_solid_angle = max(maximum_solid_angle, delta.getDetector(det_id).solidAngle(sample_position))
+    if instr_ws is None:
+        LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace=f"{instr_name}_instr")
+        instr_ws = f"{instr_name}_instr"
+    det_tmp = SolidAngle(InputWorkspace=instr_ws, OutputWorkspace="detector_tmp")
+    for wksp_index in range(info.size()):
+        maximum_solid_angle = max(maximum_solid_angle, det_tmp.readY(wksp_index)[0])
 
     # Convert to degrees for plotting
     theta_array = np.rad2deg(theta_array)
