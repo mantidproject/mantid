@@ -33,11 +33,38 @@ then the algorithm fails.
 
 After the conversion of units, the algorithm tries to fit (in
 time-of-flight) a peak in the neighborhood of every expected peak
-using a peak shape or function. The conversion is done as in the
-Mantid algorithm :ref:`AlignDetectors <algm-AlignDetectors>`
-(following GSAS equations) if the workspace is focused (single
+using a peak shape or function. If the workspace is focused (single
 spectrum) and has a log entry named "difc", where the GSAS DIFC
-parameter is expected. Otherwise the conversion of units is done as in
+parameter is expected, the conversion is done following GSAS equations.
+The equation in `GSAS
+<https://subversion.xor.aps.anl.gov/trac/pyGSAS>`_ converts from
+d-spacing (:math:`d`) to time-of-flight (:math:`TOF`) by the equation:
+
+.. math:: TOF = DIFC * d + DIFA * d^2 + TZERO
+
+The manual describes these terms in more detail. Roughly,
+:math:`TZERO` is related to the difference between the measured and
+actual time-of-flight base on emission time from the moderator, :math:`DIFA` is an empirical term (ideally zero), and :math:`DIFC` is
+
+.. math:: DIFC = \frac{2m_N}{h} L_{tot} sin \theta
+
+Measuring peak positions using a crystal with a very well known
+lattice constant will give a good value for converting the data. The
+d-spacing of the data will be calculated using whichever equation
+below is appropriate for solving the quadratic.
+
+When :math:`DIFA = 0` then the solution is just for a line and
+
+.. math:: d = \frac{TOF - TZERO}{DIFC}
+
+For the case of needing to solve the actual quadratic equation
+
+.. math:: d = \frac{-DIFC}{2 DIFA} \pm \sqrt{\frac{TOF}{DIFA} + \left(\frac{DIFC}{2 DIFA}\right)^2 - \frac{TZERO}{DIFA}}
+
+Here the positive root is used when :math:`DIFA > 0` and the negative
+when :math:`DIFA < 0`.
+
+Otherwise the conversion of units is done as in
 the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
 
 .. seealso:: :ref:`EnggFitTOFFromPeaks <algm-EnggFitTOFFromPeaks>`.
