@@ -136,12 +136,16 @@ void BinaryOperation::exec() {
 
   try {
     m_lhsBlocksize = m_lhs->blocksize();
+    m_lhsRagged = false;
   } catch (std::length_error &) {
+    m_lhsBlocksize = 0;
     m_lhsRagged = true;
   }
   try {
     m_rhsBlocksize = m_rhs->blocksize();
+    m_rhsRagged = false;
   } catch (std::length_error &) {
+    m_rhsBlocksize = 0;
     m_rhsRagged = true;
   }
 
