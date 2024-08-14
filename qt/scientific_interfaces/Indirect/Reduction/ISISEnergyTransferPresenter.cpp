@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferPresenter.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
 #include "ISISEnergyTransferData.h"
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferView.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -54,18 +54,15 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
     : DataReductionTab(idrUI, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   m_algorithmRunner->subscribe(this);
-
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
 }
 
-void IETPresenter::setup() {}
-
-bool IETPresenter::validateInstrumentDetails() {
+void IETPresenter::validateInstrumentDetails(IUserInputValidator *validator) const {
   auto const instrument = getInstrumentName().toStdString();
   if (instrument.empty()) {
-    m_view->showMessageBox("Please select a valid facility and/or instrument.");
-    return false;
+    validator->addErrorMessage("Please select a valid facility and/or instrument.");
   }
 
   QMap<QString, QString> instrumentDetails = getInstrumentDetails();
@@ -73,16 +70,14 @@ bool IETPresenter::validateInstrumentDetails() {
   for (const auto &key : keys) {
     if (!instrumentDetails.contains(QString::fromStdString(key)) ||
         instrumentDetails[QString::fromStdString(key)].isEmpty()) {
-      m_view->showMessageBox("Could not find " + key + " for the " + instrument +
-                             " instrument. Please select a valid instrument.");
-      return false;
+      validator->addErrorMessage("Could not find " + key + " for the " + instrument +
+                                 " instrument. Please select a valid instrument.");
+      break;
     }
   }
-
-  return true;
 }
 
-InstrumentData IETPresenter::getInstrumentData() {
+InstrumentData IETPresenter::getInstrumentData() const {
   QMap<QString, QString> instrumentDetails = getInstrumentDetails();
 
   return InstrumentData(
@@ -94,58 +89,72 @@ InstrumentData IETPresenter::getInstrumentData() {
 }
 
 void IETPresenter::updateInstrumentConfiguration() {
-  if (validateInstrumentDetails()) {
-    InstrumentData instrumentDetails = getInstrumentData();
-    auto const instrumentName = instrumentDetails.getInstrument();
-
-    // spectraRange & Efixed
-    auto const specMin = instrumentDetails.getDefaultSpectraMin();
-    auto const specMax = instrumentDetails.getDefaultSpectraMax();
-    m_view->setInstrumentSpectraRange(specMin, specMax);
-    m_view->setInstrumentEFixed(instrumentName, instrumentDetails.getDefaultEfixed());
-
-    // Rebinning
-    auto const rebinDefault = instrumentDetails.getDefaultRebin();
-    std::vector<double> rebinParams;
-    if (!rebinDefault.empty()) {
-      std::vector<std::string> rebinParamsStr;
-      boost::split(rebinParamsStr, rebinDefault, boost::is_any_of(","));
-      std::for_each(rebinParamsStr.begin(), rebinParamsStr.end(),
-                    [&rebinParams](auto &param) { rebinParams.push_back(std::stod(param)); });
-    } else
-      rebinParams = {0, 0, 0};
-
-    int rebinTab = (int)(rebinParams.size() != 3);
-    std::string rebinString = !rebinDefault.empty() ? rebinDefault : "";
-    m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.empty(), rebinTab);
-
-    // Grouping
-    m_view->setInstrumentGrouping(instrumentName);
-
-    // Instrument spec defaults
-    bool irsORosiris = std::regex_search(instrumentName, std::regex("(^OSIRIS$)|(^IRIS$)"));
-    bool toscaORtfxa = std::regex_search(instrumentName, std::regex("(^TOSCA$)|(^TFXA$)"));
-    m_idrUI->showAnalyserAndReflectionOptions(!toscaORtfxa);
-    std::map<std::string, bool> specMap{{"irsORosiris", !irsORosiris},
-                                        {"toscaORtfxa", !toscaORtfxa},
-                                        {"defaultEUnits", instrumentDetails.getDefaultUseDeltaEInWavenumber()},
-                                        {"defaultSaveNexus", instrumentDetails.getDefaultSaveNexus()},
-                                        {"defaultSaveASCII", instrumentDetails.getDefaultSaveASCII()},
-                                        {"defaultFoldMultiple", instrumentDetails.getDefaultFoldMultipleFrames()}};
-    m_view->setInstrumentSpecDefault(specMap);
+  auto validator = std::make_unique<UserInputValidator>();
+  validateInstrumentDetails(validator.get());
+  const auto error = validator->generateErrorMessage();
+  if (!error.empty()) {
+    m_view->displayWarning(error);
+    return;
   }
+
+  InstrumentData instrumentDetails = getInstrumentData();
+  auto const instrumentName = instrumentDetails.getInstrument();
+
+  // spectraRange & Efixed
+  auto const specMin = instrumentDetails.getDefaultSpectraMin();
+  auto const specMax = instrumentDetails.getDefaultSpectraMax();
+  m_view->setInstrumentSpectraRange(specMin, specMax);
+  m_view->setInstrumentEFixed(instrumentName, instrumentDetails.getDefaultEfixed());
+
+  // Rebinning
+  auto const rebinDefault = instrumentDetails.getDefaultRebin();
+  std::vector<double> rebinParams;
+  if (!rebinDefault.empty()) {
+    std::vector<std::string> rebinParamsStr;
+    boost::split(rebinParamsStr, rebinDefault, boost::is_any_of(","));
+    std::for_each(rebinParamsStr.begin(), rebinParamsStr.end(),
+                  [&rebinParams](auto &param) { rebinParams.push_back(std::stod(param)); });
+  } else
+    rebinParams = {0, 0, 0};
+
+  int rebinTab = (int)(rebinParams.size() != 3);
+  std::string rebinString = !rebinDefault.empty() ? rebinDefault : "";
+  m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.empty(), rebinTab);
+
+  // Grouping
+  m_view->setInstrumentGrouping(instrumentName);
+
+  // Instrument spec defaults
+  bool irsORosiris = std::regex_search(instrumentName, std::regex("(^OSIRIS$)|(^IRIS$)"));
+  bool toscaORtfxa = std::regex_search(instrumentName, std::regex("(^TOSCA$)|(^TFXA$)"));
+  m_idrUI->showAnalyserAndReflectionOptions(!toscaORtfxa);
+  std::map<std::string, bool> specMap{{"irsORosiris", !irsORosiris},
+                                      {"toscaORtfxa", !toscaORtfxa},
+                                      {"defaultEUnits", instrumentDetails.getDefaultUseDeltaEInWavenumber()},
+                                      {"defaultSaveNexus", instrumentDetails.getDefaultSaveNexus()},
+                                      {"defaultSaveASCII", instrumentDetails.getDefaultSaveASCII()},
+                                      {"defaultFoldMultiple", instrumentDetails.getDefaultFoldMultipleFrames()}};
+  m_view->setInstrumentSpecDefault(specMap);
 }
 
-bool IETPresenter::validate() {
+void IETPresenter::handleRun() {
+  InstrumentData instrumentData = getInstrumentData();
   IETRunData runData = m_view->getRunData();
-  UserInputValidator uiv;
+
+  m_view->setEnableOutputOptions(false);
+
+  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
+}
+
+void IETPresenter::handleValidation(IUserInputValidator *validator) const {
+  IETRunData runData = m_view->getRunData();
 
   if (!m_view->isRunFilesValid()) {
-    uiv.addErrorMessage("Run file range is invalid.");
+    validator->addErrorMessage("Run file range is invalid.");
   }
 
   if (runData.getInputData().getUseCalibration()) {
-    m_view->validateCalibrationFileType(uiv);
+    m_view->validateCalibrationFileType(validator);
   }
 
   auto rebinDetails = runData.getRebinData();
@@ -157,11 +166,11 @@ bool IETPresenter::validate() {
         if (response)
           rebinWidth = std::abs(rebinWidth);
 
-        bool rebinValid = !uiv.checkBins(rebinDetails.getRebinLow(), rebinWidth, rebinDetails.getRebinHigh());
+        bool rebinValid = !validator->checkBins(rebinDetails.getRebinLow(), rebinWidth, rebinDetails.getRebinHigh());
         m_view->setSingleRebin(rebinValid);
       }
     } else {
-      m_view->validateRebinString(uiv);
+      m_view->validateRebinString(validator);
     }
   } else {
     m_view->setSingleRebin(false);
@@ -177,31 +186,17 @@ bool IETPresenter::validate() {
 
   for (auto const &error : errors) {
     if (!error.empty())
-      uiv.addErrorMessage(error);
+      validator->addErrorMessage(error);
   }
 
-  auto const error = uiv.generateErrorMessage();
-  if (!error.empty())
-    m_view->showMessageBox(error);
-
-  return validateInstrumentDetails() && uiv.isAllInputValid();
+  validateInstrumentDetails(validator);
 }
 
-void IETPresenter::notifyRunClicked() { runTab(); }
-
-void IETPresenter::run() {
-  InstrumentData instrumentData = getInstrumentData();
-  IETRunData runData = m_view->getRunData();
-
-  m_view->setRunButtonText("Running...");
-  m_view->setEnableOutputOptions(false);
-
-  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
-}
+void IETPresenter::notifyFindingRun() { m_runPresenter->setRunText("Finding files..."); }
 
 void IETPresenter::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgorithm, bool error) {
+  m_runPresenter->setRunEnabled(true);
   if (!lastAlgorithm || error) {
-    m_view->setRunButtonText("Run");
     m_view->setEnableOutputOptions(false);
     m_view->setPlotTimeIsPlotting(false);
     return;
@@ -219,14 +214,15 @@ void IETPresenter::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &lastAlgor
 }
 
 void IETPresenter::handleReductionComplete() {
-  m_view->setRunButtonText("Run");
+  m_runPresenter->setRunEnabled(true);
   m_view->setEnableOutputOptions(true);
 
   InstrumentData instrumentData = getInstrumentData();
   auto const outputWorkspaceNames =
       m_model->groupWorkspaces(m_model->outputGroupName(), instrumentData.getInstrument(),
                                m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
-  m_pythonExportWsName = outputWorkspaceNames[0];
+  if (!outputWorkspaceNames.empty())
+    m_pythonExportWsName = outputWorkspaceNames[0];
 
   setOutputPlotOptionsWorkspaces(outputWorkspaceNames);
   m_view->setSaveEnabled(!outputWorkspaceNames.empty());
@@ -283,11 +279,11 @@ void IETPresenter::notifySaveCustomGroupingClicked(std::string const &customGrou
 
 void IETPresenter::notifyRunFinished() {
   if (!m_view->isRunFilesValid()) {
-    m_view->setRunButtonText("Invalid Run(s)");
+    m_runPresenter->setRunText("Invalid Run(s)");
   } else {
     double detailedBalance = m_model->loadDetailedBalance(m_view->getFirstFilename());
     m_view->setDetailedBalance(detailedBalance);
-    m_view->setRunButtonText("Run");
+    m_runPresenter->setRunEnabled(true);
   }
   m_view->setRunFilesEnabled(true);
 }

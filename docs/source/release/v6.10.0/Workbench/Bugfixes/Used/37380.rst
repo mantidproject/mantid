@@ -1,1 +1,0 @@
-- Fixed bug where selecting and deselecting different curves with error bars in the plot settings caused an error.

@@ -1,28 +1,33 @@
+cdt_name:
+  - cos7
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
-  - 15                         # [osx]
-  - 10                         # [linux]
+  - 16                         # [osx]
+  - 12                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
-  - 15                         # [osx]
-  - 10                         # [linux]
+  - 16                         # [osx]
+  - 12                         # [linux]
 llvm_openmp:                   # [osx]
-  - 15                         # [osx]
+  - 16                         # [osx]
 
 python:
   - 3.10
 
-boost:
-  - 1.78
+libboost_devel:
+  - 1.82 # Aim to follow conda-forge
 
-cmake: # Problem with fetching mslice repo in 3.27
-  - '>=3.21.0,<3.27'
+libboost_python_devel:
+  - 1.82 # Aim to follow conda-forge
+
+cmake:
+  - '>=3.21.0'
 
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
@@ -40,6 +45,10 @@ libcxx:
 
 matplotlib:
   - 3.7.*
+
+# Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
+occt:
+  - '=*=novtk*'
 
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:

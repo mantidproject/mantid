@@ -70,6 +70,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FindSXPeaksConvolve.py
+    algorithms/FindMultipleUMatrices.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
@@ -379,6 +380,7 @@ set(PYTHON_PLUGINS
     functions/RFresonance.py
     functions/Redfield.py
     functions/SCgapSwave.py
+    functions/SpinDiffusion.py
     functions/SpinGlass.py
     functions/StandardSC.py
     functions/StaticLorentzianKT.py

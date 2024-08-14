@@ -1,1 +1,0 @@
-- Fixed potential crash when opening a file to edit where that file / directory had been deleted.

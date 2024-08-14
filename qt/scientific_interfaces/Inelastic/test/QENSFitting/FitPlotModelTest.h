@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "QENSFitting/ConvFitModel.h"
+#include "QENSFitting/ConvolutionModel.h"
 #include "QENSFitting/FitOutput.h"
 #include "QENSFitting/FitPlotModel.h"
 

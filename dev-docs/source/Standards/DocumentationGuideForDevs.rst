@@ -47,8 +47,7 @@ Other tools:
   This can help you quickly track down that unexpected space or missing newline without having to rebuild the documentation each time.
   It does not support sphinx directives so links will produce errors on the page which need to be checked by building the documentation using Mantid.
   The syntax to use it is: ``restview path/to/file.rst``
-* VSCode with `reStructuredText <https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext>`__ enables previews of
-  documents inside VSCode. The preview does not support the mantid directives but is useful for a general idea of structure.
+* VSCode with `reStructuredText <https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext>`__ and `esbonio <https://marketplace.visualstudio.com/items?itemName=swyddfa.esbonio>`__ enables previews of documents inside VSCode. The preview does not support the mantid directives but is useful for a general idea of structure.
 
 The reStructuredText File
 -------------------------

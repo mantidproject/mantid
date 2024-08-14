@@ -98,7 +98,7 @@ class MatchSpectraTest(unittest.TestCase):
         )
         self.__checkReference(results, 1)
         self.__checkValues(results, 0, 1.0, 10.0)
-        self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(1)))
+        self.assertTrue(np.all(mtd[outwsname].readY(0) == mtd[outwsname].readY(1)))
 
         ##### scale only
         results = MatchSpectra(
@@ -106,7 +106,7 @@ class MatchSpectraTest(unittest.TestCase):
         )
         self.__checkReference(results, 2)
         self.__checkValues(results, 0, 10.0, 0.0)
-        self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(2)))
+        self.assertTrue(np.all(mtd[outwsname].readY(0) == mtd[outwsname].readY(2)))
 
         ##### both
         results = MatchSpectra(
@@ -114,7 +114,7 @@ class MatchSpectraTest(unittest.TestCase):
         )
         self.__checkReference(results, 3)
         self.__checkValues(results, 0, 10.0, 10.0)
-        self.assertTrue(np.alltrue(mtd[outwsname].readY(0) == mtd[outwsname].readY(3)))
+        self.assertTrue(np.all(mtd[outwsname].readY(0) == mtd[outwsname].readY(3)))
 
         DeleteWorkspaces(WorkspaceList=[inwsname, outwsname])
 

@@ -1,6 +1,16 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 # Testing
-set(TEST_FILES InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h InstrumentWidget/InstrumentDisplayTest.h
-               InstrumentWidget/InstrumentWidgetTest.h InstrumentWidget/PanelsSurfaceTest.h
+set(TEST_FILES
+    InstrumentRendererTest.h
+    InstrumentWidgetDecoderTest.h
+    InstrumentWidgetEncoderTest.h
+    InstrumentWidget/InstrumentDisplayTest.h
+    InstrumentWidget/InstrumentWidgetTest.h
+    InstrumentWidget/PanelsSurfaceTest.h
+    InstrumentWidget/ProjectionSurfaceTest.h
 )
 
 set(MOCK_HEADER_DIRS InstrumentWidget)

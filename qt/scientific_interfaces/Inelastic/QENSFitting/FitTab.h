@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -17,6 +14,8 @@
 #include "FunctionBrowser/TemplateSubType.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_FitTab.h"
 
 #include <memory>
@@ -72,7 +71,7 @@ public:
   }
 
   template <typename FittingModel> void setupFittingPresenter() {
-    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
     auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
     auto model = std::make_unique<FittingModel>();
     m_fittingPresenter = std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser,
@@ -112,10 +111,9 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return tabName(); }
 
 private:
-  void setup() override;
-
   void updateParameterEstimationData();
   void updateDataReferences();
   void updateFitFunction();
@@ -127,7 +125,6 @@ private:
   std::unique_ptr<FitDataPresenter> m_dataPresenter;
   std::unique_ptr<FittingPresenter> m_fittingPresenter;
   std::unique_ptr<FitPlotPresenter> m_plotPresenter;
-  std::unique_ptr<IRunPresenter> m_runPresenter;
   std::unique_ptr<FitOutputOptionsPresenter> m_outOptionsPresenter;
 };
 

@@ -119,6 +119,66 @@ While not vital and often not something I'd ask for changes on, it is good to ke
 * Commits that nicely encapsulate increments of work - if developers are making multiple subsequent commits that should logically be part of a previous commit encourage use of ``amend`` and ``fixup``.
 * Using ``#re`` or ``#refs`` in the comment where appropriate (either title or body; we have a mix of styles but a developer should pick one and be consistent).
 
+.. _FixProtectedBranchMergeConflict:
+
+Fixing a merge conflict between ``main`` and a protected branch
+===============================================================
+
+There may occasionally be a merge conflict when the automated "Merge protected branches" workflow attempts to merge a protected branch into ``main``. The following instructions detail how to fix the conflict, using the ``release-next`` branch as an example:
+
+From a fork
+-----------
+
+Assuming your fork has the following remote setup
+
+.. code-block:: bash
+
+    $ git remote -v
+    mantid  https://github.com/mantidproject/mantid.git (fetch)
+    mantid  https://github.com/mantidproject/mantid.git (push)
+    origin  https://github.com/<username>/mantid.git (fetch)
+    origin  https://github.com/<username>/mantid.git (push)
+
+
+then you can follow these instructions to fix the merge conflict:
+
+.. code-block:: bash
+
+    git fetch --all
+    git checkout release-next
+    git pull mantid release-next
+    git checkout main
+    git pull mantid main
+    git checkout -b 0-fix-conflicts
+    git merge release-next
+
+You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``mantid`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
+
+From a non-fork
+---------------
+
+Assuming you have the following remote setup
+
+.. code-block:: bash
+
+    $ git remote -v
+    origin  https://github.com/mantidproject/mantid.git (fetch)
+    origin  https://github.com/mantidproject/mantid.git (push)
+
+
+then you can follow these instructions to fix the merge conflict:
+
+.. code-block:: bash
+
+    git fetch --all
+    git checkout release-next
+    git pull origin release-next
+    git checkout main
+    git pull origin main
+    git checkout -b 0-fix-conflicts
+    git merge release-next
+
+You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``origin`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
 
 Specific quirks of Mantid
 =========================

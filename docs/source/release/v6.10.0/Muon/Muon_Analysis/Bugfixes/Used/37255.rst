@@ -1,1 +1,0 @@
-- Fixed an error that would occur during simultaneous fitting on the :ref:`Muon Analysis interface <Muon_Analysis-ref>`.

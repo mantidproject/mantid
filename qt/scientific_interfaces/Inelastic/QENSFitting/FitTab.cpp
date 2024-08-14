@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitTab.h"
 
-#include "Common/RunWidget/RunView.h"
 #include "FitPlotView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QString>
 
@@ -19,13 +19,11 @@ namespace Inelastic {
 
 FitTab::FitTab(QWidget *parent, std::string const &tabName)
     : InelasticTab(parent), m_uiForm(new Ui::FitTab), m_dataPresenter(), m_fittingPresenter(), m_plotPresenter(),
-      m_runPresenter(), m_outOptionsPresenter() {
+      m_outOptionsPresenter() {
   m_uiForm->setupUi(parent);
   parent->setWindowTitle(QString::fromStdString(tabName));
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm->runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm->runWidget);
 }
-
-void FitTab::setup() { updateOutputOptions(false); }
 
 void FitTab::setupOutputOptionsPresenter(bool const editResults) {
   auto model = std::make_unique<FitOutputOptionsModel>();

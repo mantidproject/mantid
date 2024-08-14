@@ -1,1 +1,0 @@
-- Fix crash when using the full 3D view with certain instruments on some versions of Linux.

@@ -52,7 +52,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
             self.setProperty(self._OUTPUT_WS, masked_workspace)
             return
 
-        summed_workspace = self.sum_banks(masked_workspace)
+        summed_workspace = self.sum_banks(masked_workspace, num_banks)
         result = self._prepend_monitors(input_workspace, summed_workspace)
         self.setProperty(self._OUTPUT_WS, result)
 
@@ -87,9 +87,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         self.createChildAlgorithm("MaskDetectors", Workspace=cloned_ws, MaskedWorkspace=mask_ws).execute()
         return cloned_ws
 
-    def sum_banks(self, workspace: MatrixWorkspace):
-        component = self._get_rectangular_detector_component(workspace)
-        num_banks = component.xpixels()
+    def sum_banks(self, workspace: MatrixWorkspace, num_banks: int):
         return self._run_child_with_out_props("SmoothNeighbours", InputWorkspace=workspace, SumPixelsX=num_banks, SumPixelsY=1)
 
     def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):

@@ -1342,6 +1342,10 @@ class MantidAxes3D(Axes3D):
     def __init__(self, *args, **kwargs):
         kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
+        # By default, when right click is held the plot will zoom in and out.
+        # For Mantid plots right click will open a context menu instead
+        # Unassigning the zoom button avoids zoom becoming toggled after leaving the context menu
+        self.mouse_init(zoom_btn=None)
 
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called

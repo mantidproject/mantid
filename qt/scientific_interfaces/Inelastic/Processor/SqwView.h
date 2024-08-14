@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "ui_SqwTab.h"
 
 namespace MantidQt {
@@ -29,7 +30,9 @@ public:
 
   void subscribePresenter(ISqwPresenter *presenter) override;
 
-  OutputPlotOptionsView *getPlotOptions() const override;
+  IRunView *getRunView() const override;
+  IOutputPlotOptionsView *getPlotOptions() const override;
+
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
   std::tuple<double, double> getQRangeFromPlot() const override;
@@ -39,7 +42,6 @@ public:
   void setDefaultQAndEnergy() override;
   bool validate() override;
   void showMessageBox(std::string const &message) const override;
-  void setRunButtonText(std::string const &runText) override;
   void setEnableOutputOptions(bool const enable) override;
 
 private slots:
@@ -51,7 +53,6 @@ private slots:
   void notifyEWidthChanged(double value);
   void notifyEHighChanged(double value);
   void notifyRebinEChanged(int value);
-  void notifyRunClicked();
   void notifySaveClicked();
 
 private:

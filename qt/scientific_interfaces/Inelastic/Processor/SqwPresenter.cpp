@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwPresenter.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -34,14 +34,14 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
+SqwPresenter::SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                           ISqwView *view, std::unique_ptr<ISqwModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
 }
-
-void SqwPresenter::setup() {}
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
@@ -63,24 +63,8 @@ void SqwPresenter::handleDataReady(std::string const &dataName) {
   }
 }
 
-bool SqwPresenter::validate() {
-  UserInputValidator uiv = m_model->validate(m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
-  auto const errorMessage = uiv.generateErrorMessage();
-  // Show an error message if needed
-  if (!errorMessage.empty())
-    m_view->showMessageBox(errorMessage);
-  return errorMessage.empty();
-}
-
-void SqwPresenter::run() {
-  m_model->setupRebinAlgorithm(m_batchAlgoRunner);
-  m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
-  m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
-
-  m_view->setRunButtonText("Running...");
-  m_view->setEnableOutputOptions(false);
-
-  m_batchAlgoRunner->executeBatch();
+void SqwPresenter::handleValidation(IUserInputValidator *validator) const {
+  m_model->validate(validator, m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
 }
 
 /**
@@ -92,7 +76,6 @@ void SqwPresenter::runComplete(bool error) {
   if (!error) {
     setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
   }
-  m_view->setRunButtonText("Run");
   m_view->setEnableOutputOptions(!error);
 }
 
@@ -119,12 +102,20 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void SqwPresenter::handleRunClicked() { runTab(); }
+void SqwPresenter::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
+  std::deque<API::IConfiguredAlgorithm_sptr> algoQueue = {};
+  if (m_model->isRebinInEnergy())
+    algoQueue.emplace_back(m_model->setupRebinAlgorithm());
+  algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
+  algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
+  m_view->setEnableOutputOptions(false);
+  m_algorithmRunner->execute(algoQueue);
+}
 
 void SqwPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_model->getOutputWorkspace()));
-  m_batchAlgoRunner->executeBatch();
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_model->getOutputWorkspace()));
 }
 
 void SqwPresenter::handleQLowChanged(double const value) { m_model->setQMin(value); }

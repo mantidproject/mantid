@@ -730,7 +730,7 @@ def _is_workspace_property(prop):
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
-    if type(prop) == _kernel.Property and "Workspace" in prop.name:
+    if type(prop) is _kernel.Property and "Workspace" in prop.name:
         return True
     else:
         # Doesn't look like a workspace property

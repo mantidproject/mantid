@@ -676,12 +676,16 @@ def _dimension_limits(
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
-    dim_limits = [(dim.getMinimum(), dim.getMaximum()) for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
-    for idim, (dim_min, dim_max) in enumerate(dim_limits):
+    dim_limits = []
+
+    for idim in range(workspace.getNumDims()):
+        dim = workspace.getDimension(idim)
+        dim_min = dim.getMinimum()
+        dim_max = dim.getMaximum()
         slice_pt = slicepoint[idim]
         if slice_pt is not None:
             # replace extents with integration limits (calc from bin width in bin_params)
-            half_bin_width = bin_params[idim] / 2
+            half_bin_width = bin_params[idim] / 2 if bin_params is not None else dim.getBinWidth() / 2
             dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
         elif limits is not None and dimension_indices[idim] is not None:
             # replace min/max of non-integrated dims with limits from ROI if specified
@@ -690,7 +694,8 @@ def _dimension_limits(
         # check all limits are over minimum width
         if dim_max - dim_min < MIN_WIDTH:
             dim_max = dim_min + MIN_WIDTH
-        dim_limits[idim] = (dim_min, dim_max)
+        dim_limits.append((dim_min, dim_max))
+
     return dim_limits
 
 

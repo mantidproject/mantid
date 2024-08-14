@@ -88,12 +88,15 @@ enum class TempCorrectionType { None, Exponential };
 
 enum class BackgroundType { None, Flat, Linear };
 
+enum class TiePeakCentresType { False, True };
+
 enum SubTypeIndex {
   Lorentzian = 0,
   Fit = 1,
   Delta = 2,
   TempCorrection = 3,
   Background = 4,
+  TiePeakCentres = 5,
 };
 
 extern std::map<FitType, bool> FitTypeQDepends;
@@ -120,6 +123,11 @@ struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
 
 struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   std::string name() const override { return "Background"; }
+};
+
+struct TiePeakCentresSubType : public TemplateSubTypeImpl<TiePeakCentresType> {
+  std::string name() const override { return "Tie Peak Centres"; }
+  bool isType(const std::type_info &type) const override { return type == typeid(bool); }
 };
 
 } // namespace ConvTypes

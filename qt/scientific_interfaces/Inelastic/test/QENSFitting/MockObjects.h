@@ -14,6 +14,9 @@
 #include "Processor/ElwinPresenter.h"
 #include "Processor/ElwinView.h"
 #include "Processor/IElwinView.h"
+#include "Processor/IMomentsView.h"
+#include "Processor/MomentsModel.h"
+#include "Processor/MomentsPresenter.h"
 #include "QENSFitting/FitOutput.h"
 #include "QENSFitting/FitPlotModel.h"
 #include "QENSFitting/FitTab.h"
@@ -287,7 +290,7 @@ public:
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isTableEmpty, bool());
   MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::IUserInputValidator *validator));
-  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
+  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow const &newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
   MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));
   MOCK_METHOD0(clearTable, void());
@@ -428,6 +431,7 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IElwinPresenter *presenter));
   MOCK_METHOD0(setup, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
 
   MOCK_METHOD2(setAvailableSpectra,
@@ -479,17 +483,18 @@ class MockElwinModel : public IElwinModel {
 public:
   virtual ~MockElwinModel() = default;
 
-  MOCK_METHOD3(setupLoadAlgorithm, void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                        std::string const &filepath, std::string const &outputName));
+  MOCK_CONST_METHOD2(setupLoadAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath,
+                                                                                  std::string const &outputName));
   MOCK_METHOD2(createGroupedWorkspaces,
                std::string(MatrixWorkspace_sptr workspce, FunctionModelSpectra const &spectra));
-  MOCK_METHOD3(setupGroupAlgorithm,
-               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &inputWorkspacesString,
-                    std::string const &inputGroupWsName));
-  MOCK_METHOD5(setupElasticWindowMultiple,
-               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &workspaceBaseName,
-                    std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
-                    std::string const &sampleEnvironmentLogValue));
+  MOCK_CONST_METHOD2(setupGroupAlgorithm,
+                     MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
+                                                              std::string const &inputGroupWsName));
+  MOCK_METHOD4(setupElasticWindowMultiple,
+               MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &workspaceBaseName,
+                                                        std::string const &inputGroupWsName,
+                                                        std::string const &sampleEnvironmentLogName,
+                                                        std::string const &sampleEnvironmentLogValue));
   MOCK_CONST_METHOD1(ungroupAlgorithm, void(std::string const &inputWorkspaces));
   MOCK_CONST_METHOD2(groupAlgorithm, void(std::string const &inputWorkspaces, std::string const &outputWorkspace));
   MOCK_METHOD1(setIntegrationStart, void(double integrationStart));
@@ -500,6 +505,45 @@ public:
   MOCK_METHOD1(setNormalise, void(bool normalise));
   MOCK_METHOD1(setOutputWorkspaceNames, void(std::string const &workspaceBaseName));
   MOCK_CONST_METHOD0(getOutputWorkspaceNames, std::string());
+};
+
+class MockMomentsView : public IMomentsView {
+public:
+  virtual ~MockMomentsView() = default;
+
+  MOCK_METHOD1(subscribePresenter, void(IMomentsPresenter *presenter));
+  MOCK_METHOD0(setupProperties, void());
+  MOCK_CONST_METHOD0(getRunView, IRunView *());
+  MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
+  MOCK_CONST_METHOD0(getDataSelector, DataSelector *());
+  MOCK_CONST_METHOD0(getDataName, std::string());
+  MOCK_CONST_METHOD1(showMessageBox, void(std::string const &message));
+
+  MOCK_METHOD1(setFBSuffixes, void(QStringList const &suffix));
+  MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
+
+  MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
+  MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));
+  MOCK_METHOD1(setRangeSelectorMin, void(double newValue));
+  MOCK_METHOD1(setRangeSelectorMax, void(double newValue));
+  MOCK_METHOD1(setSaveResultEnabled, void(bool enable));
+
+  MOCK_METHOD1(plotNewData, void(std::string const &filename));
+  MOCK_METHOD0(replot, void());
+  MOCK_METHOD1(plotOutput, void(std::string const &outputWorkspace));
+};
+
+class MockMomentsModel : public IMomentsModel {
+public:
+  virtual ~MockMomentsModel() = default;
+
+  MOCK_CONST_METHOD0(setupMomentsAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr());
+  MOCK_METHOD1(setInputWorkspace, void(const std::string &workspace));
+  MOCK_METHOD1(setEMin, void(double eMin));
+  MOCK_METHOD1(setEMax, void(double eMax));
+  MOCK_METHOD1(setScale, void(bool scale));
+  MOCK_METHOD1(setScaleValue, void(double scaleValue));
+  MOCK_CONST_METHOD0(getOutputWorkspace, std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

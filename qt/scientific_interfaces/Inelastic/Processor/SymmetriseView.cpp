@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SymmetriseView.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "SymmetrisePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -131,7 +131,6 @@ SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter()
   connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyXrangeLowChanged(double)));
   connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyXrangeHighChanged(double)));
   // Handle running, plotting and saving
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
 }
 
@@ -158,7 +157,6 @@ void SymmetriseView::setDefaults() {
   m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, AxisID::XBottom);
 
   // Disable run until preview is clicked
-  m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbPreview->setEnabled(false);
 
   // Allows empty workspace selector when initially selected
@@ -168,7 +166,11 @@ void SymmetriseView::setDefaults() {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-OutputPlotOptionsView *SymmetriseView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+MantidWidgets::DataSelector *SymmetriseView::getDataSelector() const { return m_uiForm.dsInput; }
+
+IRunView *SymmetriseView::getRunView() const { return m_uiForm.runWidget; }
+
+IOutputPlotOptionsView *SymmetriseView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
 void SymmetriseView::notifyDoubleValueChanged(QtProperty *prop, double value) {
   m_presenter->handleDoubleValueChanged(prop->propertyName().toStdString(), value);
@@ -176,9 +178,7 @@ void SymmetriseView::notifyDoubleValueChanged(QtProperty *prop, double value) {
 
 void SymmetriseView::notifyDataReady(QString const &dataName) { m_presenter->handleDataReady(dataName.toStdString()); }
 
-void SymmetriseView::notifyRunClicked() { m_presenter->handleRunOrPreviewClicked(false); }
-
-void SymmetriseView::notifyPreviewClicked() { m_presenter->handleRunOrPreviewClicked(true); }
+void SymmetriseView::notifyPreviewClicked() { m_presenter->handlePreviewClicked(); }
 
 void SymmetriseView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 /**
@@ -202,20 +202,16 @@ void SymmetriseView::notifyXrangeHighChanged(double value) {
 }
 
 void SymmetriseView::notifyReflectTypeChanged(QtProperty *prop, int value) {
-  if (prop->propertyName() == "ReflectType") {
-    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-
-    if (validate()) {
-      m_presenter->handleReflectTypeChanged(value);
-
-      MatrixWorkspace_sptr sampleWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-      auto const axisRange = getXRangeFromWorkspace(sampleWS);
-
-      resetEDefaults(value == 0, axisRange);
-    }
-  }
+  if (prop->propertyName() == "ReflectType")
+    m_presenter->handleReflectTypeChanged(value);
 }
+
+void SymmetriseView::resetEDefaults(bool isPositive) {
+  MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getDataName());
+  auto const axisRange = getXRangeFromWorkspace(sampleWS);
+  resetEDefaults(isPositive, axisRange);
+}
+
 /**
  * Updates boundaries and initial values for Selector and Data properties when changing between negative/positive side
  * of spectrum.
@@ -385,15 +381,6 @@ void SymmetriseView::replotNewSpectrum(double value) {
   updateMiniPlots();
 }
 
-bool SymmetriseView::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.empty())
-    showMessageBox(errorMessage);
-  return errorMessage.empty();
-}
-
 void SymmetriseView::setRawPlotWatchADS(bool watchADS) { m_uiForm.ppRawPlot->watchADS(watchADS); }
 
 double SymmetriseView::getElow() const { return m_dblManager->value(m_properties["Elow"]); }
@@ -437,8 +424,6 @@ void SymmetriseView::previewAlgDone() {
 }
 
 void SymmetriseView::enableSave(bool save) { m_uiForm.pbSave->setEnabled(save); }
-
-void SymmetriseView::enableRun(bool run) { m_uiForm.pbRun->setEnabled(run); }
 
 void SymmetriseView::showMessageBox(std::string const &message) const {
   QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));

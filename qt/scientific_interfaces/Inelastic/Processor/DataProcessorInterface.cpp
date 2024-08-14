@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DataProcessorInterface.h"
 
-#include "Common/Settings.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -14,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "ElwinModel.h"
 #include "ElwinPresenter.h"
@@ -51,7 +51,7 @@ std::string DataProcessorInterface::documentationPage() const { return "Inelasti
  */
 void DataProcessorInterface::exportTabPython() {
   auto const &tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex()).toStdString();
-  m_presenters[tabName]->exportPythonScript();
+  m_presenters[tabName]->exportPythonDialog();
 }
 
 /**

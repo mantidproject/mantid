@@ -1,1 +1,0 @@
-- Avoid overwriting Blank primary log setting in Engineering diffractions :ref:`Engineering Diffraction interface <Engineering_Diffraction-ref>` fitting tab :ref:`Fitting tab <ui engineering fitting>` when doing a sequential fit.

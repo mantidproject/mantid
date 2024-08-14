@@ -1,0 +1,1 @@
+- Added a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.

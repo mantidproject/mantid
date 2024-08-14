@@ -30,7 +30,8 @@ namespace DataHandling {
 
 struct HashV3DPair {
   size_t operator()(const std::pair<Kernel::V3D, uint32_t> &v) const {
-    size_t seed = std::hash<double>{}(v.first.X());
+    size_t seed = 0;
+    boost::hash_combine(seed, v.first.X());
     boost::hash_combine(seed, v.first.Y());
     boost::hash_combine(seed, v.first.Z());
     return seed;
@@ -52,7 +53,7 @@ public:
   LoadStl(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType,
           ReadMaterial::MaterialParameters params)
       : LoadSingleMesh(std::move(filename), mode, scaleType), m_setMaterial(true), m_params(std::move(params)) {}
-  virtual ~LoadStl() = default;
+  virtual ~LoadStl() override = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;

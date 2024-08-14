@@ -1,1 +1,0 @@
-- Fix bug in :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` where no shoebox dimensions could be retrieved from strong peaks unless an output file was specified.

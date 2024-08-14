@@ -4,10 +4,12 @@
 Develop with Conda on Linux
 ===========================
 
-Install `Git <https://git-scm.com/>`_
--------------------------------------
-* On Debian based systems (Ubuntu) install using apt with the following command: ``sudo apt-get install git``
-* On CentOS based systems (RHEL) install using yum with the following command: ``sudo yum install git``
+Install Git
+-----------
+
+* `Git <https://git-scm.com/>`_
+    * On Debian based systems (Ubuntu) install using apt with the following command: ``sudo apt install git``
+    * On CentOS based systems (RHEL) install using yum with the following command: ``sudo yum install git``
 
 Clone the mantid source code
 ----------------------------
@@ -35,7 +37,9 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 
 Setup the mantid conda environment
 ----------------------------------
-* With your restarted terminal.
+
+Dependencies are managed by conda via Mambaforge. The dependencies are defined in the ``mantid-developer-linux.yml`` file, located in the root of the mantid source code directory. With your restarted terminal:
+
 * Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-linux.yml``
 
 Configure CMake and generate build files

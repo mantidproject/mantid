@@ -17,8 +17,8 @@ lambda_min = 0.8
 
 
 class WishSX(BaseSX):
-    def __init__(self, vanadium_runno=None, file_ext=".raw"):
-        super().__init__(vanadium_runno, file_ext)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
@@ -62,16 +62,19 @@ class WishSX(BaseSX):
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
                 mantid.SetSample(wsname, EnableLogging=False, **self.sample_dict)
-                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", EnableLogging=False)
-                if "<sphere" in ADS.retrieve(wsname).sample().getShape().getShapeXML():
-                    transmission = mantid.SphericalAbsorption(InputWorkspace=wsname, OutputWorkspace="transmission", EnableLogging=False)
-                else:
-                    transmission = mantid.MonteCarloAbsorption(
-                        InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents, EnableLogging=False
-                    )
-                self._divide_workspaces(wsname, transmission)
-                mantid.DeleteWorkspace(transmission)
-                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
+                if not self.scale_integrated:
+                    mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", EnableLogging=False)
+                    if "<sphere" in ADS.retrieve(wsname).sample().getShape().getShapeXML():
+                        transmission = mantid.SphericalAbsorption(
+                            InputWorkspace=wsname, OutputWorkspace="transmission", EnableLogging=False
+                        )
+                    else:
+                        transmission = mantid.MonteCarloAbsorption(
+                            InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents, EnableLogging=False
+                        )
+                    self._divide_workspaces(wsname, transmission)
+                    mantid.DeleteWorkspace(transmission)
+                    mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
             # save results in dictionary
             self.set_ws(run, wsname)
         return wsname

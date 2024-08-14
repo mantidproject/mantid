@@ -722,6 +722,7 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
+    test/SelectionWorkspacesDialogTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
     test/WorkspaceUtilsTest.h
@@ -750,6 +751,7 @@ set(QT5_TEST_FILES
     test/FitScriptGeneratorPresenterTest.h
     test/FitScriptGeneratorViewTest.h
     test/FitScriptOptionsBrowserTest.h
+    test/SelectWorkspacesDialogTest.h
     test/FunctionTreeViewTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h

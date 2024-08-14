@@ -22,7 +22,10 @@ public:
 
   void setUp() override { m_model = std::make_unique<SqwModel>(); }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    m_model.reset();
+  }
 
   void test_algorrithm_set_up() {
     // The Moments algorithm is a python algorithm and so can not be called in
@@ -56,8 +59,10 @@ public:
     m_model->setEWidth(0.005);
     m_model->setEMax(0.4);
     m_model->setRebinInEnergy(true);
-    m_model->setupRebinAlgorithm(&batch);
+    auto const rebinAlg = m_model->setupRebinAlgorithm();
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{rebinAlg});
     batch.executeBatch();
+
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
   }
 
@@ -74,10 +79,10 @@ public:
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
     m_model->setEFixed(0.4);
-
-    m_model->setupRebinAlgorithm(&batch);
-    m_model->setupSofQWAlgorithm(&batch);
-    m_model->setupAddSampleLogAlgorithm(&batch);
+    std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algoQueue = {};
+    algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
+    algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
+    batch.setQueue(algoQueue);
     batch.executeBatch();
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("Workspace_name_r"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
@@ -97,11 +102,13 @@ public:
     m_model->setQMax(1.8);
     m_model->setEFixed(0.4);
     m_model->setRebinInEnergy(true);
-
-    m_model->setupRebinAlgorithm(&batch);
-    m_model->setupSofQWAlgorithm(&batch);
-    m_model->setupAddSampleLogAlgorithm(&batch);
+    std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algoQueue = {};
+    algoQueue.emplace_back(m_model->setupRebinAlgorithm());
+    algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
+    algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
+    batch.setQueue(algoQueue);
     batch.executeBatch();
+
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
   }

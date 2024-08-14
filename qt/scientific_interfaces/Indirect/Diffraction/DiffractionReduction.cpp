@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
@@ -50,7 +50,7 @@ void DiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
-  m_runPresenter = std::make_unique<RunPresenter>(this, new RunView(m_uiForm.runWidget));
+  m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
   m_plotOptionsPresenter =
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 

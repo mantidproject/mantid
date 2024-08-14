@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DataModel.h"
 #include "FitDataView.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
@@ -61,13 +61,10 @@ public:
     UNUSED_ARG(spectrum_index);
   };
 
-  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) {
-    UNUSED_ARG(widthIndex);
-    UNUSED_ARG(dataIndex);
-    UNUSED_ARG(single);
-  };
-  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) {
-    UNUSED_ARG(eisfIndex);
+  virtual void setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra, std::size_t parameterIndex,
+                                WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(activeParameterSpectra);
+    UNUSED_ARG(parameterIndex);
     UNUSED_ARG(dataIndex);
     UNUSED_ARG(single);
   };

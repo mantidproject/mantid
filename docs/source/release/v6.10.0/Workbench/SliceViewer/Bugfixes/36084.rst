@@ -1,0 +1,1 @@
+- Fixed a bug that happens when exporting ROI cuts in MDHisto workspace.

@@ -9,6 +9,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <QList>
@@ -238,8 +240,9 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
   for (int i = 0; i < nPeaks; ++i) {
     Mantid::Geometry::IPeak &peak = getPeak(i);
     int detID;
+    Mantid::DataObjects::Peak peakFull;
     try {
-      auto peakFull = dynamic_cast<Mantid::DataObjects::Peak &>(peak);
+      peakFull = dynamic_cast<Mantid::DataObjects::Peak &>(peak);
       detID = peakFull.getDetectorID();
     } catch (std::bad_cast &) {
       g_log.error("Cannot create markers for this type of peak");
@@ -249,15 +252,20 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
     try {
       double u, v, uscale, vscale;
       auto &detInfo = m_peaksWorkspace->detectorInfo();
-      auto detIndex = detInfo.indexOf(detID);
-      m_surface->project(detIndex, u, v, uscale, vscale);
+      if (detID >= 0) {
+        auto detIndex = detInfo.indexOf(detID);
+        m_surface->project(detIndex, u, v, uscale, vscale);
+      } else {
+        m_surface->project(peakFull.getCachedDetectorPosition(), u, v, uscale, vscale);
+      }
       // Create a peak marker at this position
       PeakMarker2D *r =
           new PeakMarker2D(*this, u, v, m_peakIntensityScale->getScaledMarker(peak.getIntensity(), style));
       r->setPeak(peak, i);
       addMarker(r);
     } catch (const std::runtime_error &ex) {
-      g_log.error(ex.what());
+      g_log.error("Error creating marker for peak " + std::to_string(i) + " with detector ID " +
+                  std::to_string(peak.getDetectorID()) + ". " + ex.what());
       return;
     }
   }

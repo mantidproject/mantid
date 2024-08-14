@@ -1,1 +1,0 @@
-- Updated search box for fitting functions so that function suggestions do not show repeated functions

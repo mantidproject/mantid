@@ -8,10 +8,10 @@
 
 #include "DllConfig.h"
 
-#include "Common/InelasticInterface.h"
-#include "Common/OutputPlotOptionsPresenter.h"
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "ui_DiffractionReduction.h"
 
@@ -39,6 +39,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "DiffractionReduction"; }
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);

@@ -6,9 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
 #include "DllConfig.h"
+
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -32,47 +36,53 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class DataReduction;
 
+class MANTIDQT_INELASTIC_DLL IDataProcessor {
+public:
+  virtual ~IDataProcessor() = default;
+  virtual void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter>) = 0;
+  virtual void clearOutputPlotOptionsWorkspaces() = 0;
+  virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
+  virtual void filterInputData(bool filter) = 0;
+  virtual void exportPythonDialog() = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
+                                                            const std::string &filename = "") = 0;
+};
 /** DataProcessor
 
   This class defines common functionality of tabs used in the Inelastic Data
   Processor interface.
 */
-class MANTIDQT_INELASTIC_DLL DataProcessor : public InelasticTab {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL DataProcessor : public IDataProcessor,
+                                             public InelasticTab,
+                                             public MantidQt::API::IAlgorithmRunnerSubscriber {
 
 public:
-  DataProcessor(QObject *parent = nullptr);
-  ~DataProcessor() override;
-
+  DataProcessor(QObject *parent = nullptr, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner = nullptr);
+  ~DataProcessor() = default;
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
-  /// Set the active workspaces used in the plotting options
+  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) override;
+  /// Overridden from IAlgorithmRunnerSubscriber: Notifies when a batch of algorithms is completed
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
+
   /// Clear the workspaces held by the output plotting options
-  void clearOutputPlotOptionsWorkspaces();
-  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
+  void clearOutputPlotOptionsWorkspaces() override;
+  /// Set the active workspaces used in the plotting options
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) override;
 
+  API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName,
+                                                    const std::string &filename = "") override;
   /// Prevent loading of data with incorrect naming
-  void filterInputData(bool filter);
+  void filterInputData(bool filter) override;
 
-public slots:
-  void runTab();
-
-signals:
-  /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
-
-private slots:
-  void tabExecutionComplete(bool error);
+  void exportPythonDialog() override;
 
 protected:
   virtual void runComplete(bool error) { (void)error; };
+  std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };
-
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
-  bool m_tabRunning;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

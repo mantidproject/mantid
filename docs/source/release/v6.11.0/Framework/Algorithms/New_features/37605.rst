@@ -1,0 +1,1 @@
+- Changed use of `scipy.interpolate.interp2d` in `NMoldyn4Interpolation` to use `scipy.interpolate.RectBivariateSpline`, since `interp2d` has been removed in version 1.14 of `scipy`. See reference documentation here (https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp2d.html)

@@ -64,7 +64,6 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # ####################################################################################################################
   # Look for dependencies Do NOT add include_directories commands here. They will affect every target.
   # ####################################################################################################################
-  set(BOOST_VERSION_REQUIRED 1.65.0)
   set(Boost_NO_BOOST_CMAKE TRUE)
   # Unless specified see if the boost169 package is installed
   if(EXISTS /usr/lib64/boost169 AND NOT (BOOST_LIBRARYDIR OR BOOST_INCLUDEDIR))
@@ -72,7 +71,9 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
     set(BOOST_INCLUDEDIR /usr/include/boost169)
     set(BOOST_LIBRARYDIR /usr/lib64/boost169)
   endif()
-  find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS date_time regex serialization filesystem system)
+
+  set(Boost_VERBOSE "ON")
+  find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem system)
   add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
   # Need this defined globally for our log time values
   add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)

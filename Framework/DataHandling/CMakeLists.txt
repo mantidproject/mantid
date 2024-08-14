@@ -25,6 +25,7 @@ set(SRC_FILES
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
     src/GenerateGroupingPowder.cpp
+    src/GenerateGroupingPowder2.cpp
     src/GroupDetectors.cpp
     src/GroupDetectors2.cpp
     src/H5Util.cpp
@@ -248,6 +249,7 @@ set(INC_FILES
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
+    inc/MantidDataHandling/GenerateGroupingPowder2.h
     inc/MantidDataHandling/GroupDetectors.h
     inc/MantidDataHandling/GroupDetectors2.h
     inc/MantidDataHandling/H5Util.h
@@ -471,6 +473,7 @@ set(TEST_FILES
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h
+    GenerateGroupingPowder2Test.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
     H5UtilTest.h

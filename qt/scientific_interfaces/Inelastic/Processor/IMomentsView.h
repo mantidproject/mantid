@@ -14,9 +14,13 @@
 #include <tuple>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class DataSelector;
+}
 namespace CustomInterfaces {
 
-class OutputPlotOptionsView;
+class IRunView;
+class IOutputPlotOptionsView;
 class IMomentsPresenter;
 
 class MANTIDQT_INELASTIC_DLL IMomentsView {
@@ -24,12 +28,13 @@ class MANTIDQT_INELASTIC_DLL IMomentsView {
 public:
   virtual ~IMomentsView() = default;
   virtual void subscribePresenter(IMomentsPresenter *presenter) = 0;
-
   virtual void setupProperties() = 0;
-  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
-  virtual std::string getDataName() const = 0;
 
-  virtual bool validate() = 0;
+  virtual IRunView *getRunView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual MantidWidgets::DataSelector *getDataSelector() const = 0;
+
+  virtual std::string getDataName() const = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
 
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
@@ -43,6 +48,7 @@ public:
   virtual void setRangeSelectorMin(double newValue) = 0;
   /// Sets the max of the range selector if it is more than the min
   virtual void setRangeSelectorMax(double newValue) = 0;
+  virtual void setSaveResultEnabled(bool enable) = 0;
 
   virtual void plotNewData(std::string const &filename) = 0;
   virtual void replot() = 0;

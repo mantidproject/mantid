@@ -8,8 +8,8 @@
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
-#include "Common/Settings.h"
 #include "ContainerSubtraction.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)
@@ -57,7 +57,6 @@ void Corrections::initLayout() {
 
   // Set up all tabs
   for (auto &tab : m_tabs) {
-    tab.second->setupTab();
     connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
   }
 

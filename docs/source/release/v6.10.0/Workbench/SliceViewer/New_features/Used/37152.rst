@@ -1,1 +1,0 @@
-- Added controls for the x and y limits to the main view of Sliceviewer.

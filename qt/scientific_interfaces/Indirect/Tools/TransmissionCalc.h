@@ -8,6 +8,7 @@
 
 #include "../DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ToolsTab.h"
 #include "ui_TransmissionCalc.h"
 
@@ -17,7 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL TransmissionCalc : public ToolsTab {
+class MANTIDQT_INDIRECT_DLL TransmissionCalc : public ToolsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -26,20 +27,15 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
-protected:
-  void setup() override;
-  bool validate() override;
-  void run() override;
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
+  const std::string getSubscriberName() const override { return "TransmissionCalc"; }
 
 private slots:
   /// Handles completion of the algorithm
   void algorithmComplete(bool error);
-  void runClicked();
 
 private:
-  void setRunIsRunning(bool running);
-  void setRunEnabled(bool enabled);
-
   /// The UI form
   Ui::TransmissionCalc m_uiForm;
   /// The name of the current instrument

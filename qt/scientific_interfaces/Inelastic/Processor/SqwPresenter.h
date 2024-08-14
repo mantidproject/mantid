@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "DataProcessor.h"
 #include "ISqwView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SqwModel.h"
 #include "SqwView.h"
 
@@ -30,7 +30,6 @@ public:
   virtual void handleEHighChanged(double const value) = 0;
   virtual void handleRebinEChanged(int const value) = 0;
 
-  virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
 };
 
@@ -39,15 +38,17 @@ public:
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataProcessor, public ISqwPresenter {
+class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataProcessor, public ISqwPresenter, public IRunSubscriber {
 
 public:
-  SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);
+  SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, ISqwView *view,
+               std::unique_ptr<ISqwModel> model);
   ~SqwPresenter() = default;
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
+  // runSubscriber
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Sqw"; }
 
   void handleDataReady(std::string const &dataName) override;
 
@@ -60,7 +61,6 @@ public:
   void handleEHighChanged(double const value) override;
   void handleRebinEChanged(int const value) override;
 
-  void handleRunClicked() override;
   void handleSaveClicked() override;
 
 protected:

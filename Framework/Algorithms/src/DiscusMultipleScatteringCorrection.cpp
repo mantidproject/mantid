@@ -30,6 +30,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -763,7 +764,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
     g_log.information() << "Total simulation points=" << nhists * nSimulationPoints << "\n";
-    for (auto &kv : m_attemptsToGenerateInitialTrack)
+    for (const auto &kv : m_attemptsToGenerateInitialTrack)
       g_log.information() << "Generating initial track required " << kv.first << " attempts on " << kv.second
                           << " occasions.\n";
     g_log.information() << "Calls to interceptSurface=" << m_callsToInterceptSurface << "\n";
@@ -1332,6 +1333,8 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
   return SQ;
 }
 
+GNU_DIAG_OFF("free-nonheap-object")
+
 /**
  * Simulates a set of neutron paths through the sample to a specific detector
  * position with each path containing the specified number of scattering events.
@@ -1351,7 +1354,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
  */
 std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-    ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
+    const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
     const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
   std::vector<int> countZeroWeights(wValues.size(), 0);
@@ -1387,6 +1390,8 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
 
   return {sumOfWeights, weightsErrors};
 }
+
+GNU_DIAG_ON("free-nonheap-object")
 
 /**
  * Simulates a single neutron path through the sample to a specific detector

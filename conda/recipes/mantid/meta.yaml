@@ -33,20 +33,21 @@ requirements:
     - libcxx  {{ libcxx }}                   # [osx]
 
   host:
-    - boost {{ boost }}
     - eigen
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
     - jemalloc  {{ jemalloc }} # [osx or linux]
     - jsoncpp
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
     - muparser
     - nexus
     - numpy {{ numpy }}
-    - occt
+    - occt {{ occt }}
     - python {{ python }}
     - poco {{ poco }}
     - setuptools
@@ -55,7 +56,6 @@ requirements:
     - versioningit
     - libglu  # [linux]
   run:
-    - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
@@ -63,7 +63,7 @@ requirements:
     - lib3mf  # [win]
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.27") }}
-    - {{ pin_compatible("occt", max_pin="x.x.x") }}
+    - occt {{ occt }}
     - pycifrw
     - python
     - python-dateutil
@@ -75,6 +75,8 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes
+  run_constrained:
+    - matplotlib {{ matplotlib }}
 
 test:
   imports:
@@ -85,7 +87,7 @@ about:
   home: https://github.com/mantidproject/mantid
   license: GPL-3.0-or-later
   summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
-  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib 3.5.2 to ensure correct compatibility.
+  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
 
 extra:
   recipe-maintainers:

@@ -92,7 +92,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         ADS.clear()
 
     def runTest(self):
-        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768, scale_integrated=False)
         sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
         sxd.set_sample(
             Geometry={"Shape": "CSG", "Value": sxd.sphere_shape},

@@ -8,6 +8,7 @@
 
 #include "DataProcessor.h"
 #include "IMomentsView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "MomentsModel.h"
 #include "MomentsView.h"
 
@@ -26,8 +27,6 @@ public:
   virtual void handleScaleChanged(bool state) = 0;
   virtual void handleScaleValueChanged(double const value) = 0;
   virtual void handleValueChanged(std::string const &propName, double value) = 0;
-
-  virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
 };
 /** MomentsPresenter : Calculates the S(Q,w) Moments of the provided data with
@@ -37,15 +36,17 @@ public:
   @author Samuel Jackson
   @date 13/08/2013
 */
-class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataProcessor, public IMomentsPresenter {
+class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataProcessor, public IMomentsPresenter, public IRunSubscriber {
 
 public:
-  MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
+  MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                   IMomentsView *view, std::unique_ptr<IMomentsModel> model);
   ~MomentsPresenter() = default;
 
-  void setup() override;
-  void run() override;
-  bool validate() override;
+  // runWidget
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Moments"; }
 
   void handleDataReady(std::string const &dataName) override;
 
@@ -53,7 +54,6 @@ public:
   void handleScaleValueChanged(double const value) override;
   void handleValueChanged(std::string const &propName, double value) override;
 
-  void handleRunClicked() override;
   void handleSaveClicked() override;
 
 protected:

@@ -96,7 +96,7 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Processor <interface-inelastic-data-processor>` in I(Q,t)                                                |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                        |
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSD, I(Q,t), Convolution or Function(Q)                   |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
@@ -134,20 +134,20 @@ Resolution Suffixes
 QENS Fitting Suffixes
 ~~~~~~~~~~~~~~~~~~~~~
 
-MSDFit
-######
+MSD
+###
 
 Sample Suffixes
   _eq
 
-I(Q,t)Fit
-#########
+I(Q,t)
+######
 
 Sample Suffixes
   _iqt
 
-ConvFit
-#######
+Convolution
+###########
 
 Sample Suffixes
   _red, _sqw
@@ -155,8 +155,8 @@ Sample Suffixes
 Resolution Suffixes
   _res, _red, _sqw
 
-F(Q)Fit
-#######
+Function(Q)
+###########
 
 Sample Suffixes
   _Result

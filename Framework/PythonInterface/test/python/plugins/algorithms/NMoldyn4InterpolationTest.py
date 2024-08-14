@@ -43,8 +43,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())
         self.assertEqual(inter_Q_length, osiris_Q_length)
         self.assertNotEqual(inter_Q_length, sim.getNumberHistograms())
-        self.assertAlmostEqual(sample_Y_data[0], 0.02009531, 8)
-        self.assertAlmostEqual(sample_Y_data[30], 1.73103349, 7)
+        self.assertEqual(len(sample_Y_data), len(self.TEST_DATA))
+        for i in range(len(sample_Y_data)):
+            self.assertAlmostEqual(sample_Y_data[i], self.TEST_DATA[i], 7)
 
     def test_X_min_too_big(self):
         x_data = np.arange(-0.5, 2.0, 0.05)
@@ -109,6 +110,69 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
             ReferenceWorkspace=self.osiris,
             OutputWorkspace="__NMoldyn4Interpolation_test",
         )
+
+    TEST_DATA = [
+        0.01588991,
+        0.03665782,
+        0.06572187,
+        0.10281931,
+        0.14755363,
+        0.19949125,
+        0.25811529,
+        0.32282554,
+        0.39299542,
+        0.46790749,
+        0.54681968,
+        0.62894665,
+        0.71345976,
+        0.79952206,
+        0.8862708,
+        0.9728371,
+        1.05835944,
+        1.14198366,
+        1.22286732,
+        1.30021361,
+        1.37323957,
+        1.44121843,
+        1.50347964,
+        1.55938151,
+        1.60838829,
+        1.64999461,
+        1.6837864,
+        1.70944087,
+        1.72667424,
+        1.73534293,
+        1.73534293,
+        1.72667424,
+        1.70944087,
+        1.6837864,
+        1.64999461,
+        1.60838829,
+        1.55938151,
+        1.50347964,
+        1.44121843,
+        1.37323957,
+        1.30021361,
+        1.22286732,
+        1.14198366,
+        1.05835944,
+        0.9728371,
+        0.8862708,
+        0.79952206,
+        0.71345976,
+        0.62894665,
+        0.54681968,
+        0.46790749,
+        0.39299542,
+        0.32282554,
+        0.25811529,
+        0.19949125,
+        0.14755363,
+        0.10281931,
+        0.06572187,
+        0.03665782,
+        0.01588991,
+    ]
 
 
 if __name__ == "__main__":

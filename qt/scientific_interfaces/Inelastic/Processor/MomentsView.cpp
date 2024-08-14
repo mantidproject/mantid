@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MomentsView.h"
-#include "Common/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include "MomentsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -38,7 +38,6 @@ MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
   connect(m_uiForm.ckScale, SIGNAL(stateChanged(int)), this, SLOT(notifyScaleChanged(int)));
   connect(m_uiForm.spScale, SIGNAL(valueChanged(double)), this, SLOT(notifyScaleValueChanged(double)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
 
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
@@ -84,9 +83,8 @@ void MomentsView::notifyScaleValueChanged(double const value) { m_presenter->han
 
 void MomentsView::notifyValueChanged(QtProperty *prop, double value) {
   m_presenter->handleValueChanged(prop->propertyName().toStdString(), value);
+  prop->propertyName() == "EMin" ? setRangeSelectorMin(value) : setRangeSelectorMax(value);
 }
-
-void MomentsView::notifyRunClicked() { m_presenter->handleRunClicked(); }
 
 void MomentsView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
@@ -110,19 +108,13 @@ void MomentsView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->s
 
 void MomentsView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
-OutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+IOutputPlotOptionsView *MomentsView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+
+MantidWidgets::DataSelector *MomentsView::getDataSelector() const { return m_uiForm.dsInput; }
+
+IRunView *MomentsView::getRunView() const { return m_uiForm.runWidget; }
 
 std::string MomentsView::getDataName() const { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
-
-bool MomentsView::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.empty())
-    showMessageBox(errorMessage);
-  return errorMessage.empty();
-}
 
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
@@ -222,8 +214,10 @@ void MomentsView::plotOutput(std::string const &outputWorkspace) {
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
-  m_uiForm.pbSave->setEnabled(true);
+  setSaveResultEnabled(true);
 }
+
+void MomentsView::setSaveResultEnabled(bool enable) { m_uiForm.pbSave->setEnabled(enable); }
 
 void MomentsView::showMessageBox(std::string const &message) const {
   QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));

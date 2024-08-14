@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FittingModel.h"
-#include "Common/DataModel.h"
 #include "FitOutput.h"
 #include "FitTabConstants.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -205,7 +205,10 @@ IFunction_sptr extractFirstInnerFunction(const std::string &function) {
 
 template <typename WorkspaceType>
 std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorithm, const std::string &propertyName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceType>(algorithm->getProperty(propertyName));
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(algorithm->getProperty(propertyName)))
+    return ads.retrieveWS<WorkspaceType>(algorithm->getProperty(propertyName));
+  return nullptr;
 }
 
 WorkspaceGroup_sptr getOutputResult(const IAlgorithm_sptr &algorithm) {
@@ -437,6 +440,9 @@ void FittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
+  if (!group || !parameters || !result) {
+    return;
+  }
   if (group->size() == 1u) {
     m_fitFunction = FunctionFactory::Instance().createInitialized(fitAlgorithm->getPropertyValue("Function"));
   } else {
@@ -619,7 +625,7 @@ void FittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
 
   auto group = getOutputGroup(fittingAlgorithm);
-  if (group->size() == 1u) {
+  if (group && group->size() == 1u) {
     const auto base = prefix + std::to_string(m_fitPlotModel->getActiveWorkspaceID().value + 1);
     removeFromADSIfExists(base);
     cleanTemporaries(base + "_0");
