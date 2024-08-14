@@ -69,7 +69,7 @@ Deprecated
 - ``AbortRemoteJob`` is deprecated in favour of v2.
 - ``Authenticate``  is deprecated in favour of v2.
 - :ref:`CentroidPeaksMD	 <algm-CentroidPeaksMD>`  is deprecated in favour of v2.
-- :ref:`ConvertEmptyToTof	 <algm-ConvertEmptyToTof>`.
+- ``ConvertEmptyToTof``
 - :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
 - ``DownloadRemoteFile`` is deprecated in favour of v2.
 - :ref:`FFTSmooth	 <algm-FFTSmooth>` is deprecated in favour of v2.

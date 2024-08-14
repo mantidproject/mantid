@@ -189,8 +189,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Co
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CombineDiffCal.cpp:86
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:246
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Objects/MeshObject.h:62
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertEmptyToTof.cpp:134
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertEmptyToTof.cpp:220
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h:41
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h:42
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CropWorkspaceRagged.cpp:17
