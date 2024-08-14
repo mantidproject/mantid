@@ -38,8 +38,12 @@ class PearsonIVTest(unittest.TestCase):
         new_fwhm = 2 * fwhm
         self.func.setFwhm(new_fwhm)
 
-        self.assertAlmostEqual(fwhm, 2.4494, delta=1e-3)
-        self.assertAlmostEqual(new_fwhm, 2 * 2.449, delta=1e-3)
+        self.assertAlmostEqual(fwhm, 1.5328, delta=1e-3)
+        self.assertAlmostEqual(new_fwhm, 2 * 1.5328, delta=1e-3)
+
+    def test_setFwhm_keep_sigma_grtrthn_zero(self):
+        self.func.setFwhm(0)
+        self.assertAlmostEqual(self.func.getParameterValue("Sigma"), 1e-10, delta=1e-10)
 
 
 if __name__ == "__main__":

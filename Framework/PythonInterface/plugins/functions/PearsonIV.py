@@ -59,7 +59,8 @@ class PearsonIV(IPeakFunction):
         return self.functionLocal(self.getParameterValue("Centre"))
 
     def fwhm(self):
-        return (2 * self.getParameterValue("Sigma") + 1) / np.sqrt(self.getParameterValue("Exponent"))
+        # no exact form for FWHM - this is valid for skew=0
+        return 2 * self.getParameterValue("Sigma") * np.sqrt((2 ** (1 / self.getParameterValue("Exponent"))) - 1)
 
     def setCentre(self, new_centre):
         self.setParameter("Centre", new_centre)
@@ -74,8 +75,9 @@ class PearsonIV(IPeakFunction):
         return "Sigma"
 
     def setFwhm(self, new_fwhm):
-        height = self.height()
-        self.setParameter("Sigma", (np.sqrt(self.getParameterValue("Exponent")) * new_fwhm - 1) / 2)
+        height = self.height()  # to reset after
+        new_sigma = max(new_fwhm / (2 * np.sqrt((2 ** (1 / self.getParameterValue("Exponent"))) - 1)), 1e-10)
+        self.setParameter("Sigma", new_sigma)  # valid only for S > 0
         self.setHeight(height)
 
 
