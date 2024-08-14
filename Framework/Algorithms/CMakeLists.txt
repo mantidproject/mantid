@@ -41,7 +41,6 @@ set(SRC_FILES
     src/ChangePulsetime.cpp
     src/ChangePulsetime2.cpp
     src/ChangeTimeZero.cpp
-    src/CheckWorkspacesMatch.cpp
     src/ChopData.cpp
     src/ClearCache.cpp
     src/ClearInstrumentParameters.cpp
@@ -392,7 +391,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ChangePulsetime.h
     inc/MantidAlgorithms/ChangePulsetime2.h
     inc/MantidAlgorithms/ChangeTimeZero.h
-    inc/MantidAlgorithms/CheckWorkspacesMatch.h
     inc/MantidAlgorithms/ChopData.h
     inc/MantidAlgorithms/ClearCache.h
     inc/MantidAlgorithms/ClearInstrumentParameters.h
@@ -750,7 +748,6 @@ set(TEST_FILES
     ChangePulsetime2Test.h
     ChangePulsetimeTest.h
     ChangeTimeZeroTest.h
-    CheckWorkspacesMatchTest.h
     ChopDataTest.h
     CircularBeamProfileTest.h
     ClearCacheTest.h

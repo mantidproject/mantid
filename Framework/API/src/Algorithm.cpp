@@ -1266,7 +1266,7 @@ bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime)
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
-  // CheckWorkspacesMatch, RenameWorkspace)
+  // RenameWorkspace)
 
   startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer

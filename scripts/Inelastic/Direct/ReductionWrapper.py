@@ -311,7 +311,7 @@ class ReductionWrapper(object):
         Returns:
         True   if reduction for sample_run produces result within Error from the reference file
                as reported by CompareWorkspaces.
-        False  if CheckWorkspaceMatch comparison between sample and reduction is unsuccessful
+        False  if CompareWorkspaces comparison between sample and reduction is unsuccessful
 
         True  if was not able to load reference file. In this case, algorithm builds validation
               file and returns True if the reduction and saving of this file is successful
