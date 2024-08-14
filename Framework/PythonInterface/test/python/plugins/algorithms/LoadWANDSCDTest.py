@@ -39,10 +39,18 @@ class LoadWANDTest(unittest.TestCase):
         self.assertEqual(LoadWANDTest_ws.getExperimentInfo(0).getInstrument().getName(), "WAND")
 
         run = LoadWANDTest_ws.getExperimentInfo(0).run()
-        s1 = run.getProperty("s1").value
+        s1 = run.getProperty("HB2C:Mot:s1").value
         self.assertEqual(len(s1), 2)
-        self.assertEqual(s1[0], -142.6)
-        self.assertEqual(s1[1], -142.5)
+        self.assertAlmostEqual(s1[0], -142.6)
+        self.assertAlmostEqual(s1[1], -142.5)
+        sgl = run.getProperty("HB2C:Mot:sgl").value
+        self.assertEqual(len(sgl), 2)
+        self.assertAlmostEqual(sgl[0], -4.6995)
+        self.assertAlmostEqual(sgl[1], -4.6995)
+        sgu = run.getProperty("HB2C:Mot:sgu").value
+        self.assertEqual(len(sgu), 2)
+        self.assertAlmostEqual(sgu[0], 4.4)
+        self.assertAlmostEqual(sgu[1], 4.4)
         run_number = run.getProperty("run_number").value
         self.assertEqual(len(run_number), 2)
         self.assertEqual(run_number[0], 7000)
@@ -58,9 +66,12 @@ class LoadWANDTest(unittest.TestCase):
 
         # test that the goniometer has been set correctly
         self.assertEqual(run.getNumGoniometers(), 2)
-        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YZY")[0], -142.6)  # s1 from HB2C_7000
-        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YZY")[0], -142.5)  # s1 from HB2C_7001
-
+        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YXZ")[0], -142.6)  # s1 from HB2C_7000
+        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YXZ")[0], -142.5)  # s1 from HB2C_7001
+        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YXZ")[2], -4.4)  # sgu from HB2C_7000
+        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YXZ")[2], -4.4)  # sgu from HB2C_7001
+        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YXZ")[1], 4.6995)  # sgl from HB2C_7000
+        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YXZ")[1], 4.6995)  # sgl from HB2C_7001
         LoadWANDTest_ws.delete()
 
 
