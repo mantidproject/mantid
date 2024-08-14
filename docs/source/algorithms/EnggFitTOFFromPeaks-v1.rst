@@ -39,11 +39,6 @@ If a name is given in OutParametersTable this algorithm also produces
 a table workspace with that name, containing the parameters fitted
 (DIFA, DIFC, TZERO).
 
-The parameters DIFA, DIFC, TZERO are also used in other Mantid
-algorithms. For example see :ref:`AlignDetectors
-<algm-AlignDetectors>` where these parameters are used to convert
-units from time-of-flight to d-spacing.
-
 Usage
 -----
 
