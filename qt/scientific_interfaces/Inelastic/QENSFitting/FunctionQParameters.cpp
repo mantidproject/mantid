@@ -15,6 +15,8 @@ using namespace Mantid::API;
 
 namespace {
 
+typedef std::pair<std::string, std::size_t> pairNameSpectra;
+
 std::vector<std::pair<std::string, std::size_t>> findAxisLabels(TextAxis const *axis,
                                                                 std::vector<std::string> const &parameterSuffixes) {
   std::vector<std::pair<std::string, std::size_t>> labelAndSpectra;
@@ -56,7 +58,7 @@ FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace)
       m_a0s(findAxisLabels(workspace, {".A0"})) {}
 
 std::vector<std::string> FunctionQParameters::names(std::string const &parameterType) const {
-  auto const nameGetter = [](auto const &pair) { return pair.first; };
+  auto const nameGetter = [](pairNameSpectra const &pair) { return pair.first; };
   if (parameterType == "Width") {
     return extract<std::string>(m_widths, nameGetter);
   } else if (parameterType == "EISF") {
@@ -68,7 +70,7 @@ std::vector<std::string> FunctionQParameters::names(std::string const &parameter
 }
 
 std::vector<std::size_t> FunctionQParameters::spectra(std::string const &parameterType) const {
-  auto const spectraGetter = [](auto const &pair) { return pair.second; };
+  auto const spectraGetter = [](pairNameSpectra const &pair) { return pair.second; };
   if (parameterType == "Width") {
     return extract<std::size_t>(m_widths, spectraGetter);
   } else if (parameterType == "EISF") {
