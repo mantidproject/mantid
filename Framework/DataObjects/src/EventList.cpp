@@ -1891,8 +1891,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
     return;
   }
 
-  // If the sizes are the same, then the "resize" command will NOT clear the
-  // original values.
+  // If the sizes are the same, then the "resize" command will NOT clear the original values.
   bool mustFill = (Y.size() == x_size - 1);
   // Clear the Y data, assign all to 0.
   Y.resize(x_size - 1, 0.0);
@@ -1987,8 +1986,15 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
     return;
   }
 
+  // If the sizes are the same, then the "resize" command will NOT clear the original values.
+  bool mustFill = (Y.size() == x_size - 1);
   Y.resize(x_size - 1, 0.0);
   E.resize(x_size - 1, 0.0);
+  if (mustFill) {
+    // We must make sure the starting point is 0.0
+    std::fill(Y.begin(), Y.end(), 0.0);
+    std::fill(E.begin(), E.end(), 0.0);
+  }
 
   if (events.empty())
     return;
@@ -2093,8 +2099,8 @@ void EventList::generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, 
 }
 
 // --------------------------------------------------------------------------
-/** Generates both the Y and E (error) histograms w.r.t TOF
- * for an EventList with or without WeightedEvents.
+/** Generates both the Y and E (error) histograms w.r.t TOF for an EventList with or without WeightedEvents.
+ *  This will zero out the Y array as part of the process.
  *
  * @param X: x-bins supplied
  * @param Y: counts returned
@@ -2126,8 +2132,8 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
 }
 
 // --------------------------------------------------------------------------
-/** Generates both the Y and E (error) histograms w.r.t TOF
- * for an EventList with or without WeightedEvents.
+/** Generates both the Y and E (error) histograms w.r.t TOF for an EventList with or without WeightedEvents.
+ *  This will zero out the Y array as part of the process.
  *
  * This calculates histogram without sorting the events by using the step size to estimate the bin number. This has been
  * made to only work for logarithmic or linear binning. This falls back to using the sorted histogram method if the
@@ -2466,8 +2472,12 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
     return;
   }
 
+  // If the sizes are the same, then the "resize" command will NOT clear the original values.
+  bool mustFill = (Y.size() == x_size - 1);
   // Clear the Y data, assign all to 0.
   Y.resize(x_size - 1, 0);
+  if (mustFill) // starting point is no counts
+    std::fill(Y.begin(), Y.end(), 0.0);
 
   // Do we even have any events to do?
   if (this->events.empty())
