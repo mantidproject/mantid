@@ -78,6 +78,14 @@ PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ["FrequencyLogNames", "WaveLengthLogNames"]
 
 
+def determineCompression(filename, compression, chunking, absorption):
+    if compression == 0.0 or chunking or absorption:
+        return False
+    sizeGiB = os.path.getsize(filename) / 1024.0 / 1024.0 / 1024.0
+    if sizeGiB > compression:
+        return True
+
+
 def determineChunking(filename, chunkSize):
     # chunkSize=0 signifies that the user wants to read the whole file
     if chunkSize == 0.0:
@@ -147,6 +155,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name="Filename", extensions=EXTENSIONS_NXS), "Files to combine in reduction")
         self.declareProperty("MaxChunkSize", 0.0, "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
+        self.declareProperty("MinSizeCompressOnLoad", 0.0, "Specify the file size in GB to use compression")
         self.declareProperty("FilterBadPulses", 0.0, doc="Filter out events measured while proton charge is more than 5% below average")
 
         self.declareProperty(
@@ -545,7 +554,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return wkspname, unfocusname
 
     def __compressEvents(self, wkspname):
-        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0:
+        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0 and self.do_compression:
             CompressEvents(
                 InputWorkspace=wkspname,
                 OutputWorkspace=wkspname,
@@ -664,6 +673,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.__loaderName = "Load"  # set the loader to be generic on first load
         self.filterBadPulses = self.getProperty("FilterBadPulses").value
         self.chunkSize = self.getProperty("MaxChunkSize").value
+        self.comression = self.getProperty("MinSizeCompressOnLoad").value
         self.absorption = self.getProperty("AbsorptionWorkspace").value
         self.charac = self.getProperty("Characterizations").value
         self.useCaching = len(self.getProperty("CacheDir").value) > 0
@@ -677,6 +687,13 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
 
+        # determing compression
+        if determineCompression(
+            filename=self._filenames[0], compression=self.compression, chunking=(self.chunkSize > 0.0), absorption=self.absorption
+        ):
+            self.do_compression = True
+        else:
+            self.do_compression = False
         if self.useCaching:
             # unfocus check only matters if caching is requested
             if finalunfocusname != "":
