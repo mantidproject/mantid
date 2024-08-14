@@ -62,13 +62,13 @@ ISIS Energy Transfer
 #. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (55878 from the previous test)
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184-26185_multi_graphite002_red`` workspace
-#. Choose ``Plot spectrum``, note the number of spectra, should be 51
+#. Choose ``Plot spectrum``, note the number of spectra, should be 51. The spectra numbering should start from 0.
 #. Click ``Cancel``
 #. In the ``Data reduction`` GUI, change the ``Detector Grouping`` to Groups
 #. Set ``Groups`` to 5
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184-26185_multi_graphite002_red`` workspace
-#. Choose ``Plot spectrum``, note the number of spectra, should be 6
+#. Choose ``Plot spectrum``, note the number of spectra, should be 6. The spectra numbering should start from 0.
 #. Choose ``Plot All``, this should result in a plot of all 6 spectra
 #. Open ``Interfaces`` > ``Inelastic`` > ``Data Processor`` and go to the ``S(Q, W)`` tab
 #. Change ``File`` to ``Workspace`` and load the ``_red`` workspace just created
