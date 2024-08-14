@@ -1,0 +1,1 @@
+- Fixed error in the log about `load_module()` being deprecated in Python 3.12.
