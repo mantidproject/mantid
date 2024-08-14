@@ -1,4 +1,4 @@
-.. _func-SpinDiffusion:
+.. _func-PearsonIV:
 
 =========
 PearsonIV
@@ -14,8 +14,7 @@ It differs from the traditional definition of the PearsonIV distribution [1]_ in
 centre (`Centre``) shifted so that it coincides with the peak maximum.
 
 The function is defined as
-.. math::
-    \frac{I}{\sigma}N\left[1 + \left(\frac{x - \lambda  - \nu\sigma/(2m)\right)^{2}}{\sigma}\right]^{-m}\exp\left(-\nu \arctan(\frac{x - \lambda - \nu\sigma/(2m)}{\sigma}) \right)
+.. math:: \frac{I}{\sigma}N\left[1 + \left(\frac{x - \lambda  - \nu\sigma/(2m)\right)^{2}}{\sigma}\right]^{-m}\exp\left(-\nu \arctan(\frac{x - \lambda - \nu\sigma/(2m)}{\sigma}) \right)
 
 where:
 
