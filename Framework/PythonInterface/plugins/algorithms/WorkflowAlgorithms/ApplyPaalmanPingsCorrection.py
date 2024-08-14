@@ -259,9 +259,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         )
 
     def _get_e_fixed(self, workspace):
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
-        return getEfixed(workspace)
+        return get_efixed(workspace)
 
     def _process_container_workspace(self, container_workspace, prog_container):
         # Appy container shift if needed
