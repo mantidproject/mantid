@@ -311,7 +311,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         summary_prog.report("grouping workspaces")
         self.output_ws = GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
-        self.setProperty("OutputWorkspace", mtd[self._output_ws])
+        self.setProperty("OutputWorkspace", self.output_ws)
 
         summary_prog.report("Algorithm complete")
 
