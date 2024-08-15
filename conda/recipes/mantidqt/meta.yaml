@@ -18,7 +18,7 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp  # [osx]
     - libgomp  # [linux]
-    - ninja  # [osx or linux]
+    - ninja {{ ninja }}  # [osx or linux]
     - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -37,7 +37,7 @@ requirements:
   host:
     - libboost-devel {{ libboost_devel }}
     - libboost-python-devel {{ libboost_python_devel }}
-    - eigen
+    - eigen {{ eigen }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}
@@ -47,7 +47,7 @@ requirements:
     - qt-webengine
     - setuptools
     - tbb-devel {{ tbb }}
-    - versioningit
+    - versioningit {{ versioningit }}
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - sip {{ sip }}                          # [build_platform != target_platform]
 
@@ -55,7 +55,7 @@ requirements:
     - matplotlib {{ matplotlib }}
     - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
     - {{ pin_compatible("qt-main", upper_bound="5.15.9") }}
-    - qtpy
+    - qtpy {{ qtpy }}
     - python
     - qt-gtk-platformtheme # [linux]
 

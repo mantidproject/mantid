@@ -18,7 +18,7 @@ build:
 requirements:
   build:
     - {{ compiler("cxx") }}
-    - ninja  # [osx or linux]
+    - ninja {{ ninja }}  # [osx or linux]
     - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -35,10 +35,10 @@ requirements:
     - setuptools
     - mantidqt {{ version }}
     - python {{ python }}
-    - versioningit
+    - versioningit {{ versioningit }}
   run:
     - ipykernel
-    - psutil
+    - psutil {{ psutil }}
     - {{ pin_compatible("python", max_pin="x.x") }}
     - matplotlib {{ matplotlib }}
     - python.app  # [osx]
