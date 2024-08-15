@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment, the script clones the conda-recipes
-# repo and then runs conda builds based on passed args. By default it only clones the
-# source, you need to pass a flag to actually build something useful. If building a
-# package dependent on a different one it will build and produce that package too.
+# This script expects to be in a POSIX environment. Uses boa to build the suite of
+# mantid packages. You must pass flags to specify which packages to build. If building
+# a package dependent on another one it will either install a locally built package
+# (if present from a previous build step) or build and produce that package too.
 #
 # Script usage:
 # package-conda WORKSPACE [options]
@@ -106,10 +106,10 @@ fi
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
 export LC_ALL=C
 
-# Run conda build. Use a known path so packages built in other steps can be
+# Use a known path so packages built in other steps can be
 # copied to a known location and reused.
 # Use the workspace root outside of the git tree or conda-build cannot
-# copy the source to a working folder
+# copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
     python -m conda_index $CONDA_BLD_PATH
@@ -126,6 +126,7 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
     EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
+# Run conda build.
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
 fi
