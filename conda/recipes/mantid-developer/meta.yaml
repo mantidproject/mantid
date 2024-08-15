@@ -7,61 +7,61 @@ package:
 requirements:
   run:
     - ccache
-    - cmake>=3.21.0
+    - cmake {{ cmake }}
     - conda-wrappers # [win]
-    - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
-    - eigen=3.4.*
-    - euphonic>=1.2.1,<2.0
-    - graphviz>=2.47.0
-    - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
+    - doxygen {{ doxygen }}
+    - eigen {{ eigen }}
+    - euphonic {{ euphonic }}
+    - graphviz {{ graphviz }}
+    - gsl {{ gsl }}
     - h5py
-    - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
-    - jemalloc=5.2.0 # [linux]
-    - jsoncpp>=1.9.4,<2
+    - hdf5 {{ hdf5 }}
+    - jemalloc {{ jemalloc }} # [linux]
+    - jsoncpp {{ jsoncpp }}
     - lib3mf # [win]
-    - libboost-devel=1.84.* # Use the same version as conda-forge
-    - libboost-python-devel=1.84.* # Use the same version as conda-forge
-    - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # [osx or linux]
-    - librdkafka>=1.6.0
-    - matplotlib=3.7.*
-    - muparser>=2.3.2
-    - nexus=4.4.*
-    - ninja>=1.10.2
-    - numpy>=1.24,<1.27
-    - occt=*=novtk* # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
-    - pip>=21.0.1
-    - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
-    - psutil>=5.8.0
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
+    - libopenblas {{ libopenblas }} # [osx or linux]
+    - librdkafka {{ librdkafka }}
+    - matplotlib {{ matplotlib }}
+    - muparser {{ muparser }}
+    - nexus {{ nexus }}
+    - ninja {{ ninja }}
+    - numpy>=1.24,<1.27 # This is intentionally different to conda_build_config.yaml, will address later.
+    - occt {{ occt }}
+    - pip {{ pip }}
+    - poco {{ poco }}
+    - psutil {{ psutil }}
     - pycifrw
-    - pyqt>=5.15,<6
-    - python-dateutil>=2.8.1
-    - python=3.10.*
+    - pyqt {{ pyqt }}
+    - python-dateutil {{ python-dateutil }}
+    - python {{ python }}
     - python.app # [osx]
-    - pyyaml>=5.4.1
-    - qscintilla2
-    - qt==5.15.8 # Avoid unexpected qt upgrades
-    - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
-    - qtpy>=1.9.0
+    - pyyaml {{ pyyaml }}
+    - qscintilla2 {{ qscintilla2 }}
+    - qt {{ qt-main }}
+    - qtconsole {{ qtconsole }}
+    - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
     - quasielasticbayes
     - requests>=2.25.1
-    - scipy>=1.10.0
+    - scipy {{ scipy }}
     - setuptools
-    - sphinx>=4.5.*
-    - sphinx_bootstrap_theme>=0.8.1
-    - tbb-devel=2021.*
-    - texlive-core>=20180414 # [osx or linux]
-    - toml>=0.10.2
-    - versioningit>=2.1
+    - sphinx {{ sphinx }}
+    - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
+    - tbb-devel {{ tbb }}
+    - texlive-core {{ texlive-core }} # [osx or linux]
+    - toml {{ toml }}
+    - versioningit {{ versioningit }}
     - joblib
-    - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+    - orsopy {{ orsopy }}
 
     # Not Windows, OpenGL implementation:
     - mesa-libgl-devel-cos7-x86_64>=18.3.4 # [linux]
 
     # Linux only
-    - gxx_linux-64==12.* # [linux]
-    - libglu>=9.0 # [linux]
+    - gxx_linux-64 {{ cxx_compiler_version }} # [linux]
+    - libglu {{ libglu }} # [linux]
 
     # Needed for test suite on Linux
     - pciutils-libs-cos7-x86_64>=3.5.1 # [linux]
@@ -77,16 +77,13 @@ requirements:
     - cppcheck==2.14.2
     - gcovr>=4.2 # [linux]
     - pre-commit>=2.12.0
-    - libcxx<17 # [osx]
+    - libcxx {{ libcxx }} # [osx]
 
     # Use conda version of clang to get matching CXXFLAGS.
     # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
-    - clang_osx-64=16 # [osx]
-    - clangxx_osx-64=16 # [osx]
-    - llvm-openmp=16 # [osx]
-
-python:
-  app:
+    - clang_osx-64 {{ c_compiler_version}} # [osx]
+    - clangxx_osx-64 {{ cxx_compiler_version }} # [osx]
+    - llvm-openmp {{ llvm-openmp }} # [osx]
 
 about:
   home: https://github.com/mantidproject/mantid
