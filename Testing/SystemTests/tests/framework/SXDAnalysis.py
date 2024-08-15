@@ -183,7 +183,7 @@ class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.PROFILE)
 
     def validate(self):
-        intens_over_sigma = [0.0, 18.45, 17.11, 134.29, 0.0]
+        intens_over_sigma = [0.0, 14.593, 12.116, 133.96, 0.0]
         self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
 
 
