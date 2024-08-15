@@ -271,8 +271,14 @@ void LoadEventAsWorkspace2D::exec() {
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_id");
         else
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
+
         // closeGroup and skip this bank if there is no event
+        // std::vector<int> total_counts;
+        // if (descriptor.isEntry("/entry/" + entry_name + "/total_counts", "SDS"))
+        //   total_counts = Mantid::NeXus::NeXusIOHelper::readNexusVector<int>(h5file, "total_counts");
         if (event_ids.size() == 1) {
+          // std::cout <<"total_counts[0]"<<std::endl;
+          // std::cout <<total_counts[0]<<std::endl;
           h5file.closeGroup();
           continue;
         }
@@ -295,15 +301,13 @@ void LoadEventAsWorkspace2D::exec() {
 
         if (filter_time_stop_sec != EMPTY_DBL()) {
           filter_time_stop = runstart + filter_time_stop_sec;
-          // std::cout<<"end time is not empty"<<std::endl;
         } else {
           filter_time_stop = endtime;
-          // std::cout<<endtime<<std::endl;
         }
 
         // Use run_start time as starting reference in time and create a TimeROI using bankPulseTimes
         const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
-        std::cout << filter_time_stop << std::endl;
+
         // Give pulseIndexer a TimeROI
         const PulseIndexer pulseIndexer_time(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
         // const PulseIndexer pulseIndexer_time(event_index, event_index->at(0), event_ids.size(), entry_name,
