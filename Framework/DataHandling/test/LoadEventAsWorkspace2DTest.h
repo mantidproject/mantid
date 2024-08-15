@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadEventAsWorkspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -193,4 +194,19 @@ public:
     compare->execute();
     TS_ASSERT(compare->getProperty("Result"));
   }
+
+  void test_CGE_small_empty_entries() {
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5");
+    // Run the algorithm
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out_ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename))
+
+    TS_ASSERT(alg.execute());
+    Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+  };
 };
