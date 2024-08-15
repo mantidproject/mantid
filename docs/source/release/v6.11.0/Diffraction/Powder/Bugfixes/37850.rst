@@ -1,0 +1,1 @@
+- Defect since 6.9.0: fix bug in PDCalibration where input pixels with empty event lists were no longer being masked
