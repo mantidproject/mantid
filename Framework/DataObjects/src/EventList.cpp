@@ -3522,9 +3522,8 @@ void EventList::setTofs(const MantidVec &tofs) {
  * @param error: error on 'value'. Can be 0.
  * */
 template <class T> void EventList::multiplyHelper(std::vector<T> &events, const double value, const double error) {
-  // Square of the value's error
-  double errorSquared = error * error;
-  double valueSquared = value * value;
+  // Square of the value
+  const double valueSquared = value * value;
 
   auto itev_end = events.end();
 
@@ -3536,6 +3535,7 @@ template <class T> void EventList::multiplyHelper(std::vector<T> &events, const 
     }
   } else {
     // Carry the scalar error
+    const double errorSquared = error * error; // Square of the value's error
     for (auto itev = events.begin(); itev != itev_end; itev++) {
       itev->m_errorSquared =
           static_cast<float>(itev->m_errorSquared * valueSquared + errorSquared * itev->m_weight * itev->m_weight);
@@ -3970,7 +3970,7 @@ void EventList::filterByPulseTime(Types::Core::DateAndTime start, Types::Core::D
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
-void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const {
+void EventList::filterByPulseTime(Kernel::TimeROI const *timeRoi, EventList *output) const {
 
   this->sortPulseTime();
   // Clear the output
@@ -4066,7 +4066,7 @@ void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<
  *
  * @param timeRoi :: a TimeROI that will be used to filter events
  */
-void EventList::filterInPlace(Kernel::TimeROI *timeRoi) {
+void EventList::filterInPlace(Kernel::TimeROI const *timeRoi) {
   if (timeRoi == nullptr) {
     throw std::runtime_error("TimeROI can not be a nullptr\n");
   }
@@ -4117,7 +4117,8 @@ void EventList::filterInPlace(Kernel::TimeROI *timeRoi) {
  *  in this helper function and is expected to be implicitly followed by the
  *  caller.
  */
-template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events) {
+template <class T>
+void EventList::filterInPlaceHelper(Kernel::TimeROI const *timeRoi, typename std::vector<T> &events) {
 
   const auto splitter = timeRoi->toTimeIntervals();
   // Iterate through the splitter at the same time
@@ -4244,8 +4245,8 @@ void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *
  * @param toUnit the unit to convert to
  */
 template <class T>
-void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit *fromUnit,
-                                         Mantid::Kernel::Unit *toUnit) {
+void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit const *fromUnit,
+                                         Mantid::Kernel::Unit const *toUnit) {
   for (auto &itev : events) {
     // Conver to TOF
     const double tof = fromUnit->singleToTOF(itev.m_tof);
@@ -4262,7 +4263,7 @@ void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid
  * @param fromUnit :: the Unit describing the input unit. Must be initialized.
  * @param toUnit :: the Unit describing the output unit. Must be initialized.
  */
-void EventList::convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit, Mantid::Kernel::Unit *toUnit) {
+void EventList::convertUnitsViaTof(Mantid::Kernel::Unit const *fromUnit, Mantid::Kernel::Unit const *toUnit) {
   // Check for initialized
   if (!fromUnit || !toUnit)
     throw std::runtime_error("EventList::convertUnitsViaTof(): one of the units is NULL!");
