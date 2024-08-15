@@ -110,7 +110,7 @@ qt_main:
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
-  - '>5.4.2,!=5.5.0'
+  - '>5.5.0'
 
 qscintilla2:
   - 2.13
