@@ -249,7 +249,6 @@ void LoadEventAsWorkspace2D::exec() {
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
 
   prog->doReport("Reading and integrating data");
-  // int ct = 0;
   auto itClassEntries = allEntries.find("NXevent_data");
   if (itClassEntries != allEntries.end()) {
 
