@@ -9,14 +9,38 @@ from os.path import abspath, dirname, join
 TEMPLATE_DIRECTORY = join(dirname(abspath(__file__)), "templates")
 
 
-def generate_template_files(name: str, language: str) -> None:
-    with open(join(TEMPLATE_DIRECTORY, "view.py.in"), mode="r") as file:
+def generate_file_from(name: str, file_type: str):
+    with open(join(TEMPLATE_DIRECTORY, f"{file_type.lower()}.py.in"), mode="r") as file:
         content = file.read()
 
-    content = content.replace("View", f"{name}View")
+    content = content.replace(file_type, f"{name}{file_type}")
 
-    with open(join(TEMPLATE_DIRECTORY, "file.py"), mode="w") as file:
+    with open(join(TEMPLATE_DIRECTORY, f"{name}_{file_type.lower()}.py"), mode="w") as file:
         file.write(content)
+
+
+def generate_python_files(name: str) -> None:
+    print("Generating Python files with an MVP pattern...")
+    generate_file_from(name, "View")
+    generate_file_from(name, "Presenter")
+    generate_file_from(name, "Model")
+
+
+def generate_cpp_files(name: str) -> None:
+    print("Generating C++ files with an MVP pattern...")
+    generate_file_from(name, "View")
+    generate_file_from(name, "Presenter")
+    generate_file_from(name, "Model")
+
+
+def generate_files(name: str, language: str) -> None:
+    match language.lower():
+        case "python":
+            generate_python_files(name)
+        case "c++":
+            generate_cpp_files(name)
+        case _:
+            raise ValueError(f"An unsupported language '{language}' has been provided. Choose one: [Python, C++].")
 
 
 if __name__ == "__main__":
@@ -27,4 +51,4 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--language", required=True, help="The language to generate template MVP files for [Python or C++].")
     args = parser.parse_args()
 
-    generate_template_files(args.name, args.language)
+    generate_files(args.name, args.language)
