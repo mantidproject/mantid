@@ -44,9 +44,10 @@ std::string IETDataValidator::validateConversionData(IETConversionData conversio
   return "";
 }
 
-std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundData backgroundData,
-                                                                  IETConversionData conversionData,
-                                                                  std::string firstFileName, bool isRunFileValid) {
+std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundData const &backgroundData,
+                                                                  IETConversionData const &conversionData,
+                                                                  std::string const &firstFileName,
+                                                                  bool const isRunFileValid) {
   std::vector<std::string> errors;
 
   if (!isRunFileValid || !backgroundData.getRemoveBackground()) {

@@ -16,8 +16,9 @@ public:
   IETDataValidator() = default;
 
   std::string validateConversionData(IETConversionData conversionData);
-  std::vector<std::string> validateBackgroundData(IETBackgroundData backgroundData, IETConversionData conversionData,
-                                                  std::string firstFileName, bool isRunFileValid);
+  std::vector<std::string> validateBackgroundData(IETBackgroundData const &backgroundData,
+                                                  IETConversionData const &conversionData,
+                                                  std::string const &firstFileName, bool const isRunFileValid);
   std::string validateAnalysisData(IETAnalysisData analysisData);
 };
 
