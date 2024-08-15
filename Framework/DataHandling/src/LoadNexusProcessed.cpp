@@ -731,6 +731,12 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
 
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
+
+        // for ragged workspace we need to remove all NaN value from end of vector
+        const auto idx =
+            std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
+        if (idx > 0)
+          x.resize(x.size() - idx);
         // Workspace and el was just created, so we can just set a new histogram
         // We can move x as it is not longer used after this point
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
