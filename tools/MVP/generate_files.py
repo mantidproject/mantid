@@ -10,15 +10,18 @@ from typing import Callable, Union
 TEMPLATE_DIRECTORY = join(dirname(abspath(__file__)), "templates")
 
 
-def python_filename(file_type: str, name: Union[str, None] = None) -> str:
+def _python_filename(file_type: str, name: Union[str, None] = None) -> str:
+    """Create a filename string with a Python filename convention."""
     return f"{name}_{file_type.lower()}" if name is not None else file_type.lower()
 
 
-def cpp_filename(file_type: str, name: Union[str, None] = None) -> str:
+def _cpp_filename(file_type: str, name: Union[str, None] = None) -> str:
+    """Create a filename string with a C++ filename convention."""
     return f"{name}{file_type}" if name is not None else file_type
 
 
-def generate_file_from(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
+def _generate_file_from(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
+    """Generates a file using the corresponding template in the template directory."""
     template_filepath = join(TEMPLATE_DIRECTORY, f"{filename(file_type)}.{extension}.in")
     with open(template_filepath, mode="r") as file:
         content = file.read()
@@ -30,29 +33,32 @@ def generate_file_from(name: str, filename: Callable, file_type: str, extension:
         file.write(content)
 
 
-def generate_python_files(name: str, output_directory: str) -> None:
+def _generate_python_files(name: str, output_directory: str) -> None:
+    """Generate MVP files for a Python use case."""
     print("Generating Python files with an MVP pattern...")
-    generate_file_from(name, python_filename, "View", "py", output_directory)
-    generate_file_from(name, python_filename, "Presenter", "py", output_directory)
-    generate_file_from(name, python_filename, "Model", "py", output_directory)
+    _generate_file_from(name, _python_filename, "View", "py", output_directory)
+    _generate_file_from(name, _python_filename, "Presenter", "py", output_directory)
+    _generate_file_from(name, _python_filename, "Model", "py", output_directory)
 
 
-def generate_cpp_files(name: str, output_directory: str) -> None:
+def _generate_cpp_files(name: str, output_directory: str) -> None:
+    """Generate MVP files for a C++ use case."""
     print("Generating C++ files with an MVP pattern...")
-    generate_file_from(name, cpp_filename, "View", "cpp", output_directory)
-    generate_file_from(name, cpp_filename, "Presenter", "cpp", output_directory)
-    generate_file_from(name, cpp_filename, "Model", "cpp", output_directory)
-    generate_file_from(name, cpp_filename, "View", "h", output_directory)
-    generate_file_from(name, cpp_filename, "Presenter", "h", output_directory)
-    generate_file_from(name, cpp_filename, "Model", "h", output_directory)
+    _generate_file_from(name, _cpp_filename, "View", "cpp", output_directory)
+    _generate_file_from(name, _cpp_filename, "Presenter", "cpp", output_directory)
+    _generate_file_from(name, _cpp_filename, "Model", "cpp", output_directory)
+    _generate_file_from(name, _cpp_filename, "View", "h", output_directory)
+    _generate_file_from(name, _cpp_filename, "Presenter", "h", output_directory)
+    _generate_file_from(name, _cpp_filename, "Model", "h", output_directory)
 
 
-def generate_files(name: str, language: str, output_directory: str) -> None:
+def _generate_files(name: str, language: str, output_directory: str) -> None:
+    """Generate MVP files for a specific programming language."""
     match language.lower():
         case "python":
-            generate_python_files(name, output_directory)
+            _generate_python_files(name, output_directory)
         case "c++":
-            generate_cpp_files(name, output_directory)
+            _generate_cpp_files(name, output_directory)
         case _:
             raise ValueError(f"An unsupported language '{language}' has been provided. Choose one: [Python, C++].")
 
@@ -66,4 +72,4 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-dir", required=True, help="The absolute path to output the generated files to.")
     args = parser.parse_args()
 
-    generate_files(args.name, args.language, args.output_dir)
+    _generate_files(args.name.capitalize(), args.language, args.output_dir)
