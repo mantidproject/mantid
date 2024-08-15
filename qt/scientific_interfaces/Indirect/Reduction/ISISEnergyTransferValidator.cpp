@@ -26,7 +26,8 @@ MatrixWorkspace_sptr load(std::string const &filename, int const specMin, int co
   loader->setPropertyValue("SpectrumMin", std::to_string(specMin));
   loader->setPropertyValue("SpectrumMax", std::to_string(specMax));
   loader->execute();
-  return loader->getProperty("OutputWorkspace");
+  Mantid::API::Workspace_sptr ws = loader->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 }
 } // namespace
 
