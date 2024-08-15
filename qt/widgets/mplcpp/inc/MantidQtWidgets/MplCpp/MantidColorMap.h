@@ -42,11 +42,11 @@ public:
   double getNthPower() const { return m_gamma; }
   Colormap cmap() const { return m_mappable.cmap(); }
 
-  QRgb rgb(double vmin, double vmax, double value) const;
-  std::vector<QRgb> rgb(double vmin, double vmax, const std::vector<double> &values) const;
+  QRgb rgb(double vmin, double vmax, double value);
+  std::vector<QRgb> rgb(double vmin, double vmax, const std::vector<double> &values);
 
 private:
-  mutable ScalarMappable m_mappable;
+  ScalarMappable m_mappable;
   ScaleType m_scaleType;
   double m_gamma = {2.0};
 };
