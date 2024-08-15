@@ -54,6 +54,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &peri
     : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), have_period_info(true),
       m_sorting_info(PulseSorting::UNKNOWN) {
 
+  // Some old data use "pulse_time" instead of "event_time_zero" as entry
   try {
     file.openData("event_time_zero");
   } catch (std::exception &e) {
