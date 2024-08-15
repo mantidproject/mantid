@@ -216,18 +216,22 @@ void LoadEventAsWorkspace2D::exec() {
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
 
-  // if (!WS->run().hasProperty("start_time")) {
-  //   g_log.warning("This NXS file does not have a start time, first pulse time is used instead.");
-  // }
+  if (!WS->run().hasProperty("start_time")) {
+    g_log.warning("This NXS file does not have a start time, first pulse time is used instead.");
+  }
+
   Types::Core::DateAndTime runstart(WS->run().hasProperty("start_time") ? WS->run().getProperty("start_time")->value()
                                                                         : WS->run().getFirstPulseTime());
 
-  // if (!WS->run().hasProperty("end_time")) {
-  //   g_log.warning("This NXS file does not have an end time, last pulse time is used instead.");
-  // }
+  Types::Core::DateAndTime endtime;
+  if (WS->run().hasProperty("proton_charge") &&
+      WS->run().getLastPulseTime() > WS->run().getProperty("end_time")->value()) {
+    endtime = WS->run().getLastPulseTime();
+    g_log.warning("Last pulse time is used because the last pulse time is greater than the end time!");
+  } else {
+    endtime = WS->run().getProperty("end_time")->value();
+  }
 
-  Types::Core::DateAndTime endtime(WS->run().hasProperty("end_time") ? WS->run().getProperty("end_time")->value()
-                                                                     : WS->run().getLastPulseTime());
   Types::Core::DateAndTime filter_time_start;
   Types::Core::DateAndTime filter_time_stop;
   // const bool time_filtering = (filter_time_start_sec != EMPTY_DBL() && filter_time_stop_sec != EMPTY_DBL());
@@ -267,8 +271,14 @@ void LoadEventAsWorkspace2D::exec() {
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_id");
         else
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
+
         // closeGroup and skip this bank if there is no event
+        // std::vector<int> total_counts;
+        // if (descriptor.isEntry("/entry/" + entry_name + "/total_counts", "SDS"))
+        //   total_counts = Mantid::NeXus::NeXusIOHelper::readNexusVector<int>(h5file, "total_counts");
         if (event_ids.size() == 1) {
+          // std::cout <<"total_counts[0]"<<std::endl;
+          // std::cout <<total_counts[0]<<std::endl;
           h5file.closeGroup();
           continue;
         }
@@ -291,18 +301,15 @@ void LoadEventAsWorkspace2D::exec() {
 
         if (filter_time_stop_sec != EMPTY_DBL()) {
           filter_time_stop = runstart + filter_time_stop_sec;
-          // std::cout<<"end time is not empty"<<std::endl;
         } else {
           filter_time_stop = endtime;
-          // std::cout<<endtime<<std::endl;
         }
 
         // Use run_start time as starting reference in time and create a TimeROI using bankPulseTimes
         const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
-        std::cout << filter_time_stop << std::endl;
+
         // Give pulseIndexer a TimeROI
-        const PulseIndexer pulseIndexer_time(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
-        // const PulseIndexer pulseIndexer_time(event_index, event_index->at(0), event_ids.size(), entry_name,
+        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
 
         std::vector<float> event_times;
         if (tof_filtering) {
@@ -312,9 +319,7 @@ void LoadEventAsWorkspace2D::exec() {
             event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
         }
         // Nested loop to loop through all the relavent pulses and relavent event_ids
-        for (const auto &pulse : pulseIndexer_time) {
-          // const auto &pulsetime = bankPulseTimes->pulseTime(pulse.pulseIndex);
-          // std::cout << pulsetime <<std::endl;
+        for (const auto &pulse : pulseIndexer) {
           for (size_t i = pulse.eventIndexStart; i < pulse.eventIndexStop; i++) {
             // for (size_t i = 0; i < event_ids.size(); i++) {
             if (tof_filtering) {
