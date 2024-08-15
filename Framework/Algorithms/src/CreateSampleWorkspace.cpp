@@ -384,6 +384,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(int numPixels, i
 
   const double hourInSeconds = 60 * 60;
   for (int wi = 0; wi < numPixels + numMonitors; wi++) {
+    // TODO: Can I think of *any* reason that "wi" is not the index actually used by this loop body?!
+
     EventList &el = retVal->getSpectrum(workspaceIndex);
     for (int i = 0; i < numBins; ++i) {
       // create randomised events within the bin to match the number required -
