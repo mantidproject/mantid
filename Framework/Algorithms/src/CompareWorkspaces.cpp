@@ -591,13 +591,20 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
                                   const API::MatrixWorkspace_const_sptr &ws2) {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  const size_t numBins = ws1->blocksize();
+  bool raggedWorkspace{false};
+  size_t numBins;
+  try {
+    numBins = ws1->blocksize();
+  } catch (std::length_error &) {
+    raggedWorkspace = true;
+  }
   const bool histogram = ws1->isHistogramData();
   const bool checkAllData = getProperty("CheckAllData");
   const bool RelErr = getProperty("ToleranceRelErr");
 
   // First check that the workspace are the same size
-  if (numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize()) {
+  if (numHists != ws2->getNumberHistograms() ||
+      (raggedWorkspace ? !ws2->isRaggedWorkspace() : numBins != ws2->blocksize())) {
     recordMismatch("Size mismatch");
     return false;
   }
@@ -627,31 +634,40 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       const auto &Y2 = ws2->y(i);
       const auto &E2 = ws2->e(i);
 
-      for (int j = 0; j < static_cast<int>(numBins); ++j) {
-        bool err;
-        if (RelErr) {
-          err = (relErr(X1[j], X2[j], tolerance) || relErr(Y1[j], Y2[j], tolerance) || relErr(E1[j], E2[j], tolerance));
-        } else
-          err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance ||
-                 std::fabs(E1[j] - E2[j]) > tolerance);
+      if (Y1.size() != Y2.size()) {
+        g_log.debug() << "Spectra " << i << " have different lenghts, " << X1.size() << " vs " << X2.size() << "\n";
+        recordMismatch("Mismatch in spectra length");
+        PARALLEL_CRITICAL(resultBool)
+        resultBool = false;
+      } else {
 
-        if (err) {
-          g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
-          g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
-          g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
-          g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
-                        << "," << std::fabs(E1[j] - E2[j]) << ")\n";
+        for (int j = 0; j < static_cast<int>(Y1.size()); ++j) {
+          bool err;
+          if (RelErr) {
+            err =
+                (relErr(X1[j], X2[j], tolerance) || relErr(Y1[j], Y2[j], tolerance) || relErr(E1[j], E2[j], tolerance));
+          } else
+            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance ||
+                   std::fabs(E1[j] - E2[j]) > tolerance);
+
+          if (err) {
+            g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+            g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
+            g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
+            g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
+                          << "," << std::fabs(E1[j] - E2[j]) << ")\n";
+            PARALLEL_CRITICAL(resultBool)
+            resultBool = false;
+          }
+        }
+
+        // Extra one for histogram data
+        if (histogram && std::fabs(X1.back() - X2.back()) > tolerance) {
+          g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
+          g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
           PARALLEL_CRITICAL(resultBool)
           resultBool = false;
         }
-      }
-
-      // Extra one for histogram data
-      if (histogram && std::fabs(X1.back() - X2.back()) > tolerance) {
-        g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
-        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
-        PARALLEL_CRITICAL(resultBool)
-        resultBool = false;
       }
     }
     PARALLEL_END_INTERRUPT_REGION
