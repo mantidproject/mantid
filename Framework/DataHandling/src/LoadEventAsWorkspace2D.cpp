@@ -71,15 +71,14 @@ void LoadEventAsWorkspace2D::init() {
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
                   "blank to load all events.");
-
-  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
-                  "Optional: To only include events after the provided start "
-                  "time, in seconds (relative to the start of the run).");
-
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
+      "Optional: To only include events after the provided start "
+      "time, in seconds (relative to the start of the run). If left empty, it will take start time as default.");
   declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
                   "Optional: To only include events before the provided stop "
-                  "time, in seconds (relative to the start of the run).");
-
+                  "time, in seconds (relative to the start of the run). if left empty, it will take run end time or "
+                  "last pulse time as default.");
   declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
                       "LogAllowList", std::vector<std::string>(), Direction::Input),
                   "If specified, only these logs will be loaded from the file (each "
@@ -216,6 +215,7 @@ void LoadEventAsWorkspace2D::exec() {
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
 
+  // get the start time
   if (!WS->run().hasProperty("start_time")) {
     g_log.warning("This NXS file does not have a start time, first pulse time is used instead.");
   }
@@ -223,6 +223,8 @@ void LoadEventAsWorkspace2D::exec() {
   Types::Core::DateAndTime runstart(WS->run().hasProperty("start_time") ? WS->run().getProperty("start_time")->value()
                                                                         : WS->run().getFirstPulseTime());
 
+  // get end time, to account for some older DAS issue where last pulse time can be slightly greater than end time, use
+  // last pulse time in this case and check if WS has "proton_charge" property otherwise last pulse time doesn't exist.
   Types::Core::DateAndTime endtime;
   if (WS->run().hasProperty("proton_charge") &&
       WS->run().getLastPulseTime() > WS->run().getProperty("end_time")->value()) {
@@ -234,7 +236,6 @@ void LoadEventAsWorkspace2D::exec() {
 
   Types::Core::DateAndTime filter_time_start;
   Types::Core::DateAndTime filter_time_stop;
-  // const bool time_filtering = (filter_time_start_sec != EMPTY_DBL() && filter_time_stop_sec != EMPTY_DBL());
 
   // vector to stored to integrated counts by detector ID
   std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
@@ -273,15 +274,11 @@ void LoadEventAsWorkspace2D::exec() {
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
 
         // closeGroup and skip this bank if there is no event
-        // std::vector<int> total_counts;
-        // if (descriptor.isEntry("/entry/" + entry_name + "/total_counts", "SDS"))
-        //   total_counts = Mantid::NeXus::NeXusIOHelper::readNexusVector<int>(h5file, "total_counts");
-        if (event_ids.size() == 1) {
-          // std::cout <<"total_counts[0]"<<std::endl;
-          // std::cout <<total_counts[0]<<std::endl;
+        if (event_ids.size() <= 1) {
           h5file.closeGroup();
           continue;
         }
+
         // Load "h5file" into BankPulseTimes using a shared ptr
         const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(h5file), std::vector<int>());
 
@@ -289,26 +286,24 @@ void LoadEventAsWorkspace2D::exec() {
         const auto event_index = std::make_shared<std::vector<uint64_t>>(
             Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
 
-        // if (runstart == Types::Core::DateAndTime::minimum()) {
-        //     runstart = run().getFirstPulseTime()
-        // }
-
+        // if "filterTimeStart" is empty, use run start time as default
         if (filter_time_start_sec != EMPTY_DBL()) {
           filter_time_start = runstart + filter_time_start_sec;
         } else {
           filter_time_start = runstart;
         }
 
+        // if "filterTimeStop" is empty, use end time as default
         if (filter_time_stop_sec != EMPTY_DBL()) {
           filter_time_stop = runstart + filter_time_stop_sec;
         } else {
           filter_time_stop = endtime;
         }
 
-        // Use run_start time as starting reference in time and create a TimeROI using bankPulseTimes
+        // Use filter_time_start time as starting reference in time and create a TimeROI using bankPulseTimes
         const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
 
-        // Give pulseIndexer a TimeROI
+        // set up PulseIndexer and give previous TimeROI to pulseIndexer
         const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
 
         std::vector<float> event_times;
@@ -318,7 +313,11 @@ void LoadEventAsWorkspace2D::exec() {
           else
             event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
         }
-        // Nested loop to loop through all the relavent pulses and relavent event_ids
+
+        // Nested loop to loop through all the relavent pulses and relavent event_ids.
+        // For someone new to this, every pulse creates an entry in event_index, event_index.size() = # of pulses,
+        // the value of event_index[i] points to the index of event_ids. In short, event_ids[event_index[i]] is the
+        // detector id from the i-th pulse. See NXevent_data description for more details.
         for (const auto &pulse : pulseIndexer) {
           for (size_t i = pulse.eventIndexStart; i < pulse.eventIndexStop; i++) {
             // for (size_t i = 0; i < event_ids.size(); i++) {
