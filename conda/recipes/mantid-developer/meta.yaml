@@ -1,4 +1,4 @@
-{% set version = load_setup_py_data().get('version', '0.0.0') %}
+{% set version = load_setup_py_data(setup_file='../../../setup.py', from_recipe_dir=True).get('version', '0.0.0') %}
 
 package:
   name: mantid-developer
