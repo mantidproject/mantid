@@ -273,15 +273,11 @@ void LoadEventAsWorkspace2D::exec() {
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
 
         // closeGroup and skip this bank if there is no event
-        // std::vector<int> total_counts;
-        // if (descriptor.isEntry("/entry/" + entry_name + "/total_counts", "SDS"))
-        //   total_counts = Mantid::NeXus::NeXusIOHelper::readNexusVector<int>(h5file, "total_counts");
-        if (event_ids.size() == 1) {
-          // std::cout <<"total_counts[0]"<<std::endl;
-          // std::cout <<total_counts[0]<<std::endl;
+        if (event_ids.size() <= 1) {
           h5file.closeGroup();
           continue;
         }
+
         // Load "h5file" into BankPulseTimes using a shared ptr
         const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(h5file), std::vector<int>());
 
@@ -289,23 +285,21 @@ void LoadEventAsWorkspace2D::exec() {
         const auto event_index = std::make_shared<std::vector<uint64_t>>(
             Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
 
-        // if (runstart == Types::Core::DateAndTime::minimum()) {
-        //     runstart = run().getFirstPulseTime()
-        // }
-
+        // if "filterTimeStart" is empty, use run start time as default
         if (filter_time_start_sec != EMPTY_DBL()) {
           filter_time_start = runstart + filter_time_start_sec;
         } else {
           filter_time_start = runstart;
         }
 
+        // if "filterTimeStop" is empty, use end time as default
         if (filter_time_stop_sec != EMPTY_DBL()) {
           filter_time_stop = runstart + filter_time_stop_sec;
         } else {
           filter_time_stop = endtime;
         }
 
-        // Use run_start time as starting reference in time and create a TimeROI using bankPulseTimes
+        // Use filter_time_start time as starting reference in time and create a TimeROI using bankPulseTimes
         const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
 
         // Give pulseIndexer a TimeROI
