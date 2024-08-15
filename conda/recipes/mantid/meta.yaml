@@ -65,7 +65,7 @@ requirements:
     - occt {{ occt }}
     - pycifrw
     - python
-    - python-dateutil {{ python-dateutil }}
+    - python-dateutil {{ python_dateutil }}
     - pyyaml {{ pyyaml }}
     - scipy {{ scipy }}
     - euphonic {{ euphonic }}

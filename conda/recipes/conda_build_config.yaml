@@ -98,7 +98,7 @@ pip:
 pyqt:
   - 5.15,<6
 
-python-dateutil:
+python_dateutil:
   - '>=2.8.1'
 
 pyyaml:
@@ -121,7 +121,7 @@ qtpy:
 tbb:
   - 2021
 
-texlive-core:
+texlive_core:
   - '>=20180414'
 
 toml:

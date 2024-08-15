@@ -34,12 +34,12 @@ requirements:
     - psutil {{ psutil }}
     - pycifrw
     - pyqt {{ pyqt }}
-    - python-dateutil {{ python-dateutil }}
+    - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
     - pyyaml {{ pyyaml }}
     - qscintilla2 {{ qscintilla2 }}
-    - qt {{ qt-main }}
+    - qt {{ qt_main }}
     - qtconsole {{ qtconsole }}
     - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
@@ -50,7 +50,7 @@ requirements:
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - tbb-devel {{ tbb }}
-    - texlive-core {{ texlive-core }} # [osx or linux]
+    - texlive-core {{ texlive_core }} # [osx or linux]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
     - joblib
