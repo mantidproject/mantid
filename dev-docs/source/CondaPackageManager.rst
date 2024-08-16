@@ -26,11 +26,11 @@ Creating a Python environment:
 
   conda create --name myenv python=3.10
 
-Creating an environment from file:
+Creating an environment from an environment file:
 
 .. code-block:: sh
 
-  conda create --name myenv -f mantid-developer-<OS>.yml
+  conda create --name myenv -f environment_file.yml
 
 Creating an environment from package:
 
