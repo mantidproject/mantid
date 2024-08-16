@@ -207,7 +207,12 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
     g_log.error() << "Could not create a fresh version of " << name << " version " << algHistory.version() << "\n";
   }
 
+  const bool storeInADS = algHistory.getStoreInADS();
+
   for (auto &propIter : props) {
+    if (!storeInADS && propIter->name() == "OutputWorkspace") {
+      continue;
+    }
     std::string prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
@@ -234,8 +239,14 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
   // Third case is we never specify the version, so do nothing.
 
-  if (!algHistory.getStoreInADS()) {
+  std::string assignmentStatement;
+  if (!storeInADS) {
     properties << "StoreInADS=False, ";
+    const auto it =
+        std::find_if(props.cbegin(), props.cend(), [](const auto &prop) { return prop->name() == "OutputWorkspace"; });
+    if (it != props.cend()) {
+      assignmentStatement = (*it)->value() + " = ";
+    }
   }
 
   std::string propStr = properties.str();
