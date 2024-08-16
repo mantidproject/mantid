@@ -28,8 +28,8 @@ setup_mamba () {
 # Assuming the mamba command is available,
 # create and activate a mamba environment
 # Args:
-#  1. Name of environment.
-#  2. Optional environment file
+#   1. Name of environment.
+#   2. Optional environment file
 create_and_activate_env() {
   #on ARM MAC OS, create x64 env rather than default ARM env.
   if [[ $OSTYPE == 'darwin'* && $(uname -p) == 'arm' ]]; then
@@ -50,8 +50,17 @@ create_and_activate_env() {
 
 # Build the mantid-developer metapackage from source and
 # install it into an environment called "mantid-developer"
+# Args:
+#   1. Path to pass to the package-conda script for building
+#      the mantid-developer metapackage.
 create_and_activate_mantid_developer_env() {
-  $SCRIPT_DIR/package-conda --build-mantid-developer
+  local packaging_dir=$1
+  if [[ -z "$packaging_dir" ]]; then
+    echo "A path is required for building the mantid-developer metapackage."
+    exit 1
+  fi
+
+  $SCRIPT_DIR/package-conda "$packaging_dir" --build-mantid-developer
   create_and_activate_env mantid-developer
-  mamba install --use-local mantid-developer
+  mamba install -c "$packaging_dir"/conda-bld mantid-developer --yes
 }
