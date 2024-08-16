@@ -116,10 +116,9 @@ void SaveNXSPE::exec() {
 
   // Get the value out of the property first
   double efixed = getProperty("Efixed");
-  bool efixed_provided(true);
-  if (isEmpty(efixed)) {
+  bool efixed_provided(!isEmpty(efixed));
+  if (!efixed_provided) {
     efixed = MASK_FLAG;
-    efixed_provided = false;
   }
   auto eMode = inputWS->getEMode();
   bool write_single_energy(true);
@@ -129,14 +128,14 @@ void SaveNXSPE::exec() {
     switch (eMode) {
     case (Kernel::DeltaEMode::Indirect): {
       // here workspace detectors should always have the energy
-      auto allEi = getIndirectEfixed(inputWS);
-      if (allEi.size() == 1) {
-        efixed = allEi[0];
-      } else if (allEi.size() > 1) {
+      auto detEfixed = getIndirectEfixed(inputWS);
+      if (detEfixed.size() == 1) {
+        efixed = detEfixed[0];
+      } else if (detEfixed.size() > 1) {
         write_single_energy = false; // do not write single energy, write array of energies here
-        nxFile.writeData("fixed_energy", allEi);
+        nxFile.writeData("fixed_energy", detEfixed);
       }
-      if (!write_single_energy || (allEi[0] > std::numeric_limits<float>::epsilon()))
+      if (!write_single_energy || (detEfixed[0] > std::numeric_limits<float>::epsilon()))
         // this is generally incorrect, but following historical practice
         break; // assume that indirect instrument without energy attached to detectors
                // may have energy specified in Ei log. Some user scripts may depend on it.
@@ -151,7 +150,7 @@ void SaveNXSPE::exec() {
                                           // derive efixed from Ei log similarly to Direct inelastic case if no external
                                           // efixed provided to the algorithm.
     case (Kernel::DeltaEMode::Undefined): // This should not happen
-                                          // but to keep cpp-check happy, assume Direct
+      eMode = Kernel::DeltaEMode::Direct; // but to keep cpp-check happy and code consistent, set up Direct
                                           // instrument in this case.
     case (Kernel::DeltaEMode::Direct): {
       const API::Run &run = inputWS->run();
@@ -205,7 +204,8 @@ void SaveNXSPE::exec() {
     nxFile.writeData("energy", efixed);
     nxFile.closeGroup(); // NXfermi_chopper
   }                      // TODO: Do not know what indirect people want for their instrument,
-                         // This is for them to decide in a future.
+                         // but they certainly do not have Fermi chopper.
+                         // This is for them to decide what(if) they want here in a future.
 
   nxFile.closeGroup(); // NXinstrument
 
@@ -382,13 +382,13 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
     return AllEnergies; // Empty vector, no energies,
 
   mean = mean / double(nDet);
-  double max_difr = std::accumulate(AllEnergies.begin(), AllEnergies.end(), 0., [mean](double x, double y) -> double {
-    return std::max<double>(x, std::abs(y - mean));
-  });
-  if (max_difr < std::numeric_limits<float>::epsilon()) {
+  if (std::all_of(AllEnergies.begin(), AllEnergies.end(),
+                  [&](double energy) { std::abs(energy - AllEnergies[0]) < std::numeric_limits<float>::epsilon(); })) {
+    // all detectors have same energy
     AllEnergies.resize(1);
     AllEnergies[0] = mean;
   }
+
   return AllEnergies;
 }
 } // namespace Mantid::DataHandling
