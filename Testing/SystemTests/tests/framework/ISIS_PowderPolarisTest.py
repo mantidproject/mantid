@@ -672,7 +672,9 @@ def setup_inst_object(mode, with_container=False):
         )
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape="cylinder")
-    sample_details.set_material(chemical_formula="Si")
+    # define multi-atom cell to stop regression of bug calling MaterialBuilder.build() without setting number density
+    # which works for one atom cells as number density is automatically calculated
+    sample_details.set_material(chemical_formula="Si Si", number_density=0.05)
     if with_container:
         sample_details.set_container(radius=0.3175, chemical_formula="V")
     inst_obj.set_sample_details(sample=sample_details)
