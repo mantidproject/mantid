@@ -790,7 +790,9 @@ def group_spectra_of(
     logger.information("Grouping method for workspace %s is %s" % (workspace.name(), grouping_method))
 
     if grouping_method == "Individual":
-        # Nothing to do here
+        # Ensure the spectra numbers begin at zero
+        for i in range(workspace.getNumberHistograms()):
+            workspace.getSpectrum(i).setSpectrumNo(i)
         return workspace
 
     elif grouping_method == "All":

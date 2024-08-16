@@ -311,12 +311,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         summary_prog.report("grouping workspaces")
         self.output_ws = GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
-        # The spectrum numbers need to start at 1 not 0 if spectra are grouped
-        if self.output_ws.getNumberOfEntries() == 1:
-            for i in range(len(self.output_ws.getItem(0).getSpectrumNumbers())):
-                self.output_ws.getItem(0).getSpectrum(i).setSpectrumNo(i + 1)
-
-        self.setProperty("OutputWorkspace", mtd[self._output_ws])
+        self.setProperty("OutputWorkspace", self.output_ws)
 
         summary_prog.report("Algorithm complete")
 
