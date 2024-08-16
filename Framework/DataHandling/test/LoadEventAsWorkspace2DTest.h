@@ -69,10 +69,6 @@ public:
     // has 0 total counts this should count as faulty detector and the feature is spurious and should be excluded.
     TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0)
     TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0)
-    // I don't agree with original test to have values of 1 in Y(0)[0] and E(0)[0]. CNCS_7860_event.nxs bank5
-    // has 0 total counts this should count as faulty detector and the feature is spurious and should be excluded.
-    TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0)
-    TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0)
     TS_ASSERT_EQUALS(outputWS->readX(0)[0], 2.85)
     TS_ASSERT_EQUALS(outputWS->readX(0)[1], 3.15)
   }
