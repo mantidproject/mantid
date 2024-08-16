@@ -134,8 +134,20 @@ void BinaryOperation::exec() {
   m_rhs = getProperty(inputPropName2());
   m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
 
-  m_lhsBlocksize = m_lhs->blocksize();
-  m_rhsBlocksize = m_rhs->blocksize();
+  try {
+    m_lhsBlocksize = m_lhs->blocksize();
+    m_lhsRagged = false;
+  } catch (std::length_error &) {
+    m_lhsBlocksize = 0;
+    m_lhsRagged = true;
+  }
+  try {
+    m_rhsBlocksize = m_rhs->blocksize();
+    m_rhsRagged = false;
+  } catch (std::length_error &) {
+    m_rhsBlocksize = 0;
+    m_rhsRagged = true;
+  }
 
   // Special handling for 1-WS and 1/WS.
   if (this->handleSpecialDivideMinus())
@@ -167,6 +179,7 @@ void BinaryOperation::exec() {
     std::swap(m_lhs, m_rhs);
     std::swap(m_elhs, m_erhs);
     std::swap(m_lhsBlocksize, m_rhsBlocksize);
+    std::swap(m_lhsRagged, m_rhsRagged);
   }
 
   // Check that the input workspaces are compatible
@@ -210,8 +223,7 @@ void BinaryOperation::exec() {
 
     // Always clear the MRUs.
     m_eout->clearMRU();
-    if (m_elhs)
-      m_elhs->clearMRU();
+    m_elhs->clearMRU();
     if (m_erhs)
       m_erhs->clearMRU();
 
@@ -307,7 +319,7 @@ bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr l
   const std::string rhs_unitID = (rhs_unit ? rhs_unit->unitID() : "");
 
   // Check the workspaces have the same units and distribution flag
-  if (lhs_unitID != rhs_unitID && m_lhsBlocksize > 1 && m_rhsBlocksize > 1) {
+  if (lhs_unitID != rhs_unitID && m_lhsBlocksize != 1 && m_rhsBlocksize != 1) {
     g_log.error("The two workspace are not compatible because they have "
                 "different units on the X axis.");
     return false;
@@ -372,8 +384,8 @@ std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_c
   if (m_rhsBlocksize == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms())
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
-  // the first spectrum
-  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
+  // the first spectrum except for ragged workspaces
+  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, !m_lhsRagged && !m_rhsRagged)) {
     return "X arrays must match when performing this operation on a 2D "
            "workspaces.";
   }

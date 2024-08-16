@@ -198,6 +198,9 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
+  void resize(size_t n) { mutableHistogramRef().resize(n); }
+  size_t size() const { return histogramRef().size(); }
+
   void setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index);
 
   virtual void copyDataInto(DataObjects::EventList &) const;
