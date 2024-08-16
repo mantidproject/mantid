@@ -65,13 +65,52 @@ public:
   void test_Saving_Workspace_Smaller_Than_Chunk_Size() {
     // Create a small test workspace
     const int nhist(3), nx(10);
+
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    auto loadedData = saveAndReloadWorkspace(input);
+    auto loadedData = saveAndReloadWorkspace(input, 10);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
 
     double tolerance(1e-08);
+    TS_ASSERT_EQUALS(nhist, dims[0]);
+    TS_ASSERT_EQUALS(nx, dims[1]);
+    // element 0,0
+    TS_ASSERT_DELTA(0.0, signal[0], tolerance);
+    TS_ASSERT_DELTA(0.0, error[0], tolerance);
+    // element 0,9
+    TS_ASSERT_DELTA(9.0, signal[9], tolerance);
+    TS_ASSERT_DELTA(18.0, error[9], tolerance);
+    // element 1,2 in 2D flat buffer
+    TS_ASSERT(std::isnan(signal[1 * dims[1] + 2]));
+    TS_ASSERT_DELTA(0.0, error[1 * dims[1] + 2], tolerance);
+    // final element
+    TS_ASSERT_DELTA(29.0, signal[dims[0] * dims[1] - 1], tolerance);
+    TS_ASSERT_DELTA(58.0, error[dims[0] * dims[1] - 1], tolerance);
+  }
+
+  void test_Ei_onProperty_superseeds_logs() {
+    // Create a small test workspace
+    const int nhist(3), nx(10);
+    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
+    std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
+        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Direct"));
+    // pointer is owned by run, no need to delete
+    input->mutableRun().addLogData(mode.release());
+
+    std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
+        new Mantid::Kernel::PropertyWithValue<double>("Ei", 12.0));
+    input->mutableRun().addLogData(EiLog.release());
+
+    auto loadedData = saveAndReloadWorkspace(input, 10, true);
+    auto dims = loadedData.get<0>();
+    auto signal = loadedData.get<1>();
+    auto error = loadedData.get<2>();
+    auto Ei = loadedData.get<3>();
+
+    double tolerance(1e-08);
+    TS_ASSERT_DELTA(10.0, Ei[0], tolerance);
+    //
     TS_ASSERT_EQUALS(nhist, dims[0]);
     TS_ASSERT_EQUALS(nx, dims[1]);
     // element 0,0
@@ -101,7 +140,7 @@ public:
         new Mantid::Kernel::PropertyWithValue<double>("Ei", 12.0));
     input->mutableRun().addLogData(EiLog.release());
 
-    auto loadedData = saveAndReloadWorkspace(input, false);
+    auto loadedData = saveAndReloadWorkspace(input, 10, false);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
@@ -134,7 +173,7 @@ public:
     std::vector<double> EiValue(1, 12.0);
     input = makeWS_indirect(input, EiValue);
 
-    auto loadedData = saveAndReloadWorkspace(input, false);
+    auto loadedData = saveAndReloadWorkspace(input, 10, false);
     auto Ei = loadedData.get<3>();
 
     double tolerance(1e-08);
@@ -145,7 +184,7 @@ public:
     // Create a test workspace
     const int nhist(5250), nx(100);
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    auto loadedData = saveAndReloadWorkspace(input);
+    auto loadedData = saveAndReloadWorkspace(input, 10);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
@@ -200,7 +239,7 @@ public:
 
     input = makeWS_indirect(input, EiValues);
 
-    auto loadedData = saveAndReloadWorkspace(input, false);
+    auto loadedData = saveAndReloadWorkspace(input, 10, false);
     auto detEi = loadedData.get<3>();
 
     for (int i = 0; i < nhist; i++) {
@@ -283,7 +322,8 @@ private:
 
   using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>, std::vector<double>, std::vector<double>>;
 
-  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS, bool set_efixed = true) {
+  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS, const double efix_value,
+                                    bool set_efixed = true) {
     SaveNXSPE saver;
     saver.initialize();
     saver.setChild(true);
@@ -292,7 +332,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", outputFile));
     outputFile = saver.getPropertyValue("Filename"); // get absolute path
 
-    double efix_value(10);
     if (set_efixed)
       TS_ASSERT_THROWS_NOTHING(saver.setProperty("Efixed", efix_value));
 
