@@ -19,6 +19,7 @@
 #                 not use \\ or \ in the path.
 #
 # Possible flags:
+#   --build-mantid-developer: build the mantid-developer metapackage using conda-build
 #   --build-mantid: build the mantid package using conda-build
 #   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
 #   --build-docs: build the HTML/Qthelp documentation
@@ -51,6 +52,7 @@ fi
 RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 
 # Parse flags
+ENABLE_BUILD_MANTID_DEVELOPER=false
 ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
@@ -61,6 +63,7 @@ BUILD_WORKBENCH_WITH_DOCS=true
 while [ ! $# -eq 0 ]
 do
     case "$1" in
+        --build-mantid-developer) ENABLE_BUILD_MANTID_DEVELOPER=true ;;
         --build-mantid) ENABLE_BUILD_MANTID=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
@@ -127,6 +130,9 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
 fi
 
 # Run conda build.
+if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
 fi
