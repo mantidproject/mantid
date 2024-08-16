@@ -673,7 +673,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.__loaderName = "Load"  # set the loader to be generic on first load
         self.filterBadPulses = self.getProperty("FilterBadPulses").value
         self.chunkSize = self.getProperty("MaxChunkSize").value
-        self.comression = self.getProperty("MinSizeCompressOnLoad").value
+        self.compression_threshold = self.getProperty("MinSizeCompressOnLoad").value
         self.absorption = self.getProperty("AbsorptionWorkspace").value
         self.charac = self.getProperty("Characterizations").value
         self.useCaching = len(self.getProperty("CacheDir").value) > 0
@@ -689,7 +689,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # determing compression
         if determineCompression(
-            filename=self._filenames[0], compression=self.compression, chunking=(self.chunkSize > 0.0), absorption=self.absorption
+            filename=self._filenames[0], compression=self.compression_threshold, chunking=(self.chunkSize > 0.0), absorption=self.absorption
         ):
             self.do_compression = True
         else:
