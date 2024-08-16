@@ -597,28 +597,8 @@ private:
     if (!spinStates.empty()) {
       compareCorrectionResults(
           outputWS, pols, nHist, nBins, edges, counts,
-          [&](size_t wsIndex, double c) {
-            if (pols[wsIndex] == "_++")
-              wsIndex = 0;
-            else if (pols[wsIndex] == "_+-")
-              wsIndex = 1;
-            else if (pols[wsIndex] == "_-+")
-              wsIndex = 2;
-            else if (pols[wsIndex] == "_--")
-              wsIndex = 3;
-            return c * static_cast<double>(wsIndex + 1);
-          },
-          [&](size_t wsIndex, double c) {
-            if (pols[wsIndex] == "_++")
-              wsIndex = 0;
-            else if (pols[wsIndex] == "_+-")
-              wsIndex = 1;
-            else if (pols[wsIndex] == "_-+")
-              wsIndex = 2;
-            else if (pols[wsIndex] == "_--")
-              wsIndex = 3;
-            return std::sqrt(c) * static_cast<double>(wsIndex + 1);
-          });
+          [&](size_t wsIndex, double c) { return c * static_cast<double>(getPolIndex(pols[wsIndex]) + 1); },
+          [&](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(getPolIndex(pols[wsIndex]) + 1); });
     } else {
       compareCorrectionResults(
           outputWS, pols, nHist, nBins, edges, counts,
@@ -1373,6 +1353,15 @@ private:
       spinStates = outputOrder[0] + "," + outputOrder[1] + "," + outputOrder[2] + "," + outputOrder[3];
     }
     idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig, spinStates);
+  }
+
+  size_t getPolIndex(const std::string &pol) {
+    static const std::unordered_map<std::string, size_t> polMap = {{"_++", 0}, {"_+-", 1}, {"_-+", 2}, {"_--", 3}};
+    const auto it = polMap.find(pol);
+    if (it != polMap.end()) {
+      return it->second;
+    }
+    throw std::invalid_argument("Unknown polarization string: " + pol);
   }
 };
 
