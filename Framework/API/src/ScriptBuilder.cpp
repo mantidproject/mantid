@@ -239,7 +239,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
   // Third case is we never specify the version, so do nothing.
 
-  std::string assignmentStatement;
+  std::string assignmentStatement("");
   if (!storeInADS) {
     properties << "StoreInADS=False, ";
     const auto it =
@@ -256,7 +256,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
     propStr.erase(propStr.size() - 1);
   }
 
-  std::string historyEntry = name + "(" + propStr + ")";
+  std::string historyEntry = assignmentStatement + name + "(" + propStr + ")";
   historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")), historyEntry.end());
   return historyEntry;
 }
