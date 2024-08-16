@@ -556,9 +556,15 @@ void PolarizationCorrectionWildes::addSpinStateOutput(std::vector<std::string> &
     names.emplace_back(baseName + "_" + spinState);
     API::AnalysisDataService::Instance().addOrReplace(names.back(), ws);
   } else {
-    auto const &i = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStateOrder, spinState);
-    names[i] = baseName + "_" + spinState;
-    API::AnalysisDataService::Instance().addOrReplace(names[i], ws);
+    auto const &maybeIndex = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(
+        PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder), spinState);
+    if (!maybeIndex.has_value()) {
+      throw std::invalid_argument("Required spin state (" + spinState + ") not found in spin state order (" +
+                                  spinStateOrder + ").");
+    }
+    auto const index = maybeIndex.value();
+    names[index] = baseName + "_" + spinState;
+    API::AnalysisDataService::Instance().addOrReplace(names[index], ws);
   }
 }
 
