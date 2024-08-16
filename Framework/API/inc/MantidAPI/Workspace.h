@@ -67,9 +67,11 @@ public:
 
   void virtual setTitle(const std::string &);
   void setComment(const std::string &);
+  void setPythonVariableName(const std::string &);
   virtual const std::string getTitle() const;
   const std::string &getComment() const;
   const std::string &getName() const override;
+  const std::string &getPythonVariableName() const;
   bool isDirty(const int n = 1) const;
   virtual bool isGroup() const { return false; }
   /// Get the footprint in memory in bytes.
@@ -95,6 +97,8 @@ private:
   /// The name associated with the object within the ADS (This is required for
   /// workspace algebra
   std::string m_name;
+  /// The name of the variable holding the workspace, if not stored in the ADS
+  std::string m_pythonVariableName;
   /// The history of the workspace, algorithm and environment
   std::unique_ptr<WorkspaceHistory> m_history;
 

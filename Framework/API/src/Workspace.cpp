@@ -38,6 +38,8 @@ void Workspace::setComment(const std::string &c) { m_comment = c; }
  */
 void Workspace::setName(const std::string &name) { m_name = name; }
 
+void Workspace::setPythonVariableName(const std::string &name) { m_pythonVariableName = name; }
+
 /** Get the workspace title
  *
  *  @return The title
@@ -55,6 +57,8 @@ const std::string &Workspace::getComment() const { return m_comment; }
  *  @return The name
  */
 const std::string &Workspace::getName() const { return m_name; }
+
+const std::string &Workspace::getPythonVariableName() const { return m_pythonVariableName; }
 
 /**
  * Check whether other algorithms have been applied to the
