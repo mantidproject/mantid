@@ -48,16 +48,10 @@ create_and_activate_env() {
   mamba activate $env_name
 }
 
-# Assuming the mamba command is available,
-# create and activate a mamba environment
-# Args:
+# Build the mantid-developer metapackage from source and
+# install it into an environment called "mantid-developer"
 create_and_activate_mantid_developer_env() {
-  if [[ $OSTYPE == 'msys'* ]]; then
-    local env_file=$WORKSPACE/mantid-developer-win.yml
-  elif [[ $OSTYPE == 'darwin'* ]]; then
-    local env_file=$WORKSPACE/mantid-developer-osx.yml
-  else
-    local env_file=$WORKSPACE/mantid-developer-linux.yml
-  fi
-  create_and_activate_env mantid-developer $env_file
+  $SCRIPT_DIR/package-conda --build-mantid-developer
+  create_and_activate_env mantid-developer
+  mamba install --use-local mantid-developer
 }
