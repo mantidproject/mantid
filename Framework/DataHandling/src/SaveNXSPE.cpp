@@ -382,8 +382,9 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
     return AllEnergies; // Empty vector, no energies,
 
   mean = mean / double(nDet);
-  if (std::all_of(AllEnergies.begin(), AllEnergies.end(),
-                  [&](double energy) { std::abs(energy - AllEnergies[0]) < std::numeric_limits<float>::epsilon(); })) {
+  if (std::all_of(AllEnergies.begin(), AllEnergies.end(), [&AllEnergies](double energy) {
+        return std::abs(energy - AllEnergies[0]) < std::numeric_limits<float>::epsilon();
+      })) {
     // all detectors have same energy
     AllEnergies.resize(1);
     AllEnergies[0] = mean;
