@@ -29,8 +29,8 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     return "Enter a spin state string, it should be a comma-separated list, e.g. " + m_para + m_anti + ", " + m_anti +
            m_anti + ", " + m_anti + m_para + ", " + m_para + m_para + ".";
   }
-  auto const &allowedPairs = getAllowedPairStates();
-  auto const &allowedSingles = getAllowedSingleStates();
+  const auto &allowedPairs = getAllowedPairStates();
+  const auto &allowedSingles = getAllowedSingleStates();
 
   std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(input);
 

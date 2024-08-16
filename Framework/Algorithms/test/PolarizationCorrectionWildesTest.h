@@ -584,7 +584,7 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    auto const &flipperConfigVec = splitSpinStateString(flipperConfig);
+    const auto &flipperConfigVec = splitSpinStateString(flipperConfig);
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "00").value()] = ws00->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "01").value()] = ws01->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "10").value()] = ws10->getName();
@@ -624,7 +624,7 @@ private:
     setupWorkspaceData(wsNames, wsList, nHist);
 
     // Re-order the input workspace names to match the input flipper configuration
-    auto const &flipperConfigVec = splitSpinStateString(flipperConfig);
+    const auto &flipperConfigVec = splitSpinStateString(flipperConfig);
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "00").value()] = ws00->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, presentFlipperConf).value()] = wsXX->getName();
     wsNames[indexOfWorkspaceForSpinState(flipperConfigVec, "11").value()] = ws11->getName();

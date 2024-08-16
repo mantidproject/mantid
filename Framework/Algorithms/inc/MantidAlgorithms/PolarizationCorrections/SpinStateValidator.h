@@ -53,8 +53,8 @@ private:
   const std::unordered_set<std::string> getAllowedPairStates() const;
   const std::unordered_set<std::string> getAllowedSingleStates() const;
   bool m_acceptSingleStates = false;
-  std::string const m_para;
-  std::string const m_anti;
+  const std::string m_para;
+  const std::string m_anti;
   bool m_optional = false;
 };
 } // namespace Mantid::Algorithms
