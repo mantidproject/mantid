@@ -42,10 +42,13 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
     filepaths = [path.replace("*" * len(str(number)), str(number)) for number in list(file_numbers)]
     filepaths = ", ".join(filepaths)
     norm_name = "_".join((workspace_name, "norm"))
+    sample_fields = params["sample_fields"]
     if workspace_name.endswith("_sf"):
         field_name = workspace_name[-4:]
+        sample_fields_to_try = [field for field in sample_fields if field.endswith("_sf")]
     else:
         field_name = workspace_name[-5:]
+        sample_fields_to_try = [field for field in sample_fields if field.endswith("_nsf")]
     if not standard:
         LoadDNSSCD(
             FileNames=filepaths,
@@ -65,23 +68,51 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
             SaveHuberTo=f"huber_{field_name}",
         )
     else:
-        LoadDNSSCD(
-            FileNames=filepaths,
-            OutputWorkspace=workspace_name,
-            NormalizationWorkspace=norm_name,
-            Normalization=params["norm_to"],
-            a=params["a"],
-            b=params["b"],
-            c=params["c"],
-            alpha=params["alpha"],
-            beta=params["beta"],
-            gamma=params["gamma"],
-            OmegaOffset=params["omega_offset"],
-            HKL1=params["hkl1"],
-            HKL2=params["hkl2"],
-            LoadAs="raw",
-            LoadHuberFrom=f"huber_{field_name}",
-        )
+        try:
+            LoadDNSSCD(
+                FileNames=filepaths,
+                OutputWorkspace=workspace_name,
+                NormalizationWorkspace=norm_name,
+                Normalization=params["norm_to"],
+                a=params["a"],
+                b=params["b"],
+                c=params["c"],
+                alpha=params["alpha"],
+                beta=params["beta"],
+                gamma=params["gamma"],
+                OmegaOffset=params["omega_offset"],
+                HKL1=params["hkl1"],
+                HKL2=params["hkl2"],
+                LoadAs="raw",
+                LoadHuberFrom=f"huber_{field_name}",
+            )
+        # handling of std data when sample and vana fields are different but ignore
+        # vanadium fields option is selected
+        except ValueError:
+            if params["ignore_vana"]:
+                for field in sample_fields_to_try:
+                    try:
+                        LoadDNSSCD(
+                            FileNames=filepaths,
+                            OutputWorkspace=workspace_name,
+                            NormalizationWorkspace=norm_name,
+                            Normalization=params["norm_to"],
+                            a=params["a"],
+                            b=params["b"],
+                            c=params["c"],
+                            alpha=params["alpha"],
+                            beta=params["beta"],
+                            gamma=params["gamma"],
+                            OmegaOffset=params["omega_offset"],
+                            HKL1=params["hkl1"],
+                            HKL2=params["hkl2"],
+                            LoadAs="raw",
+                            LoadHuberFrom=f"huber_{field}",
+                        )
+                        # leave the for loop on first success
+                        break
+                    except ValueError:
+                        continue
     BinMD(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
     BinMD(InputWorkspace=norm_name, OutputWorkspace=norm_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
     return mtd[workspace_name]
@@ -93,9 +124,10 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
     factor based on vanadium data.
 
     Key arguments:
-    vana_set = used Vanadium data, if not given fields matching sample are used
-    ignore_vana_fields = if True fields of vanadium files will be ignored
-    sum_vana_sf_nsf ) if True SF and NSF channels of vanadium are summed
+    vana_set: set of selected vanadium data. If not given, the fields
+    matching those of the selected sample data are used.
+    ignore_vana_fields: if True, fields of vanadium files will be ignored.
+    sum_vana_sf_nsf: if True, SF and NSF channels of vanadium are summed.
     """
     vana_sum = None
     vana_sum_norm = None

@@ -33,5 +33,5 @@ def d_spacing_from_lattice(a, b, c, alpha, beta, gamma, hkl):
     s23 = a**2 * b * c * (cos_beta * cos_gamma - cos_alpha)
     s13 = a * b**2 * c * (cos_gamma * cos_alpha - cos_beta)
     inverse_d_square = 1.0 / vol**2 * (s11 * h**2 + s22 * k**2 + s33 * l**2 + 2.0 * s12 * h * k + 2 * s23 * k * l + 2 * s13 * h * l)
-    d = sqrt(1 / inverse_d_square)
+    d = sqrt(1.0 / inverse_d_square)
     return d

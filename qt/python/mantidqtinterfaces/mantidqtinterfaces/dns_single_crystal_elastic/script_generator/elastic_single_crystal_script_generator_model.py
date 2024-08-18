@@ -45,6 +45,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._ascii = None
         self._nexus = None
         self._norm = None
+        self._selected_sample_fields = None
 
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
@@ -88,6 +89,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _setup_sample_data(self, paths, file_selector):
         self._sample_data = DNSElasticDataset(data=file_selector["full_data"], path=paths["data_dir"], is_sample=True)
+        self._selected_sample_fields = self._sample_data["fields"]
         self._plot_list = self._sample_data.create_subtract()
 
     def _setup_standard_data(self, paths, file_selector):
@@ -144,18 +146,29 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             f"\n          'norm_to': '{self._norm}',"
             f"\n          'dx': '{options['dx']}',"
             f"\n          'dy': '{options['dy']}',"
+            f"\n          'ignore_vana': '{options['ignore_vana_fields']}',"
+            f"\n          'sample_fields': {self._selected_sample_fields},"
             "}",
             "",
         ]
 
     def _get_binning_lines(self, options):
-        two_theta_bin_edge_min = options["two_theta_min"] - options["two_theta_bin_size"] / 2
-        two_theta_bin_edge_max = options["two_theta_max"] + options["two_theta_bin_size"] / 2
-        two_theta_num_bins = int(round((two_theta_bin_edge_max - two_theta_bin_edge_min) / options["two_theta_bin_size"]))
+        two_theta_min = options["two_theta_min"]
+        two_theta_max = options["two_theta_max"]
+        two_theta_step = options["two_theta_bin_size"]
+        two_theta_edges_range = np.arange(two_theta_min - 0.5 * two_theta_step, two_theta_max + 1.5 * two_theta_step, two_theta_step)
+        two_theta_bin_edge_min = two_theta_edges_range[0]
+        two_theta_bin_edge_max = two_theta_edges_range[-1]
+        two_theta_num_bins = two_theta_edges_range.size - 1
         two_theta_binning = [two_theta_bin_edge_min, two_theta_bin_edge_max, two_theta_num_bins]
-        omega_bin_edge_min = options["omega_min"] - options["omega_bin_size"] / 2
-        omega_bin_edge_max = options["omega_max"] + options["omega_bin_size"] / 2
-        omega_num_bins = int(round((omega_bin_edge_max - omega_bin_edge_min) / options["omega_bin_size"]))
+
+        omega_min = options["omega_min"]
+        omega_max = options["omega_max"]
+        omega_step = options["omega_bin_size"]
+        omega_edges_range = np.arange(omega_min - 0.5 * omega_step, omega_max + 1.5 * omega_step, omega_step)
+        omega_bin_edge_min = omega_edges_range[0]
+        omega_bin_edge_max = omega_edges_range[-1]
+        omega_num_bins = omega_edges_range.size - 1
         omega_binning = [omega_bin_edge_min, omega_bin_edge_max, omega_num_bins]
         lines = [
             f"binning = {{'two_theta_binning': {two_theta_binning},\n"
@@ -258,37 +271,43 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _flipping_ratio_not_possible(self):
         selected_angle_fields_data = self._sample_data["angle_fields_data"]
+        selected_angle_field_files_data = self._sample_data["angle_fields_files_data"]
         flipping_ratio_possibility_list = []
         incomplete_banks_list = []
         for det_bank_angle in selected_angle_fields_data.keys():
+            flipping_ratio_possible = False
             sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith("_sf")])
             sf_fields_components = [field.replace("_sf", "") for field in sf_fields]
             nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith("_nsf")])
             nsf_fields_components = [field.replace("_nsf", "") for field in nsf_fields]
             if nsf_fields_components == sf_fields_components:
-                flipping_ratio_possible = True
-            else:
-                flipping_ratio_possible = False
+                for i, field in enumerate(sf_fields):
+                    temp_sf_files = selected_angle_field_files_data[det_bank_angle][field]
+                    # to avoid error with non-existing element
+                    if nsf_fields[i]:
+                        temp_nsf_files = selected_angle_field_files_data[det_bank_angle][nsf_fields[i]]
+                        if len(temp_sf_files) == len(temp_nsf_files):
+                            flipping_ratio_possible = True
+            if not flipping_ratio_possible:
                 incomplete_banks_list.append(det_bank_angle)
             flipping_ratio_possibility_list.append(flipping_ratio_possible)
         is_possible = all(flipping_ratio_possibility_list)
-        angles = ", ".join(map(str, sorted(incomplete_banks_list)))
+        angles = incomplete_banks_list
         return not is_possible, angles
 
-    def _bank_positions_not_compatible(self, tol=0.05):
+    def _bank_positions_not_compatible(self):
         if self._corrections:
             sorted_sample_banks = np.array(sorted(self._sample_data["banks"]))
             sorted_standard_banks = np.array(sorted(self._standard_data["banks"]))
             sample_banks_size = sorted_sample_banks.size
             standard_banks_size = sorted_standard_banks.size
             if sample_banks_size == standard_banks_size:
-                banks_match = np.allclose(sorted_sample_banks, sorted_standard_banks, atol=tol)
+                banks_match = np.array_equal(sorted_sample_banks, sorted_standard_banks)
             elif sample_banks_size < standard_banks_size:
                 count = 0
                 for sample_element in sorted_sample_banks:
                     for standard_element in sorted_standard_banks:
-                        if np.allclose(sample_element, standard_element, atol=tol):
-                            print(sample_element)
+                        if np.array_equal(sample_element, standard_element):
                             count += 1
                 if count == sample_banks_size:
                     banks_match = True
@@ -312,6 +331,14 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         binning_array = np.arange(min, max + bin_size, bin_size)
         return binning_array
 
+    def _binning_step_is_zero(self, options):
+        binning_list = ["omega", "two_theta"]
+        for binning in binning_list:
+            bin_size = binning + "_bin_size"
+            if options[bin_size] == 0:
+                return True, binning
+        return False, ""
+
     def _check_errors_in_selected_files(self, options):
         """
         If any inconsistencies are found in the files selected for
@@ -319,12 +346,13 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         the corresponding error_message. If no inconsistencies are
         found then the empty string will be returned.
         """
-
         keys_to_check = ["wavelength", "dx", "dy", "hkl1", "hkl2", "omega_offset"]
         for key in keys_to_check:
             if options[key] == "" or options[key] == [] or options[key] is None:
                 return f"Missing input for {key}."
 
+        if self._binning_step_is_zero(options)[0]:
+            return f"Non-zero {self._binning_step_is_zero(options)[1]} bin size must be selected."
         if self._corrections and not self._standard_data:
             return "Standard data have to be selected to perform reduction of sample data."
         if self._bank_positions_not_compatible():
