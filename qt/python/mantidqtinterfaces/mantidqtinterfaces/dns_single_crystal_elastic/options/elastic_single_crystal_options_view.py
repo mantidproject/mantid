@@ -68,11 +68,9 @@ class DNSElasticSCOptionsView(DNSView):
 
     # signals
     sig_get_wavelength = Signal()
-    sig_two_theta_max_changed = Signal()
-    sig_two_theta_min_changed = Signal()
-    sig_omega_max_changed = Signal()
-    sig_omega_min_changed = Signal()
-    sig_auto_binning_clicked = Signal(int)
+    sig_two_theta_changed = Signal()
+    sig_omega_changed = Signal()
+    sig_auto_binning_clicked = Signal()
 
     def deactivate_get_wavelength(self):
         self._map["get_wavelength"].setCheckState(0)
@@ -117,30 +115,28 @@ class DNSElasticSCOptionsView(DNSView):
     def _disable_subtract_sample_background(self, state):
         self._map["background_factor"].setEnabled(state)
 
-    def _automatic_binning_clicked(self, state):
-        self._map["two_theta_min"].setEnabled(not state)
-        self._map["two_theta_max"].setEnabled(not state)
-        self._map["two_theta_bin_size"].setEnabled(not state)
-        self._map["omega_min"].setEnabled(not state)
-        self._map["omega_max"].setEnabled(not state)
-        self._map["omega_bin_size"].setEnabled(not state)
-        self.sig_auto_binning_clicked.emit(state)
+    def _automatic_binning_clicked(self):
+        is_checked = self._map["automatic_binning"].isChecked()
+        keys_to_process = ["two_theta_min", "two_theta_max", "two_theta_bin_size", "omega_min", "omega_max", "omega_bin_size"]
+        for key in keys_to_process:
+            if is_checked:
+                self._map[key].setEnabled(False)
+            else:
+                self._map[key].setEnabled(True)
+        self.sig_auto_binning_clicked.emit()
+        self._map["automatic_binning"].setChecked(is_checked)
 
     def _get_wavelength(self, state):
         if state:
             self.sig_get_wavelength.emit()
+        else:
+            self.deactivate_get_wavelength()
 
-    def _two_theta_min_changed(self):
-        self.sig_two_theta_min_changed.emit()
+    def _two_theta_changed(self):
+        self.sig_two_theta_changed.emit()
 
-    def _two_theta_max_changed(self):
-        self.sig_two_theta_max_changed.emit()
-
-    def _omega_min_changed(self):
-        self.sig_omega_min_changed.emit()
-
-    def _omega_max_changed(self):
-        self.sig_omega_max_changed.emit()
+    def _omega_changed(self):
+        self.sig_omega_changed.emit()
 
     def _attach_signal_slots(self):
         self._map["wavelength"].valueChanged.connect(self.deactivate_get_wavelength)
@@ -151,8 +147,8 @@ class DNSElasticSCOptionsView(DNSView):
         self._map["sum_vana_sf_nsf"].stateChanged.connect(self._disable_sum_vanadium)
         self._map["ignore_vana_fields"].stateChanged.connect(self._disable_ignore_vana)
         self._map["use_dx_dy"].stateChanged.connect(self._disable_lattice)
-        self._map["two_theta_min"].valueChanged.connect(self._two_theta_min_changed)
-        self._map["two_theta_max"].valueChanged.connect(self._two_theta_max_changed)
-        self._map["omega_min"].valueChanged.connect(self._omega_min_changed)
-        self._map["omega_max"].valueChanged.connect(self._omega_max_changed)
-        self._map["automatic_binning"].stateChanged.connect(self._automatic_binning_clicked)
+        self._map["two_theta_min"].valueChanged.connect(self._two_theta_changed)
+        self._map["two_theta_max"].valueChanged.connect(self._two_theta_changed)
+        self._map["omega_min"].valueChanged.connect(self._omega_changed)
+        self._map["omega_max"].valueChanged.connect(self._omega_changed)
+        self._map["automatic_binning"].clicked.connect(self._automatic_binning_clicked)

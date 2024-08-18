@@ -19,11 +19,29 @@ class DNSElasticSCOptionsModel(DNSCommonOptionsModel):
     def get_dx_dy(options):
         hkl1 = convert_hkl_string_to_float(options["hkl1"])
         hkl2 = convert_hkl_string_to_float(options["hkl2"])
-        dx = d_spacing_from_lattice(
-            a=options["a"], b=options["b"], c=options["c"], alpha=options["alpha"], beta=options["beta"], gamma=options["gamma"], hkl=hkl1
+        dx = round(
+            d_spacing_from_lattice(
+                a=options["a"],
+                b=options["b"],
+                c=options["c"],
+                alpha=options["alpha"],
+                beta=options["beta"],
+                gamma=options["gamma"],
+                hkl=hkl1,
+            ),
+            5,
         )
-        dy = d_spacing_from_lattice(
-            a=options["a"], b=options["b"], c=options["c"], alpha=options["alpha"], beta=options["beta"], gamma=options["gamma"], hkl=hkl2
+        dy = round(
+            d_spacing_from_lattice(
+                a=options["a"],
+                b=options["b"],
+                c=options["c"],
+                alpha=options["alpha"],
+                beta=options["beta"],
+                gamma=options["gamma"],
+                hkl=hkl2,
+            ),
+            5,
         )
         return [dx, dy]
 
