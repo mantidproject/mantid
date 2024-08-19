@@ -42,6 +42,8 @@ std::string castToString(int value) { return boost::lexical_cast<std::string>(va
 template <typename Predicate>
 void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName, std::string const &value,
                    Predicate const &condition) {
+  if (!algorithm->existsProperty(propName))
+    return;
   if (condition)
     algorithm->setPropertyValue(propName, value);
 }
@@ -127,9 +129,7 @@ void InelasticTab::exportPythonScript() {
  */
 bool InelasticTab::loadFile(const std::string &filename, const std::string &outputName, const int specMin,
                             const int specMax, bool loadHistory) {
-  const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
-
-  auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
+  auto loader = AlgorithmManager::Instance().createUnmanaged("Load", -1);
   loader->initialize();
   loader->setProperty("Filename", filename);
   loader->setProperty("OutputWorkspace", outputName);
