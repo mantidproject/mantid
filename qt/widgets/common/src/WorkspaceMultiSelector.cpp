@@ -167,13 +167,12 @@ void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
   }
 }
 
-stringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
+StringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
 
-  auto selIndexes = selectedIndexes();
-  stringPairVec nameIndexPairVec;
-  nameIndexPairVec.reserve(static_cast<std::size_t>(selIndexes.size()));
-
-  for (auto const &index : selIndexes) {
+  auto selRows = selectionModel()->selectedRows();
+  StringPairVec nameIndexPairVec;
+  nameIndexPairVec.reserve(static_cast<std::size_t>(selRows.size()));
+  for (auto const &index : selRows) {
     std::string txt = item(index.row(), namesCol)->text().toStdString();
     if (!txt.empty()) {
       std::string idx = item(index.row(), indexCol)->text().toStdString();
