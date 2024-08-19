@@ -179,6 +179,41 @@ in C++, or `unittest.mock
 can set expectations in the unit tests for certain methods to be
 called, and with certain arguments.
 
+MVP Template tool
+#################
+
+The `template.py script <https://github.com/mantidproject/mantid/blob/main/tools/MVP/template.py>`__
+provides a tool which is designed to generate initial files for an MVP-based
+widget written in either Python or C++. These generated files serve as a
+foundation or template for creating any widget using the MVP design pattern.
+It can also be used to create the necessary files when refactoring an existing
+widget which is not currently using MVP.
+
+To generate files for a Python widget with name "Example", run:
+
+.. code-block:: sh
+
+  python tools/MVP/template.py --name Example --language python --output-dir $PWD
+
+
+This command will generate three python files named `example_model.py`, `example_view.py`
+and `example_presenter.py`. These files will be saved in the current working directory,
+as specified by `$PWD`. An additional file named `launch.py` will be generated. This
+can be used to open the widget as follows:
+
+.. code-block:: sh
+
+  python $PWD/launch.py
+
+To generate files for a C++ widget with name "Example", run:
+
+.. code-block:: sh
+
+  python tools/MVP/template.py --name Example --language c++ --output-dir $PWD
+
+This command will generate six C++ files named `ExampleModel.cpp`, `ExampleModel.h`,
+`ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp` and `ExamplePresenter.h`.
+
 Visual Design
 #############
 
