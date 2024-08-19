@@ -212,17 +212,17 @@ const DateAndTime LogManager::getFirstPulseTime() const {
   // a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990."
   // There was no explanation why 100 was picked as the maximum number of times to skip.
   // In the refactored algorithm below we keep 100 as is.
-  const size_t maxSkip{100};
   const DateAndTime reference("1991-01-01T00:00:00");
   const std::vector<DateAndTime> &times = log->timesAsVector();
+  const size_t maxSkip{100};
   size_t index;
   const size_t maxIndex = std::min(static_cast<size_t>(log->realSize()), maxSkip);
   for (index = 0; index < maxIndex; index++) {
     if (times[index] >= reference)
-      break;
+      return times[index];
   }
 
-  return times[index];
+  return times[maxIndex - 1];
 }
 
 /** Return the time of the last pulse received, by accessing the run's
