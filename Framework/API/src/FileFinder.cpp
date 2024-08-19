@@ -460,8 +460,10 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
 
   // If provided exts are empty, or useExtsOnly is false,
   // we want to include facility exts as well
-  getUniqueExtensions(exts, uniqueExts);
-  if (exts.empty() || !useExtsOnly) {
+  if (extension.empty() || useExtsOnly) {
+    getUniqueExtensions(exts, uniqueExts);
+  }
+  if (extension.empty() && !useExtsOnly) {
     getUniqueExtensions(extensions, uniqueExts);
   }
 
