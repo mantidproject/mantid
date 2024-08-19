@@ -80,7 +80,7 @@ Usage
    cal_file = "hrpd_new_072_01_corr.cal"
 
    # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
-   ws = AlignDetectors(InputWorkspace='ws',CalibrationFile=cal_file)
+   ws = ConvertUnits(InputWorkspace='ws',CalibrationFile=cal_file)
    # Focus the data
    ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file)
 

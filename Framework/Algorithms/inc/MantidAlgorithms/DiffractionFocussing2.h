@@ -29,7 +29,7 @@ namespace Algorithms {
  detector,
  the third column corresponds to an offset in Deltad/d (not applied, usually
  applied using
- the AlignDetectors algorithm). The forth column is a flag to indicate whether
+ the ConvertUnits algorithm). The forth column is a flag to indicate whether
  the detector
  is selected. The fifth column indicates the group this detector belongs to
  (number >=1),
