@@ -8,7 +8,6 @@ import unittest
 
 from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
 import numpy as np
-from mantid import AnalysisDataService
 from mantid.utils.pip import package_installed
 from BayesQuasi2 import BayesQuasi2
 
@@ -315,7 +314,7 @@ if package_installed("quickBayes"):
             self._alg.add_sample_logs = mock.Mock(side_effect=add_log_mock)
             self._alg.make_results = mock.Mock(return_value=(results.name(), probs.name()))
 
-        @mock.patch("BayesQuasi2.GetThetaQ")
+        @mock.patch("BayesQuasi2.get_two_theta_and_q")
         @mock.patch("BayesQuasi2.Progress")
         def test_pyexec_QSe(self, prog_mock, get_Q_mock):
             progress_mock = mock.Mock()
@@ -379,7 +378,7 @@ if package_installed("quickBayes"):
                 name_prob="prob",
             )
 
-        @mock.patch("BayesQuasi2.GetThetaQ")
+        @mock.patch("BayesQuasi2.get_two_theta_and_q")
         @mock.patch("BayesQuasi2.Progress")
         def test_pyexec_QL(self, prog_mock, get_Q_mock):
             progress_mock = mock.Mock()
@@ -441,7 +440,7 @@ if package_installed("quickBayes"):
                 name_prob="prob",
             )
 
-        @mock.patch("BayesQuasi2.GetThetaQ")
+        @mock.patch("BayesQuasi2.get_two_theta_and_q")
         @mock.patch("BayesQuasi2.Progress")
         def test_pyexec_QL_unique(self, prog_mock, get_Q_mock):
             progress_mock = mock.Mock()

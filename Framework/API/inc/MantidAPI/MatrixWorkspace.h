@@ -233,6 +233,8 @@ public:
   void setSharedE(const size_t index, const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
     getSpectrumWithoutInvalidation(index).setSharedE(e);
   }
+  void resizeHistogram(const size_t index, size_t n) & { getSpectrum(index).resize(n); }
+  size_t histogramSize(const size_t index) const { return getSpectrum(index).size(); }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Deprecated, use x() instead. Returns a read-only (i.e. const) reference to

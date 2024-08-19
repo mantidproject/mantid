@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionQDataPresenter.h"
+
 #include "FitTab.h"
 #include "FitTabConstants.h"
-#include "MantidAPI/TextAxis.h"
 #include "ParameterEstimation.h"
 
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/TextAxis.h"
 
 namespace {
 using namespace MantidQt::CustomInterfaces::Inelastic;
@@ -23,114 +23,25 @@ std::string createSpectra(const std::vector<std::size_t> &spectrum) {
   return spectra;
 }
 
-std::string getHWHMName(const std::string &resultName) {
-  auto position = resultName.rfind("_FWHM");
-  if (position != std::string::npos)
-    return resultName.substr(0, position) + "_HWHM" + resultName.substr(position + 5, resultName.size());
-  return resultName + "_HWHM";
-}
-
-void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
-  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleter->setLogging(false);
-  for (const auto &name : workspaceNames) {
-    deleter->setProperty("Workspace", name);
-    deleter->execute();
+void replaceAxisLabel(TextAxis *axis, std::size_t const index, std::string const &fromStr, std::string const &toStr) {
+  auto label = axis->label(index);
+  auto const position = label.find(fromStr);
+  if (position == std::string::npos) {
+    return;
   }
+  label.replace(position, fromStr.length(), toStr);
+  axis->setLabel(index, label);
 }
 
-std::string scaleWorkspace(std::string const &inputName, std::string const &outputName, double factor) {
-  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
-  scaleAlg->initialize();
-  scaleAlg->setLogging(false);
-  scaleAlg->setProperty("InputWorkspace", inputName);
-  scaleAlg->setProperty("OutputWorkspace", outputName);
-  scaleAlg->setProperty("Factor", factor);
-  scaleAlg->execute();
-  return outputName;
-}
-
-std::string extractSpectra(std::string const &inputName, int startIndex, int endIndex, std::string const &outputName) {
-  auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
-  extractAlg->initialize();
-  extractAlg->setLogging(false);
-  extractAlg->setProperty("InputWorkspace", inputName);
-  extractAlg->setProperty("StartWorkspaceIndex", startIndex);
-  extractAlg->setProperty("EndWorkspaceIndex", endIndex);
-  extractAlg->setProperty("OutputWorkspace", outputName);
-  extractAlg->execute();
-  return outputName;
-}
-
-std::string extractSpectrum(const MatrixWorkspace_sptr &workspace, int index, std::string const &outputName) {
-  return extractSpectra(workspace->getName(), index, index, outputName);
-}
-
-std::string extractHWHMSpectrum(const MatrixWorkspace_sptr &workspace, int index) {
-  auto const scaledName = "__scaled_" + std::to_string(index);
-  auto const extractedName = "__extracted_" + std::to_string(index);
-  auto const outputName = scaleWorkspace(extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
-  deleteTemporaryWorkspaces({extractedName});
-  return outputName;
-}
-
-std::string appendWorkspace(std::string const &lhsName, std::string const &rhsName, std::string const &outputName) {
-  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
-  appendAlg->initialize();
-  appendAlg->setLogging(false);
-  appendAlg->setProperty("InputWorkspace1", lhsName);
-  appendAlg->setProperty("InputWorkspace2", rhsName);
-  appendAlg->setProperty("OutputWorkspace", outputName);
-  appendAlg->execute();
-  return outputName;
-}
-
-MatrixWorkspace_sptr appendAll(std::vector<std::string> const &workspaces, std::string const &outputName) {
-  auto appended = workspaces[0];
-  for (auto i = 1u; i < workspaces.size(); ++i)
-    appended = appendWorkspace(appended, workspaces[i], outputName);
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(appended);
-}
-
-std::vector<std::string> subdivideWidthWorkspace(const MatrixWorkspace_sptr &workspace,
-                                                 const std::vector<std::size_t> &widthSpectra) {
-  std::vector<std::string> subworkspaces;
-  subworkspaces.reserve(1 + 2 * widthSpectra.size());
-
-  int start = 0;
-  for (const auto &spectrum_number : widthSpectra) {
-    const auto spectrum = static_cast<int>(spectrum_number);
-    if (spectrum > start) {
-      auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(spectrum);
-      subworkspaces.emplace_back(extractSpectra(workspace->getName(), start, spectrum - 1, outputName));
+void convertWidthToHWHM(MatrixWorkspace_sptr workspace, const std::vector<std::size_t> &widthSpectra) {
+  for (auto const &spectrumIndex : widthSpectra) {
+    if (auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1))) {
+      replaceAxisLabel(axis, spectrumIndex, "Width", "HWHM");
+      replaceAxisLabel(axis, spectrumIndex, "FWHM", "HWHM");
+      workspace->mutableY(spectrumIndex) *= 0.5;
+      workspace->mutableE(spectrumIndex) *= 0.5;
     }
-    subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
-    start = spectrum + 1;
   }
-
-  const int end = static_cast<int>(workspace->getNumberHistograms());
-  if (start < end) {
-    auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(end);
-    subworkspaces.emplace_back(extractSpectra(workspace->getName(), start, end - 1, outputName));
-  }
-  return subworkspaces;
-}
-
-MatrixWorkspace_sptr createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
-                                         const std::vector<std::size_t> &widthSpectra) {
-  if (widthSpectra.empty())
-    return workspace;
-  if (AnalysisDataService::Instance().doesExist(hwhmName))
-    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(hwhmName);
-
-  const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
-  const auto hwhmWorkspace = appendAll(subworkspaces, hwhmName);
-  auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1)->clone(hwhmWorkspace.get()));
-  hwhmWorkspace->replaceAxis(1, std::unique_ptr<TextAxis>(axis));
-
-  deleteTemporaryWorkspaces(subworkspaces);
-
-  return hwhmWorkspace;
 }
 
 } // namespace
@@ -165,24 +76,23 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   const auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   FunctionQParameters parameters(workspace);
   if (!parameters)
-    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+    throw std::invalid_argument("Workspace contains no Width, EISF or A0 spectra.");
 
   if (workspace->y(0).size() == 1)
     throw std::invalid_argument("Workspace contains only one data point.");
 
-  const auto name = getHWHMName(workspace->getName());
-  const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.spectra("Width"));
+  convertWidthToHWHM(workspace, parameters.spectra("Width"));
   m_tab->handleFunctionListChanged(chooseFunctionQFunctions(paramType == "Width"));
   const auto singleSpectra = FunctionModelSpectra(std::to_string(parameters.spectra(paramType)[spectrum_index]));
-  m_model->addWorkspace(hwhmWorkspace->getName(), singleSpectra);
+  m_model->addWorkspace(workspace->getName(), singleSpectra);
 }
 
 std::map<std::string, std::string> FunctionQDataPresenter::chooseFunctionQFunctions(bool paramWidth) const {
   if (m_view->isTableEmpty()) // when first data is added to table, it can only be either WIDTH or EISF
     return paramWidth ? FunctionQ::WIDTH_FITS : FunctionQ::EISF_FITS;
 
-  bool widthFuncs = paramWidth || m_view->dataColumnContainsText("FWHM");
-  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF");
+  bool widthFuncs = paramWidth || m_view->dataColumnContainsText("HWHM");
+  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF") || m_view->dataColumnContainsText("A0");
   if (widthFuncs && eisfFuncs)
     return FunctionQ::ALL_FITS;
   else if (widthFuncs)
@@ -241,11 +151,13 @@ void FunctionQDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(MantidWidget
   //  and the vector in m_fitDataModel which is in the base class
   //  FittingModel get table workspace index
   auto const &wsName = dialog->workspaceName();
-  auto const hwhmWsName = wsName + "_HWHM";
   // This a vector of workspace names currently loaded
   auto const wsVector = m_model->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
-  auto const wsIt = std::find(wsVector.cbegin(), wsVector.cend(), hwhmWsName);
+  auto wsIt = std::find(wsVector.cbegin(), wsVector.cend(), wsName);
+  if (wsIt == wsVector.cend()) {
+    return;
+  }
   // this is the index of the workspace.
   auto const index = WorkspaceID(std::distance(wsVector.cbegin(), wsIt));
   updateActiveWorkspaceID(index);

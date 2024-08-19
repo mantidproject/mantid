@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
-#include "Common/DataValidationHelper.h"
 #include "Common/DetectorGroupingOptions.h"
-#include "Common/RunWidget/RunView.h"
 #include "ISISEnergyTransferPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -205,6 +205,10 @@ void IETView::setPlotTimeIsPlotting(bool plotting) {
 void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) {
   m_uiForm.dsCalibrationFile->setFBSuffixes(calibrationFbSuffixes);
   m_uiForm.dsCalibrationFile->setWSSuffixes(calibrationWSSuffixes);
+}
+
+void IETView::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsCalibrationFile->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void IETView::setInstrumentSpectraRange(int specMin, int specMax) {

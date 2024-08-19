@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MolDyn.h"
 
-#include "Common/RunWidget/RunView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -106,6 +106,15 @@ void MolDyn::algorithmComplete(bool error) {
  * @param settings :: The settings to loading into the interface
  */
 void MolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
+
+/**
+ * Selects wheter to load the history of a workspace for the resolution data selector loader
+ *
+ * @param doLoadHistory :: If true, the data selector loads the history of the added workspaces.
+ */
+void MolDyn::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
+}
 
 /**
  * Handles the version of nMoldyn being selected.

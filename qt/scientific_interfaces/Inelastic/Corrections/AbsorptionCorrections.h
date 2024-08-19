@@ -9,11 +9,11 @@
 #include "CorrectionsTab.h"
 #include "ui_AbsorptionCorrections.h"
 
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -31,6 +31,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "AbsorptionCorrections"; }
 
 private slots:
   virtual void algorithmComplete(bool error);
@@ -51,6 +52,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
   void validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
@@ -96,8 +98,6 @@ private:
   std::shared_ptr<Densities> m_sampleDensities;
   std::shared_ptr<Densities> m_canDensities;
   Mantid::API::IAlgorithm_sptr m_absCorAlgo;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -55,6 +55,13 @@ Plot error bars for external plots
   If ticked, this will ensure that error bars are plotted on any plots which are plotted
   externally (i.e. in a separate window) from the indirect interfaces.
 
+Load Workspace History
+  If this option is unticked, the history of the workspace won't be loaded, resulting in faster
+  workspace loading speeds.
+  For many Indirect/Inelastic interfaces, workspaces to be processed by the interface are preloaded into the ADS.
+  The history of a workspace is loaded by default when a workspace is loaded into the ADS from the interface.
+  In some cases, knowledge of the history may not be necessary for later analysis.
+
 
 Advanced
 --------

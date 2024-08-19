@@ -2,7 +2,6 @@ set(SRC_FILES
     src/AbsorptionCorrection.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
-    src/AddNote.cpp
     src/AddPeak.cpp
     src/AddSampleLog.cpp
     src/AddTimeSeriesLog.cpp
@@ -42,7 +41,6 @@ set(SRC_FILES
     src/ChangePulsetime.cpp
     src/ChangePulsetime2.cpp
     src/ChangeTimeZero.cpp
-    src/CheckWorkspacesMatch.cpp
     src/ChopData.cpp
     src/ClearCache.cpp
     src/ClearInstrumentParameters.cpp
@@ -57,7 +55,6 @@ set(SRC_FILES
     src/ConvertAxesToRealSpace.cpp
     src/ConvertAxisByFormula.cpp
     src/ConvertDiffCal.cpp
-    src/ConvertEmptyToTof.cpp
     src/ConvertFromDistribution.cpp
     src/ConvertSpectrumAxis.cpp
     src/ConvertSpectrumAxis2.cpp
@@ -240,6 +237,7 @@ set(SRC_FILES
     src/PolarizationCorrections/HeliumAnalyserEfficiency.cpp
     src/PolarizationCorrections/PolarizationCorrectionsHelpers.cpp
     src/PolarizationCorrections/SpinStateValidator.cpp
+    src/PolarizationCorrections/PolarizerEfficiency.cpp
     src/PolarizationCorrectionFredrikze.cpp
     src/PolarizationCorrectionWildes.cpp
     src/PolarizationEfficiencyCor.cpp
@@ -354,7 +352,6 @@ set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
-    inc/MantidAlgorithms/AddNote.h
     inc/MantidAlgorithms/AddPeak.h
     inc/MantidAlgorithms/AddSampleLog.h
     inc/MantidAlgorithms/AddTimeSeriesLog.h
@@ -394,7 +391,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ChangePulsetime.h
     inc/MantidAlgorithms/ChangePulsetime2.h
     inc/MantidAlgorithms/ChangeTimeZero.h
-    inc/MantidAlgorithms/CheckWorkspacesMatch.h
     inc/MantidAlgorithms/ChopData.h
     inc/MantidAlgorithms/ClearCache.h
     inc/MantidAlgorithms/ClearInstrumentParameters.h
@@ -409,7 +405,6 @@ set(INC_FILES
     inc/MantidAlgorithms/ConvertAxesToRealSpace.h
     inc/MantidAlgorithms/ConvertAxisByFormula.h
     inc/MantidAlgorithms/ConvertDiffCal.h
-    inc/MantidAlgorithms/ConvertEmptyToTof.h
     inc/MantidAlgorithms/ConvertFromDistribution.h
     inc/MantidAlgorithms/ConvertSpectrumAxis.h
     inc/MantidAlgorithms/ConvertSpectrumAxis2.h
@@ -598,6 +593,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h
     inc/MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h
     inc/MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h
+    inc/MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h
     inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
     inc/MantidAlgorithms/PolarizationCorrectionWildes.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
@@ -713,7 +709,6 @@ set(INC_FILES
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
-    AddNoteTest.h
     AddPeakTest.h
     AddSampleLogTest.h
     AddTimeSeriesLogTest.h
@@ -753,7 +748,6 @@ set(TEST_FILES
     ChangePulsetime2Test.h
     ChangePulsetimeTest.h
     ChangeTimeZeroTest.h
-    CheckWorkspacesMatchTest.h
     ChopDataTest.h
     CircularBeamProfileTest.h
     ClearCacheTest.h
@@ -769,7 +763,6 @@ set(TEST_FILES
     ConvertAxesToRealSpaceTest.h
     ConvertAxisByFormulaTest.h
     ConvertDiffCalTest.h
-    ConvertEmptyToTofTest.h
     ConvertFromDistributionTest.h
     ConvertSpectrumAxis2Test.h
     ConvertSpectrumAxisTest.h
@@ -949,6 +942,7 @@ set(TEST_FILES
     PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
     PolarizationCorrections/SpinStateValidatorTest.h
     PolarizationCorrections/FlipperEfficiencyTest.h
+    PolarizationCorrections/PolarizerEfficiencyTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
     PolarizationEfficiencyCorTest.h

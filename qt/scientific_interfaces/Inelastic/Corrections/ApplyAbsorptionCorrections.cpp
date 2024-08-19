@@ -5,10 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "Common/DataValidationHelper.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -17,6 +13,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <QStringList>
 #include <utility>
@@ -472,6 +472,12 @@ void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
   m_uiForm.dsCorrections->setFBSuffixes(filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsCorrections->setWSSuffixes(filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+}
+
+void ApplyAbsorptionCorrections::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsContainer->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsCorrections->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 /**

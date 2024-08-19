@@ -329,7 +329,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         Import 3D ASCII data (e.g. I(Q, t)).
         """
         logger.notice("Loading ASCII data")
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
         from IndirectNeutron import ChangeAngles, InstrParas
 
         # Read file
@@ -378,7 +378,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         InstrParas(wks.name(), instrument, "simul", reflection)
 
         # Process angles
-        efixed = getEfixed(wks.name())
+        efixed = get_efixed(wks.name())
         logger.information("Qmax={0}, Efixed={1}".format(q_max, efixed))
         wave = 1.8 * math.sqrt(25.2429 / efixed)
         qw = wave * v_axis_values / (4.0 * math.pi)

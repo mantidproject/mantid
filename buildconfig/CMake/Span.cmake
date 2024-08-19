@@ -13,8 +13,4 @@ fetchcontent_declare(
                 "${CMAKE_SOURCE_DIR}/buildconfig/CMake/span_disable_testing.patch"
 )
 
-fetchcontent_getproperties(span)
-if(NOT span_POPULATED)
-  fetchcontent_populate(span)
-  add_subdirectory(${span_SOURCE_DIR} ${span_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+fetchcontent_makeavailable(span)

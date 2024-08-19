@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DataModel.h"
-#include "Common/IDataModel.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "DataProcessorInterface.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/IDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 
 #include "ElwinModel.h"
 #include "ElwinView.h"
@@ -45,14 +45,16 @@ public:
 
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
 public:
-  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
-  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
-                 std::unique_ptr<IDataModel> dataModel);
+  ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
+                 std::unique_ptr<IElwinModel> model);
+  ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
+                 std::unique_ptr<IElwinModel> model, std::unique_ptr<IDataModel> dataModel);
   ~ElwinPresenter();
 
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Elwin"; }
 
   // Elwin interface methods
   void handleValueChanged(std::string const &propName, double) override;

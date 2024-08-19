@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvolutionAddWorkspaceDialog.h"
 
-#include "Common/InterfaceUtils.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include <utility>
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -48,6 +48,11 @@ void ConvolutionAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
 
 void ConvolutionAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
+}
+
+void ConvolutionAddWorkspaceDialog::setLoadProperty(const std::string &propName, bool enable) {
+  m_uiForm.dsWorkspace->setLoadProperty(propName, enable);
+  m_uiForm.dsResolution->setLoadProperty(propName, enable);
 }
 
 void ConvolutionAddWorkspaceDialog::setResolutionWSSuffices(const QStringList &suffices) {

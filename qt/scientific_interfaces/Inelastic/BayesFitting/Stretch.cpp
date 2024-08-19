@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 using namespace Mantid::API;
 
@@ -19,6 +19,12 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
+struct PlotType {
+  inline static const std::string ALL = "All";
+  inline static const std::string SIGMA = "Sigma";
+  inline static const std::string BETA = "Beta";
+  inline static const std::string FWHM = "FWHM";
+};
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -32,38 +38,9 @@ Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m
   connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
   connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
-  // Add the properties browser to the ui form
-  m_uiForm.treeSpace->addWidget(m_propTree);
-
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-  m_properties["Sigma"] = m_dblManager->addProperty("Sigma");
-  m_properties["Beta"] = m_dblManager->addProperty("Beta");
-
-  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-  m_dblManager->setDecimals(m_properties["Sigma"], INT_DECIMALS);
-  m_dblManager->setDecimals(m_properties["Beta"], INT_DECIMALS);
-
-  m_propTree->addProperty(m_properties["EMin"]);
-  m_propTree->addProperty(m_properties["EMax"]);
-  m_propTree->addProperty(m_properties["SampleBinning"]);
-  m_propTree->addProperty(m_properties["Sigma"]);
-  m_propTree->addProperty(m_properties["Beta"]);
-
-  formatTreeWidget(m_propTree, m_properties);
-
-  // default values
-  m_dblManager->setValue(m_properties["Sigma"], 50);
-  m_dblManager->setMinimum(m_properties["Sigma"], 1);
-  m_dblManager->setMaximum(m_properties["Sigma"], 200);
-  m_dblManager->setValue(m_properties["Beta"], 50);
-  m_dblManager->setMinimum(m_properties["Beta"], 1);
-  m_dblManager->setMaximum(m_properties["Beta"], 200);
-  m_dblManager->setValue(m_properties["SampleBinning"], 1);
-  m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
 
   // Connect the data selector for the sample to the mini plot
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
@@ -92,14 +69,14 @@ void Stretch::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
+void Stretch::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
+}
+
 void Stretch::handleValidation(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-  if (useQuickBayes && m_uiForm.cbBackground->currentText() == "Sloping") {
-    validator->addErrorMessage("The 'quickBayes' package does not support a 'Sloping' background type.");
-  }
 }
 
 void Stretch::handleRun() {
@@ -125,12 +102,9 @@ void Stretch::handleRun() {
   auto const eMin = m_properties["EMin"]->valueText().toDouble();
   auto const eMax = m_properties["EMax"]->valueText().toDouble();
   auto const beta = m_properties["Beta"]->valueText().toInt();
-  auto const sigma = m_properties["Sigma"]->valueText().toInt();
-  auto const nBins = m_properties["SampleBinning"]->valueText().toInt();
 
   // Bool options
   auto const elasticPeak = m_uiForm.chkElasticPeak->isChecked();
-  auto const sequence = m_uiForm.chkSequentialFit->isChecked();
 
   // Construct OutputNames
   auto const cutIndex = sampleName.find_last_of("_");
@@ -152,10 +126,12 @@ void Stretch::handleRun() {
   stretch->setProperty("Elastic", elasticPeak);
   stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
   stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
-  if (useQuickBayes) {
-    stretch->setProperty("Background", background == "Flat" ? background : "None");
-  } else {
-    stretch->setProperty("Background", background);
+  stretch->setProperty("Background", background);
+  if (!useQuickBayes) {
+    auto const sigma = m_properties["Sigma"]->valueText().toInt();
+    auto const nBins = m_properties["SampleBinning"]->valueText().toInt();
+    auto const sequence = m_uiForm.chkSequentialFit->isChecked();
+
     stretch->setProperty("SampleBins", nBins);
     stretch->setProperty("NumberSigma", sigma);
     stretch->setProperty("Loop", sequence);
@@ -268,6 +244,106 @@ void Stretch::plotContourClicked() {
 void Stretch::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
+}
+
+/**
+ * Get called whenever the settings are updated
+ *
+ * @param settings :: The current settings
+ */
+void Stretch::applySettings(std::map<std::string, QVariant> const &settings) {
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
+  setFileExtensionsByName(settings.at("RestrictInput").toBool());
+  setLoadHistory(settings.at("LoadHistory").toBool());
+}
+
+/**
+ * Setup the fit options based on the algorithm used
+ *
+ */
+void Stretch::setupFitOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  m_uiForm.cbBackground->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+    m_uiForm.chkSequentialFit->hide();
+  } else {
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::SLOPING));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
+    m_uiForm.chkSequentialFit->show();
+  }
+}
+
+/**
+ * Setup the property browser based on the algorithm used
+ *
+ */
+void Stretch::setupPropertyBrowser() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+
+  m_properties.clear();
+  m_dblManager->clear();
+  m_propTree->clear();
+
+  m_uiForm.treeSpace->addWidget(m_propTree);
+
+  m_properties["EMin"] = m_dblManager->addProperty("EMin");
+  m_properties["EMax"] = m_dblManager->addProperty("EMax");
+  m_properties["Beta"] = m_dblManager->addProperty("Beta");
+
+  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["Beta"], INT_DECIMALS);
+
+  m_propTree->addProperty(m_properties["EMin"]);
+  m_propTree->addProperty(m_properties["EMax"]);
+  m_propTree->addProperty(m_properties["Beta"]);
+
+  m_dblManager->setValue(m_properties["Beta"], 50);
+  m_dblManager->setMinimum(m_properties["Beta"], 1);
+  m_dblManager->setMaximum(m_properties["Beta"], 200);
+
+  if (!useQuickBayes) {
+    m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
+    m_properties["Sigma"] = m_dblManager->addProperty("Sigma");
+
+    m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
+    m_dblManager->setDecimals(m_properties["Sigma"], INT_DECIMALS);
+
+    m_propTree->addProperty(m_properties["SampleBinning"]);
+    m_propTree->addProperty(m_properties["Sigma"]);
+
+    m_dblManager->setValue(m_properties["Sigma"], 50);
+    m_dblManager->setMinimum(m_properties["Sigma"], 1);
+    m_dblManager->setMaximum(m_properties["Sigma"], 200);
+    m_dblManager->setValue(m_properties["SampleBinning"], 1);
+    m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+  }
+
+  formatTreeWidget(m_propTree, m_properties);
+}
+
+/**
+ * Setup the plot options based on the algorithm used
+ *
+ */
+void Stretch::setupPlotOptions() {
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  m_uiForm.cbPlot->clear();
+  if (useQuickBayes) {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::BETA));
+  } else {
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::SIGMA));
+    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::BETA));
+  }
 }
 
 /**

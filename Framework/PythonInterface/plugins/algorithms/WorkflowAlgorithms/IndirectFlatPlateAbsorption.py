@@ -94,7 +94,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
         self._setup()
 
@@ -104,7 +104,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             n_prog_reports += 1
         prog = Progress(self, 0.0, 1.0, n_prog_reports)
 
-        efixed = getEfixed(self._sample_ws)
+        efixed = get_efixed(self._sample_ws)
 
         sample_wave_ws = "__sam_wave"
         ConvertUnits(

@@ -52,7 +52,8 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 FunctionQParameters::FunctionQParameters() : m_widths(), m_eisfs() {}
 
 FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace)
-    : m_widths(findAxisLabels(workspace, {".Width", ".FWHM"})), m_eisfs(findAxisLabels(workspace, {".EISF"})) {}
+    : m_widths(findAxisLabels(workspace, {".Width", ".FWHM"})), m_eisfs(findAxisLabels(workspace, {".EISF"})),
+      m_a0s(findAxisLabels(workspace, {".A0"})) {}
 
 std::vector<std::string> FunctionQParameters::names(std::string const &parameterType) const {
   auto const nameGetter = [](auto const &pair) { return pair.first; };
@@ -60,6 +61,8 @@ std::vector<std::string> FunctionQParameters::names(std::string const &parameter
     return extract<std::string>(m_widths, nameGetter);
   } else if (parameterType == "EISF") {
     return extract<std::string>(m_eisfs, nameGetter);
+  } else if (parameterType == "A0") {
+    return extract<std::string>(m_a0s, nameGetter);
   }
   return {};
 }
@@ -70,6 +73,8 @@ std::vector<std::size_t> FunctionQParameters::spectra(std::string const &paramet
     return extract<std::size_t>(m_widths, spectraGetter);
   } else if (parameterType == "EISF") {
     return extract<std::size_t>(m_eisfs, spectraGetter);
+  } else if (parameterType == "A0") {
+    return extract<std::size_t>(m_a0s, spectraGetter);
   }
   throw std::logic_error("An unexpected parameter type '" + parameterType + "'is active.");
 }
@@ -80,6 +85,8 @@ std::vector<std::string> FunctionQParameters::types() const {
     types.emplace_back("Width");
   if (!m_eisfs.empty())
     types.emplace_back("EISF");
+  if (!m_a0s.empty())
+    types.emplace_back("A0");
   return types;
 }
 

@@ -68,6 +68,7 @@ public:
   virtual void setSaveEnabled(bool enable) = 0;
   virtual void setPlotTimeIsPlotting(bool plotting) = 0;
   virtual void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) = 0;
+  virtual void setLoadHistory(bool doLoadHistory) = 0;
   virtual void setEnableOutputOptions(bool const enable) = 0;
 
   virtual void setInstrumentSpectraRange(int specMin, int specMax) = 0;
@@ -130,6 +131,7 @@ public:
   void setSaveEnabled(bool enable) override;
   void setPlotTimeIsPlotting(bool plotting) override;
   void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) override;
+  void setLoadHistory(bool doLoadHistory) override;
   void setEnableOutputOptions(bool const enable) override;
 
   void setInstrumentSpectraRange(int specMin, int specMax) override;

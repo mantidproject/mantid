@@ -36,6 +36,7 @@ public:
   std::string getDataName() const override;
   void setFBSuffixes(QStringList const &suffix) override;
   void setWSSuffixes(QStringList const &suffix) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(const QPair<double, double> &bounds) override;

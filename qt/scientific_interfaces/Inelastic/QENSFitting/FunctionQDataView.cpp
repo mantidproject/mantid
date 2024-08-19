@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionQDataView.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
 #include "FunctionQAddWorkspaceDialog.h"
 #include "FunctionQDataPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -51,6 +51,7 @@ void FunctionQDataView::showAddWorkspaceDialog() {
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
 }

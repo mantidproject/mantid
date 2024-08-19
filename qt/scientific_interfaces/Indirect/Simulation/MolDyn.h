@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SimulationTab.h"
 #include "ui_MolDyn.h"
 
@@ -24,6 +24,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "MolDyn"; }
 
 private slots:
   void versionSelected(const QString & /*version*/);
@@ -31,6 +32,7 @@ private slots:
   void algorithmComplete(bool error);
 
 private:
+  void setLoadHistory(bool doLoadHistory) override;
   void setSaveEnabled(bool enabled);
 
   std::string m_outputWsName;

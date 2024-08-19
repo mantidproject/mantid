@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "CorrectionsTab.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "ui_ApplyAbsorptionCorrections.h"
 
@@ -27,6 +27,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ApplyAbsorptionCorrections"; }
 
 private slots:
   /// Handles a new sample being loaded
@@ -48,6 +49,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void addInterpolationStep(const Mantid::API::MatrixWorkspace_sptr &toInterpolate, std::string toMatch);
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
@@ -67,8 +69,6 @@ private:
   Mantid::API::WorkspaceGroup_sptr m_ppCorrectionsGp;
 
   size_t m_spectra;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 
 } // namespace CustomInterfaces

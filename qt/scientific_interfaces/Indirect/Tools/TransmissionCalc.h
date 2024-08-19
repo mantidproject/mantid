@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ToolsTab.h"
 #include "ui_TransmissionCalc.h"
 
@@ -29,6 +29,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "TransmissionCalc"; }
 
 private slots:
   /// Handles completion of the algorithm

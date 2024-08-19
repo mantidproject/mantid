@@ -44,6 +44,7 @@ public:
   virtual void setSampleWSSuffixes(const QStringList &suffix) = 0;
   virtual void setResolutionFBSuffixes(const QStringList &suffix) = 0;
   virtual void setResolutionWSSuffixes(const QStringList &suffix) = 0;
+  virtual void setLoadHistory(bool doLoadHistory) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
   virtual void setWatchADS(bool watch) = 0;
   virtual void setup() = 0;

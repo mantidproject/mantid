@@ -183,7 +183,7 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
         )
     else:
         return plot(
-            selection.workspaces,
+            names,
             spectrum_nums=selection.spectra,
             wksp_indices=selection.wksp_indices,
             errors=errors,

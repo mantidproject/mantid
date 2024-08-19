@@ -7,10 +7,10 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ISISDiagnostics.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -50,6 +50,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "ISISDiagnostics"; }
 
 private slots:
   void algorithmComplete(bool error);
@@ -72,6 +73,7 @@ private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void setPeakRangeLimits(double peakMin, double peakMax);
   void setBackgroundRangeLimits(double backgroundMin, double backgroundMax);

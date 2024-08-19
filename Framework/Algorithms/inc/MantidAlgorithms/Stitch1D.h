@@ -52,15 +52,15 @@ private:
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params);
   /// Perform integration
-  Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
+  Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr const &input, const double start,
                                                 const double stop);
   Mantid::API::MatrixWorkspace_sptr singleValueWS(const double val);
   /// Calculate the weighted mean
-  Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
-                                                 Mantid::API::MatrixWorkspace_sptr &inTwo);
+  Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr const &inOne,
+                                                 Mantid::API::MatrixWorkspace_sptr const &inTwo);
   /// Conjoin x axis
-  Mantid::API::MatrixWorkspace_sptr conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
-                                                 Mantid::API::MatrixWorkspace_sptr &inTwo);
+  Mantid::API::MatrixWorkspace_sptr conjoinXAxis(Mantid::API::MatrixWorkspace_sptr const &inOne,
+                                                 Mantid::API::MatrixWorkspace_sptr const &inTwo);
   /// Find the start and end indexes
   boost::tuple<int, int> findStartEndIndexes(double startOverlap, double endOverlap,
                                              Mantid::API::MatrixWorkspace_sptr &workspace);

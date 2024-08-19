@@ -1,0 +1,1 @@
+- Added tooltips to the run and abort buttons, displaying their functionality and shortcut keys.  Tooltips are displayed when hovering over the relevant buttons.

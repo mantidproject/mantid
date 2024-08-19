@@ -190,6 +190,10 @@ protected:
   /// Cache for RHS workspace's blocksize
   size_t m_rhsBlocksize;
 
+  /// Cache for if LHS workspace's is ragged
+  bool m_lhsRagged{false};
+  /// Cache for if RHS workspace's is ragged
+  bool m_rhsRagged{false};
   //------ Requirements -----------
 
   /// matchXSize set to true if the X sizes of histograms must match.

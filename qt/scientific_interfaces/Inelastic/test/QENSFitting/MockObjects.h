@@ -483,17 +483,18 @@ class MockElwinModel : public IElwinModel {
 public:
   virtual ~MockElwinModel() = default;
 
-  MOCK_METHOD3(setupLoadAlgorithm, void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                        std::string const &filepath, std::string const &outputName));
+  MOCK_CONST_METHOD2(setupLoadAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath,
+                                                                                  std::string const &outputName));
   MOCK_METHOD2(createGroupedWorkspaces,
                std::string(MatrixWorkspace_sptr workspce, FunctionModelSpectra const &spectra));
-  MOCK_METHOD3(setupGroupAlgorithm,
-               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &inputWorkspacesString,
-                    std::string const &inputGroupWsName));
-  MOCK_METHOD5(setupElasticWindowMultiple,
-               void(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &workspaceBaseName,
-                    std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
-                    std::string const &sampleEnvironmentLogValue));
+  MOCK_CONST_METHOD2(setupGroupAlgorithm,
+                     MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
+                                                              std::string const &inputGroupWsName));
+  MOCK_METHOD4(setupElasticWindowMultiple,
+               MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &workspaceBaseName,
+                                                        std::string const &inputGroupWsName,
+                                                        std::string const &sampleEnvironmentLogName,
+                                                        std::string const &sampleEnvironmentLogValue));
   MOCK_CONST_METHOD1(ungroupAlgorithm, void(std::string const &inputWorkspaces));
   MOCK_CONST_METHOD2(groupAlgorithm, void(std::string const &inputWorkspaces, std::string const &outputWorkspace));
   MOCK_METHOD1(setIntegrationStart, void(double integrationStart));
@@ -520,6 +521,7 @@ public:
 
   MOCK_METHOD1(setFBSuffixes, void(QStringList const &suffix));
   MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
+  MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
 
   MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
   MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));
@@ -536,7 +538,7 @@ class MockMomentsModel : public IMomentsModel {
 public:
   virtual ~MockMomentsModel() = default;
 
-  MOCK_METHOD0(setupAlgorithm, IAlgorithm_sptr());
+  MOCK_CONST_METHOD0(setupMomentsAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr());
   MOCK_METHOD1(setInputWorkspace, void(const std::string &workspace));
   MOCK_METHOD1(setEMin, void(double eMin));
   MOCK_METHOD1(setEMax, void(double eMax));

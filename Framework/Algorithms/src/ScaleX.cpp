@@ -118,6 +118,7 @@ void ScaleX::exec() {
     this->execEvent();
     return;
   }
+  const auto &spectrumInfo = inputW->spectrumInfo();
 
   // do the shift in X
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
@@ -134,7 +135,7 @@ void ScaleX::exec() {
     const auto &inX = inputW->x(i);
     // Change bin value by offset
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
-      double factor = getScaleFactor(inputW, i);
+      double factor = getScaleFactor(inputW, spectrumInfo, i);
       // Do the offsetting
       using std::placeholders::_1;
       std::transform(inX.begin(), inX.end(), outX.begin(), std::bind(m_binOp, _1, factor));
@@ -175,6 +176,7 @@ void ScaleX::execEvent() {
     setProperty("OutputWorkspace", matrixOutputWS);
   }
   auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  const auto &spectrumInfo = matrixInputWS->spectrumInfo();
 
   const std::string op = getPropertyValue("Operation");
   auto numHistograms = static_cast<int>(outputWS->getNumberHistograms());
@@ -183,7 +185,7 @@ void ScaleX::execEvent() {
     PARALLEL_START_INTERRUPT_REGION
     // Do the offsetting
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
-      auto factor = getScaleFactor(outputWS, i);
+      auto factor = getScaleFactor(outputWS, spectrumInfo, i);
       if (op == "Multiply") {
         outputWS->getSpectrum(i).scaleTof(factor);
         if (factor < 0) {
@@ -215,16 +217,17 @@ API::MatrixWorkspace_sptr ScaleX::createOutputWS(const API::MatrixWorkspace_sptr
  * parameter
  * from the component, else it returns the value of the Factor property
  * @param inputWS A pointer to the input workspace
+ * @param spectrumInfo The SpectrumInfo for the input workspace
  * @param index The current index to inspect
  * @return Value for the scale factor
  */
-double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, const size_t index) {
+double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
+                              const Mantid::API::SpectrumInfo &spectrumInfo, const size_t index) {
   if (m_parname.empty())
     return m_algFactor;
 
   // Try and get factor from component. If we see a DetectorGroup this will
   // use the first component
-  const auto &spectrumInfo = inputWS->spectrumInfo();
   if (!spectrumInfo.hasDetectors(index)) {
     return 0.0;
   }

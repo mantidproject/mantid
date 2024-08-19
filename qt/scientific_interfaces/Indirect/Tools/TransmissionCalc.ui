@@ -196,7 +196,7 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::RunView</class>
    <extends>QWidget</extends>
-   <header>Common/RunWidget/RunView.h</header>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

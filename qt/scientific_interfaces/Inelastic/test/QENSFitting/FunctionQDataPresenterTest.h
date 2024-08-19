@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../Common/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "QENSFitting/FitDataView.h"
 #include "QENSFitting/FunctionBrowser/SingleFunctionTemplateView.h"
 #include "QENSFitting/FunctionQAddWorkspaceDialog.h"
@@ -93,12 +93,12 @@ public:
   }
 
   void test_addWorkspace_does_not_throw_with_width() {
-    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName_HWHM", FunctionModelSpectra("0"))).Times(Exactly(1));
+    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", FunctionModelSpectra("0"))).Times(Exactly(1));
     m_presenter->addWorkspace("WorkspaceName", "Width", 0);
   }
 
   void test_addWorkspace_does_not_throw_with_EISF() {
-    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName_HWHM", FunctionModelSpectra("3"))).Times(Exactly(1));
+    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", FunctionModelSpectra("3"))).Times(Exactly(1));
     m_presenter->addWorkspace("WorkspaceName", "EISF", 0);
   }
 

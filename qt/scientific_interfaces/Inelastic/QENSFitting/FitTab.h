@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
 #include "FitDataPresenter.h"
 #include "FitOutputOptionsPresenter.h"
@@ -16,6 +14,8 @@
 #include "FunctionBrowser/TemplateSubType.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_FitTab.h"
 
 #include <memory>
@@ -71,7 +71,7 @@ public:
   }
 
   template <typename FittingModel> void setupFittingPresenter() {
-    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
     auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
     auto model = std::make_unique<FittingModel>();
     m_fittingPresenter = std::make_unique<FittingPresenter>(this, m_uiForm->dockArea->m_fitPropertyBrowser,
@@ -111,6 +111,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return tabName(); }
 
 private:
   void updateParameterEstimationData();

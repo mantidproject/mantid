@@ -1191,7 +1191,7 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
 
-  Eigen::Affine3d transformation;
+  auto transformation = Eigen::Affine3d::Identity();
   int64_t oldParentIndex = -1;
 
   const auto &componentInfo = getParameterMap()->componentInfo();

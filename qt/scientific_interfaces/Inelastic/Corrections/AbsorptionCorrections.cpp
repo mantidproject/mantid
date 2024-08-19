@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QRegExpValidator>
 #include <QSignalBlocker>
@@ -471,6 +471,10 @@ void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   auto const tabName("CalculateMonteCarlo");
   m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+}
+
+void AbsorptionCorrections::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSampleInput->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {

@@ -17,8 +17,9 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.setUp()
 
     def skipTests(self):
-        # Windows produces different outputs. Disable there for further investigation
-        return sys.platform.startswith("win")
+        # MacOS produces different results since moving from clang version 15 to 16.
+        # We skip it for now while investigation continues.
+        return sys.platform.startswith("darwin")
 
     def setUp(self):
         self.sample = self._sampleEventData()

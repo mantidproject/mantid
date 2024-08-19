@@ -94,6 +94,9 @@ class FittingPlotModel(object):
 
     def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
         fit_func_name = fit_func.name()
+        if fit_func.hasParameter("FWHM"):
+            return  # Avoid re-calculating of FWHM if the fit function already has it
+
         if fit_func_name in peak_func_names:
             peak_func = FunctionFactory.Instance().createPeakFunction(fit_func_name)
             [peak_func.setParameter(i_param, fit_func.getParameterValue(i_param)) for i_param in range(fit_func.nParams())]

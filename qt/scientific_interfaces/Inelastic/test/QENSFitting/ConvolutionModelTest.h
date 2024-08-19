@@ -152,13 +152,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_model->addOutput(alg));
   }
 
-  void test_addOutput_throws_with_unexecuted_fit() {
+  void test_addOutput_does_not_throw_with_unexecuted_fit() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     m_model->getFitDataModel()->addWorkspace(m_workspace, spectra);
     auto const modelWorkspace = m_model->getWorkspace(0);
 
     auto const alg = getSetupFitAlgorithm(m_model, std::move(modelWorkspace), "Name");
-    TS_ASSERT_THROWS_ANYTHING(m_model->addOutput(alg));
+    TS_ASSERT_THROWS_NOTHING(m_model->addOutput(alg));
   }
 
 private:

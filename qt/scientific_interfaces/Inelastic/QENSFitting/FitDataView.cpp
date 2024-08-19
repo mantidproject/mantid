@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataView.h"
-#include "Common/InterfaceUtils.h"
 #include "FitDataPresenter.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -139,6 +140,7 @@ void FitDataView::showAddWorkspaceDialog() {
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
 }

@@ -106,7 +106,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
-        selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
+        selection.spectra = self._plottable_spectra
         selection.plot_type = self._ui.plotType.currentIndex()
 
         if self._advanced:

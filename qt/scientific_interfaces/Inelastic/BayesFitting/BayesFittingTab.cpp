@@ -23,6 +23,11 @@ BayesFittingTab::~BayesFittingTab() { m_propTree->unsetFactoryForManager(m_dblMa
  */
 void BayesFittingTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
+void BayesFittingTab::applySettings(std::map<std::string, QVariant> const &settings) {
+  filterInputData(settings.at("RestrictInput").toBool());
+  setLoadHistory(settings.at("LoadHistory").toBool());
+}
+
 void BayesFittingTab::setFileExtensionsByName(bool filter) { (void)filter; }
 
 void BayesFittingTab::updateProperties(QtProperty *prop, double val) {

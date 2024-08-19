@@ -6,30 +6,35 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include <MantidAPI/AlgorithmProperties.h>
+#include <MantidAPI/AlgorithmRuntimeProps.h>
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 #include <QFileInfo>
 #include <utility>
 
 namespace {
 using namespace Mantid::API;
 
-void loadFile(const QString &filename) {
-  QFileInfo fileinfo(filename);
-
+MantidQt::API::IConfiguredAlgorithm_sptr configureLoadAlgorithm(const QString &filename,
+                                                                const AlgorithmRuntimeProps &loadProps) {
+  QFileInfo const fileinfo(filename);
   auto loader = AlgorithmManager::Instance().createUnmanaged("Load");
   loader->initialize();
   loader->setProperty("Filename", filename.toStdString());
   loader->setProperty("OutputWorkspace", fileinfo.baseName().toStdString());
-  loader->execute();
+  loader->updatePropertyValues(loadProps);
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
 
-  return;
+  return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(loader, std::move(properties));
 }
 } // namespace
 
 namespace MantidQt::MantidWidgets {
 
-AddWorkspaceMultiDialog::AddWorkspaceMultiDialog(QWidget *parent) : QDialog(parent) {
+AddWorkspaceMultiDialog::AddWorkspaceMultiDialog(QWidget *parent)
+    : QDialog(parent), m_algRunner(std::make_unique<API::QtJobRunner>()), m_loadProperties() {
   m_uiForm.setupUi(this);
-
+  m_algRunner->subscribe(this);
   connect(m_uiForm.pbSelAll, SIGNAL(clicked()), this, SLOT(selectAllSpectra()));
   connect(m_uiForm.pbResetDefault, SIGNAL(clicked()), this, SLOT(updateSelectedSpectra()));
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
@@ -60,6 +65,18 @@ void AddWorkspaceMultiDialog::setFBSuffices(const QStringList &suffices) {
   return m_uiForm.dsInputFiles->setFileExtensions(suffices);
 }
 
+/**
+ * Set an extra property on the load algorithm  of the workspace multi dialog
+ * before execution
+ *
+ * @param propName :: The name of the Load algorithm property to be set
+ * @param enable :: The value of the Load algorithm property to be set
+ */
+
+void AddWorkspaceMultiDialog::setLoadProperty(const std::string &propName, bool enable) {
+  Mantid::API::AlgorithmProperties::update(propName, enable, m_loadProperties);
+}
+
 void AddWorkspaceMultiDialog::selectAllSpectra() { return m_uiForm.tbWorkspace->selectAll(); }
 
 void AddWorkspaceMultiDialog::emitAddData() { emit addData(this); }
@@ -69,10 +86,29 @@ void AddWorkspaceMultiDialog::updateSelectedSpectra() { return m_uiForm.tbWorksp
 void AddWorkspaceMultiDialog::unifyRange() { return m_uiForm.tbWorkspace->unifyRange(); }
 
 void AddWorkspaceMultiDialog::handleFilesFound() {
+  updateAddButtonState(false);
   auto fileNames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto const &fileName : fileNames) {
-    loadFile(fileName);
-  }
+  std::deque<API::IConfiguredAlgorithm_sptr> loadQueue;
+  std::transform(fileNames.begin(), fileNames.end(), std::back_inserter(loadQueue),
+                 [&](auto const &fileName) { return configureLoadAlgorithm(fileName, m_loadProperties); });
+  m_algRunner->setAlgorithmQueue(loadQueue);
+  m_algRunner->executeAlgorithmQueue();
 }
 
+void AddWorkspaceMultiDialog::notifyBatchComplete(bool error) {
+  UNUSED_ARG(error);
+  updateAddButtonState(true);
+}
+
+void AddWorkspaceMultiDialog::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm,
+                                                   std::string const &message) {
+  UNUSED_ARG(algorithm);
+  updateAddButtonState(true);
+  QMessageBox::warning(this, "Loading error", message.c_str());
+}
+
+void AddWorkspaceMultiDialog::updateAddButtonState(bool enabled) const {
+  enabled ? m_uiForm.pbAdd->setText("Add Data") : m_uiForm.pbAdd->setText("Loading");
+  m_uiForm.pbAdd->setEnabled(enabled);
+}
 } // namespace MantidQt::MantidWidgets

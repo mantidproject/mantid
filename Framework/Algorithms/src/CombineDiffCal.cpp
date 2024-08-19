@@ -120,6 +120,7 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
 
   const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty(PropertyNames::GROUP_CALIB);
   const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty(PropertyNames::PIXEL_CALIB);
+  Mantid::API::MatrixWorkspace_sptr calibrationWS = getProperty(PropertyNames::ARB_CALIB);
 
   const auto groupedResult = generateErrorString(groupedCalibrationWS);
   if (!groupedResult.empty()) {
@@ -148,6 +149,42 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   if (!pixelResult.empty())
     results[PropertyNames::PIXEL_CALIB] = "The PixelCalibration Workspace is missing [ " + pixelResult + "]";
 
+  // Ensure compatible detector IDs in tables
+  // Ensure all detids in GroupedCalibration(detid_pd) and PixelCalibration(detid_prev)
+  // can be found in CalibrationWorkspace (detid_arb)
+
+  // put all detector IDs into sets, for easier searching
+  auto prev_col = pixelCalibrationWS->getColVector<detid_t>(ColNames::DETID);
+  auto pd_col = groupedCalibrationWS->getColVector<detid_t>(ColNames::DETID);
+  auto arb_col = calibrationWS->detectorInfo().detectorIDs();
+  std::set<detid_t> detid_pd(std::make_move_iterator(pd_col.begin()), std::make_move_iterator(pd_col.end()));
+  std::set<detid_t> detid_prev(std::make_move_iterator(prev_col.begin()), std::make_move_iterator(prev_col.end()));
+  std::set<detid_t> detid_arb(std::make_move_iterator(arb_col.begin()), std::make_move_iterator(arb_col.end()));
+
+  std::set<std::string> unmatched;
+  // check that all detector IDs from PixelCalibration are present in CalibrationWorkspace
+  if (!std::includes(detid_arb.begin(), detid_arb.end(), detid_prev.begin(), detid_prev.end())) {
+    unmatched.insert(PropertyNames::PIXEL_CALIB);
+    unmatched.insert(PropertyNames::ARB_CALIB);
+  }
+  // check that all detector IDs from GroupedCalibration are present in CalibrationWorkspace
+  if (!std::includes(detid_arb.begin(), detid_arb.end(), detid_pd.begin(), detid_pd.end())) {
+    unmatched.insert(PropertyNames::GROUP_CALIB);
+    unmatched.insert(PropertyNames::ARB_CALIB);
+  }
+  // if any workspaces do not match, throw an error
+  if (!unmatched.empty()) {
+    std::stringstream msg("");
+    msg << "Inconsistent detector IDs between";
+    for (std::string const &x : unmatched) {
+      msg << " " << x;
+    }
+    msg << ".";
+    for (std::string const &x : unmatched) {
+      results[x] = msg.str();
+    }
+  }
+
   return results;
 }
 
@@ -157,7 +194,7 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorks
   size_t end = ws->rowCount() - 1;
 
   // looking at the detid column is faster
-  std::shared_ptr<const API::Column> detIdColumn = ws->getColumn("detid");
+  std::shared_ptr<const API::Column> detIdColumn = ws->getColumn(ColNames::DETID);
 
   // since both tables are already sorted, linear search the first two rows
   if (getDetId(detIdColumn, start) == detid) {
@@ -246,6 +283,16 @@ void CombineDiffCal::exec() {
   // in order to reduce the search space
   std::size_t lastStart = 0;
 
+  // get a map from detector ID to workspace index in the calibration WS
+  // there is no guarantee detectorIDs in GroupedWorkspace will be contiguous,
+  // and therefore a map and not a vector is necessary.
+  auto wkspIndices = calibrationWS->getDetectorIDToWorkspaceIndexMap();
+
+  // access the spectrum info outside of the loop
+  // this prevents constantly re-calling the method,
+  // which can have some O(N) behavior
+  auto spectrumInfo = calibrationWS->spectrumInfo();
+
   // loop through all rows in the grouped calibration table
   // this will calculate an updated row or copy the row if it is missing from the pixel calibration
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
@@ -261,12 +308,13 @@ void CombineDiffCal::exec() {
         // value from groupedCalibrationRow
         const double difcPD = groupedCalibrationWS->cell_cast<double>(groupedCalibrationRow.row(), 1);
 
-        // get value from groupedCalibrationWS
-        const auto wkspIndex = calibrationWS->getIndicesFromDetectorIDs({detid}).front();
+        // get workspace index from the map
+        const auto wkspIndex = wkspIndices[detid];
+
         double difcArb;
         const auto difcArbIter = difcArbMap.find(wkspIndex);
         if (difcArbIter == difcArbMap.end()) {
-          difcArb = calibrationWS->spectrumInfo().diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
+          difcArb = spectrumInfo.diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
           difcArbMap[wkspIndex] = difcArb;
         } else {
           difcArb = difcArbIter->second;

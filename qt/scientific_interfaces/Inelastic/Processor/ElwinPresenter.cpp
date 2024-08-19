@@ -7,12 +7,12 @@
 #include "ElwinPresenter.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <QFileInfo>
 
@@ -41,9 +41,10 @@ public:
 
 namespace MantidQt::CustomInterfaces {
 using namespace Inelastic;
-ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::make_unique<DataModel>()),
-      m_selectedSpectrum(0) {
+ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner,
+                               IElwinView *view, std::unique_ptr<IElwinModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
+      m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -52,10 +53,11 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_pt
   updateAvailableSpectra();
 }
 
-ElwinPresenter::ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
+ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                               IElwinView *view, std::unique_ptr<IElwinModel> model,
                                std::unique_ptr<IDataModel> dataModel)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_dataModel(std::move(dataModel)),
-      m_selectedSpectrum(0) {
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
+      m_dataModel(std::move(dataModel)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -225,7 +227,7 @@ void ElwinPresenter::handleRun() {
   m_view->setRunIsRunning(true);
 
   // Get workspace names
-  std::string inputGroupWsName = "Elwin_Input";
+  std::string const inputGroupWsName = "Elwin_Input";
   std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
   // Load input files
   std::string inputWorkspacesString;
@@ -238,13 +240,11 @@ void ElwinPresenter::handleRun() {
   }
 
   // Group input workspaces
-  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
-
-  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, outputWsBasename, inputGroupWsName, m_view->getLogName(),
-                                      m_view->getLogValue());
-
-  m_batchAlgoRunner->executeBatchAsync();
-
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
+  algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
+  algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
+                                                            m_view->getLogValue()));
+  m_algorithmRunner->execute(algQueue);
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
@@ -253,9 +253,10 @@ void ElwinPresenter::handleRun() {
  * Handles saving of workspaces
  */
 void ElwinPresenter::handleSaveClicked() {
+  std::deque<IConfiguredAlgorithm_sptr> saveQueue = {};
   for (auto const &name : getOutputWorkspaceNames())
-    addSaveWorkspaceToQueue(name);
-  m_batchAlgoRunner->executeBatchAsync();
+    saveQueue.emplace_back(setupSaveAlgorithm(name));
+  m_algorithmRunner->execute(saveQueue);
 }
 
 std::vector<std::string> ElwinPresenter::getOutputWorkspaceNames() {

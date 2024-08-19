@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataProcessor.h"
 #include "IIqtView.h"
 #include "IqtModel.h"
 #include "IqtView.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_IqtTab.h"
 
 namespace MantidQt {
@@ -18,6 +18,7 @@ namespace CustomInterfaces {
 
 class IIqtPresenter {
 public:
+  virtual ~IIqtPresenter() = default;
   virtual void handleSampDataReady(const std::string &wsname) = 0;
   virtual void handleResDataReady(const std::string &resWorkspace) = 0;
   virtual void handleIterationsChanged(int iterations) = 0;
@@ -33,12 +34,14 @@ using namespace Mantid::API;
 class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataProcessor, public IIqtPresenter, public IRunSubscriber {
 
 public:
-  IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model);
+  IqtPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IIqtView *view,
+               std::unique_ptr<IIqtModel> model);
   ~IqtPresenter() = default;
 
   // runWidget
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "IQT Data Processor"; }
 
   void handleSampDataReady(const std::string &wsname) override;
   void handleResDataReady(const std::string &resWorkspace) override;
@@ -55,6 +58,7 @@ protected:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
   /// Sets the selected spectrum

@@ -61,10 +61,10 @@ Output:
 
 .. testoutput:: ExPlusAsAlg
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  2.   3.   4.   5.   6.   7.   8.   9.  10.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 2.  3.  4.  5.  6.  7.  8.  9. 10.]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Plus as an operator**
 
@@ -91,10 +91,10 @@ Output:
 
 .. testoutput:: ExPlusAsOpperand
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  2.   3.   4.   5.   6.   7.   8.   9.  10.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 2.  3.  4.  5.  6.  7.  8.  9. 10.]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Addition using in-place operator**
 
@@ -121,10 +121,10 @@ Output:
 
 .. testoutput:: ExPlusInPlace
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  2.   3.   4.   5.   6.   7.   8.   9.  10.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 2.  3.  4.  5.  6.  7.  8.  9. 10.]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Add a scalar**
 
@@ -147,9 +147,9 @@ Output:
 
 .. testoutput:: ExPlusWithSingleVal
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  2.5   3.5   4.5   5.5   6.5   7.5   8.5   9.5  10.5]
-    The updated Error values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 2.5  3.5  4.5  5.5  6.5  7.5  8.5  9.5 10.5]
+    The updated Error values are: [0. 1. 2. 3. 4. 5. 6. 7. 8.]
 
 .. categories::
 

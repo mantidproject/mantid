@@ -65,8 +65,8 @@ static const auto ALL_FITS =
 namespace IqtFit {
 static const auto TAB_NAME = "I(Q, t)";
 static const auto HIDDEN_PROPS =
-    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
-                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputWorkspace",
+                              "Output", "PeakRadius", "PlotParameter"});
 
 inline auto templateSubTypes() {
   return packTemplateSubTypes(std::make_unique<IqtTypes::ExponentialSubType>(),
@@ -82,10 +82,10 @@ static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 inline auto templateSubTypes() {
-  return packTemplateSubTypes(std::make_unique<ConvTypes::LorentzianSubType>(),
-                              std::make_unique<ConvTypes::FitSubType>(), std::make_unique<ConvTypes::DeltaSubType>(),
-                              std::make_unique<ConvTypes::TempSubType>(),
-                              std::make_unique<ConvTypes::BackgroundSubType>());
+  return packTemplateSubTypes(
+      std::make_unique<ConvTypes::LorentzianSubType>(), std::make_unique<ConvTypes::FitSubType>(),
+      std::make_unique<ConvTypes::DeltaSubType>(), std::make_unique<ConvTypes::TempSubType>(),
+      std::make_unique<ConvTypes::BackgroundSubType>(), std::make_unique<ConvTypes::TiePeakCentresSubType>());
 }
 
 } // namespace Convolution

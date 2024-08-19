@@ -7,10 +7,10 @@
 #pragma once
 
 #include "BayesFittingTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_ResNorm.h"
 
 namespace MantidQt {
@@ -26,6 +26,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ResNorm"; }
 
 private slots:
   /// Handle completion of the algorithm
@@ -49,6 +50,7 @@ private slots:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void processLogs();
   void addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;

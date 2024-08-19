@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/InelasticTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
@@ -39,9 +39,11 @@ public:
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   void clearOutputPlotOptionsWorkspaces();
 
+  void enableLoadHistoryProperty(bool doLoadHistory);
   virtual void loadSettings(const QSettings &settings) = 0;
 
 private:
+  virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces

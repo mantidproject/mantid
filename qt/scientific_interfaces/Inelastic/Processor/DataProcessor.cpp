@@ -23,32 +23,46 @@ Mantid::Kernel::Logger g_log("DataProcessor");
 
 namespace MantidQt::CustomInterfaces {
 
-DataProcessor::DataProcessor(QObject *parent) : InelasticTab(parent), m_tabRunning(false) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
+DataProcessor::DataProcessor(QObject *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner)
+    : InelasticTab(parent), m_algorithmRunner(std::move(algorithmRunner)) {
+  m_algorithmRunner->subscribe(this);
 }
-
-DataProcessor::~DataProcessor() = default;
 
 void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
+void DataProcessor::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
+  if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
+    m_runPresenter->setRunEnabled(true);
+    runComplete(error);
+  }
+}
+
 void DataProcessor::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
+
+API::IConfiguredAlgorithm_sptr DataProcessor::setupSaveAlgorithm(const std::string &wsName,
+                                                                 const std::string &filename) {
+  // Setup the input workspace property
+  auto saveProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  saveProps->setPropertyValue("InputWorkspace", wsName);
+  // Setup the algorithm
+  auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
+  saveAlgo->initialize();
+
+  if (filename.empty())
+    saveAlgo->setProperty("Filename", wsName + ".nxs");
+  else
+    saveAlgo->setProperty("Filename", filename);
+
+  API::IConfiguredAlgorithm_sptr confAlg = std::make_shared<API::ConfiguredAlgorithm>(saveAlgo, std::move(saveProps));
+  return confAlg;
+}
+
+void DataProcessor::exportPythonDialog() { exportPythonScript(); }
 
 void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
-}
-
-/**
- * Slot used to update the run button when an algorithm that was strted by the
- * Run button complete.
- *
- * @param error Unused
- */
-void DataProcessor::tabExecutionComplete(bool error) {
-  UNUSED_ARG(error);
-  m_runPresenter->setRunEnabled(true);
-  runComplete(error);
 }
 
 /**
@@ -57,5 +71,7 @@ void DataProcessor::tabExecutionComplete(bool error) {
  * @param filter :: true if you want to allow filtering
  */
 void DataProcessor::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+
+void DataProcessor::enableLoadHistoryProperty(bool doLoadHistory) { setLoadHistory(doLoadHistory); }
 
 } // namespace MantidQt::CustomInterfaces

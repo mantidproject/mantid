@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/InelasticTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
 #include <QSettings>
 
@@ -45,6 +45,13 @@ static const unsigned int NUM_DECIMALS = 6;
 /// precision for integer properties in bayes tabs
 static const unsigned int INT_DECIMALS = 0;
 
+struct BackgroundType {
+  inline static const std::string SLOPING = "Sloping";
+  inline static const std::string FLAT = "Flat";
+  inline static const std::string ZERO = "Zero";
+  inline static const std::string LINEAR = "Linear";
+};
+
 class MANTIDQT_INELASTIC_DLL BayesFittingTab : public InelasticTab {
   Q_OBJECT
 
@@ -58,6 +65,8 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
+  virtual void applySettings(std::map<std::string, QVariant> const &settings);
+
 protected slots:
   /// Slot to update the guides when the range properties change
   virtual void updateProperties(QtProperty *prop, double val);
@@ -70,6 +79,7 @@ protected:
 
 private:
   virtual void setFileExtensionsByName(bool filter);
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
 };
 
 } // namespace CustomInterfaces

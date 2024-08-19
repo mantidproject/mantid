@@ -68,8 +68,8 @@ Output:
 
 .. testoutput:: ExCalculateCarpenterSampleCorrection_corrections
 
-    Absorption Correction Output:  [ 0.85283805  0.79620318  0.74348494  0.69440412  0.64870017  0.62121997]
-    Multiply Scattering Correction Output:  [ 0.09633662  0.09991619  0.1034959   0.10705826  0.11058382  0.11280196]
+    Absorption Correction Output:  [0.85283805 0.79620318 0.74348494 0.69440412 0.64870017 0.62121997]
+    Multiply Scattering Correction Output:  [0.09633662 0.09991619 0.1034959  0.10705826 0.11058382 0.11280196]
 
 To reproduce what :ref:`algm-CarpenterSampleCorrection` does, you can calculate and apply the correction as follows
 
@@ -108,12 +108,9 @@ Output:
 
 .. testoutput:: ExCalculateCarpenterSampleCorrection_apply1
 
-    Absorption Corrected Output:  [  6.66892661   7.14329517  21.0999759    8.1904963    8.76755487
-       2.51509668]
-    Multiple Scattering Corrected Output:  [  5.13959844   5.11923959  14.06392099   5.07861898   5.05856725
-       1.38618331]
-    Combined Corrected Output:  [  6.1210107    6.57502041  19.47638255   7.58160094   8.13860778
-       2.33885171]
+    Absorption Corrected Output:  [ 6.66892661  7.14329517 21.0999759   8.1904963   8.76755487  2.51509668]
+    Multiple Scattering Corrected Output:  [ 5.13959844  5.11923959 14.06392099  5.07861898  5.05856725  1.38618331]
+    Combined Corrected Output:  [ 6.1210107   6.57502041 19.47638255  7.58160094  8.13860778  2.33885171]
 
 **Example: Apply correction for a simple cylindrical sample using getItem**
 
@@ -153,12 +150,9 @@ Output:
 
 .. testoutput:: ExCalculateCarpenterSampleCorrection_apply2
 
-    Absorption Corrected Output:  [  6.66892661   7.14329517  21.0999759    8.1904963    8.76755487
-       2.51509668]
-    Multiple Scattering Corrected Output:  [  5.13959844   5.11923959  14.06392099   5.07861898   5.05856725
-       1.38618331]
-    Combined Corrected Output:  [  6.1210107    6.57502041  19.47638255   7.58160094   8.13860778
-       2.33885171]
+    Absorption Corrected Output:  [ 6.66892661  7.14329517 21.0999759   8.1904963   8.76755487  2.51509668]
+    Multiple Scattering Corrected Output:  [ 5.13959844  5.11923959 14.06392099  5.07861898  5.05856725  1.38618331]
+    Combined Corrected Output:  [ 6.1210107   6.57502041 19.47638255  7.58160094  8.13860778  2.33885171]
 
 References
 ----------

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "BayesFittingTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Quasi.h"
 
 namespace MantidQt {
@@ -24,6 +24,14 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "Quasi"; }
+
+  // Slot for when settings are changed
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+  // Setup fit options, property browser, and plot options ui elements
+  void setupFitOptions();
+  void setupPropertyBrowser();
+  void setupPlotOptions();
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -44,6 +52,7 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
+  void enableView(bool const enable = false);
 
   void plotClicked();
   void plotCurrentPreview();
@@ -53,6 +62,7 @@ private:
   int displaySaveDirectoryMessage();
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);

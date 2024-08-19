@@ -39,6 +39,7 @@ public:
 
   virtual void setFBSuffixes(QStringList const &suffix) = 0;
   virtual void setWSSuffixes(QStringList const &suffix) = 0;
+  virtual void setLoadHistory(bool doLoadHistory) = 0;
 
   /// Function to set the range limits of the plot
   virtual void setPlotPropertyRange(const QPair<double, double> &bounds) = 0;

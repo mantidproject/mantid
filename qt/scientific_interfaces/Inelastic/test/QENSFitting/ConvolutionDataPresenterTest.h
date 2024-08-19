@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../Common/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
 #include "QENSFitting/ConvolutionAddWorkspaceDialog.h"
 #include "QENSFitting/ConvolutionDataPresenter.h"

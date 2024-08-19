@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwView.h"
-#include "Common/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
 #include "SqwPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -70,6 +70,8 @@ std::string SqwView::getDataName() const { return m_uiForm.dsInput->getCurrentDa
 void SqwView::setFBSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
 
 void SqwView::setWSSuffixes(QStringList const &suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
+
+void SqwView::setLoadHistory(bool doLoadHistory) { m_uiForm.dsInput->setLoadProperty("LoadHistory", doLoadHistory); }
 
 bool SqwView::validate() {
   auto uiv = std::make_unique<UserInputValidator>();

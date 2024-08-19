@@ -99,12 +99,12 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         do_test(dlg._ui.wkspIndices)
         do_test(dlg._ui.specNums)
 
-    def test_plot_all_gives_only_workspaces_indices(self):
+    def test_plot_all_gives_only_spectra_numbers(self):
         dlg = SpectraSelectionDialog([self._multi_spec_ws])
         dlg._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
         self.assertNotEqual(dlg.selection, None)
-        self.assertEqual(dlg.selection.spectra, None)
-        self.assertEqual(range(200), dlg.selection.wksp_indices)
+        self.assertEqual(dlg.selection.spectra, list(range(1, 201)))
+        self.assertEqual(dlg.selection.wksp_indices, None)
 
     def test_entered_workspace_indices_gives_correct_selection_back(self):
         dlg = SpectraSelectionDialog([self._multi_spec_ws])
@@ -328,7 +328,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         ssd._ui.plotType.setCurrentIndex(2)
         ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
 
-        self.assertEqual(ssd.selection.wksp_indices, range(0, 200))
+        self.assertEqual(ssd.selection.wksp_indices, None)
+        self.assertEqual(ssd.selection.spectra, list(range(1, 201)))
         self.assertEqual(ssd.selection.plot_type, 2)
         self.assertEqual(ssd.selection.errors, False)
         self.assertEqual(ssd.selection.log_name, "Workspace name")

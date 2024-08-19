@@ -41,9 +41,9 @@ Output:
 
 .. testoutput:: ExCopyDataRangeSimple
 
-   Output x data: [ 1.  2.  3.]
-   Output y data: [ 1.  2.  6.]
-   Output e data: [ 1.  1.  2.]
+   Output x data: [1. 2. 3.]
+   Output y data: [1. 2. 6.]
+   Output e data: [1. 1. 2.]
 
 .. categories::
 

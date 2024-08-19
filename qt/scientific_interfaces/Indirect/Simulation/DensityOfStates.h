@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "SimulationTab.h"
 #include "ui_DensityOfStates.h"
 
@@ -24,6 +24,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "DensityOfStates"; }
 
 private slots:
   void dosAlgoComplete(bool error);

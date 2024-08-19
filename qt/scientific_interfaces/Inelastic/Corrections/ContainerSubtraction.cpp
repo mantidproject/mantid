@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/SettingsHelper.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -196,6 +196,11 @@ void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
+
+void ContainerSubtraction::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsContainer->setLoadProperty("LoadHistory", doLoadHistory);
+};
 
 /**
  * Displays the sample data on the plot preview

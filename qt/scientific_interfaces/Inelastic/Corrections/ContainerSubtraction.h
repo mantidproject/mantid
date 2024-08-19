@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
-#include "Common/RunWidget/RunPresenter.h"
 #include "CorrectionsTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 #include "ui_ContainerSubtraction.h"
 
 namespace MantidQt {
@@ -26,6 +26,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ContainerSubtraction"; }
 
 private slots:
   /// Handles a new sample being loaded
@@ -46,6 +47,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
@@ -90,8 +92,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_transformedContainerWS;
 
   std::size_t m_spectra;
-
-  std::unique_ptr<IRunPresenter> m_runPresenter;
 };
 
 } // namespace CustomInterfaces

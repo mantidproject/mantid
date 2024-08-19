@@ -49,10 +49,10 @@ Output:
 
 .. testoutput:: ExMinusAsAlg
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
     The Y values are: [-2. -1.  0.  1.  2.  3.  4.  5.  6.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Minus as an operator**
 
@@ -79,10 +79,10 @@ Output:
 
 .. testoutput:: ExMinusAsOpperand
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
     The Y values are: [-2. -1.  0.  1.  2.  3.  4.  5.  6.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Subtract using in-place operator**
 
@@ -109,10 +109,10 @@ Output:
 
 .. testoutput:: ExMinusInPlace
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
     The Y values are: [-2. -1.  0.  1.  2.  3.  4.  5.  6.]
-    The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
-      6.70820393  7.61577311  8.54400375]
+    The updated Error values are: [3.         3.16227766 3.60555128 4.24264069 5.         5.83095189
+     6.70820393 7.61577311 8.54400375]
 
 **Example - Subtract a scalar**
 
@@ -135,9 +135,9 @@ Output:
 
 .. testoutput:: ExMinusWithSingleVal
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
     The Y values are: [-2.5 -1.5 -0.5  0.5  1.5  2.5  3.5  4.5  5.5]
-    The updated Error values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.]
+    The updated Error values are: [0. 1. 2. 3. 4. 5. 6. 7. 8.]
 
 .. categories::
 

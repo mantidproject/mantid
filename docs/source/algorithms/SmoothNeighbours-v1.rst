@@ -218,15 +218,15 @@ Output:
 
    Number of histograms: 9
    Smoothed values:
-   [[ 2.        ]
-    [ 2.16666667]
-    [ 2.        ]
-    [ 2.        ]
-    [ 2.22222222]
-    [ 2.33333333]
-    [ 2.5       ]
-    [ 2.5       ]
-    [ 2.5       ]]
+   [[2.        ]
+    [2.16666667]
+    [2.        ]
+    [2.        ]
+    [2.22222222]
+    [2.33333333]
+    [2.5       ]
+    [2.5       ]
+    [2.5       ]]
 
 **Example -  Smooth using AdjX and AdjY:**
 
@@ -261,15 +261,15 @@ Output:
 
    Number of histograms: 9
    Smoothed values:
-   [[ 2.16666667]
-    [ 2.16666667]
-    [ 2.16666667]
-    [ 2.22222222]
-    [ 2.22222222]
-    [ 2.22222222]
-    [ 2.5       ]
-    [ 2.5       ]
-    [ 2.5       ]]
+   [[2.16666667]
+    [2.16666667]
+    [2.16666667]
+    [2.22222222]
+    [2.22222222]
+    [2.22222222]
+    [2.5       ]
+    [2.5       ]
+    [2.5       ]]
 
 **Example -  Smooth and sum using SumPixelsX and SumPixelsY:**
 
@@ -304,9 +304,9 @@ Output:
 
    Number of histograms: 3
    Smoothed values:
-   [[ 6.]
-    [ 6.]
-    [ 8.]]
+   [[6.]
+    [6.]
+    [8.]]
 
 .. categories::
 

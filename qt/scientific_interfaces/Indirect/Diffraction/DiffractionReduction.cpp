@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
-#include "Common/RunWidget/RunView.h"
-#include "Common/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"

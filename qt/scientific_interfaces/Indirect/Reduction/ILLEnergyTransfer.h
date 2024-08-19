@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 
 #include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
@@ -25,6 +25,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ILLEnergyTransfer"; }
 
 private slots:
   void algorithmComplete(bool error);

@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "../Common/MockObjects.h"
-#include "Common/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/DataModel.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "QENSFitting/FitDataPresenter.h"
 #include "QENSFitting/FitDataView.h"
 #include "QENSFitting/FittingModel.h"
@@ -60,6 +60,10 @@ public:
   virtual std::string workspaceName() const override { return "Name"; }
   virtual void setWSSuffices(const QStringList &suffices) override { (void)suffices; }
   virtual void setFBSuffices(const QStringList &suffices) override { (void)suffices; }
+  virtual void setLoadProperty(const std::string &propName, bool enabled) override {
+    (void)propName;
+    (void)enabled;
+  }
 
   virtual void updateSelectedSpectra() override {}
 };

@@ -14,7 +14,6 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 FunctionQAddWorkspaceDialog::FunctionQAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.dsWorkspace->setLoadProperty("LoadHistory", false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
   connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
@@ -63,6 +62,10 @@ void FunctionQAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
 
 void FunctionQAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
+}
+
+void FunctionQAddWorkspaceDialog::setLoadProperty(const std::string &propName, bool enable) {
+  m_uiForm.dsWorkspace->setLoadProperty(propName, enable);
 }
 
 void FunctionQAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {

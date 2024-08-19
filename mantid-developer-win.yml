@@ -4,9 +4,8 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
-  - cmake>=3.21.0,<3.27
+  - cmake>=3.21.0
   - conda-wrappers
   - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
@@ -16,8 +15,10 @@ dependencies:
   - h5py
   - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jsoncpp>=1.9.4,<2
-  - librdkafka>=1.6.0
   - lib3mf # windows only
+  - libboost-devel=1.84.* # Use the same version as conda-forge
+  - libboost-python-devel=1.84.* # Use the same version as conda-forge
+  - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
   - nexus=4.4.*

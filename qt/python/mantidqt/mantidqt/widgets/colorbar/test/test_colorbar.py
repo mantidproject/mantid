@@ -4,10 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from unittest.mock import patch
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget, NORM_OPTS
@@ -50,6 +52,14 @@ class ColorbarWidgetTest(TestCase):
 
             self.assertEqual(self.widget.cmin_value, expected_c_min)
             self.assertEqual(self.widget.cmax_value, c_max)
+
+    @patch("mantidqt.widgets.colorbar.colorbar.get_current_cmap")
+    def test_cmap_values_are_replaced_correctly(self, mocked_cmap):
+        image = plt.imshow(self.data, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+        mock_cmap = mock.MagicMock()
+        mock_cmap.name = "gist_rainbow"
+        mocked_cmap.return_value = mock_cmap
+        self.widget.set_mappable(image)
 
     def test_that_all_zero_slice_with_log_normalisation_gives_valid_clim(self):
         image = plt.imshow(self.data * 0, cmap="plasma", norm=Normalize(vmin=None, vmax=None))

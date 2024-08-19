@@ -7,9 +7,9 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DataReductionTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Transmission.h"
 
 namespace MantidQt {
@@ -25,6 +25,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Transmission"; }
 
 private slots:
   void transAlgDone(bool error);
@@ -34,6 +35,7 @@ private slots:
   void setSaveEnabled(bool enabled);
 
 private:
+  void setLoadHistory(bool doLoadHistory) override;
   void setInstrument(QString const &instrumentName);
   void updateInstrumentConfiguration() override;
 

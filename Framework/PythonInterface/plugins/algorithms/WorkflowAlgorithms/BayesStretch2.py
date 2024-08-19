@@ -9,7 +9,7 @@ from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 from mantid.utils.pip import package_installed
 from mantid import logger
-from IndirectCommon import GetThetaQ
+from IndirectCommon import get_two_theta_and_q
 from mantid.api import AnalysisDataService as ADS
 from quickBayesHelper import QuickBayesTemplate
 
@@ -293,7 +293,7 @@ class BayesStretch2(QuickBayesTemplate):
         res_ws, N_res_hist = self.point_data(name=res_name)
 
         # setup
-        Q = GetThetaQ(sample_ws)
+        Q = get_two_theta_and_q(sample_ws)
         report_progress = Progress(self, start=0.0, end=1.0, nreports=N + 1)
 
         # do calculation

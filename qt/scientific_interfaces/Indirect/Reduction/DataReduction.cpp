@@ -8,7 +8,7 @@
 // Includes
 //----------------------
 #include "DataReduction.h"
-#include "Common/Settings.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
@@ -103,6 +103,7 @@ void DataReduction::initLayout() {
 void DataReduction::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->enableLoadHistoryProperty(settings.at("LoadHistory").toBool());
   }
 }
 

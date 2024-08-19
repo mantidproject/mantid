@@ -7,9 +7,9 @@
 #pragma once
 
 #include "BayesFittingTab.h"
-#include "Common/RunWidget/IRunSubscriber.h"
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Stretch.h"
 
 namespace MantidQt {
@@ -25,6 +25,15 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "Stretch"; }
+
+  // Slot for when settings are changed
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
+  // Setup fit options, property browser, and plot options ui elements
+  void setupFitOptions();
+  void setupPropertyBrowser();
+  void setupPlotOptions();
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -46,6 +55,7 @@ private slots:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void populateContourWorkspaceComboBox();
   int displaySaveDirectoryMessage();

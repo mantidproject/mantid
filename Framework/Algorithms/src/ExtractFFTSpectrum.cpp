@@ -60,7 +60,6 @@ void ExtractFFTSpectrum::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
 
-  Mantid::Kernel::Unit_sptr unit; // must retrieve this from the child FFT
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERRUPT_REGION
@@ -77,7 +76,9 @@ void ExtractFFTSpectrum::exec() {
     childFFT->setProperty<bool>("AcceptXRoundingErrors", xRoundingErrs);
     childFFT->execute();
     MatrixWorkspace_const_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
-    unit = fftTemp->getAxis(0)->unit();
+    if (i == 0) {
+      outputWS->getAxis(0)->unit() = fftTemp->getAxis(0)->unit();
+    }
     outputWS->setHistogram(i, fftTemp->histogram(fftPart));
 
     prog.report();
@@ -85,8 +86,6 @@ void ExtractFFTSpectrum::exec() {
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
-
-  outputWS->getAxis(0)->unit() = unit;
 
   if (!inputImagWS && fftPart <= 2) {
     // In this case, trim half of the workspace, as these are just zeros.
