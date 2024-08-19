@@ -6,8 +6,14 @@ cxxtest_path = '../..'
 # without having to copy it into a particular path.
 # for nicer examples you *should* use, see the cxxtest builder tests in the
 # build_tools/SCons/test directory.
+import importlib.util
 from importlib.machinery import SourceFileLoader
-cxxtest = SourceFileLoader('cxxtest', cxxtestbuilder_path).load_module()
+
+cxxtest_name = 'cxxtest'
+loader = SourceFileLoader(cxxtest_name, cxxtestbuilder_path)
+spec = importlib.util.spec_from_loader(cxxtest_name, loader)
+cxxtest = importlib.util.module_from_spec(spec)
+loader.exec_module(cxxtest)
 
 # First build the 'real' library, when working on an embedded system
 # this may involve a cross compiler.

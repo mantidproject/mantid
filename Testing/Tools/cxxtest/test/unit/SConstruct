@@ -2,8 +2,14 @@ CxxTestBuilder_path = '../../build_tools/SCons/cxxtest.py'
 CxxTest_dir = '../..'
 
 # First a little python magic to pull in CxxTestBuilder
+import importlib.util
 from importlib.machinery import SourceFileLoader
-cxxtest = SourceFileLoader('cxxtest', CxxTestBuilder_path).load_module()
+
+cxxtest_name = 'cxxtest'
+loader = SourceFileLoader(cxxtest_name, CxxTestBuilder_path)
+spec = importlib.util.spec_from_loader(cxxtest_name, loader)
+cxxtest = importlib.util.module_from_spec(spec)
+loader.exec_module(cxxtest)
 env = Environment()
 cxxtest.generate(env, CXXTEST_INSTALL_DIR=CxxTest_dir)
 
