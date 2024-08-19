@@ -202,7 +202,7 @@ bool LogManager::hasEndTime() const {
  * @throw runtime_error if the time of the first pulse is not available.
  */
 const DateAndTime LogManager::getFirstPulseTime() const {
-  TimeSeriesProperty<double> *log =
+  const TimeSeriesProperty<double> *log =
       getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
   if (log->realSize() == 0)
     throw std::runtime_error("First pulse time is not available. Log \"proton_charge\" is empty.");
@@ -232,7 +232,7 @@ const DateAndTime LogManager::getFirstPulseTime() const {
  * @throw runtime_error if the time of the last pulse is not available.
  */
 const DateAndTime LogManager::getLastPulseTime() const {
-  TimeSeriesProperty<double> *log =
+  const TimeSeriesProperty<double> *log =
       getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
   if (log->realSize() == 0)
     throw std::runtime_error("Last pulse time is not available. Log \"proton_charge\" is empty.");
@@ -252,7 +252,7 @@ bool LogManager::hasValidProtonChargeLog(std::string &error) const {
   }
 
   Kernel::Property *prop = getProperty(log_name);
-  TimeSeriesProperty<double> *log;
+  const TimeSeriesProperty<double> *log;
   if (!(log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop))) {
     error += " Log " + log_name + " is not a time series of floating-point values.";
     return false;
