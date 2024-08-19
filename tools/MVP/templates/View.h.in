@@ -1,6 +1,44 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include <string>
+
+#include <QObject>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 
 
-class View:
+class IPresenter;
 
-    def __init__(self):
-        pass
+class IView {
+public:
+  virtual ~IView() = default;
+
+  virtual void subscribePresenter(IPresenter *presenter) = 0;
+
+  virtual void setLabel(std::string const &text) = 0;
+};
+
+class View final : public QWidget, public IView {
+  Q_OBJECT
+
+public:
+  View(QWidget *parent);
+  ~View() override = default;
+
+  void subscribePresenter(IPresenter *presenter) override;
+
+  void setLabel(std::string const &text) override;
+
+private:
+  QVBoxLayout *m_layout;
+  QPushButton *m_button;
+  QLabel *m_label;
+};
