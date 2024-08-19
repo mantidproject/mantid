@@ -227,7 +227,7 @@ font-size: {self.rescale_w(28)}px"""
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
-        lbl_tutorials.setStyleSheet(f"color: ; font-size: {self.rescale_w(28)}px;")
+        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45) ; font-size: {self.rescale_w(28)}px;")
         lbl_tutorials.setText("Tutorials")
         left_layout.addWidget(lbl_tutorials)
         # Mantid Introduction
@@ -272,6 +272,10 @@ QGroupBox QComboBox QAbstractItemView{{
 QGroupBox QPushButton{{
     font: {self.rescale_w(12)}px;
     color: black;
+}}
+QGroupBox QComboBox::down-arrow{{
+     image: url(images/DropDownArrow.png)
+     color: black;
 }}
 font: {self.rescale_w(12)}px;
 """
