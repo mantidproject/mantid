@@ -57,7 +57,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &peri
   // Some old data use "pulse_time" instead of "event_time_zero" as entry
   try {
     file.openData("event_time_zero");
-  } catch (std::exception &e) {
+  } catch (std::exception &) {
     file.openData("pulse_time");
   }
   // Read the offset (time zero)
