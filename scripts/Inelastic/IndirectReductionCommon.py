@@ -939,7 +939,7 @@ def fold_chopped(workspace_name):
 # -------------------------------------------------------------------------------
 
 
-def rename_reduction(workspace_name, multiple_files):
+def rename_reduction(workspace_name, multiple_files, suffix=None):
     """
     Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
@@ -997,6 +997,9 @@ def rename_reduction(workspace_name, multiple_files):
 
     else:
         raise RuntimeError("No valid naming convention for workspace %s" % workspace_name)
+
+    if suffix:
+        new_name = "%s_%s" % (new_name, suffix)
 
     logger.information("New name for %s workspace: %s" % (workspace_name, new_name))
 
