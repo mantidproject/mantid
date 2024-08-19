@@ -554,7 +554,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return wkspname, unfocusname
 
     def __compressEvents(self, wkspname):
-        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0 and self.do_compression:
+        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0 or self.do_compression:
             CompressEvents(
                 InputWorkspace=wkspname,
                 OutputWorkspace=wkspname,
