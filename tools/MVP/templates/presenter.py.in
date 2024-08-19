@@ -19,6 +19,6 @@ class Presenter:
         self._view.show()
 
     def handle_button_clicked(self):
-        # An example method to handle view event
+        # An example method to handle a view event
         self._model.count += 1
         self._view.set_label(str(self._model.count))
