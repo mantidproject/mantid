@@ -79,7 +79,7 @@ PROPS_FOR_PD_CHARACTER = ["FrequencyLogNames", "WaveLengthLogNames"]
 
 
 def determineCompression(filename, compression, chunking, absorption):
-    if compression == 0.0 or chunking or absorption:
+    if compression == 0.0 or chunking > 0.0 or absorption:
         return False
     sizeGiB = os.path.getsize(filename) / 1024.0 / 1024.0 / 1024.0
     if sizeGiB > compression:
@@ -688,12 +688,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
 
         # determing compression
-        if determineCompression(
-            filename=self._filenames[0], compression=self.compression_threshold, chunking=(self.chunkSize > 0.0), absorption=self.absorption
-        ):
-            self.do_compression = True
-        else:
-            self.do_compression = False
+        self.do_compression = determineCompression(
+            filename=self._filenames[0], compression=self.compression_threshold, chunking=self.chunkSize, absorption=self.absorption
+        )
         if self.useCaching:
             # unfocus check only matters if caching is requested
             if finalunfocusname != "":
