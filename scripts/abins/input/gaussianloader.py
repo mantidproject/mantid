@@ -228,7 +228,7 @@ class GAUSSIANLoader(AbInitioLoader):
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        line = TextParser.find_first(file_obj=file_obj, msg="Frequencies --")
+        line = TextParser.find_first(file_obj=file_obj, msg="Frequencies -- ")
         line = line.split()
         freq.extend([float(i) for i in line[2:]])
 
