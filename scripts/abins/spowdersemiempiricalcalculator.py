@@ -608,11 +608,8 @@ class SPowderSemiEmpiricalCalculator:
             # (contributions, q_rows, frequencies) as a 2-D (contributions*q_rows, frequencies)
             # sequence of spectra, and reshape afterwards
 
-            # Precompute resolution function before parallel map to avoid PyChop problems
-            from abins.instruments import PyChopInstrument
-
-            if isinstance(self._instrument, PyChopInstrument):
-                self._instrument._polyfit_resolution()
+            # Perform resolution precomputations (if appropriate) before parallel map
+            self._instrument.prepare_resolution()
 
             z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
             s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
