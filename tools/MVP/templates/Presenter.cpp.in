@@ -15,10 +15,6 @@ Presenter::Presenter(std::unique_ptr<IModel> model, IView *view) : m_model(std::
   m_view->subscribePresenter(this);
 }
 
-void Presenter::show() const {
-  m_view->show();
-}
-
 void Presenter::handleButtonClicked() {
   // An example method to handle a view event
   m_model->setCount(m_model->count() + 1u);
