@@ -7,14 +7,11 @@
 #include "ElwinPresenter.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
-
-#include <QFileInfo>
 
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 #include <algorithm>
@@ -44,20 +41,27 @@ using namespace Inelastic;
 ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner,
                                IElwinView *view, std::unique_ptr<IElwinModel> model)
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
-      m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0) {
+      m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0),
+      m_remObserver(*this, &ElwinPresenter::handleRemoveEvent),
+      m_clearObserver(*this, &ElwinPresenter::handleClearEvent),
+      m_renameObserver(*this, &ElwinPresenter::handleRenameEvent) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
   updateAvailableSpectra();
+  connectObservers();
 }
 
 ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
                                IElwinView *view, std::unique_ptr<IElwinModel> model,
                                std::unique_ptr<IDataModel> dataModel)
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
-      m_dataModel(std::move(dataModel)), m_selectedSpectrum(0) {
+      m_dataModel(std::move(dataModel)), m_selectedSpectrum(0),
+      m_remObserver(*this, &ElwinPresenter::handleRemoveEvent),
+      m_clearObserver(*this, &ElwinPresenter::handleClearEvent),
+      m_renameObserver(*this, &ElwinPresenter::handleRenameEvent) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -66,7 +70,21 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
   updateAvailableSpectra();
 }
 
-ElwinPresenter::~ElwinPresenter() {}
+ElwinPresenter::~ElwinPresenter() { disconnectObservers(); }
+
+void ElwinPresenter::connectObservers() const {
+  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
+  ads.notificationCenter.addObserver(m_remObserver);
+  ads.notificationCenter.addObserver(m_renameObserver);
+  ads.notificationCenter.addObserver(m_clearObserver);
+}
+
+void ElwinPresenter::disconnectObservers() const {
+  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
+  ads.notificationCenter.removeObserver(m_remObserver);
+  ads.notificationCenter.removeObserver(m_renameObserver);
+  ads.notificationCenter.removeObserver(m_clearObserver);
+}
 
 /**
  * Ungroups the output after the execution of the algorithm
@@ -134,22 +152,6 @@ void ElwinPresenter::handleValueChanged(std::string const &propName, bool value)
 }
 
 /**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void ElwinPresenter::newInputDataFromDialog() {
-  // Clear the existing list of files
-  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
-
-  // sets last added workspace as input workspace
-  auto const lastAddedWSIndex = m_dataModel->getNumberOfWorkspaces() - 1;
-  m_view->setPreviewWorkspaceName(static_cast<int>(lastAddedWSIndex.value));
-  auto lastAddedWS = m_dataModel->getWorkspace(lastAddedWSIndex);
-  setInputWorkspace(lastAddedWS);
-}
-
-/**
  * Handles a new input file being selected for preview.
  *
  * Loads the file and resets the spectra selection spinner.
@@ -159,7 +161,6 @@ void ElwinPresenter::newInputDataFromDialog() {
 
 void ElwinPresenter::handlePreviewIndexChanged(int index) {
   auto const workspaceName = m_view->getPreviewWorkspaceName(index);
-
   if (!workspaceName.empty()) {
     newPreviewWorkspaceSelected(index);
   }
@@ -259,7 +260,7 @@ void ElwinPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dia
   try {
     addDataToModel(dialog);
     updateTableFromModel();
-    newInputDataFromDialog();
+    m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -296,23 +297,24 @@ void ElwinPresenter::handleRemoveSelectedData() {
     m_view->isRowCollapsed() ? m_dataModel->removeWorkspace(WorkspaceID(item->row()))
                              : m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
-  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
-  updateTableFromModel();
-  updateAvailableSpectra();
+  updateInterface();
 }
 
 void ElwinPresenter::handleRowModeChanged() { updateTableFromModel(); }
 
 void ElwinPresenter::updateAvailableSpectra() {
-  auto spectra = m_dataModel->getSpectra(findWorkspaceID());
-  m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+  if (auto const wsID = findWorkspaceID(m_view->getCurrentPreview()); wsID) {
+    auto const spectra = m_dataModel->getSpectra(*wsID);
+    m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+  }
 }
 
-WorkspaceID ElwinPresenter::findWorkspaceID() {
-  auto currentWorkspace = m_view->getCurrentPreview();
+std::optional<WorkspaceID> ElwinPresenter::findWorkspaceID(std::string const &name) const {
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
-  auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
-  size_t workspaceID = findWorkspace - allWorkspaces.begin();
+  auto const findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), name);
+  size_t const workspaceID = findWorkspace - allWorkspaces.begin();
+  if (allWorkspaces.empty() || (allWorkspaces.size() == workspaceID))
+    return std::nullopt;
   return WorkspaceID{workspaceID};
 }
 
@@ -371,6 +373,11 @@ void ElwinPresenter::handlePlotPreviewClicked() {
     m_view->showMessageBox("Workspace not found - data may not be loaded.");
 }
 
+void ElwinPresenter::updateInterface() {
+  updateTableFromModel();
+  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
+}
+
 /**
  * Retrieves the workspace containing the data to be displayed in
  * the preview plot.
@@ -388,6 +395,35 @@ MatrixWorkspace_sptr ElwinPresenter::getPreviewPlotWorkspace() { return m_previe
  */
 void ElwinPresenter::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
+}
+
+/**
+ * Remove a workspace from the data model.
+ *
+ * @param workspaceName The name of the workspace to remove from the data model.
+ */
+
+void ElwinPresenter::removeWorkspace(std::string const &workspaceName) const {
+  if (auto const wsID = findWorkspaceID(workspaceName); wsID) {
+    m_dataModel->removeWorkspace(*wsID);
+  }
+}
+
+void ElwinPresenter::handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf) {
+  removeWorkspace(pNf->objectName());
+  updateInterface();
+}
+void ElwinPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf) {
+  (void)pNf;
+  m_dataModel->clear();
+  updateInterface();
+}
+void ElwinPresenter::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+  // Remove renamed workspace if it is on the data model
+  removeWorkspace(pNf->objectName());
+  // Remove renamed workspace if new name replaces a workspace in data model
+  removeWorkspace(pNf->newObjectName());
+  updateInterface();
 }
 
 } // namespace MantidQt::CustomInterfaces

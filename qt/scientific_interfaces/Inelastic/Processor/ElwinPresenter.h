@@ -21,6 +21,7 @@
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ElwinTab.h"
+#include <Poco/NObserver.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,6 +43,7 @@ public:
   virtual void handleRowModeChanged() = 0;
   virtual void updateAvailableSpectra() = 0;
   virtual MatrixWorkspace_sptr getInputWorkspace() const = 0;
+  virtual void removeWorkspace(std::string const &workspaceName) const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
@@ -76,12 +78,16 @@ public:
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
 
+  void connectObservers() const;
+  void disconnectObservers() const;
+  void removeWorkspace(std::string const &workspaceName) const override;
+
 protected:
   void runComplete(bool error) override;
-  void newInputDataFromDialog();
   virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
+  void updateInterface();
   void updateTableFromModel();
   void updateIntegrationRange();
 
@@ -89,7 +95,11 @@ private:
   std::string getOutputBasename();
   bool checkForELTWorkspace();
   void newPreviewWorkspaceSelected(int index);
-  WorkspaceID findWorkspaceID();
+  std::optional<WorkspaceID> findWorkspaceID(std::string const &name) const;
+
+  void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
+  void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
+  void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
 
   IElwinView *m_view;
   std::unique_ptr<IElwinModel> m_model;
@@ -97,6 +107,11 @@ private:
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;
+
+  /// Poco Observers for ADS Notifications
+  Poco::NObserver<ElwinPresenter, Mantid::API::WorkspacePreDeleteNotification> m_remObserver;
+  Poco::NObserver<ElwinPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
+  Poco::NObserver<ElwinPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
