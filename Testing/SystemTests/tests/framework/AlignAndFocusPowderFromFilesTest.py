@@ -213,6 +213,32 @@ class ChunkingCompare(systemtesting.MantidSystemTest):
         return ("with_chunks", "no_chunks")
 
 
+class CompressedCompare(systemtesting.MantidSystemTest):
+    # this test is very similar to SNAPRedux.Simple
+
+    def requiredMemoryMB(self):
+        return 24 * 1024  # GiB
+
+    def runTest(self):
+        GRP_WKSP = "SNAP_compress_params"
+
+        # 11MB file
+        kwargs = {"Filename": "SNAP_45874", "Params": (0.5, -0.004, 7), "GroupingWorkspace": GRP_WKSP}
+
+        # create grouping for two output spectra
+        CreateGroupingWorkspace(InstrumentFilename="SNAP_Definition.xml", GroupDetectorsBy="Group", OutputWorkspace=GRP_WKSP)
+
+        AlignAndFocusPowderFromFiles(
+            OutputWorkspace="compress1", MaxChunkSize=0.0, CompressTolerance=1e-2, MinSizeCompressOnLoad=1e-14, **kwargs
+        )
+
+    def validateMethod(self):
+        return None
+
+    def validate(self):
+        None
+
+
 class UseCache(systemtesting.MantidSystemTest):
     cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"

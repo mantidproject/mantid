@@ -222,6 +222,11 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         loader.setPropertyValue("Filename", filename)
         loader.setPropertyValue("OutputWorkspace", wkspname)
 
+        if self.do_compression:
+            self.kwargs = self.__getAlignAndFocusArgs()
+            loader.setPropertyValue("CompressTolerance", str(self.kwargs["CompressTolerance"]))
+            loader.setPropertyValue("CompressBinningMode", self.kwargs["CompressBinningMode"])
+
         if skipLoadingLogs:
             if self.__loaderName != "LoadEventNexus":
                 raise RuntimeError("Cannot set LoadLogs=False in {}".format(self.__loaderName))
@@ -554,7 +559,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return wkspname, unfocusname
 
     def __compressEvents(self, wkspname):
-        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0 or self.do_compression:
+        if self.kwargs["PreserveEvents"] and self.kwargs["CompressTolerance"] != 0.0:
             CompressEvents(
                 InputWorkspace=wkspname,
                 OutputWorkspace=wkspname,
