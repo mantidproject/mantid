@@ -304,11 +304,15 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
       // Handle all other property types
     } else {
       std::string opener = "='";
+      std::string closer = "'";
       if (propHistory.value().find('\\') != std::string::npos) {
         opener = "=r'";
+      } else if (propHistory.pythonVariable()) {
+        opener = "=";
+        closer = "";
       }
 
-      prop = propHistory.name() + opener + propHistory.value() + "'";
+      prop = propHistory.name() + opener + propHistory.value() + closer;
     }
   }
 
