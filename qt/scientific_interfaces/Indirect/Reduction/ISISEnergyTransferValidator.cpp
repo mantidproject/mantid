@@ -15,12 +15,19 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
-IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
+MatrixWorkspace_sptr load(std::string const &filename, int const specMin, int const specMax) {
   auto loader = AlgorithmManager::Instance().create("Load");
   loader->initialize();
+  loader->setAlwaysStoreInADS(false);
   loader->setProperty("Filename", filename);
-  loader->setProperty("OutputWorkspace", outputName);
-  return loader;
+  if (loader->existsProperty("LoadLogFiles")) {
+    loader->setProperty("LoadLogFiles", false);
+  }
+  loader->setPropertyValue("SpectrumMin", std::to_string(specMin));
+  loader->setPropertyValue("SpectrumMax", std::to_string(specMax));
+  loader->execute();
+  Mantid::API::Workspace_sptr ws = loader->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 }
 } // namespace
 
@@ -38,47 +45,36 @@ std::string IETDataValidator::validateConversionData(IETConversionData conversio
   return "";
 }
 
-std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundData backgroundData,
-                                                                  IETConversionData conversionData,
-                                                                  std::string firstFileName, bool isRunFileValid) {
+std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundData const &backgroundData,
+                                                                  IETConversionData const &conversionData,
+                                                                  std::string const &firstFileName,
+                                                                  bool const isRunFileValid) {
   std::vector<std::string> errors;
 
-  if (isRunFileValid) {
-    std::filesystem::path rawFileInfo(firstFileName);
-    std::string name = rawFileInfo.filename().string();
+  if (!isRunFileValid || !backgroundData.getRemoveBackground()) {
+    return errors;
+  }
 
-    int specMin = conversionData.getSpectraMin();
-    int specMax = conversionData.getSpectraMax();
+  const int backgroundStart = backgroundData.getBackgroundStart();
+  const int backgroundEnd = backgroundData.getBackgroundEnd();
 
-    auto loadAlg = loadAlgorithm(firstFileName, name);
-    if (loadAlg->existsProperty("LoadLogFiles")) {
-      loadAlg->setProperty("LoadLogFiles", false);
-    }
-    loadAlg->setPropertyValue("SpectrumMin", std::to_string(specMin));
-    loadAlg->setPropertyValue("SpectrumMax", std::to_string(specMax));
-    loadAlg->execute();
+  if (backgroundStart > backgroundEnd) {
+    errors.push_back("Background Start must be less than Background End");
+  }
 
-    if (backgroundData.getRemoveBackground()) {
-      const int backgroundStart = backgroundData.getBackgroundStart();
-      const int backgroundEnd = backgroundData.getBackgroundEnd();
+  int specMin = conversionData.getSpectraMin();
+  int specMax = conversionData.getSpectraMax();
+  const auto workspace = load(firstFileName, specMin, specMax);
 
-      if (backgroundStart > backgroundEnd) {
-        errors.push_back("Background Start must be less than Background End");
-      }
+  const double minBack = workspace->x(0).front();
+  const double maxBack = workspace->x(0).back();
 
-      auto tempWs = getADSWorkspace(name);
+  if (backgroundStart < minBack) {
+    errors.push_back("The Start of Background Removal is less than the minimum of the data range");
+  }
 
-      const double minBack = tempWs->x(0).front();
-      const double maxBack = tempWs->x(0).back();
-
-      if (backgroundStart < minBack) {
-        errors.push_back("The Start of Background Removal is less than the minimum of the data range");
-      }
-
-      if (backgroundEnd > maxBack) {
-        errors.push_back("The End of Background Removal is more than the maximum of the data range");
-      }
-    }
+  if (backgroundEnd > maxBack) {
+    errors.push_back("The End of Background Removal is more than the maximum of the data range");
   }
 
   return errors;
