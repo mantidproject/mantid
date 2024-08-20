@@ -59,7 +59,7 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
     # ===================================================================================
     # | Use cases: GAUSSIAN16 DFT with high-precision output                            |
     # ===================================================================================
-    _gaussian_system6 = "ethanol_g16_high_precision"
+    _gaussian_system6 = "ethanol_g16_high_precision_LoadGAUSSIAN"
 
     def test_gaussian_6(self):
         self.check(name=self._gaussian_system6, loader=abins.input.GAUSSIANLoader)
