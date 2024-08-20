@@ -210,11 +210,9 @@ void ElwinView::addTableEntry(int row, std::string const &name, std::string cons
 }
 
 void ElwinView::updatePreviewWorkspaceNames(const std::vector<std::string> &names) {
-  disconnectSignals();
   m_uiForm.cbPreviewFile->clear();
   m_uiForm.cbPreviewFile->addItems(stdVectorToQStringList(names));
-  m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  connectSignals();
+  m_uiForm.cbPreviewFile->setCurrentIndex(static_cast<int>(names.size()) - 1);
 }
 
 void ElwinView::setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column) {
