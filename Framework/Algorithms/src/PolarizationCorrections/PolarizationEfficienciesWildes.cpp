@@ -255,6 +255,9 @@ void PolarizationEfficienciesWildes::exec() {
 
   progress.report(8, "Setting algorithm outputs");
   setOutputs();
+
+  // Ensure that we don't carry over values from a previous run if an instance of this algorithm is run twice
+  resetMemberVariables();
 }
 
 namespace {
@@ -395,12 +398,37 @@ void PolarizationEfficienciesWildes::setOutputs() {
     if (m_wsP != nullptr) {
       const auto wsTPMO = (2 * m_wsP) - 1;
       setProperty(PropNames::OUTPUT_TPMO_WS, wsTPMO);
+    } else if (isChild()) {
+      // Clear diagnostic output property that may have been populated in a previous run as a child algorithm
+      resetPropertyValue(PropNames::OUTPUT_TPMO_WS);
     }
 
     if (m_wsA != nullptr) {
       const auto wsTAMO = (2 * m_wsA) - 1;
       setProperty(PropNames::OUTPUT_TAMO_WS, wsTAMO);
+    } else if (isChild()) {
+      // Clear diagnostic output property that may have been populated in a previous run as a child algorithm
+      resetPropertyValue(PropNames::OUTPUT_TAMO_WS);
     }
+  } else if (isChild()) {
+    // Clear diagnostic output properties that may have been populated in a previous run as a child algorithm
+    resetPropertyValue(PropNames::OUTPUT_PHI_WS);
+    resetPropertyValue(PropNames::OUTPUT_RHO_WS);
+    resetPropertyValue(PropNames::OUTPUT_ALPHA_WS);
+    resetPropertyValue(PropNames::OUTPUT_TPMO_WS);
+    resetPropertyValue(PropNames::OUTPUT_TAMO_WS);
   }
+}
+
+void PolarizationEfficienciesWildes::resetMemberVariables() {
+  m_wsFp = nullptr;
+  m_wsFa = nullptr;
+  m_wsPhi = nullptr;
+  m_wsP = nullptr;
+  m_wsA = nullptr;
+}
+
+void PolarizationEfficienciesWildes::resetPropertyValue(const std::string &propertyName) {
+  setPropertyValue(propertyName, getPropertyValue(propertyName));
 }
 } // namespace Mantid::Algorithms

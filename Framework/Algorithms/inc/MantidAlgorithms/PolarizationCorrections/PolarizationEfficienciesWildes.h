@@ -58,8 +58,15 @@ private:
   /// Solve for the unknown efficiency from either (2p-1) or (2a-1) using the relationship Phi = (2p-1)(2a-1)
   MatrixWorkspace_sptr solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsTXMO);
 
-  ///  Set the algorithm outputs
+  /// Set the algorithm outputs
   void setOutputs();
+
+  /// Clear the values for all the algorithm member variables
+  void resetMemberVariables();
+
+  /// Sets the property value to its current value. For output workspace properties this will clear any workspaces being
+  /// held by the property
+  void resetPropertyValue(const std::string &propertyName);
 
   MatrixWorkspace_sptr m_wsFp = nullptr;
   MatrixWorkspace_sptr m_wsFa = nullptr;

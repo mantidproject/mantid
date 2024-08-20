@@ -411,6 +411,14 @@ public:
     runTestInputEfficiencyWorkspaceNotOverwrittenWhenSetAsOutput(InputPropNames::A_EFF_WS, OutputPropNames::A_EFF_WS);
   }
 
+  void test_algorithm_clears_optional_outputs_on_second_run_with_same_include_diagnostics() {
+    runTestOutputWorkspacesSetCorrectlyForMultipleRuns(true);
+  }
+
+  void test_algorithm_clears_optional_outputs_on_second_run_with_different_include_diagnostics() {
+    runTestOutputWorkspacesSetCorrectlyForMultipleRuns(false);
+  }
+
 private:
   const std::vector<double> NON_MAG_Y_VALS = {12.0, 1.0, 2.0, 10.0};
   const std::vector<double> MAG_Y_VALS = {6.0, 0.2, 0.3, 1.0};
@@ -638,5 +646,37 @@ private:
 
     const MatrixWorkspace_sptr outEffWs = alg->getProperty(outputPropName);
     TS_ASSERT(outEffWs != inEffWs);
+  }
+
+  void runTestOutputWorkspacesSetCorrectlyForMultipleRuns(const bool secondRunIncludeDiagnostics) {
+    // We need to make sure we don't get outputs from previous runs if the same instance of the algorithm is run twice,
+    // or is being run as a child algorithm.
+    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto magGrp = createMagWSGroup("magWs");
+    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+
+    alg->setPropertyValue(OutputPropNames::P_EFF_WS, "pEff");
+    alg->setPropertyValue(OutputPropNames::A_EFF_WS, "aEff");
+    alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, true);
+    alg->execute();
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::P_EFF_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::A_EFF_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::PHI_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::ALPHA_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::RHO_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::TPMO_WS, true);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::TAMO_WS, true);
+
+    alg->setPropertyValue(OutputPropNames::P_EFF_WS, "");
+    alg->setPropertyValue(OutputPropNames::A_EFF_WS, "");
+    alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, secondRunIncludeDiagnostics);
+    alg->execute();
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::P_EFF_WS, false);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::A_EFF_WS, false);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::PHI_WS, secondRunIncludeDiagnostics);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::ALPHA_WS, secondRunIncludeDiagnostics);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::RHO_WS, secondRunIncludeDiagnostics);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::TPMO_WS, false);
+    checkOutputWorkspaceIsSet(alg, OutputPropNames::TAMO_WS, false);
   }
 };
