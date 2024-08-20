@@ -214,22 +214,20 @@ class PyChopGui(QMainWindow):
         # Checks for independent phases
         phases = []
         for key, widget in self.widgets.items():
-            if "MERLIN" in str(self.engine.instname) and key.endswith("Phase") and widget["Label"].isHidden():
+            if key.endswith("Phase"):
                 # Special case for MERLIN
                 # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
-                phase = float(widget["Edit"].text())
-                phases.append(phase)
-            if key.endswith("Phase") and not widget["Label"].isHidden():
-                idx = int(key[7])
-                phase = widget["Edit"].text()
-                if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
-                    phase = str(phase)
-                else:
-                    try:
-                        phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
-                    except ValueError:
-                        raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
-                phases.append(phase)
+                if not widget["Label"].isHidden() or "MERLIN" in str(self.engine.instname) and widget["Label"].isHidden():
+                    idx = int(key[7])
+                    phase = widget["Edit"].text()
+                    if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
+                        phase = str(phase)
+                    else:
+                        try:
+                            phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
+                        except ValueError:
+                            raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
+                    phases.append(phase)
         if phases:
             self.engine.setFrequency(freq_in, phase=phases)
         else:
