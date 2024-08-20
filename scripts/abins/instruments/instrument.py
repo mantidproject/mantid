@@ -128,6 +128,18 @@ class Instrument:
         """
         raise NotImplementedError()
 
+    def prepare_resolution(self):
+        """Perform preparation steps for resolution calculation
+
+        This should be called automatically by convolve_with_resolution_function if appropriate
+
+        The purpose of this method is to allow common computation
+        (e.g. lookup-table generation) to be performed before the instrument is
+        duplicated in parallel calculations.
+
+        """
+        pass
+
     def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme="auto"):
         """
         Convolves discrete spectrum with the resolution function for the particular instrument.
