@@ -381,7 +381,7 @@ public:
     // But you can still add a plain one
     TofEvent e(789, 654);
     el += e;
-    TS_ASSERT_EQUALS(el.getWeightedEvents()[NUMEVENTS + 1], e);
+    TS_ASSERT_EQUALS(el.getWeightedEvents()[NUMEVENTS + 1], static_cast<WeightedEvent>(e));
     TS_ASSERT_EQUALS(el.getEvent(NUMEVENTS + 1).weight(), 1.0);
   }
 

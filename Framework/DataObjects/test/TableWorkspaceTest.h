@@ -27,7 +27,7 @@ using namespace std;
 
 template <class T> class TableColTestHelper : public TableColumn<T> {
 public:
-  TableColTestHelper<T>(T value) {
+  TableColTestHelper(T value) {
     std::vector<T> &dat = TableColumn<T>::data();
     dat.resize(1);
     dat[0] = value;

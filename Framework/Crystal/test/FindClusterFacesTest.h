@@ -110,7 +110,8 @@ class FindClusterFacesTest : public CxxTest::TestSuite {
 
 private:
   void verify_table_row(ITableWorkspace_sptr &outWS, int expectedClusterId, double expectedWorkspaceIndex,
-                        int expectedNormalDimensionIndex, bool expectedMaxExtent, double expectedRadius = -1) {
+                        int expectedNormalDimensionIndex, Mantid::API::Boolean expectedMaxExtent,
+                        double expectedRadius = -1) {
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
       auto clusterId = outWS->cell<int>(rowIndex, 0);
       auto wsIndex = outWS->cell<double>(rowIndex, 1);
