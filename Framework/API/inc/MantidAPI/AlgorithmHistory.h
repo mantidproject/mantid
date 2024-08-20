@@ -131,7 +131,7 @@ private:
   /// UUID for this algorithm history
   std::string m_uuid;
   /// If algorithm was set to store workspaces in the ADS
-  bool m_storeInADS;
+  bool m_storeInADS{true};
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &, const AlgorithmHistory &);

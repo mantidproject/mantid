@@ -712,7 +712,7 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item, int index) 
 }
 
 void AlgHistoryTreeWidget::treeSelectionChanged() {
-  if (AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
+  if (const AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
     emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
   }
 }

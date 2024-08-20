@@ -330,8 +330,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/So
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:382
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:230
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:274
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:317
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1DMany.cpp:291
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
@@ -390,8 +388,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ScopedWorkspac
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:209
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Workspace.cpp:99
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScatterer.h:71
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/PointGroup.h:39
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/PointGroupFactory.h:24
@@ -1266,7 +1262,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidg
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h:45
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h:19
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h:73
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmHistoryWindow.cpp:716
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/WeightedMeanMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnitsConversionHelper.cpp:0
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:103

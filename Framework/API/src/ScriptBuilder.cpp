@@ -208,7 +208,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
 
   const bool storeInADS = algHistory.getStoreInADS();
 
-  for (auto &propIter : props) {
+  for (const auto &propIter : props) {
     if (!storeInADS && propIter->name() == "OutputWorkspace") {
       continue;
     }
