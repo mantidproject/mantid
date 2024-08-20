@@ -29,7 +29,7 @@ View::View(QWidget *parent) : QWidget(parent), m_presenter() {
   connect(button, SIGNAL(clicked()), this, SLOT(notifyButtonClicked()));
 }
 
-void View::subscribePresenter(IPresenter *presenter) {
+void View::subscribe(IPresenter *presenter) {
   m_presenter = presenter;
 }
 

@@ -1,15 +1,16 @@
+from model import Model
 from view import View
 from presenter import Presenter
-from model import Model
 
 from qtpy.QtWidgets import QApplication
 
 
 app = QApplication([])
 
-m = Model()
-v = View()
-p = Presenter(v, m)
-p.show()
+model = Model()
+view = View()
+presenter = Presenter(model, view)
+
+view.show()
 
 app.exec_()
