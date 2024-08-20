@@ -99,10 +99,10 @@ In addition it is possible to concatenate these specifications using
 comma-separation. An example would be *8-10,12:2:16,20-22*, which would
 use 8, 9, 10, 12, 14, 16, 20, 21, 22.
 
+.. _compatibility_mode:
 
 Compatibility Mode
 """"""""""""""""""
-.. _Compatibility_Mode:
 
 The previous SANS GUI converted event-mode data to histogram-mode early into
 processing. This used the time-of-flight binning parameters specified by the
