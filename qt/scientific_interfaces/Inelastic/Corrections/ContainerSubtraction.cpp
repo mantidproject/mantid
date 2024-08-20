@@ -179,17 +179,6 @@ std::string ContainerSubtraction::createOutputName() {
   return outputWsName.toStdString();
 }
 
-/**
- * Removes the output workspace from the ADS if exists
- */
-void ContainerSubtraction::removeOutput() {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(m_pythonExportWsName)) {
-    ads.remove(m_pythonExportWsName);
-  }
-  m_pythonExportWsName.clear();
-}
-
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
