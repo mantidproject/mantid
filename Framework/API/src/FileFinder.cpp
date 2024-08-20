@@ -472,14 +472,26 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
 
   auto path = getPath(archs, filenames, uniqueExts);
   if (path) {
-    g_log.information() << "found path = " << path << '\n';
+    g_log.information() << "Found path = " << path << '\n';
     return path;
-  } else {
-    g_log.information() << "Unable to find run with hint " << hint << "\n";
   }
 
-  g_log.information() << "Unable to find file path for " << hint << "\n";
+  if (!path && uniqueExts.size() == 1) {
+    uniqueExts.pop_back();
+    getUniqueExtensions(exts, uniqueExts);
+    getUniqueExtensions(extensions, uniqueExts);
 
+    g_log.warning() << "Extension ['" << extension << "'] not found.\n";
+    g_log.warning() << "Searching for other facility extensions." << std::endl;
+
+    path = getPath(archs, filenames, uniqueExts);
+    if (path) {
+      g_log.information() << "Found path = " << path << '\n';
+      return path;
+    }
+  }
+  // Path not found
+  g_log.information() << "Unable to find run with hint " << hint << "\n";
   return API::Result<std::string>("", path.errors());
 }
 
