@@ -10,9 +10,7 @@
 
 #include <QObject>
 #include <QWidget>
-#include <QVBoxLayout>
 #include <QLabel>
-#include <QPushButton>
 
 
 class IPresenter;
@@ -30,15 +28,18 @@ class View final : public QWidget, public IView {
   Q_OBJECT
 
 public:
-  View(QWidget *parent);
+  View(QWidget *parent = nullptr);
   ~View() override = default;
 
   void subscribePresenter(IPresenter *presenter) override;
 
   void setLabel(std::string const &text) override;
 
+private slots:
+  void notifyButtonClicked();
+
 private:
-  QVBoxLayout *m_layout;
-  QPushButton *m_button;
   QLabel *m_label;
+
+  IPresenter *m_presenter;
 };

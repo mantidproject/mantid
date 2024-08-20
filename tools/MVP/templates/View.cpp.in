@@ -8,20 +8,25 @@
 
 #include "Presenter.h"
 
+#include <string>
+
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QString>
 
 
 View::View(QWidget *parent) : QWidget(parent), m_presenter() {
-    m_layout = new QVBoxLayout();
-    m_button = new QPushButton("Increment", this);
-    m_label = new QLabel("0");
+  auto layout = new QVBoxLayout();
+  auto button = new QPushButton("Increment", this);
+  m_label = new QLabel("0", this);
 
-    m_layout->addWidget(m_button);
-    m_layout->addWidget(m_label);
+  layout->addWidget(button);
+  layout->addWidget(m_label);
 
-    connect(m_button, SIGNAL(clicked()), this, SLOT(notifyButtonClicked()));
+  setLayout(layout);
+
+  connect(button, SIGNAL(clicked()), this, SLOT(notifyButtonClicked()));
 }
 
 void View::subscribePresenter(IPresenter *presenter) {

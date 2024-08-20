@@ -1,0 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "Model.h"
+#include "View.h"
+#include "Presenter.h"
+
+#include <QApplication>
+
+
+int main(int argc, char *argv[]){
+  QApplication app(argc, argv);
+
+  //{
+  //  QString test = "3";
+  //  std::string blah = test.toStdString();
+  //}
+  auto model = std::make_unique<Model>();
+  auto view = new View();
+  auto presenter = std::make_unique<Presenter>(std::move(model), view);
+
+  view->show();
+
+  return app.exec();
+}

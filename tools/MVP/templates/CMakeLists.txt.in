@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.21)
+
+project(MVPWidget)
+
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+
+qt5_wrap_cpp(MOC_FILES View.h)
+
+add_executable(launch
+    main.cpp
+    Model.cpp
+    View.cpp
+    Presenter.cpp
+    ${MOC_FILES}
+)
+
+target_link_libraries(launch
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+)
