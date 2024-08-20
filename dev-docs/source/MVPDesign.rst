@@ -189,30 +189,57 @@ foundation or template for creating any widget using the MVP design pattern.
 It can also be used to create the necessary files when refactoring an existing
 widget which is not currently using MVP.
 
+Python
+------
+
 To generate files for a Python widget with name "Example", run:
 
 .. code-block:: sh
 
-  python tools/MVP/template.py --name Example --language python --output-dir $PWD
+  python tools/MVP/template.py --name Example --language python --output-dir $PWD/..
 
 
-This command will generate three python files named `example_model.py`, `example_view.py`
-and `example_presenter.py`. These files will be saved in the current working directory,
-as specified by `$PWD`. An additional file named `launch.py` will be generated. This
+This command will generate four python files including `example_model.py`, `example_view.py`
+and `example_presenter.py`. These files will be saved in the provided output directory,
+as specified by `$PWD/..`. An additional file named `launch.py` will be generated. This
 can be used to open the widget as follows:
 
 .. code-block:: sh
 
-  python $PWD/launch.py
+  python $PWD/../launch.py
+
+C++
+---
 
 To generate files for a C++ widget with name "Example", run:
 
 .. code-block:: sh
 
-  python tools/MVP/template.py --name Example --language c++ --output-dir $PWD
+  python tools/MVP/template.py --name Example --language c++ --output-dir $PWD/..
 
-This command will generate six C++ files named `ExampleModel.cpp`, `ExampleModel.h`,
+This command will generate eight files including `ExampleModel.cpp`, `ExampleModel.h`,
 `ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp` and `ExamplePresenter.h`.
+An additional file named `main.cpp` and a `CMakeLists.txt` will be generated. These
+files can be used to build the widget as follows:
+
+.. code-block:: sh
+
+  mkdir buildmvp
+  cd buildmvp
+  cmake ..
+  cmake --buildmvp .
+
+The example widget can then be opened with:
+
+.. code-block:: sh
+
+  cd buildmvp
+  ./Debug/launch.exe
+
+The `main.cpp` and a `CMakeLists.txt` files are intended as an example for how you can
+build, and then instantiate your widget. If you are refactoring or creating a new
+widget for Mantid, the headers and cpp files should be included in the relevant
+CMakeLists file elsewhere in the project.
 
 Visual Design
 #############
