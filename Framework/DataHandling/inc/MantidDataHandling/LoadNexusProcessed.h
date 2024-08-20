@@ -116,9 +116,9 @@ private:
   /// Loads a V3D column to the TableWorkspace.
   void loadV3DColumn(Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs);
 
-  API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadPeaksEntry(const Mantid::NeXus::NXEntry &entry);
 
-  API::Workspace_sptr loadLeanElasticPeaksEntry(Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadLeanElasticPeaksEntry(const Mantid::NeXus::NXEntry &entry);
 
   API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData &wksp_cls, Mantid::NeXus::NXDouble &xbins,
                                            const double &progressStart, const double &progressRange);
@@ -160,7 +160,7 @@ private:
                  const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
-  void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, Mantid::NeXus::NXData &data);
+  void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const Mantid::NeXus::NXData &data);
 
   /// Validates the optional 'spectra to read' properties, if they have been set
   void checkOptionalProperties(const std::size_t numberofspectra);

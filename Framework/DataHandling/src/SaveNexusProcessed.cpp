@@ -408,7 +408,7 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
 /** Execute the saving of event data.
  * This will make one long event list for all events contained.
  * */
-void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
+void SaveNexusProcessed::execEvent(const Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
                                    const bool raggedSpectra, const std::vector<int> &spec) {
   m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
