@@ -12,7 +12,7 @@
 
 Presenter::Presenter(std::unique_ptr<IModel> model, IView *view) : m_model(std::move(model)), m_view(view) {
   // Use a subscriber to avoid Qt connections in the presenter
-  m_view->subscribePresenter(this);
+  m_view->subscribe(this);
 }
 
 void Presenter::handleButtonClicked() {

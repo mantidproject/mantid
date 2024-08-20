@@ -20,20 +20,21 @@ def _cpp_filename(file_type: str, name: Union[str, None] = None) -> str:
     return f"{name}{file_type}" if name is not None else file_type
 
 
-def _generate_launch_file(name: str, filename: Callable, extension: str, output_directory: str) -> None:
-    """Generates a file which can be used to launch the generated MVP widget."""
-    template_filepath = join(TEMPLATE_DIRECTORY, f"launch.{extension}.in")
+def _generate_setup_file(name: str, filename: Callable, setup_filename: str, extension: str, output_directory: str) -> None:
+    """Generates a file which is used to setup or launch the generated MVP widget."""
+    template_filepath = join(TEMPLATE_DIRECTORY, f"{setup_filename}.{extension}.in")
     with open(template_filepath, mode="r") as file:
         content = file.read()
 
     content = content.replace("Model", f"{name}Model")
     content = content.replace("View", f"{name}View")
     content = content.replace("Presenter", f"{name}Presenter")
-    content = content.replace("model", filename("Model", name))
-    content = content.replace("view", filename("View", name))
-    content = content.replace("presenter", filename("Presenter", name))
+    # Only required for python launch file
+    content = content.replace("from model", "from " + filename("Model", name))
+    content = content.replace("from view", "from " + filename("View", name))
+    content = content.replace("from presenter", "from " + filename("Presenter", name))
 
-    output_filepath = join(output_directory, f"launch.{extension}")
+    output_filepath = join(output_directory, f"{setup_filename}.{extension}")
     with open(output_filepath, mode="w") as file:
         file.write(content)
 
@@ -44,7 +45,8 @@ def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension:
     with open(template_filepath, mode="r") as file:
         content = file.read()
 
-    content = content.replace(file_type, f"{name}{file_type}")
+    for mvp_type in ["Model", "View", "Presenter"]:
+        content = content.replace(mvp_type, f"{name}{mvp_type}")
 
     output_filepath = join(output_directory, f"{filename(file_type, name)}.{extension}")
     with open(output_filepath, mode="w") as file:
@@ -58,7 +60,7 @@ def _generate_python_files(name: str, output_directory: str) -> None:
     _generate_mvp_file(name, _python_filename, "View", "py", output_directory)
     _generate_mvp_file(name, _python_filename, "Presenter", "py", output_directory)
     _generate_mvp_file(name, _python_filename, "Model", "py", output_directory)
-    _generate_launch_file(name, _python_filename, "py", output_directory)
+    _generate_setup_file(name, _python_filename, "launch", "py", output_directory)
 
     print(f"Output directory: {output_directory}")
     print("Done!")
@@ -74,6 +76,8 @@ def _generate_cpp_files(name: str, output_directory: str) -> None:
     _generate_mvp_file(name, _cpp_filename, "View", "h", output_directory)
     _generate_mvp_file(name, _cpp_filename, "Presenter", "h", output_directory)
     _generate_mvp_file(name, _cpp_filename, "Model", "h", output_directory)
+    _generate_setup_file(name, _cpp_filename, "main", "cpp", output_directory)
+    _generate_setup_file(name, _cpp_filename, "CMakeLists", "txt", output_directory)
 
     print(f"Output directory: {output_directory}")
     print("Done!")

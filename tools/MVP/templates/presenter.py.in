@@ -8,15 +8,12 @@
 
 class Presenter:
 
-    def __init__(self, view, model):
-        self._view = view
+    def __init__(self, model, view):
         self._model = model
+        self._view = view
 
         # Use a subscriber to avoid Qt connections in the presenter
         self._view.subscribe_presenter(self)
-
-    def show(self):
-        self._view.show()
 
     def handle_button_clicked(self):
         # An example method to handle a view event
