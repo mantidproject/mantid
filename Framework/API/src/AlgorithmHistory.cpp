@@ -241,6 +241,7 @@ AlgorithmHistory &AlgorithmHistory::operator=(const AlgorithmHistory &A) {
     auto temp = A.m_childHistories;
     m_childHistories = temp;
     m_uuid = A.m_uuid;
+    m_execCount = A.m_execCount;
   }
   return *this;
 }
@@ -273,7 +274,7 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   file->writeData("data", algData.str());
 
   // child algorithms
-  for (auto &history : m_childHistories) {
+  for (const auto &history : m_childHistories) {
     history->saveNexus(file, algCount);
   }
   file->closeGroup();
