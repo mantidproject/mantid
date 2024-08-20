@@ -302,11 +302,12 @@ template <typename TYPE> std::vector<std::string> WorkspaceProperty<TYPE>::allow
 template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
   std::string wsName = m_workspaceName;
   bool isdefault = this->isDefault();
+  bool pythonVariable = false;
 
   if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()()) {
     const auto pvName = Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value->getPythonVariableName();
     if (!pvName.empty()) {
-      // TODO also set something to say this should be recreated as a variable.
+      pythonVariable = true;
       wsName = pvName;
     } else {
       // give the property a temporary name in the history
@@ -316,7 +317,7 @@ template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::
     }
     isdefault = false;
   }
-  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction());
+  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction(), pythonVariable);
 }
 
 /** If this is an output workspace, store it into the AnalysisDataService
