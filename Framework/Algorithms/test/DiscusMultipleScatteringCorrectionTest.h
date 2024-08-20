@@ -171,6 +171,7 @@ public:
     pmap.addDouble(instrument.get(), "col-radius", 0.5);
     pmap.addDouble(instrument.get(), "col-angular-extent", 0.034);
     pmap.addDouble(instrument.get(), "col-plate-height", 0.2);
+    pmap.addString(instrument.get(), "col-axis", "0,1,0");
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
