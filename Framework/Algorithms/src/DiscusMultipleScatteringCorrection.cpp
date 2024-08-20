@@ -1361,7 +1361,7 @@ GNU_DIAG_OFF("free-nonheap-object")
  */
 std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-    ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
+    const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
     bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
   std::vector<int> countZeroWeights(wValues.size(), 0);
@@ -1469,7 +1469,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
     auto hexahedron = createCollimatorHexahedronShape(samplePos, detectorInfo, histogramIndex);
     // zero the paths if the final scatter point is not inside the collimatorCorridor shape or the collimator shape is
     // not as expected
-    if ((!hexahedron) || (hexahedron && !hexahedron->isValid(track.startPoint())))
+    if ((!hexahedron) || (!hexahedron->isValid(track.startPoint())))
       return {true, std::vector<double>(wValues.size(), 0.)};
   }
 
@@ -1536,7 +1536,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
  * Construct a hexahedron shape extending from the detector's front face across the collimator openning window toward
  the sample with a legth as twice the distance from sample to detector.
  */
-std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createCollimatorHexahedronShape(
+const std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createCollimatorHexahedronShape(
     const Kernel::V3D &samplePos, const Mantid::Geometry::DetectorInfo &detectorInfo, const size_t &histogramIndex) {
   const auto shape = detectorInfo.detector(histogramIndex).shape();
   if (!shape || (shape->shape() != Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID)) {
@@ -1547,6 +1547,11 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
     shape->shapeInfo();
   } catch (std::exception &) {
     return nullptr;
+  }
+
+  const auto colCorridorShape = readFromCollimatorCorridorCache(histogramIndex);
+  if (colCorridorShape) {
+    return colCorridorShape;
   }
 
   const auto &detectorId = detectorInfo.detector(histogramIndex).getID();
@@ -1569,7 +1574,6 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
   }
 
   // Define the unit vectors needed for calculations
-  const auto unitVecBottomToUp = Kernel::normalize(detTopMiddlePos - detCentrePos);
   const auto unitVecSampleToDet = Kernel::normalize(detCentrePos - samplePos);
   const auto unitVecLeftToRight = Kernel::normalize(
       V3D(-1.0 * unitVecSampleToDet.Z(), 0,
@@ -1577,19 +1581,19 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
 
   const auto colOpenningLeftTopPos =
       (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos +
-      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) -
+      (m_collimatorInfo->m_axisVec * (m_collimatorInfo->m_plateHeight / 2.0)) -
       (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
   const auto colOpenningRightTopPos =
       (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos +
-      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) +
+      (m_collimatorInfo->m_axisVec * (m_collimatorInfo->m_plateHeight / 2.0)) +
       (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
   const auto colOpenningLeftBottomPos =
       (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos -
-      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) -
+      (m_collimatorInfo->m_axisVec * (m_collimatorInfo->m_plateHeight / 2.0)) -
       (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
   const auto colOpenningRightBottomPos =
       (unitVecSampleToDet * m_collimatorInfo->m_innerRadius * cos(m_collimatorInfo->m_halfAngularExtent)) + samplePos -
-      (m_collimatorInfo->m_axis * (m_collimatorInfo->m_plateHeight / 2.0)) +
+      (m_collimatorInfo->m_axisVec * (m_collimatorInfo->m_plateHeight / 2.0)) +
       (unitVecLeftToRight * m_collimatorInfo->m_innerRadius * sin(m_collimatorInfo->m_halfAngularExtent));
 
   // Sanity check to avoid dividing by zero
@@ -1646,10 +1650,29 @@ std::shared_ptr<Geometry::CSGObject> DiscusMultipleScatteringCorrection::createC
                  << " z=\"" << detLeftFrontBottomPos.Z() << "\" />"
                  << "</hexahedron>";
   Geometry::ShapeFactory shapeMaker;
-  return shapeMaker.createShape(xmlShapeStream.str());
+  const auto collimatorCorridorCsgObj = shapeMaker.createShape(xmlShapeStream.str());
+  writeToCollimatorCorridorCache(histogramIndex, collimatorCorridorCsgObj);
+  return collimatorCorridorCsgObj;
+}
+
+const std::shared_ptr<Geometry::CSGObject>
+DiscusMultipleScatteringCorrection::readFromCollimatorCorridorCache(const std::size_t &histogramIndex) {
+  std::shared_lock<std::shared_mutex> guard(m_mutexCorridorCache);
+  const auto itCollimatorCorridor = m_collimatorCorridorCache.find(histogramIndex);
+  if (itCollimatorCorridor != m_collimatorCorridorCache.end()) {
+    return itCollimatorCorridor->second;
+  }
+  return nullptr;
+}
+
+void DiscusMultipleScatteringCorrection::writeToCollimatorCorridorCache(
+    const std::size_t &histogramIndex, const std::shared_ptr<Geometry::CSGObject> &collimatorCorridorCsgObj) {
+  std::unique_lock<std::shared_mutex> guard(m_mutexCorridorCache);
+  m_collimatorCorridorCache[histogramIndex] = collimatorCorridorCsgObj;
 }
 
 void DiscusMultipleScatteringCorrection::loadCollimatorInfo() {
+  m_collimatorCorridorCache.clear(); // Clear the cache for collimator corridor shapes
   const bool radialCollimator = getProperty("RadialCollimator");
   if (radialCollimator) {
     m_collimatorInfo = std::make_unique<CollimatorInfo>();
@@ -1659,7 +1682,7 @@ void DiscusMultipleScatteringCorrection::loadCollimatorInfo() {
     m_collimatorInfo->m_halfAngularExtent = 0.5 * getDoubleParamFromIDF("col-angular-extent");
     // Height of collimator plate
     m_collimatorInfo->m_plateHeight = getDoubleParamFromIDF("col-plate-height");
-    m_collimatorInfo->m_axis = getV3DParamFromIDF("col-axis");
+    m_collimatorInfo->m_axisVec = getV3DParamFromIDF("col-axis");
   }
 }
 
@@ -1691,7 +1714,7 @@ Kernel::V3D DiscusMultipleScatteringCorrection::getV3DParamFromIDF(std::string p
   std::transform(v3dStrComponent.begin(), v3dStrComponent.end(), v3dComponents.begin(),
                  [](const std::string &str) -> double { return std::stod(str); });
 
-  return Kernel::V3D(v3dComponents[0], v3dComponents[1], v3dComponents[3]);
+  return Kernel::V3D(v3dComponents[0], v3dComponents[1], v3dComponents[2]);
 }
 
 double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const double kinc) {
