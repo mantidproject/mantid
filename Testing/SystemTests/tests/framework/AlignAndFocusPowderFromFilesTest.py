@@ -236,7 +236,7 @@ class CompressedCompare(systemtesting.MantidSystemTest):
         return None
 
     def validate(self):
-        None
+        return None
 
 
 class UseCache(systemtesting.MantidSystemTest):
