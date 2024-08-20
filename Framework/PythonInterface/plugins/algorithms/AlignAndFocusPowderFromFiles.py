@@ -224,7 +224,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         if self.do_compression:
             self.kwargs = self.__getAlignAndFocusArgs()
-            loader.setPropertyValue("CompressTolerance", str(self.kwargs["CompressTolerance"]))
+            loader.setProperty("CompressTolerance", self.kwargs["CompressTolerance"])
             loader.setPropertyValue("CompressBinningMode", self.kwargs["CompressBinningMode"])
 
         if skipLoadingLogs:
