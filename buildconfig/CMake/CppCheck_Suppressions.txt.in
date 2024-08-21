@@ -215,7 +215,7 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTu
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:273
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:89
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:677
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:685
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:134
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:330
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
@@ -870,13 +870,8 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusPr
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:380
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CenteringGroup.h:46
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:410
-variableScope:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3516
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CompositeBraggScatterer.h:64
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3963
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4110
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4237
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4238
 derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1590
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/Group.h:148
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:411
