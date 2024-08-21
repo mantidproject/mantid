@@ -230,21 +230,21 @@ void ElwinPresenter::handleRun() {
   std::string const inputGroupWsName = "Elwin_Input";
   std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
   // Load input files
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
-
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
-    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    auto spectraWS = workspace->getName() + "_extracted_spectra";
+    algQueue.emplace_back(m_model->setupExtractSpectra(workspace, spectra, spectraWS));
     inputWorkspacesString += spectraWS + ",";
   }
 
   // Group input workspaces
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
   algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
-  m_algorithmRunner->execute(algQueue);
+  m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
@@ -256,7 +256,7 @@ void ElwinPresenter::handleSaveClicked() {
   std::deque<IConfiguredAlgorithm_sptr> saveQueue = {};
   for (auto const &name : getOutputWorkspaceNames())
     saveQueue.emplace_back(setupSaveAlgorithm(name));
-  m_algorithmRunner->execute(saveQueue);
+  m_algorithmRunner->execute(std::move(saveQueue));
 }
 
 std::vector<std::string> ElwinPresenter::getOutputWorkspaceNames() {

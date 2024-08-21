@@ -18,7 +18,7 @@ dependencies:
   - jsoncpp>=1.9.4,<2
   - libboost-devel=1.84.* # Use the same version as conda-forge
   - libboost-python-devel=1.84.* # Use the same version as conda-forge
-  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
@@ -50,7 +50,7 @@ dependencies:
   - toml>=0.10.2
   - versioningit>=2.1
   - joblib
-  - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+  - orsopy==1.2.1 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 
   # Not Windows, OpenGL implementation:
   - mesa-libgl-devel-cos7-x86_64>=18.3.4

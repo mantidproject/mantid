@@ -2844,6 +2844,8 @@ public:
     VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
 
     TS_ASSERT(!e.isSortedByTof());
+    // set the values of Y to be one so we can check that the values are zeroed out
+    Y.resize(X.size() - 1, 1.);
 
     // do unsorted histogram then compare and check still unsorted
     e.generateHistogram(rebinParams[1], X, Y, E);

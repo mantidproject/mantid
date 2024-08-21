@@ -77,7 +77,7 @@ void SymmetrisePresenter::handleRun() {
   }
 
   // Execute the algorithm(s) on a separated thread
-  m_algorithmRunner->execute(configuredAlgorithm);
+  m_algorithmRunner->execute(std::move(configuredAlgorithm));
 }
 
 /**

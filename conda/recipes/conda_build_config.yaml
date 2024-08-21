@@ -52,7 +52,7 @@ occt:
 
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
-  - 1.2.0
+  - 1.2.1
 
 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
 # It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
@@ -87,7 +87,7 @@ gsl:
 
 # v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
 libopenblas:
-  - '!=0.3.23,!=0.3.24,!=0.3.25'
+  - '!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28'
 
 euphonic:
   - '>=1.2.1,<2.0'

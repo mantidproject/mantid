@@ -422,7 +422,7 @@ void LoadNexusProcessed::execLoader() {
       // multiperiod workspace.
       const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
       const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
-      Property *specListProp = this->getProperty("SpectrumList");
+      const Property *specListProp = this->getProperty("SpectrumList");
       m_list = !specListProp->isDefault();
 
       // Load all first level entries
@@ -731,6 +731,12 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
 
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
+
+        // for ragged workspace we need to remove all NaN value from end of vector
+        const auto idx =
+            std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
+        if (idx > 0)
+          x.resize(x.size() - idx);
         // Workspace and el was just created, so we can just set a new histogram
         // We can move x as it is not longer used after this point
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
@@ -925,7 +931,7 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
  * @param entry
  * @return API::Workspace_sptr
  */
-API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry &entry) {
   g_log.notice("Load as LeanElasticPeaks");
 
   // API::IPeaksWorkspace_sptr workspace;
@@ -1205,7 +1211,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
 /**
  * Load peaks
  */
-API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   // API::IPeaksWorkspace_sptr workspace;
   API::ITableWorkspace_sptr tWorkspace;
   // PeaksWorkspace_sptr workspace;
@@ -1716,6 +1722,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
                   nchannels, hist_index, wsIndex, local_workspace);
       }
     }
+
+    // now check for NaN at end of X which would signify ragged binning
+    for (size_t i = 0; i < local_workspace->getNumberHistograms(); i++) {
+      const auto x = local_workspace->readX(i);
+      const auto idx =
+          std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
+      if (idx > 0)
+        local_workspace->resizeHistogram(i, local_workspace->histogramSize(i) - idx);
+    }
   }
   return local_workspace;
 }
@@ -1991,7 +2006,7 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
  * @param local_workspace :: pointer to workspace object
  * @param data :: reference to the NeXuS data for the axis
  */
-void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, NXData &data) {
+void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const NXData &data) {
   Axis *axis = local_workspace->getAxis(1);
 
   if (axis->isNumeric()) {
