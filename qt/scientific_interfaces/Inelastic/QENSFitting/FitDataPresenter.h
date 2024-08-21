@@ -15,6 +15,7 @@
 #include "InelasticFitPropertyBrowser.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
