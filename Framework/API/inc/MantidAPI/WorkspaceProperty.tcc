@@ -306,8 +306,8 @@ template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::
 
   if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()()) {
     const auto pvName = Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value->getPythonVariableName();
-    if (!pvName.empty()) {
-      pythonVariable = true;
+    pythonVariable = !pvName.empty();
+    if (pythonVariable) {
       wsName = pvName;
     } else {
       // give the property a temporary name in the history
