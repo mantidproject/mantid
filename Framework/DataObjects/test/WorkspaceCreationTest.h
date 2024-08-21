@@ -14,6 +14,7 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -362,6 +363,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws = create<EventWorkspace>(2, BinEdges{1, 2, 4}))
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
     check_zeroed_data(*ws);
+  }
+
+  void test_create_ragged_from_parent() {
+    const auto parent = create<Workspace2D>(2, Histogram(BinEdges(3)));
+    MantidVec x_data{1., 2., 3., 4.};
+    MantidVec y_data{1., 2., 3.};
+    MantidVec e_data{1., 1., 1.};
+    HistogramBuilder builder;
+    builder.setX(x_data);
+    builder.setY(y_data);
+    builder.setE(e_data);
+    parent->setHistogram(1, builder.build());
+    TS_ASSERT(parent->isRaggedWorkspace());
+
+    const auto ws = create<Workspace2D>(*parent);
+    ;
+    TS_ASSERT(ws->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->x(0).size(), 3);
+    TS_ASSERT_EQUALS(ws->x(1).size(), 4);
+    TS_ASSERT_EQUALS(ws->y(0).size(), 2);
+    TS_ASSERT_EQUALS(ws->y(1).size(), 3);
+    TS_ASSERT_EQUALS(ws->x(0).rawData(), std::vector<double>({0, 0, 0}));
+    TS_ASSERT_EQUALS(ws->x(1).rawData(), std::vector<double>({1, 2, 3, 4}));
+    TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({0, 0, 0})); // y is expected to be zeroed
   }
 
 private:

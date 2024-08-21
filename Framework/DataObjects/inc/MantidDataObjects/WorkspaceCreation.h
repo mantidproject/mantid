@@ -178,7 +178,25 @@ std::unique_ptr<T> create(const std::shared_ptr<const Geometry::Instrument> &ins
 }
 
 template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
+std::unique_ptr<T> createRagged(const P &parent) {
+  const auto numHistograms = parent.getNumberHistograms();
+
+  // make a temporary histogram that will be used for initialization. Can't be 0 size so resize.
+  auto histArg = HistogramData::Histogram(parent.histogram(0).xMode(), parent.histogram(0).yMode());
+  histArg.resize(1);
+  auto ws = create<T>(parent, numHistograms, histArg);
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->resizeHistogram(i, parent.histogramSize(i));
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
+}
+
+template <class T, class P, typename std::enable_if<std::is_base_of<API::MatrixWorkspace, P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
+  if (parent.isRaggedWorkspace())
+    return createRagged<T>(parent);
+
   const auto numHistograms = parent.getNumberHistograms();
   auto ws = create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
