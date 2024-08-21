@@ -217,7 +217,7 @@ class PyChopGui(QMainWindow):
             if key.endswith("Phase"):
                 # Special case for MERLIN
                 # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
-                if not widget["Label"].isHidden() or "MERLIN" in str(self.engine.instname) and widget["Label"].isHidden():
+                if not widget["Label"].isHidden() or "MERLIN" in str(self.engine.instname) and key[7] == 0:
                     idx = int(key[7])
                     phase = widget["Edit"].text()
                     if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
