@@ -96,13 +96,16 @@ void HeliumAnalyserEfficiency::init() {
 }
 
 void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
+  if (workspace == nullptr) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be of type MatrixWorkspace.";
+    return;
+  }
+
   Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
   if (unit->unitID() != "Wavelength") {
     errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
-    return;
   }
 }
-
 /**
  * Tests that the inputs are all valid
  * @return A map containing the incorrect workspace
@@ -119,7 +122,7 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
         "The input group workspace must have four periods corresponding to the four spin configurations.";
   } else {
     for (size_t i = 0; i < wsGroup->size(); ++i) {
-      MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+      const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
       validateInputWorkspace(stateWs, errorList);
     }
   }
@@ -130,7 +133,7 @@ void HeliumAnalyserEfficiency::exec() { calculateAnalyserEfficiency(); }
 
 void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  WorkspaceGroup_sptr groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
+  const WorkspaceGroup_sptr groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
   const auto t11Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
