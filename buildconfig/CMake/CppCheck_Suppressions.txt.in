@@ -381,9 +381,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/PeakFunctionIntegrator.cpp:190
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:205
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:235
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:255
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:395
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ScopedWorkspace.h:52
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58

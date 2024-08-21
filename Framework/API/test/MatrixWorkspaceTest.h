@@ -56,9 +56,6 @@ using namespace Mantid::Geometry;
 using Mantid::Indexing::IndexInfo;
 using Mantid::Types::Core::DateAndTime;
 
-// Declare into the factory.
-DECLARE_WORKSPACE(WorkspaceTester)
-
 namespace {
 static const int INVALID_DET_ID = -1;
 static const int INVALID_DET_ID2 = -2;
