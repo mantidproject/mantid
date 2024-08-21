@@ -1,0 +1,1 @@
+- If the ADS is cleared from workspaces that are used to run fits on an open :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>`, a warning message pops up when clicking on the `Run` button.
