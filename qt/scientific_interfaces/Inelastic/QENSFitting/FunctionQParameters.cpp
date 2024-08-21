@@ -14,10 +14,10 @@
 using namespace Mantid::API;
 
 namespace {
+using namespace MantidQt::CustomInterfaces::Inelastic;
 
-std::vector<std::pair<std::string, std::size_t>> findAxisLabels(TextAxis const *axis,
-                                                                std::vector<std::string> const &parameterSuffixes) {
-  std::vector<std::pair<std::string, std::size_t>> labelAndSpectra;
+std::vector<PairNameSpectra> findAxisLabels(TextAxis const *axis, std::vector<std::string> const &parameterSuffixes) {
+  std::vector<PairNameSpectra> labelAndSpectra;
 
   for (auto i = 0u; i < axis->length(); ++i) {
     auto const label = axis->label(i);
@@ -29,16 +29,15 @@ std::vector<std::pair<std::string, std::size_t>> findAxisLabels(TextAxis const *
   return labelAndSpectra;
 }
 
-std::vector<std::pair<std::string, std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
-                                                                std::vector<std::string> const &parameterSuffixes) {
+std::vector<PairNameSpectra> findAxisLabels(MatrixWorkspace_sptr const &workspace,
+                                            std::vector<std::string> const &parameterSuffixes) {
   if (auto const axis = dynamic_cast<TextAxis *>(workspace->getAxis(1)))
     return findAxisLabels(axis, parameterSuffixes);
   return {};
 }
 
 template <typename T>
-std::vector<T> extract(const std::vector<std::pair<std::string, std::size_t>> &vec,
-                       std::function<T(std::pair<std::string, std::size_t>)> const &lambda) {
+std::vector<T> extract(const std::vector<PairNameSpectra> &vec, std::function<T(PairNameSpectra)> const &lambda) {
   std::vector<T> result;
   result.reserve(vec.size());
   std::transform(vec.begin(), vec.end(), std::back_inserter(result), lambda);
@@ -56,7 +55,7 @@ FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace)
       m_a0s(findAxisLabels(workspace, {".A0"})) {}
 
 std::vector<std::string> FunctionQParameters::names(std::string const &parameterType) const {
-  auto const nameGetter = [](auto const &pair) { return pair.first; };
+  auto const nameGetter = [](PairNameSpectra const &pair) -> std::string { return pair.first; };
   if (parameterType == "Width") {
     return extract<std::string>(m_widths, nameGetter);
   } else if (parameterType == "EISF") {
@@ -68,7 +67,7 @@ std::vector<std::string> FunctionQParameters::names(std::string const &parameter
 }
 
 std::vector<std::size_t> FunctionQParameters::spectra(std::string const &parameterType) const {
-  auto const spectraGetter = [](auto const &pair) { return pair.second; };
+  auto const spectraGetter = [](PairNameSpectra const &pair) -> std::size_t { return pair.second; };
   if (parameterType == "Width") {
     return extract<std::size_t>(m_widths, spectraGetter);
   } else if (parameterType == "EISF") {

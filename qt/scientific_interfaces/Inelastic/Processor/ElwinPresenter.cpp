@@ -244,7 +244,7 @@ void ElwinPresenter::handleRun() {
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
   algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
-  m_algorithmRunner->execute(algQueue);
+  m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
@@ -256,7 +256,7 @@ void ElwinPresenter::handleSaveClicked() {
   std::deque<IConfiguredAlgorithm_sptr> saveQueue = {};
   for (auto const &name : getOutputWorkspaceNames())
     saveQueue.emplace_back(setupSaveAlgorithm(name));
-  m_algorithmRunner->execute(saveQueue);
+  m_algorithmRunner->execute(std::move(saveQueue));
 }
 
 std::vector<std::string> ElwinPresenter::getOutputWorkspaceNames() {
