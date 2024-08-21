@@ -313,6 +313,10 @@ const std::string PolarizationCorrectionWildes::summary() const {
          "and analyzer efficiencies.";
 }
 
+const std::vector<std::string> PolarizationCorrectionWildes::seeAlso() const {
+  return {"PolarizationEfficienciesWildes"};
+}
+
 /**
  * Count the non-nullptr workspaces
  * @return the count on non-nullptr workspaces.
