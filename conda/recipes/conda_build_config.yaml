@@ -21,10 +21,10 @@ python:
   - 3.10
 
 libboost_devel:
-  - 1.82 # Aim to follow conda-forge
+  - 1.84 # Aim to follow conda-forge
 
 libboost_python_devel:
-  - 1.82 # Aim to follow conda-forge
+  - 1.84 # Aim to follow conda-forge
 
 cmake:
   - '>=3.21.0'
@@ -87,7 +87,7 @@ gsl:
 
 # v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
 libopenblas:
-  - '!=0.3.23,!=0.3.24,!=0.3.25'
+  - '!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28'
 
 euphonic:
   - '>=1.2.1,<2.0'
