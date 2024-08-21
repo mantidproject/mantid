@@ -39,7 +39,6 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  bool processGroups() override;
   void validateGroupInput();
   void calculateAnalyserEfficiency();
   MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);

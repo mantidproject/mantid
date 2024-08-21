@@ -42,8 +42,8 @@ public:
     MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
     heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
   }
 
@@ -75,8 +75,11 @@ public:
     heliumAnalyserEfficiency->initialize();
 
     heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
 
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.");
   }
 
   void testZeroPdError() {
