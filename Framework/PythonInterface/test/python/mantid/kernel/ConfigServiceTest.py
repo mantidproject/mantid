@@ -220,6 +220,14 @@ class ConfigServiceTest(unittest.TestCase):
         # verify check for converting checked value to string
         self.assertFalse(1 in ConfigService)
 
+    def test_remove(self):
+        garbage = "garbage.truck"
+        assert garbage not in list(config.keys())
+        config.setString(garbage, "yes")
+        assert garbage in list(config.keys())
+        config.remove(garbage)
+        assert garbage not in list(config.keys())
+
     @unittest.skipIf(not _on_windows, "Windows only test, uses APPDATA")
     def test_get_app_data_dir(self):
         self.assertEqual(
