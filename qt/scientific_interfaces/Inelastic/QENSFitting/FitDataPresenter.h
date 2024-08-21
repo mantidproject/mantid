@@ -36,7 +36,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
   FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
-  ~FitDataPresenter();
+  ~FitDataPresenter() override;
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
