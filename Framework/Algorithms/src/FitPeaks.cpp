@@ -445,7 +445,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
 
   // check that min/max spectra indices make sense - only matters if both are specified
-  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::START_WKSP_INDEX))) {
+  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::STOP_WKSP_INDEX))) {
     const int startIndex = getProperty(PropertyNames::START_WKSP_INDEX);
     const int stopIndex = getProperty(PropertyNames::STOP_WKSP_INDEX);
     if (startIndex > stopIndex) {
