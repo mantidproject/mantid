@@ -256,7 +256,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.c
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/InterpolatingRebin.cpp:69
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:213
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/GetAllEi.h:32
-duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:448
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetTimeSeriesLogInformation.cpp:277
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetTimeSeriesLogInformation.cpp:501
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetTimeSeriesLogInformation.cpp:248
