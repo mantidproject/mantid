@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -173,6 +174,8 @@ private:
   std::unordered_map<std::string, SetterType> m_setterMap;
 };
 
+GNU_DIAG_OFF("maybe-uninitialized")
+
 /**
  * Get the row index and column name from python types.
  *
@@ -201,6 +204,8 @@ std::pair<int, std::string> getRowAndColumnName(const IPeaksWorkspace &self, con
 
   return std::make_pair(rowIndex, columnName);
 }
+
+GNU_DIAG_ON("maybe-uninitialized")
 
 /**
  * Sets the value of the given cell

@@ -587,9 +587,6 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePo
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters.cpp:487
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters.cpp:772
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:500
-uninitvar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters.cpp:933
-uninitvar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters.cpp:934
-uninitvar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters.cpp:935
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:1603
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:1914
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2172

@@ -17,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/range/algorithm/remove_if.hpp>
@@ -245,6 +246,8 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   return historyEntry;
 }
 
+GNU_DIAG_OFF("maybe-uninitialized")
+
 /**
  * Build the script output for a single property
  *
@@ -296,5 +299,7 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
 
   return prop;
 }
+
+GNU_DIAG_ON("maybe-uninitialized")
 
 } // namespace Mantid::API
