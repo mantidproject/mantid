@@ -332,7 +332,7 @@ void PolarizationCorrectionWildes::init() {
                       FlipperConfigurations::ON_OFF + ", " + FlipperConfigurations::ON_ON,
                   flipperConfigValidator, "Flipper configurations of the input workspaces.");
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, true, '+', '-', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, false, '+', '-', true);
   declareProperty(Prop::SPIN_STATES, "", spinStateValidator, "The order of the spin states in the output workspace.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
