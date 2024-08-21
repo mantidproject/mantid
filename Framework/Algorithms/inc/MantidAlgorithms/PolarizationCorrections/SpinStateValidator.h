@@ -28,20 +28,6 @@ public:
                      const char paraIndicator = '0', const char antiIndicator = '1', const bool optional = false);
   Kernel::IValidator_sptr clone() const override;
 
-  static const std::string ZERO_ONE;
-  static const std::string ONE_ZERO;
-  static const std::string ZERO_ZERO;
-  static const std::string ONE_ONE;
-  static const std::string ZERO;
-  static const std::string ONE;
-
-  static const std::string MINUS_PLUS;
-  static const std::string PLUS_MINUS;
-  static const std::string MINUS_MINUS;
-  static const std::string PLUS_PLUS;
-  static const std::string MINUS;
-  static const std::string PLUS;
-
   static bool anyOfIsInSet(const std::vector<std::string> &anyOf, const std::unordered_set<std::string> &set);
   static bool setContains(const std::unordered_set<std::string> &set, const std::string &s) {
     return set.find(s) != set.cend();
