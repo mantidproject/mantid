@@ -12,6 +12,7 @@
 #include "MantidAPI/HistoryItem.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/utility.hpp>
 #include <utility>
@@ -143,6 +144,8 @@ const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_c
   return name + "(" + propStr + ")";
 }
 
+GNU_DIAG_OFF("maybe-uninitialized")
+
 /**
  * Build the script output for a single property
  *
@@ -181,5 +184,7 @@ const std::string NotebookBuilder::buildPropertyString(const PropertyHistory_con
 
   return prop;
 }
+
+GNU_DIAG_ON("maybe-uninitialized")
 
 } // namespace Mantid::API
