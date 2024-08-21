@@ -71,6 +71,10 @@ bool FunctionQDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspace
   return false;
 }
 
+void FunctionQDataPresenter::updateFitFunctionList() const {
+  m_tab->handleFunctionListChanged(chooseFunctionQFunctions(std::nullopt));
+}
+
 void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                           const int &spectrum_index) {
   const auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -87,18 +91,23 @@ void FunctionQDataPresenter::addWorkspace(const std::string &workspaceName, cons
   m_model->addWorkspace(workspace->getName(), singleSpectra);
 }
 
-std::map<std::string, std::string> FunctionQDataPresenter::chooseFunctionQFunctions(bool paramWidth) const {
-  if (m_view->isTableEmpty()) // when first data is added to table, it can only be either WIDTH or EISF
-    return paramWidth ? FunctionQ::WIDTH_FITS : FunctionQ::EISF_FITS;
-
-  bool widthFuncs = paramWidth || m_view->dataColumnContainsText("HWHM");
-  bool eisfFuncs = !paramWidth || m_view->dataColumnContainsText("EISF") || m_view->dataColumnContainsText("A0");
+std::map<std::string, std::string>
+FunctionQDataPresenter::chooseFunctionQFunctions(std::optional<bool> paramWidth) const {
+  if (m_view->isTableEmpty())
+    return (paramWidth == std::nullopt) ? FunctionQ::ALL_FITS
+           : *paramWidth                ? FunctionQ::WIDTH_FITS
+                                        : FunctionQ::EISF_FITS;
+  auto widthFuncs = m_view->dataColumnContainsText("HWHM");
+  auto eisfFuncs = m_view->dataColumnContainsText("EISF") || m_view->dataColumnContainsText("A0");
+  if (paramWidth != std::nullopt) {
+    widthFuncs = widthFuncs || *paramWidth;
+    eisfFuncs = eisfFuncs || !*paramWidth;
+  }
   if (widthFuncs && eisfFuncs)
     return FunctionQ::ALL_FITS;
-  else if (widthFuncs)
+  if (widthFuncs)
     return FunctionQ::WIDTH_FITS;
-  else
-    return FunctionQ::EISF_FITS;
+  return FunctionQ::EISF_FITS;
 }
 
 void FunctionQDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
