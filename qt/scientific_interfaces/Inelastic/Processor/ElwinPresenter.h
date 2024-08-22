@@ -15,13 +15,13 @@
 #include "ElwinModel.h"
 #include "ElwinView.h"
 #include "IElwinView.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ElwinTab.h"
-#include <Poco/NObserver.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,13 +46,16 @@ public:
   virtual void removeWorkspace(std::string const &workspaceName) const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
+class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor,
+                                              public IElwinPresenter,
+                                              public IRunSubscriber,
+                                              public AnalysisDataServiceObserver {
 public:
   ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
                  std::unique_ptr<IElwinModel> model);
   ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
                  std::unique_ptr<IElwinModel> model, std::unique_ptr<IDataModel> dataModel);
-  ~ElwinPresenter();
+  ~ElwinPresenter() override = default;
 
   // runWidget
   void handleRun() override;
@@ -78,9 +81,12 @@ public:
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
 
-  void connectObservers() const;
-  void disconnectObservers() const;
   void removeWorkspace(std::string const &workspaceName) const override;
+
+  // Analysis Data Service Observer
+  void renameHandle(const std::string &wsName, const std::string &newName) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void clearHandle() override;
 
 protected:
   void runComplete(bool error) override;
@@ -107,11 +113,6 @@ private:
   int m_selectedSpectrum;
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;
-
-  /// Poco Observers for ADS Notifications
-  Poco::NObserver<ElwinPresenter, Mantid::API::WorkspacePreDeleteNotification> m_remObserver;
-  Poco::NObserver<ElwinPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
-  Poco::NObserver<ElwinPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

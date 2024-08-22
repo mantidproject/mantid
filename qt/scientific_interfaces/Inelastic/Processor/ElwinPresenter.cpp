@@ -41,49 +41,29 @@ using namespace Inelastic;
 ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner,
                                IElwinView *view, std::unique_ptr<IElwinModel> model)
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
-      m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0),
-      m_remObserver(*this, &ElwinPresenter::handleRemoveEvent),
-      m_clearObserver(*this, &ElwinPresenter::handleClearEvent),
-      m_renameObserver(*this, &ElwinPresenter::handleRenameEvent) {
+      m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
+  observeRename(true);
+  observeDelete(true);
+  observeClear(true);
   updateAvailableSpectra();
-  connectObservers();
 }
 
 ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
                                IElwinView *view, std::unique_ptr<IElwinModel> model,
                                std::unique_ptr<IDataModel> dataModel)
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
-      m_dataModel(std::move(dataModel)), m_selectedSpectrum(0),
-      m_remObserver(*this, &ElwinPresenter::handleRemoveEvent),
-      m_clearObserver(*this, &ElwinPresenter::handleClearEvent),
-      m_renameObserver(*this, &ElwinPresenter::handleRenameEvent) {
+      m_dataModel(std::move(dataModel)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
   updateAvailableSpectra();
-}
-
-ElwinPresenter::~ElwinPresenter() { disconnectObservers(); }
-
-void ElwinPresenter::connectObservers() const {
-  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
-  ads.notificationCenter.addObserver(m_remObserver);
-  ads.notificationCenter.addObserver(m_renameObserver);
-  ads.notificationCenter.addObserver(m_clearObserver);
-}
-
-void ElwinPresenter::disconnectObservers() const {
-  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
-  ads.notificationCenter.removeObserver(m_remObserver);
-  ads.notificationCenter.removeObserver(m_renameObserver);
-  ads.notificationCenter.removeObserver(m_clearObserver);
 }
 
 /**
@@ -409,20 +389,20 @@ void ElwinPresenter::removeWorkspace(std::string const &workspaceName) const {
   }
 }
 
-void ElwinPresenter::handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf) {
-  removeWorkspace(pNf->objectName());
+void ElwinPresenter::deleteHandle(std::string const &wsName, Workspace_sptr const &ws) {
+  (void)ws;
+  removeWorkspace(wsName);
   updateInterface();
 }
-void ElwinPresenter::handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf) {
-  (void)pNf;
+void ElwinPresenter::clearHandle() {
   m_dataModel->clear();
   updateInterface();
 }
-void ElwinPresenter::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+void ElwinPresenter::renameHandle(std::string const &wsName, std::string const &newName) {
   // Remove renamed workspace if it is on the data model
-  removeWorkspace(pNf->objectName());
+  removeWorkspace(wsName);
   // Remove renamed workspace if new name replaces a workspace in data model
-  removeWorkspace(pNf->newObjectName());
+  removeWorkspace(newName);
   updateInterface();
 }
 
