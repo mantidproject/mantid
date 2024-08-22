@@ -122,7 +122,7 @@
       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,5,3">
        <item>
         <widget class="QFrame" name="frame_2">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,0,0,0">
           <property name="leftMargin">
            <number>30</number>
           </property>
@@ -139,7 +139,7 @@
            <widget class="QCheckBox" name="ckSymmetricEnergy">
             <property name="maximumSize">
              <size>
-              <width>140</width>
+              <width>400</width>
               <height>16777215</height>
              </size>
             </property>
@@ -161,7 +161,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>20</width>
               <height>20</height>
              </size>
             </property>
