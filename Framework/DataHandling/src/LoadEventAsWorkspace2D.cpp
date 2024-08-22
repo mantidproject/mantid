@@ -14,12 +14,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidDataHandling/PulseIndexer.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusIOHelper.h"
-
 #include <regex>
 
 namespace Mantid {
@@ -32,6 +33,7 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::UnitFactory;
+// using Mantid::Kernel::TimeROI;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventAsWorkspace2D)
 
@@ -69,6 +71,14 @@ void LoadEventAsWorkspace2D::init() {
                   "of times-of-flight. "
                   "This is the maximum accepted value in microseconds. Keep "
                   "blank to load all events.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
+      "Optional: To only include events after the provided start "
+      "time, in seconds (relative to the start of the run). If left empty, it will take start time as default.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
+                  "Optional: To only include events before the provided stop "
+                  "time, in seconds (relative to the start of the run). if left empty, it will take run end time or "
+                  "last pulse time as default.");
   declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
                       "LogAllowList", std::vector<std::string>(), Direction::Input),
                   "If specified, only these logs will be loaded from the file (each "
@@ -123,6 +133,7 @@ std::map<std::string, std::string> LoadEventAsWorkspace2D::validateInputs() {
 
   return results;
 }
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -200,6 +211,32 @@ void LoadEventAsWorkspace2D::exec() {
   const double tof_max = getProperty("FilterByTofMax");
   const bool tof_filtering = (tof_min != EMPTY_DBL() && tof_max != EMPTY_DBL());
 
+  double filter_time_start_sec, filter_time_stop_sec;
+  filter_time_start_sec = getProperty("FilterByTimeStart");
+  filter_time_stop_sec = getProperty("FilterByTimeStop");
+
+  // get the start time
+  if (!WS->run().hasProperty("start_time")) {
+    g_log.warning("This NXS file does not have a start time, first pulse time is used instead.");
+  }
+
+  Types::Core::DateAndTime runstart(WS->run().hasProperty("start_time") ? WS->run().getProperty("start_time")->value()
+                                                                        : WS->run().getFirstPulseTime());
+
+  // get end time, to account for some older DAS issue where last pulse time can be slightly greater than end time, use
+  // last pulse time in this case and check if WS has "proton_charge" property otherwise last pulse time doesn't exist.
+  Types::Core::DateAndTime endtime;
+  if (WS->run().hasProperty("proton_charge") &&
+      WS->run().getLastPulseTime() > WS->run().getProperty("end_time")->value()) {
+    endtime = WS->run().getLastPulseTime();
+    g_log.warning("Last pulse time is used because the last pulse time is greater than the end time!");
+  } else {
+    endtime = WS->run().getProperty("end_time")->value();
+  }
+
+  Types::Core::DateAndTime filter_time_start;
+  Types::Core::DateAndTime filter_time_stop;
+
   // vector to stored to integrated counts by detector ID
   std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
 
@@ -212,24 +249,19 @@ void LoadEventAsWorkspace2D::exec() {
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
 
   prog->doReport("Reading and integrating data");
-
   auto itClassEntries = allEntries.find("NXevent_data");
-
   if (itClassEntries != allEntries.end()) {
 
     const std::set<std::string> &classEntries = itClassEntries->second;
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
-
     for (const std::string &classEntry : classEntries) {
 
       if (std::regex_match(classEntry, groups, classRegex)) {
         const std::string entry_name(groups[2].str());
-
         // skip entries with junk data
         if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
           continue;
-
         g_log.debug() << "Loading bank " << entry_name << '\n';
         h5file.openGroup(entry_name, "NXevent_data");
 
@@ -240,6 +272,39 @@ void LoadEventAsWorkspace2D::exec() {
         else
           event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
 
+        // closeGroup and skip this bank if there is no event
+        if (event_ids.size() <= 1) {
+          h5file.closeGroup();
+          continue;
+        }
+
+        // Load "h5file" into BankPulseTimes using a shared ptr
+        const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(h5file), std::vector<int>());
+
+        // Get event_index from the "h5file"
+        const auto event_index = std::make_shared<std::vector<uint64_t>>(
+            Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
+
+        // if "filterTimeStart" is empty, use run start time as default
+        if (filter_time_start_sec != EMPTY_DBL()) {
+          filter_time_start = runstart + filter_time_start_sec;
+        } else {
+          filter_time_start = runstart;
+        }
+
+        // if "filterTimeStop" is empty, use end time as default
+        if (filter_time_stop_sec != EMPTY_DBL()) {
+          filter_time_stop = runstart + filter_time_stop_sec;
+        } else {
+          filter_time_stop = endtime;
+        }
+
+        // Use filter_time_start time as starting reference in time and create a TimeROI using bankPulseTimes
+        const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
+
+        // set up PulseIndexer and give previous TimeROI to pulseIndexer
+        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
+
         std::vector<float> event_times;
         if (tof_filtering) {
           if (descriptor.isEntry("/entry/" + entry_name + "/event_time_offset", "SDS"))
@@ -248,20 +313,24 @@ void LoadEventAsWorkspace2D::exec() {
             event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
         }
 
-        for (size_t i = 0; i < event_ids.size(); i++) {
-          if (tof_filtering) {
-            const auto tof = event_times[i];
-            if (tof < tof_min || tof > tof_max)
+        // Nested loop to loop through all the relavent pulses and relavent event_ids.
+        // For someone new to this, every pulse creates an entry in event_index, event_index.size() = # of pulses,
+        // the value of event_index[i] points to the index of event_ids. In short, event_ids[event_index[i]] is the
+        // detector id from the i-th pulse. See NXevent_data description for more details.
+        for (const auto &pulse : pulseIndexer) {
+          for (size_t i = pulse.eventIndexStart; i < pulse.eventIndexStop; i++) {
+            // for (size_t i = 0; i < event_ids.size(); i++) {
+            if (tof_filtering) {
+              const auto tof = event_times[i];
+              if (tof < tof_min || tof > tof_max)
+                continue;
+            }
+            const detid_t det_id = event_ids[i];
+            if (det_id < min_detid || det_id > max_detid)
               continue;
+            Y[det_id - min_detid]++;
           }
-
-          const detid_t det_id = event_ids[i];
-          if (det_id < min_detid || det_id > max_detid)
-            continue;
-
-          Y[det_id - min_detid]++;
         }
-
         h5file.closeGroup();
       }
     }
