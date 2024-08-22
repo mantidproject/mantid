@@ -56,7 +56,7 @@ void HeliumAnalyserEfficiency::init() {
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropertyNames::SPIN_STATES, "11,10,01,00", spinValidator,
-                  "Order of individual spin states in the input group workspace, e.g. \"01,11,00,10\"");
+                  "Order of individual flipper configurations in the input group workspace, e.g. \"01,11,00,10\"");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
@@ -137,13 +137,13 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
   const auto t11Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ONE_ONE);
+                                                                           FlipperConfigurations::ON_ON);
   const auto t10Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ONE_ZERO);
+                                                                           FlipperConfigurations::ON_OFF);
   const auto t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ZERO_ONE);
+                                                                           FlipperConfigurations::OFF_ON);
   const auto t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                           SpinStateValidator::ZERO_ZERO);
+                                                                           FlipperConfigurations::OFF_OFF);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)
   MatrixWorkspace_sptr tnsfWs = addTwoWorkspaces(t11Ws, t00Ws);

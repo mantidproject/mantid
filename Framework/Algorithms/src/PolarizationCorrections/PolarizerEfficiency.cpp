@@ -25,6 +25,7 @@ DECLARE_ALGORITHM(PolarizerEfficiency)
 
 using namespace Kernel;
 using namespace API;
+using namespace FlipperConfigurations;
 
 namespace PropertyNames {
 static const std::string INPUT_WORKSPACE = "InputWorkspace";
@@ -126,9 +127,9 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
         ") does not match the number of spin states provided (" + std::to_string(spinStates.size()) + ").";
   }
   const auto &t01WsIndex =
-      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, SpinStateValidator::ZERO_ONE);
+      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_ON);
   const auto &t00WsIndex =
-      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, SpinStateValidator::ZERO_ZERO);
+      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_OFF);
   if (!t01WsIndex.has_value() || !t00WsIndex.has_value()) {
     errorList[PropertyNames::SPIN_STATES] =
         "The required spin configurations (00, 01) could not be found in the given SpinStates.";
@@ -161,9 +162,9 @@ void PolarizerEfficiency::calculatePolarizerEfficiency() {
   const auto spinConfigurationInput = getPropertyValue(PropertyNames::SPIN_STATES);
 
   const auto &t01Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                            SpinStateValidator::ZERO_ONE);
+                                                                            FlipperConfigurations::OFF_ON);
   const auto &t00Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
-                                                                            SpinStateValidator::ZERO_ZERO);
+                                                                            FlipperConfigurations::OFF_OFF);
 
   const MatrixWorkspace_sptr effCell = getProperty(PropertyNames::ANALYSER_EFFICIENCY);
 
