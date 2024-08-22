@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -15,6 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include <algorithm>
 #include <boost/math/distributions/students_t.hpp>
@@ -48,11 +50,8 @@ auto constexpr GROUP_OUTPUTS{"Outputs"};
 
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
-  auto validator = std::make_shared<CompositeValidator>();
-  validator->add<WorkspaceUnitValidator>("Wavelength");
-  validator->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input, validator),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
       "Input group workspace to use for polarization calculation");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
@@ -96,6 +95,17 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::OUTPUT_FIT_PARAMS, PropertyNames::GROUP_OUTPUTS);
 }
 
+void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
+  if (workspace == nullptr) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be of type MatrixWorkspace.";
+    return;
+  }
+
+  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
+  if (unit->unitID() != "Wavelength") {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+  }
+}
 /**
  * Tests that the inputs are all valid
  * @return A map containing the incorrect workspace
@@ -103,49 +113,27 @@ void HeliumAnalyserEfficiency::init() {
  */
 std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
-  const std::string inputWorkspaceName = getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (!AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
+  const WorkspaceGroup_sptr wsGroup = getProperty(PropertyNames::INPUT_WORKSPACE);
+
+  if (wsGroup == nullptr) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
+  } else if (wsGroup->size() != 4) {
     errorList[PropertyNames::INPUT_WORKSPACE] =
-        "The input workspace " + inputWorkspaceName + " does not exist in the ADS.";
+        "The input group workspace must have four periods corresponding to the four spin configurations.";
   } else {
-    const auto ws = AnalysisDataService::Instance().retrieve(getProperty(PropertyNames::INPUT_WORKSPACE));
-    if (!ws->isGroup()) {
-      errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
-    } else {
-      const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
-      if (wsGroup->size() != 4) {
-        errorList[PropertyNames::INPUT_WORKSPACE] =
-            "The input group workspace must have four periods corresponding to the four spin configurations.";
-      }
+    for (size_t i = 0; i < wsGroup->size(); ++i) {
+      const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+      validateInputWorkspace(stateWs, errorList);
     }
   }
   return errorList;
-}
-
-/**
- * Explicitly calls validateInputs and throws runtime error in case
- * of issues in the input properties.
- */
-void HeliumAnalyserEfficiency::validateGroupInput() {
-  const auto results = validateInputs();
-  if (results.size() > 0) {
-    const auto result = results.cbegin();
-    throw std::runtime_error("Issue in " + result->first + " property: " + result->second);
-  }
-}
-
-bool HeliumAnalyserEfficiency::processGroups() {
-  validateGroupInput();
-  calculateAnalyserEfficiency();
-  return true;
 }
 
 void HeliumAnalyserEfficiency::exec() { calculateAnalyserEfficiency(); }
 
 void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
-  const auto groupWorkspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getProperty(PropertyNames::INPUT_WORKSPACE));
+  const WorkspaceGroup_sptr groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
 
   const auto t11Ws = PolarizationCorrectionsHelpers::workspaceForSpinState(groupWorkspace, spinConfigurationInput,
