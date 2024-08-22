@@ -83,6 +83,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self._backup_instrument = config["default.instrument"]
         self._backup_datasearch_dirs = config["datasearch.directories"]
         self._backup_save_dir = config["defaultsave.directory"]
+        self._backup_sans_plot_results = config["sans.isis_sans.plotResults"]
 
         config["default.facility"] = "ISIS"
 
@@ -121,6 +122,7 @@ class RunTabPresenterTest(unittest.TestCase):
         config["default.instrument"] = self._backup_instrument
         config["datasearch.directories"] = self._backup_datasearch_dirs
         config["defaultsave.directory2"] = self._backup_save_dir
+        config["sans.isis_sans.plotResults"] = self._backup_sans_plot_results
 
     def test_that_will_load_user_file(self):
         # Setup self.presenter.and mock view
@@ -767,6 +769,23 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._beam_centre_presenter.reset_mock()
         self.presenter.on_reduction_mode_selection_has_changed("rear-detector")
         self.presenter._beam_centre_presenter.update_rear_selected.assert_called_once_with()
+
+    def test_plot_results_visibility_on(self):
+        self._test_plot_results_visibility("On", True)
+
+    def test_plot_results_visibility_off(self):
+        self._test_plot_results_visibility("Off", False)
+
+    def test_plot_results_visibility_when_not_set(self):
+        self._test_plot_results_visibility("", False)
+
+    def _test_plot_results_visibility(self, config_value, expected_visibility):
+        config.setString("sans.isis_sans.plotResults", config_value)
+
+        self.presenter._view.set_plot_results_checkbox_visibility = mock.Mock()
+        self.presenter.hide_or_show_plot_results_checkbox_based_on_user_properties()
+
+        self.presenter._view.set_plot_results_checkbox_visibility.assert_called_once_with(expected_visibility)
 
     @staticmethod
     def _clear_property_manager_data_service():

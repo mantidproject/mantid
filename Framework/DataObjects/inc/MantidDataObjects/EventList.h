@@ -267,9 +267,9 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const;
+  void filterByPulseTime(Kernel::TimeROI const *timeRoi, EventList *output) const;
 
-  void filterInPlace(Kernel::TimeROI *timeRoi);
+  void filterInPlace(const Kernel::TimeROI *timeRoi);
 
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
@@ -284,7 +284,7 @@ public:
 
   void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) override;
 
-  void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit, Mantid::Kernel::Unit *toUnit);
+  void convertUnitsViaTof(Mantid::Kernel::Unit const *fromUnit, Mantid::Kernel::Unit const *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
   /// Returns a copy of the Histogram associated with this spectrum.
@@ -421,7 +421,7 @@ private:
   static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
                                     EventList *output);
 
-  template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
+  template <class T> void filterInPlaceHelper(Kernel::TimeROI const *timeRoi, typename std::vector<T> &events);
 
   template <class T> static void multiplyHelper(std::vector<T> &events, const double value, const double error = 0.0);
   template <class T>
@@ -430,8 +430,8 @@ private:
   template <class T>
   static void divideHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y, const MantidVec &E);
   template <class T>
-  void convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit *fromUnit,
-                                Mantid::Kernel::Unit *toUnit);
+  void convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit const *fromUnit,
+                                Mantid::Kernel::Unit const *toUnit);
   template <class T>
   void convertUnitsQuicklyHelper(typename std::vector<T> &events, const double &factor, const double &power);
 };

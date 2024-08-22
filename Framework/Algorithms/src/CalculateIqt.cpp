@@ -205,7 +205,6 @@ MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace, 
   auto rebinAlgorithm = createChildAlgorithm("Rebin");
   rebinAlgorithm->initialize();
   rebinAlgorithm->setProperty("InputWorkspace", workspace);
-  rebinAlgorithm->setProperty("OutputWorkspace", "_");
   rebinAlgorithm->setProperty("Params", params);
   rebinAlgorithm->execute();
   return rebinAlgorithm->getProperty("OutputWorkspace");
@@ -215,7 +214,6 @@ MatrixWorkspace_sptr CalculateIqt::integration(const MatrixWorkspace_sptr &works
   auto integrationAlgorithm = createChildAlgorithm("Integration");
   integrationAlgorithm->initialize();
   integrationAlgorithm->setProperty("InputWorkspace", workspace);
-  integrationAlgorithm->setProperty("OutputWorkspace", "_");
   integrationAlgorithm->execute();
   return integrationAlgorithm->getProperty("OutputWorkspace");
 }
@@ -224,7 +222,6 @@ MatrixWorkspace_sptr CalculateIqt::convertToPointData(const MatrixWorkspace_sptr
   auto pointDataAlgorithm = createChildAlgorithm("ConvertToPointData");
   pointDataAlgorithm->initialize();
   pointDataAlgorithm->setProperty("InputWorkspace", workspace);
-  pointDataAlgorithm->setProperty("OutputWorkspace", "_");
   pointDataAlgorithm->execute();
   return pointDataAlgorithm->getProperty("OutputWorkspace");
 }
@@ -233,7 +230,6 @@ MatrixWorkspace_sptr CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr
   auto FFTAlgorithm = createChildAlgorithm("ExtractFFTSpectrum");
   FFTAlgorithm->initialize();
   FFTAlgorithm->setProperty("InputWorkspace", workspace);
-  FFTAlgorithm->setProperty("OutputWorkspace", "_");
   FFTAlgorithm->setProperty("FFTPart", 2);
   FFTAlgorithm->execute();
   return FFTAlgorithm->getProperty("OutputWorkspace");
@@ -245,7 +241,6 @@ MatrixWorkspace_sptr CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspa
   divideAlgorithm->initialize();
   divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
   divideAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
-  divideAlgorithm->setProperty("OutputWorkspace", "_");
   divideAlgorithm->execute();
   return divideAlgorithm->getProperty("OutputWorkspace");
 }
@@ -254,7 +249,6 @@ MatrixWorkspace_sptr CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &wor
   auto cropAlgorithm = createChildAlgorithm("CropWorkspace");
   cropAlgorithm->initialize();
   cropAlgorithm->setProperty("InputWorkspace", workspace);
-  cropAlgorithm->setProperty("OutputWorkspace", "_");
   cropAlgorithm->setProperty("XMax", xMax);
   cropAlgorithm->execute();
   return cropAlgorithm->getProperty("OutputWorkspace");
@@ -264,7 +258,6 @@ MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sp
   auto specialValuesAlgorithm = createChildAlgorithm("ReplaceSpecialValues");
   specialValuesAlgorithm->initialize();
   specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
-  specialValuesAlgorithm->setProperty("OutputWorkspace", "_");
   specialValuesAlgorithm->setProperty("InfinityValue", 0.0);
   specialValuesAlgorithm->setProperty("BigNumberThreshold", 1.0001);
   specialValuesAlgorithm->setProperty("NaNValue", 0.0);

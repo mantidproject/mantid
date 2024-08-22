@@ -304,7 +304,7 @@ const std::string PolarizationCorrectionWildes::summary() const {
 }
 
 /// Algorithm's related algorithms. @see Algorithm::seeAlso
-const std::vector<std::string> PolarizationCorrectionWildes::seeAlso() const { return {"PolarizationEfficiencyCor"}; }
+const std::vector<std::string> PolarizationCorrectionWildes::seeAlso() const { return {"PolarizationEfficiencyCor", "PolarizationEfficienciesWildes"}; }
 
 /**
  * Count the non-nullptr workspaces
