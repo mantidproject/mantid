@@ -103,10 +103,6 @@ private:
   void newPreviewWorkspaceSelected(int index);
   std::optional<WorkspaceID> findWorkspaceID(std::string const &name) const;
 
-  void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
-  void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
-  void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-
   IElwinView *m_view;
   std::unique_ptr<IElwinModel> m_model;
   std::unique_ptr<IDataModel> m_dataModel;
