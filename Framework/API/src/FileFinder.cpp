@@ -458,11 +458,11 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   if (!extension.empty())
     uniqueExts.emplace_back(extension);
 
-  // If useExtsOnly and extension not in filename
+  // If no extension in filename and useExtsOnly
   if (extension.empty() || useExtsOnly) {
     getUniqueExtensions(exts, uniqueExts);
   }
-  // Majority of cases, no extension in filename
+  // If no extension in filename and useExtsOnly=Flase (most cases)
   if (extension.empty() && !useExtsOnly) {
     getUniqueExtensions(extensions, uniqueExts);
   }
@@ -476,8 +476,9 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
     return path;
   }
 
-  if (!path && uniqueExts.size() == 1) {
-    uniqueExts.pop_back();
+  // Path not found
+  if (uniqueExts.size() == 1) {
+    uniqueExts.pop_back(); // No need to search for missing extension again
     getUniqueExtensions(exts, uniqueExts);
     getUniqueExtensions(extensions, uniqueExts);
 
@@ -490,7 +491,6 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
       return path;
     }
   }
-  // Path not found
   g_log.information() << "Unable to find run with hint " << hint << "\n";
   return API::Result<std::string>("", path.errors());
 }
