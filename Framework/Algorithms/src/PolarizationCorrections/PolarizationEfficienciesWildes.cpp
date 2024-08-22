@@ -271,10 +271,10 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   // Calculate the polarizing and analysing flipper efficiencies
   const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
   const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ZERO_ZERO);
-  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ZERO_ONE);
-  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ONE_ZERO);
-  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, SpinStateValidator::ONE_ONE);
+  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
   const auto numerator = ws00 - ws01 - ws10 + ws11;
 
@@ -290,10 +290,10 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
 
 MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp) {
   const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const auto &ws00 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ZERO_ZERO);
-  const auto &ws01 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ZERO_ONE);
-  const auto &ws10 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ONE_ZERO);
-  const auto &ws11 = workspaceForSpinState(magWsGrp, flipperConfig, SpinStateValidator::ONE_ONE);
+  const auto &ws00 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+  const auto &ws01 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+  const auto &ws10 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+  const auto &ws11 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
   // We use the flipper efficiency to multiply the mag ws counts, but the resulting workspace will have lost the Y unit
   // and distribution information. We need to put these back otherwise the rest of the calculation fails when it tries
