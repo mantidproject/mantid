@@ -30,15 +30,15 @@ public:
   static void destroySuite(MDFrameValidatorTest *suite) { delete suite; }
 
   void testGetType() {
-    MDFrameValidator unitValidator(HKL::HKLName);
+    MDFrameValidator unitValidator(Mantid::Geometry::HKL::HKLName);
     TS_ASSERT_EQUALS(unitValidator.getType(), "mdframe");
   }
 
   void testHKLMDWorkspaceIsValidForValidatorWithHKLFrame() {
-    MDFrameValidator frameValidator(HKL::HKLName);
+    MDFrameValidator frameValidator(Mantid::Geometry::HKL::HKLName);
 
     HKLFrameFactory factory;
-    auto frame = factory.create(MDFrameArgument{HKL::HKLName, Units::Symbol::RLU});
+    auto frame = factory.create(MDFrameArgument{Mantid::Geometry::HKL::HKLName, Units::Symbol::RLU});
     auto dim = std::make_shared<MDHistoDimension>("x", "x", *frame, 0.0f, 100.0f, 10);
     auto ws = std::make_shared<MDHistoWorkspaceTester>(dim, dim, dim);
     TS_ASSERT_EQUALS(frameValidator.isValid(ws), "")
@@ -47,7 +47,7 @@ public:
   void testHKLMDWorkspaceIsNotValidForValidatorWithQLabFrame() {
     MDFrameValidator frameValidator(QLab::QLabName);
 
-    MDFrameArgument args{HKL::HKLName, Units::Symbol::RLU};
+    MDFrameArgument args{Mantid::Geometry::HKL::HKLName, Units::Symbol::RLU};
     auto frame = HKLFrameFactory().create(args);
     auto dim = std::make_shared<MDHistoDimension>("x", "x", *frame, 0.0f, 100.0f, 10);
     auto ws = std::make_shared<MDHistoWorkspaceTester>(dim, dim, dim);
@@ -57,7 +57,7 @@ public:
   void testMixedAxisMDWorkspaceIsNotValidForValidatorWithQLabFrame() {
     MDFrameValidator frameValidator(QLab::QLabName);
 
-    MDFrameArgument axisArgs1{HKL::HKLName, Units::Symbol::RLU};
+    MDFrameArgument axisArgs1{Mantid::Geometry::HKL::HKLName, Units::Symbol::RLU};
     MDFrameArgument axisArgs2{QLab::QLabName, Units::Symbol::InverseAngstrom};
 
     auto frame1 = HKLFrameFactory().create(axisArgs1);

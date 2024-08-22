@@ -35,7 +35,7 @@ public:
   // single values
   void test_Constructor_With_Good_Stream_Does_Not_Touch_Stream() {
     BinaryStreamReader reader(m_bytes);
-    TS_ASSERT_EQUALS(std::ios_base::beg, m_bytes.tellg());
+    TS_ASSERT_EQUALS(std::streampos(0), m_bytes.tellg());
   }
 
   void test_Write_int16_t_Gives_Correct_Value() { doWriteSingleValueTest<int16_t>(6); }
