@@ -207,7 +207,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreatePSDBle
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateLogPropertyTable.cpp:126
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateGroupingWorkspace.cpp:684
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:268
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:931
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:947
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhenWorkspaceIsType.h:50
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCor.cpp:126
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCorUser.cpp:176
