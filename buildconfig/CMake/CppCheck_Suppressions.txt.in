@@ -454,12 +454,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindClusterFaces
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:88
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:337
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1635
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1636
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:383
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:405
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1638
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:2126
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:73
