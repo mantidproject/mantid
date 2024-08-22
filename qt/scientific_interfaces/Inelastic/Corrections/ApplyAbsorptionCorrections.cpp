@@ -62,8 +62,12 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
 }
 
 ApplyAbsorptionCorrections::~ApplyAbsorptionCorrections() {
-  if (m_ppContainerWS)
+  if (m_ppContainerWS) {
+    (void)m_uiForm.dsSample->disconnect();
+    (void)m_uiForm.dsContainer->disconnect();
+    (void)m_uiForm.dsContainer->disconnect();
     AnalysisDataService::Instance().remove(m_containerWorkspaceName);
+  }
 }
 
 /**

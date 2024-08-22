@@ -50,8 +50,15 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(par
 
 ContainerSubtraction::~ContainerSubtraction() {
   m_uiForm.ppPreview->watchADS(false);
-  if (m_transformedContainerWS)
-    AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
+  if (m_transformedContainerWS) {
+    auto const containerName = m_transformedContainerWS->getName();
+
+    // It is not safe to keep the signals connected
+    (void)m_uiForm.dsContainer->disconnect();
+    (void)m_uiForm.dsSample->disconnect();
+    if (containerName.find("Subtract") == std::string::npos)
+      AnalysisDataService::Instance().remove(containerName);
+  }
 }
 
 void ContainerSubtraction::setTransformedContainer(MatrixWorkspace_sptr workspace, const std::string &name) {
@@ -172,17 +179,6 @@ std::string ContainerSubtraction::createOutputName() {
   return outputWsName.toStdString();
 }
 
-/**
- * Removes the output workspace from the ADS if exists
- */
-void ContainerSubtraction::removeOutput() {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(m_pythonExportWsName)) {
-    ads.remove(m_pythonExportWsName);
-  }
-  m_pythonExportWsName.clear();
-}
-
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
@@ -210,8 +206,6 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   // Remove old sample and fit curves from plot
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
-  // Remove the subtracted workspace as it is no longer valid
-  removeOutput();
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
   // Get new workspace
@@ -241,8 +235,6 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Container");
-  // Remove the subtracted workspace as it is no longer valid
-  removeOutput();
 
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
