@@ -177,7 +177,6 @@ set(TEST_FILES
     FindUBUsingFFTTest.h
     FindUBUsingIndexedPeaksTest.h
     FindUBUsingLatticeParametersTest.h
-    FindUBUsingMinMaxDTest.h
     GoniometerAnglesFromPhiRotationTest.h
     HardThresholdBackgroundTest.h
     HasUBTest.h
