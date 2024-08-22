@@ -18,6 +18,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -363,7 +364,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     dimensionNames[1] = "K";
     dimensionNames[2] = "L";
     coordinateSystem = Mantid::Kernel::HKL;
-    MDFrameArgument frameArgQLab(HKL::HKLName, Units::Symbol::RLU.ascii());
+    MDFrameArgument frameArgQLab(Mantid::Geometry::HKL::HKLName, Units::Symbol::RLU.ascii());
     frame = frameFactory->create(frameArgQLab);
   } else {
     MDFrameArgument frameArgQLab(QLab::QLabName, "");

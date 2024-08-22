@@ -43,7 +43,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pWSWrap->releaseWorkspace());
 
-    TSM_ASSERT("should be unique", pws.unique());
+    TSM_ASSERT("should be unique", pws.use_count() == 1);
   }
   void test_AddEventsData() {
 

@@ -35,7 +35,7 @@ public:
 
   int m_argc = 1;
   GNU_DIAG_OFF("pedantic")
-  char *m_argv[1] = {"QAppForTesting"};
+  char *m_argv[1] = {const_cast<char *>("QAppForTesting")};
   GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
