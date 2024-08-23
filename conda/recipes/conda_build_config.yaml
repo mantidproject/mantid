@@ -85,7 +85,7 @@ tbb:
 gsl:
   - 2.7
 
-# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
+# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux.
 libopenblas:
   - '!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28'
 
