@@ -380,7 +380,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/WeightedMeanOfWorksp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:92
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxis.cpp:154
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxis.cpp:160
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cpp:52
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
