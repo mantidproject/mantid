@@ -195,8 +195,10 @@ Installing
 
 Mantid does not come packaged with clang-tidy; each developer must download it themselves. Windows users can utilise clang-tidy support for Visual Studio.
 For other operating systems, Mantid provides clang-tidy functionality through cmake.
+The guide `How To Setup Clang Tooling For LLVM <https://clang.llvm.org/docs/HowToSetupToolingForLLVM.html>`_ gives valuable information for configuration.
+Two keys are to add ``-DCMAKE_EXPORT_COMPILE_COMMANDS=on`` and to symbolically link the ``compile_commands.json`` from the build tree into the source tree.
 
-- **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
+- **Ubuntu**: Run ``sudo apt-get install clang clang-tidy`` in the command line. The ``clang`` package is needed to get the system headers.
 - **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
 
 For non-Ubuntu systems, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
