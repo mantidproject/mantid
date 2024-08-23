@@ -721,11 +721,16 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   } // End while-loop
 
   // Any remaining keys within the changed key store weren't present in the
-  // current user properties so append them
+  // current user properties so append them IF they exist
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
     auto key_end = m_changed_keys.end();
     for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
+      // if the key does not have a property, skip it
+      if (!hasProperty(*key_itr)) {
+        ++key_itr;
+        continue;
+      }
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
