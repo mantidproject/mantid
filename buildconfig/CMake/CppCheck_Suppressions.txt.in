@@ -657,6 +657,11 @@ uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidData
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:126
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSS.cpp:449
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:1112
+constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:672
+constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:942
+uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:582
+uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:589
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFullprofResolution.cpp:324
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFullprofResolution.cpp:299
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
